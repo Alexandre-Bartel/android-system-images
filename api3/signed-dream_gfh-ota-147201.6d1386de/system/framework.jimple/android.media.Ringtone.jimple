@@ -1,0 +1,511 @@
+public class android.media.Ringtone extends java.lang.Object
+{
+    private static final java.lang.String[] DRM_COLUMNS;
+    private static final java.lang.String[] MEDIA_COLUMNS;
+    private static java.lang.String TAG;
+    private android.content.res.AssetFileDescriptor mAssetFileDescriptor;
+    private android.media.MediaPlayer mAudio;
+    private android.content.Context mContext;
+    private java.io.FileDescriptor mFileDescriptor;
+    private int mStreamType;
+    private java.lang.String mTitle;
+    private android.net.Uri mUri;
+
+    static void <clinit>()
+    {
+        java.lang.String[] $r0;
+
+        <android.media.Ringtone: java.lang.String TAG> = "Ringtone";
+
+        $r0 = newarray (java.lang.String)[3];
+
+        $r0[0] = "_id";
+
+        $r0[1] = "_data";
+
+        $r0[2] = "title";
+
+        <android.media.Ringtone: java.lang.String[] MEDIA_COLUMNS> = $r0;
+
+        $r0 = newarray (java.lang.String)[3];
+
+        $r0[0] = "_id";
+
+        $r0[1] = "_data";
+
+        $r0[2] = "title";
+
+        <android.media.Ringtone: java.lang.String[] DRM_COLUMNS> = $r0;
+
+        return;
+    }
+
+    void <init>(android.content.Context)
+    {
+        android.media.Ringtone $r0;
+        android.content.Context $r1;
+
+        $r0 := @this: android.media.Ringtone;
+
+        $r1 := @parameter0: android.content.Context;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r0.<android.media.Ringtone: int mStreamType> = 2;
+
+        $r0.<android.media.Ringtone: android.content.Context mContext> = $r1;
+
+        return;
+    }
+
+    private static java.lang.String getTitle(android.content.Context, android.net.Uri, boolean)
+    {
+        android.content.Context $r0;
+        android.net.Uri $r1;
+        boolean $z0, $z1;
+        android.database.Cursor $r2;
+        android.content.ContentResolver $r3;
+        java.lang.String $r4, $r5, $r6;
+        int $i0;
+        java.lang.Object[] $r7;
+        java.lang.String[] $r8;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 := @parameter1: android.net.Uri;
+
+        $z0 := @parameter2: boolean;
+
+        $r2 = null;
+
+        $r3 = virtualinvoke $r0.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r4 = null;
+
+        if $r1 == null goto label1;
+
+        $r5 = virtualinvoke $r1.<android.net.Uri: java.lang.String getAuthority()>();
+
+        $r6 = "settings";
+
+        $z1 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>($r5);
+
+        if $z1 == 0 goto label3;
+
+        if $z0 == 0 goto label1;
+
+        $i0 = staticinvoke <android.media.RingtoneManager: int getDefaultType(android.net.Uri)>($r1);
+
+        $r1 = staticinvoke <android.media.RingtoneManager: android.net.Uri getActualDefaultRingtoneUri(android.content.Context,int)>($r0, $i0);
+
+        $r5 = staticinvoke <android.media.Ringtone: java.lang.String getTitle(android.content.Context,android.net.Uri,boolean)>($r0, $r1, 0);
+
+        $r7 = newarray (java.lang.Object)[1];
+
+        $r7[0] = $r5;
+
+        $r4 = virtualinvoke $r0.<android.content.Context: java.lang.String getString(int,java.lang.Object[])>(17039969, $r7);
+
+     label1:
+        if $r4 != null goto label2;
+
+        $r5 = virtualinvoke $r0.<android.content.Context: java.lang.String getString(int)>(17039972);
+
+        $r4 = $r5;
+
+        if $r5 != null goto label2;
+
+        $r4 = "";
+
+     label2:
+        return $r4;
+
+     label3:
+        $r4 = "drm";
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 == 0 goto label5;
+
+        $r8 = <android.media.Ringtone: java.lang.String[] DRM_COLUMNS>;
+
+        $r2 = virtualinvoke $r3.<android.content.ContentResolver: android.database.Cursor query(android.net.Uri,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String)>($r1, $r8, null, null, null);
+
+     label4:
+        if $r2 == null goto label6;
+
+        $i0 = interfaceinvoke $r2.<android.database.Cursor: int getCount()>();
+
+        if $i0 != 1 goto label6;
+
+        interfaceinvoke $r2.<android.database.Cursor: boolean moveToFirst()>();
+
+        $r5 = interfaceinvoke $r2.<android.database.Cursor: java.lang.String getString(int)>(2);
+
+        return $r5;
+
+     label5:
+        $r4 = "media";
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 == 0 goto label4;
+
+        $r8 = <android.media.Ringtone: java.lang.String[] MEDIA_COLUMNS>;
+
+        $r2 = virtualinvoke $r3.<android.content.ContentResolver: android.database.Cursor query(android.net.Uri,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String)>($r1, $r8, null, null, null);
+
+        goto label4;
+
+     label6:
+        $r4 = virtualinvoke $r1.<android.net.Uri: java.lang.String getLastPathSegment()>();
+
+        goto label1;
+    }
+
+    private void openMediaPlayer() throws java.io.IOException
+    {
+        android.media.Ringtone $r0;
+        android.media.MediaPlayer $r1;
+        android.net.Uri $r2;
+        android.content.Context $r3;
+        int $i0;
+        java.io.FileDescriptor $r4;
+        android.content.res.AssetFileDescriptor $r5;
+        long $l1, $l3;
+        byte $b2;
+        java.io.IOException $r6;
+
+        $r0 := @this: android.media.Ringtone;
+
+        $r1 = new android.media.MediaPlayer;
+
+        specialinvoke $r1.<android.media.MediaPlayer: void <init>()>();
+
+        $r0.<android.media.Ringtone: android.media.MediaPlayer mAudio> = $r1;
+
+        $r2 = $r0.<android.media.Ringtone: android.net.Uri mUri>;
+
+        if $r2 == null goto label2;
+
+        $r1 = $r0.<android.media.Ringtone: android.media.MediaPlayer mAudio>;
+
+        $r3 = $r0.<android.media.Ringtone: android.content.Context mContext>;
+
+        $r2 = $r0.<android.media.Ringtone: android.net.Uri mUri>;
+
+        virtualinvoke $r1.<android.media.MediaPlayer: void setDataSource(android.content.Context,android.net.Uri)>($r3, $r2);
+
+     label1:
+        $r1 = $r0.<android.media.Ringtone: android.media.MediaPlayer mAudio>;
+
+        $i0 = $r0.<android.media.Ringtone: int mStreamType>;
+
+        virtualinvoke $r1.<android.media.MediaPlayer: void setAudioStreamType(int)>($i0);
+
+        $r1 = $r0.<android.media.Ringtone: android.media.MediaPlayer mAudio>;
+
+        virtualinvoke $r1.<android.media.MediaPlayer: void prepare()>();
+
+        return;
+
+     label2:
+        $r4 = $r0.<android.media.Ringtone: java.io.FileDescriptor mFileDescriptor>;
+
+        if $r4 == null goto label3;
+
+        $r1 = $r0.<android.media.Ringtone: android.media.MediaPlayer mAudio>;
+
+        $r4 = $r0.<android.media.Ringtone: java.io.FileDescriptor mFileDescriptor>;
+
+        virtualinvoke $r1.<android.media.MediaPlayer: void setDataSource(java.io.FileDescriptor)>($r4);
+
+        goto label1;
+
+     label3:
+        $r5 = $r0.<android.media.Ringtone: android.content.res.AssetFileDescriptor mAssetFileDescriptor>;
+
+        if $r5 == null goto label5;
+
+        $r5 = $r0.<android.media.Ringtone: android.content.res.AssetFileDescriptor mAssetFileDescriptor>;
+
+        $l1 = virtualinvoke $r5.<android.content.res.AssetFileDescriptor: long getDeclaredLength()>();
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 >= 0 goto label4;
+
+        $r1 = $r0.<android.media.Ringtone: android.media.MediaPlayer mAudio>;
+
+        $r5 = $r0.<android.media.Ringtone: android.content.res.AssetFileDescriptor mAssetFileDescriptor>;
+
+        $r4 = virtualinvoke $r5.<android.content.res.AssetFileDescriptor: java.io.FileDescriptor getFileDescriptor()>();
+
+        virtualinvoke $r1.<android.media.MediaPlayer: void setDataSource(java.io.FileDescriptor)>($r4);
+
+        goto label1;
+
+     label4:
+        $r1 = $r0.<android.media.Ringtone: android.media.MediaPlayer mAudio>;
+
+        $r5 = $r0.<android.media.Ringtone: android.content.res.AssetFileDescriptor mAssetFileDescriptor>;
+
+        $r4 = virtualinvoke $r5.<android.content.res.AssetFileDescriptor: java.io.FileDescriptor getFileDescriptor()>();
+
+        $r5 = $r0.<android.media.Ringtone: android.content.res.AssetFileDescriptor mAssetFileDescriptor>;
+
+        $l1 = virtualinvoke $r5.<android.content.res.AssetFileDescriptor: long getStartOffset()>();
+
+        $r5 = $r0.<android.media.Ringtone: android.content.res.AssetFileDescriptor mAssetFileDescriptor>;
+
+        $l3 = virtualinvoke $r5.<android.content.res.AssetFileDescriptor: long getDeclaredLength()>();
+
+        virtualinvoke $r1.<android.media.MediaPlayer: void setDataSource(java.io.FileDescriptor,long,long)>($r4, $l1, $l3);
+
+        goto label1;
+
+     label5:
+        $r6 = new java.io.IOException;
+
+        specialinvoke $r6.<java.io.IOException: void <init>(java.lang.String)>("No data source set.");
+
+        throw $r6;
+    }
+
+    public int getStreamType()
+    {
+        android.media.Ringtone $r0;
+        int i0;
+
+        $r0 := @this: android.media.Ringtone;
+
+        i0 = $r0.<android.media.Ringtone: int mStreamType>;
+
+        return i0;
+    }
+
+    public java.lang.String getTitle(android.content.Context)
+    {
+        android.media.Ringtone $r0;
+        android.content.Context $r1;
+        java.lang.String $r2;
+        android.net.Uri $r3;
+
+        $r0 := @this: android.media.Ringtone;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 = $r0.<android.media.Ringtone: java.lang.String mTitle>;
+
+        if $r2 == null goto label1;
+
+        $r2 = $r0.<android.media.Ringtone: java.lang.String mTitle>;
+
+        return $r2;
+
+     label1:
+        $r3 = $r0.<android.media.Ringtone: android.net.Uri mUri>;
+
+        $r2 = staticinvoke <android.media.Ringtone: java.lang.String getTitle(android.content.Context,android.net.Uri,boolean)>($r1, $r3, 1);
+
+        $r0.<android.media.Ringtone: java.lang.String mTitle> = $r2;
+
+        return $r2;
+    }
+
+    public boolean isPlaying()
+    {
+        android.media.Ringtone $r0;
+        boolean $z0;
+        android.media.MediaPlayer $r1;
+
+        $r0 := @this: android.media.Ringtone;
+
+        $r1 = $r0.<android.media.Ringtone: android.media.MediaPlayer mAudio>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<android.media.Ringtone: android.media.MediaPlayer mAudio>;
+
+        $z0 = virtualinvoke $r1.<android.media.MediaPlayer: boolean isPlaying()>();
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    void open(android.content.res.AssetFileDescriptor) throws java.io.IOException
+    {
+        android.media.Ringtone $r0;
+        android.content.res.AssetFileDescriptor $r1;
+
+        $r0 := @this: android.media.Ringtone;
+
+        $r1 := @parameter0: android.content.res.AssetFileDescriptor;
+
+        $r0.<android.media.Ringtone: android.content.res.AssetFileDescriptor mAssetFileDescriptor> = $r1;
+
+        specialinvoke $r0.<android.media.Ringtone: void openMediaPlayer()>();
+
+        return;
+    }
+
+    void open(android.net.Uri) throws java.io.IOException
+    {
+        android.media.Ringtone $r0;
+        android.net.Uri $r1;
+
+        $r0 := @this: android.media.Ringtone;
+
+        $r1 := @parameter0: android.net.Uri;
+
+        $r0.<android.media.Ringtone: android.net.Uri mUri> = $r1;
+
+        specialinvoke $r0.<android.media.Ringtone: void openMediaPlayer()>();
+
+        return;
+    }
+
+    void open(java.io.FileDescriptor) throws java.io.IOException
+    {
+        android.media.Ringtone $r0;
+        java.io.FileDescriptor $r1;
+
+        $r0 := @this: android.media.Ringtone;
+
+        $r1 := @parameter0: java.io.FileDescriptor;
+
+        $r0.<android.media.Ringtone: java.io.FileDescriptor mFileDescriptor> = $r1;
+
+        specialinvoke $r0.<android.media.Ringtone: void openMediaPlayer()>();
+
+        return;
+    }
+
+    public void play()
+    {
+        android.media.Ringtone $r0;
+        java.lang.Exception $r1;
+        android.media.MediaPlayer $r2;
+        java.lang.String $r3;
+
+        $r0 := @this: android.media.Ringtone;
+
+        $r2 = $r0.<android.media.Ringtone: android.media.MediaPlayer mAudio>;
+
+        if $r2 != null goto label2;
+
+     label1:
+        specialinvoke $r0.<android.media.Ringtone: void openMediaPlayer()>();
+
+     label2:
+        $r2 = $r0.<android.media.Ringtone: android.media.MediaPlayer mAudio>;
+
+        if $r2 == null goto label4;
+
+        $r2 = $r0.<android.media.Ringtone: android.media.MediaPlayer mAudio>;
+
+        virtualinvoke $r2.<android.media.MediaPlayer: void start()>();
+
+        return;
+
+     label3:
+        $r1 := @caughtexception;
+
+        $r3 = <android.media.Ringtone: java.lang.String TAG>;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>($r3, "play() caught ", $r1);
+
+        $r0.<android.media.Ringtone: android.media.MediaPlayer mAudio> = null;
+
+        goto label2;
+
+     label4:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public void setStreamType(int)
+    {
+        android.media.Ringtone $r0;
+        int $i0;
+        java.io.IOException $r1;
+        android.media.MediaPlayer $r2;
+        java.lang.String $r3;
+
+        $r0 := @this: android.media.Ringtone;
+
+        $i0 := @parameter0: int;
+
+        $r0.<android.media.Ringtone: int mStreamType> = $i0;
+
+        $r2 = $r0.<android.media.Ringtone: android.media.MediaPlayer mAudio>;
+
+        if $r2 == null goto label4;
+
+     label1:
+        specialinvoke $r0.<android.media.Ringtone: void openMediaPlayer()>();
+
+     label2:
+        return;
+
+     label3:
+        $r1 := @caughtexception;
+
+        $r3 = <android.media.Ringtone: java.lang.String TAG>;
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String,java.lang.Throwable)>($r3, "Couldn\'t set the stream type", $r1);
+
+        return;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    void setTitle(java.lang.String)
+    {
+        android.media.Ringtone $r0;
+        java.lang.String $r1;
+
+        $r0 := @this: android.media.Ringtone;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r0.<android.media.Ringtone: java.lang.String mTitle> = $r1;
+
+        return;
+    }
+
+    public void stop()
+    {
+        android.media.Ringtone $r0;
+        android.media.MediaPlayer $r1;
+
+        $r0 := @this: android.media.Ringtone;
+
+        $r1 = $r0.<android.media.Ringtone: android.media.MediaPlayer mAudio>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<android.media.Ringtone: android.media.MediaPlayer mAudio>;
+
+        virtualinvoke $r1.<android.media.MediaPlayer: void reset()>();
+
+        $r1 = $r0.<android.media.Ringtone: android.media.MediaPlayer mAudio>;
+
+        virtualinvoke $r1.<android.media.MediaPlayer: void release()>();
+
+        $r0.<android.media.Ringtone: android.media.MediaPlayer mAudio> = null;
+
+        return;
+
+     label1:
+        return;
+    }
+}

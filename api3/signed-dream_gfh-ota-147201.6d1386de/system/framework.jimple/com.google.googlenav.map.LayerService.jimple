@@ -1,0 +1,604 @@
+public class com.google.googlenav.map.LayerService extends java.lang.Object implements com.google.common.OutOfMemoryHandler, com.google.googlenav.layer.LayerPayloadHandler
+{
+    public static final long NO_REFRESH;
+    private final java.util.Hashtable cache;
+    private long nextRefreshTime;
+    private final java.util.Vector observers;
+    private long refreshMillis;
+    private volatile com.google.googlenav.map.LayerService$LayerTileRequest request;
+    private final java.util.Hashtable requestedTiles;
+
+    public void <init>()
+    {
+        com.google.googlenav.map.LayerService $r0;
+        java.util.Vector $r1;
+        java.util.Hashtable $r2;
+
+        $r0 := @this: com.google.googlenav.map.LayerService;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.Vector;
+
+        specialinvoke $r1.<java.util.Vector: void <init>()>();
+
+        $r0.<com.google.googlenav.map.LayerService: java.util.Vector observers> = $r1;
+
+        $r2 = new java.util.Hashtable;
+
+        specialinvoke $r2.<java.util.Hashtable: void <init>()>();
+
+        $r0.<com.google.googlenav.map.LayerService: java.util.Hashtable cache> = $r2;
+
+        $r2 = new java.util.Hashtable;
+
+        specialinvoke $r2.<java.util.Hashtable: void <init>()>();
+
+        $r0.<com.google.googlenav.map.LayerService: java.util.Hashtable requestedTiles> = $r2;
+
+        $r0.<com.google.googlenav.map.LayerService: long refreshMillis> = -1L;
+
+        $r0.<com.google.googlenav.map.LayerService: long nextRefreshTime> = 0L;
+
+        staticinvoke <com.google.common.StaticUtil: void registerOutOfMemoryHandler(com.google.common.OutOfMemoryHandler)>($r0);
+
+        return;
+    }
+
+    static java.util.Vector access$000(com.google.googlenav.map.LayerService)
+    {
+        com.google.googlenav.map.LayerService $r0;
+        java.util.Vector r1;
+
+        $r0 := @parameter0: com.google.googlenav.map.LayerService;
+
+        r1 = $r0.<com.google.googlenav.map.LayerService: java.util.Vector observers>;
+
+        return r1;
+    }
+
+    static java.util.Hashtable access$100(com.google.googlenav.map.LayerService)
+    {
+        com.google.googlenav.map.LayerService $r0;
+        java.util.Hashtable r1;
+
+        $r0 := @parameter0: com.google.googlenav.map.LayerService;
+
+        r1 = $r0.<com.google.googlenav.map.LayerService: java.util.Hashtable requestedTiles>;
+
+        return r1;
+    }
+
+    static java.util.Hashtable access$200(com.google.googlenav.map.LayerService)
+    {
+        com.google.googlenav.map.LayerService $r0;
+        java.util.Hashtable r1;
+
+        $r0 := @parameter0: com.google.googlenav.map.LayerService;
+
+        r1 = $r0.<com.google.googlenav.map.LayerService: java.util.Hashtable cache>;
+
+        return r1;
+    }
+
+    private void requestTile(com.google.googlenav.map.Tile, com.google.googlenav.map.LayerTile)
+    {
+        com.google.googlenav.map.LayerService $r0;
+        com.google.googlenav.map.Tile $r1;
+        com.google.googlenav.map.LayerTile $r2;
+        com.google.googlenav.map.LayerService$LayerTileRequest $r3;
+        java.util.Hashtable $r4;
+        java.lang.Throwable $r5;
+
+        $r0 := @this: com.google.googlenav.map.LayerService;
+
+        $r1 := @parameter0: com.google.googlenav.map.Tile;
+
+        $r2 := @parameter1: com.google.googlenav.map.LayerTile;
+
+        entermonitor $r0;
+
+     label1:
+        $r3 = $r0.<com.google.googlenav.map.LayerService: com.google.googlenav.map.LayerService$LayerTileRequest request>;
+
+        if $r3 != null goto label2;
+
+        $r3 = new com.google.googlenav.map.LayerService$LayerTileRequest;
+
+        specialinvoke $r3.<com.google.googlenav.map.LayerService$LayerTileRequest: void <init>(com.google.googlenav.map.LayerService)>($r0);
+
+        $r0.<com.google.googlenav.map.LayerService: com.google.googlenav.map.LayerService$LayerTileRequest request> = $r3;
+
+     label2:
+        $r3 = $r0.<com.google.googlenav.map.LayerService: com.google.googlenav.map.LayerService$LayerTileRequest request>;
+
+        virtualinvoke $r3.<com.google.googlenav.map.LayerService$LayerTileRequest: void addTile(com.google.googlenav.map.LayerTile)>($r2);
+
+        $r4 = $r0.<com.google.googlenav.map.LayerService: java.util.Hashtable requestedTiles>;
+
+        virtualinvoke $r4.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, $r2);
+
+     label3:
+        exitmonitor $r0;
+
+        return;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+    }
+
+    public void addTileUpdateObserver(com.google.googlenav.map.LayerService$TileUpdateObserver)
+    {
+        com.google.googlenav.map.LayerService $r0;
+        com.google.googlenav.map.LayerService$TileUpdateObserver $r1;
+        java.util.Vector $r2;
+        boolean $z0;
+        com.google.googlenav.layer.LayerInfo $r3;
+        long $l0, $l2;
+        byte $b1;
+        java.util.Hashtable $r4;
+
+        $r0 := @this: com.google.googlenav.map.LayerService;
+
+        $r1 := @parameter0: com.google.googlenav.map.LayerService$TileUpdateObserver;
+
+        staticinvoke <com.google.common.util.Assert: void assertNotNull(java.lang.Object)>($r1);
+
+        $r2 = $r0.<com.google.googlenav.map.LayerService: java.util.Vector observers>;
+
+        $z0 = virtualinvoke $r2.<java.util.Vector: boolean contains(java.lang.Object)>($r1);
+
+        if $z0 != 0 goto label4;
+
+        $z0 = 1;
+
+     label1:
+        staticinvoke <com.google.common.util.Assert: void assertTrue(boolean)>($z0);
+
+        $r2 = $r0.<com.google.googlenav.map.LayerService: java.util.Vector observers>;
+
+        virtualinvoke $r2.<java.util.Vector: void addElement(java.lang.Object)>($r1);
+
+        $r3 = interfaceinvoke $r1.<com.google.googlenav.map.LayerService$TileUpdateObserver: com.google.googlenav.layer.LayerInfo getLayerInfo()>();
+
+        $l0 = virtualinvoke $r3.<com.google.googlenav.layer.LayerInfo: long getLayerTileExpirationTime()>();
+
+        $b1 = $l0 cmp -1L;
+
+        if $b1 == 0 goto label3;
+
+        $l2 = $r0.<com.google.googlenav.map.LayerService: long refreshMillis>;
+
+        $b1 = $l2 cmp -1L;
+
+        if $b1 == 0 goto label2;
+
+        $l2 = $r0.<com.google.googlenav.map.LayerService: long refreshMillis>;
+
+        $b1 = $l0 cmp $l2;
+
+        if $b1 >= 0 goto label3;
+
+     label2:
+        $r0.<com.google.googlenav.map.LayerService: long refreshMillis> = $l0;
+
+     label3:
+        $r4 = $r0.<com.google.googlenav.map.LayerService: java.util.Hashtable cache>;
+
+        virtualinvoke $r4.<java.util.Hashtable: void clear()>();
+
+        return;
+
+     label4:
+        $z0 = 0;
+
+        goto label1;
+    }
+
+    public void close()
+    {
+        com.google.googlenav.map.LayerService $r0;
+
+        $r0 := @this: com.google.googlenav.map.LayerService;
+
+        staticinvoke <com.google.common.StaticUtil: void removeOutOfMemoryHandler(com.google.common.OutOfMemoryHandler)>($r0);
+
+        return;
+    }
+
+    public com.google.googlenav.map.LayerTile getTile(com.google.googlenav.map.Tile, boolean)
+    {
+        com.google.googlenav.map.LayerService $r0;
+        com.google.googlenav.map.Tile $r1;
+        boolean $z0, $z1;
+        long $l0, $l2;
+        java.util.Hashtable $r2;
+        java.lang.Object $r3;
+        com.google.googlenav.map.LayerTile $r4, $r5;
+        byte $b1;
+        com.google.googlenav.map.LayerService$LayerTileRequest $r6;
+        java.lang.Throwable $r7;
+
+        $r0 := @this: com.google.googlenav.map.LayerService;
+
+        $r1 := @parameter0: com.google.googlenav.map.Tile;
+
+        $z0 := @parameter1: boolean;
+
+        entermonitor $r0;
+
+     label1:
+        $z1 = virtualinvoke $r1.<com.google.googlenav.map.Tile: boolean isClickableLayer()>();
+
+        staticinvoke <com.google.common.util.Assert: void assertTrue(boolean)>($z1);
+
+        $r2 = $r0.<com.google.googlenav.map.LayerService: java.util.Hashtable cache>;
+
+        $r3 = virtualinvoke $r2.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r4 = (com.google.googlenav.map.LayerTile) $r3;
+
+        $r2 = $r0.<com.google.googlenav.map.LayerService: java.util.Hashtable requestedTiles>;
+
+        $r3 = virtualinvoke $r2.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r5 = (com.google.googlenav.map.LayerTile) $r3;
+
+        if $r4 == null goto label4;
+
+        $l0 = $r0.<com.google.googlenav.map.LayerService: long refreshMillis>;
+
+        $b1 = $l0 cmp -1L;
+
+        if $b1 == 0 goto label3;
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l2 = virtualinvoke $r4.<com.google.googlenav.map.LayerTile: long getDataTime()>();
+
+        $l0 = $l0 - $l2;
+
+        if $z0 == 0 goto label3;
+
+        if $r5 != null goto label3;
+
+        $l2 = $r0.<com.google.googlenav.map.LayerService: long refreshMillis>;
+
+        $b1 = $l0 cmp $l2;
+
+        if $b1 <= 0 goto label3;
+
+        $l2 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l0 = $r0.<com.google.googlenav.map.LayerService: long nextRefreshTime>;
+
+        $b1 = $l2 cmp $l0;
+
+        if $b1 > 0 goto label2;
+
+        $r6 = $r0.<com.google.googlenav.map.LayerService: com.google.googlenav.map.LayerService$LayerTileRequest request>;
+
+        if $r6 == null goto label3;
+
+     label2:
+        specialinvoke $r0.<com.google.googlenav.map.LayerService: void requestTile(com.google.googlenav.map.Tile,com.google.googlenav.map.LayerTile)>($r1, $r4);
+
+     label3:
+        exitmonitor $r0;
+
+        return $r4;
+
+     label4:
+        if $r5 == null goto label5;
+
+        $r4 = $r5;
+
+        goto label3;
+
+     label5:
+        $r4 = new com.google.googlenav.map.LayerTile;
+
+        specialinvoke $r4.<com.google.googlenav.map.LayerTile: void <init>(com.google.googlenav.map.Tile)>($r1);
+
+        if $z0 == 0 goto label3;
+
+        specialinvoke $r0.<com.google.googlenav.map.LayerService: void requestTile(com.google.googlenav.map.Tile,com.google.googlenav.map.LayerTile)>($r1, $r4);
+
+     label6:
+        goto label3;
+
+     label7:
+        $r7 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r7;
+
+        catch java.lang.Throwable from label1 to label3 with label7;
+        catch java.lang.Throwable from label5 to label6 with label7;
+    }
+
+    public void handleLayerTileInfo(com.google.common.io.protocol.ProtoBuf)
+    {
+        com.google.googlenav.map.LayerService $r0;
+        com.google.common.io.protocol.ProtoBuf $r1;
+        com.google.googlenav.map.LayerService$LayerTileRequest $r2;
+
+        $r0 := @this: com.google.googlenav.map.LayerService;
+
+        $r1 := @parameter0: com.google.common.io.protocol.ProtoBuf;
+
+        $r2 = new com.google.googlenav.map.LayerService$LayerTileRequest;
+
+        specialinvoke $r2.<com.google.googlenav.map.LayerService$LayerTileRequest: void <init>(com.google.googlenav.map.LayerService)>($r0);
+
+        virtualinvoke $r2.<com.google.googlenav.map.LayerService$LayerTileRequest: void processLayerTile(com.google.common.io.protocol.ProtoBuf,boolean)>($r1, 0);
+
+        return;
+    }
+
+    public void handleLayerTileResponseHeader(com.google.common.io.protocol.ProtoBuf)
+    {
+        com.google.googlenav.map.LayerService $r0;
+        com.google.common.io.protocol.ProtoBuf $r1;
+        com.google.googlenav.map.LayerService$LayerTileRequest $r2;
+
+        $r0 := @this: com.google.googlenav.map.LayerService;
+
+        $r1 := @parameter0: com.google.common.io.protocol.ProtoBuf;
+
+        $r2 = new com.google.googlenav.map.LayerService$LayerTileRequest;
+
+        specialinvoke $r2.<com.google.googlenav.map.LayerService$LayerTileRequest: void <init>(com.google.googlenav.map.LayerService)>($r0);
+
+        virtualinvoke $r2.<com.google.googlenav.map.LayerService$LayerTileRequest: void processResponseHeader(com.google.common.io.protocol.ProtoBuf)>($r1);
+
+        return;
+    }
+
+    public void handleOutOfMemory()
+    {
+        com.google.googlenav.map.LayerService $r0;
+        java.util.Hashtable $r1;
+
+        $r0 := @this: com.google.googlenav.map.LayerService;
+
+        $r1 = $r0.<com.google.googlenav.map.LayerService: java.util.Hashtable cache>;
+
+        virtualinvoke $r1.<java.util.Hashtable: void clear()>();
+
+        return;
+    }
+
+    public boolean needFetchLayerTiles()
+    {
+        com.google.googlenav.map.LayerService $r0;
+        int $i0;
+        java.util.Vector $r1;
+
+        $r0 := @this: com.google.googlenav.map.LayerService;
+
+        $r1 = $r0.<com.google.googlenav.map.LayerService: java.util.Vector observers>;
+
+        $i0 = virtualinvoke $r1.<java.util.Vector: int size()>();
+
+        if $i0 <= 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    public void notifyNewLayerInfo(java.lang.String, com.google.common.io.protocol.ProtoBuf[])
+    {
+        com.google.googlenav.map.LayerService $r0;
+        java.lang.String $r1;
+        com.google.common.io.protocol.ProtoBuf[] $r2;
+        java.util.Vector $r3;
+        int $i0, $i1;
+        java.lang.Object $r4;
+        com.google.googlenav.map.LayerService$TileUpdateObserver $r5;
+
+        $r0 := @this: com.google.googlenav.map.LayerService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: com.google.common.io.protocol.ProtoBuf[];
+
+        $r3 = $r0.<com.google.googlenav.map.LayerService: java.util.Vector observers>;
+
+        $i0 = virtualinvoke $r3.<java.util.Vector: int size()>();
+
+        $i1 = 0;
+
+     label1:
+        if $i1 >= $i0 goto label2;
+
+        $r3 = $r0.<com.google.googlenav.map.LayerService: java.util.Vector observers>;
+
+        $r4 = virtualinvoke $r3.<java.util.Vector: java.lang.Object elementAt(int)>($i1);
+
+        $r5 = (com.google.googlenav.map.LayerService$TileUpdateObserver) $r4;
+
+        interfaceinvoke $r5.<com.google.googlenav.map.LayerService$TileUpdateObserver: void updateLayerInfo(java.lang.String,com.google.common.io.protocol.ProtoBuf[])>($r1, $r2);
+
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void notifyNewTile()
+    {
+        com.google.googlenav.map.LayerService $r0;
+        java.util.Vector $r1;
+        int $i0, $i1;
+        java.lang.Object $r2;
+        com.google.googlenav.map.LayerService$TileUpdateObserver $r3;
+
+        $r0 := @this: com.google.googlenav.map.LayerService;
+
+        $r1 = $r0.<com.google.googlenav.map.LayerService: java.util.Vector observers>;
+
+        $i0 = virtualinvoke $r1.<java.util.Vector: int size()>();
+
+        $i1 = 0;
+
+     label1:
+        if $i1 >= $i0 goto label2;
+
+        $r1 = $r0.<com.google.googlenav.map.LayerService: java.util.Vector observers>;
+
+        $r2 = virtualinvoke $r1.<java.util.Vector: java.lang.Object elementAt(int)>($i1);
+
+        $r3 = (com.google.googlenav.map.LayerService$TileUpdateObserver) $r2;
+
+        interfaceinvoke $r3.<com.google.googlenav.map.LayerService$TileUpdateObserver: void updateTile()>();
+
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void removeTileUpdateObserver(com.google.googlenav.map.LayerService$TileUpdateObserver)
+    {
+        com.google.googlenav.map.LayerService $r0;
+        com.google.googlenav.map.LayerService$TileUpdateObserver $r1;
+        java.util.Vector $r2;
+        int $i0, $i1;
+        java.lang.Object $r3;
+        com.google.googlenav.layer.LayerInfo $r4;
+        long $l2, $l4;
+        byte $b3;
+        java.util.Hashtable $r5;
+
+        $r0 := @this: com.google.googlenav.map.LayerService;
+
+        $r1 := @parameter0: com.google.googlenav.map.LayerService$TileUpdateObserver;
+
+        staticinvoke <com.google.common.util.Assert: void assertNotNull(java.lang.Object)>($r1);
+
+        $r2 = $r0.<com.google.googlenav.map.LayerService: java.util.Vector observers>;
+
+        virtualinvoke $r2.<java.util.Vector: boolean removeElement(java.lang.Object)>($r1);
+
+        $r0.<com.google.googlenav.map.LayerService: long refreshMillis> = -1L;
+
+        $r2 = $r0.<com.google.googlenav.map.LayerService: java.util.Vector observers>;
+
+        $i0 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        $i1 = 0;
+
+     label1:
+        if $i1 >= $i0 goto label4;
+
+        $r2 = $r0.<com.google.googlenav.map.LayerService: java.util.Vector observers>;
+
+        $r3 = virtualinvoke $r2.<java.util.Vector: java.lang.Object elementAt(int)>($i1);
+
+        $r1 = (com.google.googlenav.map.LayerService$TileUpdateObserver) $r3;
+
+        $r4 = interfaceinvoke $r1.<com.google.googlenav.map.LayerService$TileUpdateObserver: com.google.googlenav.layer.LayerInfo getLayerInfo()>();
+
+        $l2 = virtualinvoke $r4.<com.google.googlenav.layer.LayerInfo: long getLayerTileExpirationTime()>();
+
+        $b3 = $l2 cmp -1L;
+
+        if $b3 == 0 goto label3;
+
+        $l4 = $r0.<com.google.googlenav.map.LayerService: long refreshMillis>;
+
+        $b3 = $l4 cmp -1L;
+
+        if $b3 == 0 goto label2;
+
+        $l4 = $r0.<com.google.googlenav.map.LayerService: long refreshMillis>;
+
+        $b3 = $l2 cmp $l4;
+
+        if $b3 >= 0 goto label3;
+
+     label2:
+        $r0.<com.google.googlenav.map.LayerService: long refreshMillis> = $l2;
+
+     label3:
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label4:
+        $r5 = $r0.<com.google.googlenav.map.LayerService: java.util.Hashtable cache>;
+
+        virtualinvoke $r5.<java.util.Hashtable: void clear()>();
+
+        return;
+    }
+
+    public void requestTiles()
+    {
+        com.google.googlenav.map.LayerService $r0;
+        com.google.googlenav.map.LayerService$LayerTileRequest $r1;
+        long $l0, $l1;
+        com.google.common.DataRequestDispatcher $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: com.google.googlenav.map.LayerService;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = $r0.<com.google.googlenav.map.LayerService: com.google.googlenav.map.LayerService$LayerTileRequest request>;
+
+        if $r1 == null goto label2;
+
+        $r2 = staticinvoke <com.google.common.DataRequestDispatcher: com.google.common.DataRequestDispatcher getInstance()>();
+
+        $r1 = $r0.<com.google.googlenav.map.LayerService: com.google.googlenav.map.LayerService$LayerTileRequest request>;
+
+        virtualinvoke $r2.<com.google.common.DataRequestDispatcher: void addDataRequest(com.google.common.DataRequest)>($r1);
+
+        $r0.<com.google.googlenav.map.LayerService: com.google.googlenav.map.LayerService$LayerTileRequest request> = null;
+
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l0 = $r0.<com.google.googlenav.map.LayerService: long refreshMillis>;
+
+        $l0 = $l1 + $l0;
+
+        $r0.<com.google.googlenav.map.LayerService: long nextRefreshTime> = $l0;
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public static void <clinit>()
+    {
+        <com.google.googlenav.map.LayerService: long NO_REFRESH> = -1L;
+
+        return;
+    }
+}

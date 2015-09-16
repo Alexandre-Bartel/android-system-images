@@ -1,0 +1,163 @@
+public class org.apache.http.protocol.ResponseContent extends java.lang.Object implements org.apache.http.HttpResponseInterceptor
+{
+
+    public void <init>()
+    {
+        org.apache.http.protocol.ResponseContent $r0;
+
+        $r0 := @this: org.apache.http.protocol.ResponseContent;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public void process(org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException, java.io.IOException
+    {
+        org.apache.http.protocol.ResponseContent $r0;
+        org.apache.http.HttpResponse $r1;
+        org.apache.http.protocol.HttpContext $r2;
+        java.lang.IllegalArgumentException $r3;
+        boolean $z0;
+        org.apache.http.ProtocolException $r4;
+        org.apache.http.StatusLine $r5;
+        org.apache.http.ProtocolVersion $r6;
+        org.apache.http.HttpEntity $r7;
+        long $l0;
+        org.apache.http.HttpVersion $r8;
+        org.apache.http.Header $r9;
+        byte $b1;
+        java.lang.String $r10;
+        int $i2;
+
+        $r0 := @this: org.apache.http.protocol.ResponseContent;
+
+        $r1 := @parameter0: org.apache.http.HttpResponse;
+
+        $r2 := @parameter1: org.apache.http.protocol.HttpContext;
+
+        if $r1 != null goto label01;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("HTTP request may not be null");
+
+        throw $r3;
+
+     label01:
+        $z0 = interfaceinvoke $r1.<org.apache.http.HttpResponse: boolean containsHeader(java.lang.String)>("Transfer-Encoding");
+
+        if $z0 == 0 goto label02;
+
+        $r4 = new org.apache.http.ProtocolException;
+
+        specialinvoke $r4.<org.apache.http.ProtocolException: void <init>(java.lang.String)>("Transfer-encoding header already present");
+
+        throw $r4;
+
+     label02:
+        $z0 = interfaceinvoke $r1.<org.apache.http.HttpResponse: boolean containsHeader(java.lang.String)>("Content-Length");
+
+        if $z0 == 0 goto label03;
+
+        $r4 = new org.apache.http.ProtocolException;
+
+        specialinvoke $r4.<org.apache.http.ProtocolException: void <init>(java.lang.String)>("Content-Length header already present");
+
+        throw $r4;
+
+     label03:
+        $r5 = interfaceinvoke $r1.<org.apache.http.HttpResponse: org.apache.http.StatusLine getStatusLine()>();
+
+        $r6 = interfaceinvoke $r5.<org.apache.http.StatusLine: org.apache.http.ProtocolVersion getProtocolVersion()>();
+
+        $r7 = interfaceinvoke $r1.<org.apache.http.HttpResponse: org.apache.http.HttpEntity getEntity()>();
+
+        if $r7 == null goto label07;
+
+        $l0 = interfaceinvoke $r7.<org.apache.http.HttpEntity: long getContentLength()>();
+
+        $z0 = interfaceinvoke $r7.<org.apache.http.HttpEntity: boolean isChunked()>();
+
+        if $z0 == 0 goto label06;
+
+        $r8 = <org.apache.http.HttpVersion: org.apache.http.HttpVersion HTTP_1_0>;
+
+        $z0 = virtualinvoke $r6.<org.apache.http.ProtocolVersion: boolean lessEquals(org.apache.http.ProtocolVersion)>($r8);
+
+        if $z0 != 0 goto label06;
+
+        interfaceinvoke $r1.<org.apache.http.HttpResponse: void addHeader(java.lang.String,java.lang.String)>("Transfer-Encoding", "chunked");
+
+     label04:
+        $r9 = interfaceinvoke $r7.<org.apache.http.HttpEntity: org.apache.http.Header getContentType()>();
+
+        if $r9 == null goto label05;
+
+        $z0 = interfaceinvoke $r1.<org.apache.http.HttpResponse: boolean containsHeader(java.lang.String)>("Content-Type");
+
+        if $z0 != 0 goto label05;
+
+        $r9 = interfaceinvoke $r7.<org.apache.http.HttpEntity: org.apache.http.Header getContentType()>();
+
+        interfaceinvoke $r1.<org.apache.http.HttpResponse: void addHeader(org.apache.http.Header)>($r9);
+
+     label05:
+        $r9 = interfaceinvoke $r7.<org.apache.http.HttpEntity: org.apache.http.Header getContentEncoding()>();
+
+        if $r9 == null goto label08;
+
+        $z0 = interfaceinvoke $r1.<org.apache.http.HttpResponse: boolean containsHeader(java.lang.String)>("Content-Encoding");
+
+        if $z0 != 0 goto label09;
+
+        $r9 = interfaceinvoke $r7.<org.apache.http.HttpEntity: org.apache.http.Header getContentEncoding()>();
+
+        interfaceinvoke $r1.<org.apache.http.HttpResponse: void addHeader(org.apache.http.Header)>($r9);
+
+        return;
+
+     label06:
+        $b1 = $l0 cmp 0L;
+
+        if $b1 < 0 goto label04;
+
+        $l0 = interfaceinvoke $r7.<org.apache.http.HttpEntity: long getContentLength()>();
+
+        $r10 = staticinvoke <java.lang.Long: java.lang.String toString(long)>($l0);
+
+        interfaceinvoke $r1.<org.apache.http.HttpResponse: void addHeader(java.lang.String,java.lang.String)>("Content-Length", $r10);
+
+        goto label04;
+
+     label07:
+        $r5 = interfaceinvoke $r1.<org.apache.http.HttpResponse: org.apache.http.StatusLine getStatusLine()>();
+
+        $i2 = interfaceinvoke $r5.<org.apache.http.StatusLine: int getStatusCode()>();
+
+        if $i2 == 204 goto label10;
+
+        if $i2 == 304 goto label11;
+
+        if $i2 == 205 goto label12;
+
+        interfaceinvoke $r1.<org.apache.http.HttpResponse: void addHeader(java.lang.String,java.lang.String)>("Content-Length", "0");
+
+        return;
+
+     label08:
+        return;
+
+     label09:
+        return;
+
+     label10:
+        return;
+
+     label11:
+        return;
+
+     label12:
+        return;
+    }
+}

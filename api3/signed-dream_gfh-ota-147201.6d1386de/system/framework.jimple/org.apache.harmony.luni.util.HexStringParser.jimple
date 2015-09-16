@@ -1,0 +1,894 @@
+final class org.apache.harmony.luni.util.HexStringParser extends java.lang.Object
+{
+    private static final java.lang.String BINARY_EXPONENT;
+    private static final int DOUBLE_EXPONENT_WIDTH;
+    private static final int DOUBLE_MANTISSA_WIDTH;
+    private static final int FLOAT_EXPONENT_WIDTH;
+    private static final int FLOAT_MANTISSA_WIDTH;
+    private static final java.lang.String FLOAT_TYPE_SUFFIX;
+    private static final java.lang.String HEX_PATTERN;
+    private static final int HEX_RADIX;
+    private static final java.lang.String HEX_SIGNIFICANT;
+    private static final int MAX_SIGNIFICANT_LENGTH;
+    private static final java.util.regex.Pattern PATTERN;
+    private final long EXPONENT_BASE;
+    private final int EXPONENT_WIDTH;
+    private final long MANTISSA_MASK;
+    private final int MANTISSA_WIDTH;
+    private final long MAX_EXPONENT;
+    private final long MIN_EXPONENT;
+    private java.lang.String abandonedNumber;
+    private long exponent;
+    private long mantissa;
+    private long sign;
+
+    static void <clinit>()
+    {
+        java.util.regex.Pattern $r0;
+
+        <org.apache.harmony.luni.util.HexStringParser: int MAX_SIGNIFICANT_LENGTH> = 15;
+
+        <org.apache.harmony.luni.util.HexStringParser: java.lang.String HEX_SIGNIFICANT> = "0[xX](\\p{XDigit}+\\.?|\\p{XDigit}*\\.\\p{XDigit}+)";
+
+        <org.apache.harmony.luni.util.HexStringParser: int HEX_RADIX> = 16;
+
+        <org.apache.harmony.luni.util.HexStringParser: java.lang.String HEX_PATTERN> = "[\\x00-\\x20]*([+-]?)0[xX](\\p{XDigit}+\\.?|\\p{XDigit}*\\.\\p{XDigit}+)[pP]([+-]?\\d+)[fFdD]?[\\x00-\\x20]*";
+
+        <org.apache.harmony.luni.util.HexStringParser: java.lang.String FLOAT_TYPE_SUFFIX> = "[fFdD]?";
+
+        <org.apache.harmony.luni.util.HexStringParser: int FLOAT_MANTISSA_WIDTH> = 23;
+
+        <org.apache.harmony.luni.util.HexStringParser: int FLOAT_EXPONENT_WIDTH> = 8;
+
+        <org.apache.harmony.luni.util.HexStringParser: int DOUBLE_MANTISSA_WIDTH> = 52;
+
+        <org.apache.harmony.luni.util.HexStringParser: int DOUBLE_EXPONENT_WIDTH> = 11;
+
+        <org.apache.harmony.luni.util.HexStringParser: java.lang.String BINARY_EXPONENT> = "[pP]([+-]?\\d+)";
+
+        $r0 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>("[\\x00-\\x20]*([+-]?)0[xX](\\p{XDigit}+\\.?|\\p{XDigit}*\\.\\p{XDigit}+)[pP]([+-]?\\d+)[fFdD]?[\\x00-\\x20]*");
+
+        <org.apache.harmony.luni.util.HexStringParser: java.util.regex.Pattern PATTERN> = $r0;
+
+        return;
+    }
+
+    public void <init>(int, int)
+    {
+        org.apache.harmony.luni.util.HexStringParser $r0;
+        int $i0, $i1, $i2;
+        long $l3;
+
+        $r0 := @this: org.apache.harmony.luni.util.HexStringParser;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r0.<org.apache.harmony.luni.util.HexStringParser: java.lang.String abandonedNumber> = "";
+
+        $r0.<org.apache.harmony.luni.util.HexStringParser: int EXPONENT_WIDTH> = $i0;
+
+        $r0.<org.apache.harmony.luni.util.HexStringParser: int MANTISSA_WIDTH> = $i1;
+
+        $i2 = $i0 - 1;
+
+        $l3 = -1L << $i2;
+
+        $l3 = $l3 ^ -1L;
+
+        $r0.<org.apache.harmony.luni.util.HexStringParser: long EXPONENT_BASE> = $l3;
+
+        $l3 = -1L << $i0;
+
+        $l3 = $l3 ^ -1L;
+
+        $r0.<org.apache.harmony.luni.util.HexStringParser: long MAX_EXPONENT> = $l3;
+
+        $i0 = $r0.<org.apache.harmony.luni.util.HexStringParser: int MANTISSA_WIDTH>;
+
+        $i0 = $i0 + 1;
+
+        $i0 = neg $i0;
+
+        $l3 = (long) $i0;
+
+        $r0.<org.apache.harmony.luni.util.HexStringParser: long MIN_EXPONENT> = $l3;
+
+        $l3 = -1L << $i1;
+
+        $l3 = $l3 ^ -1L;
+
+        $r0.<org.apache.harmony.luni.util.HexStringParser: long MANTISSA_MASK> = $l3;
+
+        return;
+    }
+
+    private void checkedAddExponent(long)
+    {
+        org.apache.harmony.luni.util.HexStringParser $r0;
+        long $l0, $l1, $l2;
+        int $i3, $i4;
+
+        $r0 := @this: org.apache.harmony.luni.util.HexStringParser;
+
+        $l0 := @parameter0: long;
+
+        $l1 = $r0.<org.apache.harmony.luni.util.HexStringParser: long exponent>;
+
+        $l1 = $l1 + $l0;
+
+        $l2 = $r0.<org.apache.harmony.luni.util.HexStringParser: long exponent>;
+
+        $i3 = staticinvoke <java.lang.Long: int signum(long)>($l2);
+
+        $i4 = staticinvoke <java.lang.Long: int signum(long)>($l0);
+
+        $i4 = $i4 * $i3;
+
+        if $i4 <= 0 goto label1;
+
+        $i4 = staticinvoke <java.lang.Long: int signum(long)>($l1);
+
+        $i4 = $i4 * $i3;
+
+        if $i4 >= 0 goto label1;
+
+        $l0 = (long) $i3;
+
+        $l0 = $l0 * 9223372036854775807L;
+
+        $r0.<org.apache.harmony.luni.util.HexStringParser: long exponent> = $l0;
+
+        return;
+
+     label1:
+        $r0.<org.apache.harmony.luni.util.HexStringParser: long exponent> = $l1;
+
+        return;
+    }
+
+    private int countBitsLength(long)
+    {
+        org.apache.harmony.luni.util.HexStringParser $r0;
+        long $l0;
+        int $i1;
+
+        $r0 := @this: org.apache.harmony.luni.util.HexStringParser;
+
+        $l0 := @parameter0: long;
+
+        $i1 = staticinvoke <java.lang.Long: int numberOfLeadingZeros(long)>($l0);
+
+        $i1 = 64 - $i1;
+
+        return $i1;
+    }
+
+    private void discardTrailingBits(long)
+    {
+        org.apache.harmony.luni.util.HexStringParser $r0;
+        long $l0, $l1, $l3;
+        int $i2;
+        java.lang.StringBuilder $r1;
+        java.lang.String $r2;
+
+        $r0 := @this: org.apache.harmony.luni.util.HexStringParser;
+
+        $l0 := @parameter0: long;
+
+        $i2 = (int) $l0;
+
+        $l1 = -1L << $i2;
+
+        $l1 = $l1 ^ -1L;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = $r0.<org.apache.harmony.luni.util.HexStringParser: java.lang.String abandonedNumber>;
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $l3 = $r0.<org.apache.harmony.luni.util.HexStringParser: long mantissa>;
+
+        $l1 = $l3 & $l1;
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l1);
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r0.<org.apache.harmony.luni.util.HexStringParser: java.lang.String abandonedNumber> = $r2;
+
+        $l1 = $r0.<org.apache.harmony.luni.util.HexStringParser: long mantissa>;
+
+        $i2 = (int) $l0;
+
+        $l0 = $l1 >> $i2;
+
+        $r0.<org.apache.harmony.luni.util.HexStringParser: long mantissa> = $l0;
+
+        return;
+    }
+
+    private void fitMantissaInDesiredWidth(int)
+    {
+        org.apache.harmony.luni.util.HexStringParser $r0;
+        int $i0, $i1;
+        long $l2;
+
+        $r0 := @this: org.apache.harmony.luni.util.HexStringParser;
+
+        $i0 := @parameter0: int;
+
+        $l2 = $r0.<org.apache.harmony.luni.util.HexStringParser: long mantissa>;
+
+        $i1 = specialinvoke $r0.<org.apache.harmony.luni.util.HexStringParser: int countBitsLength(long)>($l2);
+
+        if $i1 <= $i0 goto label1;
+
+        $i0 = $i1 - $i0;
+
+        $l2 = (long) $i0;
+
+        specialinvoke $r0.<org.apache.harmony.luni.util.HexStringParser: void discardTrailingBits(long)>($l2);
+
+        return;
+
+     label1:
+        $l2 = $r0.<org.apache.harmony.luni.util.HexStringParser: long mantissa>;
+
+        $i0 = $i0 - $i1;
+
+        $l2 = $l2 << $i0;
+
+        $r0.<org.apache.harmony.luni.util.HexStringParser: long mantissa> = $l2;
+
+        return;
+    }
+
+    private java.lang.String getNormalizedSignificand(java.lang.String, java.lang.String)
+    {
+        org.apache.harmony.luni.util.HexStringParser $r0;
+        java.lang.String $r1, $r2;
+        java.lang.StringBuilder $r3;
+        int $i0;
+
+        $r0 := @this: org.apache.harmony.luni.util.HexStringParser;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String replaceFirst(java.lang.String,java.lang.String)>("^0+", "");
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 != 0 goto label1;
+
+        return "0";
+
+     label1:
+        return $r1;
+    }
+
+    private int getOffset(java.lang.String, java.lang.String)
+    {
+        org.apache.harmony.luni.util.HexStringParser $r0;
+        java.lang.String $r1, $r2;
+        int $i0, $i2;
+        long $l1;
+        char $c3;
+
+        $r0 := @this: org.apache.harmony.luni.util.HexStringParser;
+
+        $r2 := @parameter0: java.lang.String;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $r2 = virtualinvoke $r2.<java.lang.String: java.lang.String replaceFirst(java.lang.String,java.lang.String)>("^0+", "");
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        if $i0 == 0 goto label1;
+
+        $r1 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int,int)>(0, 1);
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        $i0 = $i0 - 1;
+
+        $i0 = $i0 * 4;
+
+        $l1 = staticinvoke <java.lang.Long: long parseLong(java.lang.String,int)>($r1, 16);
+
+        $i2 = specialinvoke $r0.<org.apache.harmony.luni.util.HexStringParser: int countBitsLength(long)>($l1);
+
+        $i0 = $i0 + $i2;
+
+        $i0 = $i0 - 1;
+
+        return $i0;
+
+     label1:
+        $i0 = 0;
+
+     label2:
+        $i2 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 >= $i2 goto label3;
+
+        $c3 = virtualinvoke $r1.<java.lang.String: char charAt(int)>($i0);
+
+        if $c3 != 48 goto label3;
+
+        $i0 = $i0 + 1;
+
+        goto label2;
+
+     label3:
+        $i2 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 != $i2 goto label4;
+
+        return 0;
+
+     label4:
+        $i2 = $i0 + 1;
+
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>($i0, $i2);
+
+        $i0 = neg $i0;
+
+        $i0 = $i0 - 1;
+
+        $i0 = $i0 * 4;
+
+        $l1 = staticinvoke <java.lang.Long: long parseLong(java.lang.String,int)>($r2, 16);
+
+        $i2 = specialinvoke $r0.<org.apache.harmony.luni.util.HexStringParser: int countBitsLength(long)>($l1);
+
+        $i0 = $i0 + $i2;
+
+        $i0 = $i0 - 1;
+
+        return $i0;
+    }
+
+    private static java.lang.String[] getSegmentsFromHexString(java.lang.String)
+    {
+        java.lang.String $r0;
+        java.lang.String[] $r1;
+        java.util.regex.Pattern $r2;
+        java.util.regex.Matcher $r3;
+        boolean $z0;
+        java.lang.NumberFormatException $r4;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $r2 = <org.apache.harmony.luni.util.HexStringParser: java.util.regex.Pattern PATTERN>;
+
+        $r3 = virtualinvoke $r2.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>($r0);
+
+        $z0 = virtualinvoke $r3.<java.util.regex.Matcher: boolean matches()>();
+
+        if $z0 != 0 goto label1;
+
+        $r4 = new java.lang.NumberFormatException;
+
+        specialinvoke $r4.<java.lang.NumberFormatException: void <init>()>();
+
+        throw $r4;
+
+     label1:
+        $r1 = newarray (java.lang.String)[3];
+
+        $r0 = virtualinvoke $r3.<java.util.regex.Matcher: java.lang.String group(int)>(1);
+
+        $r1[0] = $r0;
+
+        $r0 = virtualinvoke $r3.<java.util.regex.Matcher: java.lang.String group(int)>(2);
+
+        $r1[1] = $r0;
+
+        $r0 = virtualinvoke $r3.<java.util.regex.Matcher: java.lang.String group(int)>(3);
+
+        $r1[2] = $r0;
+
+        return $r1;
+    }
+
+    private long parse(java.lang.String)
+    {
+        org.apache.harmony.luni.util.HexStringParser $r0;
+        java.lang.String $r1, $r2, $r3;
+        int $i0, $i2;
+        java.lang.String[] $r4;
+        long $l1, $l3;
+
+        $r0 := @this: org.apache.harmony.luni.util.HexStringParser;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r4 = staticinvoke <org.apache.harmony.luni.util.HexStringParser: java.lang.String[] getSegmentsFromHexString(java.lang.String)>($r1);
+
+        $r2 = $r4[0];
+
+        $r3 = $r4[1];
+
+        $r1 = $r4[2];
+
+        specialinvoke $r0.<org.apache.harmony.luni.util.HexStringParser: void parseHexSign(java.lang.String)>($r2);
+
+        specialinvoke $r0.<org.apache.harmony.luni.util.HexStringParser: void parseExponent(java.lang.String)>($r1);
+
+        specialinvoke $r0.<org.apache.harmony.luni.util.HexStringParser: void parseMantissa(java.lang.String)>($r3);
+
+        $l1 = $r0.<org.apache.harmony.luni.util.HexStringParser: long sign>;
+
+        $i2 = $r0.<org.apache.harmony.luni.util.HexStringParser: int MANTISSA_WIDTH>;
+
+        $i0 = $r0.<org.apache.harmony.luni.util.HexStringParser: int EXPONENT_WIDTH>;
+
+        $i0 = $i2 + $i0;
+
+        $l1 = $l1 << $i0;
+
+        $r0.<org.apache.harmony.luni.util.HexStringParser: long sign> = $l1;
+
+        $l1 = $r0.<org.apache.harmony.luni.util.HexStringParser: long exponent>;
+
+        $i0 = $r0.<org.apache.harmony.luni.util.HexStringParser: int MANTISSA_WIDTH>;
+
+        $l1 = $l1 << $i0;
+
+        $r0.<org.apache.harmony.luni.util.HexStringParser: long exponent> = $l1;
+
+        $l1 = $r0.<org.apache.harmony.luni.util.HexStringParser: long sign>;
+
+        $l3 = $r0.<org.apache.harmony.luni.util.HexStringParser: long exponent>;
+
+        $l1 = $l1 | $l3;
+
+        $l3 = $r0.<org.apache.harmony.luni.util.HexStringParser: long mantissa>;
+
+        $l1 = $l1 | $l3;
+
+        return $l1;
+    }
+
+    public static double parseDouble(java.lang.String)
+    {
+        java.lang.String $r0;
+        org.apache.harmony.luni.util.HexStringParser $r1;
+        long $l0;
+        double $d0;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $r1 = new org.apache.harmony.luni.util.HexStringParser;
+
+        specialinvoke $r1.<org.apache.harmony.luni.util.HexStringParser: void <init>(int,int)>(11, 52);
+
+        $l0 = specialinvoke $r1.<org.apache.harmony.luni.util.HexStringParser: long parse(java.lang.String)>($r0);
+
+        $d0 = staticinvoke <java.lang.Double: double longBitsToDouble(long)>($l0);
+
+        return $d0;
+    }
+
+    private void parseExponent(java.lang.String)
+    {
+        org.apache.harmony.luni.util.HexStringParser $r0;
+        java.lang.String $r1;
+        char $c0;
+        byte $b1;
+        boolean $z0;
+        long $l2, $l3;
+        java.lang.NumberFormatException $r2;
+
+        $r0 := @this: org.apache.harmony.luni.util.HexStringParser;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $c0 = virtualinvoke $r1.<java.lang.String: char charAt(int)>(0);
+
+        if $c0 != 45 goto label7;
+
+        $b1 = -1;
+
+     label1:
+        $z0 = staticinvoke <java.lang.Character: boolean isDigit(char)>($c0);
+
+        if $z0 != 0 goto label2;
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int)>(1);
+
+     label2:
+        $l2 = (long) $b1;
+
+     label3:
+        $l3 = staticinvoke <java.lang.Long: long parseLong(java.lang.String)>($r1);
+
+     label4:
+        $l2 = $l2 * $l3;
+
+        $r0.<org.apache.harmony.luni.util.HexStringParser: long exponent> = $l2;
+
+     label5:
+        $l2 = $r0.<org.apache.harmony.luni.util.HexStringParser: long EXPONENT_BASE>;
+
+        specialinvoke $r0.<org.apache.harmony.luni.util.HexStringParser: void checkedAddExponent(long)>($l2);
+
+     label6:
+        return;
+
+     label7:
+        $b1 = 1;
+
+        goto label1;
+
+     label8:
+        $r2 := @caughtexception;
+
+        $l2 = (long) $b1;
+
+        $l2 = $l2 * 9223372036854775807L;
+
+        $r0.<org.apache.harmony.luni.util.HexStringParser: long exponent> = $l2;
+
+        return;
+
+        catch java.lang.NumberFormatException from label3 to label4 with label8;
+        catch java.lang.NumberFormatException from label5 to label6 with label8;
+    }
+
+    public static float parseFloat(java.lang.String)
+    {
+        java.lang.String $r0;
+        org.apache.harmony.luni.util.HexStringParser $r1;
+        int $i0;
+        long $l1;
+        float $f0;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $r1 = new org.apache.harmony.luni.util.HexStringParser;
+
+        specialinvoke $r1.<org.apache.harmony.luni.util.HexStringParser: void <init>(int,int)>(8, 23);
+
+        $l1 = specialinvoke $r1.<org.apache.harmony.luni.util.HexStringParser: long parse(java.lang.String)>($r0);
+
+        $i0 = (int) $l1;
+
+        $f0 = staticinvoke <java.lang.Float: float intBitsToFloat(int)>($i0);
+
+        return $f0;
+    }
+
+    private void parseHexSign(java.lang.String)
+    {
+        org.apache.harmony.luni.util.HexStringParser $r0;
+        java.lang.String $r1;
+        boolean $z0;
+        long $l0;
+
+        $r0 := @this: org.apache.harmony.luni.util.HexStringParser;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("-");
+
+        if $z0 == 0 goto label2;
+
+        $l0 = 1L;
+
+     label1:
+        $r0.<org.apache.harmony.luni.util.HexStringParser: long sign> = $l0;
+
+        return;
+
+     label2:
+        $l0 = 0L;
+
+        goto label1;
+    }
+
+    private void parseMantissa(java.lang.String)
+    {
+        org.apache.harmony.luni.util.HexStringParser $r0;
+        java.lang.String $r1, $r3, $r4, $r5;
+        java.lang.String[] $r2;
+        int $i0;
+        boolean $z0;
+        long $l1, $l2;
+        byte $b3;
+
+        $r0 := @this: org.apache.harmony.luni.util.HexStringParser;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String[] split(java.lang.String)>("\\.");
+
+        $r1 = $r2[0];
+
+        $i0 = lengthof $r2;
+
+        if $i0 <= 1 goto label2;
+
+        $r4 = $r2[1];
+
+     label1:
+        $r3 = specialinvoke $r0.<org.apache.harmony.luni.util.HexStringParser: java.lang.String getNormalizedSignificand(java.lang.String,java.lang.String)>($r1, $r4);
+
+        $r5 = $r3;
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("0");
+
+        if $z0 == 0 goto label3;
+
+        specialinvoke $r0.<org.apache.harmony.luni.util.HexStringParser: void setZero()>();
+
+        return;
+
+     label2:
+        $r4 = "";
+
+        goto label1;
+
+     label3:
+        $i0 = specialinvoke $r0.<org.apache.harmony.luni.util.HexStringParser: int getOffset(java.lang.String,java.lang.String)>($r1, $r4);
+
+        $l1 = (long) $i0;
+
+        specialinvoke $r0.<org.apache.harmony.luni.util.HexStringParser: void checkedAddExponent(long)>($l1);
+
+        $l1 = $r0.<org.apache.harmony.luni.util.HexStringParser: long exponent>;
+
+        $l2 = $r0.<org.apache.harmony.luni.util.HexStringParser: long MAX_EXPONENT>;
+
+        $b3 = $l1 cmp $l2;
+
+        if $b3 < 0 goto label4;
+
+        specialinvoke $r0.<org.apache.harmony.luni.util.HexStringParser: void setInfinite()>();
+
+        return;
+
+     label4:
+        $l1 = $r0.<org.apache.harmony.luni.util.HexStringParser: long exponent>;
+
+        $l2 = $r0.<org.apache.harmony.luni.util.HexStringParser: long MIN_EXPONENT>;
+
+        $b3 = $l1 cmp $l2;
+
+        if $b3 > 0 goto label5;
+
+        specialinvoke $r0.<org.apache.harmony.luni.util.HexStringParser: void setZero()>();
+
+        return;
+
+     label5:
+        $i0 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        if $i0 <= 15 goto label6;
+
+        $r1 = virtualinvoke $r3.<java.lang.String: java.lang.String substring(int)>(15);
+
+        $r0.<org.apache.harmony.luni.util.HexStringParser: java.lang.String abandonedNumber> = $r1;
+
+        $r5 = virtualinvoke $r3.<java.lang.String: java.lang.String substring(int,int)>(0, 15);
+
+     label6:
+        $l1 = staticinvoke <java.lang.Long: long parseLong(java.lang.String,int)>($r5, 16);
+
+        $r0.<org.apache.harmony.luni.util.HexStringParser: long mantissa> = $l1;
+
+        $l1 = $r0.<org.apache.harmony.luni.util.HexStringParser: long exponent>;
+
+        $b3 = $l1 cmp 1L;
+
+        if $b3 < 0 goto label7;
+
+        specialinvoke $r0.<org.apache.harmony.luni.util.HexStringParser: void processNormalNumber()>();
+
+        return;
+
+     label7:
+        specialinvoke $r0.<org.apache.harmony.luni.util.HexStringParser: void processSubNormalNumber()>();
+
+        return;
+    }
+
+    private void processNormalNumber()
+    {
+        org.apache.harmony.luni.util.HexStringParser $r0;
+        int $i0;
+        long $l1, $l2;
+
+        $r0 := @this: org.apache.harmony.luni.util.HexStringParser;
+
+        $i0 = $r0.<org.apache.harmony.luni.util.HexStringParser: int MANTISSA_WIDTH>;
+
+        $i0 = $i0 + 2;
+
+        specialinvoke $r0.<org.apache.harmony.luni.util.HexStringParser: void fitMantissaInDesiredWidth(int)>($i0);
+
+        specialinvoke $r0.<org.apache.harmony.luni.util.HexStringParser: void round()>();
+
+        $l2 = $r0.<org.apache.harmony.luni.util.HexStringParser: long mantissa>;
+
+        $l1 = $r0.<org.apache.harmony.luni.util.HexStringParser: long MANTISSA_MASK>;
+
+        $l1 = $l2 & $l1;
+
+        $r0.<org.apache.harmony.luni.util.HexStringParser: long mantissa> = $l1;
+
+        return;
+    }
+
+    private void processSubNormalNumber()
+    {
+        org.apache.harmony.luni.util.HexStringParser $r0;
+        long $l0, $l3;
+        int $i1, $i2;
+
+        $r0 := @this: org.apache.harmony.luni.util.HexStringParser;
+
+        $i1 = $r0.<org.apache.harmony.luni.util.HexStringParser: int MANTISSA_WIDTH>;
+
+        $i1 = $i1 + 1;
+
+        $l0 = $r0.<org.apache.harmony.luni.util.HexStringParser: long exponent>;
+
+        $i2 = (int) $l0;
+
+        $i1 = $i1 + $i2;
+
+        $r0.<org.apache.harmony.luni.util.HexStringParser: long exponent> = 0L;
+
+        specialinvoke $r0.<org.apache.harmony.luni.util.HexStringParser: void fitMantissaInDesiredWidth(int)>($i1);
+
+        specialinvoke $r0.<org.apache.harmony.luni.util.HexStringParser: void round()>();
+
+        $l3 = $r0.<org.apache.harmony.luni.util.HexStringParser: long mantissa>;
+
+        $l0 = $r0.<org.apache.harmony.luni.util.HexStringParser: long MANTISSA_MASK>;
+
+        $l0 = $l3 & $l0;
+
+        $r0.<org.apache.harmony.luni.util.HexStringParser: long mantissa> = $l0;
+
+        return;
+    }
+
+    private void round()
+    {
+        org.apache.harmony.luni.util.HexStringParser $r0;
+        int $i0, $i1, $i3;
+        java.lang.String $r1;
+        boolean $z0;
+        long $l2;
+
+        $r0 := @this: org.apache.harmony.luni.util.HexStringParser;
+
+        $r1 = $r0.<org.apache.harmony.luni.util.HexStringParser: java.lang.String abandonedNumber>;
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>("0+", "");
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 <= 0 goto label3;
+
+        $z0 = 1;
+
+     label1:
+        $l2 = $r0.<org.apache.harmony.luni.util.HexStringParser: long mantissa>;
+
+        $l2 = $l2 & 1L;
+
+        $i0 = (int) $l2;
+
+        $l2 = $r0.<org.apache.harmony.luni.util.HexStringParser: long mantissa>;
+
+        $l2 = $l2 >> 1;
+
+        $r0.<org.apache.harmony.luni.util.HexStringParser: long mantissa> = $l2;
+
+        $l2 = $r0.<org.apache.harmony.luni.util.HexStringParser: long mantissa>;
+
+        $l2 = $l2 & 1L;
+
+        $i1 = (int) $l2;
+
+        if $i0 != 1 goto label4;
+
+        if $z0 != 0 goto label2;
+
+        if $i1 != 1 goto label5;
+
+     label2:
+        $l2 = $r0.<org.apache.harmony.luni.util.HexStringParser: long mantissa>;
+
+        $i0 = specialinvoke $r0.<org.apache.harmony.luni.util.HexStringParser: int countBitsLength(long)>($l2);
+
+        $l2 = $r0.<org.apache.harmony.luni.util.HexStringParser: long mantissa>;
+
+        $l2 = $l2 + 1L;
+
+        $r0.<org.apache.harmony.luni.util.HexStringParser: long mantissa> = $l2;
+
+        $l2 = $r0.<org.apache.harmony.luni.util.HexStringParser: long mantissa>;
+
+        $i1 = specialinvoke $r0.<org.apache.harmony.luni.util.HexStringParser: int countBitsLength(long)>($l2);
+
+        $i3 = $r0.<org.apache.harmony.luni.util.HexStringParser: int MANTISSA_WIDTH>;
+
+        if $i0 < $i3 goto label6;
+
+        if $i1 <= $i0 goto label7;
+
+        specialinvoke $r0.<org.apache.harmony.luni.util.HexStringParser: void checkedAddExponent(long)>(1L);
+
+        return;
+
+     label3:
+        $z0 = 0;
+
+        goto label1;
+
+     label4:
+        return;
+
+     label5:
+        return;
+
+     label6:
+        return;
+
+     label7:
+        return;
+    }
+
+    private void setInfinite()
+    {
+        org.apache.harmony.luni.util.HexStringParser $r0;
+        long $l0;
+
+        $r0 := @this: org.apache.harmony.luni.util.HexStringParser;
+
+        $l0 = $r0.<org.apache.harmony.luni.util.HexStringParser: long MAX_EXPONENT>;
+
+        $r0.<org.apache.harmony.luni.util.HexStringParser: long exponent> = $l0;
+
+        $r0.<org.apache.harmony.luni.util.HexStringParser: long mantissa> = 0L;
+
+        return;
+    }
+
+    private void setZero()
+    {
+        org.apache.harmony.luni.util.HexStringParser $r0;
+
+        $r0 := @this: org.apache.harmony.luni.util.HexStringParser;
+
+        $r0.<org.apache.harmony.luni.util.HexStringParser: long exponent> = 0L;
+
+        $r0.<org.apache.harmony.luni.util.HexStringParser: long mantissa> = 0L;
+
+        return;
+    }
+}

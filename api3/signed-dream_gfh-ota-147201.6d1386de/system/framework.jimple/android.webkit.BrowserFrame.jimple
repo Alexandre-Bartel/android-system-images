@@ -1,0 +1,1433 @@
+class android.webkit.BrowserFrame extends android.os.Handler
+{
+    static final int FRAME_COMPLETED;
+    static final int FRAME_LOADTYPE_BACK;
+    static final int FRAME_LOADTYPE_FORWARD;
+    static final int FRAME_LOADTYPE_INDEXEDBACKFORWARD;
+    static final int FRAME_LOADTYPE_REDIRECT;
+    static final int FRAME_LOADTYPE_RELOAD;
+    static final int FRAME_LOADTYPE_RELOADALLOWINGSTALEDATA;
+    static final int FRAME_LOADTYPE_REPLACE;
+    static final int FRAME_LOADTYPE_SAME;
+    static final int FRAME_LOADTYPE_STANDARD;
+    private static final int LOADERROR;
+    private static final java.lang.String LOGTAG;
+    private static final int MAX_OUTSTANDING_REQUESTS;
+    private static final int NODOMAIN;
+    static final int POLICY_FUNCTION;
+    static final int POLICY_IGNORE;
+    static final int POLICY_USE;
+    private static final int TRANSITION_SWITCH_THRESHOLD;
+    static android.webkit.JWebCoreJavaBridge sJavaBridge;
+    private final android.webkit.CallbackProxy mCallbackProxy;
+    private boolean mCommitted;
+    private final android.content.Context mContext;
+    private final android.webkit.WebViewDatabase mDatabase;
+    private boolean mFirstLayoutDone;
+    private boolean mIsMainFrame;
+    private java.util.HashMap mJSInterfaceMap;
+    boolean mLoadInitFromJava;
+    private int mLoadType;
+    int mNativeFrame;
+    private final android.webkit.WebSettings mSettings;
+    private final android.webkit.WebViewCore mWebViewCore;
+
+    public void <init>(android.content.Context, android.webkit.WebViewCore, android.webkit.CallbackProxy, android.webkit.WebSettings)
+    {
+        android.webkit.BrowserFrame $r0;
+        android.content.Context $r1;
+        android.webkit.WebViewCore $r2;
+        android.webkit.CallbackProxy $r3;
+        android.webkit.WebSettings $r4;
+        android.webkit.JWebCoreJavaBridge $r5;
+        android.content.res.AssetManager $r6;
+        android.webkit.WebBackForwardList $r7;
+        android.webkit.WebViewDatabase $r8;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: android.webkit.WebViewCore;
+
+        $r3 := @parameter2: android.webkit.CallbackProxy;
+
+        $r4 := @parameter3: android.webkit.WebSettings;
+
+        specialinvoke $r0.<android.os.Handler: void <init>()>();
+
+        $r0.<android.webkit.BrowserFrame: boolean mFirstLayoutDone> = 1;
+
+        $r0.<android.webkit.BrowserFrame: boolean mCommitted> = 1;
+
+        $r5 = <android.webkit.BrowserFrame: android.webkit.JWebCoreJavaBridge sJavaBridge>;
+
+        if $r5 != null goto label1;
+
+        $r5 = new android.webkit.JWebCoreJavaBridge;
+
+        specialinvoke $r5.<android.webkit.JWebCoreJavaBridge: void <init>()>();
+
+        <android.webkit.BrowserFrame: android.webkit.JWebCoreJavaBridge sJavaBridge> = $r5;
+
+        $r5 = <android.webkit.BrowserFrame: android.webkit.JWebCoreJavaBridge sJavaBridge>;
+
+        virtualinvoke $r5.<android.webkit.JWebCoreJavaBridge: void setCacheSize(int)>(4194304);
+
+        staticinvoke <android.webkit.CacheManager: void init(android.content.Context)>($r1);
+
+        staticinvoke <android.webkit.CookieSyncManager: android.webkit.CookieSyncManager createInstance(android.content.Context)>($r1);
+
+     label1:
+        $r6 = virtualinvoke $r1.<android.content.Context: android.content.res.AssetManager getAssets()>();
+
+        $r7 = virtualinvoke $r3.<android.webkit.CallbackProxy: android.webkit.WebBackForwardList getBackForwardList()>();
+
+        specialinvoke $r0.<android.webkit.BrowserFrame: void nativeCreateFrame(android.webkit.WebViewCore,android.content.res.AssetManager,android.webkit.WebBackForwardList)>($r2, $r6, $r7);
+
+        $r0.<android.webkit.BrowserFrame: android.webkit.WebSettings mSettings> = $r4;
+
+        $r0.<android.webkit.BrowserFrame: android.content.Context mContext> = $r1;
+
+        $r0.<android.webkit.BrowserFrame: android.webkit.CallbackProxy mCallbackProxy> = $r3;
+
+        $r8 = staticinvoke <android.webkit.WebViewDatabase: android.webkit.WebViewDatabase getInstance(android.content.Context)>($r1);
+
+        $r0.<android.webkit.BrowserFrame: android.webkit.WebViewDatabase mDatabase> = $r8;
+
+        $r0.<android.webkit.BrowserFrame: android.webkit.WebViewCore mWebViewCore> = $r2;
+
+        return;
+    }
+
+    private void closeWindow(android.webkit.WebViewCore)
+    {
+        android.webkit.BrowserFrame $r0;
+        android.webkit.WebViewCore $r1;
+        android.webkit.CallbackProxy $r2;
+        android.webkit.WebView $r3;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        $r1 := @parameter0: android.webkit.WebViewCore;
+
+        $r2 = $r0.<android.webkit.BrowserFrame: android.webkit.CallbackProxy mCallbackProxy>;
+
+        $r3 = virtualinvoke $r1.<android.webkit.WebViewCore: android.webkit.WebView getWebView()>();
+
+        virtualinvoke $r2.<android.webkit.CallbackProxy: void onCloseWindow(android.webkit.WebView)>($r3);
+
+        return;
+    }
+
+    private android.webkit.BrowserFrame createWindow(boolean, boolean)
+    {
+        android.webkit.BrowserFrame $r0;
+        boolean $z0, $z1;
+        android.webkit.CallbackProxy $r1;
+        android.webkit.WebView $r2;
+        android.webkit.WebViewCore $r3;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        $z0 := @parameter0: boolean;
+
+        $z1 := @parameter1: boolean;
+
+        $r1 = $r0.<android.webkit.BrowserFrame: android.webkit.CallbackProxy mCallbackProxy>;
+
+        $r2 = virtualinvoke $r1.<android.webkit.CallbackProxy: android.webkit.WebView createWindow(boolean,boolean)>($z0, $z1);
+
+        if $r2 == null goto label1;
+
+        $r3 = virtualinvoke $r2.<android.webkit.WebView: android.webkit.WebViewCore getWebViewCore()>();
+
+        $r0 = virtualinvoke $r3.<android.webkit.WebViewCore: android.webkit.BrowserFrame getBrowserFrame()>();
+
+        return $r0;
+
+     label1:
+        return null;
+    }
+
+    private void decidePolicyForFormResubmission(int)
+    {
+        android.webkit.BrowserFrame $r0;
+        int $i0;
+        android.os.Message $r1, $r2;
+        android.webkit.CallbackProxy $r3;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        $i0 := @parameter0: int;
+
+        $r1 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,int,int)>(1003, $i0, 2);
+
+        $r2 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,int,int)>(1003, $i0, 0);
+
+        $r3 = $r0.<android.webkit.BrowserFrame: android.webkit.CallbackProxy mCallbackProxy>;
+
+        virtualinvoke $r3.<android.webkit.CallbackProxy: void onFormResubmission(android.os.Message,android.os.Message)>($r1, $r2);
+
+        return;
+    }
+
+    private void didReceiveIcon(android.graphics.Bitmap)
+    {
+        android.webkit.BrowserFrame $r0;
+        android.graphics.Bitmap $r1;
+        android.webkit.CallbackProxy $r2;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        $r1 := @parameter0: android.graphics.Bitmap;
+
+        $r2 = $r0.<android.webkit.BrowserFrame: android.webkit.CallbackProxy mCallbackProxy>;
+
+        virtualinvoke $r2.<android.webkit.CallbackProxy: void onReceivedIcon(android.graphics.Bitmap)>($r1);
+
+        return;
+    }
+
+    private native java.lang.String documentAsText();
+
+    private native java.lang.String externalRepresentation();
+
+    private native java.util.HashMap getFormTextData();
+
+    private native java.lang.String[] getUsernamePassword();
+
+    private native boolean hasPasswordField();
+
+    private void loadFinished(java.lang.String, int, boolean)
+    {
+        android.webkit.BrowserFrame $r0;
+        java.lang.String $r1;
+        int $i0;
+        boolean $z0;
+        android.webkit.CallbackProxy $r2;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $z0 := @parameter2: boolean;
+
+        if $z0 != 0 goto label1;
+
+        if $i0 != 0 goto label2;
+
+     label1:
+        if $z0 == 0 goto label3;
+
+        specialinvoke $r0.<android.webkit.BrowserFrame: void resetLoadingStates()>();
+
+        $r2 = $r0.<android.webkit.BrowserFrame: android.webkit.CallbackProxy mCallbackProxy>;
+
+        virtualinvoke $r2.<android.webkit.CallbackProxy: void switchOutDrawHistory()>();
+
+        $r2 = $r0.<android.webkit.BrowserFrame: android.webkit.CallbackProxy mCallbackProxy>;
+
+        virtualinvoke $r2.<android.webkit.CallbackProxy: void onPageFinished(java.lang.String)>($r1);
+
+        return;
+
+     label2:
+        return;
+
+     label3:
+        return;
+    }
+
+    private void loadStarted(java.lang.String, android.graphics.Bitmap, int, boolean)
+    {
+        android.webkit.BrowserFrame $r0;
+        java.lang.String $r1;
+        android.graphics.Bitmap $r2;
+        int $i0;
+        boolean $z0;
+        android.webkit.CallbackProxy $r3;
+        android.webkit.WebViewCore $r4;
+        android.webkit.WebSettings $r5;
+        android.webkit.WebBackForwardList $r6;
+        android.webkit.WebHistoryItem $r7;
+        android.webkit.WebViewDatabase $r8;
+        java.util.HashMap $r9;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: android.graphics.Bitmap;
+
+        $i0 := @parameter2: int;
+
+        $z0 := @parameter3: boolean;
+
+        $r0.<android.webkit.BrowserFrame: boolean mIsMainFrame> = $z0;
+
+        if $z0 != 0 goto label1;
+
+        if $i0 != 0 goto label3;
+
+     label1:
+        $r0.<android.webkit.BrowserFrame: int mLoadType> = $i0;
+
+        if $z0 == 0 goto label2;
+
+        $r3 = $r0.<android.webkit.BrowserFrame: android.webkit.CallbackProxy mCallbackProxy>;
+
+        virtualinvoke $r3.<android.webkit.CallbackProxy: void onPageStarted(java.lang.String,android.graphics.Bitmap)>($r1, $r2);
+
+        $r0.<android.webkit.BrowserFrame: boolean mFirstLayoutDone> = 0;
+
+        $r0.<android.webkit.BrowserFrame: boolean mCommitted> = 0;
+
+        $r4 = $r0.<android.webkit.BrowserFrame: android.webkit.WebViewCore mWebViewCore>;
+
+        virtualinvoke $r4.<android.webkit.WebViewCore: void removeMessages(int)>(130);
+
+     label2:
+        if $i0 != 0 goto label4;
+
+        $r5 = $r0.<android.webkit.BrowserFrame: android.webkit.WebSettings mSettings>;
+
+        $z0 = virtualinvoke $r5.<android.webkit.WebSettings: boolean getSaveFormData()>();
+
+        if $z0 == 0 goto label5;
+
+        $r3 = $r0.<android.webkit.BrowserFrame: android.webkit.CallbackProxy mCallbackProxy>;
+
+        $r6 = virtualinvoke $r3.<android.webkit.CallbackProxy: android.webkit.WebBackForwardList getBackForwardList()>();
+
+        $r7 = virtualinvoke $r6.<android.webkit.WebBackForwardList: android.webkit.WebHistoryItem getCurrentItem()>();
+
+        if $r7 == null goto label6;
+
+        $r1 = virtualinvoke $r7.<android.webkit.WebHistoryItem: java.lang.String getUrl()>();
+
+        if $r1 == null goto label7;
+
+        $r8 = $r0.<android.webkit.BrowserFrame: android.webkit.WebViewDatabase mDatabase>;
+
+        $r9 = specialinvoke $r0.<android.webkit.BrowserFrame: java.util.HashMap getFormTextData()>();
+
+        virtualinvoke $r8.<android.webkit.WebViewDatabase: void setFormData(java.lang.String,java.util.HashMap)>($r1, $r9);
+
+        return;
+
+     label3:
+        return;
+
+     label4:
+        return;
+
+     label5:
+        return;
+
+     label6:
+        return;
+
+     label7:
+        return;
+    }
+
+    private native void nativeAddJavascriptInterface(int, java.lang.Object, java.lang.String);
+
+    private native void nativeCallPolicyFunction(int, int);
+
+    private native void nativeCreateFrame(android.webkit.WebViewCore, android.content.res.AssetManager, android.webkit.WebBackForwardList);
+
+    private native void nativeGoBackOrForward(int);
+
+    private native void nativeLoadData(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String);
+
+    private native void nativeLoadUrl(java.lang.String);
+
+    private native void nativeStopLoading();
+
+    private void reportError(int, java.lang.String, java.lang.String)
+    {
+        android.webkit.BrowserFrame $r0;
+        int $i0;
+        java.lang.String $r1, $r2;
+        android.webkit.CallbackProxy $r3;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $r2 := @parameter2: java.lang.String;
+
+        specialinvoke $r0.<android.webkit.BrowserFrame: void resetLoadingStates()>();
+
+        $r3 = $r0.<android.webkit.BrowserFrame: android.webkit.CallbackProxy mCallbackProxy>;
+
+        virtualinvoke $r3.<android.webkit.CallbackProxy: void onReceivedError(int,java.lang.String,java.lang.String)>($i0, $r1, $r2);
+
+        return;
+    }
+
+    private void requestFocus()
+    {
+        android.webkit.BrowserFrame $r0;
+        android.webkit.CallbackProxy $r1;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        $r1 = $r0.<android.webkit.BrowserFrame: android.webkit.CallbackProxy mCallbackProxy>;
+
+        virtualinvoke $r1.<android.webkit.CallbackProxy: void onRequestFocus()>();
+
+        return;
+    }
+
+    private void resetLoadingStates()
+    {
+        android.webkit.BrowserFrame $r0;
+        android.webkit.WebViewCore $r1;
+        boolean $z0;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        $r0.<android.webkit.BrowserFrame: boolean mCommitted> = 1;
+
+        $r1 = $r0.<android.webkit.BrowserFrame: android.webkit.WebViewCore mWebViewCore>;
+
+        $z0 = $r0.<android.webkit.BrowserFrame: boolean mFirstLayoutDone>;
+
+        if $z0 != 0 goto label2;
+
+        $z0 = 1;
+
+     label1:
+        $r1.<android.webkit.WebViewCore: boolean mEndScaleZoom> = $z0;
+
+        $r0.<android.webkit.BrowserFrame: boolean mFirstLayoutDone> = 1;
+
+        return;
+
+     label2:
+        $z0 = 0;
+
+        goto label1;
+    }
+
+    private native void setCacheDisabled(boolean);
+
+    private void setProgress(int)
+    {
+        android.webkit.BrowserFrame $r0;
+        int $i0;
+        android.os.Message $r1;
+        android.webkit.CallbackProxy $r2;
+        boolean $z0;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        $i0 := @parameter0: int;
+
+        $r2 = $r0.<android.webkit.BrowserFrame: android.webkit.CallbackProxy mCallbackProxy>;
+
+        virtualinvoke $r2.<android.webkit.CallbackProxy: void onProgressChanged(int)>($i0);
+
+        if $i0 != 100 goto label1;
+
+        $r1 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(1001);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessageDelayed(android.os.Message,long)>($r1, 100L);
+
+     label1:
+        $z0 = $r0.<android.webkit.BrowserFrame: boolean mFirstLayoutDone>;
+
+        if $z0 == 0 goto label2;
+
+        if $i0 <= 75 goto label3;
+
+        $r2 = $r0.<android.webkit.BrowserFrame: android.webkit.CallbackProxy mCallbackProxy>;
+
+        virtualinvoke $r2.<android.webkit.CallbackProxy: void switchOutDrawHistory()>();
+
+        return;
+
+     label2:
+        return;
+
+     label3:
+        return;
+    }
+
+    private void setTitle(java.lang.String)
+    {
+        android.webkit.BrowserFrame $r0;
+        java.lang.String $r1;
+        android.webkit.CallbackProxy $r2;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = $r0.<android.webkit.BrowserFrame: android.webkit.CallbackProxy mCallbackProxy>;
+
+        virtualinvoke $r2.<android.webkit.CallbackProxy: void onReceivedTitle(java.lang.String)>($r1);
+
+        return;
+    }
+
+    private native void setUsernamePassword(java.lang.String, java.lang.String);
+
+    private android.webkit.LoadListener startLoadingResource(int, java.lang.String, java.lang.String, java.util.HashMap, byte[], int, boolean, boolean)
+    {
+        android.webkit.BrowserFrame $r0;
+        int $i0, $i1, $i2;
+        java.lang.String $r1, $r2, $r7, $r13, $r16;
+        java.util.HashMap $r3;
+        byte[] $r4;
+        boolean $z0, $z1, $z2;
+        android.webkit.PerfChecker $r5;
+        android.webkit.FrameLoader $r6;
+        android.net.WebAddress $r8;
+        android.webkit.WebSettings $r9;
+        android.webkit.CallbackProxy $r10;
+        android.webkit.WebBackForwardList $r11;
+        android.webkit.WebHistoryItem $r12;
+        java.lang.StringBuilder $r14;
+        java.lang.String[] $r15, $r18;
+        android.webkit.WebViewDatabase $r17;
+        android.content.Context $r19;
+        android.webkit.LoadListener $r20;
+        android.net.ParseException $r21;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $r2 := @parameter2: java.lang.String;
+
+        $r3 := @parameter3: java.util.HashMap;
+
+        $r4 := @parameter4: byte[];
+
+        $i1 := @parameter5: int;
+
+        $z0 := @parameter6: boolean;
+
+        $z1 := @parameter7: boolean;
+
+        $r5 = new android.webkit.PerfChecker;
+
+        specialinvoke $r5.<android.webkit.PerfChecker: void <init>()>();
+
+        $r9 = $r0.<android.webkit.BrowserFrame: android.webkit.WebSettings mSettings>;
+
+        $i2 = virtualinvoke $r9.<android.webkit.WebSettings: int getCacheMode()>();
+
+        if $i2 == -1 goto label01;
+
+        $r9 = $r0.<android.webkit.BrowserFrame: android.webkit.WebSettings mSettings>;
+
+        $i1 = virtualinvoke $r9.<android.webkit.WebSettings: int getCacheMode()>();
+
+     label01:
+        $z2 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("POST");
+
+        if $z2 == 0 goto label16;
+
+        if $i1 != 0 goto label02;
+
+        $i1 = 2;
+
+     label02:
+        $r9 = $r0.<android.webkit.BrowserFrame: android.webkit.WebSettings mSettings>;
+
+        $z2 = virtualinvoke $r9.<android.webkit.WebSettings: boolean getSavePassword()>();
+
+        if $z2 == 0 goto label16;
+
+        $z2 = specialinvoke $r0.<android.webkit.BrowserFrame: boolean hasPasswordField()>();
+
+        if $z2 == 0 goto label16;
+
+        $r8 = new android.net.WebAddress;
+
+        $r10 = $r0.<android.webkit.BrowserFrame: android.webkit.CallbackProxy mCallbackProxy>;
+
+     label03:
+        $r11 = virtualinvoke $r10.<android.webkit.CallbackProxy: android.webkit.WebBackForwardList getBackForwardList()>();
+
+        $r12 = virtualinvoke $r11.<android.webkit.WebBackForwardList: android.webkit.WebHistoryItem getCurrentItem()>();
+
+        $r13 = virtualinvoke $r12.<android.webkit.WebHistoryItem: java.lang.String getUrl()>();
+
+        specialinvoke $r8.<android.net.WebAddress: void <init>(java.lang.String)>($r13);
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = $r8.<android.net.WebAddress: java.lang.String mScheme>;
+
+        $r14 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r13 = $r8.<android.net.WebAddress: java.lang.String mHost>;
+
+        $r14 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r13 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r15 = specialinvoke $r0.<android.webkit.BrowserFrame: java.lang.String[] getUsernamePassword()>();
+
+     label04:
+        if $r15 == null goto label16;
+
+        if $r4 == null goto label16;
+
+     label05:
+        $r7 = $r15[0];
+
+        $i2 = virtualinvoke $r7.<java.lang.String: int length()>();
+
+     label06:
+        if $i2 <= 0 goto label16;
+
+     label07:
+        $r7 = $r15[1];
+
+        $i2 = virtualinvoke $r7.<java.lang.String: int length()>();
+
+     label08:
+        if $i2 <= 0 goto label16;
+
+     label09:
+        $r7 = new java.lang.String;
+
+        specialinvoke $r7.<java.lang.String: void <init>(byte[])>($r4);
+
+        $r16 = $r15[0];
+
+        $r16 = staticinvoke <java.net.URLEncoder: java.lang.String encode(java.lang.String)>($r16);
+
+        $z2 = virtualinvoke $r7.<java.lang.String: boolean contains(java.lang.CharSequence)>($r16);
+
+     label10:
+        if $z2 == 0 goto label16;
+
+     label11:
+        $r16 = $r15[1];
+
+        $r16 = staticinvoke <java.net.URLEncoder: java.lang.String encode(java.lang.String)>($r16);
+
+        $z2 = virtualinvoke $r7.<java.lang.String: boolean contains(java.lang.CharSequence)>($r16);
+
+     label12:
+        if $z2 == 0 goto label16;
+
+     label13:
+        $r17 = $r0.<android.webkit.BrowserFrame: android.webkit.WebViewDatabase mDatabase>;
+
+        $r18 = virtualinvoke $r17.<android.webkit.WebViewDatabase: java.lang.String[] getUsernamePassword(java.lang.String)>($r13);
+
+     label14:
+        if $r18 == null goto label17;
+
+        $r7 = $r18[0];
+
+        if $r7 == null goto label16;
+
+        $r17 = $r0.<android.webkit.BrowserFrame: android.webkit.WebViewDatabase mDatabase>;
+
+        $r7 = $r15[0];
+
+     label15:
+        $r16 = $r15[1];
+
+        virtualinvoke $r17.<android.webkit.WebViewDatabase: void setUsernamePassword(java.lang.String,java.lang.String,java.lang.String)>($r13, $r7, $r16);
+
+     label16:
+        $z2 = $r0.<android.webkit.BrowserFrame: boolean mIsMainFrame>;
+
+        $r19 = $r0.<android.webkit.BrowserFrame: android.content.Context mContext>;
+
+        $r20 = staticinvoke <android.webkit.LoadListener: android.webkit.LoadListener getLoadListener(android.content.Context,android.webkit.BrowserFrame,java.lang.String,int,boolean,boolean)>($r19, $r0, $r1, $i0, $z1, $z2);
+
+        $r10 = $r0.<android.webkit.BrowserFrame: android.webkit.CallbackProxy mCallbackProxy>;
+
+        virtualinvoke $r10.<android.webkit.CallbackProxy: void onLoadResource(java.lang.String)>($r1);
+
+        $i0 = staticinvoke <android.webkit.LoadListener: int getNativeLoaderCount()>();
+
+        if $i0 <= 300 goto label21;
+
+        $r19 = $r0.<android.webkit.BrowserFrame: android.content.Context mContext>;
+
+        $r1 = virtualinvoke $r19.<android.content.Context: java.lang.String getString(int)>(17039447);
+
+        virtualinvoke $r20.<android.webkit.LoadListener: void error(int,java.lang.String)>(-1, $r1);
+
+        virtualinvoke $r20.<android.webkit.LoadListener: void notifyError()>();
+
+        virtualinvoke $r20.<android.webkit.LoadListener: void tearDown()>();
+
+        return null;
+
+     label17:
+        $r10 = $r0.<android.webkit.BrowserFrame: android.webkit.CallbackProxy mCallbackProxy>;
+
+        $r7 = $r15[0];
+
+        $r16 = $r15[1];
+
+     label18:
+        virtualinvoke $r10.<android.webkit.CallbackProxy: boolean onSavePassword(java.lang.String,java.lang.String,java.lang.String,android.os.Message)>($r13, $r7, $r16, null);
+
+     label19:
+        goto label16;
+
+     label20:
+        $r21 := @caughtexception;
+
+        goto label16;
+
+     label21:
+        if $z1 == 0 goto label22;
+
+        staticinvoke <android.webkit.CacheManager: boolean endCacheTransaction()>();
+
+     label22:
+        $r6 = new android.webkit.FrameLoader;
+
+        $r9 = $r0.<android.webkit.BrowserFrame: android.webkit.WebSettings mSettings>;
+
+        specialinvoke $r6.<android.webkit.FrameLoader: void <init>(android.webkit.LoadListener,android.webkit.WebSettings,java.lang.String,boolean)>($r20, $r9, $r2, $z0);
+
+        virtualinvoke $r6.<android.webkit.FrameLoader: void setHeaders(java.util.HashMap)>($r3);
+
+        virtualinvoke $r6.<android.webkit.FrameLoader: void setPostData(byte[])>($r4);
+
+        $z0 = virtualinvoke $r3.<java.util.HashMap: boolean containsKey(java.lang.Object)>("If-Modified-Since");
+
+        if $z0 != 0 goto label23;
+
+        $z0 = virtualinvoke $r3.<java.util.HashMap: boolean containsKey(java.lang.Object)>("If-None-Match");
+
+        if $z0 == 0 goto label27;
+
+     label23:
+        $i0 = 2;
+
+     label24:
+        virtualinvoke $r6.<android.webkit.FrameLoader: void setCacheMode(int)>($i0);
+
+        $z0 = virtualinvoke $r6.<android.webkit.FrameLoader: boolean executeLoad()>();
+
+        if $z0 != 0 goto label25;
+
+        virtualinvoke $r5.<android.webkit.PerfChecker: void responseAlert(java.lang.String)>("startLoadingResource fail");
+
+     label25:
+        virtualinvoke $r5.<android.webkit.PerfChecker: void responseAlert(java.lang.String)>("startLoadingResource succeed");
+
+        if $z1 == 0 goto label26;
+
+        staticinvoke <android.webkit.CacheManager: boolean startCacheTransaction()>();
+
+     label26:
+        if $z1 != 0 goto label28;
+
+        return $r20;
+
+     label27:
+        $i0 = $i1;
+
+        goto label24;
+
+     label28:
+        return null;
+
+        catch android.net.ParseException from label03 to label04 with label20;
+        catch android.net.ParseException from label05 to label06 with label20;
+        catch android.net.ParseException from label07 to label08 with label20;
+        catch android.net.ParseException from label09 to label10 with label20;
+        catch android.net.ParseException from label11 to label12 with label20;
+        catch android.net.ParseException from label13 to label14 with label20;
+        catch android.net.ParseException from label15 to label16 with label20;
+        catch android.net.ParseException from label18 to label19 with label20;
+    }
+
+    private void transitionToCommitted(int, boolean)
+    {
+        android.webkit.BrowserFrame $r0;
+        int $i0;
+        boolean $z0;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        $i0 := @parameter0: int;
+
+        $z0 := @parameter1: boolean;
+
+        if $z0 == 0 goto label1;
+
+        $r0.<android.webkit.BrowserFrame: boolean mCommitted> = 1;
+
+        return;
+
+     label1:
+        return;
+    }
+
+    private void updateVisitedHistory(java.lang.String, boolean)
+    {
+        android.webkit.BrowserFrame $r0;
+        java.lang.String $r1;
+        boolean $z0;
+        android.webkit.CallbackProxy $r2;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $z0 := @parameter1: boolean;
+
+        $r2 = $r0.<android.webkit.BrowserFrame: android.webkit.CallbackProxy mCallbackProxy>;
+
+        virtualinvoke $r2.<android.webkit.CallbackProxy: void doUpdateVisitedHistory(java.lang.String,boolean)>($r1, $z0);
+
+        return;
+    }
+
+    private void windowObjectCleared(int)
+    {
+        android.webkit.BrowserFrame $r0;
+        int $i0;
+        java.util.HashMap $r1;
+        java.util.Set $r2;
+        java.util.Iterator $r3;
+        boolean $z0;
+        java.lang.Object $r4;
+        java.lang.String $r5;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<android.webkit.BrowserFrame: java.util.HashMap mJSInterfaceMap>;
+
+        if $r1 == null goto label2;
+
+        $r1 = $r0.<android.webkit.BrowserFrame: java.util.HashMap mJSInterfaceMap>;
+
+        $r2 = virtualinvoke $r1.<java.util.HashMap: java.util.Set keySet()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        $r5 = (java.lang.String) $r4;
+
+        $r1 = $r0.<android.webkit.BrowserFrame: java.util.HashMap mJSInterfaceMap>;
+
+        $r4 = virtualinvoke $r1.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r5);
+
+        specialinvoke $r0.<android.webkit.BrowserFrame: void nativeAddJavascriptInterface(int,java.lang.Object,java.lang.String)>($i0, $r4, $r5);
+
+        goto label1;
+
+     label2:
+        return;
+
+     label3:
+        return;
+    }
+
+    public void addJavascriptInterface(java.lang.Object, java.lang.String)
+    {
+        android.webkit.BrowserFrame $r0;
+        java.lang.Object $r1;
+        java.lang.String $r2;
+        boolean $z0;
+        java.util.HashMap $r3;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        $r1 := @parameter0: java.lang.Object;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 = $r0.<android.webkit.BrowserFrame: java.util.HashMap mJSInterfaceMap>;
+
+        if $r3 != null goto label1;
+
+        $r3 = new java.util.HashMap;
+
+        specialinvoke $r3.<java.util.HashMap: void <init>()>();
+
+        $r0.<android.webkit.BrowserFrame: java.util.HashMap mJSInterfaceMap> = $r3;
+
+     label1:
+        $r3 = $r0.<android.webkit.BrowserFrame: java.util.HashMap mJSInterfaceMap>;
+
+        $z0 = virtualinvoke $r3.<java.util.HashMap: boolean containsKey(java.lang.Object)>($r2);
+
+        if $z0 == 0 goto label2;
+
+        $r3 = $r0.<android.webkit.BrowserFrame: java.util.HashMap mJSInterfaceMap>;
+
+        virtualinvoke $r3.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>($r2);
+
+     label2:
+        $r3 = $r0.<android.webkit.BrowserFrame: java.util.HashMap mJSInterfaceMap>;
+
+        virtualinvoke $r3.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r2, $r1);
+
+        return;
+    }
+
+    public native boolean cacheDisabled();
+
+    void certificate(android.net.http.SslCertificate)
+    {
+        android.webkit.BrowserFrame $r0;
+        android.net.http.SslCertificate $r1;
+        boolean $z0;
+        android.webkit.CallbackProxy $r2;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        $r1 := @parameter0: android.net.http.SslCertificate;
+
+        $z0 = $r0.<android.webkit.BrowserFrame: boolean mIsMainFrame>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = $r0.<android.webkit.BrowserFrame: android.webkit.CallbackProxy mCallbackProxy>;
+
+        virtualinvoke $r2.<android.webkit.CallbackProxy: void onReceivedCertificate(android.net.http.SslCertificate)>($r1);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public native void clearCache();
+
+    boolean committed()
+    {
+        android.webkit.BrowserFrame $r0;
+        boolean z0;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        z0 = $r0.<android.webkit.BrowserFrame: boolean mCommitted>;
+
+        return z0;
+    }
+
+    public void destroy()
+    {
+        android.webkit.BrowserFrame $r0;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        virtualinvoke $r0.<android.webkit.BrowserFrame: void nativeDestroyFrame()>();
+
+        virtualinvoke $r0.<android.os.Handler: void removeCallbacksAndMessages(java.lang.Object)>(null);
+
+        return;
+    }
+
+    void didFirstLayout()
+    {
+        android.webkit.BrowserFrame $r0;
+        boolean $z0;
+        android.webkit.WebViewCore $r1;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        $z0 = $r0.<android.webkit.BrowserFrame: boolean mFirstLayoutDone>;
+
+        if $z0 != 0 goto label1;
+
+        $r0.<android.webkit.BrowserFrame: boolean mFirstLayoutDone> = 1;
+
+        $r1 = $r0.<android.webkit.BrowserFrame: android.webkit.WebViewCore mWebViewCore>;
+
+        virtualinvoke $r1.<android.webkit.WebViewCore: void contentDraw()>();
+
+     label1:
+        $r1 = $r0.<android.webkit.BrowserFrame: android.webkit.WebViewCore mWebViewCore>;
+
+        $r1.<android.webkit.WebViewCore: boolean mEndScaleZoom> = 1;
+
+        return;
+    }
+
+    public void documentAsText(android.os.Message)
+    {
+        android.webkit.BrowserFrame $r0;
+        android.os.Message $r1;
+        java.lang.String $r2;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        $r1 := @parameter0: android.os.Message;
+
+        $r2 = specialinvoke $r0.<android.webkit.BrowserFrame: java.lang.String documentAsText()>();
+
+        $r1.<android.os.Message: java.lang.Object obj> = $r2;
+
+        virtualinvoke $r1.<android.os.Message: void sendToTarget()>();
+
+        return;
+    }
+
+    public native boolean documentHasImages();
+
+    public void externalRepresentation(android.os.Message)
+    {
+        android.webkit.BrowserFrame $r0;
+        android.os.Message $r1;
+        java.lang.String $r2;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        $r1 := @parameter0: android.os.Message;
+
+        $r2 = specialinvoke $r0.<android.webkit.BrowserFrame: java.lang.String externalRepresentation()>();
+
+        $r1.<android.os.Message: java.lang.Object obj> = $r2;
+
+        virtualinvoke $r1.<android.os.Message: void sendToTarget()>();
+
+        return;
+    }
+
+    boolean firstLayoutDone()
+    {
+        android.webkit.BrowserFrame $r0;
+        boolean z0;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        z0 = $r0.<android.webkit.BrowserFrame: boolean mFirstLayoutDone>;
+
+        return z0;
+    }
+
+    android.webkit.CallbackProxy getCallbackProxy()
+    {
+        android.webkit.BrowserFrame $r0;
+        android.webkit.CallbackProxy r1;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        r1 = $r0.<android.webkit.BrowserFrame: android.webkit.CallbackProxy mCallbackProxy>;
+
+        return r1;
+    }
+
+    java.lang.String getRawResFilename(int)
+    {
+        android.webkit.BrowserFrame $r0;
+        int $i0;
+        android.util.TypedValue $r1;
+        java.lang.String $r2;
+        android.content.Context $r3;
+        android.content.res.Resources $r4;
+        java.lang.CharSequence $r5;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        $i0 := @parameter0: int;
+
+        lookupswitch($i0)
+        {
+            case 1: goto label2;
+            case 2: goto label4;
+            default: goto label1;
+        };
+
+     label1:
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("webkit", "getRawResFilename got incompatible resource ID");
+
+        $r2 = new java.lang.String;
+
+        specialinvoke $r2.<java.lang.String: void <init>()>();
+
+        return $r2;
+
+     label2:
+        $i0 = 17563650;
+
+     label3:
+        $r1 = new android.util.TypedValue;
+
+        specialinvoke $r1.<android.util.TypedValue: void <init>()>();
+
+        $r3 = $r0.<android.webkit.BrowserFrame: android.content.Context mContext>;
+
+        $r4 = virtualinvoke $r3.<android.content.Context: android.content.res.Resources getResources()>();
+
+        virtualinvoke $r4.<android.content.res.Resources: void getValue(int,android.util.TypedValue,boolean)>($i0, $r1, 1);
+
+        $r5 = $r1.<android.util.TypedValue: java.lang.CharSequence string>;
+
+        $r2 = virtualinvoke $r5.<java.lang.Object: java.lang.String toString()>();
+
+        return $r2;
+
+     label4:
+        $i0 = 17563649;
+
+        goto label3;
+    }
+
+    java.lang.String getUserAgentString()
+    {
+        android.webkit.BrowserFrame $r0;
+        java.lang.String $r1;
+        android.webkit.WebSettings $r2;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        $r2 = $r0.<android.webkit.BrowserFrame: android.webkit.WebSettings mSettings>;
+
+        $r1 = virtualinvoke $r2.<android.webkit.WebSettings: java.lang.String getUserAgentString()>();
+
+        return $r1;
+    }
+
+    public void goBackOrForward(int)
+    {
+        android.webkit.BrowserFrame $r0;
+        int $i0;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        $i0 := @parameter0: int;
+
+        $r0.<android.webkit.BrowserFrame: boolean mLoadInitFromJava> = 1;
+
+        specialinvoke $r0.<android.webkit.BrowserFrame: void nativeGoBackOrForward(int)>($i0);
+
+        $r0.<android.webkit.BrowserFrame: boolean mLoadInitFromJava> = 0;
+
+        return;
+    }
+
+    public void handleMessage(android.os.Message)
+    {
+        android.webkit.BrowserFrame $r0;
+        android.os.Message $r1;
+        android.net.WebAddress $r2;
+        int $i0, $i1;
+        android.webkit.WebSettings $r3;
+        boolean $z0;
+        android.webkit.CallbackProxy $r4;
+        android.webkit.WebBackForwardList $r5;
+        android.webkit.WebHistoryItem $r6;
+        java.lang.String $r7, $r11;
+        java.lang.StringBuilder $r8;
+        android.webkit.WebViewDatabase $r9;
+        java.lang.String[] $r10;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        $r1 := @parameter0: android.os.Message;
+
+        $i0 = $r1.<android.os.Message: int what>;
+
+        lookupswitch($i0)
+        {
+            case 1001: goto label2;
+            case 1002: goto label1;
+            case 1003: goto label4;
+            default: goto label1;
+        };
+
+     label1:
+        return;
+
+     label2:
+        $r3 = $r0.<android.webkit.BrowserFrame: android.webkit.WebSettings mSettings>;
+
+        $z0 = virtualinvoke $r3.<android.webkit.WebSettings: boolean getSavePassword()>();
+
+        if $z0 == 0 goto label3;
+
+        $z0 = specialinvoke $r0.<android.webkit.BrowserFrame: boolean hasPasswordField()>();
+
+        if $z0 == 0 goto label3;
+
+        $r2 = new android.net.WebAddress;
+
+        $r4 = $r0.<android.webkit.BrowserFrame: android.webkit.CallbackProxy mCallbackProxy>;
+
+        $r5 = virtualinvoke $r4.<android.webkit.CallbackProxy: android.webkit.WebBackForwardList getBackForwardList()>();
+
+        $r6 = virtualinvoke $r5.<android.webkit.WebBackForwardList: android.webkit.WebHistoryItem getCurrentItem()>();
+
+        $r7 = virtualinvoke $r6.<android.webkit.WebHistoryItem: java.lang.String getUrl()>();
+
+        specialinvoke $r2.<android.net.WebAddress: void <init>(java.lang.String)>($r7);
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = $r2.<android.net.WebAddress: java.lang.String mScheme>;
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r7 = $r2.<android.net.WebAddress: java.lang.String mHost>;
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r7 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r9 = $r0.<android.webkit.BrowserFrame: android.webkit.WebViewDatabase mDatabase>;
+
+        $r10 = virtualinvoke $r9.<android.webkit.WebViewDatabase: java.lang.String[] getUsernamePassword(java.lang.String)>($r7);
+
+        if $r10 == null goto label3;
+
+        $r7 = $r10[0];
+
+        if $r7 == null goto label3;
+
+        $r7 = $r10[0];
+
+        $r11 = $r10[1];
+
+        specialinvoke $r0.<android.webkit.BrowserFrame: void setUsernamePassword(java.lang.String,java.lang.String)>($r7, $r11);
+
+     label3:
+        staticinvoke <android.webkit.CacheManager: void trimCacheIfNeeded()>();
+
+        return;
+
+     label4:
+        $i0 = $r1.<android.os.Message: int arg1>;
+
+        $i1 = $r1.<android.os.Message: int arg2>;
+
+        specialinvoke $r0.<android.webkit.BrowserFrame: void nativeCallPolicyFunction(int,int)>($i0, $i1);
+
+        return;
+    }
+
+    public boolean handleUrl(java.lang.String)
+    {
+        android.webkit.BrowserFrame $r0;
+        java.lang.String $r1;
+        boolean $z0;
+        android.webkit.CallbackProxy $r2;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $z0 = $r0.<android.webkit.BrowserFrame: boolean mLoadInitFromJava>;
+
+        if $z0 != 1 goto label1;
+
+        return 0;
+
+     label1:
+        $r2 = $r0.<android.webkit.BrowserFrame: android.webkit.CallbackProxy mCallbackProxy>;
+
+        $z0 = virtualinvoke $r2.<android.webkit.CallbackProxy: boolean shouldOverrideUrlLoading(java.lang.String)>($r1);
+
+        if $z0 == 0 goto label2;
+
+        virtualinvoke $r0.<android.webkit.BrowserFrame: void didFirstLayout()>();
+
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    public void loadData(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+    {
+        android.webkit.BrowserFrame $r0;
+        java.lang.String $r1, $r2, $r3, $r4, $r5;
+        int $i0;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        $r2 := @parameter0: java.lang.String;
+
+        $r3 := @parameter1: java.lang.String;
+
+        $r4 := @parameter2: java.lang.String;
+
+        $r1 := @parameter3: java.lang.String;
+
+        $r5 := @parameter4: java.lang.String;
+
+        $r0.<android.webkit.BrowserFrame: boolean mLoadInitFromJava> = 1;
+
+        if $r5 != null goto label1;
+
+        $r5 = "";
+
+     label1:
+        if $r3 != null goto label2;
+
+        $r3 = "";
+
+     label2:
+        if $r2 == null goto label3;
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        if $i0 != 0 goto label4;
+
+     label3:
+        $r2 = "about:blank";
+
+     label4:
+        if $r4 == null goto label5;
+
+        $i0 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        if $i0 != 0 goto label6;
+
+     label5:
+        $r4 = "text/html";
+
+     label6:
+        specialinvoke $r0.<android.webkit.BrowserFrame: void nativeLoadData(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)>($r2, $r3, $r4, $r1, $r5);
+
+        $r0.<android.webkit.BrowserFrame: boolean mLoadInitFromJava> = 0;
+
+        return;
+    }
+
+    int loadType()
+    {
+        android.webkit.BrowserFrame $r0;
+        int i0;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        i0 = $r0.<android.webkit.BrowserFrame: int mLoadType>;
+
+        return i0;
+    }
+
+    public void loadUrl(java.lang.String)
+    {
+        android.webkit.BrowserFrame $r0;
+        java.lang.String $r1, $r2;
+        boolean $z0;
+        int $i0;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r0.<android.webkit.BrowserFrame: boolean mLoadInitFromJava> = 1;
+
+        $z0 = staticinvoke <android.webkit.URLUtil: boolean isJavaScriptUrl(java.lang.String)>($r1);
+
+        if $z0 == 0 goto label2;
+
+        $r2 = "javascript:";
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int)>($i0);
+
+        virtualinvoke $r0.<android.webkit.BrowserFrame: java.lang.String stringByEvaluatingJavaScriptFromString(java.lang.String)>($r1);
+
+     label1:
+        $r0.<android.webkit.BrowserFrame: boolean mLoadInitFromJava> = 0;
+
+        return;
+
+     label2:
+        specialinvoke $r0.<android.webkit.BrowserFrame: void nativeLoadUrl(java.lang.String)>($r1);
+
+        goto label1;
+    }
+
+    public native void nativeDestroyFrame();
+
+    public native void reload(boolean);
+
+    public void stopLoading()
+    {
+        android.webkit.BrowserFrame $r0;
+        boolean $z0;
+
+        $r0 := @this: android.webkit.BrowserFrame;
+
+        $z0 = $r0.<android.webkit.BrowserFrame: boolean mIsMainFrame>;
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke $r0.<android.webkit.BrowserFrame: void resetLoadingStates()>();
+
+     label1:
+        specialinvoke $r0.<android.webkit.BrowserFrame: void nativeStopLoading()>();
+
+        return;
+    }
+
+    public native java.lang.String stringByEvaluatingJavaScriptFromString(java.lang.String);
+
+    public static void <clinit>()
+    {
+        <android.webkit.BrowserFrame: int TRANSITION_SWITCH_THRESHOLD> = 75;
+
+        <android.webkit.BrowserFrame: int POLICY_USE> = 0;
+
+        <android.webkit.BrowserFrame: int POLICY_IGNORE> = 2;
+
+        <android.webkit.BrowserFrame: int POLICY_FUNCTION> = 1003;
+
+        <android.webkit.BrowserFrame: int NODOMAIN> = 1;
+
+        <android.webkit.BrowserFrame: int MAX_OUTSTANDING_REQUESTS> = 300;
+
+        <android.webkit.BrowserFrame: java.lang.String LOGTAG> = "webkit";
+
+        <android.webkit.BrowserFrame: int LOADERROR> = 2;
+
+        <android.webkit.BrowserFrame: int FRAME_LOADTYPE_STANDARD> = 0;
+
+        <android.webkit.BrowserFrame: int FRAME_LOADTYPE_SAME> = 6;
+
+        <android.webkit.BrowserFrame: int FRAME_LOADTYPE_REPLACE> = 8;
+
+        <android.webkit.BrowserFrame: int FRAME_LOADTYPE_RELOADALLOWINGSTALEDATA> = 5;
+
+        <android.webkit.BrowserFrame: int FRAME_LOADTYPE_RELOAD> = 4;
+
+        <android.webkit.BrowserFrame: int FRAME_LOADTYPE_REDIRECT> = 7;
+
+        <android.webkit.BrowserFrame: int FRAME_LOADTYPE_INDEXEDBACKFORWARD> = 3;
+
+        <android.webkit.BrowserFrame: int FRAME_LOADTYPE_FORWARD> = 2;
+
+        <android.webkit.BrowserFrame: int FRAME_LOADTYPE_BACK> = 1;
+
+        <android.webkit.BrowserFrame: int FRAME_COMPLETED> = 1001;
+
+        return;
+    }
+}

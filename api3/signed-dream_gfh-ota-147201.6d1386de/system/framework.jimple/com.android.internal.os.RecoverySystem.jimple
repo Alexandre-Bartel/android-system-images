@@ -1,0 +1,297 @@
+public class com.android.internal.os.RecoverySystem extends java.lang.Object
+{
+    private static java.io.File COMMAND_FILE;
+    private static java.io.File LOG_FILE;
+    private static int LOG_FILE_MAX_LENGTH;
+    private static java.io.File RECOVERY_DIR;
+    private static final java.lang.String TAG;
+
+    static void <clinit>()
+    {
+        java.io.File $r0, $r1;
+
+        <com.android.internal.os.RecoverySystem: java.lang.String TAG> = "RecoverySystem";
+
+        $r0 = new java.io.File;
+
+        specialinvoke $r0.<java.io.File: void <init>(java.lang.String)>("/cache/recovery");
+
+        <com.android.internal.os.RecoverySystem: java.io.File RECOVERY_DIR> = $r0;
+
+        $r0 = new java.io.File;
+
+        $r1 = <com.android.internal.os.RecoverySystem: java.io.File RECOVERY_DIR>;
+
+        specialinvoke $r0.<java.io.File: void <init>(java.io.File,java.lang.String)>($r1, "command");
+
+        <com.android.internal.os.RecoverySystem: java.io.File COMMAND_FILE> = $r0;
+
+        $r0 = new java.io.File;
+
+        $r1 = <com.android.internal.os.RecoverySystem: java.io.File RECOVERY_DIR>;
+
+        specialinvoke $r0.<java.io.File: void <init>(java.io.File,java.lang.String)>($r1, "log");
+
+        <com.android.internal.os.RecoverySystem: java.io.File LOG_FILE> = $r0;
+
+        <com.android.internal.os.RecoverySystem: int LOG_FILE_MAX_LENGTH> = 8192;
+
+        return;
+    }
+
+    public void <init>()
+    {
+        com.android.internal.os.RecoverySystem $r0;
+
+        $r0 := @this: com.android.internal.os.RecoverySystem;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private static void bootCommand(java.lang.String) throws java.io.IOException
+    {
+        java.lang.String $r0;
+        java.io.FileWriter $r1;
+        java.io.File $r2;
+        java.io.IOException $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $r2 = <com.android.internal.os.RecoverySystem: java.io.File RECOVERY_DIR>;
+
+        virtualinvoke $r2.<java.io.File: boolean mkdirs()>();
+
+        $r2 = <com.android.internal.os.RecoverySystem: java.io.File COMMAND_FILE>;
+
+        virtualinvoke $r2.<java.io.File: boolean delete()>();
+
+        $r2 = <com.android.internal.os.RecoverySystem: java.io.File LOG_FILE>;
+
+        virtualinvoke $r2.<java.io.File: boolean delete()>();
+
+        $r1 = new java.io.FileWriter;
+
+        $r2 = <com.android.internal.os.RecoverySystem: java.io.File COMMAND_FILE>;
+
+        specialinvoke $r1.<java.io.FileWriter: void <init>(java.io.File)>($r2);
+
+     label1:
+        virtualinvoke $r1.<java.io.Writer: void write(java.lang.String)>($r0);
+
+        virtualinvoke $r1.<java.io.Writer: void write(java.lang.String)>("\n");
+
+     label2:
+        virtualinvoke $r1.<java.io.OutputStreamWriter: void close()>();
+
+        staticinvoke <android.os.Power: void reboot(java.lang.String)>("recovery");
+
+        $r3 = new java.io.IOException;
+
+        specialinvoke $r3.<java.io.IOException: void <init>(java.lang.String)>("Reboot failed (no permissions?)");
+
+        throw $r3;
+
+     label3:
+        $r4 := @caughtexception;
+
+        virtualinvoke $r1.<java.io.OutputStreamWriter: void close()>();
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public static java.lang.String handleAftermath()
+    {
+        java.io.File $r0, $r3;
+        java.lang.String $r1, $r4;
+        int $i0, $i1;
+        java.lang.String[] $r2;
+        boolean $z0;
+        java.lang.StringBuilder $r5;
+        java.io.FileNotFoundException $r6;
+        java.io.IOException $r7;
+
+        $r1 = null;
+
+        $r0 = <com.android.internal.os.RecoverySystem: java.io.File LOG_FILE>;
+
+        $i0 = <com.android.internal.os.RecoverySystem: int LOG_FILE_MAX_LENGTH>;
+
+        $i0 = neg $i0;
+
+     label1:
+        $r1 = staticinvoke <android.os.FileUtils: java.lang.String readTextFile(java.io.File,int,java.lang.String)>($r0, $i0, "...\n");
+
+     label2:
+        $r0 = <com.android.internal.os.RecoverySystem: java.io.File RECOVERY_DIR>;
+
+        $r2 = virtualinvoke $r0.<java.io.File: java.lang.String[] list()>();
+
+        $i0 = 0;
+
+     label3:
+        if $r2 == null goto label8;
+
+        $i1 = lengthof $r2;
+
+        if $i0 >= $i1 goto label9;
+
+        $r0 = new java.io.File;
+
+        $r3 = <com.android.internal.os.RecoverySystem: java.io.File RECOVERY_DIR>;
+
+        $r4 = $r2[$i0];
+
+        specialinvoke $r0.<java.io.File: void <init>(java.io.File,java.lang.String)>($r3, $r4);
+
+        $z0 = virtualinvoke $r0.<java.io.File: boolean delete()>();
+
+        if $z0 != 0 goto label7;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Can\'t delete: ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r0);
+
+        $r4 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("RecoverySystem", $r4);
+
+     label4:
+        $i0 = $i0 + 1;
+
+        goto label3;
+
+     label5:
+        $r6 := @caughtexception;
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("RecoverySystem", "No recovery log file");
+
+        goto label2;
+
+     label6:
+        $r7 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("RecoverySystem", "Error reading recovery log", $r7);
+
+        goto label2;
+
+     label7:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Deleted: ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r0);
+
+        $r4 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("RecoverySystem", $r4);
+
+        goto label4;
+
+     label8:
+        return $r1;
+
+     label9:
+        return $r1;
+
+        catch java.io.FileNotFoundException from label1 to label2 with label5;
+        catch java.io.IOException from label1 to label2 with label6;
+    }
+
+    public static void rebootAndUpdate(java.io.File) throws java.io.IOException
+    {
+        java.io.File $r0;
+        java.lang.String $r1;
+        boolean $z0;
+        java.lang.StringBuilder $r2;
+        java.lang.IllegalArgumentException $r3;
+
+        $r0 := @parameter0: java.io.File;
+
+        $r1 = virtualinvoke $r0.<java.io.File: java.lang.String getCanonicalPath()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>("/cache/");
+
+        if $z0 == 0 goto label2;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("CACHE:");
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int)>(7);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label1:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("--update_package=");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.android.internal.os.RecoverySystem: void bootCommand(java.lang.String)>($r1);
+
+        return;
+
+     label2:
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>("/data/");
+
+        if $z0 == 0 goto label3;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("DATA:");
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int)>(6);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label1;
+
+     label3:
+        $r3 = new java.lang.IllegalArgumentException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Must start with /cache or /data: ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r1);
+
+        throw $r3;
+    }
+
+    public static void rebootAndWipe() throws java.io.IOException
+    {
+        staticinvoke <com.android.internal.os.RecoverySystem: void bootCommand(java.lang.String)>("--wipe_data");
+
+        return;
+    }
+}

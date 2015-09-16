@@ -1,0 +1,857 @@
+public class android.view.GestureDetector extends java.lang.Object
+{
+    private static final int DOUBLE_TAP_TIMEOUT;
+    private static final int LONGPRESS_TIMEOUT;
+    private static final int LONG_PRESS;
+    private static final int SHOW_PRESS;
+    private static final int TAP;
+    private static final int TAP_TIMEOUT;
+    private boolean mAlwaysInBiggerTapRegion;
+    private boolean mAlwaysInTapRegion;
+    private int mBiggerTouchSlopSquare;
+    private android.view.MotionEvent mCurrentDownEvent;
+    private android.view.GestureDetector$OnDoubleTapListener mDoubleTapListener;
+    private int mDoubleTapSlopSquare;
+    private final android.os.Handler mHandler;
+    private boolean mInLongPress;
+    private boolean mIsDoubleTapping;
+    private boolean mIsLongpressEnabled;
+    private float mLastMotionX;
+    private float mLastMotionY;
+    private final android.view.GestureDetector$OnGestureListener mListener;
+    private int mMinimumFlingVelocity;
+    private android.view.MotionEvent mPreviousUpEvent;
+    private boolean mStillDown;
+    private int mTouchSlopSquare;
+    private android.view.VelocityTracker mVelocityTracker;
+
+    static void <clinit>()
+    {
+        int $i0;
+
+        <android.view.GestureDetector: int TAP> = 3;
+
+        <android.view.GestureDetector: int SHOW_PRESS> = 1;
+
+        <android.view.GestureDetector: int LONG_PRESS> = 2;
+
+        $i0 = staticinvoke <android.view.ViewConfiguration: int getLongPressTimeout()>();
+
+        <android.view.GestureDetector: int LONGPRESS_TIMEOUT> = $i0;
+
+        $i0 = staticinvoke <android.view.ViewConfiguration: int getTapTimeout()>();
+
+        <android.view.GestureDetector: int TAP_TIMEOUT> = $i0;
+
+        $i0 = staticinvoke <android.view.ViewConfiguration: int getDoubleTapTimeout()>();
+
+        <android.view.GestureDetector: int DOUBLE_TAP_TIMEOUT> = $i0;
+
+        return;
+    }
+
+    public void <init>(android.content.Context, android.view.GestureDetector$OnGestureListener)
+    {
+        android.view.GestureDetector $r0;
+        android.content.Context $r1;
+        android.view.GestureDetector$OnGestureListener $r2;
+
+        $r0 := @this: android.view.GestureDetector;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: android.view.GestureDetector$OnGestureListener;
+
+        specialinvoke $r0.<android.view.GestureDetector: void <init>(android.content.Context,android.view.GestureDetector$OnGestureListener,android.os.Handler)>($r1, $r2, null);
+
+        return;
+    }
+
+    public void <init>(android.content.Context, android.view.GestureDetector$OnGestureListener, android.os.Handler)
+    {
+        android.view.GestureDetector $r0;
+        android.content.Context $r1;
+        android.os.Handler $r2;
+        android.view.GestureDetector$OnGestureListener $r3;
+        android.view.GestureDetector$GestureHandler $r4;
+        boolean $z0;
+        android.view.GestureDetector$OnDoubleTapListener $r5;
+
+        $r0 := @this: android.view.GestureDetector;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r3 := @parameter1: android.view.GestureDetector$OnGestureListener;
+
+        $r2 := @parameter2: android.os.Handler;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r0.<android.view.GestureDetector: int mBiggerTouchSlopSquare> = 400;
+
+        if $r2 == null goto label3;
+
+        $r4 = new android.view.GestureDetector$GestureHandler;
+
+        specialinvoke $r4.<android.view.GestureDetector$GestureHandler: void <init>(android.view.GestureDetector,android.os.Handler)>($r0, $r2);
+
+        $r0.<android.view.GestureDetector: android.os.Handler mHandler> = $r4;
+
+     label1:
+        $r0.<android.view.GestureDetector: android.view.GestureDetector$OnGestureListener mListener> = $r3;
+
+        $z0 = $r3 instanceof android.view.GestureDetector$OnDoubleTapListener;
+
+        if $z0 == 0 goto label2;
+
+        $r5 = (android.view.GestureDetector$OnDoubleTapListener) $r3;
+
+        virtualinvoke $r0.<android.view.GestureDetector: void setOnDoubleTapListener(android.view.GestureDetector$OnDoubleTapListener)>($r5);
+
+     label2:
+        specialinvoke $r0.<android.view.GestureDetector: void init(android.content.Context)>($r1);
+
+        return;
+
+     label3:
+        $r4 = new android.view.GestureDetector$GestureHandler;
+
+        specialinvoke $r4.<android.view.GestureDetector$GestureHandler: void <init>(android.view.GestureDetector)>($r0);
+
+        $r0.<android.view.GestureDetector: android.os.Handler mHandler> = $r4;
+
+        goto label1;
+    }
+
+    public void <init>(android.view.GestureDetector$OnGestureListener)
+    {
+        android.view.GestureDetector $r0;
+        android.view.GestureDetector$OnGestureListener $r1;
+
+        $r0 := @this: android.view.GestureDetector;
+
+        $r1 := @parameter0: android.view.GestureDetector$OnGestureListener;
+
+        specialinvoke $r0.<android.view.GestureDetector: void <init>(android.content.Context,android.view.GestureDetector$OnGestureListener,android.os.Handler)>(null, $r1, null);
+
+        return;
+    }
+
+    public void <init>(android.view.GestureDetector$OnGestureListener, android.os.Handler)
+    {
+        android.view.GestureDetector $r0;
+        android.view.GestureDetector$OnGestureListener $r1;
+        android.os.Handler $r2;
+
+        $r0 := @this: android.view.GestureDetector;
+
+        $r1 := @parameter0: android.view.GestureDetector$OnGestureListener;
+
+        $r2 := @parameter1: android.os.Handler;
+
+        specialinvoke $r0.<android.view.GestureDetector: void <init>(android.content.Context,android.view.GestureDetector$OnGestureListener,android.os.Handler)>(null, $r1, $r2);
+
+        return;
+    }
+
+    static android.view.MotionEvent access$000(android.view.GestureDetector)
+    {
+        android.view.GestureDetector $r0;
+        android.view.MotionEvent r1;
+
+        $r0 := @parameter0: android.view.GestureDetector;
+
+        r1 = $r0.<android.view.GestureDetector: android.view.MotionEvent mCurrentDownEvent>;
+
+        return r1;
+    }
+
+    static android.view.GestureDetector$OnGestureListener access$100(android.view.GestureDetector)
+    {
+        android.view.GestureDetector $r0;
+        android.view.GestureDetector$OnGestureListener r1;
+
+        $r0 := @parameter0: android.view.GestureDetector;
+
+        r1 = $r0.<android.view.GestureDetector: android.view.GestureDetector$OnGestureListener mListener>;
+
+        return r1;
+    }
+
+    static void access$200(android.view.GestureDetector)
+    {
+        android.view.GestureDetector $r0;
+
+        $r0 := @parameter0: android.view.GestureDetector;
+
+        specialinvoke $r0.<android.view.GestureDetector: void dispatchLongPress()>();
+
+        return;
+    }
+
+    static android.view.GestureDetector$OnDoubleTapListener access$300(android.view.GestureDetector)
+    {
+        android.view.GestureDetector $r0;
+        android.view.GestureDetector$OnDoubleTapListener r1;
+
+        $r0 := @parameter0: android.view.GestureDetector;
+
+        r1 = $r0.<android.view.GestureDetector: android.view.GestureDetector$OnDoubleTapListener mDoubleTapListener>;
+
+        return r1;
+    }
+
+    static boolean access$400(android.view.GestureDetector)
+    {
+        android.view.GestureDetector $r0;
+        boolean z0;
+
+        $r0 := @parameter0: android.view.GestureDetector;
+
+        z0 = $r0.<android.view.GestureDetector: boolean mStillDown>;
+
+        return z0;
+    }
+
+    private void dispatchLongPress()
+    {
+        android.view.GestureDetector $r0;
+        android.os.Handler $r1;
+        android.view.GestureDetector$OnGestureListener $r2;
+        android.view.MotionEvent $r3;
+
+        $r0 := @this: android.view.GestureDetector;
+
+        $r1 = $r0.<android.view.GestureDetector: android.os.Handler mHandler>;
+
+        virtualinvoke $r1.<android.os.Handler: void removeMessages(int)>(3);
+
+        $r0.<android.view.GestureDetector: boolean mInLongPress> = 1;
+
+        $r2 = $r0.<android.view.GestureDetector: android.view.GestureDetector$OnGestureListener mListener>;
+
+        $r3 = $r0.<android.view.GestureDetector: android.view.MotionEvent mCurrentDownEvent>;
+
+        interfaceinvoke $r2.<android.view.GestureDetector$OnGestureListener: void onLongPress(android.view.MotionEvent)>($r3);
+
+        return;
+    }
+
+    private void init(android.content.Context)
+    {
+        android.view.GestureDetector $r0;
+        android.content.Context $r1;
+        android.view.GestureDetector$OnGestureListener $r2;
+        java.lang.NullPointerException $r3;
+        int $i0, $i1, $i2;
+        android.view.ViewConfiguration $r4;
+
+        $r0 := @this: android.view.GestureDetector;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 = $r0.<android.view.GestureDetector: android.view.GestureDetector$OnGestureListener mListener>;
+
+        if $r2 != null goto label1;
+
+        $r3 = new java.lang.NullPointerException;
+
+        specialinvoke $r3.<java.lang.NullPointerException: void <init>(java.lang.String)>("OnGestureListener must not be null");
+
+        throw $r3;
+
+     label1:
+        $r0.<android.view.GestureDetector: boolean mIsLongpressEnabled> = 1;
+
+        if $r1 != null goto label3;
+
+        $i0 = staticinvoke <android.view.ViewConfiguration: int getTouchSlop()>();
+
+        $i1 = staticinvoke <android.view.ViewConfiguration: int getDoubleTapSlop()>();
+
+        $i2 = staticinvoke <android.view.ViewConfiguration: int getMinimumFlingVelocity()>();
+
+        $r0.<android.view.GestureDetector: int mMinimumFlingVelocity> = $i2;
+
+     label2:
+        $i0 = $i0 * $i0;
+
+        $r0.<android.view.GestureDetector: int mTouchSlopSquare> = $i0;
+
+        $i0 = $i1 * $i1;
+
+        $r0.<android.view.GestureDetector: int mDoubleTapSlopSquare> = $i0;
+
+        return;
+
+     label3:
+        $r4 = staticinvoke <android.view.ViewConfiguration: android.view.ViewConfiguration get(android.content.Context)>($r1);
+
+        $i0 = virtualinvoke $r4.<android.view.ViewConfiguration: int getScaledTouchSlop()>();
+
+        $i1 = virtualinvoke $r4.<android.view.ViewConfiguration: int getScaledDoubleTapSlop()>();
+
+        $i2 = virtualinvoke $r4.<android.view.ViewConfiguration: int getScaledMinimumFlingVelocity()>();
+
+        $r0.<android.view.GestureDetector: int mMinimumFlingVelocity> = $i2;
+
+        goto label2;
+    }
+
+    private boolean isConsideredDoubleTap(android.view.MotionEvent, android.view.MotionEvent, android.view.MotionEvent)
+    {
+        android.view.GestureDetector $r0;
+        android.view.MotionEvent $r1, $r2, $r3;
+        int $i0, $i1, $i5;
+        boolean $z0;
+        long $l2, $l3;
+        byte $b4;
+        float $f0;
+
+        $r0 := @this: android.view.GestureDetector;
+
+        $r1 := @parameter0: android.view.MotionEvent;
+
+        $r2 := @parameter1: android.view.MotionEvent;
+
+        $r3 := @parameter2: android.view.MotionEvent;
+
+        $z0 = $r0.<android.view.GestureDetector: boolean mAlwaysInBiggerTapRegion>;
+
+        if $z0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $l2 = virtualinvoke $r3.<android.view.MotionEvent: long getEventTime()>();
+
+        $l3 = virtualinvoke $r2.<android.view.MotionEvent: long getEventTime()>();
+
+        $l2 = $l2 - $l3;
+
+        $i0 = <android.view.GestureDetector: int DOUBLE_TAP_TIMEOUT>;
+
+        $l3 = (long) $i0;
+
+        $b4 = $l2 cmp $l3;
+
+        if $b4 <= 0 goto label2;
+
+        return 0;
+
+     label2:
+        $f0 = virtualinvoke $r1.<android.view.MotionEvent: float getX()>();
+
+        $i0 = (int) $f0;
+
+        $f0 = virtualinvoke $r3.<android.view.MotionEvent: float getX()>();
+
+        $i1 = (int) $f0;
+
+        $i0 = $i0 - $i1;
+
+        $f0 = virtualinvoke $r1.<android.view.MotionEvent: float getY()>();
+
+        $i1 = (int) $f0;
+
+        $f0 = virtualinvoke $r3.<android.view.MotionEvent: float getY()>();
+
+        $i5 = (int) $f0;
+
+        $i1 = $i1 - $i5;
+
+        $i0 = $i0 * $i0;
+
+        $i1 = $i1 * $i1;
+
+        $i0 = $i0 + $i1;
+
+        $i1 = $r0.<android.view.GestureDetector: int mDoubleTapSlopSquare>;
+
+        if $i0 >= $i1 goto label3;
+
+        return 1;
+
+     label3:
+        return 0;
+    }
+
+    public boolean isLongpressEnabled()
+    {
+        android.view.GestureDetector $r0;
+        boolean z0;
+
+        $r0 := @this: android.view.GestureDetector;
+
+        z0 = $r0.<android.view.GestureDetector: boolean mIsLongpressEnabled>;
+
+        return z0;
+    }
+
+    public boolean onTouchEvent(android.view.MotionEvent)
+    {
+        android.view.GestureDetector $r0;
+        android.view.MotionEvent $r1, $r5, $r6;
+        int $i0, $i3;
+        float $f0, $f1, $f2, $f3, $f4;
+        android.view.VelocityTracker $r2;
+        boolean $z0, $z1;
+        android.view.GestureDetector$OnDoubleTapListener $r3;
+        android.os.Handler $r4;
+        long $l1, $l2;
+        android.view.GestureDetector$OnGestureListener $r7;
+        byte $b4;
+
+        $r0 := @this: android.view.GestureDetector;
+
+        $r1 := @parameter0: android.view.MotionEvent;
+
+        $i0 = virtualinvoke $r1.<android.view.MotionEvent: int getAction()>();
+
+        $f2 = virtualinvoke $r1.<android.view.MotionEvent: float getY()>();
+
+        $f3 = virtualinvoke $r1.<android.view.MotionEvent: float getX()>();
+
+        $r2 = $r0.<android.view.GestureDetector: android.view.VelocityTracker mVelocityTracker>;
+
+        if $r2 != null goto label01;
+
+        $r2 = staticinvoke <android.view.VelocityTracker: android.view.VelocityTracker obtain()>();
+
+        $r0.<android.view.GestureDetector: android.view.VelocityTracker mVelocityTracker> = $r2;
+
+     label01:
+        $r2 = $r0.<android.view.GestureDetector: android.view.VelocityTracker mVelocityTracker>;
+
+        virtualinvoke $r2.<android.view.VelocityTracker: void addMovement(android.view.MotionEvent)>($r1);
+
+        $z0 = 0;
+
+        lookupswitch($i0)
+        {
+            case 0: goto label03;
+            case 1: goto label13;
+            case 2: goto label08;
+            case 3: goto label19;
+            default: goto label02;
+        };
+
+     label02:
+        return 0;
+
+     label03:
+        $r3 = $r0.<android.view.GestureDetector: android.view.GestureDetector$OnDoubleTapListener mDoubleTapListener>;
+
+        if $r3 == null goto label05;
+
+        $r4 = $r0.<android.view.GestureDetector: android.os.Handler mHandler>;
+
+        $z1 = virtualinvoke $r4.<android.os.Handler: boolean hasMessages(int)>(3);
+
+        if $z1 == 0 goto label04;
+
+        $r4 = $r0.<android.view.GestureDetector: android.os.Handler mHandler>;
+
+        virtualinvoke $r4.<android.os.Handler: void removeMessages(int)>(3);
+
+     label04:
+        $r5 = $r0.<android.view.GestureDetector: android.view.MotionEvent mCurrentDownEvent>;
+
+        if $r5 == null goto label07;
+
+        $r5 = $r0.<android.view.GestureDetector: android.view.MotionEvent mPreviousUpEvent>;
+
+        if $r5 == null goto label07;
+
+        if $z1 == 0 goto label07;
+
+        $r5 = $r0.<android.view.GestureDetector: android.view.MotionEvent mCurrentDownEvent>;
+
+        $r6 = $r0.<android.view.GestureDetector: android.view.MotionEvent mPreviousUpEvent>;
+
+        $z1 = specialinvoke $r0.<android.view.GestureDetector: boolean isConsideredDoubleTap(android.view.MotionEvent,android.view.MotionEvent,android.view.MotionEvent)>($r5, $r6, $r1);
+
+        if $z1 == 0 goto label07;
+
+        $r0.<android.view.GestureDetector: boolean mIsDoubleTapping> = 1;
+
+        $r3 = $r0.<android.view.GestureDetector: android.view.GestureDetector$OnDoubleTapListener mDoubleTapListener>;
+
+        $r5 = $r0.<android.view.GestureDetector: android.view.MotionEvent mCurrentDownEvent>;
+
+        $z0 = interfaceinvoke $r3.<android.view.GestureDetector$OnDoubleTapListener: boolean onDoubleTap(android.view.MotionEvent)>($r5);
+
+        $z0 = 0 | $z0;
+
+        $r3 = $r0.<android.view.GestureDetector: android.view.GestureDetector$OnDoubleTapListener mDoubleTapListener>;
+
+        $z1 = interfaceinvoke $r3.<android.view.GestureDetector$OnDoubleTapListener: boolean onDoubleTapEvent(android.view.MotionEvent)>($r1);
+
+        $z0 = $z0 | $z1;
+
+     label05:
+        $r0.<android.view.GestureDetector: float mLastMotionX> = $f3;
+
+        $r0.<android.view.GestureDetector: float mLastMotionY> = $f2;
+
+        $r5 = staticinvoke <android.view.MotionEvent: android.view.MotionEvent obtain(android.view.MotionEvent)>($r1);
+
+        $r0.<android.view.GestureDetector: android.view.MotionEvent mCurrentDownEvent> = $r5;
+
+        $r0.<android.view.GestureDetector: boolean mAlwaysInTapRegion> = 1;
+
+        $r0.<android.view.GestureDetector: boolean mAlwaysInBiggerTapRegion> = 1;
+
+        $r0.<android.view.GestureDetector: boolean mStillDown> = 1;
+
+        $r0.<android.view.GestureDetector: boolean mInLongPress> = 0;
+
+        $z1 = $r0.<android.view.GestureDetector: boolean mIsLongpressEnabled>;
+
+        if $z1 == 0 goto label06;
+
+        $r4 = $r0.<android.view.GestureDetector: android.os.Handler mHandler>;
+
+        virtualinvoke $r4.<android.os.Handler: void removeMessages(int)>(2);
+
+        $r4 = $r0.<android.view.GestureDetector: android.os.Handler mHandler>;
+
+        $r5 = $r0.<android.view.GestureDetector: android.view.MotionEvent mCurrentDownEvent>;
+
+        $l1 = virtualinvoke $r5.<android.view.MotionEvent: long getDownTime()>();
+
+        $i0 = <android.view.GestureDetector: int TAP_TIMEOUT>;
+
+        $l2 = (long) $i0;
+
+        $l1 = $l1 + $l2;
+
+        $i0 = <android.view.GestureDetector: int LONGPRESS_TIMEOUT>;
+
+        $l2 = (long) $i0;
+
+        $l1 = $l1 + $l2;
+
+        virtualinvoke $r4.<android.os.Handler: boolean sendEmptyMessageAtTime(int,long)>(2, $l1);
+
+     label06:
+        $r4 = $r0.<android.view.GestureDetector: android.os.Handler mHandler>;
+
+        $r5 = $r0.<android.view.GestureDetector: android.view.MotionEvent mCurrentDownEvent>;
+
+        $l1 = virtualinvoke $r5.<android.view.MotionEvent: long getDownTime()>();
+
+        $i0 = <android.view.GestureDetector: int TAP_TIMEOUT>;
+
+        $l2 = (long) $i0;
+
+        $l1 = $l1 + $l2;
+
+        virtualinvoke $r4.<android.os.Handler: boolean sendEmptyMessageAtTime(int,long)>(1, $l1);
+
+        $r7 = $r0.<android.view.GestureDetector: android.view.GestureDetector$OnGestureListener mListener>;
+
+        $z1 = interfaceinvoke $r7.<android.view.GestureDetector$OnGestureListener: boolean onDown(android.view.MotionEvent)>($r1);
+
+        $z0 = $z0 | $z1;
+
+        return $z0;
+
+     label07:
+        $r4 = $r0.<android.view.GestureDetector: android.os.Handler mHandler>;
+
+        $i0 = <android.view.GestureDetector: int DOUBLE_TAP_TIMEOUT>;
+
+        $l1 = (long) $i0;
+
+        virtualinvoke $r4.<android.os.Handler: boolean sendEmptyMessageDelayed(int,long)>(3, $l1);
+
+        goto label05;
+
+     label08:
+        $z1 = $r0.<android.view.GestureDetector: boolean mInLongPress>;
+
+        if $z1 != 0 goto label20;
+
+        $f0 = $r0.<android.view.GestureDetector: float mLastMotionX>;
+
+        $f0 = $f0 - $f3;
+
+        $f1 = $r0.<android.view.GestureDetector: float mLastMotionY>;
+
+        $f1 = $f1 - $f2;
+
+        $z1 = $r0.<android.view.GestureDetector: boolean mIsDoubleTapping>;
+
+        if $z1 == 0 goto label09;
+
+        $r3 = $r0.<android.view.GestureDetector: android.view.GestureDetector$OnDoubleTapListener mDoubleTapListener>;
+
+        $z0 = interfaceinvoke $r3.<android.view.GestureDetector$OnDoubleTapListener: boolean onDoubleTapEvent(android.view.MotionEvent)>($r1);
+
+        $z0 = 0 | $z0;
+
+        return $z0;
+
+     label09:
+        $z1 = $r0.<android.view.GestureDetector: boolean mAlwaysInTapRegion>;
+
+        if $z1 == 0 goto label11;
+
+        $r5 = $r0.<android.view.GestureDetector: android.view.MotionEvent mCurrentDownEvent>;
+
+        $f4 = virtualinvoke $r5.<android.view.MotionEvent: float getX()>();
+
+        $f4 = $f3 - $f4;
+
+        $i3 = (int) $f4;
+
+        $r5 = $r0.<android.view.GestureDetector: android.view.MotionEvent mCurrentDownEvent>;
+
+        $f4 = virtualinvoke $r5.<android.view.MotionEvent: float getY()>();
+
+        $f4 = $f2 - $f4;
+
+        $i0 = (int) $f4;
+
+        $i3 = $i3 * $i3;
+
+        $i0 = $i0 * $i0;
+
+        $i0 = $i3 + $i0;
+
+        $i3 = $r0.<android.view.GestureDetector: int mTouchSlopSquare>;
+
+        if $i0 <= $i3 goto label10;
+
+        $r7 = $r0.<android.view.GestureDetector: android.view.GestureDetector$OnGestureListener mListener>;
+
+        $r5 = $r0.<android.view.GestureDetector: android.view.MotionEvent mCurrentDownEvent>;
+
+        $z0 = interfaceinvoke $r7.<android.view.GestureDetector$OnGestureListener: boolean onScroll(android.view.MotionEvent,android.view.MotionEvent,float,float)>($r5, $r1, $f0, $f1);
+
+        $r0.<android.view.GestureDetector: float mLastMotionX> = $f3;
+
+        $r0.<android.view.GestureDetector: float mLastMotionY> = $f2;
+
+        $r0.<android.view.GestureDetector: boolean mAlwaysInTapRegion> = 0;
+
+        $r4 = $r0.<android.view.GestureDetector: android.os.Handler mHandler>;
+
+        virtualinvoke $r4.<android.os.Handler: void removeMessages(int)>(3);
+
+        $r4 = $r0.<android.view.GestureDetector: android.os.Handler mHandler>;
+
+        virtualinvoke $r4.<android.os.Handler: void removeMessages(int)>(1);
+
+        $r4 = $r0.<android.view.GestureDetector: android.os.Handler mHandler>;
+
+        virtualinvoke $r4.<android.os.Handler: void removeMessages(int)>(2);
+
+     label10:
+        $i3 = $r0.<android.view.GestureDetector: int mBiggerTouchSlopSquare>;
+
+        if $i0 <= $i3 goto label21;
+
+        $r0.<android.view.GestureDetector: boolean mAlwaysInBiggerTapRegion> = 0;
+
+        return $z0;
+
+     label11:
+        $f4 = staticinvoke <java.lang.Math: float abs(float)>($f0);
+
+        $b4 = $f4 cmpl 1.0F;
+
+        if $b4 >= 0 goto label12;
+
+        $f4 = staticinvoke <java.lang.Math: float abs(float)>($f1);
+
+        $b4 = $f4 cmpl 1.0F;
+
+        if $b4 < 0 goto label22;
+
+     label12:
+        $r7 = $r0.<android.view.GestureDetector: android.view.GestureDetector$OnGestureListener mListener>;
+
+        $r5 = $r0.<android.view.GestureDetector: android.view.MotionEvent mCurrentDownEvent>;
+
+        $z0 = interfaceinvoke $r7.<android.view.GestureDetector$OnGestureListener: boolean onScroll(android.view.MotionEvent,android.view.MotionEvent,float,float)>($r5, $r1, $f0, $f1);
+
+        $r0.<android.view.GestureDetector: float mLastMotionX> = $f3;
+
+        $r0.<android.view.GestureDetector: float mLastMotionY> = $f2;
+
+        return $z0;
+
+     label13:
+        $r0.<android.view.GestureDetector: boolean mStillDown> = 0;
+
+        $r5 = staticinvoke <android.view.MotionEvent: android.view.MotionEvent obtain(android.view.MotionEvent)>($r1);
+
+        $z1 = $r0.<android.view.GestureDetector: boolean mIsDoubleTapping>;
+
+        if $z1 == 0 goto label15;
+
+        $r3 = $r0.<android.view.GestureDetector: android.view.GestureDetector$OnDoubleTapListener mDoubleTapListener>;
+
+        $z0 = interfaceinvoke $r3.<android.view.GestureDetector$OnDoubleTapListener: boolean onDoubleTapEvent(android.view.MotionEvent)>($r1);
+
+        $z0 = 0 | $z0;
+
+     label14:
+        $r1 = staticinvoke <android.view.MotionEvent: android.view.MotionEvent obtain(android.view.MotionEvent)>($r1);
+
+        $r0.<android.view.GestureDetector: android.view.MotionEvent mPreviousUpEvent> = $r1;
+
+        $r2 = $r0.<android.view.GestureDetector: android.view.VelocityTracker mVelocityTracker>;
+
+        virtualinvoke $r2.<android.view.VelocityTracker: void recycle()>();
+
+        $r0.<android.view.GestureDetector: android.view.VelocityTracker mVelocityTracker> = null;
+
+        $r0.<android.view.GestureDetector: boolean mIsDoubleTapping> = 0;
+
+        $r4 = $r0.<android.view.GestureDetector: android.os.Handler mHandler>;
+
+        virtualinvoke $r4.<android.os.Handler: void removeMessages(int)>(1);
+
+        $r4 = $r0.<android.view.GestureDetector: android.os.Handler mHandler>;
+
+        virtualinvoke $r4.<android.os.Handler: void removeMessages(int)>(2);
+
+        return $z0;
+
+     label15:
+        $z1 = $r0.<android.view.GestureDetector: boolean mInLongPress>;
+
+        if $z1 == 0 goto label16;
+
+        $r4 = $r0.<android.view.GestureDetector: android.os.Handler mHandler>;
+
+        virtualinvoke $r4.<android.os.Handler: void removeMessages(int)>(3);
+
+        $r0.<android.view.GestureDetector: boolean mInLongPress> = 0;
+
+        goto label14;
+
+     label16:
+        $z1 = $r0.<android.view.GestureDetector: boolean mAlwaysInTapRegion>;
+
+        if $z1 == 0 goto label17;
+
+        $r7 = $r0.<android.view.GestureDetector: android.view.GestureDetector$OnGestureListener mListener>;
+
+        $z0 = interfaceinvoke $r7.<android.view.GestureDetector$OnGestureListener: boolean onSingleTapUp(android.view.MotionEvent)>($r1);
+
+        goto label14;
+
+     label17:
+        $r2 = $r0.<android.view.GestureDetector: android.view.VelocityTracker mVelocityTracker>;
+
+        virtualinvoke $r2.<android.view.VelocityTracker: void computeCurrentVelocity(int)>(1000);
+
+        $f2 = virtualinvoke $r2.<android.view.VelocityTracker: float getYVelocity()>();
+
+        $f3 = virtualinvoke $r2.<android.view.VelocityTracker: float getXVelocity()>();
+
+        $f0 = staticinvoke <java.lang.Math: float abs(float)>($f2);
+
+        $i0 = $r0.<android.view.GestureDetector: int mMinimumFlingVelocity>;
+
+        $f1 = (float) $i0;
+
+        $b4 = $f0 cmpl $f1;
+
+        if $b4 > 0 goto label18;
+
+        $f0 = staticinvoke <java.lang.Math: float abs(float)>($f3);
+
+        $i0 = $r0.<android.view.GestureDetector: int mMinimumFlingVelocity>;
+
+        $f1 = (float) $i0;
+
+        $b4 = $f0 cmpl $f1;
+
+        if $b4 <= 0 goto label14;
+
+     label18:
+        $r7 = $r0.<android.view.GestureDetector: android.view.GestureDetector$OnGestureListener mListener>;
+
+        $r6 = $r0.<android.view.GestureDetector: android.view.MotionEvent mCurrentDownEvent>;
+
+        $z0 = interfaceinvoke $r7.<android.view.GestureDetector$OnGestureListener: boolean onFling(android.view.MotionEvent,android.view.MotionEvent,float,float)>($r6, $r5, $f3, $f2);
+
+        goto label14;
+
+     label19:
+        $r4 = $r0.<android.view.GestureDetector: android.os.Handler mHandler>;
+
+        virtualinvoke $r4.<android.os.Handler: void removeMessages(int)>(1);
+
+        $r4 = $r0.<android.view.GestureDetector: android.os.Handler mHandler>;
+
+        virtualinvoke $r4.<android.os.Handler: void removeMessages(int)>(2);
+
+        $r4 = $r0.<android.view.GestureDetector: android.os.Handler mHandler>;
+
+        virtualinvoke $r4.<android.os.Handler: void removeMessages(int)>(3);
+
+        $r2 = $r0.<android.view.GestureDetector: android.view.VelocityTracker mVelocityTracker>;
+
+        virtualinvoke $r2.<android.view.VelocityTracker: void recycle()>();
+
+        $r0.<android.view.GestureDetector: android.view.VelocityTracker mVelocityTracker> = null;
+
+        $r0.<android.view.GestureDetector: boolean mIsDoubleTapping> = 0;
+
+        $r0.<android.view.GestureDetector: boolean mStillDown> = 0;
+
+        $z0 = $r0.<android.view.GestureDetector: boolean mInLongPress>;
+
+        if $z0 == 0 goto label23;
+
+        $r0.<android.view.GestureDetector: boolean mInLongPress> = 0;
+
+        return 0;
+
+     label20:
+        return 0;
+
+     label21:
+        return $z0;
+
+     label22:
+        return 0;
+
+     label23:
+        return 0;
+    }
+
+    public void setIsLongpressEnabled(boolean)
+    {
+        android.view.GestureDetector $r0;
+        boolean $z0;
+
+        $r0 := @this: android.view.GestureDetector;
+
+        $z0 := @parameter0: boolean;
+
+        $r0.<android.view.GestureDetector: boolean mIsLongpressEnabled> = $z0;
+
+        return;
+    }
+
+    public void setOnDoubleTapListener(android.view.GestureDetector$OnDoubleTapListener)
+    {
+        android.view.GestureDetector $r0;
+        android.view.GestureDetector$OnDoubleTapListener $r1;
+
+        $r0 := @this: android.view.GestureDetector;
+
+        $r1 := @parameter0: android.view.GestureDetector$OnDoubleTapListener;
+
+        $r0.<android.view.GestureDetector: android.view.GestureDetector$OnDoubleTapListener mDoubleTapListener> = $r1;
+
+        return;
+    }
+}

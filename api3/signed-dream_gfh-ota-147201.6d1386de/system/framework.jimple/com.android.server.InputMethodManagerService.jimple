@@ -1,0 +1,4799 @@
+public class com.android.server.InputMethodManagerService extends com.android.internal.view.IInputMethodManager$Stub implements android.content.ServiceConnection, android.os.Handler$Callback
+{
+    static final boolean DEBUG;
+    static final int LOG_IMF_FORCE_RECONNECT_IME;
+    static final int MSG_ATTACH_TOKEN;
+    static final int MSG_BIND_INPUT;
+    static final int MSG_BIND_METHOD;
+    static final int MSG_CREATE_SESSION;
+    static final int MSG_HIDE_SOFT_INPUT;
+    static final int MSG_RESTART_INPUT;
+    static final int MSG_SHOW_IM_PICKER;
+    static final int MSG_SHOW_SOFT_INPUT;
+    static final int MSG_START_INPUT;
+    static final int MSG_UNBIND_INPUT;
+    static final int MSG_UNBIND_METHOD;
+    static final java.lang.String TAG;
+    static final long TIME_TO_RECONNECT;
+    boolean mBoundToMethod;
+    final com.android.internal.os.HandlerCaller mCaller;
+    final java.util.HashMap mClients;
+    final android.content.Context mContext;
+    android.view.inputmethod.EditorInfo mCurAttribute;
+    com.android.server.InputMethodManagerService$ClientState mCurClient;
+    android.os.IBinder mCurFocusedWindow;
+    java.lang.String mCurId;
+    com.android.internal.view.IInputContext mCurInputContext;
+    android.content.Intent mCurIntent;
+    com.android.internal.view.IInputMethod mCurMethod;
+    java.lang.String mCurMethodId;
+    int mCurSeq;
+    android.os.IBinder mCurToken;
+    android.app.AlertDialog$Builder mDialogBuilder;
+    com.android.server.InputMethodManagerService$SessionState mEnabledSession;
+    final android.os.Handler mHandler;
+    boolean mHaveConnection;
+    final android.view.IWindowManager mIWindowManager;
+    android.view.inputmethod.InputMethodInfo[] mIms;
+    final com.android.server.status.IconData mInputMethodData;
+    final android.os.IBinder mInputMethodIcon;
+    boolean mInputShown;
+    java.lang.CharSequence[] mItems;
+    long mLastBindTime;
+    final java.util.ArrayList mMethodList;
+    final java.util.HashMap mMethodMap;
+    final com.android.internal.view.InputBindResult mNoBinding;
+    boolean mScreenOn;
+    final com.android.server.InputMethodManagerService$SettingsObserver mSettingsObserver;
+    boolean mShowExplicitlyRequested;
+    boolean mShowForced;
+    boolean mShowRequested;
+    final com.android.server.status.StatusBarService mStatusBar;
+    final android.text.TextUtils$SimpleStringSplitter mStringColonSplitter;
+    android.app.AlertDialog mSwitchingDialog;
+
+    public void <init>(android.content.Context, com.android.server.status.StatusBarService)
+    {
+        com.android.server.InputMethodManagerService $r0;
+        android.content.Context $r1;
+        com.android.server.status.StatusBarService $r2;
+        android.content.IntentFilter $r3;
+        java.lang.StringBuilder $r4, $r22;
+        com.android.internal.view.InputBindResult $r5;
+        java.util.ArrayList $r6;
+        java.util.HashMap $r7;
+        android.text.TextUtils$SimpleStringSplitter $r8;
+        android.os.Handler $r9;
+        android.os.IBinder $r10;
+        android.view.IWindowManager $r11;
+        com.android.internal.os.HandlerCaller $r12;
+        com.android.server.InputMethodManagerService$1 $r13;
+        com.android.server.InputMethodManagerService$PackageReceiver $r14;
+        com.android.server.InputMethodManagerService$ScreenOnOffReceiver $r15;
+        android.content.ContentResolver $r16;
+        java.lang.String $r17, $r18;
+        android.view.inputmethod.InputMethodInfo $r19, $r21;
+        int $i0, $i1, $i2;
+        java.lang.Object $r20;
+        android.content.res.Resources $r23;
+        boolean $z0;
+        com.android.server.status.IconData $r24;
+        com.android.server.InputMethodManagerService$SettingsObserver $r25;
+        android.content.res.Resources$NotFoundException $r26;
+        android.content.pm.PackageManager$NameNotFoundException $r27;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: com.android.server.status.StatusBarService;
+
+        specialinvoke $r0.<com.android.internal.view.IInputMethodManager$Stub: void <init>()>();
+
+        $r5 = new com.android.internal.view.InputBindResult;
+
+        specialinvoke $r5.<com.android.internal.view.InputBindResult: void <init>(com.android.internal.view.IInputMethodSession,java.lang.String,int)>(null, null, -1);
+
+        $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.InputBindResult mNoBinding> = $r5;
+
+        $r6 = new java.util.ArrayList;
+
+        specialinvoke $r6.<java.util.ArrayList: void <init>()>();
+
+        $r0.<com.android.server.InputMethodManagerService: java.util.ArrayList mMethodList> = $r6;
+
+        $r7 = new java.util.HashMap;
+
+        specialinvoke $r7.<java.util.HashMap: void <init>()>();
+
+        $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mMethodMap> = $r7;
+
+        $r8 = new android.text.TextUtils$SimpleStringSplitter;
+
+        specialinvoke $r8.<android.text.TextUtils$SimpleStringSplitter: void <init>(char)>(58);
+
+        $r0.<com.android.server.InputMethodManagerService: android.text.TextUtils$SimpleStringSplitter mStringColonSplitter> = $r8;
+
+        $r7 = new java.util.HashMap;
+
+        specialinvoke $r7.<java.util.HashMap: void <init>()>();
+
+        $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mClients> = $r7;
+
+        $r0.<com.android.server.InputMethodManagerService: boolean mScreenOn> = 1;
+
+        $r0.<com.android.server.InputMethodManagerService: android.content.Context mContext> = $r1;
+
+        $r9 = new android.os.Handler;
+
+        specialinvoke $r9.<android.os.Handler: void <init>(android.os.Handler$Callback)>($r0);
+
+        $r0.<com.android.server.InputMethodManagerService: android.os.Handler mHandler> = $r9;
+
+        $r10 = staticinvoke <android.os.ServiceManager: android.os.IBinder getService(java.lang.String)>("window");
+
+        $r11 = staticinvoke <android.view.IWindowManager$Stub: android.view.IWindowManager asInterface(android.os.IBinder)>($r10);
+
+        $r0.<com.android.server.InputMethodManagerService: android.view.IWindowManager mIWindowManager> = $r11;
+
+        $r12 = new com.android.internal.os.HandlerCaller;
+
+        $r13 = new com.android.server.InputMethodManagerService$1;
+
+        specialinvoke $r13.<com.android.server.InputMethodManagerService$1: void <init>(com.android.server.InputMethodManagerService)>($r0);
+
+        specialinvoke $r12.<com.android.internal.os.HandlerCaller: void <init>(android.content.Context,com.android.internal.os.HandlerCaller$Callback)>($r1, $r13);
+
+        $r0.<com.android.server.InputMethodManagerService: com.android.internal.os.HandlerCaller mCaller> = $r12;
+
+        $r3 = new android.content.IntentFilter;
+
+        specialinvoke $r3.<android.content.IntentFilter: void <init>()>();
+
+        virtualinvoke $r3.<android.content.IntentFilter: void addAction(java.lang.String)>("android.intent.action.PACKAGE_ADDED");
+
+        virtualinvoke $r3.<android.content.IntentFilter: void addAction(java.lang.String)>("android.intent.action.PACKAGE_CHANGED");
+
+        virtualinvoke $r3.<android.content.IntentFilter: void addAction(java.lang.String)>("android.intent.action.PACKAGE_REMOVED");
+
+        virtualinvoke $r3.<android.content.IntentFilter: void addAction(java.lang.String)>("android.intent.action.PACKAGE_RESTARTED");
+
+        virtualinvoke $r3.<android.content.IntentFilter: void addDataScheme(java.lang.String)>("package");
+
+        $r1 = $r0.<com.android.server.InputMethodManagerService: android.content.Context mContext>;
+
+        $r14 = new com.android.server.InputMethodManagerService$PackageReceiver;
+
+        specialinvoke $r14.<com.android.server.InputMethodManagerService$PackageReceiver: void <init>(com.android.server.InputMethodManagerService)>($r0);
+
+        virtualinvoke $r1.<android.content.Context: android.content.Intent registerReceiver(android.content.BroadcastReceiver,android.content.IntentFilter)>($r14, $r3);
+
+        $r3 = new android.content.IntentFilter;
+
+        specialinvoke $r3.<android.content.IntentFilter: void <init>()>();
+
+        virtualinvoke $r3.<android.content.IntentFilter: void addAction(java.lang.String)>("android.intent.action.SCREEN_ON");
+
+        virtualinvoke $r3.<android.content.IntentFilter: void addAction(java.lang.String)>("android.intent.action.SCREEN_OFF");
+
+        virtualinvoke $r3.<android.content.IntentFilter: void addAction(java.lang.String)>("android.intent.action.CLOSE_SYSTEM_DIALOGS");
+
+        $r1 = $r0.<com.android.server.InputMethodManagerService: android.content.Context mContext>;
+
+        $r15 = new com.android.server.InputMethodManagerService$ScreenOnOffReceiver;
+
+        specialinvoke $r15.<com.android.server.InputMethodManagerService$ScreenOnOffReceiver: void <init>(com.android.server.InputMethodManagerService)>($r0);
+
+        virtualinvoke $r1.<android.content.Context: android.content.Intent registerReceiver(android.content.BroadcastReceiver,android.content.IntentFilter)>($r15, $r3);
+
+        $r6 = $r0.<com.android.server.InputMethodManagerService: java.util.ArrayList mMethodList>;
+
+        $r7 = $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mMethodMap>;
+
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: void buildInputMethodListLocked(java.util.ArrayList,java.util.HashMap)>($r6, $r7);
+
+        $r1 = $r0.<com.android.server.InputMethodManagerService: android.content.Context mContext>;
+
+        $r16 = virtualinvoke $r1.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r17 = staticinvoke <android.provider.Settings$Secure: java.lang.String getString(android.content.ContentResolver,java.lang.String)>($r16, "enabled_input_methods");
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Enabled input methods: ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r18 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("InputManagerService", $r18);
+
+        if $r17 != null goto label09;
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("InputManagerService", "Enabled input methods has not been set, enabling all");
+
+        $r19 = null;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>(int)>(256);
+
+        $r6 = $r0.<com.android.server.InputMethodManagerService: java.util.ArrayList mMethodList>;
+
+        $i0 = virtualinvoke $r6.<java.util.ArrayList: int size()>();
+
+        $i1 = 0;
+
+     label01:
+        if $i1 >= $i0 goto label07;
+
+        $r6 = $r0.<com.android.server.InputMethodManagerService: java.util.ArrayList mMethodList>;
+
+        $r20 = virtualinvoke $r6.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r21 = (android.view.inputmethod.InputMethodInfo) $r20;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Adding: ");
+
+        $r17 = virtualinvoke $r21.<android.view.inputmethod.InputMethodInfo: java.lang.String getId()>();
+
+        $r22 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r17 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("InputManagerService", $r17);
+
+        if $i1 <= 0 goto label02;
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(58);
+
+     label02:
+        $r17 = virtualinvoke $r21.<android.view.inputmethod.InputMethodInfo: java.lang.String getId()>();
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        if $r19 != null goto label06;
+
+        $i2 = virtualinvoke $r21.<android.view.inputmethod.InputMethodInfo: int getIsDefaultResourceId()>();
+
+        if $i2 == 0 goto label06;
+
+        $r1 = $r0.<com.android.server.InputMethodManagerService: android.content.Context mContext>;
+
+     label03:
+        $r17 = virtualinvoke $r21.<android.view.inputmethod.InputMethodInfo: java.lang.String getPackageName()>();
+
+        $r1 = virtualinvoke $r1.<android.content.Context: android.content.Context createPackageContext(java.lang.String,int)>($r17, 0);
+
+        $r23 = virtualinvoke $r1.<android.content.Context: android.content.res.Resources getResources()>();
+
+        $i2 = virtualinvoke $r21.<android.view.inputmethod.InputMethodInfo: int getIsDefaultResourceId()>();
+
+        $z0 = virtualinvoke $r23.<android.content.res.Resources: boolean getBoolean(int)>($i2);
+
+     label04:
+        if $z0 == 0 goto label06;
+
+        $r19 = $r21;
+
+     label05:
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Selected default: ");
+
+        $r17 = virtualinvoke $r21.<android.view.inputmethod.InputMethodInfo: java.lang.String getId()>();
+
+        $r22 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r17 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("InputManagerService", $r17);
+
+     label06:
+        $i1 = $i1 + 1;
+
+        goto label01;
+
+     label07:
+        if $r19 != null goto label08;
+
+        if $i0 <= 0 goto label08;
+
+        $r6 = $r0.<com.android.server.InputMethodManagerService: java.util.ArrayList mMethodList>;
+
+        $r20 = virtualinvoke $r6.<java.util.ArrayList: java.lang.Object get(int)>(0);
+
+        $r19 = (android.view.inputmethod.InputMethodInfo) $r20;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No default found, using ");
+
+        $r17 = virtualinvoke $r19.<android.view.inputmethod.InputMethodInfo: java.lang.String getId()>();
+
+        $r22 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r17 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("InputManagerService", $r17);
+
+     label08:
+        $r1 = $r0.<com.android.server.InputMethodManagerService: android.content.Context mContext>;
+
+        $r16 = virtualinvoke $r1.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r17 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.provider.Settings$Secure: boolean putString(android.content.ContentResolver,java.lang.String,java.lang.String)>($r16, "enabled_input_methods", $r17);
+
+        if $r19 == null goto label09;
+
+        $r1 = $r0.<com.android.server.InputMethodManagerService: android.content.Context mContext>;
+
+        $r16 = virtualinvoke $r1.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r17 = virtualinvoke $r19.<android.view.inputmethod.InputMethodInfo: java.lang.String getId()>();
+
+        staticinvoke <android.provider.Settings$Secure: boolean putString(android.content.ContentResolver,java.lang.String,java.lang.String)>($r16, "default_input_method", $r17);
+
+     label09:
+        $r0.<com.android.server.InputMethodManagerService: com.android.server.status.StatusBarService mStatusBar> = $r2;
+
+        $r24 = staticinvoke <com.android.server.status.IconData: com.android.server.status.IconData makeIcon(java.lang.String,java.lang.String,int,int,int)>("ime", null, 0, 0, 0);
+
+        $r0.<com.android.server.InputMethodManagerService: com.android.server.status.IconData mInputMethodData> = $r24;
+
+        $r24 = $r0.<com.android.server.InputMethodManagerService: com.android.server.status.IconData mInputMethodData>;
+
+        $r10 = virtualinvoke $r2.<com.android.server.status.StatusBarService: android.os.IBinder addIcon(com.android.server.status.IconData,com.android.server.status.NotificationData)>($r24, null);
+
+        $r0.<com.android.server.InputMethodManagerService: android.os.IBinder mInputMethodIcon> = $r10;
+
+        $r10 = $r0.<com.android.server.InputMethodManagerService: android.os.IBinder mInputMethodIcon>;
+
+        virtualinvoke $r2.<com.android.server.status.StatusBarService: void setIconVisibility(android.os.IBinder,boolean)>($r10, 0);
+
+        $r25 = new com.android.server.InputMethodManagerService$SettingsObserver;
+
+        $r9 = $r0.<com.android.server.InputMethodManagerService: android.os.Handler mHandler>;
+
+        specialinvoke $r25.<com.android.server.InputMethodManagerService$SettingsObserver: void <init>(com.android.server.InputMethodManagerService,android.os.Handler)>($r0, $r9);
+
+        $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$SettingsObserver mSettingsObserver> = $r25;
+
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: void updateFromSettingsLocked()>();
+
+        return;
+
+     label10:
+        $r26 := @caughtexception;
+
+        goto label06;
+
+     label11:
+        $r27 := @caughtexception;
+
+        goto label06;
+
+        catch android.content.pm.PackageManager$NameNotFoundException from label03 to label04 with label11;
+        catch android.content.pm.PackageManager$NameNotFoundException from label05 to label06 with label11;
+        catch android.content.res.Resources$NotFoundException from label03 to label04 with label10;
+        catch android.content.res.Resources$NotFoundException from label05 to label06 with label10;
+    }
+
+    private int getAppShowFlags()
+    {
+        com.android.server.InputMethodManagerService $r0;
+        byte $b0;
+        boolean $z0;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $z0 = $r0.<com.android.server.InputMethodManagerService: boolean mShowForced>;
+
+        if $z0 == 0 goto label1;
+
+        $b0 = 0 | 2;
+
+        return $b0;
+
+     label1:
+        $z0 = $r0.<com.android.server.InputMethodManagerService: boolean mShowExplicitlyRequested>;
+
+        if $z0 != 0 goto label2;
+
+        $b0 = 0 | 1;
+
+        return $b0;
+
+     label2:
+        return 0;
+    }
+
+    private int getImeShowFlags()
+    {
+        com.android.server.InputMethodManagerService $r0;
+        byte $b0;
+        boolean $z0;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $z0 = $r0.<com.android.server.InputMethodManagerService: boolean mShowForced>;
+
+        if $z0 == 0 goto label1;
+
+        $b0 = 0 | 3;
+
+        return $b0;
+
+     label1:
+        $z0 = $r0.<com.android.server.InputMethodManagerService: boolean mShowExplicitlyRequested>;
+
+        if $z0 == 0 goto label2;
+
+        $b0 = 0 | 1;
+
+        return $b0;
+
+     label2:
+        return 0;
+    }
+
+    public void addClient(com.android.internal.view.IInputMethodClient, com.android.internal.view.IInputContext, int, int)
+    {
+        com.android.server.InputMethodManagerService $r0;
+        com.android.internal.view.IInputMethodClient $r1;
+        com.android.internal.view.IInputContext $r2;
+        int $i0, $i1;
+        java.util.HashMap $r3, $r4;
+        android.os.IBinder $r5;
+        com.android.server.InputMethodManagerService$ClientState $r6;
+        java.lang.Throwable $r7;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r1 := @parameter0: com.android.internal.view.IInputMethodClient;
+
+        $r2 := @parameter1: com.android.internal.view.IInputContext;
+
+        $i0 := @parameter2: int;
+
+        $i1 := @parameter3: int;
+
+        $r3 = $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mMethodMap>;
+
+        entermonitor $r3;
+
+     label1:
+        $r4 = $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mClients>;
+
+        $r5 = interfaceinvoke $r1.<com.android.internal.view.IInputMethodClient: android.os.IBinder asBinder()>();
+
+        $r6 = new com.android.server.InputMethodManagerService$ClientState;
+
+        specialinvoke $r6.<com.android.server.InputMethodManagerService$ClientState: void <init>(com.android.server.InputMethodManagerService,com.android.internal.view.IInputMethodClient,com.android.internal.view.IInputContext,int,int)>($r0, $r1, $r2, $i0, $i1);
+
+        virtualinvoke $r4.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r5, $r6);
+
+        exitmonitor $r3;
+
+     label2:
+        return;
+
+     label3:
+        $r7 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label4:
+        throw $r7;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    com.android.internal.view.InputBindResult attachNewInputLocked(boolean, boolean)
+    {
+        com.android.server.InputMethodManagerService $r0;
+        boolean $z0, $z1, $z2;
+        com.android.server.InputMethodManagerService$SessionState $r1;
+        com.android.internal.view.IInputMethod $r2, $r4;
+        com.android.internal.os.HandlerCaller $r3;
+        com.android.server.InputMethodManagerService$ClientState $r5;
+        android.view.inputmethod.InputBinding $r6;
+        android.os.Message $r7;
+        com.android.internal.view.IInputContext $r8;
+        android.view.inputmethod.EditorInfo $r9;
+        int $i0;
+        com.android.internal.view.IInputMethodSession $r11;
+        java.lang.String $r12;
+        com.android.internal.view.InputBindResult r13;
+        android.os.IInterface r14;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $z0 := @parameter0: boolean;
+
+        $z1 := @parameter1: boolean;
+
+        $z2 = $r0.<com.android.server.InputMethodManagerService: boolean mBoundToMethod>;
+
+        if $z2 != 0 goto label1;
+
+        $r2 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputMethod mCurMethod>;
+
+        $r3 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.os.HandlerCaller mCaller>;
+
+        $r4 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputMethod mCurMethod>;
+
+        $r5 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        $r6 = $r5.<com.android.server.InputMethodManagerService$ClientState: android.view.inputmethod.InputBinding binding>;
+
+        $r7 = virtualinvoke $r3.<com.android.internal.os.HandlerCaller: android.os.Message obtainMessageOO(int,java.lang.Object,java.lang.Object)>(1010, $r4, $r6);
+
+        r14 = (android.os.IInterface) $r2;
+
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: void executeOrSendMessage(android.os.IInterface,android.os.Message)>(r14, $r7);
+
+        $r0.<com.android.server.InputMethodManagerService: boolean mBoundToMethod> = 1;
+
+     label1:
+        $r5 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        $r1 = $r5.<com.android.server.InputMethodManagerService$ClientState: com.android.server.InputMethodManagerService$SessionState curSession>;
+
+        if $z0 == 0 goto label4;
+
+        $r2 = $r1.<com.android.server.InputMethodManagerService$SessionState: com.android.internal.view.IInputMethod method>;
+
+        $r3 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.os.HandlerCaller mCaller>;
+
+        $r8 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputContext mCurInputContext>;
+
+        $r9 = $r0.<com.android.server.InputMethodManagerService: android.view.inputmethod.EditorInfo mCurAttribute>;
+
+        $r7 = virtualinvoke $r3.<com.android.internal.os.HandlerCaller: android.os.Message obtainMessageOOO(int,java.lang.Object,java.lang.Object,java.lang.Object)>(2000, $r1, $r8, $r9);
+
+        r14 = (android.os.IInterface) $r2;
+
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: void executeOrSendMessage(android.os.IInterface,android.os.Message)>(r14, $r7);
+
+     label2:
+        $z0 = $r0.<com.android.server.InputMethodManagerService: boolean mShowRequested>;
+
+        if $z0 == 0 goto label3;
+
+        $i0 = specialinvoke $r0.<com.android.server.InputMethodManagerService: int getAppShowFlags()>();
+
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: boolean showCurrentInputLocked(int,android.os.ResultReceiver)>($i0, null);
+
+     label3:
+        if $z1 == 0 goto label5;
+
+        r13 = new com.android.internal.view.InputBindResult;
+
+        $r11 = $r1.<com.android.server.InputMethodManagerService$SessionState: com.android.internal.view.IInputMethodSession session>;
+
+        $r12 = $r0.<com.android.server.InputMethodManagerService: java.lang.String mCurId>;
+
+        $i0 = $r0.<com.android.server.InputMethodManagerService: int mCurSeq>;
+
+        specialinvoke r13.<com.android.internal.view.InputBindResult: void <init>(com.android.internal.view.IInputMethodSession,java.lang.String,int)>($r11, $r12, $i0);
+
+        return r13;
+
+     label4:
+        $r2 = $r1.<com.android.server.InputMethodManagerService$SessionState: com.android.internal.view.IInputMethod method>;
+
+        $r3 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.os.HandlerCaller mCaller>;
+
+        $r8 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputContext mCurInputContext>;
+
+        $r9 = $r0.<com.android.server.InputMethodManagerService: android.view.inputmethod.EditorInfo mCurAttribute>;
+
+        $r7 = virtualinvoke $r3.<com.android.internal.os.HandlerCaller: android.os.Message obtainMessageOOO(int,java.lang.Object,java.lang.Object,java.lang.Object)>(2010, $r1, $r8, $r9);
+
+        r14 = (android.os.IInterface) $r2;
+
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: void executeOrSendMessage(android.os.IInterface,android.os.Message)>(r14, $r7);
+
+        goto label2;
+
+     label5:
+        return null;
+    }
+
+    void buildInputMethodListLocked(java.util.ArrayList, java.util.HashMap)
+    {
+        com.android.server.InputMethodManagerService $r0;
+        java.util.ArrayList $r1;
+        java.util.HashMap $r2;
+        android.content.ComponentName $r3;
+        android.view.inputmethod.InputMethodInfo $r4;
+        android.content.pm.ServiceInfo $r5;
+        java.lang.String $r6, $r13, $r14;
+        android.content.Context $r7;
+        android.content.pm.PackageManager $r8;
+        android.content.Intent $r9;
+        java.util.List $r10;
+        int $i0, $i1;
+        java.lang.Object $r11;
+        android.content.pm.ResolveInfo $r12;
+        boolean $z0;
+        java.lang.StringBuilder $r15;
+        org.xmlpull.v1.XmlPullParserException $r16;
+        java.io.IOException $r17;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r1 := @parameter0: java.util.ArrayList;
+
+        $r2 := @parameter1: java.util.HashMap;
+
+        $r6 = "android.permission.BIND_INPUT_METHOD";
+
+        virtualinvoke $r1.<java.util.ArrayList: void clear()>();
+
+        virtualinvoke $r2.<java.util.HashMap: void clear()>();
+
+        $r7 = $r0.<com.android.server.InputMethodManagerService: android.content.Context mContext>;
+
+        $r8 = virtualinvoke $r7.<android.content.Context: android.content.pm.PackageManager getPackageManager()>();
+
+        $r9 = new android.content.Intent;
+
+        specialinvoke $r9.<android.content.Intent: void <init>(java.lang.String)>("android.view.InputMethod");
+
+        $r10 = virtualinvoke $r8.<android.content.pm.PackageManager: java.util.List queryIntentServices(android.content.Intent,int)>($r9, 128);
+
+        $i0 = 0;
+
+     label1:
+        $i1 = interfaceinvoke $r10.<java.util.List: int size()>();
+
+        if $i0 >= $i1 goto label8;
+
+        $r11 = interfaceinvoke $r10.<java.util.List: java.lang.Object get(int)>($i0);
+
+        $r12 = (android.content.pm.ResolveInfo) $r11;
+
+        $r5 = $r12.<android.content.pm.ResolveInfo: android.content.pm.ServiceInfo serviceInfo>;
+
+        $r3 = new android.content.ComponentName;
+
+        $r13 = $r5.<android.content.pm.PackageItemInfo: java.lang.String packageName>;
+
+        $r14 = $r5.<android.content.pm.PackageItemInfo: java.lang.String name>;
+
+        specialinvoke $r3.<android.content.ComponentName: void <init>(java.lang.String,java.lang.String)>($r13, $r14);
+
+        $r13 = $r5.<android.content.pm.ServiceInfo: java.lang.String permission>;
+
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>($r13);
+
+        if $z0 != 0 goto label3;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Skipping input method ");
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r3);
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": it does not require the permission ");
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("android.permission.BIND_INPUT_METHOD");
+
+        $r13 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("InputManagerService", $r13);
+
+     label2:
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label3:
+        $r4 = new android.view.inputmethod.InputMethodInfo;
+
+        $r7 = $r0.<com.android.server.InputMethodManagerService: android.content.Context mContext>;
+
+     label4:
+        specialinvoke $r4.<android.view.inputmethod.InputMethodInfo: void <init>(android.content.Context,android.content.pm.ResolveInfo)>($r7, $r12);
+
+        virtualinvoke $r1.<java.util.ArrayList: boolean add(java.lang.Object)>($r4);
+
+        $r13 = virtualinvoke $r4.<android.view.inputmethod.InputMethodInfo: java.lang.String getId()>();
+
+        virtualinvoke $r2.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r13, $r4);
+
+     label5:
+        goto label2;
+
+     label6:
+        $r16 := @caughtexception;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to load input method ");
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r3);
+
+        $r13 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String,java.lang.Throwable)>("InputManagerService", $r13, $r16);
+
+        goto label2;
+
+     label7:
+        $r17 := @caughtexception;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to load input method ");
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r3);
+
+        $r13 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String,java.lang.Throwable)>("InputManagerService", $r13, $r17);
+
+        goto label2;
+
+     label8:
+        return;
+
+        catch org.xmlpull.v1.XmlPullParserException from label4 to label5 with label6;
+        catch java.io.IOException from label4 to label5 with label7;
+    }
+
+    void clearCurMethodLocked()
+    {
+        com.android.server.InputMethodManagerService $r0;
+        com.android.internal.view.IInputMethod $r1;
+        java.util.HashMap $r2;
+        java.util.Collection $r3;
+        java.util.Iterator $r4;
+        boolean $z0;
+        java.lang.Object $r5;
+        com.android.server.InputMethodManagerService$ClientState $r6;
+        com.android.server.status.StatusBarService $r7;
+        android.os.IBinder $r8;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r1 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputMethod mCurMethod>;
+
+        if $r1 == null goto label3;
+
+        $r2 = $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mClients>;
+
+        $r3 = virtualinvoke $r2.<java.util.HashMap: java.util.Collection values()>();
+
+        $r4 = interfaceinvoke $r3.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        $r6 = (com.android.server.InputMethodManagerService$ClientState) $r5;
+
+        $r6.<com.android.server.InputMethodManagerService$ClientState: boolean sessionRequested> = 0;
+
+        $r6.<com.android.server.InputMethodManagerService$ClientState: com.android.server.InputMethodManagerService$SessionState curSession> = null;
+
+        goto label1;
+
+     label2:
+        $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputMethod mCurMethod> = null;
+
+     label3:
+        $r7 = $r0.<com.android.server.InputMethodManagerService: com.android.server.status.StatusBarService mStatusBar>;
+
+        $r8 = $r0.<com.android.server.InputMethodManagerService: android.os.IBinder mInputMethodIcon>;
+
+        virtualinvoke $r7.<com.android.server.status.StatusBarService: void setIconVisibility(android.os.IBinder,boolean)>($r8, 0);
+
+        return;
+    }
+
+    protected void dump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[])
+    {
+        com.android.server.InputMethodManagerService $r0;
+        java.io.FileDescriptor $r1;
+        java.io.PrintWriter $r2;
+        java.lang.String[] $r3;
+        com.android.server.InputMethodManagerService$ClientState $r4;
+        com.android.internal.view.IInputMethod $r5, $r24;
+        android.util.PrintWriterPrinter $r6;
+        android.content.Context $r7;
+        int $i0, $i1;
+        java.lang.StringBuilder $r8;
+        java.lang.String $r9;
+        java.util.HashMap $r10, $r14;
+        java.util.ArrayList $r11;
+        java.lang.Object $r12;
+        android.view.inputmethod.InputMethodInfo $r13;
+        java.util.Collection $r15;
+        java.util.Iterator $r16;
+        boolean $z0;
+        com.android.internal.view.IInputMethodClient $r17;
+        com.android.internal.view.IInputContext $r18;
+        com.android.server.InputMethodManagerService$SessionState $r19;
+        java.lang.Throwable $r20;
+        android.os.IBinder $r21;
+        com.android.server.status.IconData $r22;
+        android.content.Intent $r23;
+        android.os.RemoteException $r25, $r26;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r1 := @parameter0: java.io.FileDescriptor;
+
+        $r2 := @parameter1: java.io.PrintWriter;
+
+        $r3 := @parameter2: java.lang.String[];
+
+        $r7 = $r0.<com.android.server.InputMethodManagerService: android.content.Context mContext>;
+
+        $i0 = virtualinvoke $r7.<android.content.Context: int checkCallingOrSelfPermission(java.lang.String)>("android.permission.DUMP");
+
+        if $i0 == 0 goto label01;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Permission Denial: can\'t dump InputMethodManager from from pid=");
+
+        $i0 = staticinvoke <android.os.Binder: int getCallingPid()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", uid=");
+
+        $i0 = staticinvoke <android.os.Binder: int getCallingUid()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r9);
+
+        return;
+
+     label01:
+        $r6 = new android.util.PrintWriterPrinter;
+
+        specialinvoke $r6.<android.util.PrintWriterPrinter: void <init>(java.io.PrintWriter)>($r2);
+
+        $r10 = $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mMethodMap>;
+
+        entermonitor $r10;
+
+     label02:
+        interfaceinvoke $r6.<android.util.Printer: void println(java.lang.String)>("Current Input Method Manager state:");
+
+        $r11 = $r0.<com.android.server.InputMethodManagerService: java.util.ArrayList mMethodList>;
+
+        $i0 = virtualinvoke $r11.<java.util.ArrayList: int size()>();
+
+        interfaceinvoke $r6.<android.util.Printer: void println(java.lang.String)>("  Input Methods:");
+
+        $i1 = 0;
+
+     label03:
+        if $i1 >= $i0 goto label04;
+
+        $r11 = $r0.<com.android.server.InputMethodManagerService: java.util.ArrayList mMethodList>;
+
+        $r12 = virtualinvoke $r11.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r13 = (android.view.inputmethod.InputMethodInfo) $r12;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  InputMethod #");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r6.<android.util.Printer: void println(java.lang.String)>($r9);
+
+        virtualinvoke $r13.<android.view.inputmethod.InputMethodInfo: void dump(android.util.Printer,java.lang.String)>($r6, "    ");
+
+        $i1 = $i1 + 1;
+
+        goto label03;
+
+     label04:
+        interfaceinvoke $r6.<android.util.Printer: void println(java.lang.String)>("  Clients:");
+
+        $r14 = $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mClients>;
+
+        $r15 = virtualinvoke $r14.<java.util.HashMap: java.util.Collection values()>();
+
+        $r16 = interfaceinvoke $r15.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label05:
+        $z0 = interfaceinvoke $r16.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label08;
+
+        $r12 = interfaceinvoke $r16.<java.util.Iterator: java.lang.Object next()>();
+
+        $r4 = (com.android.server.InputMethodManagerService$ClientState) $r12;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  Client ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r4);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r6.<android.util.Printer: void println(java.lang.String)>($r9);
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("    client=");
+
+        $r17 = $r4.<com.android.server.InputMethodManagerService$ClientState: com.android.internal.view.IInputMethodClient client>;
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r17);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r6.<android.util.Printer: void println(java.lang.String)>($r9);
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("    inputContext=");
+
+        $r18 = $r4.<com.android.server.InputMethodManagerService$ClientState: com.android.internal.view.IInputContext inputContext>;
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r18);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r6.<android.util.Printer: void println(java.lang.String)>($r9);
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("    sessionRequested=");
+
+        $z0 = $r4.<com.android.server.InputMethodManagerService$ClientState: boolean sessionRequested>;
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r6.<android.util.Printer: void println(java.lang.String)>($r9);
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("    curSession=");
+
+        $r19 = $r4.<com.android.server.InputMethodManagerService$ClientState: com.android.server.InputMethodManagerService$SessionState curSession>;
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r19);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r6.<android.util.Printer: void println(java.lang.String)>($r9);
+
+        goto label05;
+
+     label06:
+        $r20 := @caughtexception;
+
+        exitmonitor $r10;
+
+     label07:
+        throw $r20;
+
+     label08:
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mInputMethodIcon=");
+
+        $r21 = $r0.<com.android.server.InputMethodManagerService: android.os.IBinder mInputMethodIcon>;
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r21);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r6.<android.util.Printer: void println(java.lang.String)>($r9);
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mInputMethodData=");
+
+        $r22 = $r0.<com.android.server.InputMethodManagerService: com.android.server.status.IconData mInputMethodData>;
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r22);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r6.<android.util.Printer: void println(java.lang.String)>($r9);
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mCurMethodId=");
+
+        $r9 = $r0.<com.android.server.InputMethodManagerService: java.lang.String mCurMethodId>;
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r6.<android.util.Printer: void println(java.lang.String)>($r9);
+
+        $r4 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mCurClient=");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r4);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" mCurSeq=");
+
+        $i0 = $r0.<com.android.server.InputMethodManagerService: int mCurSeq>;
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r6.<android.util.Printer: void println(java.lang.String)>($r9);
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mCurFocusedWindow=");
+
+        $r21 = $r0.<com.android.server.InputMethodManagerService: android.os.IBinder mCurFocusedWindow>;
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r21);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r6.<android.util.Printer: void println(java.lang.String)>($r9);
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mCurId=");
+
+        $r9 = $r0.<com.android.server.InputMethodManagerService: java.lang.String mCurId>;
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" mHaveConnect=");
+
+        $z0 = $r0.<com.android.server.InputMethodManagerService: boolean mHaveConnection>;
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" mBoundToMethod=");
+
+        $z0 = $r0.<com.android.server.InputMethodManagerService: boolean mBoundToMethod>;
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r6.<android.util.Printer: void println(java.lang.String)>($r9);
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mCurToken=");
+
+        $r21 = $r0.<com.android.server.InputMethodManagerService: android.os.IBinder mCurToken>;
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r21);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r6.<android.util.Printer: void println(java.lang.String)>($r9);
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mCurIntent=");
+
+        $r23 = $r0.<com.android.server.InputMethodManagerService: android.content.Intent mCurIntent>;
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r23);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r6.<android.util.Printer: void println(java.lang.String)>($r9);
+
+        $r5 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputMethod mCurMethod>;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mCurMethod=");
+
+        $r24 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputMethod mCurMethod>;
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r24);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r6.<android.util.Printer: void println(java.lang.String)>($r9);
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mEnabledSession=");
+
+        $r19 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$SessionState mEnabledSession>;
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r19);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r6.<android.util.Printer: void println(java.lang.String)>($r9);
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mShowRequested=");
+
+        $z0 = $r0.<com.android.server.InputMethodManagerService: boolean mShowRequested>;
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" mShowExplicitlyRequested=");
+
+        $z0 = $r0.<com.android.server.InputMethodManagerService: boolean mShowExplicitlyRequested>;
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" mShowForced=");
+
+        $z0 = $r0.<com.android.server.InputMethodManagerService: boolean mShowForced>;
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" mInputShown=");
+
+        $z0 = $r0.<com.android.server.InputMethodManagerService: boolean mInputShown>;
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r6.<android.util.Printer: void println(java.lang.String)>($r9);
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mScreenOn=");
+
+        $z0 = $r0.<com.android.server.InputMethodManagerService: boolean mScreenOn>;
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r6.<android.util.Printer: void println(java.lang.String)>($r9);
+
+        exitmonitor $r10;
+
+     label09:
+        if $r4 == null goto label11;
+
+        interfaceinvoke $r6.<android.util.Printer: void println(java.lang.String)>(" ");
+
+        virtualinvoke $r2.<java.io.PrintWriter: void flush()>();
+
+        $r17 = $r4.<com.android.server.InputMethodManagerService$ClientState: com.android.internal.view.IInputMethodClient client>;
+
+     label10:
+        $r21 = interfaceinvoke $r17.<com.android.internal.view.IInputMethodClient: android.os.IBinder asBinder()>();
+
+        interfaceinvoke $r21.<android.os.IBinder: void dump(java.io.FileDescriptor,java.lang.String[])>($r1, $r3);
+
+     label11:
+        if $r5 == null goto label16;
+
+        interfaceinvoke $r6.<android.util.Printer: void println(java.lang.String)>(" ");
+
+        virtualinvoke $r2.<java.io.PrintWriter: void flush()>();
+
+     label12:
+        $r21 = interfaceinvoke $r5.<com.android.internal.view.IInputMethod: android.os.IBinder asBinder()>();
+
+        interfaceinvoke $r21.<android.os.IBinder: void dump(java.io.FileDescriptor,java.lang.String[])>($r1, $r3);
+
+     label13:
+        return;
+
+     label14:
+        $r25 := @caughtexception;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Input method service dead: ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r25);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r6.<android.util.Printer: void println(java.lang.String)>($r9);
+
+        return;
+
+     label15:
+        $r26 := @caughtexception;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Input method client dead: ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r26);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r6.<android.util.Printer: void println(java.lang.String)>($r9);
+
+        goto label11;
+
+     label16:
+        return;
+
+        catch java.lang.Throwable from label02 to label07 with label06;
+        catch java.lang.Throwable from label08 to label09 with label06;
+        catch android.os.RemoteException from label10 to label11 with label15;
+        catch android.os.RemoteException from label12 to label13 with label14;
+    }
+
+    void executeOrSendMessage(android.os.IInterface, android.os.Message)
+    {
+        com.android.server.InputMethodManagerService $r0;
+        android.os.IInterface $r1;
+        android.os.Message $r2;
+        android.os.IBinder $r3;
+        boolean $z0;
+        com.android.internal.os.HandlerCaller $r4;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r1 := @parameter0: android.os.IInterface;
+
+        $r2 := @parameter1: android.os.Message;
+
+        $r3 = interfaceinvoke $r1.<android.os.IInterface: android.os.IBinder asBinder()>();
+
+        $z0 = $r3 instanceof android.os.Binder;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.os.HandlerCaller mCaller>;
+
+        virtualinvoke $r4.<com.android.internal.os.HandlerCaller: void sendMessage(android.os.Message)>($r2);
+
+        return;
+
+     label1:
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: boolean handleMessage(android.os.Message)>($r2);
+
+        virtualinvoke $r2.<android.os.Message: void recycle()>();
+
+        return;
+    }
+
+    public void finishInput(com.android.internal.view.IInputMethodClient)
+    {
+        com.android.server.InputMethodManagerService $r0;
+        com.android.internal.view.IInputMethodClient $r1;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r1 := @parameter0: com.android.internal.view.IInputMethodClient;
+
+        return;
+    }
+
+    public java.util.List getEnabledInputMethodList()
+    {
+        com.android.server.InputMethodManagerService $r0;
+        java.util.HashMap $r1;
+        java.util.List $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r1 = $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mMethodMap>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = virtualinvoke $r0.<com.android.server.InputMethodManagerService: java.util.List getEnabledInputMethodListLocked()>();
+
+        exitmonitor $r1;
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    java.util.List getEnabledInputMethodListLocked()
+    {
+        com.android.server.InputMethodManagerService $r0;
+        java.util.ArrayList $r1;
+        android.text.TextUtils$SimpleStringSplitter $r2;
+        android.content.Context $r3;
+        android.content.ContentResolver $r4;
+        java.lang.String $r5;
+        boolean $z0;
+        java.util.HashMap $r6;
+        java.lang.Object $r7;
+        android.view.inputmethod.InputMethodInfo $r8;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        $r3 = $r0.<com.android.server.InputMethodManagerService: android.content.Context mContext>;
+
+        $r4 = virtualinvoke $r3.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r5 = staticinvoke <android.provider.Settings$Secure: java.lang.String getString(android.content.ContentResolver,java.lang.String)>($r4, "enabled_input_methods");
+
+        if $r5 == null goto label2;
+
+        $r2 = $r0.<com.android.server.InputMethodManagerService: android.text.TextUtils$SimpleStringSplitter mStringColonSplitter>;
+
+        virtualinvoke $r2.<android.text.TextUtils$SimpleStringSplitter: void setString(java.lang.String)>($r5);
+
+     label1:
+        $z0 = virtualinvoke $r2.<android.text.TextUtils$SimpleStringSplitter: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r6 = $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mMethodMap>;
+
+        $r5 = virtualinvoke $r2.<android.text.TextUtils$SimpleStringSplitter: java.lang.String next()>();
+
+        $r7 = virtualinvoke $r6.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r5);
+
+        $r8 = (android.view.inputmethod.InputMethodInfo) $r7;
+
+        if $r8 == null goto label1;
+
+        virtualinvoke $r1.<java.util.ArrayList: boolean add(java.lang.Object)>($r8);
+
+        goto label1;
+
+     label2:
+        return $r1;
+
+     label3:
+        return $r1;
+    }
+
+    public java.util.List getInputMethodList()
+    {
+        com.android.server.InputMethodManagerService $r0;
+        java.util.HashMap $r1;
+        java.util.ArrayList $r2, $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r1 = $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mMethodMap>;
+
+        entermonitor $r1;
+
+     label1:
+        $r3 = new java.util.ArrayList;
+
+        $r2 = $r0.<com.android.server.InputMethodManagerService: java.util.ArrayList mMethodList>;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>(java.util.Collection)>($r2);
+
+        exitmonitor $r1;
+
+     label2:
+        return $r3;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public boolean handleMessage(android.os.Message)
+    {
+        android.os.Message $r0;
+        com.android.server.InputMethodManagerService $r1;
+        int $i0;
+        java.lang.Object $r2;
+        com.android.internal.view.IInputMethod $r3;
+        com.android.internal.os.HandlerCaller$SomeArgs $r4;
+        android.view.inputmethod.InputBinding $r5;
+        android.os.ResultReceiver $r6;
+        android.os.IBinder $r7;
+        com.android.internal.view.IInputMethodCallback $r8;
+        com.android.server.InputMethodManagerService$SessionState $r9;
+        com.android.internal.view.IInputContext $r10;
+        android.view.inputmethod.EditorInfo $r11;
+        com.android.internal.view.IInputMethodClient $r12;
+        com.android.internal.view.InputBindResult $r13;
+        android.os.RemoteException $r14, $r17, $r18, $r19, $r20, $r21, $r22, $r23, $r24, $r25;
+        java.lang.StringBuilder $r15;
+        java.lang.String $r16;
+
+        $r1 := @this: com.android.server.InputMethodManagerService;
+
+        $r0 := @parameter0: android.os.Message;
+
+        $i0 = $r0.<android.os.Message: int what>;
+
+        lookupswitch($i0)
+        {
+            case 1: goto label02;
+            case 1000: goto label03;
+            case 1010: goto label06;
+            case 1020: goto label09;
+            case 1030: goto label12;
+            case 1040: goto label15;
+            case 1050: goto label18;
+            case 2000: goto label21;
+            case 2010: goto label26;
+            case 3000: goto label31;
+            case 3010: goto label34;
+            default: goto label01;
+        };
+
+     label01:
+        return 0;
+
+     label02:
+        virtualinvoke $r1.<com.android.server.InputMethodManagerService: void showInputMethodMenu()>();
+
+        return 1;
+
+     label03:
+        $r2 = $r0.<android.os.Message: java.lang.Object obj>;
+
+        $r3 = (com.android.internal.view.IInputMethod) $r2;
+
+     label04:
+        interfaceinvoke $r3.<com.android.internal.view.IInputMethod: void unbindInput()>();
+
+     label05:
+        return 1;
+
+     label06:
+        $r2 = $r0.<android.os.Message: java.lang.Object obj>;
+
+        $r4 = (com.android.internal.os.HandlerCaller$SomeArgs) $r2;
+
+        $r2 = $r4.<com.android.internal.os.HandlerCaller$SomeArgs: java.lang.Object arg1>;
+
+        $r3 = (com.android.internal.view.IInputMethod) $r2;
+
+        $r2 = $r4.<com.android.internal.os.HandlerCaller$SomeArgs: java.lang.Object arg2>;
+
+        $r5 = (android.view.inputmethod.InputBinding) $r2;
+
+     label07:
+        interfaceinvoke $r3.<com.android.internal.view.IInputMethod: void bindInput(android.view.inputmethod.InputBinding)>($r5);
+
+     label08:
+        return 1;
+
+     label09:
+        $r2 = $r0.<android.os.Message: java.lang.Object obj>;
+
+        $r4 = (com.android.internal.os.HandlerCaller$SomeArgs) $r2;
+
+        $r2 = $r4.<com.android.internal.os.HandlerCaller$SomeArgs: java.lang.Object arg1>;
+
+        $r3 = (com.android.internal.view.IInputMethod) $r2;
+
+        $i0 = $r0.<android.os.Message: int arg1>;
+
+        $r2 = $r4.<com.android.internal.os.HandlerCaller$SomeArgs: java.lang.Object arg2>;
+
+        $r6 = (android.os.ResultReceiver) $r2;
+
+     label10:
+        interfaceinvoke $r3.<com.android.internal.view.IInputMethod: void showSoftInput(int,android.os.ResultReceiver)>($i0, $r6);
+
+     label11:
+        return 1;
+
+     label12:
+        $r2 = $r0.<android.os.Message: java.lang.Object obj>;
+
+        $r4 = (com.android.internal.os.HandlerCaller$SomeArgs) $r2;
+
+        $r2 = $r4.<com.android.internal.os.HandlerCaller$SomeArgs: java.lang.Object arg1>;
+
+        $r3 = (com.android.internal.view.IInputMethod) $r2;
+
+        $r2 = $r4.<com.android.internal.os.HandlerCaller$SomeArgs: java.lang.Object arg2>;
+
+        $r6 = (android.os.ResultReceiver) $r2;
+
+     label13:
+        interfaceinvoke $r3.<com.android.internal.view.IInputMethod: void hideSoftInput(int,android.os.ResultReceiver)>(0, $r6);
+
+     label14:
+        return 1;
+
+     label15:
+        $r2 = $r0.<android.os.Message: java.lang.Object obj>;
+
+        $r4 = (com.android.internal.os.HandlerCaller$SomeArgs) $r2;
+
+        $r2 = $r4.<com.android.internal.os.HandlerCaller$SomeArgs: java.lang.Object arg1>;
+
+        $r3 = (com.android.internal.view.IInputMethod) $r2;
+
+        $r2 = $r4.<com.android.internal.os.HandlerCaller$SomeArgs: java.lang.Object arg2>;
+
+        $r7 = (android.os.IBinder) $r2;
+
+     label16:
+        interfaceinvoke $r3.<com.android.internal.view.IInputMethod: void attachToken(android.os.IBinder)>($r7);
+
+     label17:
+        return 1;
+
+     label18:
+        $r2 = $r0.<android.os.Message: java.lang.Object obj>;
+
+        $r4 = (com.android.internal.os.HandlerCaller$SomeArgs) $r2;
+
+        $r2 = $r4.<com.android.internal.os.HandlerCaller$SomeArgs: java.lang.Object arg1>;
+
+        $r3 = (com.android.internal.view.IInputMethod) $r2;
+
+        $r2 = $r4.<com.android.internal.os.HandlerCaller$SomeArgs: java.lang.Object arg2>;
+
+        $r8 = (com.android.internal.view.IInputMethodCallback) $r2;
+
+     label19:
+        interfaceinvoke $r3.<com.android.internal.view.IInputMethod: void createSession(com.android.internal.view.IInputMethodCallback)>($r8);
+
+     label20:
+        return 1;
+
+     label21:
+        $r2 = $r0.<android.os.Message: java.lang.Object obj>;
+
+        $r4 = (com.android.internal.os.HandlerCaller$SomeArgs) $r2;
+
+        $r2 = $r4.<com.android.internal.os.HandlerCaller$SomeArgs: java.lang.Object arg1>;
+
+        $r9 = (com.android.server.InputMethodManagerService$SessionState) $r2;
+
+     label22:
+        virtualinvoke $r1.<com.android.server.InputMethodManagerService: void setEnabledSessionInMainThread(com.android.server.InputMethodManagerService$SessionState)>($r9);
+
+     label23:
+        $r3 = $r9.<com.android.server.InputMethodManagerService$SessionState: com.android.internal.view.IInputMethod method>;
+
+        $r2 = $r4.<com.android.internal.os.HandlerCaller$SomeArgs: java.lang.Object arg2>;
+
+        $r10 = (com.android.internal.view.IInputContext) $r2;
+
+        $r2 = $r4.<com.android.internal.os.HandlerCaller$SomeArgs: java.lang.Object arg3>;
+
+     label24:
+        $r11 = (android.view.inputmethod.EditorInfo) $r2;
+
+        interfaceinvoke $r3.<com.android.internal.view.IInputMethod: void startInput(com.android.internal.view.IInputContext,android.view.inputmethod.EditorInfo)>($r10, $r11);
+
+     label25:
+        return 1;
+
+     label26:
+        $r2 = $r0.<android.os.Message: java.lang.Object obj>;
+
+        $r4 = (com.android.internal.os.HandlerCaller$SomeArgs) $r2;
+
+        $r2 = $r4.<com.android.internal.os.HandlerCaller$SomeArgs: java.lang.Object arg1>;
+
+        $r9 = (com.android.server.InputMethodManagerService$SessionState) $r2;
+
+     label27:
+        virtualinvoke $r1.<com.android.server.InputMethodManagerService: void setEnabledSessionInMainThread(com.android.server.InputMethodManagerService$SessionState)>($r9);
+
+     label28:
+        $r3 = $r9.<com.android.server.InputMethodManagerService$SessionState: com.android.internal.view.IInputMethod method>;
+
+        $r2 = $r4.<com.android.internal.os.HandlerCaller$SomeArgs: java.lang.Object arg2>;
+
+        $r10 = (com.android.internal.view.IInputContext) $r2;
+
+        $r2 = $r4.<com.android.internal.os.HandlerCaller$SomeArgs: java.lang.Object arg3>;
+
+     label29:
+        $r11 = (android.view.inputmethod.EditorInfo) $r2;
+
+        interfaceinvoke $r3.<com.android.internal.view.IInputMethod: void restartInput(com.android.internal.view.IInputContext,android.view.inputmethod.EditorInfo)>($r10, $r11);
+
+     label30:
+        return 1;
+
+     label31:
+        $r2 = $r0.<android.os.Message: java.lang.Object obj>;
+
+        $r12 = (com.android.internal.view.IInputMethodClient) $r2;
+
+        $i0 = $r0.<android.os.Message: int arg1>;
+
+     label32:
+        interfaceinvoke $r12.<com.android.internal.view.IInputMethodClient: void onUnbindMethod(int)>($i0);
+
+     label33:
+        return 1;
+
+     label34:
+        $r2 = $r0.<android.os.Message: java.lang.Object obj>;
+
+        $r4 = (com.android.internal.os.HandlerCaller$SomeArgs) $r2;
+
+        $r2 = $r4.<com.android.internal.os.HandlerCaller$SomeArgs: java.lang.Object arg1>;
+
+        $r12 = (com.android.internal.view.IInputMethodClient) $r2;
+
+        $r2 = $r4.<com.android.internal.os.HandlerCaller$SomeArgs: java.lang.Object arg2>;
+
+        $r13 = (com.android.internal.view.InputBindResult) $r2;
+
+     label35:
+        interfaceinvoke $r12.<com.android.internal.view.IInputMethodClient: void onBindMethod(com.android.internal.view.InputBindResult)>($r13);
+
+     label36:
+        return 1;
+
+     label37:
+        $r14 := @caughtexception;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Client died receiving input method ");
+
+        $r2 = $r4.<com.android.internal.os.HandlerCaller$SomeArgs: java.lang.Object arg2>;
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("InputManagerService", $r16);
+
+        goto label36;
+
+     label38:
+        $r17 := @caughtexception;
+
+        goto label33;
+
+     label39:
+        $r18 := @caughtexception;
+
+        goto label30;
+
+     label40:
+        $r19 := @caughtexception;
+
+        goto label25;
+
+     label41:
+        $r20 := @caughtexception;
+
+        goto label20;
+
+     label42:
+        $r21 := @caughtexception;
+
+        goto label17;
+
+     label43:
+        $r22 := @caughtexception;
+
+        goto label14;
+
+     label44:
+        $r23 := @caughtexception;
+
+        goto label11;
+
+     label45:
+        $r24 := @caughtexception;
+
+        goto label08;
+
+     label46:
+        $r25 := @caughtexception;
+
+        goto label05;
+
+        catch android.os.RemoteException from label04 to label05 with label46;
+        catch android.os.RemoteException from label07 to label08 with label45;
+        catch android.os.RemoteException from label10 to label11 with label44;
+        catch android.os.RemoteException from label13 to label14 with label43;
+        catch android.os.RemoteException from label16 to label17 with label42;
+        catch android.os.RemoteException from label19 to label20 with label41;
+        catch android.os.RemoteException from label22 to label23 with label40;
+        catch android.os.RemoteException from label24 to label25 with label40;
+        catch android.os.RemoteException from label27 to label28 with label39;
+        catch android.os.RemoteException from label29 to label30 with label39;
+        catch android.os.RemoteException from label32 to label33 with label38;
+        catch android.os.RemoteException from label35 to label36 with label37;
+    }
+
+    boolean hideCurrentInputLocked(int, android.os.ResultReceiver)
+    {
+        com.android.server.InputMethodManagerService $r0;
+        int $i0, $i1;
+        android.os.ResultReceiver $r1;
+        com.android.internal.view.IInputMethod $r2, $r4;
+        android.os.Message $r3;
+        boolean $z0;
+        com.android.internal.os.HandlerCaller $r5;
+        android.os.IInterface r6;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: android.os.ResultReceiver;
+
+        $i1 = $i0 & 1;
+
+        if $i1 == 0 goto label2;
+
+        $z0 = $r0.<com.android.server.InputMethodManagerService: boolean mShowExplicitlyRequested>;
+
+        if $z0 != 0 goto label1;
+
+        $z0 = $r0.<com.android.server.InputMethodManagerService: boolean mShowForced>;
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $z0 = $r0.<com.android.server.InputMethodManagerService: boolean mShowForced>;
+
+        if $z0 == 0 goto label3;
+
+        $i0 = $i0 & 2;
+
+        if $i0 == 0 goto label3;
+
+        return 0;
+
+     label3:
+        $z0 = $r0.<com.android.server.InputMethodManagerService: boolean mInputShown>;
+
+        if $z0 == 0 goto label5;
+
+        $r2 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputMethod mCurMethod>;
+
+        if $r2 == null goto label5;
+
+        $r4 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputMethod mCurMethod>;
+
+        $r5 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.os.HandlerCaller mCaller>;
+
+        $r2 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputMethod mCurMethod>;
+
+        $r3 = virtualinvoke $r5.<com.android.internal.os.HandlerCaller: android.os.Message obtainMessageOO(int,java.lang.Object,java.lang.Object)>(1030, $r2, $r1);
+
+        r6 = (android.os.IInterface) $r4;
+
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: void executeOrSendMessage(android.os.IInterface,android.os.Message)>(r6, $r3);
+
+        $z0 = 1;
+
+     label4:
+        $r0.<com.android.server.InputMethodManagerService: boolean mInputShown> = 0;
+
+        $r0.<com.android.server.InputMethodManagerService: boolean mShowRequested> = 0;
+
+        $r0.<com.android.server.InputMethodManagerService: boolean mShowExplicitlyRequested> = 0;
+
+        $r0.<com.android.server.InputMethodManagerService: boolean mShowForced> = 0;
+
+        return $z0;
+
+     label5:
+        $z0 = 0;
+
+        goto label4;
+    }
+
+    void hideInputMethodMenu()
+    {
+        com.android.server.InputMethodManagerService $r0;
+        java.util.HashMap $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r1 = $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mMethodMap>;
+
+        entermonitor $r1;
+
+     label1:
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: void hideInputMethodMenuLocked()>();
+
+        exitmonitor $r1;
+
+     label2:
+        return;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    void hideInputMethodMenuLocked()
+    {
+        com.android.server.InputMethodManagerService $r0;
+        android.app.AlertDialog $r1;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r1 = $r0.<com.android.server.InputMethodManagerService: android.app.AlertDialog mSwitchingDialog>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<com.android.server.InputMethodManagerService: android.app.AlertDialog mSwitchingDialog>;
+
+        virtualinvoke $r1.<android.app.Dialog: void dismiss()>();
+
+        $r0.<com.android.server.InputMethodManagerService: android.app.AlertDialog mSwitchingDialog> = null;
+
+     label1:
+        $r0.<com.android.server.InputMethodManagerService: android.app.AlertDialog$Builder mDialogBuilder> = null;
+
+        $r0.<com.android.server.InputMethodManagerService: java.lang.CharSequence[] mItems> = null;
+
+        $r0.<com.android.server.InputMethodManagerService: android.view.inputmethod.InputMethodInfo[] mIms> = null;
+
+        return;
+    }
+
+    public void hideMySoftInput(android.os.IBinder, int)
+    {
+        com.android.server.InputMethodManagerService $r0;
+        android.os.IBinder $r1, $r3;
+        int $i0;
+        java.util.HashMap $r2;
+        java.lang.StringBuilder $r4;
+        java.lang.String $r5;
+        long $l1;
+        java.lang.Throwable $r6, $r7;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r1 := @parameter0: android.os.IBinder;
+
+        $i0 := @parameter1: int;
+
+        $r2 = $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mMethodMap>;
+
+        entermonitor $r2;
+
+        if $r1 == null goto label02;
+
+     label01:
+        $r3 = $r0.<com.android.server.InputMethodManagerService: android.os.IBinder mCurToken>;
+
+        if $r3 == $r1 goto label04;
+
+     label02:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignoring hideInputMethod of token: ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("InputManagerService", $r5);
+
+        exitmonitor $r2;
+
+     label03:
+        return;
+
+     label04:
+        $l1 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label05:
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: boolean hideCurrentInputLocked(int,android.os.ResultReceiver)>($i0, null);
+
+     label06:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        exitmonitor $r2;
+
+     label07:
+        return;
+
+     label08:
+        $r6 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label09:
+        throw $r6;
+
+     label10:
+        $r7 := @caughtexception;
+
+     label11:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        throw $r7;
+
+     label12:
+        nop;
+
+        catch java.lang.Throwable from label01 to label03 with label08;
+        catch java.lang.Throwable from label04 to label05 with label08;
+        catch java.lang.Throwable from label05 to label06 with label10;
+        catch java.lang.Throwable from label06 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+        catch java.lang.Throwable from label11 to label12 with label08;
+    }
+
+    public boolean hideSoftInput(com.android.internal.view.IInputMethodClient, int, android.os.ResultReceiver)
+    {
+        com.android.server.InputMethodManagerService $r0;
+        com.android.internal.view.IInputMethodClient $r1, $r5;
+        int $i0;
+        android.os.ResultReceiver $r2;
+        long $l1;
+        java.util.HashMap $r3;
+        com.android.server.InputMethodManagerService$ClientState $r4;
+        android.os.IBinder $r6, $r7;
+        android.view.IWindowManager $r8;
+        boolean $z0;
+        java.lang.StringBuilder $r9;
+        java.lang.String $r10;
+        android.os.RemoteException $r11;
+        java.lang.Throwable $r12, $r13;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r1 := @parameter0: com.android.internal.view.IInputMethodClient;
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: android.os.ResultReceiver;
+
+        $l1 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label01:
+        $r3 = $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mMethodMap>;
+
+        entermonitor $r3;
+
+     label02:
+        $r4 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        if $r4 == null goto label04;
+
+        if $r1 == null goto label04;
+
+        $r4 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        $r5 = $r4.<com.android.server.InputMethodManagerService$ClientState: com.android.internal.view.IInputMethodClient client>;
+
+        $r6 = interfaceinvoke $r5.<com.android.internal.view.IInputMethodClient: android.os.IBinder asBinder()>();
+
+        $r7 = interfaceinvoke $r1.<com.android.internal.view.IInputMethodClient: android.os.IBinder asBinder()>();
+
+     label03:
+        if $r6 == $r7 goto label13;
+
+     label04:
+        $r8 = $r0.<com.android.server.InputMethodManagerService: android.view.IWindowManager mIWindowManager>;
+
+     label05:
+        $z0 = interfaceinvoke $r8.<android.view.IWindowManager: boolean inputMethodClientHasFocus(com.android.internal.view.IInputMethodClient)>($r1);
+
+     label06:
+        if $z0 != 0 goto label13;
+
+     label07:
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignoring hideSoftInput of: ");
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("InputManagerService", $r10);
+
+     label08:
+        exitmonitor $r3;
+
+     label09:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        return 0;
+
+     label10:
+        $r11 := @caughtexception;
+
+     label11:
+        exitmonitor $r3;
+
+     label12:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        return 0;
+
+     label13:
+        $z0 = virtualinvoke $r0.<com.android.server.InputMethodManagerService: boolean hideCurrentInputLocked(int,android.os.ResultReceiver)>($i0, $r2);
+
+        exitmonitor $r3;
+
+     label14:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        return $z0;
+
+     label15:
+        $r12 := @caughtexception;
+
+     label16:
+        exitmonitor $r3;
+
+     label17:
+        throw $r12;
+
+     label18:
+        $r13 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        throw $r13;
+
+        catch java.lang.Throwable from label01 to label02 with label18;
+        catch java.lang.Throwable from label02 to label03 with label15;
+        catch android.os.RemoteException from label05 to label06 with label10;
+        catch android.os.RemoteException from label07 to label08 with label10;
+        catch java.lang.Throwable from label04 to label08 with label15;
+        catch java.lang.Throwable from label08 to label09 with label15;
+        catch java.lang.Throwable from label11 to label12 with label15;
+        catch java.lang.Throwable from label13 to label14 with label15;
+        catch java.lang.Throwable from label16 to label17 with label15;
+        catch java.lang.Throwable from label17 to label18 with label18;
+    }
+
+    public void onServiceConnected(android.content.ComponentName, android.os.IBinder)
+    {
+        com.android.server.InputMethodManagerService $r0;
+        android.content.ComponentName $r1, $r6;
+        android.os.IBinder $r2;
+        java.util.HashMap $r3;
+        com.android.internal.view.IInputMethod $r4, $r9, $r11;
+        android.content.Intent $r5;
+        boolean $z0;
+        com.android.server.InputMethodManagerService$ClientState $r7;
+        com.android.internal.os.HandlerCaller $r8;
+        android.os.Message $r10;
+        java.lang.Throwable $r13;
+        com.android.server.InputMethodManagerService$MethodCallback r14;
+        android.os.IInterface r15;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r1 := @parameter0: android.content.ComponentName;
+
+        $r2 := @parameter1: android.os.IBinder;
+
+        $r3 = $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mMethodMap>;
+
+        entermonitor $r3;
+
+     label1:
+        $r5 = $r0.<com.android.server.InputMethodManagerService: android.content.Intent mCurIntent>;
+
+        if $r5 == null goto label2;
+
+        $r5 = $r0.<com.android.server.InputMethodManagerService: android.content.Intent mCurIntent>;
+
+        $r6 = virtualinvoke $r5.<android.content.Intent: android.content.ComponentName getComponent()>();
+
+        $z0 = virtualinvoke $r1.<android.content.ComponentName: boolean equals(java.lang.Object)>($r6);
+
+        if $z0 == 0 goto label2;
+
+        $r4 = staticinvoke <com.android.internal.view.IInputMethod$Stub: com.android.internal.view.IInputMethod asInterface(android.os.IBinder)>($r2);
+
+        $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputMethod mCurMethod> = $r4;
+
+        $r7 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        if $r7 == null goto label2;
+
+        $r4 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputMethod mCurMethod>;
+
+        $r8 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.os.HandlerCaller mCaller>;
+
+        $r9 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputMethod mCurMethod>;
+
+        $r2 = $r0.<com.android.server.InputMethodManagerService: android.os.IBinder mCurToken>;
+
+        $r10 = virtualinvoke $r8.<com.android.internal.os.HandlerCaller: android.os.Message obtainMessageOO(int,java.lang.Object,java.lang.Object)>(1040, $r9, $r2);
+
+        r15 = (android.os.IInterface) $r4;
+
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: void executeOrSendMessage(android.os.IInterface,android.os.Message)>(r15, $r10);
+
+        $r7 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        if $r7 == null goto label2;
+
+        $r9 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputMethod mCurMethod>;
+
+        $r8 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.os.HandlerCaller mCaller>;
+
+        $r11 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputMethod mCurMethod>;
+
+        r14 = new com.android.server.InputMethodManagerService$MethodCallback;
+
+        $r4 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputMethod mCurMethod>;
+
+        specialinvoke r14.<com.android.server.InputMethodManagerService$MethodCallback: void <init>(com.android.server.InputMethodManagerService,com.android.internal.view.IInputMethod)>($r0, $r4);
+
+        $r10 = virtualinvoke $r8.<com.android.internal.os.HandlerCaller: android.os.Message obtainMessageOO(int,java.lang.Object,java.lang.Object)>(1050, $r11, r14);
+
+        r15 = (android.os.IInterface) $r9;
+
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: void executeOrSendMessage(android.os.IInterface,android.os.Message)>(r15, $r10);
+
+     label2:
+        exitmonitor $r3;
+
+     label3:
+        return;
+
+     label4:
+        $r13 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label5:
+        throw $r13;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public void onServiceDisconnected(android.content.ComponentName)
+    {
+        com.android.server.InputMethodManagerService $r0;
+        android.content.ComponentName $r1, $r5;
+        java.util.HashMap $r2;
+        int $i0;
+        com.android.internal.view.IInputMethod $r3;
+        android.content.Intent $r4;
+        boolean $z0;
+        long $l1;
+        com.android.server.InputMethodManagerService$ClientState $r6;
+        com.android.internal.view.IInputMethodClient $r7, $r9;
+        com.android.internal.os.HandlerCaller $r8;
+        android.os.Message $r10;
+        java.lang.Throwable $r11;
+        android.os.IInterface r12;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r1 := @parameter0: android.content.ComponentName;
+
+        $r2 = $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mMethodMap>;
+
+        entermonitor $r2;
+
+     label1:
+        $r3 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputMethod mCurMethod>;
+
+        if $r3 == null goto label2;
+
+        $r4 = $r0.<com.android.server.InputMethodManagerService: android.content.Intent mCurIntent>;
+
+        if $r4 == null goto label2;
+
+        $r4 = $r0.<com.android.server.InputMethodManagerService: android.content.Intent mCurIntent>;
+
+        $r5 = virtualinvoke $r4.<android.content.Intent: android.content.ComponentName getComponent()>();
+
+        $z0 = virtualinvoke $r1.<android.content.ComponentName: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 == 0 goto label2;
+
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: void clearCurMethodLocked()>();
+
+        $l1 = staticinvoke <android.os.SystemClock: long uptimeMillis()>();
+
+        $r0.<com.android.server.InputMethodManagerService: long mLastBindTime> = $l1;
+
+        $z0 = $r0.<com.android.server.InputMethodManagerService: boolean mInputShown>;
+
+        $r0.<com.android.server.InputMethodManagerService: boolean mShowRequested> = $z0;
+
+        $r0.<com.android.server.InputMethodManagerService: boolean mInputShown> = 0;
+
+        $r6 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        if $r6 == null goto label2;
+
+        $r6 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        $r7 = $r6.<com.android.server.InputMethodManagerService$ClientState: com.android.internal.view.IInputMethodClient client>;
+
+        $r8 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.os.HandlerCaller mCaller>;
+
+        $i0 = $r0.<com.android.server.InputMethodManagerService: int mCurSeq>;
+
+        $r6 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        $r9 = $r6.<com.android.server.InputMethodManagerService$ClientState: com.android.internal.view.IInputMethodClient client>;
+
+        $r10 = virtualinvoke $r8.<com.android.internal.os.HandlerCaller: android.os.Message obtainMessageIO(int,int,java.lang.Object)>(3000, $i0, $r9);
+
+        r12 = (android.os.IInterface) $r7;
+
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: void executeOrSendMessage(android.os.IInterface,android.os.Message)>(r12, $r10);
+
+     label2:
+        exitmonitor $r2;
+
+     label3:
+        return;
+
+     label4:
+        $r11 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label5:
+        throw $r11;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    void onSessionCreated(com.android.internal.view.IInputMethod, com.android.internal.view.IInputMethodSession)
+    {
+        com.android.server.InputMethodManagerService $r0;
+        com.android.internal.view.IInputMethod $r1, $r4;
+        com.android.internal.view.IInputMethodSession $r2;
+        java.util.HashMap $r3;
+        android.os.IBinder $r5, $r6;
+        com.android.server.InputMethodManagerService$ClientState $r7, $r9;
+        com.android.internal.view.InputBindResult $r10;
+        com.android.internal.view.IInputMethodClient $r11, $r13;
+        com.android.internal.os.HandlerCaller $r12;
+        android.os.Message $r14;
+        java.lang.Throwable $r15;
+        com.android.server.InputMethodManagerService$SessionState r16;
+        android.os.IInterface r17;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r1 := @parameter0: com.android.internal.view.IInputMethod;
+
+        $r2 := @parameter1: com.android.internal.view.IInputMethodSession;
+
+        $r3 = $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mMethodMap>;
+
+        entermonitor $r3;
+
+     label1:
+        $r4 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputMethod mCurMethod>;
+
+        if $r4 == null goto label2;
+
+        if $r1 == null goto label2;
+
+        $r4 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputMethod mCurMethod>;
+
+        $r5 = interfaceinvoke $r4.<com.android.internal.view.IInputMethod: android.os.IBinder asBinder()>();
+
+        $r6 = interfaceinvoke $r1.<com.android.internal.view.IInputMethod: android.os.IBinder asBinder()>();
+
+        if $r5 != $r6 goto label2;
+
+        $r7 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        if $r7 == null goto label2;
+
+        $r7 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        r16 = new com.android.server.InputMethodManagerService$SessionState;
+
+        $r9 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        specialinvoke r16.<com.android.server.InputMethodManagerService$SessionState: void <init>(com.android.server.InputMethodManagerService,com.android.server.InputMethodManagerService$ClientState,com.android.internal.view.IInputMethod,com.android.internal.view.IInputMethodSession)>($r0, $r9, $r1, $r2);
+
+        $r7.<com.android.server.InputMethodManagerService$ClientState: com.android.server.InputMethodManagerService$SessionState curSession> = r16;
+
+        $r7 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        $r7.<com.android.server.InputMethodManagerService$ClientState: boolean sessionRequested> = 0;
+
+        $r10 = virtualinvoke $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.InputBindResult attachNewInputLocked(boolean,boolean)>(1, 1);
+
+        $r2 = $r10.<com.android.internal.view.InputBindResult: com.android.internal.view.IInputMethodSession method>;
+
+        if $r2 == null goto label2;
+
+        $r7 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        $r11 = $r7.<com.android.server.InputMethodManagerService$ClientState: com.android.internal.view.IInputMethodClient client>;
+
+        $r12 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.os.HandlerCaller mCaller>;
+
+        $r7 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        $r13 = $r7.<com.android.server.InputMethodManagerService$ClientState: com.android.internal.view.IInputMethodClient client>;
+
+        $r14 = virtualinvoke $r12.<com.android.internal.os.HandlerCaller: android.os.Message obtainMessageOO(int,java.lang.Object,java.lang.Object)>(3010, $r13, $r10);
+
+        r17 = (android.os.IInterface) $r11;
+
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: void executeOrSendMessage(android.os.IInterface,android.os.Message)>(r17, $r14);
+
+     label2:
+        exitmonitor $r3;
+
+     label3:
+        return;
+
+     label4:
+        $r15 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label5:
+        throw $r15;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public boolean onTransact(int, android.os.Parcel, android.os.Parcel, int) throws android.os.RemoteException
+    {
+        com.android.server.InputMethodManagerService $r0;
+        int $i0, $i1;
+        android.os.Parcel $r1, $r2;
+        java.lang.RuntimeException $r3;
+        boolean $z0;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: android.os.Parcel;
+
+        $r2 := @parameter2: android.os.Parcel;
+
+        $i1 := @parameter3: int;
+
+     label1:
+        $z0 = specialinvoke $r0.<com.android.internal.view.IInputMethodManager$Stub: boolean onTransact(int,android.os.Parcel,android.os.Parcel,int)>($i0, $r1, $r2, $i1);
+
+     label2:
+        return $z0;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $z0 = $r3 instanceof java.lang.SecurityException;
+
+        if $z0 != 0 goto label4;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("InputManagerService", "Input Method Manager Crash", $r3);
+
+     label4:
+        throw $r3;
+
+        catch java.lang.RuntimeException from label1 to label2 with label3;
+    }
+
+    public void removeClient(com.android.internal.view.IInputMethodClient)
+    {
+        com.android.server.InputMethodManagerService $r0;
+        com.android.internal.view.IInputMethodClient $r1;
+        java.util.HashMap $r2, $r4;
+        android.os.IBinder $r3;
+        java.lang.Throwable $r5;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r1 := @parameter0: com.android.internal.view.IInputMethodClient;
+
+        $r2 = $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mMethodMap>;
+
+        entermonitor $r2;
+
+     label1:
+        $r4 = $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mClients>;
+
+        $r3 = interfaceinvoke $r1.<com.android.internal.view.IInputMethodClient: android.os.IBinder asBinder()>();
+
+        virtualinvoke $r4.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>($r3);
+
+        exitmonitor $r2;
+
+     label2:
+        return;
+
+     label3:
+        $r5 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label4:
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    void setEnabledSessionInMainThread(com.android.server.InputMethodManagerService$SessionState)
+    {
+        com.android.server.InputMethodManagerService $r0;
+        com.android.server.InputMethodManagerService$SessionState $r1, $r2;
+        com.android.internal.view.IInputMethod $r3;
+        com.android.internal.view.IInputMethodSession $r4;
+        android.os.RemoteException $r5, $r6;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r1 := @parameter0: com.android.server.InputMethodManagerService$SessionState;
+
+        $r2 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$SessionState mEnabledSession>;
+
+        if $r2 == $r1 goto label7;
+
+        $r2 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$SessionState mEnabledSession>;
+
+        if $r2 == null goto label2;
+
+        $r2 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$SessionState mEnabledSession>;
+
+        $r3 = $r2.<com.android.server.InputMethodManagerService$SessionState: com.android.internal.view.IInputMethod method>;
+
+        $r2 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$SessionState mEnabledSession>;
+
+        $r4 = $r2.<com.android.server.InputMethodManagerService$SessionState: com.android.internal.view.IInputMethodSession session>;
+
+     label1:
+        interfaceinvoke $r3.<com.android.internal.view.IInputMethod: void setSessionEnabled(com.android.internal.view.IInputMethodSession,boolean)>($r4, 0);
+
+     label2:
+        $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$SessionState mEnabledSession> = $r1;
+
+        $r3 = $r1.<com.android.server.InputMethodManagerService$SessionState: com.android.internal.view.IInputMethod method>;
+
+        $r4 = $r1.<com.android.server.InputMethodManagerService$SessionState: com.android.internal.view.IInputMethodSession session>;
+
+     label3:
+        interfaceinvoke $r3.<com.android.internal.view.IInputMethod: void setSessionEnabled(com.android.internal.view.IInputMethodSession,boolean)>($r4, 1);
+
+     label4:
+        return;
+
+     label5:
+        $r5 := @caughtexception;
+
+        return;
+
+     label6:
+        $r6 := @caughtexception;
+
+        goto label2;
+
+     label7:
+        return;
+
+        catch android.os.RemoteException from label1 to label2 with label6;
+        catch android.os.RemoteException from label3 to label4 with label5;
+    }
+
+    public void setInputMethod(android.os.IBinder, java.lang.String)
+    {
+        com.android.server.InputMethodManagerService $r0;
+        android.os.IBinder $r1, $r7;
+        java.lang.String $r2;
+        java.util.HashMap $r3;
+        android.content.Context $r4;
+        int $i0;
+        java.lang.SecurityException $r5;
+        java.lang.Throwable $r6, $r9;
+        java.lang.StringBuilder $r8;
+        long $l1;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r1 := @parameter0: android.os.IBinder;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 = $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mMethodMap>;
+
+        entermonitor $r3;
+
+        if $r1 != null goto label04;
+
+     label01:
+        $r4 = $r0.<com.android.server.InputMethodManagerService: android.content.Context mContext>;
+
+        $i0 = virtualinvoke $r4.<android.content.Context: int checkCallingOrSelfPermission(java.lang.String)>("android.permission.WRITE_SECURE_SETTINGS");
+
+        if $i0 == 0 goto label06;
+
+        $r5 = new java.lang.SecurityException;
+
+        specialinvoke $r5.<java.lang.SecurityException: void <init>(java.lang.String)>("Using null token requires permission android.permission.WRITE_SECURE_SETTINGS");
+
+        throw $r5;
+
+     label02:
+        $r6 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label03:
+        throw $r6;
+
+     label04:
+        $r7 = $r0.<com.android.server.InputMethodManagerService: android.os.IBinder mCurToken>;
+
+        if $r7 == $r1 goto label06;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignoring setInputMethod of token: ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r2 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("InputManagerService", $r2);
+
+        exitmonitor $r3;
+
+     label05:
+        return;
+
+     label06:
+        $l1 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label07:
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: void setInputMethodLocked(java.lang.String)>($r2);
+
+     label08:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        exitmonitor $r3;
+
+     label09:
+        return;
+
+     label10:
+        $r9 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        throw $r9;
+
+     label11:
+        nop;
+
+        catch java.lang.Throwable from label01 to label03 with label02;
+        catch java.lang.Throwable from label04 to label05 with label02;
+        catch java.lang.Throwable from label06 to label07 with label02;
+        catch java.lang.Throwable from label07 to label08 with label10;
+        catch java.lang.Throwable from label08 to label09 with label02;
+        catch java.lang.Throwable from label10 to label11 with label02;
+    }
+
+    public boolean setInputMethodEnabled(java.lang.String, boolean)
+    {
+        com.android.server.InputMethodManagerService $r0;
+        java.lang.String $r1, $r13, $r15, $r16;
+        boolean $z0, $z1, $z2;
+        java.lang.StringBuilder $r2;
+        android.text.TextUtils$SimpleStringSplitter $r3;
+        java.util.HashMap $r4, $r8;
+        android.content.Context $r5;
+        int $i0;
+        java.lang.SecurityException $r6;
+        java.lang.Throwable $r7, $r12;
+        long $l1;
+        java.lang.Object $r9;
+        android.view.inputmethod.InputMethodInfo $r10;
+        java.lang.IllegalArgumentException $r11;
+        android.content.ContentResolver $r14;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $z0 := @parameter1: boolean;
+
+        $r4 = $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mMethodMap>;
+
+        entermonitor $r4;
+
+     label01:
+        $r5 = $r0.<com.android.server.InputMethodManagerService: android.content.Context mContext>;
+
+        $i0 = virtualinvoke $r5.<android.content.Context: int checkCallingOrSelfPermission(java.lang.String)>("android.permission.WRITE_SECURE_SETTINGS");
+
+        if $i0 == 0 goto label04;
+
+        $r6 = new java.lang.SecurityException;
+
+        specialinvoke $r6.<java.lang.SecurityException: void <init>(java.lang.String)>("Requires permission android.permission.WRITE_SECURE_SETTINGS");
+
+        throw $r6;
+
+     label02:
+        $r7 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label03:
+        throw $r7;
+
+     label04:
+        $l1 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label05:
+        $r8 = $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mMethodMap>;
+
+        $r9 = virtualinvoke $r8.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r10 = (android.view.inputmethod.InputMethodInfo) $r9;
+
+        if $r10 != null goto label08;
+
+        if $r10 != null goto label08;
+
+        $r11 = new java.lang.IllegalArgumentException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown id: ");
+
+        $r1 = $r0.<com.android.server.InputMethodManagerService: java.lang.String mCurMethodId>;
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r11.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r1);
+
+        throw $r11;
+
+     label06:
+        $r12 := @caughtexception;
+
+     label07:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        throw $r12;
+
+     label08:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>(int)>(256);
+
+        $z1 = 0;
+
+        $r13 = null;
+
+        $r5 = $r0.<com.android.server.InputMethodManagerService: android.content.Context mContext>;
+
+        $r14 = virtualinvoke $r5.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r15 = staticinvoke <android.provider.Settings$Secure: java.lang.String getString(android.content.ContentResolver,java.lang.String)>($r14, "enabled_input_methods");
+
+        if $r15 == null goto label18;
+
+        $r3 = $r0.<com.android.server.InputMethodManagerService: android.text.TextUtils$SimpleStringSplitter mStringColonSplitter>;
+
+        virtualinvoke $r3.<android.text.TextUtils$SimpleStringSplitter: void setString(java.lang.String)>($r15);
+
+     label09:
+        $z2 = virtualinvoke $r3.<android.text.TextUtils$SimpleStringSplitter: boolean hasNext()>();
+
+        if $z2 == 0 goto label18;
+
+        $r16 = virtualinvoke $r3.<android.text.TextUtils$SimpleStringSplitter: java.lang.String next()>();
+
+        $z2 = virtualinvoke $r16.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+     label10:
+        if $z2 == 0 goto label14;
+
+        if $z0 == 0 goto label13;
+
+     label11:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        exitmonitor $r4;
+
+     label12:
+        return 1;
+
+     label13:
+        $z1 = 1;
+
+        goto label09;
+
+     label14:
+        if $z0 != 0 goto label09;
+
+        if $r13 != null goto label15;
+
+        $r13 = $r16;
+
+     label15:
+        $i0 = virtualinvoke $r2.<java.lang.StringBuilder: int length()>();
+
+        if $i0 <= 0 goto label16;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(58);
+
+     label16:
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r16);
+
+     label17:
+        goto label09;
+
+     label18:
+        if $z0 != 0 goto label26;
+
+        if $z1 != 0 goto label21;
+
+     label19:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        exitmonitor $r4;
+
+     label20:
+        return 0;
+
+     label21:
+        $r5 = $r0.<com.android.server.InputMethodManagerService: android.content.Context mContext>;
+
+        $r14 = virtualinvoke $r5.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r15 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.provider.Settings$Secure: boolean putString(android.content.ContentResolver,java.lang.String,java.lang.String)>($r14, "enabled_input_methods", $r15);
+
+        $r5 = $r0.<com.android.server.InputMethodManagerService: android.content.Context mContext>;
+
+        $r14 = virtualinvoke $r5.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r15 = staticinvoke <android.provider.Settings$Secure: java.lang.String getString(android.content.ContentResolver,java.lang.String)>($r14, "default_input_method");
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>($r15);
+
+        if $z0 == 0 goto label23;
+
+        $r5 = $r0.<com.android.server.InputMethodManagerService: android.content.Context mContext>;
+
+        $r14 = virtualinvoke $r5.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        if $r13 == null goto label25;
+
+        $r1 = $r13;
+
+     label22:
+        staticinvoke <android.provider.Settings$Secure: boolean putString(android.content.ContentResolver,java.lang.String,java.lang.String)>($r14, "default_input_method", $r1);
+
+     label23:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        exitmonitor $r4;
+
+     label24:
+        return 1;
+
+     label25:
+        $r1 = "";
+
+        goto label22;
+
+     label26:
+        if $r15 == null goto label27;
+
+        $i0 = virtualinvoke $r15.<java.lang.String: int length()>();
+
+        if $i0 != 0 goto label30;
+
+     label27:
+        $r5 = $r0.<com.android.server.InputMethodManagerService: android.content.Context mContext>;
+
+        $r14 = virtualinvoke $r5.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        staticinvoke <android.provider.Settings$Secure: boolean putString(android.content.ContentResolver,java.lang.String,java.lang.String)>($r14, "enabled_input_methods", $r1);
+
+     label28:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        exitmonitor $r4;
+
+     label29:
+        return 0;
+
+     label30:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(58);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label31:
+        goto label27;
+
+        catch java.lang.Throwable from label01 to label03 with label02;
+        catch java.lang.Throwable from label04 to label05 with label02;
+        catch java.lang.Throwable from label05 to label06 with label06;
+        catch java.lang.Throwable from label07 to label08 with label02;
+        catch java.lang.Throwable from label08 to label10 with label06;
+        catch java.lang.Throwable from label11 to label12 with label02;
+        catch java.lang.Throwable from label15 to label17 with label06;
+        catch java.lang.Throwable from label19 to label20 with label02;
+        catch java.lang.Throwable from label21 to label23 with label06;
+        catch java.lang.Throwable from label23 to label24 with label02;
+        catch java.lang.Throwable from label25 to label28 with label06;
+        catch java.lang.Throwable from label28 to label29 with label02;
+        catch java.lang.Throwable from label30 to label31 with label06;
+    }
+
+    void setInputMethodLocked(java.lang.String)
+    {
+        com.android.server.InputMethodManagerService $r0;
+        java.lang.String $r1, $r8;
+        android.content.Intent $r2;
+        java.util.HashMap $r3;
+        java.lang.Object $r4;
+        android.view.inputmethod.InputMethodInfo $r5;
+        java.lang.IllegalArgumentException $r6;
+        java.lang.StringBuilder $r7;
+        boolean $z0;
+        long $l0;
+        android.content.Context $r9;
+        android.content.ContentResolver $r10;
+        java.lang.Throwable $r11;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r3 = $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mMethodMap>;
+
+        $r4 = virtualinvoke $r3.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r5 = (android.view.inputmethod.InputMethodInfo) $r4;
+
+        if $r5 != null goto label1;
+
+        $r6 = new java.lang.IllegalArgumentException;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown id: ");
+
+        $r1 = $r0.<com.android.server.InputMethodManagerService: java.lang.String mCurMethodId>;
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r1);
+
+        throw $r6;
+
+     label1:
+        $r8 = $r0.<com.android.server.InputMethodManagerService: java.lang.String mCurMethodId>;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>($r8);
+
+        if $z0 == 0 goto label2;
+
+        return;
+
+     label2:
+        $l0 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label3:
+        $r0.<com.android.server.InputMethodManagerService: java.lang.String mCurMethodId> = $r1;
+
+        $r9 = $r0.<com.android.server.InputMethodManagerService: android.content.Context mContext>;
+
+        $r10 = virtualinvoke $r9.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        staticinvoke <android.provider.Settings$Secure: boolean putString(android.content.ContentResolver,java.lang.String,java.lang.String)>($r10, "default_input_method", $r1);
+
+        $z0 = staticinvoke <android.app.ActivityManagerNative: boolean isSystemReady()>();
+
+        if $z0 == 0 goto label4;
+
+        $r2 = new android.content.Intent;
+
+        specialinvoke $r2.<android.content.Intent: void <init>(java.lang.String)>("android.intent.action.INPUT_METHOD_CHANGED");
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("input_method_id", $r1);
+
+        $r9 = $r0.<com.android.server.InputMethodManagerService: android.content.Context mContext>;
+
+        virtualinvoke $r9.<android.content.Context: void sendBroadcast(android.content.Intent)>($r2);
+
+     label4:
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: void unbindCurrentClientLocked()>();
+
+     label5:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l0);
+
+        return;
+
+     label6:
+        $r11 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l0);
+
+        throw $r11;
+
+        catch java.lang.Throwable from label3 to label5 with label6;
+    }
+
+    boolean showCurrentInputLocked(int, android.os.ResultReceiver)
+    {
+        com.android.server.InputMethodManagerService $r0;
+        int $i0, $i1;
+        android.os.ResultReceiver $r1;
+        com.android.internal.view.IInputMethod $r2, $r4;
+        com.android.internal.os.HandlerCaller $r3;
+        android.os.Message $r5;
+        boolean $z0;
+        long $l2, $l3;
+        byte $b4;
+        java.lang.Object[] $r6;
+        java.lang.String $r7;
+        java.lang.Long $r8;
+        java.lang.Integer $r9;
+        android.content.Context $r10;
+        android.content.Intent $r11;
+        android.os.IInterface r12;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: android.os.ResultReceiver;
+
+        $r0.<com.android.server.InputMethodManagerService: boolean mShowRequested> = 1;
+
+        $i1 = $i0 & 1;
+
+        if $i1 != 0 goto label1;
+
+        $r0.<com.android.server.InputMethodManagerService: boolean mShowExplicitlyRequested> = 1;
+
+     label1:
+        $i0 = $i0 & 2;
+
+        if $i0 == 0 goto label2;
+
+        $r0.<com.android.server.InputMethodManagerService: boolean mShowExplicitlyRequested> = 1;
+
+        $r0.<com.android.server.InputMethodManagerService: boolean mShowForced> = 1;
+
+     label2:
+        $r2 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputMethod mCurMethod>;
+
+        if $r2 == null goto label3;
+
+        $r2 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputMethod mCurMethod>;
+
+        $r3 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.os.HandlerCaller mCaller>;
+
+        $i0 = specialinvoke $r0.<com.android.server.InputMethodManagerService: int getImeShowFlags()>();
+
+        $r4 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputMethod mCurMethod>;
+
+        $r5 = virtualinvoke $r3.<com.android.internal.os.HandlerCaller: android.os.Message obtainMessageIOO(int,int,java.lang.Object,java.lang.Object)>(1020, $i0, $r4, $r1);
+
+        r12 = (android.os.IInterface) $r2;
+
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: void executeOrSendMessage(android.os.IInterface,android.os.Message)>(r12, $r5);
+
+        $r0.<com.android.server.InputMethodManagerService: boolean mInputShown> = 1;
+
+        return 1;
+
+     label3:
+        $z0 = $r0.<com.android.server.InputMethodManagerService: boolean mHaveConnection>;
+
+        if $z0 == 0 goto label4;
+
+        $l2 = staticinvoke <android.os.SystemClock: long uptimeMillis()>();
+
+        $l3 = $r0.<com.android.server.InputMethodManagerService: long mLastBindTime>;
+
+        $l3 = $l3 + 10000L;
+
+        $b4 = $l2 cmp $l3;
+
+        if $b4 >= 0 goto label5;
+
+        $r6 = newarray (java.lang.Object)[3];
+
+        $r7 = $r0.<com.android.server.InputMethodManagerService: java.lang.String mCurMethodId>;
+
+        $r6[0] = $r7;
+
+        $l2 = staticinvoke <android.os.SystemClock: long uptimeMillis()>();
+
+        $l3 = $r0.<com.android.server.InputMethodManagerService: long mLastBindTime>;
+
+        $l2 = $l2 - $l3;
+
+        $r8 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l2);
+
+        $r6[1] = $r8;
+
+        $r9 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(1);
+
+        $r6[2] = $r9;
+
+        staticinvoke <android.util.EventLog: int writeEvent(int,java.lang.Object[])>(32000, $r6);
+
+        $r10 = $r0.<com.android.server.InputMethodManagerService: android.content.Context mContext>;
+
+        virtualinvoke $r10.<android.content.Context: void unbindService(android.content.ServiceConnection)>($r0);
+
+        $r10 = $r0.<com.android.server.InputMethodManagerService: android.content.Context mContext>;
+
+        $r11 = $r0.<com.android.server.InputMethodManagerService: android.content.Intent mCurIntent>;
+
+        virtualinvoke $r10.<android.content.Context: boolean bindService(android.content.Intent,android.content.ServiceConnection,int)>($r11, $r0, 1);
+
+        return 0;
+
+     label4:
+        return 0;
+
+     label5:
+        return 0;
+    }
+
+    void showInputMethodMenu()
+    {
+        com.android.server.InputMethodManagerService $r0;
+        com.android.server.InputMethodManagerService$2 $r1;
+        android.content.Context $r2;
+        android.content.pm.PackageManager $r3;
+        android.content.ContentResolver $r4;
+        java.lang.String $r5, $r12;
+        java.util.List $r6;
+        int $i0, $i1, $i2;
+        java.lang.CharSequence[] $r7;
+        android.view.inputmethod.InputMethodInfo[] $r8;
+        java.lang.Object $r9;
+        android.view.inputmethod.InputMethodInfo $r10;
+        java.lang.CharSequence $r11;
+        boolean $z0;
+        int[] $r13;
+        android.content.res.TypedArray $r14;
+        android.app.AlertDialog$Builder $r15;
+        com.android.server.InputMethodManagerService$3 $r16;
+        android.graphics.drawable.Drawable $r17;
+        com.android.server.InputMethodManagerService$4 $r18;
+        java.util.HashMap $r19;
+        android.app.AlertDialog $r20;
+        android.view.Window $r21;
+        java.lang.Throwable $r22;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: void hideInputMethodMenu()>();
+
+        $r2 = $r0.<com.android.server.InputMethodManagerService: android.content.Context mContext>;
+
+        $r3 = virtualinvoke $r2.<android.content.Context: android.content.pm.PackageManager getPackageManager()>();
+
+        $r4 = virtualinvoke $r2.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r5 = staticinvoke <android.provider.Settings$Secure: java.lang.String getString(android.content.ContentResolver,java.lang.String)>($r4, "default_input_method");
+
+        $r6 = virtualinvoke $r0.<com.android.server.InputMethodManagerService: java.util.List getEnabledInputMethodList()>();
+
+        if $r6 != null goto label03;
+
+        $i0 = 0;
+
+     label01:
+        $r7 = newarray (java.lang.CharSequence)[$i0];
+
+        $r0.<com.android.server.InputMethodManagerService: java.lang.CharSequence[] mItems> = $r7;
+
+        $r8 = newarray (android.view.inputmethod.InputMethodInfo)[$i0];
+
+        $r0.<com.android.server.InputMethodManagerService: android.view.inputmethod.InputMethodInfo[] mIms> = $r8;
+
+        $i1 = 0;
+
+     label02:
+        if $i1 >= $i0 goto label04;
+
+        $r9 = interfaceinvoke $r6.<java.util.List: java.lang.Object get(int)>($i1);
+
+        $r10 = (android.view.inputmethod.InputMethodInfo) $r9;
+
+        $r7 = $r0.<com.android.server.InputMethodManagerService: java.lang.CharSequence[] mItems>;
+
+        $r11 = virtualinvoke $r10.<android.view.inputmethod.InputMethodInfo: java.lang.CharSequence loadLabel(android.content.pm.PackageManager)>($r3);
+
+        $r7[$i1] = $r11;
+
+        $r8 = $r0.<com.android.server.InputMethodManagerService: android.view.inputmethod.InputMethodInfo[] mIms>;
+
+        $r8[$i1] = $r10;
+
+        $i1 = $i1 + 1;
+
+        goto label02;
+
+     label03:
+        $i0 = interfaceinvoke $r6.<java.util.List: int size()>();
+
+        goto label01;
+
+     label04:
+        $i1 = 0;
+
+        $i2 = 0;
+
+     label05:
+        if $i2 >= $i0 goto label06;
+
+        $r8 = $r0.<com.android.server.InputMethodManagerService: android.view.inputmethod.InputMethodInfo[] mIms>;
+
+        $r10 = $r8[$i2];
+
+        $r12 = virtualinvoke $r10.<android.view.inputmethod.InputMethodInfo: java.lang.String getId()>();
+
+        $z0 = virtualinvoke $r12.<java.lang.String: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 == 0 goto label09;
+
+        $i1 = $i2;
+
+     label06:
+        $r1 = new com.android.server.InputMethodManagerService$2;
+
+        specialinvoke $r1.<com.android.server.InputMethodManagerService$2: void <init>(com.android.server.InputMethodManagerService)>($r0);
+
+        $r13 = <com.android.internal.R$styleable: int[] DialogPreference>;
+
+        $r14 = virtualinvoke $r2.<android.content.Context: android.content.res.TypedArray obtainStyledAttributes(android.util.AttributeSet,int[],int,int)>(null, $r13, 16842845, 0);
+
+        $r15 = new android.app.AlertDialog$Builder;
+
+        specialinvoke $r15.<android.app.AlertDialog$Builder: void <init>(android.content.Context)>($r2);
+
+        $r15 = virtualinvoke $r15.<android.app.AlertDialog$Builder: android.app.AlertDialog$Builder setTitle(int)>(17040004);
+
+        $r16 = new com.android.server.InputMethodManagerService$3;
+
+        specialinvoke $r16.<com.android.server.InputMethodManagerService$3: void <init>(com.android.server.InputMethodManagerService)>($r0);
+
+        $r15 = virtualinvoke $r15.<android.app.AlertDialog$Builder: android.app.AlertDialog$Builder setOnCancelListener(android.content.DialogInterface$OnCancelListener)>($r16);
+
+        $r17 = virtualinvoke $r14.<android.content.res.TypedArray: android.graphics.drawable.Drawable getDrawable(int)>(0);
+
+        $r15 = virtualinvoke $r15.<android.app.AlertDialog$Builder: android.app.AlertDialog$Builder setIcon(android.graphics.drawable.Drawable)>($r17);
+
+        $r0.<com.android.server.InputMethodManagerService: android.app.AlertDialog$Builder mDialogBuilder> = $r15;
+
+        virtualinvoke $r14.<android.content.res.TypedArray: void recycle()>();
+
+        $r15 = $r0.<com.android.server.InputMethodManagerService: android.app.AlertDialog$Builder mDialogBuilder>;
+
+        $r7 = $r0.<com.android.server.InputMethodManagerService: java.lang.CharSequence[] mItems>;
+
+        $r18 = new com.android.server.InputMethodManagerService$4;
+
+        specialinvoke $r18.<com.android.server.InputMethodManagerService$4: void <init>(com.android.server.InputMethodManagerService)>($r0);
+
+        virtualinvoke $r15.<android.app.AlertDialog$Builder: android.app.AlertDialog$Builder setSingleChoiceItems(java.lang.CharSequence[],int,android.content.DialogInterface$OnClickListener)>($r7, $i1, $r18);
+
+        $r19 = $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mMethodMap>;
+
+        entermonitor $r19;
+
+     label07:
+        $r15 = $r0.<com.android.server.InputMethodManagerService: android.app.AlertDialog$Builder mDialogBuilder>;
+
+        $r20 = virtualinvoke $r15.<android.app.AlertDialog$Builder: android.app.AlertDialog create()>();
+
+        $r0.<com.android.server.InputMethodManagerService: android.app.AlertDialog mSwitchingDialog> = $r20;
+
+        $r20 = $r0.<com.android.server.InputMethodManagerService: android.app.AlertDialog mSwitchingDialog>;
+
+        $r21 = virtualinvoke $r20.<android.app.Dialog: android.view.Window getWindow()>();
+
+        virtualinvoke $r21.<android.view.Window: void setType(int)>(2012);
+
+        $r20 = $r0.<com.android.server.InputMethodManagerService: android.app.AlertDialog mSwitchingDialog>;
+
+        virtualinvoke $r20.<android.app.Dialog: void show()>();
+
+        exitmonitor $r19;
+
+     label08:
+        return;
+
+     label09:
+        $i2 = $i2 + 1;
+
+        goto label05;
+
+     label10:
+        $r22 := @caughtexception;
+
+        exitmonitor $r19;
+
+     label11:
+        throw $r22;
+
+        catch java.lang.Throwable from label07 to label08 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    public void showInputMethodPickerFromClient(com.android.internal.view.IInputMethodClient)
+    {
+        com.android.server.InputMethodManagerService $r0;
+        com.android.internal.view.IInputMethodClient $r1, $r4;
+        java.util.HashMap $r2;
+        com.android.server.InputMethodManagerService$ClientState $r3;
+        android.os.IBinder $r5, $r6;
+        java.lang.StringBuilder $r7;
+        java.lang.String $r8;
+        android.os.Handler $r9;
+        java.lang.Throwable $r10;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r1 := @parameter0: com.android.internal.view.IInputMethodClient;
+
+        $r2 = $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mMethodMap>;
+
+        entermonitor $r2;
+
+     label1:
+        $r3 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        if $r3 == null goto label2;
+
+        if $r1 == null goto label2;
+
+        $r3 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        $r4 = $r3.<com.android.server.InputMethodManagerService$ClientState: com.android.internal.view.IInputMethodClient client>;
+
+        $r5 = interfaceinvoke $r4.<com.android.internal.view.IInputMethodClient: android.os.IBinder asBinder()>();
+
+        $r6 = interfaceinvoke $r1.<com.android.internal.view.IInputMethodClient: android.os.IBinder asBinder()>();
+
+        if $r5 == $r6 goto label3;
+
+     label2:
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignoring showInputMethodDialogFromClient of: ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("InputManagerService", $r8);
+
+     label3:
+        $r9 = $r0.<com.android.server.InputMethodManagerService: android.os.Handler mHandler>;
+
+        virtualinvoke $r9.<android.os.Handler: boolean sendEmptyMessage(int)>(1);
+
+        exitmonitor $r2;
+
+     label4:
+        return;
+
+     label5:
+        $r10 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label6:
+        throw $r10;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public void showMySoftInput(android.os.IBinder, int)
+    {
+        com.android.server.InputMethodManagerService $r0;
+        android.os.IBinder $r1, $r3;
+        int $i0;
+        java.util.HashMap $r2;
+        java.lang.StringBuilder $r4;
+        java.lang.String $r5;
+        long $l1;
+        java.lang.Throwable $r6, $r7;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r1 := @parameter0: android.os.IBinder;
+
+        $i0 := @parameter1: int;
+
+        $r2 = $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mMethodMap>;
+
+        entermonitor $r2;
+
+        if $r1 == null goto label02;
+
+     label01:
+        $r3 = $r0.<com.android.server.InputMethodManagerService: android.os.IBinder mCurToken>;
+
+        if $r3 == $r1 goto label04;
+
+     label02:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignoring hideInputMethod of token: ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("InputManagerService", $r5);
+
+        exitmonitor $r2;
+
+     label03:
+        return;
+
+     label04:
+        $l1 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label05:
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: boolean showCurrentInputLocked(int,android.os.ResultReceiver)>($i0, null);
+
+     label06:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        exitmonitor $r2;
+
+     label07:
+        return;
+
+     label08:
+        $r6 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label09:
+        throw $r6;
+
+     label10:
+        $r7 := @caughtexception;
+
+     label11:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        throw $r7;
+
+     label12:
+        nop;
+
+        catch java.lang.Throwable from label01 to label03 with label08;
+        catch java.lang.Throwable from label04 to label05 with label08;
+        catch java.lang.Throwable from label05 to label06 with label10;
+        catch java.lang.Throwable from label06 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+        catch java.lang.Throwable from label11 to label12 with label08;
+    }
+
+    public boolean showSoftInput(com.android.internal.view.IInputMethodClient, int, android.os.ResultReceiver)
+    {
+        com.android.server.InputMethodManagerService $r0;
+        com.android.internal.view.IInputMethodClient $r1, $r5;
+        int $i0;
+        android.os.ResultReceiver $r2;
+        long $l1;
+        java.util.HashMap $r3;
+        com.android.server.InputMethodManagerService$ClientState $r4;
+        android.os.IBinder $r6, $r7;
+        android.view.IWindowManager $r8;
+        boolean $z0;
+        java.lang.StringBuilder $r9;
+        java.lang.String $r10;
+        android.os.RemoteException $r11;
+        java.lang.Throwable $r12, $r13;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r1 := @parameter0: com.android.internal.view.IInputMethodClient;
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: android.os.ResultReceiver;
+
+        $l1 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label01:
+        $r3 = $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mMethodMap>;
+
+        entermonitor $r3;
+
+     label02:
+        $r4 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        if $r4 == null goto label04;
+
+        if $r1 == null goto label04;
+
+        $r4 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        $r5 = $r4.<com.android.server.InputMethodManagerService$ClientState: com.android.internal.view.IInputMethodClient client>;
+
+        $r6 = interfaceinvoke $r5.<com.android.internal.view.IInputMethodClient: android.os.IBinder asBinder()>();
+
+        $r7 = interfaceinvoke $r1.<com.android.internal.view.IInputMethodClient: android.os.IBinder asBinder()>();
+
+     label03:
+        if $r6 == $r7 goto label13;
+
+     label04:
+        $r8 = $r0.<com.android.server.InputMethodManagerService: android.view.IWindowManager mIWindowManager>;
+
+     label05:
+        $z0 = interfaceinvoke $r8.<android.view.IWindowManager: boolean inputMethodClientHasFocus(com.android.internal.view.IInputMethodClient)>($r1);
+
+     label06:
+        if $z0 != 0 goto label13;
+
+     label07:
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignoring showSoftInput of: ");
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("InputManagerService", $r10);
+
+     label08:
+        exitmonitor $r3;
+
+     label09:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        return 0;
+
+     label10:
+        $r11 := @caughtexception;
+
+     label11:
+        exitmonitor $r3;
+
+     label12:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        return 0;
+
+     label13:
+        $z0 = virtualinvoke $r0.<com.android.server.InputMethodManagerService: boolean showCurrentInputLocked(int,android.os.ResultReceiver)>($i0, $r2);
+
+        exitmonitor $r3;
+
+     label14:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        return $z0;
+
+     label15:
+        $r12 := @caughtexception;
+
+     label16:
+        exitmonitor $r3;
+
+     label17:
+        throw $r12;
+
+     label18:
+        $r13 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        throw $r13;
+
+        catch java.lang.Throwable from label01 to label02 with label18;
+        catch java.lang.Throwable from label02 to label03 with label15;
+        catch android.os.RemoteException from label05 to label06 with label10;
+        catch android.os.RemoteException from label07 to label08 with label10;
+        catch java.lang.Throwable from label04 to label08 with label15;
+        catch java.lang.Throwable from label08 to label09 with label15;
+        catch java.lang.Throwable from label11 to label12 with label15;
+        catch java.lang.Throwable from label13 to label14 with label15;
+        catch java.lang.Throwable from label16 to label17 with label15;
+        catch java.lang.Throwable from label17 to label18 with label18;
+    }
+
+    public com.android.internal.view.InputBindResult startInput(com.android.internal.view.IInputMethodClient, com.android.internal.view.IInputContext, android.view.inputmethod.EditorInfo, boolean, boolean)
+    {
+        com.android.server.InputMethodManagerService $r0;
+        com.android.internal.view.IInputMethodClient $r1;
+        com.android.internal.view.IInputContext $r2;
+        android.view.inputmethod.EditorInfo $r3;
+        boolean $z0, $z1;
+        java.util.HashMap $r4;
+        long $l0;
+        com.android.internal.view.InputBindResult $r5;
+        java.lang.Throwable $r6, $r7;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r1 := @parameter0: com.android.internal.view.IInputMethodClient;
+
+        $r2 := @parameter1: com.android.internal.view.IInputContext;
+
+        $r3 := @parameter2: android.view.inputmethod.EditorInfo;
+
+        $z0 := @parameter3: boolean;
+
+        $z1 := @parameter4: boolean;
+
+        $r4 = $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mMethodMap>;
+
+        entermonitor $r4;
+
+     label1:
+        $l0 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label2:
+        $r5 = virtualinvoke $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.InputBindResult startInputLocked(com.android.internal.view.IInputMethodClient,com.android.internal.view.IInputContext,android.view.inputmethod.EditorInfo,boolean,boolean)>($r1, $r2, $r3, $z0, $z1);
+
+     label3:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l0);
+
+        exitmonitor $r4;
+
+     label4:
+        return $r5;
+
+     label5:
+        $r6 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l0);
+
+        throw $r6;
+
+     label6:
+        $r7 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label7:
+        throw $r7;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label2 to label3 with label5;
+        catch java.lang.Throwable from label3 to label4 with label6;
+        catch java.lang.Throwable from label5 to label7 with label6;
+    }
+
+    com.android.internal.view.InputBindResult startInputLocked(com.android.internal.view.IInputMethodClient, com.android.internal.view.IInputContext, android.view.inputmethod.EditorInfo, boolean, boolean)
+    {
+        com.android.server.InputMethodManagerService $r0;
+        com.android.internal.view.IInputMethodClient $r1;
+        com.android.internal.view.IInputContext $r2;
+        android.view.inputmethod.EditorInfo $r3;
+        boolean $z0, $z1, $z2;
+        java.lang.String $r4, $r15;
+        com.android.internal.view.InputBindResult $r5, r36;
+        java.util.HashMap $r6;
+        android.os.IBinder $r7;
+        java.lang.Object $r8;
+        com.android.server.InputMethodManagerService$ClientState $r9, $r14;
+        java.lang.StringBuilder $r11, r33;
+        android.view.IWindowManager $r12;
+        int $i0;
+        android.os.RemoteException $r13, $r17, $r32;
+        com.android.server.InputMethodManagerService$SessionState $r16;
+        com.android.internal.view.IInputMethod $r18, $r20, $r22;
+        com.android.internal.os.HandlerCaller $r19;
+        android.os.Message $r23;
+        long $l1, $l2;
+        byte $b3;
+        java.lang.Object[] $r24;
+        java.lang.Long $r25;
+        java.lang.Integer $r26;
+        android.view.inputmethod.InputMethodInfo $r27;
+        android.content.Intent $r28, r37;
+        android.content.ComponentName $r29;
+        android.content.Context $r30;
+        java.lang.IllegalArgumentException r34;
+        com.android.server.InputMethodManagerService$MethodCallback r35;
+        android.os.Binder r38;
+        android.os.IInterface r39;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r1 := @parameter0: com.android.internal.view.IInputMethodClient;
+
+        $r2 := @parameter1: com.android.internal.view.IInputContext;
+
+        $r3 := @parameter2: android.view.inputmethod.EditorInfo;
+
+        $z0 := @parameter3: boolean;
+
+        $z1 := @parameter4: boolean;
+
+        $r4 = $r0.<com.android.server.InputMethodManagerService: java.lang.String mCurMethodId>;
+
+        if $r4 != null goto label01;
+
+        $r5 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.InputBindResult mNoBinding>;
+
+        return $r5;
+
+     label01:
+        $r6 = $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mClients>;
+
+        $r7 = interfaceinvoke $r1.<com.android.internal.view.IInputMethodClient: android.os.IBinder asBinder()>();
+
+        $r8 = virtualinvoke $r6.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r7);
+
+        $r9 = (com.android.server.InputMethodManagerService$ClientState) $r8;
+
+        if $r9 != null goto label02;
+
+        r34 = new java.lang.IllegalArgumentException;
+
+        r33 = new java.lang.StringBuilder;
+
+        specialinvoke r33.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unknown client ");
+
+        $r7 = interfaceinvoke $r1.<com.android.internal.view.IInputMethodClient: android.os.IBinder asBinder()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r7);
+
+        $r4 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r34.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r4);
+
+        throw r34;
+
+     label02:
+        $r12 = $r0.<com.android.server.InputMethodManagerService: android.view.IWindowManager mIWindowManager>;
+
+        $r1 = $r9.<com.android.server.InputMethodManagerService$ClientState: com.android.internal.view.IInputMethodClient client>;
+
+     label03:
+        $z2 = interfaceinvoke $r12.<android.view.IWindowManager: boolean inputMethodClientHasFocus(com.android.internal.view.IInputMethodClient)>($r1);
+
+     label04:
+        if $z2 != 0 goto label08;
+
+        r33 = new java.lang.StringBuilder;
+
+     label05:
+        specialinvoke r33.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Starting input on non-focused client ");
+
+        $r1 = $r9.<com.android.server.InputMethodManagerService$ClientState: com.android.internal.view.IInputMethodClient client>;
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" (uid=");
+
+        $i0 = $r9.<com.android.server.InputMethodManagerService$ClientState: int uid>;
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" pid=");
+
+        $i0 = $r9.<com.android.server.InputMethodManagerService$ClientState: int pid>;
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r4 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("InputManagerService", $r4);
+
+     label06:
+        return null;
+
+     label07:
+        $r13 := @caughtexception;
+
+     label08:
+        $r14 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        if $r14 == $r9 goto label10;
+
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: void unbindCurrentClientLocked()>();
+
+        $z2 = $r0.<com.android.server.InputMethodManagerService: boolean mScreenOn>;
+
+        if $z2 == 0 goto label10;
+
+        $r1 = $r9.<com.android.server.InputMethodManagerService$ClientState: com.android.internal.view.IInputMethodClient client>;
+
+        $z2 = $r0.<com.android.server.InputMethodManagerService: boolean mScreenOn>;
+
+     label09:
+        interfaceinvoke $r1.<com.android.internal.view.IInputMethodClient: void setActive(boolean)>($z2);
+
+     label10:
+        $i0 = $r0.<com.android.server.InputMethodManagerService: int mCurSeq>;
+
+        $i0 = $i0 + 1;
+
+        $r0.<com.android.server.InputMethodManagerService: int mCurSeq> = $i0;
+
+        $i0 = $r0.<com.android.server.InputMethodManagerService: int mCurSeq>;
+
+        if $i0 > 0 goto label11;
+
+        $r0.<com.android.server.InputMethodManagerService: int mCurSeq> = 1;
+
+     label11:
+        $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient> = $r9;
+
+        $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputContext mCurInputContext> = $r2;
+
+        $r0.<com.android.server.InputMethodManagerService: android.view.inputmethod.EditorInfo mCurAttribute> = $r3;
+
+        $r4 = $r0.<com.android.server.InputMethodManagerService: java.lang.String mCurId>;
+
+        if $r4 == null goto label17;
+
+        $r4 = $r0.<com.android.server.InputMethodManagerService: java.lang.String mCurId>;
+
+        $r15 = $r0.<com.android.server.InputMethodManagerService: java.lang.String mCurMethodId>;
+
+        $z2 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>($r15);
+
+        if $z2 == 0 goto label17;
+
+        $r16 = $r9.<com.android.server.InputMethodManagerService$ClientState: com.android.server.InputMethodManagerService$SessionState curSession>;
+
+        if $r16 == null goto label13;
+
+        $r5 = virtualinvoke $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.InputBindResult attachNewInputLocked(boolean,boolean)>($z0, $z1);
+
+        return $r5;
+
+     label12:
+        $r17 := @caughtexception;
+
+        r33 = new java.lang.StringBuilder;
+
+        specialinvoke r33.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Got RemoteException sending setActive notification to pid ");
+
+        $i0 = $r9.<com.android.server.InputMethodManagerService$ClientState: int pid>;
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" uid ");
+
+        $i0 = $r9.<com.android.server.InputMethodManagerService$ClientState: int uid>;
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("InputManagerService", $r4);
+
+        goto label10;
+
+     label13:
+        $z0 = $r0.<com.android.server.InputMethodManagerService: boolean mHaveConnection>;
+
+        if $z0 == 0 goto label17;
+
+        $r18 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputMethod mCurMethod>;
+
+        if $r18 == null goto label15;
+
+        $z0 = $r9.<com.android.server.InputMethodManagerService$ClientState: boolean sessionRequested>;
+
+        if $z0 != 0 goto label14;
+
+        $r9.<com.android.server.InputMethodManagerService$ClientState: boolean sessionRequested> = 1;
+
+        $r18 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputMethod mCurMethod>;
+
+        $r19 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.os.HandlerCaller mCaller>;
+
+        $r20 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputMethod mCurMethod>;
+
+        r35 = new com.android.server.InputMethodManagerService$MethodCallback;
+
+        $r22 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputMethod mCurMethod>;
+
+        specialinvoke r35.<com.android.server.InputMethodManagerService$MethodCallback: void <init>(com.android.server.InputMethodManagerService,com.android.internal.view.IInputMethod)>($r0, $r22);
+
+        $r23 = virtualinvoke $r19.<com.android.internal.os.HandlerCaller: android.os.Message obtainMessageOO(int,java.lang.Object,java.lang.Object)>(1050, $r20, r35);
+
+        r39 = (android.os.IInterface) $r18;
+
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: void executeOrSendMessage(android.os.IInterface,android.os.Message)>(r39, $r23);
+
+     label14:
+        r36 = new com.android.internal.view.InputBindResult;
+
+        $r4 = $r0.<com.android.server.InputMethodManagerService: java.lang.String mCurId>;
+
+        $i0 = $r0.<com.android.server.InputMethodManagerService: int mCurSeq>;
+
+        specialinvoke r36.<com.android.internal.view.InputBindResult: void <init>(com.android.internal.view.IInputMethodSession,java.lang.String,int)>(null, $r4, $i0);
+
+        return r36;
+
+     label15:
+        $l1 = staticinvoke <android.os.SystemClock: long uptimeMillis()>();
+
+        $l2 = $r0.<com.android.server.InputMethodManagerService: long mLastBindTime>;
+
+        $l2 = $l2 + 10000L;
+
+        $b3 = $l1 cmp $l2;
+
+        if $b3 >= 0 goto label16;
+
+        r36 = new com.android.internal.view.InputBindResult;
+
+        $r4 = $r0.<com.android.server.InputMethodManagerService: java.lang.String mCurId>;
+
+        $i0 = $r0.<com.android.server.InputMethodManagerService: int mCurSeq>;
+
+        specialinvoke r36.<com.android.internal.view.InputBindResult: void <init>(com.android.internal.view.IInputMethodSession,java.lang.String,int)>(null, $r4, $i0);
+
+        return r36;
+
+     label16:
+        $r24 = newarray (java.lang.Object)[3];
+
+        $r4 = $r0.<com.android.server.InputMethodManagerService: java.lang.String mCurMethodId>;
+
+        $r24[0] = $r4;
+
+        $l1 = staticinvoke <android.os.SystemClock: long uptimeMillis()>();
+
+        $l2 = $r0.<com.android.server.InputMethodManagerService: long mLastBindTime>;
+
+        $l1 = $l1 - $l2;
+
+        $r25 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l1);
+
+        $r24[1] = $r25;
+
+        $r26 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+        $r24[2] = $r26;
+
+        staticinvoke <android.util.EventLog: int writeEvent(int,java.lang.Object[])>(32000, $r24);
+
+     label17:
+        $r6 = $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mMethodMap>;
+
+        $r4 = $r0.<com.android.server.InputMethodManagerService: java.lang.String mCurMethodId>;
+
+        $r8 = virtualinvoke $r6.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r4);
+
+        $r27 = (android.view.inputmethod.InputMethodInfo) $r8;
+
+        if $r27 != null goto label18;
+
+        r34 = new java.lang.IllegalArgumentException;
+
+        r33 = new java.lang.StringBuilder;
+
+        specialinvoke r33.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown id: ");
+
+        $r4 = $r0.<com.android.server.InputMethodManagerService: java.lang.String mCurMethodId>;
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r34.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r4);
+
+        throw r34;
+
+     label18:
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: void unbindCurrentMethodLocked(boolean)>(0);
+
+        r37 = new android.content.Intent;
+
+        specialinvoke r37.<android.content.Intent: void <init>(java.lang.String)>("android.view.InputMethod");
+
+        $r0.<com.android.server.InputMethodManagerService: android.content.Intent mCurIntent> = r37;
+
+        $r28 = $r0.<com.android.server.InputMethodManagerService: android.content.Intent mCurIntent>;
+
+        $r29 = virtualinvoke $r27.<android.view.inputmethod.InputMethodInfo: android.content.ComponentName getComponent()>();
+
+        virtualinvoke $r28.<android.content.Intent: android.content.Intent setComponent(android.content.ComponentName)>($r29);
+
+        $r30 = $r0.<com.android.server.InputMethodManagerService: android.content.Context mContext>;
+
+        $r28 = $r0.<com.android.server.InputMethodManagerService: android.content.Intent mCurIntent>;
+
+        $z0 = virtualinvoke $r30.<android.content.Context: boolean bindService(android.content.Intent,android.content.ServiceConnection,int)>($r28, $r0, 1);
+
+        if $z0 == 0 goto label21;
+
+        $l1 = staticinvoke <android.os.SystemClock: long uptimeMillis()>();
+
+        $r0.<com.android.server.InputMethodManagerService: long mLastBindTime> = $l1;
+
+        $r0.<com.android.server.InputMethodManagerService: boolean mHaveConnection> = 1;
+
+        $r4 = virtualinvoke $r27.<android.view.inputmethod.InputMethodInfo: java.lang.String getId()>();
+
+        $r0.<com.android.server.InputMethodManagerService: java.lang.String mCurId> = $r4;
+
+        r38 = new android.os.Binder;
+
+        specialinvoke r38.<android.os.Binder: void <init>()>();
+
+        $r0.<com.android.server.InputMethodManagerService: android.os.IBinder mCurToken> = r38;
+
+        $r12 = $r0.<com.android.server.InputMethodManagerService: android.view.IWindowManager mIWindowManager>;
+
+        $r7 = $r0.<com.android.server.InputMethodManagerService: android.os.IBinder mCurToken>;
+
+     label19:
+        interfaceinvoke $r12.<android.view.IWindowManager: void addWindowToken(android.os.IBinder,int)>($r7, 2011);
+
+     label20:
+        r36 = new com.android.internal.view.InputBindResult;
+
+        $r4 = $r0.<com.android.server.InputMethodManagerService: java.lang.String mCurId>;
+
+        $i0 = $r0.<com.android.server.InputMethodManagerService: int mCurSeq>;
+
+        specialinvoke r36.<com.android.internal.view.InputBindResult: void <init>(com.android.internal.view.IInputMethodSession,java.lang.String,int)>(null, $r4, $i0);
+
+        return r36;
+
+     label21:
+        $r0.<com.android.server.InputMethodManagerService: android.content.Intent mCurIntent> = null;
+
+        r33 = new java.lang.StringBuilder;
+
+        specialinvoke r33.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke r33.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failure connecting to input method service: ");
+
+        $r28 = $r0.<com.android.server.InputMethodManagerService: android.content.Intent mCurIntent>;
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r28);
+
+        $r4 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("InputManagerService", $r4);
+
+        return null;
+
+     label22:
+        $r32 := @caughtexception;
+
+        goto label20;
+
+        catch android.os.RemoteException from label03 to label04 with label07;
+        catch android.os.RemoteException from label05 to label06 with label07;
+        catch android.os.RemoteException from label09 to label10 with label12;
+        catch android.os.RemoteException from label19 to label20 with label22;
+    }
+
+    public void systemReady()
+    {
+        com.android.server.InputMethodManagerService $r0;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        return;
+    }
+
+    void unbindCurrentClientLocked()
+    {
+        com.android.server.InputMethodManagerService $r0;
+        com.android.server.InputMethodManagerService$ClientState $r1;
+        boolean $z0;
+        com.android.internal.view.IInputMethod $r2, $r4;
+        com.android.internal.os.HandlerCaller $r3;
+        android.os.Message $r5;
+        com.android.internal.view.IInputMethodClient $r6, $r7;
+        int $i0;
+        android.os.RemoteException $r8;
+        java.lang.StringBuilder $r9, r11;
+        java.lang.String $r10;
+        android.os.IInterface r12;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r1 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        if $r1 == null goto label5;
+
+        $z0 = $r0.<com.android.server.InputMethodManagerService: boolean mBoundToMethod>;
+
+        if $z0 == 0 goto label1;
+
+        $r0.<com.android.server.InputMethodManagerService: boolean mBoundToMethod> = 0;
+
+        $r2 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputMethod mCurMethod>;
+
+        if $r2 == null goto label1;
+
+        $r2 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputMethod mCurMethod>;
+
+        $r3 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.os.HandlerCaller mCaller>;
+
+        $r4 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.view.IInputMethod mCurMethod>;
+
+        $r5 = virtualinvoke $r3.<com.android.internal.os.HandlerCaller: android.os.Message obtainMessageO(int,java.lang.Object)>(1000, $r4);
+
+        r12 = (android.os.IInterface) $r2;
+
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: void executeOrSendMessage(android.os.IInterface,android.os.Message)>(r12, $r5);
+
+     label1:
+        $r1 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        $r6 = $r1.<com.android.server.InputMethodManagerService$ClientState: com.android.internal.view.IInputMethodClient client>;
+
+        $r3 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.os.HandlerCaller mCaller>;
+
+        $i0 = $r0.<com.android.server.InputMethodManagerService: int mCurSeq>;
+
+        $r1 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        $r7 = $r1.<com.android.server.InputMethodManagerService$ClientState: com.android.internal.view.IInputMethodClient client>;
+
+        $r5 = virtualinvoke $r3.<com.android.internal.os.HandlerCaller: android.os.Message obtainMessageIO(int,int,java.lang.Object)>(3000, $i0, $r7);
+
+        r12 = (android.os.IInterface) $r6;
+
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: void executeOrSendMessage(android.os.IInterface,android.os.Message)>(r12, $r5);
+
+        $r1 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        $r1.<com.android.server.InputMethodManagerService$ClientState: boolean sessionRequested> = 0;
+
+        $r1 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        $r6 = $r1.<com.android.server.InputMethodManagerService$ClientState: com.android.internal.view.IInputMethodClient client>;
+
+     label2:
+        interfaceinvoke $r6.<com.android.internal.view.IInputMethodClient: void setActive(boolean)>(0);
+
+     label3:
+        $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient> = null;
+
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: void hideInputMethodMenuLocked()>();
+
+        return;
+
+     label4:
+        $r8 := @caughtexception;
+
+        r11 = new java.lang.StringBuilder;
+
+        specialinvoke r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Got RemoteException sending setActive(false) notification to pid ");
+
+        $r1 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        $i0 = $r1.<com.android.server.InputMethodManagerService$ClientState: int pid>;
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" uid ");
+
+        $r1 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        $i0 = $r1.<com.android.server.InputMethodManagerService$ClientState: int uid>;
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("InputManagerService", $r10);
+
+        goto label3;
+
+     label5:
+        return;
+
+        catch android.os.RemoteException from label2 to label3 with label4;
+    }
+
+    void unbindCurrentMethodLocked(boolean)
+    {
+        com.android.server.InputMethodManagerService $r0;
+        boolean $z0, $z1;
+        int $i0;
+        android.os.Message $r1;
+        android.content.Context $r2;
+        android.os.IBinder $r3;
+        android.view.IWindowManager $r4;
+        com.android.server.InputMethodManagerService$ClientState $r5;
+        com.android.internal.view.IInputMethodClient $r6, $r8;
+        com.android.internal.os.HandlerCaller $r7;
+        android.os.RemoteException $r9;
+        android.os.IInterface r10;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $z0 := @parameter0: boolean;
+
+        $z1 = $r0.<com.android.server.InputMethodManagerService: boolean mHaveConnection>;
+
+        if $z1 == 0 goto label1;
+
+        $r2 = $r0.<com.android.server.InputMethodManagerService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void unbindService(android.content.ServiceConnection)>($r0);
+
+        $r0.<com.android.server.InputMethodManagerService: boolean mHaveConnection> = 0;
+
+     label1:
+        $r3 = $r0.<com.android.server.InputMethodManagerService: android.os.IBinder mCurToken>;
+
+        if $r3 == null goto label4;
+
+        $r4 = $r0.<com.android.server.InputMethodManagerService: android.view.IWindowManager mIWindowManager>;
+
+        $r3 = $r0.<com.android.server.InputMethodManagerService: android.os.IBinder mCurToken>;
+
+     label2:
+        interfaceinvoke $r4.<android.view.IWindowManager: void removeWindowToken(android.os.IBinder)>($r3);
+
+     label3:
+        $r0.<com.android.server.InputMethodManagerService: android.os.IBinder mCurToken> = null;
+
+     label4:
+        $r0.<com.android.server.InputMethodManagerService: java.lang.String mCurId> = null;
+
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: void clearCurMethodLocked()>();
+
+        if $z0 == 0 goto label6;
+
+        $r5 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        if $r5 == null goto label7;
+
+        $r5 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        $r6 = $r5.<com.android.server.InputMethodManagerService$ClientState: com.android.internal.view.IInputMethodClient client>;
+
+        $r7 = $r0.<com.android.server.InputMethodManagerService: com.android.internal.os.HandlerCaller mCaller>;
+
+        $i0 = $r0.<com.android.server.InputMethodManagerService: int mCurSeq>;
+
+        $r5 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        $r8 = $r5.<com.android.server.InputMethodManagerService$ClientState: com.android.internal.view.IInputMethodClient client>;
+
+        $r1 = virtualinvoke $r7.<com.android.internal.os.HandlerCaller: android.os.Message obtainMessageIO(int,int,java.lang.Object)>(3000, $i0, $r8);
+
+        r10 = (android.os.IInterface) $r6;
+
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: void executeOrSendMessage(android.os.IInterface,android.os.Message)>(r10, $r1);
+
+        return;
+
+     label5:
+        $r9 := @caughtexception;
+
+        goto label3;
+
+     label6:
+        return;
+
+     label7:
+        return;
+
+        catch android.os.RemoteException from label2 to label3 with label5;
+    }
+
+    void updateFromSettingsLocked()
+    {
+        com.android.server.InputMethodManagerService $r0;
+        java.lang.IllegalArgumentException $r1;
+        android.content.Context $r2;
+        android.content.ContentResolver $r3;
+        java.lang.String $r4;
+        int $i0;
+        java.lang.StringBuilder $r5;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r2 = $r0.<com.android.server.InputMethodManagerService: android.content.Context mContext>;
+
+        $r3 = virtualinvoke $r2.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r4 = staticinvoke <android.provider.Settings$Secure: java.lang.String getString(android.content.ContentResolver,java.lang.String)>($r3, "default_input_method");
+
+        if $r4 == null goto label4;
+
+        $i0 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        if $i0 <= 0 goto label4;
+
+     label1:
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: void setInputMethodLocked(java.lang.String)>($r4);
+
+     label2:
+        return;
+
+     label3:
+        $r1 := @caughtexception;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown input method from prefs: ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String,java.lang.Throwable)>("InputManagerService", $r4, $r1);
+
+        $r0.<com.android.server.InputMethodManagerService: java.lang.String mCurMethodId> = null;
+
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: void unbindCurrentMethodLocked(boolean)>(1);
+
+        return;
+
+     label4:
+        $r0.<com.android.server.InputMethodManagerService: java.lang.String mCurMethodId> = null;
+
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: void unbindCurrentMethodLocked(boolean)>(1);
+
+        return;
+
+        catch java.lang.IllegalArgumentException from label1 to label2 with label3;
+    }
+
+    public void updateStatusIcon(android.os.IBinder, java.lang.String, int)
+    {
+        com.android.server.InputMethodManagerService $r0;
+        android.os.IBinder $r1, $r3;
+        java.lang.String $r2;
+        int $i0;
+        long $l1;
+        java.lang.StringBuilder $r4;
+        java.util.HashMap $r5;
+        com.android.server.status.StatusBarService $r6;
+        com.android.server.status.IconData $r7;
+        java.lang.Throwable $r8, $r9;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r1 := @parameter0: android.os.IBinder;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $i0 := @parameter2: int;
+
+        $l1 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+        if $r1 == null goto label02;
+
+     label01:
+        $r3 = $r0.<com.android.server.InputMethodManagerService: android.os.IBinder mCurToken>;
+
+        if $r3 == $r1 goto label04;
+
+     label02:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignoring setInputMethod of token: ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r2 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("InputManagerService", $r2);
+
+     label03:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        return;
+
+     label04:
+        $r5 = $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mMethodMap>;
+
+        entermonitor $r5;
+
+     label05:
+        if $i0 != 0 goto label09;
+
+     label06:
+        $r6 = $r0.<com.android.server.InputMethodManagerService: com.android.server.status.StatusBarService mStatusBar>;
+
+        $r1 = $r0.<com.android.server.InputMethodManagerService: android.os.IBinder mInputMethodIcon>;
+
+        virtualinvoke $r6.<com.android.server.status.StatusBarService: void setIconVisibility(android.os.IBinder,boolean)>($r1, 0);
+
+     label07:
+        exitmonitor $r5;
+
+     label08:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        return;
+
+     label09:
+        if $r2 == null goto label07;
+
+     label10:
+        $r7 = $r0.<com.android.server.InputMethodManagerService: com.android.server.status.IconData mInputMethodData>;
+
+        $r7.<com.android.server.status.IconData: int iconId> = $i0;
+
+        $r7 = $r0.<com.android.server.InputMethodManagerService: com.android.server.status.IconData mInputMethodData>;
+
+        $r7.<com.android.server.status.IconData: java.lang.String iconPackage> = $r2;
+
+        $r6 = $r0.<com.android.server.InputMethodManagerService: com.android.server.status.StatusBarService mStatusBar>;
+
+        $r1 = $r0.<com.android.server.InputMethodManagerService: android.os.IBinder mInputMethodIcon>;
+
+        $r7 = $r0.<com.android.server.InputMethodManagerService: com.android.server.status.IconData mInputMethodData>;
+
+        virtualinvoke $r6.<com.android.server.status.StatusBarService: void updateIcon(android.os.IBinder,com.android.server.status.IconData,com.android.server.status.NotificationData)>($r1, $r7, null);
+
+        $r6 = $r0.<com.android.server.InputMethodManagerService: com.android.server.status.StatusBarService mStatusBar>;
+
+        $r1 = $r0.<com.android.server.InputMethodManagerService: android.os.IBinder mInputMethodIcon>;
+
+        virtualinvoke $r6.<com.android.server.status.StatusBarService: void setIconVisibility(android.os.IBinder,boolean)>($r1, 1);
+
+        goto label07;
+
+     label11:
+        $r8 := @caughtexception;
+
+        exitmonitor $r5;
+
+     label12:
+        throw $r8;
+
+     label13:
+        $r9 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        throw $r9;
+
+        catch java.lang.Throwable from label01 to label03 with label13;
+        catch java.lang.Throwable from label04 to label05 with label13;
+        catch java.lang.Throwable from label06 to label08 with label11;
+        catch java.lang.Throwable from label10 to label12 with label11;
+        catch java.lang.Throwable from label12 to label13 with label13;
+    }
+
+    public void windowGainedFocus(com.android.internal.view.IInputMethodClient, android.os.IBinder, boolean, boolean, int, boolean, int)
+    {
+        com.android.server.InputMethodManagerService $r0;
+        com.android.internal.view.IInputMethodClient $r1, $r5;
+        android.os.IBinder $r2, $r6, $r7;
+        boolean $z0, $z1, $z2;
+        int $i0, $i1, $i3;
+        long $l2;
+        java.util.HashMap $r3;
+        com.android.server.InputMethodManagerService$ClientState $r4;
+        android.view.IWindowManager $r8;
+        java.lang.StringBuilder $r9;
+        java.lang.String $r10;
+        android.os.RemoteException $r11;
+        java.lang.Throwable $r12, $r13;
+
+        $r0 := @this: com.android.server.InputMethodManagerService;
+
+        $r1 := @parameter0: com.android.internal.view.IInputMethodClient;
+
+        $r2 := @parameter1: android.os.IBinder;
+
+        $z0 := @parameter2: boolean;
+
+        $z1 := @parameter3: boolean;
+
+        $i0 := @parameter4: int;
+
+        $z2 := @parameter5: boolean;
+
+        $i1 := @parameter6: int;
+
+        $l2 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label01:
+        $r3 = $r0.<com.android.server.InputMethodManagerService: java.util.HashMap mMethodMap>;
+
+        entermonitor $r3;
+
+     label02:
+        $r4 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        if $r4 == null goto label04;
+
+        if $r1 == null goto label04;
+
+        $r4 = $r0.<com.android.server.InputMethodManagerService: com.android.server.InputMethodManagerService$ClientState mCurClient>;
+
+        $r5 = $r4.<com.android.server.InputMethodManagerService$ClientState: com.android.internal.view.IInputMethodClient client>;
+
+        $r6 = interfaceinvoke $r5.<com.android.internal.view.IInputMethodClient: android.os.IBinder asBinder()>();
+
+        $r7 = interfaceinvoke $r1.<com.android.internal.view.IInputMethodClient: android.os.IBinder asBinder()>();
+
+     label03:
+        if $r6 == $r7 goto label11;
+
+     label04:
+        $r8 = $r0.<com.android.server.InputMethodManagerService: android.view.IWindowManager mIWindowManager>;
+
+     label05:
+        $z0 = interfaceinvoke $r8.<android.view.IWindowManager: boolean inputMethodClientHasFocus(com.android.internal.view.IInputMethodClient)>($r1);
+
+     label06:
+        if $z0 != 0 goto label11;
+
+     label07:
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Client not active, ignoring focus gain of: ");
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("InputManagerService", $r10);
+
+     label08:
+        exitmonitor $r3;
+
+     label09:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l2);
+
+        return;
+
+     label10:
+        $r11 := @caughtexception;
+
+     label11:
+        $r6 = $r0.<com.android.server.InputMethodManagerService: android.os.IBinder mCurFocusedWindow>;
+
+        if $r6 != $r2 goto label13;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Window already focused, ignoring focus gain of: ");
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("InputManagerService", $r10);
+
+        exitmonitor $r3;
+
+     label12:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l2);
+
+        return;
+
+     label13:
+        $r0.<com.android.server.InputMethodManagerService: android.os.IBinder mCurFocusedWindow> = $r2;
+
+        $i3 = $i0 & 15;
+
+        lookupswitch($i3)
+        {
+            case 0: goto label16;
+            case 1: goto label14;
+            case 2: goto label23;
+            case 3: goto label24;
+            case 4: goto label25;
+            case 5: goto label26;
+            default: goto label14;
+        };
+
+     label14:
+        exitmonitor $r3;
+
+     label15:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l2);
+
+        return;
+
+     label16:
+        if $z1 == 0 goto label17;
+
+        $i3 = $i0 & 240;
+
+        if $i3 == 16 goto label21;
+
+     label17:
+        $z0 = staticinvoke <android.view.WindowManager$LayoutParams: boolean mayUseInputMethod(int)>($i1);
+
+        if $z0 == 0 goto label14;
+
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: boolean hideCurrentInputLocked(int,android.os.ResultReceiver)>(2, null);
+
+        goto label14;
+
+     label18:
+        $r12 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label19:
+        throw $r12;
+
+     label20:
+        $r13 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l2);
+
+        throw $r13;
+
+     label21:
+        if $z1 == 0 goto label14;
+
+        $i1 = $i0 & 240;
+
+        if $i1 != 16 goto label14;
+
+        $i0 = $i0 & 256;
+
+        if $i0 == 0 goto label14;
+
+     label22:
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: boolean showCurrentInputLocked(int,android.os.ResultReceiver)>(1, null);
+
+        goto label14;
+
+     label23:
+        $i0 = $i0 & 256;
+
+        if $i0 == 0 goto label14;
+
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: boolean hideCurrentInputLocked(int,android.os.ResultReceiver)>(0, null);
+
+        goto label14;
+
+     label24:
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: boolean hideCurrentInputLocked(int,android.os.ResultReceiver)>(0, null);
+
+        goto label14;
+
+     label25:
+        $i0 = $i0 & 256;
+
+        if $i0 == 0 goto label14;
+
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: boolean showCurrentInputLocked(int,android.os.ResultReceiver)>(1, null);
+
+        goto label14;
+
+     label26:
+        virtualinvoke $r0.<com.android.server.InputMethodManagerService: boolean showCurrentInputLocked(int,android.os.ResultReceiver)>(1, null);
+
+     label27:
+        goto label14;
+
+        catch java.lang.Throwable from label01 to label02 with label20;
+        catch java.lang.Throwable from label02 to label03 with label18;
+        catch android.os.RemoteException from label05 to label06 with label10;
+        catch android.os.RemoteException from label07 to label08 with label10;
+        catch java.lang.Throwable from label04 to label08 with label18;
+        catch java.lang.Throwable from label08 to label09 with label18;
+        catch java.lang.Throwable from label11 to label12 with label18;
+        catch java.lang.Throwable from label13 to label15 with label18;
+        catch java.lang.Throwable from label17 to label19 with label18;
+        catch java.lang.Throwable from label19 to label20 with label20;
+        catch java.lang.Throwable from label22 to label27 with label18;
+    }
+
+    public static void <clinit>()
+    {
+        <com.android.server.InputMethodManagerService: long TIME_TO_RECONNECT> = 10000L;
+
+        <com.android.server.InputMethodManagerService: java.lang.String TAG> = "InputManagerService";
+
+        <com.android.server.InputMethodManagerService: int MSG_UNBIND_METHOD> = 3000;
+
+        <com.android.server.InputMethodManagerService: int MSG_UNBIND_INPUT> = 1000;
+
+        <com.android.server.InputMethodManagerService: int MSG_START_INPUT> = 2000;
+
+        <com.android.server.InputMethodManagerService: int MSG_SHOW_SOFT_INPUT> = 1020;
+
+        <com.android.server.InputMethodManagerService: int MSG_SHOW_IM_PICKER> = 1;
+
+        <com.android.server.InputMethodManagerService: int MSG_RESTART_INPUT> = 2010;
+
+        <com.android.server.InputMethodManagerService: int MSG_HIDE_SOFT_INPUT> = 1030;
+
+        <com.android.server.InputMethodManagerService: int MSG_CREATE_SESSION> = 1050;
+
+        <com.android.server.InputMethodManagerService: int MSG_BIND_METHOD> = 3010;
+
+        <com.android.server.InputMethodManagerService: int MSG_BIND_INPUT> = 1010;
+
+        <com.android.server.InputMethodManagerService: int MSG_ATTACH_TOKEN> = 1040;
+
+        <com.android.server.InputMethodManagerService: int LOG_IMF_FORCE_RECONNECT_IME> = 32000;
+
+        <com.android.server.InputMethodManagerService: boolean DEBUG> = 0;
+
+        return;
+    }
+}

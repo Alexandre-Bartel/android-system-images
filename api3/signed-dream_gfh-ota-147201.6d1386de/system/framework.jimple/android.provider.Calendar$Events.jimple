@@ -1,0 +1,522 @@
+public final class android.provider.Calendar$Events extends java.lang.Object implements android.provider.BaseColumns, android.provider.Calendar$CalendarsColumns, android.provider.Calendar$EventsColumns, android.provider.SyncConstValue
+{
+    private static final java.lang.String[] ATTENDEES_COLUMNS;
+    public static final android.net.Uri CONTENT_URI;
+    public static final java.lang.String DEFAULT_SORT_ORDER;
+    public static final android.net.Uri DELETED_CONTENT_URI;
+    private static final java.lang.String[] FETCH_ENTRY_COLUMNS;
+    private static com.google.wireless.gdata.calendar.client.CalendarClient sCalendarClient;
+
+    static void <clinit>()
+    {
+        java.lang.String[] $r0;
+        android.net.Uri $r1;
+
+        <android.provider.Calendar$Events: java.lang.String DEFAULT_SORT_ORDER> = "";
+
+        $r0 = newarray (java.lang.String)[2];
+
+        $r0[0] = "_sync_account";
+
+        $r0[1] = "_sync_id";
+
+        <android.provider.Calendar$Events: java.lang.String[] FETCH_ENTRY_COLUMNS> = $r0;
+
+        $r0 = newarray (java.lang.String)[5];
+
+        $r0[0] = "attendeeName";
+
+        $r0[1] = "attendeeEmail";
+
+        $r0[2] = "attendeeRelationship";
+
+        $r0[3] = "attendeeType";
+
+        $r0[4] = "attendeeStatus";
+
+        <android.provider.Calendar$Events: java.lang.String[] ATTENDEES_COLUMNS> = $r0;
+
+        <android.provider.Calendar$Events: com.google.wireless.gdata.calendar.client.CalendarClient sCalendarClient> = null;
+
+        $r1 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>("content://calendar/events");
+
+        <android.provider.Calendar$Events: android.net.Uri CONTENT_URI> = $r1;
+
+        $r1 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>("content://calendar/deleted_events");
+
+        <android.provider.Calendar$Events: android.net.Uri DELETED_CONTENT_URI> = $r1;
+
+        return;
+    }
+
+    public void <init>()
+    {
+        android.provider.Calendar$Events $r0;
+
+        $r0 := @this: android.provider.Calendar$Events;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private static final void extractAttendeesIntoArrayList(com.google.wireless.gdata.calendar.data.EventEntry, java.util.ArrayList)
+    {
+        com.google.wireless.gdata.calendar.data.EventEntry $r0;
+        java.util.ArrayList $r1, $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+        java.util.Vector $r5;
+        int $i0, $i1;
+        java.lang.Object $r6;
+        com.google.wireless.gdata.calendar.data.Who $r7;
+        byte $b2;
+        java.lang.Byte $r8;
+
+        $r0 := @parameter0: com.google.wireless.gdata.calendar.data.EventEntry;
+
+        $r1 := @parameter1: java.util.ArrayList;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("EVENT: ");
+
+        $r4 = virtualinvoke $r0.<com.google.wireless.gdata.data.Entry: java.lang.String toString()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Calendar", $r4);
+
+        $r5 = virtualinvoke $r0.<com.google.wireless.gdata.calendar.data.EventEntry: java.util.Vector getAttendees()>();
+
+        if $r5 != null goto label3;
+
+        $i0 = 0;
+
+     label1:
+        $i1 = 0;
+
+     label2:
+        if $i1 >= $i0 goto label4;
+
+        $r6 = virtualinvoke $r5.<java.util.Vector: java.lang.Object elementAt(int)>($i1);
+
+        $r7 = (com.google.wireless.gdata.calendar.data.Who) $r6;
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        $r4 = virtualinvoke $r7.<com.google.wireless.gdata.calendar.data.Who: java.lang.String getValue()>();
+
+        virtualinvoke $r2.<java.util.ArrayList: boolean add(java.lang.Object)>($r4);
+
+        $r4 = virtualinvoke $r7.<com.google.wireless.gdata.calendar.data.Who: java.lang.String getEmail()>();
+
+        virtualinvoke $r2.<java.util.ArrayList: boolean add(java.lang.Object)>($r4);
+
+        $b2 = virtualinvoke $r7.<com.google.wireless.gdata.calendar.data.Who: byte getRelationship()>();
+
+        $r8 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>($b2);
+
+        virtualinvoke $r2.<java.util.ArrayList: boolean add(java.lang.Object)>($r8);
+
+        $b2 = virtualinvoke $r7.<com.google.wireless.gdata.calendar.data.Who: byte getType()>();
+
+        $r8 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>($b2);
+
+        virtualinvoke $r2.<java.util.ArrayList: boolean add(java.lang.Object)>($r8);
+
+        $b2 = virtualinvoke $r7.<com.google.wireless.gdata.calendar.data.Who: byte getStatus()>();
+
+        $r8 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>($b2);
+
+        virtualinvoke $r2.<java.util.ArrayList: boolean add(java.lang.Object)>($r8);
+
+        virtualinvoke $r1.<java.util.ArrayList: boolean add(java.lang.Object)>($r2);
+
+        $i1 = $i1 + 1;
+
+        goto label2;
+
+     label3:
+        $i0 = virtualinvoke $r5.<java.util.Vector: int size()>();
+
+        goto label1;
+
+     label4:
+        return;
+    }
+
+    private static java.lang.String extractValue(android.pim.ICalendar$Component, java.lang.String)
+    {
+        android.pim.ICalendar$Component $r0;
+        java.lang.String $r1;
+        android.pim.ICalendar$Property $r2;
+
+        $r0 := @parameter0: android.pim.ICalendar$Component;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $r2 = virtualinvoke $r0.<android.pim.ICalendar$Component: android.pim.ICalendar$Property getFirstProperty(java.lang.String)>($r1);
+
+        if $r2 == null goto label1;
+
+        $r1 = virtualinvoke $r2.<android.pim.ICalendar$Property: java.lang.String getValue()>();
+
+        return $r1;
+
+     label1:
+        return null;
+    }
+
+    private static com.google.wireless.gdata.calendar.client.CalendarClient getCalendarClient(android.content.ContentResolver)
+    {
+        android.content.ContentResolver $r0;
+        com.google.android.gdata.client.AndroidGDataClient $r1;
+        com.google.wireless.gdata.calendar.parser.xml.XmlCalendarGDataParserFactory $r2;
+        com.google.android.gdata.client.AndroidXmlParserFactory $r3;
+        com.google.wireless.gdata.calendar.client.CalendarClient $r4;
+        java.lang.Throwable $r5;
+
+        $r0 := @parameter0: android.content.ContentResolver;
+
+        entermonitor class "android/provider/Calendar$Events";
+
+     label1:
+        $r4 = <android.provider.Calendar$Events: com.google.wireless.gdata.calendar.client.CalendarClient sCalendarClient>;
+
+        if $r4 != null goto label2;
+
+        $r4 = new com.google.wireless.gdata.calendar.client.CalendarClient;
+
+        $r1 = new com.google.android.gdata.client.AndroidGDataClient;
+
+        specialinvoke $r1.<com.google.android.gdata.client.AndroidGDataClient: void <init>(android.content.ContentResolver)>($r0);
+
+        $r2 = new com.google.wireless.gdata.calendar.parser.xml.XmlCalendarGDataParserFactory;
+
+        $r3 = new com.google.android.gdata.client.AndroidXmlParserFactory;
+
+        specialinvoke $r3.<com.google.android.gdata.client.AndroidXmlParserFactory: void <init>()>();
+
+        specialinvoke $r2.<com.google.wireless.gdata.calendar.parser.xml.XmlCalendarGDataParserFactory: void <init>(com.google.wireless.gdata.parser.xml.XmlParserFactory)>($r3);
+
+        specialinvoke $r4.<com.google.wireless.gdata.calendar.client.CalendarClient: void <init>(com.google.wireless.gdata.client.GDataClient,com.google.wireless.gdata.client.GDataParserFactory)>($r1, $r2);
+
+        <android.provider.Calendar$Events: com.google.wireless.gdata.calendar.client.CalendarClient sCalendarClient> = $r4;
+
+     label2:
+        $r4 = <android.provider.Calendar$Events: com.google.wireless.gdata.calendar.client.CalendarClient sCalendarClient>;
+
+     label3:
+        exitmonitor class "android/provider/Calendar$Events";
+
+        return $r4;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor class "android/provider/Calendar$Events";
+
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+    }
+
+    public static final android.net.Uri insertVEvent(android.content.ContentResolver, android.pim.ICalendar$Component, long, int, android.content.ContentValues)
+    {
+        android.content.ContentValues $r0;
+        android.content.ContentResolver $r1;
+        android.pim.ICalendar$Component $r2;
+        long $l0;
+        int $i1;
+        java.lang.String $r3, $r7, $r10;
+        boolean $z0;
+        java.lang.Integer $r4;
+        java.lang.Long $r5;
+        android.text.format.Time $r6;
+        android.pim.ICalendar$Property $r8;
+        android.pim.ICalendar$Parameter $r9;
+        java.lang.Exception $r11, $r13;
+        java.lang.StringBuilder $r12;
+        android.net.Uri $r14;
+
+        $r1 := @parameter0: android.content.ContentResolver;
+
+        $r2 := @parameter1: android.pim.ICalendar$Component;
+
+        $l0 := @parameter2: long;
+
+        $i1 := @parameter3: int;
+
+        $r0 := @parameter4: android.content.ContentValues;
+
+        virtualinvoke $r0.<android.content.ContentValues: void clear()>();
+
+        $r3 = staticinvoke <android.provider.Calendar$Events: java.lang.String extractValue(android.pim.ICalendar$Component,java.lang.String)>($r2, "SUMMARY");
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r3);
+
+        if $z0 == 0 goto label01;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Calendar", "No SUMMARY provided for event.  Cannot import.");
+
+        return null;
+
+     label01:
+        virtualinvoke $r0.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("title", $r3);
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        virtualinvoke $r0.<android.content.ContentValues: void put(java.lang.String,java.lang.Integer)>("eventStatus", $r4);
+
+        $r3 = staticinvoke <android.provider.Calendar$Events: java.lang.String extractValue(android.pim.ICalendar$Component,java.lang.String)>($r2, "DESCRIPTION");
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r3);
+
+        if $z0 != 0 goto label02;
+
+        virtualinvoke $r0.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("description", $r3);
+
+     label02:
+        $r3 = staticinvoke <android.provider.Calendar$Events: java.lang.String extractValue(android.pim.ICalendar$Component,java.lang.String)>($r2, "LOCATION");
+
+        $z0 = staticinvoke <com.google.wireless.gdata.data.StringUtils: boolean isEmpty(java.lang.String)>($r3);
+
+        if $z0 != 0 goto label03;
+
+        virtualinvoke $r0.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("eventLocation", $r3);
+
+     label03:
+        $r5 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l0);
+
+        virtualinvoke $r0.<android.content.ContentValues: void put(java.lang.String,java.lang.Long)>("calendar_id", $r5);
+
+        $r6 = new android.text.format.Time;
+
+        specialinvoke $r6.<android.text.format.Time: void <init>(java.lang.String)>("UTC");
+
+        $r7 = null;
+
+        $r3 = null;
+
+        $r8 = virtualinvoke $r2.<android.pim.ICalendar$Component: android.pim.ICalendar$Property getFirstProperty(java.lang.String)>("DTSTART");
+
+        if $r8 == null goto label19;
+
+        $r7 = virtualinvoke $r8.<android.pim.ICalendar$Property: java.lang.String getValue()>();
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r7);
+
+        if $z0 != 0 goto label07;
+
+        $r9 = virtualinvoke $r8.<android.pim.ICalendar$Property: android.pim.ICalendar$Parameter getFirstParameter(java.lang.String)>("TZID");
+
+        if $r9 == null goto label04;
+
+        $r10 = $r9.<android.pim.ICalendar$Parameter: java.lang.String value>;
+
+        if $r10 == null goto label04;
+
+        $r10 = $r9.<android.pim.ICalendar$Parameter: java.lang.String value>;
+
+        virtualinvoke $r6.<android.text.format.Time: void clear(java.lang.String)>($r10);
+
+     label04:
+        virtualinvoke $r6.<android.text.format.Time: boolean parse(java.lang.String)>($r7);
+
+     label05:
+        $z0 = $r6.<android.text.format.Time: boolean allDay>;
+
+        if $z0 == 0 goto label06;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(1);
+
+        virtualinvoke $r0.<android.content.ContentValues: void put(java.lang.String,java.lang.Integer)>("allDay", $r4);
+
+     label06:
+        $l0 = virtualinvoke $r6.<android.text.format.Time: long toMillis(boolean)>(0);
+
+        $r5 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l0);
+
+        virtualinvoke $r0.<android.content.ContentValues: void put(java.lang.String,java.lang.Long)>("dtstart", $r5);
+
+        $r10 = $r6.<android.text.format.Time: java.lang.String timezone>;
+
+        virtualinvoke $r0.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("eventTimezone", $r10);
+
+     label07:
+        $r8 = virtualinvoke $r2.<android.pim.ICalendar$Component: android.pim.ICalendar$Property getFirstProperty(java.lang.String)>("DTEND");
+
+        if $r8 == null goto label14;
+
+        $r10 = virtualinvoke $r8.<android.pim.ICalendar$Property: java.lang.String getValue()>();
+
+        $r3 = $r10;
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r10);
+
+        if $z0 != 0 goto label18;
+
+     label08:
+        virtualinvoke $r6.<android.text.format.Time: boolean parse(java.lang.String)>($r10);
+
+     label09:
+        $l0 = virtualinvoke $r6.<android.text.format.Time: long toMillis(boolean)>(0);
+
+        $r5 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l0);
+
+        virtualinvoke $r0.<android.content.ContentValues: void put(java.lang.String,java.lang.Long)>("dtend", $r5);
+
+        $r10 = null;
+
+     label10:
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r7);
+
+        if $z0 != 0 goto label11;
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r3);
+
+        if $z0 == 0 goto label16;
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r10);
+
+        if $z0 == 0 goto label16;
+
+     label11:
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Calendar", "No DTSTART or DTEND/DURATION defined.");
+
+        return null;
+
+     label12:
+        $r11 := @caughtexception;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot parse dtstart ");
+
+        $r12 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r3 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String,java.lang.Throwable)>("Calendar", $r3, $r11);
+
+        return null;
+
+     label13:
+        $r13 := @caughtexception;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot parse dtend ");
+
+        $r12 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r3 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String,java.lang.Throwable)>("Calendar", $r3, $r13);
+
+        return null;
+
+     label14:
+        $r8 = virtualinvoke $r2.<android.pim.ICalendar$Component: android.pim.ICalendar$Property getFirstProperty(java.lang.String)>("DURATION");
+
+        if $r8 == null goto label18;
+
+        $r10 = virtualinvoke $r8.<android.pim.ICalendar$Property: java.lang.String getValue()>();
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r10);
+
+        if $z0 != 0 goto label15;
+
+        virtualinvoke $r0.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("duration", $r10);
+
+     label15:
+        goto label10;
+
+     label16:
+        $z0 = staticinvoke <android.pim.RecurrenceSet: boolean populateContentValues(android.pim.ICalendar$Component,android.content.ContentValues)>($r2, $r0);
+
+        if $z0 != 0 goto label17;
+
+        return null;
+
+     label17:
+        $r14 = <android.provider.Calendar$Events: android.net.Uri CONTENT_URI>;
+
+        $r14 = virtualinvoke $r1.<android.content.ContentResolver: android.net.Uri insert(android.net.Uri,android.content.ContentValues)>($r14, $r0);
+
+        return $r14;
+
+     label18:
+        $r10 = null;
+
+        goto label10;
+
+     label19:
+        $r10 = null;
+
+        goto label10;
+
+        catch java.lang.Exception from label04 to label05 with label12;
+        catch java.lang.Exception from label08 to label09 with label13;
+    }
+
+    public static final android.database.Cursor query(android.content.ContentResolver, java.lang.String[])
+    {
+        android.content.ContentResolver $r0;
+        java.lang.String[] $r1;
+        android.net.Uri $r2;
+        android.database.Cursor $r3;
+
+        $r0 := @parameter0: android.content.ContentResolver;
+
+        $r1 := @parameter1: java.lang.String[];
+
+        $r2 = <android.provider.Calendar$Events: android.net.Uri CONTENT_URI>;
+
+        $r3 = virtualinvoke $r0.<android.content.ContentResolver: android.database.Cursor query(android.net.Uri,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String)>($r2, $r1, null, null, "");
+
+        return $r3;
+    }
+
+    public static final android.database.Cursor query(android.content.ContentResolver, java.lang.String[], java.lang.String, java.lang.String)
+    {
+        android.content.ContentResolver $r0;
+        java.lang.String[] $r1;
+        java.lang.String $r2, $r3;
+        android.net.Uri $r4;
+        android.database.Cursor $r5;
+
+        $r0 := @parameter0: android.content.ContentResolver;
+
+        $r1 := @parameter1: java.lang.String[];
+
+        $r2 := @parameter2: java.lang.String;
+
+        $r3 := @parameter3: java.lang.String;
+
+        $r4 = <android.provider.Calendar$Events: android.net.Uri CONTENT_URI>;
+
+        if $r3 != null goto label2;
+
+        $r3 = "";
+
+     label1:
+        $r5 = virtualinvoke $r0.<android.content.ContentResolver: android.database.Cursor query(android.net.Uri,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String)>($r4, $r1, $r2, null, $r3);
+
+        return $r5;
+
+     label2:
+        goto label1;
+    }
+}

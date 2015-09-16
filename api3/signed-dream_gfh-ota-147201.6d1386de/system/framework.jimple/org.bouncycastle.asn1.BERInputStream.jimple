@@ -1,0 +1,310 @@
+public class org.bouncycastle.asn1.BERInputStream extends org.bouncycastle.asn1.DERInputStream
+{
+    private org.bouncycastle.asn1.DERObject END_OF_STREAM;
+
+    public void <init>(java.io.InputStream)
+    {
+        org.bouncycastle.asn1.BERInputStream $r0;
+        java.io.InputStream $r1;
+        org.bouncycastle.asn1.BERInputStream$1 $r2;
+
+        $r0 := @this: org.bouncycastle.asn1.BERInputStream;
+
+        $r1 := @parameter0: java.io.InputStream;
+
+        specialinvoke $r0.<org.bouncycastle.asn1.DERInputStream: void <init>(java.io.InputStream)>($r1);
+
+        $r2 = new org.bouncycastle.asn1.BERInputStream$1;
+
+        specialinvoke $r2.<org.bouncycastle.asn1.BERInputStream$1: void <init>(org.bouncycastle.asn1.BERInputStream)>($r0);
+
+        $r0.<org.bouncycastle.asn1.BERInputStream: org.bouncycastle.asn1.DERObject END_OF_STREAM> = $r2;
+
+        return;
+    }
+
+    private org.bouncycastle.asn1.BERConstructedOctetString buildConstructedOctetString() throws java.io.IOException
+    {
+        org.bouncycastle.asn1.BERInputStream $r0;
+        java.util.Vector $r1;
+        org.bouncycastle.asn1.DERObject $r2, $r3;
+        org.bouncycastle.asn1.BERConstructedOctetString $r4;
+
+        $r0 := @this: org.bouncycastle.asn1.BERInputStream;
+
+        $r1 = new java.util.Vector;
+
+        specialinvoke $r1.<java.util.Vector: void <init>()>();
+
+     label1:
+        $r2 = virtualinvoke $r0.<org.bouncycastle.asn1.BERInputStream: org.bouncycastle.asn1.DERObject readObject()>();
+
+        $r3 = $r0.<org.bouncycastle.asn1.BERInputStream: org.bouncycastle.asn1.DERObject END_OF_STREAM>;
+
+        if $r2 != $r3 goto label2;
+
+        $r4 = new org.bouncycastle.asn1.BERConstructedOctetString;
+
+        specialinvoke $r4.<org.bouncycastle.asn1.BERConstructedOctetString: void <init>(java.util.Vector)>($r1);
+
+        return $r4;
+
+     label2:
+        virtualinvoke $r1.<java.util.Vector: void addElement(java.lang.Object)>($r2);
+
+        goto label1;
+    }
+
+    private byte[] readIndefiniteLengthFully() throws java.io.IOException
+    {
+        org.bouncycastle.asn1.BERInputStream $r0;
+        java.io.ByteArrayOutputStream $r1;
+        int $i0, $i1;
+        byte[] $r2;
+
+        $r0 := @this: org.bouncycastle.asn1.BERInputStream;
+
+        $r1 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r1.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        $i0 = virtualinvoke $r0.<java.io.FilterInputStream: int read()>();
+
+     label1:
+        $i1 = virtualinvoke $r0.<java.io.FilterInputStream: int read()>();
+
+        if $i1 < 0 goto label2;
+
+        if $i0 != 0 goto label3;
+
+        if $i1 != 0 goto label3;
+
+     label2:
+        $r2 = virtualinvoke $r1.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        return $r2;
+
+     label3:
+        virtualinvoke $r1.<java.io.ByteArrayOutputStream: void write(int)>($i0);
+
+        $i0 = $i1;
+
+        goto label1;
+    }
+
+    public org.bouncycastle.asn1.DERObject readObject() throws java.io.IOException
+    {
+        org.bouncycastle.asn1.BERInputStream $r0;
+        org.bouncycastle.asn1.ASN1EncodableVector $r1, r15;
+        int $i0, $i1;
+        org.bouncycastle.asn1.DERObject $r5, $r7, $r10, $r11;
+        org.bouncycastle.asn1.BERConstructedSequence $r6, r14;
+        org.bouncycastle.asn1.BERConstructedOctetString $r8;
+        byte[] $r9;
+        java.io.EOFException r12;
+        java.io.IOException r13;
+        org.bouncycastle.asn1.BERSet r16;
+        org.bouncycastle.asn1.DEROctetString r17;
+        org.bouncycastle.asn1.BERTaggedObject r18;
+        org.bouncycastle.asn1.DERTaggedObject r19;
+
+        $r0 := @this: org.bouncycastle.asn1.BERInputStream;
+
+        $i0 = virtualinvoke $r0.<java.io.FilterInputStream: int read()>();
+
+        if $i0 != -1 goto label01;
+
+        r12 = new java.io.EOFException;
+
+        specialinvoke r12.<java.io.EOFException: void <init>()>();
+
+        throw r12;
+
+     label01:
+        $i1 = virtualinvoke $r0.<org.bouncycastle.asn1.DERInputStream: int readLength()>();
+
+        if $i1 >= 0 goto label17;
+
+        lookupswitch($i0)
+        {
+            case 5: goto label03;
+            case 36: goto label07;
+            case 48: goto label04;
+            case 49: goto label08;
+            default: goto label02;
+        };
+
+     label02:
+        $i1 = $i0 & 128;
+
+        if $i1 == 0 goto label16;
+
+        $i1 = $i0 & 31;
+
+        if $i1 != 31 goto label11;
+
+        r13 = new java.io.IOException;
+
+        specialinvoke r13.<java.io.IOException: void <init>(java.lang.String)>("unsupported high tag encountered");
+
+        throw r13;
+
+     label03:
+        return null;
+
+     label04:
+        r14 = new org.bouncycastle.asn1.BERConstructedSequence;
+
+        $r6 = r14;
+
+        specialinvoke r14.<org.bouncycastle.asn1.BERConstructedSequence: void <init>()>();
+
+     label05:
+        $r7 = virtualinvoke $r0.<org.bouncycastle.asn1.BERInputStream: org.bouncycastle.asn1.DERObject readObject()>();
+
+        $r5 = $r0.<org.bouncycastle.asn1.BERInputStream: org.bouncycastle.asn1.DERObject END_OF_STREAM>;
+
+        if $r7 != $r5 goto label06;
+
+        return $r6;
+
+     label06:
+        virtualinvoke $r6.<org.bouncycastle.asn1.DERConstructedSequence: void addObject(org.bouncycastle.asn1.DEREncodable)>($r7);
+
+        goto label05;
+
+     label07:
+        $r8 = specialinvoke $r0.<org.bouncycastle.asn1.BERInputStream: org.bouncycastle.asn1.BERConstructedOctetString buildConstructedOctetString()>();
+
+        return $r8;
+
+     label08:
+        r15 = new org.bouncycastle.asn1.ASN1EncodableVector;
+
+        $r1 = r15;
+
+        specialinvoke r15.<org.bouncycastle.asn1.ASN1EncodableVector: void <init>()>();
+
+     label09:
+        $r7 = virtualinvoke $r0.<org.bouncycastle.asn1.BERInputStream: org.bouncycastle.asn1.DERObject readObject()>();
+
+        $r5 = $r0.<org.bouncycastle.asn1.BERInputStream: org.bouncycastle.asn1.DERObject END_OF_STREAM>;
+
+        if $r7 != $r5 goto label10;
+
+        r16 = new org.bouncycastle.asn1.BERSet;
+
+        specialinvoke r16.<org.bouncycastle.asn1.BERSet: void <init>(org.bouncycastle.asn1.DEREncodableVector)>($r1);
+
+        return r16;
+
+     label10:
+        virtualinvoke $r1.<org.bouncycastle.asn1.DEREncodableVector: void add(org.bouncycastle.asn1.DEREncodable)>($r7);
+
+        goto label09;
+
+     label11:
+        $i1 = $i0 & 32;
+
+        if $i1 != 0 goto label12;
+
+        $r9 = specialinvoke $r0.<org.bouncycastle.asn1.BERInputStream: byte[] readIndefiniteLengthFully()>();
+
+        r18 = new org.bouncycastle.asn1.BERTaggedObject;
+
+        $i0 = $i0 & 31;
+
+        r17 = new org.bouncycastle.asn1.DEROctetString;
+
+        specialinvoke r17.<org.bouncycastle.asn1.DEROctetString: void <init>(byte[])>($r9);
+
+        specialinvoke r18.<org.bouncycastle.asn1.BERTaggedObject: void <init>(boolean,int,org.bouncycastle.asn1.DEREncodable)>(0, $i0, r17);
+
+        return r18;
+
+     label12:
+        $r7 = virtualinvoke $r0.<org.bouncycastle.asn1.BERInputStream: org.bouncycastle.asn1.DERObject readObject()>();
+
+        $r5 = $r0.<org.bouncycastle.asn1.BERInputStream: org.bouncycastle.asn1.DERObject END_OF_STREAM>;
+
+        if $r7 != $r5 goto label13;
+
+        r19 = new org.bouncycastle.asn1.DERTaggedObject;
+
+        $i0 = $i0 & 31;
+
+        specialinvoke r19.<org.bouncycastle.asn1.DERTaggedObject: void <init>(int)>($i0);
+
+        return r19;
+
+     label13:
+        $r10 = virtualinvoke $r0.<org.bouncycastle.asn1.BERInputStream: org.bouncycastle.asn1.DERObject readObject()>();
+
+        $r5 = $r10;
+
+        $r11 = $r0.<org.bouncycastle.asn1.BERInputStream: org.bouncycastle.asn1.DERObject END_OF_STREAM>;
+
+        if $r10 != $r11 goto label14;
+
+        r18 = new org.bouncycastle.asn1.BERTaggedObject;
+
+        $i0 = $i0 & 31;
+
+        specialinvoke r18.<org.bouncycastle.asn1.BERTaggedObject: void <init>(int,org.bouncycastle.asn1.DEREncodable)>($i0, $r7);
+
+        return r18;
+
+     label14:
+        r14 = new org.bouncycastle.asn1.BERConstructedSequence;
+
+        $r6 = r14;
+
+        specialinvoke r14.<org.bouncycastle.asn1.BERConstructedSequence: void <init>()>();
+
+        virtualinvoke $r6.<org.bouncycastle.asn1.DERConstructedSequence: void addObject(org.bouncycastle.asn1.DEREncodable)>($r7);
+
+     label15:
+        virtualinvoke $r6.<org.bouncycastle.asn1.DERConstructedSequence: void addObject(org.bouncycastle.asn1.DEREncodable)>($r5);
+
+        $r7 = virtualinvoke $r0.<org.bouncycastle.asn1.BERInputStream: org.bouncycastle.asn1.DERObject readObject()>();
+
+        $r5 = $r7;
+
+        $r10 = $r0.<org.bouncycastle.asn1.BERInputStream: org.bouncycastle.asn1.DERObject END_OF_STREAM>;
+
+        if $r7 != $r10 goto label15;
+
+        r18 = new org.bouncycastle.asn1.BERTaggedObject;
+
+        $i0 = $i0 & 31;
+
+        specialinvoke r18.<org.bouncycastle.asn1.BERTaggedObject: void <init>(boolean,int,org.bouncycastle.asn1.DEREncodable)>(0, $i0, $r6);
+
+        return r18;
+
+     label16:
+        r13 = new java.io.IOException;
+
+        specialinvoke r13.<java.io.IOException: void <init>(java.lang.String)>("unknown BER object encountered");
+
+        throw r13;
+
+     label17:
+        if $i0 != 0 goto label18;
+
+        if $i1 != 0 goto label18;
+
+        $r7 = $r0.<org.bouncycastle.asn1.BERInputStream: org.bouncycastle.asn1.DERObject END_OF_STREAM>;
+
+        return $r7;
+
+     label18:
+        $r9 = newarray (byte)[$i1];
+
+        virtualinvoke $r0.<org.bouncycastle.asn1.DERInputStream: void readFully(byte[])>($r9);
+
+        $r7 = virtualinvoke $r0.<org.bouncycastle.asn1.DERInputStream: org.bouncycastle.asn1.DERObject buildObject(int,byte[])>($i0, $r9);
+
+        return $r7;
+    }
+}

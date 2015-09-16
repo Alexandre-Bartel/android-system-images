@@ -1,0 +1,1074 @@
+public class org.bouncycastle.jce.provider.JDKX509CertificateFactory extends java.security.cert.CertificateFactorySpi
+{
+    private static final long MAX_MEMORY;
+    private java.io.InputStream currentCrlStream;
+    private java.io.InputStream currentStream;
+    private org.bouncycastle.asn1.pkcs.SignedData sCrlData;
+    private int sCrlDataObjectCount;
+    private org.bouncycastle.asn1.pkcs.SignedData sData;
+    private int sDataObjectCount;
+
+    static void <clinit>()
+    {
+        java.lang.Runtime $r0;
+        long $l0;
+
+        $r0 = staticinvoke <java.lang.Runtime: java.lang.Runtime getRuntime()>();
+
+        $l0 = virtualinvoke $r0.<java.lang.Runtime: long maxMemory()>();
+
+        <org.bouncycastle.jce.provider.JDKX509CertificateFactory: long MAX_MEMORY> = $l0;
+
+        return;
+    }
+
+    public void <init>()
+    {
+        org.bouncycastle.jce.provider.JDKX509CertificateFactory $r0;
+
+        $r0 := @this: org.bouncycastle.jce.provider.JDKX509CertificateFactory;
+
+        specialinvoke $r0.<java.security.cert.CertificateFactorySpi: void <init>()>();
+
+        $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: org.bouncycastle.asn1.pkcs.SignedData sData> = null;
+
+        $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: int sDataObjectCount> = 0;
+
+        $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: java.io.InputStream currentStream> = null;
+
+        $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: org.bouncycastle.asn1.pkcs.SignedData sCrlData> = null;
+
+        $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: int sCrlDataObjectCount> = 0;
+
+        $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: java.io.InputStream currentCrlStream> = null;
+
+        return;
+    }
+
+    private int getLimit(java.io.InputStream) throws java.io.IOException
+    {
+        org.bouncycastle.jce.provider.JDKX509CertificateFactory $r0;
+        java.io.InputStream $r1;
+        int $i0;
+        boolean $z0;
+        long $l1;
+        byte $b2;
+
+        $r0 := @this: org.bouncycastle.jce.provider.JDKX509CertificateFactory;
+
+        $r1 := @parameter0: java.io.InputStream;
+
+        $z0 = $r1 instanceof java.io.ByteArrayInputStream;
+
+        if $z0 == 0 goto label1;
+
+        $i0 = virtualinvoke $r1.<java.io.InputStream: int available()>();
+
+        return $i0;
+
+     label1:
+        $l1 = <org.bouncycastle.jce.provider.JDKX509CertificateFactory: long MAX_MEMORY>;
+
+        $b2 = $l1 cmp 2147483647L;
+
+        if $b2 <= 0 goto label2;
+
+        return 2147483647;
+
+     label2:
+        $l1 = <org.bouncycastle.jce.provider.JDKX509CertificateFactory: long MAX_MEMORY>;
+
+        $i0 = (int) $l1;
+
+        return $i0;
+    }
+
+    private java.security.cert.CRL readDERCRL(org.bouncycastle.asn1.ASN1InputStream) throws java.io.IOException, java.security.cert.CRLException
+    {
+        org.bouncycastle.asn1.ASN1InputStream $r0;
+        org.bouncycastle.jce.provider.X509CRLObject $r1;
+        org.bouncycastle.asn1.x509.CertificateList $r2;
+        org.bouncycastle.asn1.DERObject $r3;
+        org.bouncycastle.jce.provider.JDKX509CertificateFactory $r4;
+        org.bouncycastle.asn1.ASN1Sequence $r5;
+
+        $r4 := @this: org.bouncycastle.jce.provider.JDKX509CertificateFactory;
+
+        $r0 := @parameter0: org.bouncycastle.asn1.ASN1InputStream;
+
+        $r1 = new org.bouncycastle.jce.provider.X509CRLObject;
+
+        $r2 = new org.bouncycastle.asn1.x509.CertificateList;
+
+        $r3 = virtualinvoke $r0.<org.bouncycastle.asn1.ASN1InputStream: org.bouncycastle.asn1.DERObject readObject()>();
+
+        $r5 = (org.bouncycastle.asn1.ASN1Sequence) $r3;
+
+        specialinvoke $r2.<org.bouncycastle.asn1.x509.CertificateList: void <init>(org.bouncycastle.asn1.ASN1Sequence)>($r5);
+
+        specialinvoke $r1.<org.bouncycastle.jce.provider.X509CRLObject: void <init>(org.bouncycastle.asn1.x509.CertificateList)>($r2);
+
+        return $r1;
+    }
+
+    private java.security.cert.Certificate readDERCertificate(org.bouncycastle.asn1.ASN1InputStream) throws java.io.IOException
+    {
+        org.bouncycastle.jce.provider.JDKX509CertificateFactory $r0;
+        org.bouncycastle.asn1.ASN1InputStream $r1;
+        int $i0, $i1;
+        org.bouncycastle.asn1.DERObject $r2;
+        org.bouncycastle.asn1.ASN1Sequence $r3;
+        org.bouncycastle.asn1.DEREncodable $r4;
+        boolean $z0;
+        org.bouncycastle.asn1.DERObjectIdentifier $r5;
+        org.bouncycastle.asn1.pkcs.SignedData $r6;
+        org.bouncycastle.asn1.ASN1TaggedObject $r7;
+        org.bouncycastle.jce.provider.X509CertificateObject $r8;
+        org.bouncycastle.asn1.ASN1Set $r9;
+        org.bouncycastle.asn1.x509.X509CertificateStructure $r10;
+
+        $r0 := @this: org.bouncycastle.jce.provider.JDKX509CertificateFactory;
+
+        $r1 := @parameter0: org.bouncycastle.asn1.ASN1InputStream;
+
+        $r2 = virtualinvoke $r1.<org.bouncycastle.asn1.ASN1InputStream: org.bouncycastle.asn1.DERObject readObject()>();
+
+        $r3 = (org.bouncycastle.asn1.ASN1Sequence) $r2;
+
+        $i0 = virtualinvoke $r3.<org.bouncycastle.asn1.ASN1Collection: int size()>();
+
+        if $i0 <= 1 goto label1;
+
+        $r4 = virtualinvoke $r3.<org.bouncycastle.asn1.ASN1Collection: org.bouncycastle.asn1.DEREncodable getObjectAt(int)>(0);
+
+        $z0 = $r4 instanceof org.bouncycastle.asn1.DERObjectIdentifier;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = virtualinvoke $r3.<org.bouncycastle.asn1.ASN1Collection: org.bouncycastle.asn1.DEREncodable getObjectAt(int)>(0);
+
+        $r5 = <org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers: org.bouncycastle.asn1.DERObjectIdentifier signedData>;
+
+        $z0 = virtualinvoke $r4.<java.lang.Object: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 == 0 goto label1;
+
+        $r6 = new org.bouncycastle.asn1.pkcs.SignedData;
+
+        $r4 = virtualinvoke $r3.<org.bouncycastle.asn1.ASN1Collection: org.bouncycastle.asn1.DEREncodable getObjectAt(int)>(1);
+
+        $r7 = (org.bouncycastle.asn1.ASN1TaggedObject) $r4;
+
+        $r3 = staticinvoke <org.bouncycastle.asn1.ASN1Sequence: org.bouncycastle.asn1.ASN1Sequence getInstance(org.bouncycastle.asn1.ASN1TaggedObject,boolean)>($r7, 1);
+
+        specialinvoke $r6.<org.bouncycastle.asn1.pkcs.SignedData: void <init>(org.bouncycastle.asn1.ASN1Sequence)>($r3);
+
+        $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: org.bouncycastle.asn1.pkcs.SignedData sData> = $r6;
+
+        $r8 = new org.bouncycastle.jce.provider.X509CertificateObject;
+
+        $r6 = $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: org.bouncycastle.asn1.pkcs.SignedData sData>;
+
+        $r9 = virtualinvoke $r6.<org.bouncycastle.asn1.pkcs.SignedData: org.bouncycastle.asn1.ASN1Set getCertificates()>();
+
+        $i1 = $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: int sDataObjectCount>;
+
+        $i0 = $i1 + 1;
+
+        $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: int sDataObjectCount> = $i0;
+
+        $r4 = virtualinvoke $r9.<org.bouncycastle.asn1.ASN1Collection: org.bouncycastle.asn1.DEREncodable getObjectAt(int)>($i1);
+
+        $r10 = staticinvoke <org.bouncycastle.asn1.x509.X509CertificateStructure: org.bouncycastle.asn1.x509.X509CertificateStructure getInstance(java.lang.Object)>($r4);
+
+        specialinvoke $r8.<org.bouncycastle.jce.provider.X509CertificateObject: void <init>(org.bouncycastle.asn1.x509.X509CertificateStructure)>($r10);
+
+        return $r8;
+
+     label1:
+        $r8 = new org.bouncycastle.jce.provider.X509CertificateObject;
+
+        $r10 = staticinvoke <org.bouncycastle.asn1.x509.X509CertificateStructure: org.bouncycastle.asn1.x509.X509CertificateStructure getInstance(java.lang.Object)>($r3);
+
+        specialinvoke $r8.<org.bouncycastle.jce.provider.X509CertificateObject: void <init>(org.bouncycastle.asn1.x509.X509CertificateStructure)>($r10);
+
+        return $r8;
+    }
+
+    private java.lang.String readLine(java.io.InputStream) throws java.io.IOException
+    {
+        org.bouncycastle.jce.provider.JDKX509CertificateFactory $r0;
+        java.io.InputStream $r1;
+        java.lang.StringBuffer $r2;
+        int $i0;
+        char $c1;
+        java.lang.String $r3;
+
+        $r0 := @this: org.bouncycastle.jce.provider.JDKX509CertificateFactory;
+
+        $r1 := @parameter0: java.io.InputStream;
+
+        $r2 = new java.lang.StringBuffer;
+
+        specialinvoke $r2.<java.lang.StringBuffer: void <init>()>();
+
+     label1:
+        $i0 = virtualinvoke $r1.<java.io.InputStream: int read()>();
+
+        if $i0 == 10 goto label2;
+
+        if $i0 < 0 goto label2;
+
+        if $i0 == 13 goto label1;
+
+        $c1 = (char) $i0;
+
+        virtualinvoke $r2.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c1);
+
+        goto label1;
+
+     label2:
+        if $i0 >= 0 goto label3;
+
+        return null;
+
+     label3:
+        $r3 = virtualinvoke $r2.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r3;
+    }
+
+    private java.security.cert.CRL readPEMCRL(java.io.InputStream) throws java.io.IOException, java.security.cert.CRLException
+    {
+        org.bouncycastle.jce.provider.JDKX509CertificateFactory $r0;
+        java.io.InputStream $r1;
+        java.lang.StringBuffer $r2;
+        java.lang.String $r3;
+        boolean $z0;
+        int $i0;
+        org.bouncycastle.asn1.ASN1InputStream $r4;
+        byte[] $r5;
+        java.security.cert.CRL $r6;
+
+        $r0 := @this: org.bouncycastle.jce.provider.JDKX509CertificateFactory;
+
+        $r1 := @parameter0: java.io.InputStream;
+
+        $r2 = new java.lang.StringBuffer;
+
+        specialinvoke $r2.<java.lang.StringBuffer: void <init>()>();
+
+     label1:
+        $r3 = specialinvoke $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: java.lang.String readLine(java.io.InputStream)>($r1);
+
+        if $r3 == null goto label2;
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("-----BEGIN CRL-----");
+
+        if $z0 != 0 goto label2;
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("-----BEGIN X509 CRL-----");
+
+        if $z0 == 0 goto label1;
+
+     label2:
+        $r3 = specialinvoke $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: java.lang.String readLine(java.io.InputStream)>($r1);
+
+        if $r3 == null goto label3;
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("-----END CRL-----");
+
+        if $z0 != 0 goto label3;
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("-----END X509 CRL-----");
+
+        if $z0 == 0 goto label4;
+
+     label3:
+        $i0 = virtualinvoke $r2.<java.lang.StringBuffer: int length()>();
+
+        if $i0 == 0 goto label5;
+
+        $r4 = new org.bouncycastle.asn1.ASN1InputStream;
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        $r5 = staticinvoke <org.bouncycastle.util.encoders.Base64: byte[] decode(java.lang.String)>($r3);
+
+        specialinvoke $r4.<org.bouncycastle.asn1.ASN1InputStream: void <init>(byte[])>($r5);
+
+        $r6 = specialinvoke $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: java.security.cert.CRL readDERCRL(org.bouncycastle.asn1.ASN1InputStream)>($r4);
+
+        return $r6;
+
+     label4:
+        virtualinvoke $r2.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r3);
+
+        goto label2;
+
+     label5:
+        return null;
+    }
+
+    private java.security.cert.Certificate readPEMCertificate(java.io.InputStream) throws java.io.IOException
+    {
+        org.bouncycastle.jce.provider.JDKX509CertificateFactory $r0;
+        java.io.InputStream $r1;
+        java.lang.StringBuffer $r2;
+        java.lang.String $r3;
+        boolean $z0;
+        int $i0;
+        org.bouncycastle.asn1.ASN1InputStream $r4;
+        byte[] $r5;
+        java.security.cert.Certificate $r6;
+
+        $r0 := @this: org.bouncycastle.jce.provider.JDKX509CertificateFactory;
+
+        $r1 := @parameter0: java.io.InputStream;
+
+        $r2 = new java.lang.StringBuffer;
+
+        specialinvoke $r2.<java.lang.StringBuffer: void <init>()>();
+
+     label1:
+        $r3 = specialinvoke $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: java.lang.String readLine(java.io.InputStream)>($r1);
+
+        if $r3 == null goto label2;
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("-----BEGIN CERTIFICATE-----");
+
+        if $z0 != 0 goto label2;
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("-----BEGIN X509 CERTIFICATE-----");
+
+        if $z0 == 0 goto label1;
+
+     label2:
+        $r3 = specialinvoke $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: java.lang.String readLine(java.io.InputStream)>($r1);
+
+        if $r3 == null goto label3;
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("-----END CERTIFICATE-----");
+
+        if $z0 != 0 goto label3;
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("-----END X509 CERTIFICATE-----");
+
+        if $z0 == 0 goto label4;
+
+     label3:
+        $i0 = virtualinvoke $r2.<java.lang.StringBuffer: int length()>();
+
+        if $i0 == 0 goto label5;
+
+        $r4 = new org.bouncycastle.asn1.ASN1InputStream;
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        $r5 = staticinvoke <org.bouncycastle.util.encoders.Base64: byte[] decode(java.lang.String)>($r3);
+
+        specialinvoke $r4.<org.bouncycastle.asn1.ASN1InputStream: void <init>(byte[])>($r5);
+
+        $r6 = specialinvoke $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: java.security.cert.Certificate readDERCertificate(org.bouncycastle.asn1.ASN1InputStream)>($r4);
+
+        return $r6;
+
+     label4:
+        virtualinvoke $r2.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r3);
+
+        goto label2;
+
+     label5:
+        return null;
+    }
+
+    private java.security.cert.CRL readPKCS7CRL(java.io.InputStream) throws java.io.IOException, java.security.cert.CRLException
+    {
+        org.bouncycastle.jce.provider.JDKX509CertificateFactory $r0;
+        java.io.InputStream $r1;
+        org.bouncycastle.asn1.ASN1InputStream $r2;
+        int $i0, $i1;
+        org.bouncycastle.asn1.DERObject $r3;
+        org.bouncycastle.asn1.ASN1Sequence $r4;
+        org.bouncycastle.asn1.DEREncodable $r5;
+        boolean $z0;
+        org.bouncycastle.asn1.DERObjectIdentifier $r6;
+        org.bouncycastle.asn1.pkcs.SignedData $r7;
+        org.bouncycastle.asn1.ASN1TaggedObject $r8;
+        org.bouncycastle.jce.provider.X509CRLObject $r9;
+        org.bouncycastle.asn1.ASN1Set $r10;
+        org.bouncycastle.asn1.x509.CertificateList $r11;
+
+        $r0 := @this: org.bouncycastle.jce.provider.JDKX509CertificateFactory;
+
+        $r1 := @parameter0: java.io.InputStream;
+
+        $r2 = new org.bouncycastle.asn1.ASN1InputStream;
+
+        $i0 = specialinvoke $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: int getLimit(java.io.InputStream)>($r1);
+
+        specialinvoke $r2.<org.bouncycastle.asn1.ASN1InputStream: void <init>(java.io.InputStream,int)>($r1, $i0);
+
+        $r3 = virtualinvoke $r2.<org.bouncycastle.asn1.ASN1InputStream: org.bouncycastle.asn1.DERObject readObject()>();
+
+        $r4 = (org.bouncycastle.asn1.ASN1Sequence) $r3;
+
+        $i0 = virtualinvoke $r4.<org.bouncycastle.asn1.ASN1Collection: int size()>();
+
+        if $i0 <= 1 goto label1;
+
+        $r5 = virtualinvoke $r4.<org.bouncycastle.asn1.ASN1Collection: org.bouncycastle.asn1.DEREncodable getObjectAt(int)>(0);
+
+        $z0 = $r5 instanceof org.bouncycastle.asn1.DERObjectIdentifier;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = virtualinvoke $r4.<org.bouncycastle.asn1.ASN1Collection: org.bouncycastle.asn1.DEREncodable getObjectAt(int)>(0);
+
+        $r6 = <org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers: org.bouncycastle.asn1.DERObjectIdentifier signedData>;
+
+        $z0 = virtualinvoke $r5.<java.lang.Object: boolean equals(java.lang.Object)>($r6);
+
+        if $z0 == 0 goto label1;
+
+        $r7 = new org.bouncycastle.asn1.pkcs.SignedData;
+
+        $r5 = virtualinvoke $r4.<org.bouncycastle.asn1.ASN1Collection: org.bouncycastle.asn1.DEREncodable getObjectAt(int)>(1);
+
+        $r8 = (org.bouncycastle.asn1.ASN1TaggedObject) $r5;
+
+        $r4 = staticinvoke <org.bouncycastle.asn1.ASN1Sequence: org.bouncycastle.asn1.ASN1Sequence getInstance(org.bouncycastle.asn1.ASN1TaggedObject,boolean)>($r8, 1);
+
+        specialinvoke $r7.<org.bouncycastle.asn1.pkcs.SignedData: void <init>(org.bouncycastle.asn1.ASN1Sequence)>($r4);
+
+        $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: org.bouncycastle.asn1.pkcs.SignedData sCrlData> = $r7;
+
+        $r9 = new org.bouncycastle.jce.provider.X509CRLObject;
+
+        $r7 = $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: org.bouncycastle.asn1.pkcs.SignedData sCrlData>;
+
+        $r10 = virtualinvoke $r7.<org.bouncycastle.asn1.pkcs.SignedData: org.bouncycastle.asn1.ASN1Set getCRLs()>();
+
+        $i1 = $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: int sCrlDataObjectCount>;
+
+        $i0 = $i1 + 1;
+
+        $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: int sCrlDataObjectCount> = $i0;
+
+        $r5 = virtualinvoke $r10.<org.bouncycastle.asn1.ASN1Collection: org.bouncycastle.asn1.DEREncodable getObjectAt(int)>($i1);
+
+        $r11 = staticinvoke <org.bouncycastle.asn1.x509.CertificateList: org.bouncycastle.asn1.x509.CertificateList getInstance(java.lang.Object)>($r5);
+
+        specialinvoke $r9.<org.bouncycastle.jce.provider.X509CRLObject: void <init>(org.bouncycastle.asn1.x509.CertificateList)>($r11);
+
+        return $r9;
+
+     label1:
+        $r9 = new org.bouncycastle.jce.provider.X509CRLObject;
+
+        $r11 = staticinvoke <org.bouncycastle.asn1.x509.CertificateList: org.bouncycastle.asn1.x509.CertificateList getInstance(java.lang.Object)>($r4);
+
+        specialinvoke $r9.<org.bouncycastle.jce.provider.X509CRLObject: void <init>(org.bouncycastle.asn1.x509.CertificateList)>($r11);
+
+        return $r9;
+    }
+
+    private java.security.cert.Certificate readPKCS7Certificate(java.io.InputStream) throws java.io.IOException
+    {
+        org.bouncycastle.jce.provider.JDKX509CertificateFactory $r0;
+        java.io.InputStream $r1;
+        org.bouncycastle.asn1.ASN1InputStream $r2;
+        int $i0, $i1;
+        org.bouncycastle.asn1.DERObject $r3;
+        org.bouncycastle.asn1.ASN1Sequence $r4;
+        org.bouncycastle.asn1.DEREncodable $r5;
+        boolean $z0;
+        org.bouncycastle.asn1.DERObjectIdentifier $r6;
+        org.bouncycastle.asn1.pkcs.SignedData $r7;
+        org.bouncycastle.asn1.ASN1TaggedObject $r8;
+        org.bouncycastle.jce.provider.X509CertificateObject $r9;
+        org.bouncycastle.asn1.ASN1Set $r10;
+        org.bouncycastle.asn1.x509.X509CertificateStructure $r11;
+
+        $r0 := @this: org.bouncycastle.jce.provider.JDKX509CertificateFactory;
+
+        $r1 := @parameter0: java.io.InputStream;
+
+        $r2 = new org.bouncycastle.asn1.ASN1InputStream;
+
+        $i0 = specialinvoke $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: int getLimit(java.io.InputStream)>($r1);
+
+        specialinvoke $r2.<org.bouncycastle.asn1.ASN1InputStream: void <init>(java.io.InputStream,int)>($r1, $i0);
+
+        $r3 = virtualinvoke $r2.<org.bouncycastle.asn1.ASN1InputStream: org.bouncycastle.asn1.DERObject readObject()>();
+
+        $r4 = (org.bouncycastle.asn1.ASN1Sequence) $r3;
+
+        $i0 = virtualinvoke $r4.<org.bouncycastle.asn1.ASN1Collection: int size()>();
+
+        if $i0 <= 1 goto label1;
+
+        $r5 = virtualinvoke $r4.<org.bouncycastle.asn1.ASN1Collection: org.bouncycastle.asn1.DEREncodable getObjectAt(int)>(0);
+
+        $z0 = $r5 instanceof org.bouncycastle.asn1.DERObjectIdentifier;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = virtualinvoke $r4.<org.bouncycastle.asn1.ASN1Collection: org.bouncycastle.asn1.DEREncodable getObjectAt(int)>(0);
+
+        $r6 = <org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers: org.bouncycastle.asn1.DERObjectIdentifier signedData>;
+
+        $z0 = virtualinvoke $r5.<java.lang.Object: boolean equals(java.lang.Object)>($r6);
+
+        if $z0 == 0 goto label1;
+
+        $r7 = new org.bouncycastle.asn1.pkcs.SignedData;
+
+        $r5 = virtualinvoke $r4.<org.bouncycastle.asn1.ASN1Collection: org.bouncycastle.asn1.DEREncodable getObjectAt(int)>(1);
+
+        $r8 = (org.bouncycastle.asn1.ASN1TaggedObject) $r5;
+
+        $r4 = staticinvoke <org.bouncycastle.asn1.ASN1Sequence: org.bouncycastle.asn1.ASN1Sequence getInstance(org.bouncycastle.asn1.ASN1TaggedObject,boolean)>($r8, 1);
+
+        specialinvoke $r7.<org.bouncycastle.asn1.pkcs.SignedData: void <init>(org.bouncycastle.asn1.ASN1Sequence)>($r4);
+
+        $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: org.bouncycastle.asn1.pkcs.SignedData sData> = $r7;
+
+        $r9 = new org.bouncycastle.jce.provider.X509CertificateObject;
+
+        $r7 = $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: org.bouncycastle.asn1.pkcs.SignedData sData>;
+
+        $r10 = virtualinvoke $r7.<org.bouncycastle.asn1.pkcs.SignedData: org.bouncycastle.asn1.ASN1Set getCertificates()>();
+
+        $i1 = $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: int sDataObjectCount>;
+
+        $i0 = $i1 + 1;
+
+        $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: int sDataObjectCount> = $i0;
+
+        $r5 = virtualinvoke $r10.<org.bouncycastle.asn1.ASN1Collection: org.bouncycastle.asn1.DEREncodable getObjectAt(int)>($i1);
+
+        $r11 = staticinvoke <org.bouncycastle.asn1.x509.X509CertificateStructure: org.bouncycastle.asn1.x509.X509CertificateStructure getInstance(java.lang.Object)>($r5);
+
+        specialinvoke $r9.<org.bouncycastle.jce.provider.X509CertificateObject: void <init>(org.bouncycastle.asn1.x509.X509CertificateStructure)>($r11);
+
+        return $r9;
+
+     label1:
+        $r9 = new org.bouncycastle.jce.provider.X509CertificateObject;
+
+        $r11 = staticinvoke <org.bouncycastle.asn1.x509.X509CertificateStructure: org.bouncycastle.asn1.x509.X509CertificateStructure getInstance(java.lang.Object)>($r4);
+
+        specialinvoke $r9.<org.bouncycastle.jce.provider.X509CertificateObject: void <init>(org.bouncycastle.asn1.x509.X509CertificateStructure)>($r11);
+
+        return $r9;
+    }
+
+    public java.security.cert.CRL engineGenerateCRL(java.io.InputStream) throws java.security.cert.CRLException
+    {
+        org.bouncycastle.jce.provider.JDKX509CertificateFactory $r0;
+        java.io.BufferedInputStream $r1;
+        int $i0, $i1;
+        java.io.InputStream $r2, $r3;
+        org.bouncycastle.asn1.pkcs.SignedData $r4;
+        org.bouncycastle.asn1.ASN1Set $r5;
+        org.bouncycastle.jce.provider.X509CRLObject $r6;
+        org.bouncycastle.asn1.DEREncodable $r7;
+        org.bouncycastle.asn1.x509.CertificateList $r8;
+        boolean $z0;
+        java.security.cert.CRL $r9;
+        org.bouncycastle.asn1.ASN1InputStream $r10;
+        java.security.cert.CRLException $r11;
+        java.lang.Exception $r12;
+        java.lang.String $r13;
+
+        $r0 := @this: org.bouncycastle.jce.provider.JDKX509CertificateFactory;
+
+        $r2 := @parameter0: java.io.InputStream;
+
+        $r3 = $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: java.io.InputStream currentCrlStream>;
+
+        if $r3 != null goto label08;
+
+        $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: java.io.InputStream currentCrlStream> = $r2;
+
+        $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: org.bouncycastle.asn1.pkcs.SignedData sCrlData> = null;
+
+        $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: int sCrlDataObjectCount> = 0;
+
+     label01:
+        $r4 = $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: org.bouncycastle.asn1.pkcs.SignedData sCrlData>;
+
+        if $r4 == null goto label11;
+
+        $i0 = $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: int sCrlDataObjectCount>;
+
+        $r4 = $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: org.bouncycastle.asn1.pkcs.SignedData sCrlData>;
+
+     label02:
+        $r5 = virtualinvoke $r4.<org.bouncycastle.asn1.pkcs.SignedData: org.bouncycastle.asn1.ASN1Set getCertificates()>();
+
+        $i1 = virtualinvoke $r5.<org.bouncycastle.asn1.ASN1Collection: int size()>();
+
+     label03:
+        if $i0 == $i1 goto label09;
+
+        $r6 = new org.bouncycastle.jce.provider.X509CRLObject;
+
+     label04:
+        $r4 = $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: org.bouncycastle.asn1.pkcs.SignedData sCrlData>;
+
+        $r5 = virtualinvoke $r4.<org.bouncycastle.asn1.pkcs.SignedData: org.bouncycastle.asn1.ASN1Set getCRLs()>();
+
+     label05:
+        $i1 = $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: int sCrlDataObjectCount>;
+
+        $i0 = $i1 + 1;
+
+     label06:
+        $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: int sCrlDataObjectCount> = $i0;
+
+        $r7 = virtualinvoke $r5.<org.bouncycastle.asn1.ASN1Collection: org.bouncycastle.asn1.DEREncodable getObjectAt(int)>($i1);
+
+        $r8 = staticinvoke <org.bouncycastle.asn1.x509.CertificateList: org.bouncycastle.asn1.x509.CertificateList getInstance(java.lang.Object)>($r7);
+
+        specialinvoke $r6.<org.bouncycastle.jce.provider.X509CRLObject: void <init>(org.bouncycastle.asn1.x509.CertificateList)>($r8);
+
+     label07:
+        return $r6;
+
+     label08:
+        $r3 = $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: java.io.InputStream currentCrlStream>;
+
+        if $r3 == $r2 goto label01;
+
+        $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: java.io.InputStream currentCrlStream> = $r2;
+
+        $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: org.bouncycastle.asn1.pkcs.SignedData sCrlData> = null;
+
+        $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: int sCrlDataObjectCount> = 0;
+
+        goto label01;
+
+     label09:
+        $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: org.bouncycastle.asn1.pkcs.SignedData sCrlData> = null;
+
+        $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: int sCrlDataObjectCount> = 0;
+
+     label10:
+        return null;
+
+     label11:
+        $z0 = virtualinvoke $r2.<java.io.InputStream: boolean markSupported()>();
+
+        if $z0 != 0 goto label12;
+
+        $r1 = new java.io.BufferedInputStream;
+
+        specialinvoke $r1.<java.io.BufferedInputStream: void <init>(java.io.InputStream,int)>($r2, 8192);
+
+        $r2 = $r1;
+
+     label12:
+        virtualinvoke $r2.<java.io.InputStream: void mark(int)>(10);
+
+        $i0 = virtualinvoke $r2.<java.io.InputStream: int read()>();
+
+        if $i0 == 48 goto label14;
+
+        virtualinvoke $r2.<java.io.InputStream: void reset()>();
+
+        $r9 = specialinvoke $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: java.security.cert.CRL readPEMCRL(java.io.InputStream)>($r2);
+
+     label13:
+        return $r9;
+
+     label14:
+        $i0 = virtualinvoke $r2.<java.io.InputStream: int read()>();
+
+        if $i0 != 128 goto label16;
+
+        virtualinvoke $r2.<java.io.InputStream: void reset()>();
+
+        $r9 = specialinvoke $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: java.security.cert.CRL readPKCS7CRL(java.io.InputStream)>($r2);
+
+     label15:
+        return $r9;
+
+     label16:
+        virtualinvoke $r2.<java.io.InputStream: void reset()>();
+
+        $r10 = new org.bouncycastle.asn1.ASN1InputStream;
+
+        $i0 = specialinvoke $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: int getLimit(java.io.InputStream)>($r2);
+
+        specialinvoke $r10.<org.bouncycastle.asn1.ASN1InputStream: void <init>(java.io.InputStream,int)>($r2, $i0);
+
+        $r9 = specialinvoke $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: java.security.cert.CRL readDERCRL(org.bouncycastle.asn1.ASN1InputStream)>($r10);
+
+     label17:
+        return $r9;
+
+     label18:
+        $r11 := @caughtexception;
+
+        throw $r11;
+
+     label19:
+        $r12 := @caughtexception;
+
+        $r11 = new java.security.cert.CRLException;
+
+        $r13 = virtualinvoke $r12.<java.lang.Throwable: java.lang.String toString()>();
+
+        specialinvoke $r11.<java.security.cert.CRLException: void <init>(java.lang.String)>($r13);
+
+        throw $r11;
+
+        catch java.security.cert.CRLException from label02 to label03 with label18;
+        catch java.security.cert.CRLException from label04 to label05 with label18;
+        catch java.security.cert.CRLException from label06 to label07 with label18;
+        catch java.lang.Exception from label01 to label07 with label19;
+        catch java.security.cert.CRLException from label11 to label13 with label18;
+        catch java.security.cert.CRLException from label14 to label15 with label18;
+        catch java.security.cert.CRLException from label16 to label17 with label18;
+        catch java.lang.Exception from label09 to label10 with label19;
+        catch java.lang.Exception from label11 to label13 with label19;
+        catch java.lang.Exception from label14 to label15 with label19;
+        catch java.lang.Exception from label16 to label17 with label19;
+    }
+
+    public java.util.Collection engineGenerateCRLs(java.io.InputStream) throws java.security.cert.CRLException
+    {
+        org.bouncycastle.jce.provider.JDKX509CertificateFactory $r0;
+        java.io.InputStream $r1;
+        java.util.ArrayList $r2;
+        java.security.cert.CRL $r3;
+
+        $r0 := @this: org.bouncycastle.jce.provider.JDKX509CertificateFactory;
+
+        $r1 := @parameter0: java.io.InputStream;
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+     label1:
+        $r3 = virtualinvoke $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: java.security.cert.CRL engineGenerateCRL(java.io.InputStream)>($r1);
+
+        if $r3 == null goto label2;
+
+        interfaceinvoke $r2.<java.util.List: boolean add(java.lang.Object)>($r3);
+
+        goto label1;
+
+     label2:
+        return $r2;
+    }
+
+    public java.security.cert.CertPath engineGenerateCertPath(java.io.InputStream) throws java.security.cert.CertificateException
+    {
+        org.bouncycastle.jce.provider.JDKX509CertificateFactory $r0;
+        java.io.InputStream $r1;
+        java.security.cert.CertPath $r2;
+
+        $r0 := @this: org.bouncycastle.jce.provider.JDKX509CertificateFactory;
+
+        $r1 := @parameter0: java.io.InputStream;
+
+        $r2 = virtualinvoke $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: java.security.cert.CertPath engineGenerateCertPath(java.io.InputStream,java.lang.String)>($r1, "PkiPath");
+
+        return $r2;
+    }
+
+    public java.security.cert.CertPath engineGenerateCertPath(java.io.InputStream, java.lang.String) throws java.security.cert.CertificateException
+    {
+        org.bouncycastle.jce.provider.JDKX509CertificateFactory $r0;
+        java.io.InputStream $r1;
+        java.lang.String $r2;
+        org.bouncycastle.jce.provider.PKIXCertPath $r3;
+
+        $r0 := @this: org.bouncycastle.jce.provider.JDKX509CertificateFactory;
+
+        $r1 := @parameter0: java.io.InputStream;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 = new org.bouncycastle.jce.provider.PKIXCertPath;
+
+        specialinvoke $r3.<org.bouncycastle.jce.provider.PKIXCertPath: void <init>(java.io.InputStream,java.lang.String)>($r1, $r2);
+
+        return $r3;
+    }
+
+    public java.security.cert.CertPath engineGenerateCertPath(java.util.List) throws java.security.cert.CertificateException
+    {
+        org.bouncycastle.jce.provider.JDKX509CertificateFactory $r0;
+        java.util.List $r1;
+        java.util.Iterator $r2;
+        boolean $z0;
+        java.lang.Object $r3;
+        java.security.cert.CertificateException $r4;
+        java.lang.StringBuilder $r5;
+        java.lang.String $r6;
+        org.bouncycastle.jce.provider.PKIXCertPath $r7;
+
+        $r0 := @this: org.bouncycastle.jce.provider.JDKX509CertificateFactory;
+
+        $r1 := @parameter0: java.util.List;
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        if $r3 == null goto label1;
+
+        $z0 = $r3 instanceof java.security.cert.X509Certificate;
+
+        if $z0 != 0 goto label1;
+
+        $r4 = new java.security.cert.CertificateException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("list contains none X509Certificate object while creating CertPath\n");
+
+        $r6 = virtualinvoke $r3.<java.lang.Object: java.lang.String toString()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.security.cert.CertificateException: void <init>(java.lang.String)>($r6);
+
+        throw $r4;
+
+     label2:
+        $r7 = new org.bouncycastle.jce.provider.PKIXCertPath;
+
+        specialinvoke $r7.<org.bouncycastle.jce.provider.PKIXCertPath: void <init>(java.util.List)>($r1);
+
+        return $r7;
+    }
+
+    public java.security.cert.Certificate engineGenerateCertificate(java.io.InputStream) throws java.security.cert.CertificateException
+    {
+        org.bouncycastle.jce.provider.JDKX509CertificateFactory $r0;
+        java.io.BufferedInputStream $r1;
+        int $i0, $i1;
+        java.io.InputStream $r2, $r3;
+        org.bouncycastle.asn1.pkcs.SignedData $r4;
+        org.bouncycastle.asn1.ASN1Set $r5;
+        org.bouncycastle.jce.provider.X509CertificateObject $r6;
+        org.bouncycastle.asn1.DEREncodable $r7;
+        org.bouncycastle.asn1.x509.X509CertificateStructure $r8;
+        boolean $z0;
+        java.security.cert.Certificate $r9;
+        org.bouncycastle.asn1.ASN1InputStream $r10;
+        java.lang.Exception $r11;
+        java.security.cert.CertificateException $r12;
+        java.lang.String $r13;
+
+        $r0 := @this: org.bouncycastle.jce.provider.JDKX509CertificateFactory;
+
+        $r2 := @parameter0: java.io.InputStream;
+
+        $r3 = $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: java.io.InputStream currentStream>;
+
+        if $r3 != null goto label03;
+
+        $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: java.io.InputStream currentStream> = $r2;
+
+        $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: org.bouncycastle.asn1.pkcs.SignedData sData> = null;
+
+        $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: int sDataObjectCount> = 0;
+
+     label01:
+        $r4 = $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: org.bouncycastle.asn1.pkcs.SignedData sData>;
+
+        if $r4 == null goto label06;
+
+        $i0 = $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: int sDataObjectCount>;
+
+        $r4 = $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: org.bouncycastle.asn1.pkcs.SignedData sData>;
+
+        $r5 = virtualinvoke $r4.<org.bouncycastle.asn1.pkcs.SignedData: org.bouncycastle.asn1.ASN1Set getCertificates()>();
+
+        $i1 = virtualinvoke $r5.<org.bouncycastle.asn1.ASN1Collection: int size()>();
+
+        if $i0 == $i1 goto label04;
+
+        $r6 = new org.bouncycastle.jce.provider.X509CertificateObject;
+
+        $r4 = $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: org.bouncycastle.asn1.pkcs.SignedData sData>;
+
+        $r5 = virtualinvoke $r4.<org.bouncycastle.asn1.pkcs.SignedData: org.bouncycastle.asn1.ASN1Set getCertificates()>();
+
+        $i1 = $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: int sDataObjectCount>;
+
+        $i0 = $i1 + 1;
+
+        $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: int sDataObjectCount> = $i0;
+
+        $r7 = virtualinvoke $r5.<org.bouncycastle.asn1.ASN1Collection: org.bouncycastle.asn1.DEREncodable getObjectAt(int)>($i1);
+
+        $r8 = staticinvoke <org.bouncycastle.asn1.x509.X509CertificateStructure: org.bouncycastle.asn1.x509.X509CertificateStructure getInstance(java.lang.Object)>($r7);
+
+        specialinvoke $r6.<org.bouncycastle.jce.provider.X509CertificateObject: void <init>(org.bouncycastle.asn1.x509.X509CertificateStructure)>($r8);
+
+     label02:
+        return $r6;
+
+     label03:
+        $r3 = $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: java.io.InputStream currentStream>;
+
+        if $r3 == $r2 goto label01;
+
+        $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: java.io.InputStream currentStream> = $r2;
+
+        $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: org.bouncycastle.asn1.pkcs.SignedData sData> = null;
+
+        $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: int sDataObjectCount> = 0;
+
+        goto label01;
+
+     label04:
+        $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: org.bouncycastle.asn1.pkcs.SignedData sData> = null;
+
+        $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: int sDataObjectCount> = 0;
+
+     label05:
+        return null;
+
+     label06:
+        $z0 = virtualinvoke $r2.<java.io.InputStream: boolean markSupported()>();
+
+        if $z0 != 0 goto label07;
+
+        $r1 = new java.io.BufferedInputStream;
+
+        specialinvoke $r1.<java.io.BufferedInputStream: void <init>(java.io.InputStream,int)>($r2, 8192);
+
+        $r2 = $r1;
+
+     label07:
+        virtualinvoke $r2.<java.io.InputStream: void mark(int)>(10);
+
+        $i0 = virtualinvoke $r2.<java.io.InputStream: int read()>();
+
+     label08:
+        if $i0 != -1 goto label09;
+
+        return null;
+
+     label09:
+        if $i0 == 48 goto label11;
+
+        virtualinvoke $r2.<java.io.InputStream: void reset()>();
+
+        $r9 = specialinvoke $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: java.security.cert.Certificate readPEMCertificate(java.io.InputStream)>($r2);
+
+     label10:
+        return $r9;
+
+     label11:
+        $i0 = virtualinvoke $r2.<java.io.InputStream: int read()>();
+
+        if $i0 != 128 goto label13;
+
+        virtualinvoke $r2.<java.io.InputStream: void reset()>();
+
+        $r10 = new org.bouncycastle.asn1.ASN1InputStream;
+
+        $i0 = specialinvoke $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: int getLimit(java.io.InputStream)>($r2);
+
+        specialinvoke $r10.<org.bouncycastle.asn1.ASN1InputStream: void <init>(java.io.InputStream,int)>($r2, $i0);
+
+        $r9 = specialinvoke $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: java.security.cert.Certificate readPKCS7Certificate(java.io.InputStream)>($r10);
+
+     label12:
+        return $r9;
+
+     label13:
+        virtualinvoke $r2.<java.io.InputStream: void reset()>();
+
+        $r10 = new org.bouncycastle.asn1.ASN1InputStream;
+
+        $i0 = specialinvoke $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: int getLimit(java.io.InputStream)>($r2);
+
+        specialinvoke $r10.<org.bouncycastle.asn1.ASN1InputStream: void <init>(java.io.InputStream,int)>($r2, $i0);
+
+        $r9 = specialinvoke $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: java.security.cert.Certificate readDERCertificate(org.bouncycastle.asn1.ASN1InputStream)>($r10);
+
+     label14:
+        return $r9;
+
+     label15:
+        $r11 := @caughtexception;
+
+        $r12 = new java.security.cert.CertificateException;
+
+        $r13 = virtualinvoke $r11.<java.lang.Throwable: java.lang.String toString()>();
+
+        specialinvoke $r12.<java.security.cert.CertificateException: void <init>(java.lang.String)>($r13);
+
+        throw $r12;
+
+        catch java.lang.Exception from label01 to label02 with label15;
+        catch java.lang.Exception from label04 to label05 with label15;
+        catch java.lang.Exception from label06 to label08 with label15;
+        catch java.lang.Exception from label09 to label10 with label15;
+        catch java.lang.Exception from label11 to label12 with label15;
+        catch java.lang.Exception from label13 to label14 with label15;
+    }
+
+    public java.util.Collection engineGenerateCertificates(java.io.InputStream) throws java.security.cert.CertificateException
+    {
+        org.bouncycastle.jce.provider.JDKX509CertificateFactory $r0;
+        java.io.InputStream $r1;
+        java.util.ArrayList $r2;
+        java.security.cert.Certificate $r3;
+
+        $r0 := @this: org.bouncycastle.jce.provider.JDKX509CertificateFactory;
+
+        $r1 := @parameter0: java.io.InputStream;
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+     label1:
+        $r3 = virtualinvoke $r0.<org.bouncycastle.jce.provider.JDKX509CertificateFactory: java.security.cert.Certificate engineGenerateCertificate(java.io.InputStream)>($r1);
+
+        if $r3 == null goto label2;
+
+        interfaceinvoke $r2.<java.util.List: boolean add(java.lang.Object)>($r3);
+
+        goto label1;
+
+     label2:
+        return $r2;
+    }
+
+    public java.util.Iterator engineGetCertPathEncodings()
+    {
+        org.bouncycastle.jce.provider.JDKX509CertificateFactory $r0;
+        java.util.Iterator $r1;
+        java.util.List $r2;
+
+        $r0 := @this: org.bouncycastle.jce.provider.JDKX509CertificateFactory;
+
+        $r2 = <org.bouncycastle.jce.provider.PKIXCertPath: java.util.List certPathEncodings>;
+
+        $r1 = interfaceinvoke $r2.<java.util.List: java.util.Iterator iterator()>();
+
+        return $r1;
+    }
+}

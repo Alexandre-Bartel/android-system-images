@@ -1,0 +1,1232 @@
+public class org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection extends java.net.URLConnection
+{
+    private static final int FTP_DATAOPEN;
+    private static final int FTP_FILEOK;
+    private static final int FTP_LOGGEDIN;
+    private static final int FTP_NOTFOUND;
+    private static final int FTP_OK;
+    private static final int FTP_OPENDATA;
+    private static final int FTP_PASWD;
+    private static final int FTP_PORT;
+    private static final int FTP_TRANSFEROK;
+    private static final int FTP_USERREADY;
+    private java.net.ServerSocket acceptSocket;
+    private java.net.Socket controlSocket;
+    private java.io.InputStream ctrlInput;
+    private java.io.OutputStream ctrlOutput;
+    private java.net.Proxy currentProxy;
+    private int dataPort;
+    private java.net.Socket dataSocket;
+    private java.lang.String hostName;
+    private java.io.InputStream inputStream;
+    private java.lang.String password;
+    private java.net.Proxy proxy;
+    private java.lang.String replyCode;
+    private java.net.URI uri;
+    private java.lang.String username;
+
+    protected void <init>(java.net.URL)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection $r0;
+        java.net.URL $r1;
+        java.lang.String $r2, $r3;
+        int $i0;
+        java.net.URI $r4;
+        java.net.URISyntaxException $r5;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection;
+
+        $r1 := @parameter0: java.net.URL;
+
+        specialinvoke $r0.<java.net.URLConnection: void <init>(java.net.URL)>($r1);
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.lang.String username> = "anonymous";
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.lang.String password> = "";
+
+        $r2 = virtualinvoke $r1.<java.net.URL: java.lang.String getHost()>();
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.lang.String hostName> = $r2;
+
+        $r2 = virtualinvoke $r1.<java.net.URL: java.lang.String getUserInfo()>();
+
+        if $r2 == null goto label1;
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int indexOf(int)>(58);
+
+        if $i0 < 0 goto label4;
+
+        $r3 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.lang.String username> = $r3;
+
+        $i0 = $i0 + 1;
+
+        $r2 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int)>($i0);
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.lang.String password> = $r2;
+
+     label1:
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.net.URI uri> = null;
+
+     label2:
+        $r4 = virtualinvoke $r1.<java.net.URL: java.net.URI toURI()>();
+
+     label3:
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.net.URI uri> = $r4;
+
+        return;
+
+     label4:
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.lang.String username> = $r2;
+
+        goto label1;
+
+     label5:
+        $r5 := @caughtexception;
+
+        return;
+
+        catch java.net.URISyntaxException from label2 to label3 with label5;
+    }
+
+    protected void <init>(java.net.URL, java.net.Proxy)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection $r0;
+        java.net.URL $r1;
+        java.net.Proxy $r2;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection;
+
+        $r1 := @parameter0: java.net.URL;
+
+        $r2 := @parameter1: java.net.Proxy;
+
+        specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: void <init>(java.net.URL)>($r1);
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.net.Proxy proxy> = $r2;
+
+        return;
+    }
+
+    private void cd() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection $r0;
+        java.net.URL $r1;
+        java.lang.String $r2, $r4;
+        int $i0, $i1;
+        java.lang.StringBuilder $r3;
+        char $c2;
+        java.io.IOException $r5;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection;
+
+        $r1 = $r0.<java.net.URLConnection: java.net.URL url>;
+
+        $r2 = virtualinvoke $r1.<java.net.URL: java.lang.String getFile()>();
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int lastIndexOf(int)>(47);
+
+        if $i0 <= 0 goto label2;
+
+        $r1 = $r0.<java.net.URLConnection: java.net.URL url>;
+
+        $r2 = virtualinvoke $r1.<java.net.URL: java.lang.String getFile()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("CWD ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: void write(java.lang.String)>($r4);
+
+        $i1 = specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: int getReply()>();
+
+        $i0 = $i1;
+
+        if $i1 == 250 goto label1;
+
+        $i1 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        if $i1 <= 0 goto label1;
+
+        $c2 = virtualinvoke $r2.<java.lang.String: char charAt(int)>(0);
+
+        if $c2 != 47 goto label1;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("CWD ");
+
+        $r2 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int)>(1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+        $r2 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: void write(java.lang.String)>($r2);
+
+        $i0 = specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: int getReply()>();
+
+     label1:
+        if $i0 == 250 goto label3;
+
+        $r5 = new java.io.IOException;
+
+        $r2 = staticinvoke <org.apache.harmony.luni.util.Msg: java.lang.String getString(java.lang.String)>("K0094");
+
+        specialinvoke $r5.<java.io.IOException: void <init>(java.lang.String)>($r2);
+
+        throw $r5;
+
+     label2:
+        return;
+
+     label3:
+        return;
+    }
+
+    private void connectInternal() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection $r0;
+        java.net.InetSocketAddress $r1;
+        java.net.URL $r2;
+        int $i0, $i1, $i2;
+        java.net.Proxy $r3;
+        java.net.Proxy$Type $r4, $r5;
+        java.net.Socket $r6;
+        java.lang.String $r7;
+        java.io.OutputStream $r8;
+        java.io.InputStream $r9;
+        boolean $z0;
+        java.net.ServerSocket $r10;
+        org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLInputStream $r11;
+        java.io.BufferedInputStream $r12;
+        java.io.InterruptedIOException $r13;
+        java.io.IOException $r14;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection;
+
+        $r2 = $r0.<java.net.URLConnection: java.net.URL url>;
+
+        $i0 = virtualinvoke $r2.<java.net.URL: int getPort()>();
+
+        $i1 = $i0;
+
+        $i2 = virtualinvoke $r0.<java.net.URLConnection: int getConnectTimeout()>();
+
+        if $i0 > 0 goto label01;
+
+        $i1 = 21;
+
+     label01:
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.net.Proxy currentProxy>;
+
+        if $r3 == null goto label02;
+
+        $r4 = <java.net.Proxy$Type: java.net.Proxy$Type HTTP>;
+
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.net.Proxy currentProxy>;
+
+        $r5 = virtualinvoke $r3.<java.net.Proxy: java.net.Proxy$Type type()>();
+
+        if $r4 != $r5 goto label14;
+
+     label02:
+        $r6 = new java.net.Socket;
+
+        specialinvoke $r6.<java.net.Socket: void <init>()>();
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.net.Socket controlSocket> = $r6;
+
+     label03:
+        $r1 = new java.net.InetSocketAddress;
+
+        $r7 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.lang.String hostName>;
+
+        specialinvoke $r1.<java.net.InetSocketAddress: void <init>(java.lang.String,int)>($r7, $i1);
+
+        $r6 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.net.Socket controlSocket>;
+
+        virtualinvoke $r6.<java.net.Socket: void connect(java.net.SocketAddress,int)>($r1, $i2);
+
+        $r0.<java.net.URLConnection: boolean connected> = 1;
+
+        $r6 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.net.Socket controlSocket>;
+
+        $r8 = virtualinvoke $r6.<java.net.Socket: java.io.OutputStream getOutputStream()>();
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.io.OutputStream ctrlOutput> = $r8;
+
+        $r6 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.net.Socket controlSocket>;
+
+        $r9 = virtualinvoke $r6.<java.net.Socket: java.io.InputStream getInputStream()>();
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.io.InputStream ctrlInput> = $r9;
+
+        specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: void login()>();
+
+        specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: void setType()>();
+
+        $z0 = virtualinvoke $r0.<java.net.URLConnection: boolean getDoInput()>();
+
+        if $z0 != 0 goto label04;
+
+        specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: void cd()>();
+
+     label04:
+        $r10 = new java.net.ServerSocket;
+
+     label05:
+        specialinvoke $r10.<java.net.ServerSocket: void <init>(int)>(0);
+
+     label06:
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.net.ServerSocket acceptSocket> = $r10;
+
+     label07:
+        $r10 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.net.ServerSocket acceptSocket>;
+
+        $i0 = virtualinvoke $r10.<java.net.ServerSocket: int getLocalPort()>();
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: int dataPort> = $i0;
+
+        specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: void port()>();
+
+     label08:
+        if $i2 != 0 goto label09;
+
+     label09:
+        $r10 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.net.ServerSocket acceptSocket>;
+
+        $i2 = virtualinvoke $r0.<java.net.URLConnection: int getConnectTimeout()>();
+
+        virtualinvoke $r10.<java.net.ServerSocket: void setSoTimeout(int)>($i2);
+
+        $z0 = virtualinvoke $r0.<java.net.URLConnection: boolean getDoInput()>();
+
+        if $z0 == 0 goto label15;
+
+        specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: void getFile()>();
+
+     label10:
+        $r10 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.net.ServerSocket acceptSocket>;
+
+        $r6 = virtualinvoke $r10.<java.net.ServerSocket: java.net.Socket accept()>();
+
+     label11:
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.net.Socket dataSocket> = $r6;
+
+     label12:
+        $r6 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.net.Socket dataSocket>;
+
+        $i2 = virtualinvoke $r0.<java.net.URLConnection: int getReadTimeout()>();
+
+        virtualinvoke $r6.<java.net.Socket: void setSoTimeout(int)>($i2);
+
+        $r10 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.net.ServerSocket acceptSocket>;
+
+        virtualinvoke $r10.<java.net.ServerSocket: void close()>();
+
+     label13:
+        $z0 = virtualinvoke $r0.<java.net.URLConnection: boolean getDoInput()>();
+
+        if $z0 == 0 goto label18;
+
+        $r11 = new org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLInputStream;
+
+        $r12 = new java.io.BufferedInputStream;
+
+        $r6 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.net.Socket dataSocket>;
+
+        $r9 = virtualinvoke $r6.<java.net.Socket: java.io.InputStream getInputStream()>();
+
+        specialinvoke $r12.<java.io.BufferedInputStream: void <init>(java.io.InputStream,int)>($r9, 8192);
+
+        $r6 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.net.Socket controlSocket>;
+
+        specialinvoke $r11.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLInputStream: void <init>(java.io.InputStream,java.net.Socket)>($r12, $r6);
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.io.InputStream inputStream> = $r11;
+
+        return;
+
+     label14:
+        $r6 = new java.net.Socket;
+
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.net.Proxy currentProxy>;
+
+        specialinvoke $r6.<java.net.Socket: void <init>(java.net.Proxy)>($r3);
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.net.Socket controlSocket> = $r6;
+
+        goto label03;
+
+     label15:
+        specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: void sendFile()>();
+
+     label16:
+        goto label10;
+
+     label17:
+        $r13 := @caughtexception;
+
+        $r14 = new java.io.IOException;
+
+        $r7 = staticinvoke <org.apache.harmony.luni.util.Msg: java.lang.String getString(java.lang.String)>("K0095");
+
+        specialinvoke $r14.<java.io.IOException: void <init>(java.lang.String)>($r7);
+
+        throw $r14;
+
+     label18:
+        return;
+
+        catch java.io.InterruptedIOException from label05 to label06 with label17;
+        catch java.io.InterruptedIOException from label07 to label08 with label17;
+        catch java.io.InterruptedIOException from label09 to label11 with label17;
+        catch java.io.InterruptedIOException from label12 to label13 with label17;
+        catch java.io.InterruptedIOException from label15 to label16 with label17;
+    }
+
+    private void getFile() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection $r0;
+        java.net.URL $r1;
+        java.lang.String $r2, $r4;
+        java.lang.StringBuilder $r3;
+        int $i0, $i1;
+        char $c2;
+        java.io.FileNotFoundException $r5;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection;
+
+        $r1 = $r0.<java.net.URLConnection: java.net.URL url>;
+
+        $r2 = virtualinvoke $r1.<java.net.URL: java.lang.String getFile()>();
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("RETR ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: void write(java.lang.String)>($r4);
+
+        $i0 = specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: int getReply()>();
+
+        $i1 = $i0;
+
+        if $i0 != 550 goto label1;
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        if $i0 <= 0 goto label1;
+
+        $c2 = virtualinvoke $r2.<java.lang.String: char charAt(int)>(0);
+
+        if $c2 != 47 goto label1;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("RETR ");
+
+        $r2 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int)>(1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+        $r2 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: void write(java.lang.String)>($r2);
+
+        $i1 = specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: int getReply()>();
+
+     label1:
+        if $i1 == 150 goto label2;
+
+        if $i1 == 226 goto label3;
+
+        $r5 = new java.io.FileNotFoundException;
+
+        $r2 = staticinvoke <org.apache.harmony.luni.util.Msg: java.lang.String getString(java.lang.String,int)>("K0096", $i1);
+
+        specialinvoke $r5.<java.io.FileNotFoundException: void <init>(java.lang.String)>($r2);
+
+        throw $r5;
+
+     label2:
+        return;
+
+     label3:
+        return;
+    }
+
+    private int getReply() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection $r0;
+        byte[] $r1;
+        int $i0;
+        java.io.InputStream $r2;
+        java.lang.String $r3;
+        boolean $z0;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection;
+
+        $r1 = newarray (byte)[3];
+
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.io.InputStream ctrlInput>;
+
+        $i0 = lengthof $r1;
+
+        virtualinvoke $r2.<java.io.InputStream: int read(byte[],int,int)>($r1, 0, $i0);
+
+        $r3 = new java.lang.String;
+
+        specialinvoke $r3.<java.lang.String: void <init>(byte[],java.lang.String)>($r1, "ISO8859_1");
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.lang.String replyCode> = $r3;
+
+        $z0 = 0;
+
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.io.InputStream ctrlInput>;
+
+        $i0 = virtualinvoke $r2.<java.io.InputStream: int read()>();
+
+        if $i0 != 45 goto label1;
+
+        $z0 = 1;
+
+     label1:
+        specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.lang.String readLine()>();
+
+        if $z0 == 0 goto label3;
+
+     label2:
+        $z0 = specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: boolean readMultiLine()>();
+
+        if $z0 != 0 goto label2;
+
+     label3:
+        $r3 = new java.lang.String;
+
+        specialinvoke $r3.<java.lang.String: void <init>(byte[],java.lang.String)>($r1, "ISO8859_1");
+
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r3);
+
+        return $i0;
+    }
+
+    private void login() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection $r0;
+        int $i0;
+        java.lang.StringBuilder $r1;
+        java.lang.String $r2;
+        java.io.IOException $r3;
+        java.net.URL $r4;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection;
+
+        $i0 = specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: int getReply()>();
+
+        if $i0 != 220 goto label2;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("USER ");
+
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.lang.String username>;
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: void write(java.lang.String)>($r2);
+
+        $i0 = specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: int getReply()>();
+
+        if $i0 == 331 goto label1;
+
+        if $i0 != 230 goto label3;
+
+     label1:
+        if $i0 != 331 goto label4;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PASS ");
+
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.lang.String password>;
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: void write(java.lang.String)>($r2);
+
+        $i0 = specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: int getReply()>();
+
+        if $i0 == 200 goto label5;
+
+        if $i0 == 220 goto label6;
+
+        if $i0 == 230 goto label7;
+
+        $r3 = new java.io.IOException;
+
+        $r4 = $r0.<java.net.URLConnection: java.net.URL url>;
+
+        $r2 = virtualinvoke $r4.<java.net.URL: java.lang.String getHost()>();
+
+        $r2 = staticinvoke <org.apache.harmony.luni.util.Msg: java.lang.String getString(java.lang.String,java.lang.Object)>("K0098", $r2);
+
+        specialinvoke $r3.<java.io.IOException: void <init>(java.lang.String)>($r2);
+
+        throw $r3;
+
+     label2:
+        $r3 = new java.io.IOException;
+
+        $r4 = $r0.<java.net.URLConnection: java.net.URL url>;
+
+        $r2 = virtualinvoke $r4.<java.net.URL: java.lang.String getHost()>();
+
+        $r2 = staticinvoke <org.apache.harmony.luni.util.Msg: java.lang.String getString(java.lang.String,java.lang.Object)>("K0097", $r2);
+
+        specialinvoke $r3.<java.io.IOException: void <init>(java.lang.String)>($r2);
+
+        throw $r3;
+
+     label3:
+        $r3 = new java.io.IOException;
+
+        $r4 = $r0.<java.net.URLConnection: java.net.URL url>;
+
+        $r2 = virtualinvoke $r4.<java.net.URL: java.lang.String getHost()>();
+
+        $r2 = staticinvoke <org.apache.harmony.luni.util.Msg: java.lang.String getString(java.lang.String,java.lang.Object)>("K0098", $r2);
+
+        specialinvoke $r3.<java.io.IOException: void <init>(java.lang.String)>($r2);
+
+        throw $r3;
+
+     label4:
+        return;
+
+     label5:
+        return;
+
+     label6:
+        return;
+
+     label7:
+        return;
+    }
+
+    private void port() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection $r0;
+        java.lang.StringBuilder $r1;
+        java.net.Socket $r2;
+        java.net.InetAddress $r3;
+        java.lang.String $r4;
+        int $i0;
+        java.io.IOException $r5;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PORT ");
+
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.net.Socket controlSocket>;
+
+        $r3 = virtualinvoke $r2.<java.net.Socket: java.net.InetAddress getLocalAddress()>();
+
+        $r4 = virtualinvoke $r3.<java.net.InetAddress: java.lang.String getHostAddress()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.String: java.lang.String replace(char,char)>(46, 44);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        $i0 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: int dataPort>;
+
+        $i0 = $i0 >> 8;
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        $i0 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: int dataPort>;
+
+        $i0 = $i0 & 255;
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: void write(java.lang.String)>($r4);
+
+        $i0 = specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: int getReply()>();
+
+        if $i0 == 200 goto label1;
+
+        $r5 = new java.io.IOException;
+
+        $r4 = staticinvoke <org.apache.harmony.luni.util.Msg: java.lang.String getString(java.lang.String)>("K0099");
+
+        specialinvoke $r5.<java.io.IOException: void <init>(java.lang.String)>($r4);
+
+        throw $r5;
+
+     label1:
+        return;
+    }
+
+    private java.lang.String readLine() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection $r0;
+        java.lang.StringBuffer $r1;
+        java.io.InputStream $r2;
+        int $i0;
+        char $c1;
+        java.lang.String $r3;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection;
+
+        $r1 = new java.lang.StringBuffer;
+
+        specialinvoke $r1.<java.lang.StringBuffer: void <init>()>();
+
+     label1:
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.io.InputStream ctrlInput>;
+
+        $i0 = virtualinvoke $r2.<java.io.InputStream: int read()>();
+
+        if $i0 == 10 goto label2;
+
+        $c1 = (char) $i0;
+
+        virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c1);
+
+        goto label1;
+
+     label2:
+        $r3 = virtualinvoke $r1.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r3;
+    }
+
+    private boolean readMultiLine() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection $r0;
+        java.lang.String $r1, $r2, $r3;
+        int $i0;
+        boolean $z0;
+        char $c1;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection;
+
+        $r1 = specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.lang.String readLine()>();
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 >= 4 goto label1;
+
+        return 1;
+
+     label1:
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(0, 3);
+
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.lang.String replyCode>;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label2;
+
+        $c1 = virtualinvoke $r1.<java.lang.String: char charAt(int)>(3);
+
+        if $c1 != 32 goto label2;
+
+        return 0;
+
+     label2:
+        return 1;
+    }
+
+    private void sendFile() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection $r0;
+        java.lang.StringBuilder $r1;
+        java.net.URL $r2;
+        java.lang.String $r3, $r4;
+        int $i0, $i1;
+        java.io.IOException $r5;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("STOR ");
+
+        $r2 = $r0.<java.net.URLConnection: java.net.URL url>;
+
+        $r3 = virtualinvoke $r2.<java.net.URL: java.lang.String getFile()>();
+
+        $r2 = $r0.<java.net.URLConnection: java.net.URL url>;
+
+        $r4 = virtualinvoke $r2.<java.net.URL: java.lang.String getFile()>();
+
+        $i0 = virtualinvoke $r4.<java.lang.String: int lastIndexOf(int)>(47);
+
+        $i0 = $i0 + 1;
+
+        $r2 = $r0.<java.net.URLConnection: java.net.URL url>;
+
+        $r4 = virtualinvoke $r2.<java.net.URL: java.lang.String getFile()>();
+
+        $i1 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.String: java.lang.String substring(int,int)>($i0, $i1);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: void write(java.lang.String)>($r3);
+
+        $i0 = specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: int getReply()>();
+
+        if $i0 == 150 goto label1;
+
+        if $i0 == 200 goto label2;
+
+        if $i0 == 125 goto label3;
+
+        $r5 = new java.io.IOException;
+
+        $r3 = staticinvoke <org.apache.harmony.luni.util.Msg: java.lang.String getString(java.lang.String)>("K009a");
+
+        specialinvoke $r5.<java.io.IOException: void <init>(java.lang.String)>($r3);
+
+        throw $r5;
+
+     label1:
+        return;
+
+     label2:
+        return;
+
+     label3:
+        return;
+    }
+
+    private void setType() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection $r0;
+        int $i0;
+        java.io.IOException $r1;
+        java.lang.String $r2;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection;
+
+        specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: void write(java.lang.String)>("TYPE I\r\n");
+
+        $i0 = specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: int getReply()>();
+
+        if $i0 == 200 goto label1;
+
+        $r1 = new java.io.IOException;
+
+        $r2 = staticinvoke <org.apache.harmony.luni.util.Msg: java.lang.String getString(java.lang.String)>("K009b");
+
+        specialinvoke $r1.<java.io.IOException: void <init>(java.lang.String)>($r2);
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+
+    private void write(java.lang.String) throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection $r0;
+        java.lang.String $r1;
+        java.io.OutputStream $r2;
+        byte[] $r3;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.io.OutputStream ctrlOutput>;
+
+        $r3 = virtualinvoke $r1.<java.lang.String: byte[] getBytes(java.lang.String)>("ISO8859_1");
+
+        virtualinvoke $r2.<java.io.OutputStream: void write(byte[])>($r3);
+
+        return;
+    }
+
+    public void connect() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection $r0;
+        java.io.IOException $r1, r12;
+        java.net.Proxy $r2, $r8;
+        java.util.List $r3;
+        java.net.URI $r4;
+        java.net.ProxySelector $r5;
+        java.util.Iterator $r6;
+        boolean $z0, $z1;
+        java.lang.Object $r7;
+        java.net.SocketAddress $r9;
+        java.lang.String $r10;
+        java.util.ArrayList r11;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection;
+
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.net.Proxy proxy>;
+
+        if $r2 == null goto label2;
+
+        r11 = new java.util.ArrayList;
+
+        $r3 = r11;
+
+        specialinvoke r11.<java.util.ArrayList: void <init>(int)>(1);
+
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.net.Proxy proxy>;
+
+        interfaceinvoke $r3.<java.util.List: boolean add(java.lang.Object)>($r2);
+
+     label1:
+        if $r3 != null goto label3;
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.net.Proxy currentProxy> = null;
+
+        specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: void connectInternal()>();
+
+        return;
+
+     label2:
+        $r4 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.net.URI uri>;
+
+        $r3 = staticinvoke <org.apache.harmony.luni.net.NetUtil: java.util.List getProxyList(java.net.URI)>($r4);
+
+        goto label1;
+
+     label3:
+        $r5 = staticinvoke <java.net.ProxySelector: java.net.ProxySelector getDefault()>();
+
+        $r6 = interfaceinvoke $r3.<java.util.List: java.util.Iterator iterator()>();
+
+        $z0 = 0;
+
+     label4:
+        $z1 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label8;
+
+        if $z0 != 0 goto label8;
+
+        $r7 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        $r2 = (java.net.Proxy) $r7;
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.net.Proxy currentProxy> = $r2;
+
+     label5:
+        specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: void connectInternal()>();
+
+     label6:
+        $z0 = 1;
+
+        goto label4;
+
+     label7:
+        $r1 := @caughtexception;
+
+        if $r5 == null goto label4;
+
+        $r2 = <java.net.Proxy: java.net.Proxy NO_PROXY>;
+
+        $r8 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.net.Proxy currentProxy>;
+
+        if $r2 == $r8 goto label4;
+
+        $r4 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.net.URI uri>;
+
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.net.Proxy currentProxy>;
+
+        $r9 = virtualinvoke $r2.<java.net.Proxy: java.net.SocketAddress address()>();
+
+        virtualinvoke $r5.<java.net.ProxySelector: void connectFailed(java.net.URI,java.net.SocketAddress,java.io.IOException)>($r4, $r9, $r1);
+
+        goto label4;
+
+     label8:
+        if $z0 != 0 goto label9;
+
+        r12 = new java.io.IOException;
+
+        $r10 = staticinvoke <org.apache.harmony.luni.util.Msg: java.lang.String getString(java.lang.String)>("K0097");
+
+        specialinvoke r12.<java.io.IOException: void <init>(java.lang.String)>($r10);
+
+        throw r12;
+
+     label9:
+        return;
+
+        catch java.io.IOException from label5 to label6 with label7;
+    }
+
+    public java.lang.String getContentType()
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection $r0;
+        java.net.URL $r1;
+        java.lang.String $r2;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection;
+
+        $r1 = $r0.<java.net.URLConnection: java.net.URL url>;
+
+        $r2 = virtualinvoke $r1.<java.net.URL: java.lang.String getFile()>();
+
+        $r2 = staticinvoke <org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.lang.String guessContentTypeFromName(java.lang.String)>($r2);
+
+        if $r2 != null goto label1;
+
+        return "content/unknown";
+
+     label1:
+        return $r2;
+    }
+
+    public java.io.InputStream getInputStream() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection $r0;
+        boolean $z0;
+        java.io.InputStream r1;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection;
+
+        $z0 = $r0.<java.net.URLConnection: boolean connected>;
+
+        if $z0 != 0 goto label1;
+
+        virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: void connect()>();
+
+     label1:
+        r1 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.io.InputStream inputStream>;
+
+        return r1;
+    }
+
+    public java.io.OutputStream getOutputStream() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection $r0;
+        java.io.OutputStream $r1;
+        boolean $z0;
+        java.net.Socket $r2;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection;
+
+        $z0 = $r0.<java.net.URLConnection: boolean connected>;
+
+        if $z0 != 0 goto label1;
+
+        virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: void connect()>();
+
+     label1:
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.net.Socket dataSocket>;
+
+        $r1 = virtualinvoke $r2.<java.net.Socket: java.io.OutputStream getOutputStream()>();
+
+        return $r1;
+    }
+
+    public java.security.Permission getPermission() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection $r0;
+        java.net.URL $r1;
+        int $i0, $i1;
+        java.net.SocketPermission $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection;
+
+        $r1 = $r0.<java.net.URLConnection: java.net.URL url>;
+
+        $i0 = virtualinvoke $r1.<java.net.URL: int getPort()>();
+
+        $i1 = $i0;
+
+        if $i0 > 0 goto label1;
+
+        $i1 = 21;
+
+     label1:
+        $r2 = new java.net.SocketPermission;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: java.lang.String hostName>;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.net.SocketPermission: void <init>(java.lang.String,java.lang.String)>($r4, "connect, resolve");
+
+        return $r2;
+    }
+
+    public void setDoInput(boolean)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection $r0;
+        boolean $z0, $z1;
+        java.lang.IllegalAccessError $r1;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection;
+
+        $z0 := @parameter0: boolean;
+
+        $z1 = $r0.<java.net.URLConnection: boolean connected>;
+
+        if $z1 == 0 goto label1;
+
+        $r1 = new java.lang.IllegalAccessError;
+
+        specialinvoke $r1.<java.lang.IllegalAccessError: void <init>()>();
+
+        throw $r1;
+
+     label1:
+        $r0.<java.net.URLConnection: boolean doInput> = $z0;
+
+        if $z0 != 0 goto label3;
+
+        $z0 = 1;
+
+     label2:
+        $r0.<java.net.URLConnection: boolean doOutput> = $z0;
+
+        return;
+
+     label3:
+        $z0 = 0;
+
+        goto label2;
+    }
+
+    public void setDoOutput(boolean)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection $r0;
+        boolean $z0, $z1;
+        java.lang.IllegalAccessError $r1;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection;
+
+        $z0 := @parameter0: boolean;
+
+        $z1 = $r0.<java.net.URLConnection: boolean connected>;
+
+        if $z1 == 0 goto label1;
+
+        $r1 = new java.lang.IllegalAccessError;
+
+        specialinvoke $r1.<java.lang.IllegalAccessError: void <init>()>();
+
+        throw $r1;
+
+     label1:
+        $r0.<java.net.URLConnection: boolean doOutput> = $z0;
+
+        if $z0 != 0 goto label3;
+
+        $z0 = 1;
+
+     label2:
+        $r0.<java.net.URLConnection: boolean doInput> = $z0;
+
+        return;
+
+     label3:
+        $z0 = 0;
+
+        goto label2;
+    }
+
+    public static void <clinit>()
+    {
+        <org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: int FTP_USERREADY> = 220;
+
+        <org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: int FTP_TRANSFEROK> = 226;
+
+        <org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: int FTP_PORT> = 21;
+
+        <org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: int FTP_PASWD> = 331;
+
+        <org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: int FTP_OPENDATA> = 150;
+
+        <org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: int FTP_OK> = 200;
+
+        <org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: int FTP_NOTFOUND> = 550;
+
+        <org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: int FTP_LOGGEDIN> = 230;
+
+        <org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: int FTP_FILEOK> = 250;
+
+        <org.apache.harmony.luni.internal.net.www.protocol.ftp.FtpURLConnection: int FTP_DATAOPEN> = 125;
+
+        return;
+    }
+}

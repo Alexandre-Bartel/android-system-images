@@ -1,0 +1,1903 @@
+public class com.android.server.Watchdog extends java.lang.Thread
+{
+    static final java.lang.String CHECKUP_ACTION;
+    static final boolean DB;
+    static final int EVENT_LOG_HARD_RESET_TAG;
+    static final int EVENT_LOG_MEMINFO_TAG;
+    static final int EVENT_LOG_PROC_PSS_TAG;
+    static final int EVENT_LOG_PROC_STATS_TAG;
+    static final int EVENT_LOG_PSS_STATS_TAG;
+    static final int EVENT_LOG_REQUESTED_REBOOT_TAG;
+    static final int EVENT_LOG_SCHEDULED_REBOOT_TAG;
+    static final int EVENT_LOG_SOFT_RESET_TAG;
+    static final int EVENT_LOG_TAG;
+    static final int EVENT_LOG_VMSTAT_TAG;
+    static final int GLOBAL_PSS;
+    static final int MEMCHECK_DEFAULT_EXEC_END_TIME;
+    static final int MEMCHECK_DEFAULT_EXEC_START_TIME;
+    static final int MEMCHECK_DEFAULT_INTERVAL;
+    static final int MEMCHECK_DEFAULT_LOG_REALTIME_INTERVAL;
+    static final int MEMCHECK_DEFAULT_MIN_ALARM;
+    static final int MEMCHECK_DEFAULT_MIN_SCREEN_OFF;
+    static final int MEMCHECK_DEFAULT_PHONE_HARD_THRESHOLD;
+    static final int MEMCHECK_DEFAULT_PHONE_SOFT_THRESHOLD;
+    static final int MEMCHECK_DEFAULT_RECHECK_INTERVAL;
+    static final int MEMCHECK_DEFAULT_SYSTEM_HARD_THRESHOLD;
+    static final int MEMCHECK_DEFAULT_SYSTEM_SOFT_THRESHOLD;
+    static final int MONITOR;
+    static final java.lang.String REBOOT_ACTION;
+    static final int REBOOT_DEFAULT_INTERVAL;
+    static final int REBOOT_DEFAULT_START_TIME;
+    static final int REBOOT_DEFAULT_WINDOW;
+    static final java.lang.String TAG;
+    static final int TIME_TO_WAIT;
+    static final boolean localLOGV;
+    static com.android.server.Watchdog sWatchdog;
+    com.android.server.am.ActivityManagerService mActivity;
+    com.android.server.AlarmManagerService mAlarm;
+    com.android.server.BatteryService mBattery;
+    long mBootTime;
+    final java.util.Calendar mCalendar;
+    android.app.PendingIntent mCheckupIntent;
+    boolean mCompleted;
+    com.android.server.Watchdog$Monitor mCurrentMonitor;
+    boolean mForceKillSystem;
+    final java.lang.Runnable mGlobalPssCollected;
+    final android.os.Handler mHandler;
+    boolean mHaveGlobalPss;
+    boolean mHavePss;
+    long mLastLogGlobalMemoryTime;
+    long mLastMemCheckRealtime;
+    long mLastMemCheckTime;
+    final java.lang.String[] mMemInfoFields;
+    final long[] mMemInfoSizes;
+    long mMemcheckExecEndTime;
+    long mMemcheckExecStartTime;
+    long mMemcheckLastTime;
+    int mMinAlarm;
+    int mMinScreenOff;
+    final java.util.ArrayList mMonitors;
+    boolean mNeedScheduledCheck;
+    final com.android.server.Watchdog$MemMonitor mPhoneMemMonitor;
+    int mPhonePid;
+    int mPhonePss;
+    com.android.server.Watchdog$PssRequestor mPhoneReq;
+    com.android.server.PowerManagerService mPower;
+    final long[] mPrevVMStatSizes;
+    final com.android.server.Watchdog$PssStats mPssStats;
+    android.app.PendingIntent mRebootIntent;
+    int mRebootInterval;
+    int mReqMinNextAlarm;
+    int mReqMinScreenOff;
+    int mReqRebootInterval;
+    boolean mReqRebootNoWait;
+    int mReqRebootStartTime;
+    int mReqRebootWindow;
+    int mReqRecheckInterval;
+    android.content.ContentResolver mResolver;
+    final com.android.server.Watchdog$MemMonitor mSystemMemMonitor;
+    final java.lang.String[] mVMStatFields;
+    final long[] mVMStatSizes;
+
+    private void <init>()
+    {
+        com.android.server.Watchdog $r0;
+        java.util.Calendar $r1;
+        java.util.ArrayList $r2;
+        com.android.server.Watchdog$MemMonitor $r3;
+        com.android.server.Watchdog$PssStats $r4;
+        java.lang.String[] $r5;
+        int $i0;
+        long[] $r6;
+        com.android.server.Watchdog$HeartbeatHandler $r7;
+        com.android.server.Watchdog$GlobalPssCollected $r8;
+
+        $r0 := @this: com.android.server.Watchdog;
+
+        specialinvoke $r0.<java.lang.Thread: void <init>(java.lang.String)>("watchdog");
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        $r0.<com.android.server.Watchdog: java.util.ArrayList mMonitors> = $r2;
+
+        $r0.<com.android.server.Watchdog: long mLastMemCheckTime> = -1800000L;
+
+        $r0.<com.android.server.Watchdog: long mLastMemCheckRealtime> = -7200000L;
+
+        $r3 = new com.android.server.Watchdog$MemMonitor;
+
+        specialinvoke $r3.<com.android.server.Watchdog$MemMonitor: void <init>(com.android.server.Watchdog,java.lang.String,java.lang.String,java.lang.String,int,java.lang.String,int)>($r0, "system", "memcheck_system_enabled", "memcheck_system_soft", 16777216, "memcheck_system_hard", 20971520);
+
+        $r0.<com.android.server.Watchdog: com.android.server.Watchdog$MemMonitor mSystemMemMonitor> = $r3;
+
+        $r3 = new com.android.server.Watchdog$MemMonitor;
+
+        specialinvoke $r3.<com.android.server.Watchdog$MemMonitor: void <init>(com.android.server.Watchdog,java.lang.String,java.lang.String,java.lang.String,int,java.lang.String,int)>($r0, "com.android.phone", "memcheck_phone_enabled", "memcheck_phone_soft", 8388608, "memcheck_phone_hard", 12582912);
+
+        $r0.<com.android.server.Watchdog: com.android.server.Watchdog$MemMonitor mPhoneMemMonitor> = $r3;
+
+        $r1 = staticinvoke <java.util.Calendar: java.util.Calendar getInstance()>();
+
+        $r0.<com.android.server.Watchdog: java.util.Calendar mCalendar> = $r1;
+
+        $r0.<com.android.server.Watchdog: int mMinScreenOff> = 300;
+
+        $r0.<com.android.server.Watchdog: int mMinAlarm> = 180;
+
+        $r0.<com.android.server.Watchdog: int mReqRebootInterval> = -1;
+
+        $r0.<com.android.server.Watchdog: int mReqRebootStartTime> = -1;
+
+        $r0.<com.android.server.Watchdog: int mReqRebootWindow> = -1;
+
+        $r0.<com.android.server.Watchdog: int mReqMinScreenOff> = -1;
+
+        $r0.<com.android.server.Watchdog: int mReqMinNextAlarm> = -1;
+
+        $r0.<com.android.server.Watchdog: int mReqRecheckInterval> = -1;
+
+        $r4 = new com.android.server.Watchdog$PssStats;
+
+        specialinvoke $r4.<com.android.server.Watchdog$PssStats: void <init>(com.android.server.Watchdog)>($r0);
+
+        $r0.<com.android.server.Watchdog: com.android.server.Watchdog$PssStats mPssStats> = $r4;
+
+        $r5 = newarray (java.lang.String)[11];
+
+        $r5[0] = "MemFree:";
+
+        $r5[1] = "Buffers:";
+
+        $r5[2] = "Cached:";
+
+        $r5[3] = "Active:";
+
+        $r5[4] = "Inactive:";
+
+        $r5[5] = "AnonPages:";
+
+        $r5[6] = "Mapped:";
+
+        $r5[7] = "Slab:";
+
+        $r5[8] = "SReclaimable:";
+
+        $r5[9] = "SUnreclaim:";
+
+        $r5[10] = "PageTables:";
+
+        $r0.<com.android.server.Watchdog: java.lang.String[] mMemInfoFields> = $r5;
+
+        $r5 = $r0.<com.android.server.Watchdog: java.lang.String[] mMemInfoFields>;
+
+        $i0 = lengthof $r5;
+
+        $r6 = newarray (long)[$i0];
+
+        $r0.<com.android.server.Watchdog: long[] mMemInfoSizes> = $r6;
+
+        $r5 = newarray (java.lang.String)[5];
+
+        $r5[0] = "pgfree ";
+
+        $r5[1] = "pgactivate ";
+
+        $r5[2] = "pgdeactivate ";
+
+        $r5[3] = "pgfault ";
+
+        $r5[4] = "pgmajfault ";
+
+        $r0.<com.android.server.Watchdog: java.lang.String[] mVMStatFields> = $r5;
+
+        $r5 = $r0.<com.android.server.Watchdog: java.lang.String[] mVMStatFields>;
+
+        $i0 = lengthof $r5;
+
+        $r6 = newarray (long)[$i0];
+
+        $r0.<com.android.server.Watchdog: long[] mVMStatSizes> = $r6;
+
+        $r5 = $r0.<com.android.server.Watchdog: java.lang.String[] mVMStatFields>;
+
+        $i0 = lengthof $r5;
+
+        $r6 = newarray (long)[$i0];
+
+        $r0.<com.android.server.Watchdog: long[] mPrevVMStatSizes> = $r6;
+
+        $r7 = new com.android.server.Watchdog$HeartbeatHandler;
+
+        specialinvoke $r7.<com.android.server.Watchdog$HeartbeatHandler: void <init>(com.android.server.Watchdog)>($r0);
+
+        $r0.<com.android.server.Watchdog: android.os.Handler mHandler> = $r7;
+
+        $r8 = new com.android.server.Watchdog$GlobalPssCollected;
+
+        specialinvoke $r8.<com.android.server.Watchdog$GlobalPssCollected: void <init>(com.android.server.Watchdog)>($r0);
+
+        $r0.<com.android.server.Watchdog: java.lang.Runnable mGlobalPssCollected> = $r8;
+
+        return;
+    }
+
+    static long computeCalendarTime(java.util.Calendar, long, long)
+    {
+        java.util.Calendar $r0;
+        long $l0, $l2, $l4;
+        int $i1, $i3;
+        byte $b5;
+
+        $r0 := @parameter0: java.util.Calendar;
+
+        $l0 := @parameter1: long;
+
+        $l2 := @parameter2: long;
+
+        virtualinvoke $r0.<java.util.Calendar: void setTimeInMillis(long)>($l0);
+
+        $i3 = (int) $l2;
+
+        $i3 = $i3 / 3600;
+
+        virtualinvoke $r0.<java.util.Calendar: void set(int,int)>(11, $i3);
+
+        $i3 = $i3 * 3600;
+
+        $l4 = (long) $i3;
+
+        $l2 = $l2 - $l4;
+
+        $i3 = (int) $l2;
+
+        $i1 = $i3 / 60;
+
+        virtualinvoke $r0.<java.util.Calendar: void set(int,int)>(12, $i1);
+
+        $i3 = (int) $l2;
+
+        $i1 = $i1 * 60;
+
+        $i3 = $i3 - $i1;
+
+        virtualinvoke $r0.<java.util.Calendar: void set(int,int)>(13, $i3);
+
+        virtualinvoke $r0.<java.util.Calendar: void set(int,int)>(14, 0);
+
+        $l2 = virtualinvoke $r0.<java.util.Calendar: long getTimeInMillis()>();
+
+        $b5 = $l2 cmp $l0;
+
+        if $b5 >= 0 goto label1;
+
+        virtualinvoke $r0.<java.util.Calendar: void add(int,int)>(5, 1);
+
+        $l0 = virtualinvoke $r0.<java.util.Calendar: long getTimeInMillis()>();
+
+        return $l0;
+
+     label1:
+        return $l2;
+    }
+
+    public static com.android.server.Watchdog getInstance()
+    {
+        com.android.server.Watchdog $r0;
+
+        $r0 = <com.android.server.Watchdog: com.android.server.Watchdog sWatchdog>;
+
+        if $r0 != null goto label1;
+
+        $r0 = new com.android.server.Watchdog;
+
+        specialinvoke $r0.<com.android.server.Watchdog: void <init>()>();
+
+        <com.android.server.Watchdog: com.android.server.Watchdog sWatchdog> = $r0;
+
+     label1:
+        $r0 = <com.android.server.Watchdog: com.android.server.Watchdog sWatchdog>;
+
+        return $r0;
+    }
+
+    public void addMonitor(com.android.server.Watchdog$Monitor)
+    {
+        com.android.server.Watchdog $r0;
+        com.android.server.Watchdog$Monitor $r1;
+        boolean $z0;
+        java.lang.RuntimeException $r2;
+        java.lang.Throwable $r3;
+        java.util.ArrayList $r4;
+
+        $r0 := @this: com.android.server.Watchdog;
+
+        $r1 := @parameter0: com.android.server.Watchdog$Monitor;
+
+        entermonitor $r0;
+
+     label1:
+        $z0 = virtualinvoke $r0.<java.lang.Thread: boolean isAlive()>();
+
+        if $z0 == 0 goto label4;
+
+        $r2 = new java.lang.RuntimeException;
+
+        specialinvoke $r2.<java.lang.RuntimeException: void <init>(java.lang.String)>("Monitors can\'t be added while the Watchdog is running");
+
+        throw $r2;
+
+     label2:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label3:
+        throw $r3;
+
+     label4:
+        $r4 = $r0.<com.android.server.Watchdog: java.util.ArrayList mMonitors>;
+
+        virtualinvoke $r4.<java.util.ArrayList: boolean add(java.lang.Object)>($r1);
+
+        exitmonitor $r0;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label2;
+        catch java.lang.Throwable from label4 to label5 with label2;
+    }
+
+    void checkMemory()
+    {
+        com.android.server.Watchdog $r0;
+        boolean $z0;
+        long $l0, $l1, $l2, $l5;
+        android.content.ContentResolver $r1;
+        com.android.server.Watchdog$MemMonitor $r2;
+        int $i3, $i4;
+        com.android.server.Watchdog$PssRequestor $r3;
+        byte $b6;
+        com.android.server.AlarmManagerService $r4;
+        android.app.PendingIntent $r5;
+        java.lang.Throwable $r6;
+
+        $r0 := @this: com.android.server.Watchdog;
+
+        $l1 = 0L;
+
+        $r1 = $r0.<com.android.server.Watchdog: android.content.ContentResolver mResolver>;
+
+        $l0 = staticinvoke <android.provider.Settings$Gservices: long getLong(android.content.ContentResolver,java.lang.String,long)>($r1, "memcheck_recheck_interval", 300L);
+
+        $l0 = $l0 * 1000L;
+
+        $r2 = $r0.<com.android.server.Watchdog: com.android.server.Watchdog$MemMonitor mSystemMemMonitor>;
+
+        $r1 = $r0.<com.android.server.Watchdog: android.content.ContentResolver mResolver>;
+
+        virtualinvoke $r2.<com.android.server.Watchdog$MemMonitor: void retrieveSettings(android.content.ContentResolver)>($r1);
+
+        $r2 = $r0.<com.android.server.Watchdog: com.android.server.Watchdog$MemMonitor mPhoneMemMonitor>;
+
+        $r1 = $r0.<com.android.server.Watchdog: android.content.ContentResolver mResolver>;
+
+        virtualinvoke $r2.<com.android.server.Watchdog$MemMonitor: void retrieveSettings(android.content.ContentResolver)>($r1);
+
+        virtualinvoke $r0.<com.android.server.Watchdog: void retrieveBrutalityAmount()>();
+
+        entermonitor $r0;
+
+     label01:
+        $l2 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r0.<com.android.server.Watchdog: boolean mNeedScheduledCheck> = 0;
+
+        $r2 = $r0.<com.android.server.Watchdog: com.android.server.Watchdog$MemMonitor mSystemMemMonitor>;
+
+        $i3 = staticinvoke <android.os.Process: int myPid()>();
+
+        $i4 = staticinvoke <android.os.Process: int myPid()>();
+
+        $l5 = staticinvoke <android.os.Process: long getPss(int)>($i4);
+
+        $i4 = (int) $l5;
+
+        $z0 = virtualinvoke $r2.<com.android.server.Watchdog$MemMonitor: boolean checkLocked(long,int,int)>($l2, $i3, $i4);
+
+        if $z0 == 0 goto label03;
+
+        $r0.<com.android.server.Watchdog: boolean mForceKillSystem> = 1;
+
+        virtualinvoke $r0.<java.lang.Object: void notifyAll()>();
+
+        exitmonitor $r0;
+
+     label02:
+        return;
+
+     label03:
+        $r3 = $r0.<com.android.server.Watchdog: com.android.server.Watchdog$PssRequestor mPhoneReq>;
+
+        if $r3 == null goto label07;
+
+        $r2 = $r0.<com.android.server.Watchdog: com.android.server.Watchdog$MemMonitor mPhoneMemMonitor>;
+
+        $i3 = $r0.<com.android.server.Watchdog: int mPhonePid>;
+
+        $i4 = $r0.<com.android.server.Watchdog: int mPhonePss>;
+
+        $z0 = virtualinvoke $r2.<com.android.server.Watchdog$MemMonitor: boolean checkLocked(long,int,int)>($l2, $i3, $i4);
+
+        if $z0 == 0 goto label04;
+
+        $i3 = $r0.<com.android.server.Watchdog: int mPhonePid>;
+
+        staticinvoke <android.os.Process: void killProcess(int)>($i3);
+
+     label04:
+        $z0 = $r0.<com.android.server.Watchdog: boolean mNeedScheduledCheck>;
+
+        if $z0 == 0 goto label05;
+
+        $l1 = $l2 + $l0;
+
+        $l0 = $r0.<com.android.server.Watchdog: long mMemcheckExecStartTime>;
+
+        $b6 = $l1 cmp $l0;
+
+        if $b6 >= 0 goto label10;
+
+        $l1 = $r0.<com.android.server.Watchdog: long mMemcheckExecStartTime>;
+
+     label05:
+        exitmonitor $r0;
+
+     label06:
+        if $z0 == 0 goto label12;
+
+        $r4 = $r0.<com.android.server.Watchdog: com.android.server.AlarmManagerService mAlarm>;
+
+        $r5 = $r0.<com.android.server.Watchdog: android.app.PendingIntent mCheckupIntent>;
+
+        virtualinvoke $r4.<com.android.server.AlarmManagerService: void remove(android.app.PendingIntent)>($r5);
+
+        $r4 = $r0.<com.android.server.Watchdog: com.android.server.AlarmManagerService mAlarm>;
+
+        $r5 = $r0.<com.android.server.Watchdog: android.app.PendingIntent mCheckupIntent>;
+
+        virtualinvoke $r4.<com.android.server.AlarmManagerService: void set(int,long,android.app.PendingIntent)>(0, $l1, $r5);
+
+        return;
+
+     label07:
+        $r2 = $r0.<com.android.server.Watchdog: com.android.server.Watchdog$MemMonitor mPhoneMemMonitor>;
+
+        virtualinvoke $r2.<com.android.server.Watchdog$MemMonitor: void clear()>();
+
+        goto label04;
+
+     label08:
+        $r6 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label09:
+        throw $r6;
+
+     label10:
+        $l0 = $r0.<com.android.server.Watchdog: long mMemcheckExecEndTime>;
+
+        $b6 = $l1 cmp $l0;
+
+        if $b6 < 0 goto label05;
+
+        virtualinvoke $r0.<com.android.server.Watchdog: void computeMemcheckTimesLocked(long)>($l1);
+
+        $l1 = $r0.<com.android.server.Watchdog: long mMemcheckExecStartTime>;
+
+     label11:
+        goto label05;
+
+     label12:
+        $r4 = $r0.<com.android.server.Watchdog: com.android.server.AlarmManagerService mAlarm>;
+
+        $r5 = $r0.<com.android.server.Watchdog: android.app.PendingIntent mCheckupIntent>;
+
+        virtualinvoke $r4.<com.android.server.AlarmManagerService: void remove(android.app.PendingIntent)>($r5);
+
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label08;
+        catch java.lang.Throwable from label03 to label06 with label08;
+        catch java.lang.Throwable from label07 to label09 with label08;
+        catch java.lang.Throwable from label10 to label11 with label08;
+    }
+
+    void checkReboot(boolean)
+    {
+        com.android.server.Watchdog $r0;
+        boolean $z0, $z1;
+        long $l0, $l1, $l4, $l5, $l6, $l7, $l8, $l9, $l10;
+        int $i2, $i3;
+        com.android.server.AlarmManagerService $r1;
+        android.app.PendingIntent $r2;
+        android.content.ContentResolver $r3;
+        java.util.Calendar $r4;
+        byte $b11;
+        java.lang.Object[] $r5;
+        java.lang.Long $r6;
+        java.lang.Integer $r7;
+        java.lang.Throwable $r8;
+        java.lang.String $r9, $r10;
+
+        $r0 := @this: com.android.server.Watchdog;
+
+        $z0 := @parameter0: boolean;
+
+        $i2 = $r0.<com.android.server.Watchdog: int mReqRebootInterval>;
+
+        if $i2 < 0 goto label02;
+
+        $i2 = $r0.<com.android.server.Watchdog: int mReqRebootInterval>;
+
+     label01:
+        $r0.<com.android.server.Watchdog: int mRebootInterval> = $i2;
+
+        if $i2 > 0 goto label03;
+
+        $r1 = $r0.<com.android.server.Watchdog: com.android.server.AlarmManagerService mAlarm>;
+
+        $r2 = $r0.<com.android.server.Watchdog: android.app.PendingIntent mRebootIntent>;
+
+        virtualinvoke $r1.<com.android.server.AlarmManagerService: void remove(android.app.PendingIntent)>($r2);
+
+        return;
+
+     label02:
+        $r3 = $r0.<com.android.server.Watchdog: android.content.ContentResolver mResolver>;
+
+        $i2 = staticinvoke <android.provider.Settings$Gservices: int getInt(android.content.ContentResolver,java.lang.String,int)>($r3, "reboot_interval", 0);
+
+        goto label01;
+
+     label03:
+        $i3 = $r0.<com.android.server.Watchdog: int mReqRebootStartTime>;
+
+        if $i3 < 0 goto label12;
+
+        $i3 = $r0.<com.android.server.Watchdog: int mReqRebootStartTime>;
+
+        $l4 = (long) $i3;
+
+     label04:
+        $i3 = $r0.<com.android.server.Watchdog: int mReqRebootWindow>;
+
+        if $i3 < 0 goto label13;
+
+        $i3 = $r0.<com.android.server.Watchdog: int mReqRebootWindow>;
+
+        $l0 = (long) $i3;
+
+     label05:
+        $l0 = $l0 * 1000L;
+
+        $i3 = $r0.<com.android.server.Watchdog: int mReqRecheckInterval>;
+
+        if $i3 < 0 goto label14;
+
+        $i3 = $r0.<com.android.server.Watchdog: int mReqRecheckInterval>;
+
+        $l1 = (long) $i3;
+
+     label06:
+        $l1 = $l1 * 1000L;
+
+        virtualinvoke $r0.<com.android.server.Watchdog: void retrieveBrutalityAmount()>();
+
+        entermonitor $r0;
+
+     label07:
+        $l5 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r4 = $r0.<com.android.server.Watchdog: java.util.Calendar mCalendar>;
+
+        $l6 = staticinvoke <com.android.server.Watchdog: long computeCalendarTime(java.util.Calendar,long,long)>($r4, $l5, $l4);
+
+        $l7 = $l6;
+
+        $i3 = $i2 * 24;
+
+        $i3 = $i3 * 60;
+
+        $i3 = $i3 * 60;
+
+        $i3 = $i3 * 1000;
+
+        $l8 = (long) $i3;
+
+        $z1 = $r0.<com.android.server.Watchdog: boolean mReqRebootNoWait>;
+
+        if $z1 != 0 goto label08;
+
+        $l9 = $r0.<com.android.server.Watchdog: long mBootTime>;
+
+        $l9 = $l5 - $l9;
+
+        $l10 = $l8 - $l0;
+
+        $b11 = $l9 cmp $l10;
+
+        if $b11 < 0 goto label17;
+
+     label08:
+        if $z0 == 0 goto label15;
+
+        $b11 = $l0 cmp 0L;
+
+        if $b11 > 0 goto label15;
+
+        $r5 = newarray (java.lang.Object)[5];
+
+        $r6 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l5);
+
+        $r5[0] = $r6;
+
+        $i2 = (int) $l8;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r5[1] = $r7;
+
+        $i2 = (int) $l4;
+
+        $i2 = $i2 * 1000;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r5[2] = $r7;
+
+        $i2 = (int) $l0;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r5[3] = $r7;
+
+        $r5[4] = "";
+
+        staticinvoke <android.util.EventLog: int writeEvent(int,java.lang.Object[])>(2808, $r5);
+
+        virtualinvoke $r0.<com.android.server.Watchdog: void rebootSystem(java.lang.String)>("Checkin scheduled forced");
+
+        exitmonitor $r0;
+
+     label09:
+        return;
+
+     label10:
+        $r8 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label11:
+        throw $r8;
+
+     label12:
+        $r3 = $r0.<com.android.server.Watchdog: android.content.ContentResolver mResolver>;
+
+        $l4 = staticinvoke <android.provider.Settings$Gservices: long getLong(android.content.ContentResolver,java.lang.String,long)>($r3, "reboot_start_time", 10800L);
+
+        goto label04;
+
+     label13:
+        $r3 = $r0.<com.android.server.Watchdog: android.content.ContentResolver mResolver>;
+
+        $l0 = staticinvoke <android.provider.Settings$Gservices: long getLong(android.content.ContentResolver,java.lang.String,long)>($r3, "reboot_window", 3600L);
+
+        goto label05;
+
+     label14:
+        $r3 = $r0.<com.android.server.Watchdog: android.content.ContentResolver mResolver>;
+
+        $l1 = staticinvoke <android.provider.Settings$Gservices: long getLong(android.content.ContentResolver,java.lang.String,long)>($r3, "memcheck_recheck_interval", 300L);
+
+        goto label06;
+
+     label15:
+        $b11 = $l5 cmp $l6;
+
+        if $b11 >= 0 goto label19;
+
+     label16:
+        $r4 = $r0.<com.android.server.Watchdog: java.util.Calendar mCalendar>;
+
+        $l7 = staticinvoke <com.android.server.Watchdog: long computeCalendarTime(java.util.Calendar,long,long)>($r4, $l5, $l4);
+
+     label17:
+        exitmonitor $r0;
+
+     label18:
+        $r1 = $r0.<com.android.server.Watchdog: com.android.server.AlarmManagerService mAlarm>;
+
+        $r2 = $r0.<com.android.server.Watchdog: android.app.PendingIntent mRebootIntent>;
+
+        virtualinvoke $r1.<com.android.server.AlarmManagerService: void remove(android.app.PendingIntent)>($r2);
+
+        $r1 = $r0.<com.android.server.Watchdog: com.android.server.AlarmManagerService mAlarm>;
+
+        $r2 = $r0.<com.android.server.Watchdog: android.app.PendingIntent mRebootIntent>;
+
+        virtualinvoke $r1.<com.android.server.AlarmManagerService: void set(int,long,android.app.PendingIntent)>(0, $l7, $r2);
+
+        return;
+
+     label19:
+        $l7 = $l6 + $l0;
+
+        $b11 = $l5 cmp $l7;
+
+        if $b11 >= 0 goto label26;
+
+     label20:
+        $r9 = virtualinvoke $r0.<com.android.server.Watchdog: java.lang.String shouldWeBeBrutalLocked(long)>($l5);
+
+        $r5 = newarray (java.lang.Object)[5];
+
+        $r6 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l5);
+
+        $r5[0] = $r6;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r5[1] = $r7;
+
+        $i2 = (int) $l4;
+
+        $i2 = $i2 * 1000;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r5[2] = $r7;
+
+        $i2 = (int) $l0;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r5[3] = $r7;
+
+        if $r9 == null goto label23;
+
+        $r10 = $r9;
+
+     label21:
+        $r5[4] = $r10;
+
+        staticinvoke <android.util.EventLog: int writeEvent(int,java.lang.Object[])>(2808, $r5);
+
+        if $r9 != null goto label24;
+
+        virtualinvoke $r0.<com.android.server.Watchdog: void rebootSystem(java.lang.String)>("Checked scheduled range");
+
+        exitmonitor $r0;
+
+     label22:
+        return;
+
+     label23:
+        $r10 = "";
+
+        goto label21;
+
+     label24:
+        $l7 = $l5 + $l1;
+
+        $l0 = $l6 + $l0;
+
+        $b11 = $l7 cmp $l0;
+
+        if $b11 < 0 goto label25;
+
+        $r4 = $r0.<com.android.server.Watchdog: java.util.Calendar mCalendar>;
+
+        $l0 = $l5 + $l8;
+
+        $l7 = staticinvoke <com.android.server.Watchdog: long computeCalendarTime(java.util.Calendar,long,long)>($r4, $l0, $l4);
+
+        goto label17;
+
+     label25:
+        $l7 = $l5 + $l1;
+
+        goto label17;
+
+     label26:
+        $r4 = $r0.<com.android.server.Watchdog: java.util.Calendar mCalendar>;
+
+        $l0 = $l5 + $l8;
+
+        $l4 = staticinvoke <com.android.server.Watchdog: long computeCalendarTime(java.util.Calendar,long,long)>($r4, $l0, $l4);
+
+     label27:
+        $l7 = $l4;
+
+        goto label17;
+
+        catch java.lang.Throwable from label07 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+        catch java.lang.Throwable from label16 to label18 with label10;
+        catch java.lang.Throwable from label20 to label22 with label10;
+        catch java.lang.Throwable from label23 to label27 with label10;
+    }
+
+    void collectGlobalMemory()
+    {
+        com.android.server.Watchdog $r0;
+        com.android.server.am.ActivityManagerService $r1;
+        java.lang.Runnable $r2;
+
+        $r0 := @this: com.android.server.Watchdog;
+
+        $r1 = $r0.<com.android.server.Watchdog: com.android.server.am.ActivityManagerService mActivity>;
+
+        $r2 = $r0.<com.android.server.Watchdog: java.lang.Runnable mGlobalPssCollected>;
+
+        virtualinvoke $r1.<com.android.server.am.ActivityManagerService: void requestPss(java.lang.Runnable)>($r2);
+
+        return;
+    }
+
+    void collectMemory()
+    {
+        com.android.server.Watchdog $r0;
+        com.android.server.Watchdog$PssRequestor $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: com.android.server.Watchdog;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = $r0.<com.android.server.Watchdog: com.android.server.Watchdog$PssRequestor mPhoneReq>;
+
+        if $r1 == null goto label2;
+
+        $r1 = $r0.<com.android.server.Watchdog: com.android.server.Watchdog$PssRequestor mPhoneReq>;
+
+        interfaceinvoke $r1.<com.android.server.Watchdog$PssRequestor: void requestPss()>();
+
+     label2:
+        exitmonitor $r0;
+
+     label3:
+        return;
+
+     label4:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label5:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    void computeMemcheckTimesLocked(long)
+    {
+        com.android.server.Watchdog $r0;
+        long $l0, $l1, $l3, $l4, $l5;
+        byte $b2;
+        android.content.ContentResolver $r1;
+        java.util.Calendar $r2;
+
+        $r0 := @this: com.android.server.Watchdog;
+
+        $l0 := @parameter0: long;
+
+        $l1 = $r0.<com.android.server.Watchdog: long mMemcheckLastTime>;
+
+        $b2 = $l1 cmp $l0;
+
+        if $b2 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r0.<com.android.server.Watchdog: long mMemcheckLastTime> = $l0;
+
+        $r1 = $r0.<com.android.server.Watchdog: android.content.ContentResolver mResolver>;
+
+        $l3 = staticinvoke <android.provider.Settings$Gservices: long getLong(android.content.ContentResolver,java.lang.String,long)>($r1, "memcheck_exec_start_time", 3600L);
+
+        $l1 = $l3;
+
+        $r1 = $r0.<com.android.server.Watchdog: android.content.ContentResolver mResolver>;
+
+        $l4 = staticinvoke <android.provider.Settings$Gservices: long getLong(android.content.ContentResolver,java.lang.String,long)>($r1, "memcheck_exec_end_time", 18000L);
+
+        $r2 = $r0.<com.android.server.Watchdog: java.util.Calendar mCalendar>;
+
+        $l5 = staticinvoke <com.android.server.Watchdog: long computeCalendarTime(java.util.Calendar,long,long)>($r2, $l0, $l4);
+
+        $r0.<com.android.server.Watchdog: long mMemcheckExecEndTime> = $l5;
+
+        $l5 = $r0.<com.android.server.Watchdog: long mMemcheckExecEndTime>;
+
+        $b2 = $l5 cmp $l0;
+
+        if $b2 >= 0 goto label2;
+
+        $l1 = $l3 + 86400L;
+
+        $l3 = $l4 + 86400L;
+
+        $r2 = $r0.<com.android.server.Watchdog: java.util.Calendar mCalendar>;
+
+        $l3 = staticinvoke <com.android.server.Watchdog: long computeCalendarTime(java.util.Calendar,long,long)>($r2, $l0, $l3);
+
+        $r0.<com.android.server.Watchdog: long mMemcheckExecEndTime> = $l3;
+
+     label2:
+        $r2 = $r0.<com.android.server.Watchdog: java.util.Calendar mCalendar>;
+
+        $l0 = staticinvoke <com.android.server.Watchdog: long computeCalendarTime(java.util.Calendar,long,long)>($r2, $l0, $l1);
+
+        $r0.<com.android.server.Watchdog: long mMemcheckExecStartTime> = $l0;
+
+        return;
+    }
+
+    public void init(android.content.Context, com.android.server.BatteryService, com.android.server.PowerManagerService, com.android.server.AlarmManagerService, com.android.server.am.ActivityManagerService)
+    {
+        com.android.server.Watchdog $r0;
+        android.content.Context $r1;
+        com.android.server.BatteryService $r2;
+        com.android.server.PowerManagerService $r3;
+        com.android.server.AlarmManagerService $r4;
+        com.android.server.am.ActivityManagerService $r5;
+        android.content.ContentResolver $r6;
+        com.android.server.Watchdog$CheckupReceiver $r7;
+        android.content.IntentFilter $r8;
+        android.content.Intent $r9;
+        android.app.PendingIntent $r10;
+        com.android.server.Watchdog$RebootReceiver $r11;
+        com.android.server.Watchdog$RebootRequestReceiver $r12;
+        long $l0;
+
+        $r0 := @this: com.android.server.Watchdog;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: com.android.server.BatteryService;
+
+        $r3 := @parameter2: com.android.server.PowerManagerService;
+
+        $r4 := @parameter3: com.android.server.AlarmManagerService;
+
+        $r5 := @parameter4: com.android.server.am.ActivityManagerService;
+
+        $r6 = virtualinvoke $r1.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r0.<com.android.server.Watchdog: android.content.ContentResolver mResolver> = $r6;
+
+        $r0.<com.android.server.Watchdog: com.android.server.BatteryService mBattery> = $r2;
+
+        $r0.<com.android.server.Watchdog: com.android.server.PowerManagerService mPower> = $r3;
+
+        $r0.<com.android.server.Watchdog: com.android.server.AlarmManagerService mAlarm> = $r4;
+
+        $r0.<com.android.server.Watchdog: com.android.server.am.ActivityManagerService mActivity> = $r5;
+
+        $r7 = new com.android.server.Watchdog$CheckupReceiver;
+
+        specialinvoke $r7.<com.android.server.Watchdog$CheckupReceiver: void <init>(com.android.server.Watchdog)>($r0);
+
+        $r8 = new android.content.IntentFilter;
+
+        specialinvoke $r8.<android.content.IntentFilter: void <init>(java.lang.String)>("com.android.service.Watchdog.CHECKUP");
+
+        virtualinvoke $r1.<android.content.Context: android.content.Intent registerReceiver(android.content.BroadcastReceiver,android.content.IntentFilter)>($r7, $r8);
+
+        $r9 = new android.content.Intent;
+
+        specialinvoke $r9.<android.content.Intent: void <init>(java.lang.String)>("com.android.service.Watchdog.CHECKUP");
+
+        $r10 = staticinvoke <android.app.PendingIntent: android.app.PendingIntent getBroadcast(android.content.Context,int,android.content.Intent,int)>($r1, 0, $r9, 0);
+
+        $r0.<com.android.server.Watchdog: android.app.PendingIntent mCheckupIntent> = $r10;
+
+        $r11 = new com.android.server.Watchdog$RebootReceiver;
+
+        specialinvoke $r11.<com.android.server.Watchdog$RebootReceiver: void <init>(com.android.server.Watchdog)>($r0);
+
+        $r8 = new android.content.IntentFilter;
+
+        specialinvoke $r8.<android.content.IntentFilter: void <init>(java.lang.String)>("com.android.service.Watchdog.REBOOT");
+
+        virtualinvoke $r1.<android.content.Context: android.content.Intent registerReceiver(android.content.BroadcastReceiver,android.content.IntentFilter)>($r11, $r8);
+
+        $r9 = new android.content.Intent;
+
+        specialinvoke $r9.<android.content.Intent: void <init>(java.lang.String)>("com.android.service.Watchdog.REBOOT");
+
+        $r10 = staticinvoke <android.app.PendingIntent: android.app.PendingIntent getBroadcast(android.content.Context,int,android.content.Intent,int)>($r1, 0, $r9, 0);
+
+        $r0.<com.android.server.Watchdog: android.app.PendingIntent mRebootIntent> = $r10;
+
+        $r12 = new com.android.server.Watchdog$RebootRequestReceiver;
+
+        specialinvoke $r12.<com.android.server.Watchdog$RebootRequestReceiver: void <init>(com.android.server.Watchdog)>($r0);
+
+        $r8 = new android.content.IntentFilter;
+
+        specialinvoke $r8.<android.content.IntentFilter: void <init>(java.lang.String)>("android.intent.action.REBOOT");
+
+        virtualinvoke $r1.<android.content.Context: android.content.Intent registerReceiver(android.content.BroadcastReceiver,android.content.IntentFilter,java.lang.String,android.os.Handler)>($r12, $r8, "android.permission.REBOOT", null);
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r0.<com.android.server.Watchdog: long mBootTime> = $l0;
+
+        return;
+    }
+
+    void logGlobalMemory()
+    {
+        com.android.server.Watchdog $r0;
+        long $l0, $l1, $l4, $l5;
+        com.android.server.Watchdog$PssStats $r1;
+        com.android.server.am.ActivityManagerService $r2;
+        java.lang.Object[] $r3;
+        int $i2, $i3;
+        java.lang.Integer $r4;
+        int[] $r5;
+        java.lang.String[] $r6;
+        long[] $r7, $r8;
+        java.lang.Long $r9;
+
+        $r0 := @this: com.android.server.Watchdog;
+
+        $r1 = $r0.<com.android.server.Watchdog: com.android.server.Watchdog$PssStats mPssStats>;
+
+        $r2 = $r0.<com.android.server.Watchdog: com.android.server.am.ActivityManagerService mActivity>;
+
+        virtualinvoke $r2.<com.android.server.am.ActivityManagerService: void collectPss(com.android.server.Watchdog$PssStats)>($r1);
+
+        $r3 = newarray (java.lang.Object)[11];
+
+        $i2 = $r1.<com.android.server.Watchdog$PssStats: int mEmptyPss>;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[0] = $r4;
+
+        $i2 = $r1.<com.android.server.Watchdog$PssStats: int mEmptyCount>;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[1] = $r4;
+
+        $i2 = $r1.<com.android.server.Watchdog$PssStats: int mBackgroundPss>;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[2] = $r4;
+
+        $i2 = $r1.<com.android.server.Watchdog$PssStats: int mBackgroundCount>;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[3] = $r4;
+
+        $i2 = $r1.<com.android.server.Watchdog$PssStats: int mServicePss>;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[4] = $r4;
+
+        $i2 = $r1.<com.android.server.Watchdog$PssStats: int mServiceCount>;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[5] = $r4;
+
+        $i2 = $r1.<com.android.server.Watchdog$PssStats: int mVisiblePss>;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[6] = $r4;
+
+        $i2 = $r1.<com.android.server.Watchdog$PssStats: int mVisibleCount>;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[7] = $r4;
+
+        $i2 = $r1.<com.android.server.Watchdog$PssStats: int mForegroundPss>;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[8] = $r4;
+
+        $i2 = $r1.<com.android.server.Watchdog$PssStats: int mForegroundCount>;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[9] = $r4;
+
+        $i2 = $r1.<com.android.server.Watchdog$PssStats: int mNoPssCount>;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[10] = $r4;
+
+        staticinvoke <android.util.EventLog: int writeEvent(int,java.lang.Object[])>(2806, $r3);
+
+        $r3 = newarray (java.lang.Object)[5];
+
+        $r5 = $r1.<com.android.server.Watchdog$PssStats: int[] mProcDeaths>;
+
+        $i2 = $r5[0];
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[0] = $r4;
+
+        $r5 = $r1.<com.android.server.Watchdog$PssStats: int[] mProcDeaths>;
+
+        $i2 = $r5[1];
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[1] = $r4;
+
+        $r5 = $r1.<com.android.server.Watchdog$PssStats: int[] mProcDeaths>;
+
+        $i2 = $r5[2];
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[2] = $r4;
+
+        $r5 = $r1.<com.android.server.Watchdog$PssStats: int[] mProcDeaths>;
+
+        $i2 = $r5[3];
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[3] = $r4;
+
+        $r5 = $r1.<com.android.server.Watchdog$PssStats: int[] mProcDeaths>;
+
+        $i2 = $r5[4];
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[4] = $r4;
+
+        staticinvoke <android.util.EventLog: int writeEvent(int,java.lang.Object[])>(2807, $r3);
+
+        $r6 = $r0.<com.android.server.Watchdog: java.lang.String[] mMemInfoFields>;
+
+        $r7 = $r0.<com.android.server.Watchdog: long[] mMemInfoSizes>;
+
+        staticinvoke <android.os.Process: void readProcLines(java.lang.String,java.lang.String[],long[])>("/proc/meminfo", $r6, $r7);
+
+        $i2 = 0;
+
+     label1:
+        $r7 = $r0.<com.android.server.Watchdog: long[] mMemInfoSizes>;
+
+        $i3 = lengthof $r7;
+
+        if $i2 >= $i3 goto label2;
+
+        $r7 = $r0.<com.android.server.Watchdog: long[] mMemInfoSizes>;
+
+        $l0 = $r7[$i2];
+
+        $l0 = $l0 * 1024L;
+
+        $r7[$i2] = $l0;
+
+        $i2 = $i2 + 1;
+
+        goto label1;
+
+     label2:
+        $r3 = newarray (java.lang.Object)[11];
+
+        $r7 = $r0.<com.android.server.Watchdog: long[] mMemInfoSizes>;
+
+        $l0 = $r7[0];
+
+        $i2 = (int) $l0;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[0] = $r4;
+
+        $r7 = $r0.<com.android.server.Watchdog: long[] mMemInfoSizes>;
+
+        $l0 = $r7[1];
+
+        $i2 = (int) $l0;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[1] = $r4;
+
+        $r7 = $r0.<com.android.server.Watchdog: long[] mMemInfoSizes>;
+
+        $l0 = $r7[2];
+
+        $i2 = (int) $l0;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[2] = $r4;
+
+        $r7 = $r0.<com.android.server.Watchdog: long[] mMemInfoSizes>;
+
+        $l0 = $r7[3];
+
+        $i2 = (int) $l0;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[3] = $r4;
+
+        $r7 = $r0.<com.android.server.Watchdog: long[] mMemInfoSizes>;
+
+        $l0 = $r7[4];
+
+        $i2 = (int) $l0;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[4] = $r4;
+
+        $r7 = $r0.<com.android.server.Watchdog: long[] mMemInfoSizes>;
+
+        $l0 = $r7[5];
+
+        $i2 = (int) $l0;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[5] = $r4;
+
+        $r7 = $r0.<com.android.server.Watchdog: long[] mMemInfoSizes>;
+
+        $l0 = $r7[6];
+
+        $i2 = (int) $l0;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[6] = $r4;
+
+        $r7 = $r0.<com.android.server.Watchdog: long[] mMemInfoSizes>;
+
+        $l0 = $r7[7];
+
+        $i2 = (int) $l0;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[7] = $r4;
+
+        $r7 = $r0.<com.android.server.Watchdog: long[] mMemInfoSizes>;
+
+        $l0 = $r7[8];
+
+        $i2 = (int) $l0;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[8] = $r4;
+
+        $r7 = $r0.<com.android.server.Watchdog: long[] mMemInfoSizes>;
+
+        $l0 = $r7[9];
+
+        $i2 = (int) $l0;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[9] = $r4;
+
+        $r7 = $r0.<com.android.server.Watchdog: long[] mMemInfoSizes>;
+
+        $l0 = $r7[10];
+
+        $i2 = (int) $l0;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[10] = $r4;
+
+        staticinvoke <android.util.EventLog: int writeEvent(int,java.lang.Object[])>(2809, $r3);
+
+        $l1 = staticinvoke <android.os.SystemClock: long uptimeMillis()>();
+
+        $l0 = $r0.<com.android.server.Watchdog: long mLastLogGlobalMemoryTime>;
+
+        $l0 = $l1 - $l0;
+
+        $r0.<com.android.server.Watchdog: long mLastLogGlobalMemoryTime> = $l1;
+
+        $r6 = $r0.<com.android.server.Watchdog: java.lang.String[] mVMStatFields>;
+
+        $r7 = $r0.<com.android.server.Watchdog: long[] mVMStatSizes>;
+
+        staticinvoke <android.os.Process: void readProcLines(java.lang.String,java.lang.String[],long[])>("/proc/vmstat", $r6, $r7);
+
+        $i2 = 0;
+
+     label3:
+        $r7 = $r0.<com.android.server.Watchdog: long[] mVMStatSizes>;
+
+        $i3 = lengthof $r7;
+
+        if $i2 >= $i3 goto label4;
+
+        $r7 = $r0.<com.android.server.Watchdog: long[] mVMStatSizes>;
+
+        $l1 = $r7[$i2];
+
+        $r7 = $r0.<com.android.server.Watchdog: long[] mVMStatSizes>;
+
+        $l4 = $r7[$i2];
+
+        $r8 = $r0.<com.android.server.Watchdog: long[] mPrevVMStatSizes>;
+
+        $l5 = $r8[$i2];
+
+        $l4 = $l4 - $l5;
+
+        $r7[$i2] = $l4;
+
+        $r7 = $r0.<com.android.server.Watchdog: long[] mPrevVMStatSizes>;
+
+        $r7[$i2] = $l1;
+
+        $i2 = $i2 + 1;
+
+        goto label3;
+
+     label4:
+        $r3 = newarray (java.lang.Object)[6];
+
+        $r9 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l0);
+
+        $r3[0] = $r9;
+
+        $r7 = $r0.<com.android.server.Watchdog: long[] mVMStatSizes>;
+
+        $l0 = $r7[0];
+
+        $i2 = (int) $l0;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[1] = $r4;
+
+        $r7 = $r0.<com.android.server.Watchdog: long[] mVMStatSizes>;
+
+        $l0 = $r7[1];
+
+        $i2 = (int) $l0;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[2] = $r4;
+
+        $r7 = $r0.<com.android.server.Watchdog: long[] mVMStatSizes>;
+
+        $l0 = $r7[2];
+
+        $i2 = (int) $l0;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[3] = $r4;
+
+        $r7 = $r0.<com.android.server.Watchdog: long[] mVMStatSizes>;
+
+        $l0 = $r7[3];
+
+        $i2 = (int) $l0;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[4] = $r4;
+
+        $r7 = $r0.<com.android.server.Watchdog: long[] mVMStatSizes>;
+
+        $l0 = $r7[4];
+
+        $i2 = (int) $l0;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r3[5] = $r4;
+
+        staticinvoke <android.util.EventLog: int writeEvent(int,java.lang.Object[])>(2810, $r3);
+
+        return;
+    }
+
+    public void processStarted(com.android.server.Watchdog$PssRequestor, java.lang.String, int)
+    {
+        com.android.server.Watchdog $r0;
+        com.android.server.Watchdog$PssRequestor $r1;
+        java.lang.String $r2, $r3;
+        int $i0;
+        boolean $z0;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: com.android.server.Watchdog;
+
+        $r1 := @parameter0: com.android.server.Watchdog$PssRequestor;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $i0 := @parameter2: int;
+
+        entermonitor $r0;
+
+     label1:
+        $r3 = "com.android.phone";
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 == 0 goto label2;
+
+        $r0.<com.android.server.Watchdog: com.android.server.Watchdog$PssRequestor mPhoneReq> = $r1;
+
+        $r0.<com.android.server.Watchdog: int mPhonePid> = $i0;
+
+        $r0.<com.android.server.Watchdog: int mPhonePss> = 0;
+
+     label2:
+        exitmonitor $r0;
+
+     label3:
+        return;
+
+     label4:
+        $r4 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label5:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    void rebootSystem(java.lang.String)
+    {
+        com.android.server.Watchdog $r0;
+        java.lang.String $r1, $r4;
+        java.io.IOException $r2;
+        java.lang.StringBuilder $r3;
+
+        $r0 := @this: com.android.server.Watchdog;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Rebooting system because: ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("Watchdog", $r4);
+
+     label1:
+        staticinvoke <android.os.Power: void reboot(java.lang.String)>($r1);
+
+     label2:
+        return;
+
+     label3:
+        $r2 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("Watchdog", "Reboot failed!", $r2);
+
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public void reportPss(com.android.server.Watchdog$PssRequestor, java.lang.String, int)
+    {
+        com.android.server.Watchdog $r0;
+        com.android.server.Watchdog$PssRequestor $r1, $r3;
+        java.lang.String $r2;
+        int $i0;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: com.android.server.Watchdog;
+
+        $r1 := @parameter0: com.android.server.Watchdog$PssRequestor;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $i0 := @parameter2: int;
+
+        entermonitor $r0;
+
+     label1:
+        $r3 = $r0.<com.android.server.Watchdog: com.android.server.Watchdog$PssRequestor mPhoneReq>;
+
+        if $r3 != $r1 goto label2;
+
+        $r0.<com.android.server.Watchdog: int mPhonePss> = $i0;
+
+     label2:
+        exitmonitor $r0;
+
+     label3:
+        return;
+
+     label4:
+        $r4 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label5:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    void retrieveBrutalityAmount()
+    {
+        com.android.server.Watchdog $r0;
+        int $i0;
+        android.content.ContentResolver $r1;
+
+        $r0 := @this: com.android.server.Watchdog;
+
+        $i0 = $r0.<com.android.server.Watchdog: int mReqMinScreenOff>;
+
+        if $i0 < 0 goto label3;
+
+        $i0 = $r0.<com.android.server.Watchdog: int mReqMinScreenOff>;
+
+     label1:
+        $i0 = $i0 * 1000;
+
+        $r0.<com.android.server.Watchdog: int mMinScreenOff> = $i0;
+
+        $i0 = $r0.<com.android.server.Watchdog: int mReqMinNextAlarm>;
+
+        if $i0 < 0 goto label4;
+
+        $i0 = $r0.<com.android.server.Watchdog: int mReqMinNextAlarm>;
+
+     label2:
+        $i0 = $i0 * 1000;
+
+        $r0.<com.android.server.Watchdog: int mMinAlarm> = $i0;
+
+        return;
+
+     label3:
+        $r1 = $r0.<com.android.server.Watchdog: android.content.ContentResolver mResolver>;
+
+        $i0 = staticinvoke <android.provider.Settings$Gservices: int getInt(android.content.ContentResolver,java.lang.String,int)>($r1, "memcheck_min_screen_off", 300);
+
+        goto label1;
+
+     label4:
+        $r1 = $r0.<com.android.server.Watchdog: android.content.ContentResolver mResolver>;
+
+        $i0 = staticinvoke <android.provider.Settings$Gservices: int getInt(android.content.ContentResolver,java.lang.String,int)>($r1, "memcheck_min_alarm", 180);
+
+        goto label2;
+    }
+
+    public void run()
+    {
+        com.android.server.Watchdog $r0;
+        java.lang.InterruptedException $r1, $r8;
+        android.os.Handler $r2;
+        long $l0, $l1;
+        byte $b2;
+        boolean $z0;
+        java.lang.Throwable $r3;
+        java.lang.AssertionError $r4;
+        com.android.server.Watchdog$Monitor $r5;
+        java.lang.Class $r6;
+        java.lang.String $r7;
+        int $i3;
+
+        $r0 := @this: com.android.server.Watchdog;
+
+     label01:
+        $r0.<com.android.server.Watchdog: boolean mCompleted> = 0;
+
+        $r2 = $r0.<com.android.server.Watchdog: android.os.Handler mHandler>;
+
+        virtualinvoke $r2.<android.os.Handler: boolean sendEmptyMessage(int)>(2718);
+
+        entermonitor $r0;
+
+        $l0 = 60000L;
+
+     label02:
+        $l1 = staticinvoke <android.os.SystemClock: long uptimeMillis()>();
+
+     label03:
+        virtualinvoke $r0.<java.lang.Object: void wait(long)>($l0);
+
+     label04:
+        $l0 = staticinvoke <android.os.SystemClock: long uptimeMillis()>();
+
+        $l0 = $l0 - $l1;
+
+        $l0 = 60000L - $l0;
+
+        $b2 = $l0 cmp 0L;
+
+        if $b2 <= 0 goto label05;
+
+        $z0 = $r0.<com.android.server.Watchdog: boolean mForceKillSystem>;
+
+        if $z0 == 0 goto label03;
+
+     label05:
+        $z0 = $r0.<com.android.server.Watchdog: boolean mCompleted>;
+
+        if $z0 == 0 goto label12;
+
+        $z0 = $r0.<com.android.server.Watchdog: boolean mForceKillSystem>;
+
+        if $z0 != 0 goto label12;
+
+        exitmonitor $r0;
+
+     label06:
+        goto label01;
+
+     label07:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label08:
+        throw $r3;
+
+     label09:
+        $r1 := @caughtexception;
+
+     label10:
+        $z0 = staticinvoke <android.os.SystemProperties: boolean getBoolean(java.lang.String,boolean)>("ro.secure", 0);
+
+        if $z0 == 0 goto label11;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("WatchDog", "Woof! Woof! Interrupter!");
+
+        goto label04;
+
+     label11:
+        $r4 = new java.lang.AssertionError;
+
+        specialinvoke $r4.<java.lang.AssertionError: void <init>(java.lang.Object)>("Someone interrupted the watchdog");
+
+        throw $r4;
+
+     label12:
+        exitmonitor $r0;
+
+     label13:
+        $r5 = $r0.<com.android.server.Watchdog: com.android.server.Watchdog$Monitor mCurrentMonitor>;
+
+        if $r5 == null goto label17;
+
+        $r5 = $r0.<com.android.server.Watchdog: com.android.server.Watchdog$Monitor mCurrentMonitor>;
+
+        $r6 = virtualinvoke $r5.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r7 = virtualinvoke $r6.<java.lang.Class: java.lang.String getName()>();
+
+     label14:
+        staticinvoke <android.util.EventLog: int writeEvent(int,java.lang.String)>(2802, $r7);
+
+        $i3 = staticinvoke <android.os.Process: int myPid()>();
+
+        staticinvoke <android.os.Process: void sendSignal(int,int)>($i3, 3);
+
+     label15:
+        staticinvoke <java.lang.Thread: void sleep(long)>(10000L);
+
+     label16:
+        $z0 = staticinvoke <android.os.Debug: boolean isDebuggerConnected()>();
+
+        if $z0 != 0 goto label01;
+
+        $i3 = staticinvoke <android.os.Process: int myPid()>();
+
+        staticinvoke <android.os.Process: void killProcess(int)>($i3);
+
+        goto label01;
+
+     label17:
+        $r7 = "null";
+
+        goto label14;
+
+     label18:
+        $r8 := @caughtexception;
+
+        goto label16;
+
+        catch java.lang.Throwable from label02 to label03 with label07;
+        catch java.lang.InterruptedException from label03 to label04 with label09;
+        catch java.lang.Throwable from label03 to label04 with label07;
+        catch java.lang.Throwable from label04 to label06 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+        catch java.lang.Throwable from label10 to label13 with label07;
+        catch java.lang.InterruptedException from label15 to label16 with label18;
+    }
+
+    java.lang.String shouldWeBeBrutalLocked(long)
+    {
+        com.android.server.Watchdog $r0;
+        long $l0, $l2;
+        com.android.server.BatteryService $r1;
+        boolean $z0;
+        int $i1;
+        com.android.server.PowerManagerService $r2;
+        byte $b3;
+        com.android.server.AlarmManagerService $r3;
+
+        $r0 := @this: com.android.server.Watchdog;
+
+        $l0 := @parameter0: long;
+
+        $r1 = $r0.<com.android.server.Watchdog: com.android.server.BatteryService mBattery>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<com.android.server.Watchdog: com.android.server.BatteryService mBattery>;
+
+        $z0 = virtualinvoke $r1.<com.android.server.BatteryService: boolean isPowered()>();
+
+        if $z0 != 0 goto label2;
+
+     label1:
+        return "battery";
+
+     label2:
+        $i1 = $r0.<com.android.server.Watchdog: int mMinScreenOff>;
+
+        if $i1 < 0 goto label4;
+
+        $r2 = $r0.<com.android.server.Watchdog: com.android.server.PowerManagerService mPower>;
+
+        if $r2 == null goto label3;
+
+        $r2 = $r0.<com.android.server.Watchdog: com.android.server.PowerManagerService mPower>;
+
+        $l0 = virtualinvoke $r2.<com.android.server.PowerManagerService: long timeSinceScreenOn()>();
+
+        $i1 = $r0.<com.android.server.Watchdog: int mMinScreenOff>;
+
+        $l2 = (long) $i1;
+
+        $b3 = $l0 cmp $l2;
+
+        if $b3 >= 0 goto label4;
+
+     label3:
+        return "screen";
+
+     label4:
+        $i1 = $r0.<com.android.server.Watchdog: int mMinAlarm>;
+
+        if $i1 < 0 goto label6;
+
+        $r3 = $r0.<com.android.server.Watchdog: com.android.server.AlarmManagerService mAlarm>;
+
+        if $r3 == null goto label5;
+
+        $r3 = $r0.<com.android.server.Watchdog: com.android.server.AlarmManagerService mAlarm>;
+
+        $l0 = virtualinvoke $r3.<com.android.server.AlarmManagerService: long timeToNextAlarm()>();
+
+        $i1 = $r0.<com.android.server.Watchdog: int mMinAlarm>;
+
+        $l2 = (long) $i1;
+
+        $b3 = $l0 cmp $l2;
+
+        if $b3 >= 0 goto label6;
+
+     label5:
+        return "alarm";
+
+     label6:
+        return null;
+    }
+
+    public static void <clinit>()
+    {
+        <com.android.server.Watchdog: int TIME_TO_WAIT> = 60000;
+
+        <com.android.server.Watchdog: java.lang.String TAG> = "Watchdog";
+
+        <com.android.server.Watchdog: int REBOOT_DEFAULT_WINDOW> = 3600;
+
+        <com.android.server.Watchdog: int REBOOT_DEFAULT_START_TIME> = 10800;
+
+        <com.android.server.Watchdog: int REBOOT_DEFAULT_INTERVAL> = 0;
+
+        <com.android.server.Watchdog: java.lang.String REBOOT_ACTION> = "com.android.service.Watchdog.REBOOT";
+
+        <com.android.server.Watchdog: int MONITOR> = 2718;
+
+        <com.android.server.Watchdog: int MEMCHECK_DEFAULT_SYSTEM_SOFT_THRESHOLD> = 16777216;
+
+        <com.android.server.Watchdog: int MEMCHECK_DEFAULT_SYSTEM_HARD_THRESHOLD> = 20971520;
+
+        <com.android.server.Watchdog: int MEMCHECK_DEFAULT_RECHECK_INTERVAL> = 300;
+
+        <com.android.server.Watchdog: int MEMCHECK_DEFAULT_PHONE_SOFT_THRESHOLD> = 8388608;
+
+        <com.android.server.Watchdog: int MEMCHECK_DEFAULT_PHONE_HARD_THRESHOLD> = 12582912;
+
+        <com.android.server.Watchdog: int MEMCHECK_DEFAULT_MIN_SCREEN_OFF> = 300;
+
+        <com.android.server.Watchdog: int MEMCHECK_DEFAULT_MIN_ALARM> = 180;
+
+        <com.android.server.Watchdog: int MEMCHECK_DEFAULT_LOG_REALTIME_INTERVAL> = 7200;
+
+        <com.android.server.Watchdog: int MEMCHECK_DEFAULT_INTERVAL> = 1800;
+
+        <com.android.server.Watchdog: int MEMCHECK_DEFAULT_EXEC_START_TIME> = 3600;
+
+        <com.android.server.Watchdog: int MEMCHECK_DEFAULT_EXEC_END_TIME> = 18000;
+
+        <com.android.server.Watchdog: int GLOBAL_PSS> = 2719;
+
+        <com.android.server.Watchdog: int EVENT_LOG_VMSTAT_TAG> = 2810;
+
+        <com.android.server.Watchdog: int EVENT_LOG_TAG> = 2802;
+
+        <com.android.server.Watchdog: int EVENT_LOG_SOFT_RESET_TAG> = 2804;
+
+        <com.android.server.Watchdog: int EVENT_LOG_SCHEDULED_REBOOT_TAG> = 2808;
+
+        <com.android.server.Watchdog: int EVENT_LOG_REQUESTED_REBOOT_TAG> = 2811;
+
+        <com.android.server.Watchdog: int EVENT_LOG_PSS_STATS_TAG> = 2806;
+
+        <com.android.server.Watchdog: int EVENT_LOG_PROC_STATS_TAG> = 2807;
+
+        <com.android.server.Watchdog: int EVENT_LOG_PROC_PSS_TAG> = 2803;
+
+        <com.android.server.Watchdog: int EVENT_LOG_MEMINFO_TAG> = 2809;
+
+        <com.android.server.Watchdog: int EVENT_LOG_HARD_RESET_TAG> = 2805;
+
+        <com.android.server.Watchdog: boolean DB> = 0;
+
+        <com.android.server.Watchdog: java.lang.String CHECKUP_ACTION> = "com.android.service.Watchdog.CHECKUP";
+
+        return;
+    }
+}

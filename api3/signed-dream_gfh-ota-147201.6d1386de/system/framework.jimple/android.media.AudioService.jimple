@@ -1,0 +1,2606 @@
+public class android.media.AudioService extends android.media.IAudioService$Stub
+{
+    private static final int MSG_MEDIA_SERVER_DIED;
+    private static final int MSG_MEDIA_SERVER_STARTED;
+    private static final int MSG_PERSIST_RINGER_MODE;
+    private static final int MSG_PERSIST_VIBRATE_SETTING;
+    private static final int MSG_PERSIST_VOLUME;
+    private static final int MSG_PLAY_SOUND_EFFECT;
+    private static final int MSG_SET_SYSTEM_VOLUME;
+    private static final int NUM_SOUNDPOOL_CHANNELS;
+    private static final int PERSIST_DELAY;
+    private static final int SENDMSG_NOOP;
+    private static final int SENDMSG_QUEUE;
+    private static final int SENDMSG_REPLACE;
+    private static final int SHARED_MSG;
+    private static final java.lang.String SOUND_EFFECTS_PATH;
+    private static final java.lang.String[] SOUND_EFFECT_FILES;
+    private static final int SOUND_EFFECT_VOLUME;
+    private static final java.lang.String TAG;
+    private int[][] SOUND_EFFECT_FILES_MAP;
+    private android.media.AudioService$AudioHandler mAudioHandler;
+    private android.media.AudioSystem$ErrorCallback mAudioSystemCallback;
+    private android.media.AudioService$AudioSystemThread mAudioSystemThread;
+    private android.content.ContentResolver mContentResolver;
+    private android.content.Context mContext;
+    private boolean mMediaServerOk;
+    private boolean mMicMute;
+    private int mMode;
+    private int mMuteAffectedStreams;
+    private int mRingerMode;
+    private int[] mRoutes;
+    private java.lang.Object mSettingsLock;
+    private android.media.AudioService$SettingsObserver mSettingsObserver;
+    private java.lang.Object mSoundEffectsLock;
+    private android.media.SoundPool mSoundPool;
+    private android.media.AudioService$VolumeStreamState[] mStreamStates;
+    private int mVibrateSetting;
+    private android.view.VolumePanel mVolumePanel;
+
+    static void <clinit>()
+    {
+        java.lang.String[] $r0;
+
+        <android.media.AudioService: java.lang.String TAG> = "AudioService";
+
+        <android.media.AudioService: int SOUND_EFFECT_VOLUME> = 1000;
+
+        <android.media.AudioService: java.lang.String SOUND_EFFECTS_PATH> = "/media/audio/ui/";
+
+        <android.media.AudioService: int SHARED_MSG> = -1;
+
+        <android.media.AudioService: int SENDMSG_REPLACE> = 0;
+
+        <android.media.AudioService: int SENDMSG_QUEUE> = 2;
+
+        <android.media.AudioService: int SENDMSG_NOOP> = 1;
+
+        <android.media.AudioService: int PERSIST_DELAY> = 3000;
+
+        <android.media.AudioService: int NUM_SOUNDPOOL_CHANNELS> = 4;
+
+        <android.media.AudioService: int MSG_SET_SYSTEM_VOLUME> = 0;
+
+        <android.media.AudioService: int MSG_PLAY_SOUND_EFFECT> = 7;
+
+        <android.media.AudioService: int MSG_PERSIST_VOLUME> = 1;
+
+        <android.media.AudioService: int MSG_PERSIST_VIBRATE_SETTING> = 4;
+
+        <android.media.AudioService: int MSG_PERSIST_RINGER_MODE> = 3;
+
+        <android.media.AudioService: int MSG_MEDIA_SERVER_STARTED> = 6;
+
+        <android.media.AudioService: int MSG_MEDIA_SERVER_DIED> = 5;
+
+        $r0 = newarray (java.lang.String)[5];
+
+        $r0[0] = "Effect_Tick.ogg";
+
+        $r0[1] = "KeypressStandard.ogg";
+
+        $r0[2] = "KeypressSpacebar.ogg";
+
+        $r0[3] = "KeypressDelete.ogg";
+
+        $r0[4] = "KeypressReturn.ogg";
+
+        <android.media.AudioService: java.lang.String[] SOUND_EFFECT_FILES> = $r0;
+
+        return;
+    }
+
+    public void <init>(android.content.Context)
+    {
+        android.media.AudioService $r0;
+        android.content.Context $r1;
+        android.content.ContentResolver $r2;
+        int[] $r3;
+        java.lang.Object $r4;
+        int[][] $r5;
+        android.media.AudioService$1 $r6;
+        android.view.VolumePanel $r7;
+        android.media.AudioService$SettingsObserver $r8;
+        android.media.AudioSystem$ErrorCallback $r9;
+
+        $r0 := @this: android.media.AudioService;
+
+        $r1 := @parameter0: android.content.Context;
+
+        specialinvoke $r0.<android.media.IAudioService$Stub: void <init>()>();
+
+        $r3 = newarray (int)[3];
+
+        $r0.<android.media.AudioService: int[] mRoutes> = $r3;
+
+        $r4 = new java.lang.Object;
+
+        specialinvoke $r4.<java.lang.Object: void <init>()>();
+
+        $r0.<android.media.AudioService: java.lang.Object mSettingsLock> = $r4;
+
+        $r4 = new java.lang.Object;
+
+        specialinvoke $r4.<java.lang.Object: void <init>()>();
+
+        $r0.<android.media.AudioService: java.lang.Object mSoundEffectsLock> = $r4;
+
+        $r5 = newarray (int[])[9];
+
+        $r3 = newarray (int)[2];
+
+        $r3[0] = 0;
+
+        $r3[1] = -1;
+
+        $r5[0] = $r3;
+
+        $r3 = newarray (int)[2];
+
+        $r3[0] = 0;
+
+        $r3[1] = -1;
+
+        $r5[1] = $r3;
+
+        $r3 = newarray (int)[2];
+
+        $r3[0] = 0;
+
+        $r3[1] = -1;
+
+        $r5[2] = $r3;
+
+        $r3 = newarray (int)[2];
+
+        $r3[0] = 0;
+
+        $r3[1] = -1;
+
+        $r5[3] = $r3;
+
+        $r3 = newarray (int)[2];
+
+        $r3[0] = 0;
+
+        $r3[1] = -1;
+
+        $r5[4] = $r3;
+
+        $r3 = newarray (int)[2];
+
+        $r3[0] = 1;
+
+        $r3[1] = -1;
+
+        $r5[5] = $r3;
+
+        $r3 = newarray (int)[2];
+
+        $r3[0] = 2;
+
+        $r3[1] = -1;
+
+        $r5[6] = $r3;
+
+        $r3 = newarray (int)[2];
+
+        $r3[0] = 3;
+
+        $r3[1] = -1;
+
+        $r5[7] = $r3;
+
+        $r3 = newarray (int)[2];
+
+        $r3[0] = 4;
+
+        $r3[1] = -1;
+
+        $r5[8] = $r3;
+
+        $r0.<android.media.AudioService: int[][] SOUND_EFFECT_FILES_MAP> = $r5;
+
+        $r6 = new android.media.AudioService$1;
+
+        specialinvoke $r6.<android.media.AudioService$1: void <init>(android.media.AudioService)>($r0);
+
+        $r0.<android.media.AudioService: android.media.AudioSystem$ErrorCallback mAudioSystemCallback> = $r6;
+
+        $r0.<android.media.AudioService: android.content.Context mContext> = $r1;
+
+        $r2 = virtualinvoke $r1.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r0.<android.media.AudioService: android.content.ContentResolver mContentResolver> = $r2;
+
+        $r7 = new android.view.VolumePanel;
+
+        specialinvoke $r7.<android.view.VolumePanel: void <init>(android.content.Context,android.media.AudioService)>($r1, $r0);
+
+        $r0.<android.media.AudioService: android.view.VolumePanel mVolumePanel> = $r7;
+
+        $r8 = new android.media.AudioService$SettingsObserver;
+
+        specialinvoke $r8.<android.media.AudioService$SettingsObserver: void <init>(android.media.AudioService)>($r0);
+
+        $r0.<android.media.AudioService: android.media.AudioService$SettingsObserver mSettingsObserver> = $r8;
+
+        specialinvoke $r0.<android.media.AudioService: void createAudioSystemThread()>();
+
+        specialinvoke $r0.<android.media.AudioService: void createStreamStates()>();
+
+        specialinvoke $r0.<android.media.AudioService: void readPersistedSettings()>();
+
+        specialinvoke $r0.<android.media.AudioService: void readAudioSettings()>();
+
+        $r0.<android.media.AudioService: boolean mMediaServerOk> = 1;
+
+        $r9 = $r0.<android.media.AudioService: android.media.AudioSystem$ErrorCallback mAudioSystemCallback>;
+
+        staticinvoke <android.media.AudioSystem: void setErrorCallback(android.media.AudioSystem$ErrorCallback)>($r9);
+
+        virtualinvoke $r0.<android.media.AudioService: boolean loadSoundEffects()>();
+
+        return;
+    }
+
+    static boolean access$000(android.media.AudioService)
+    {
+        android.media.AudioService $r0;
+        boolean z0;
+
+        $r0 := @parameter0: android.media.AudioService;
+
+        z0 = $r0.<android.media.AudioService: boolean mMediaServerOk>;
+
+        return z0;
+    }
+
+    static boolean access$002(android.media.AudioService, boolean)
+    {
+        android.media.AudioService $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: android.media.AudioService;
+
+        $z0 := @parameter1: boolean;
+
+        $r0.<android.media.AudioService: boolean mMediaServerOk> = $z0;
+
+        return $z0;
+    }
+
+    static android.media.AudioService$AudioHandler access$100(android.media.AudioService)
+    {
+        android.media.AudioService $r0;
+        android.media.AudioService$AudioHandler r1;
+
+        $r0 := @parameter0: android.media.AudioService;
+
+        r1 = $r0.<android.media.AudioService: android.media.AudioService$AudioHandler mAudioHandler>;
+
+        return r1;
+    }
+
+    static android.media.AudioService$AudioHandler access$102(android.media.AudioService, android.media.AudioService$AudioHandler)
+    {
+        android.media.AudioService $r0;
+        android.media.AudioService$AudioHandler $r1;
+
+        $r0 := @parameter0: android.media.AudioService;
+
+        $r1 := @parameter1: android.media.AudioService$AudioHandler;
+
+        $r0.<android.media.AudioService: android.media.AudioService$AudioHandler mAudioHandler> = $r1;
+
+        return $r1;
+    }
+
+    static int access$1100(android.media.AudioService)
+    {
+        android.media.AudioService $r0;
+        int i0;
+
+        $r0 := @parameter0: android.media.AudioService;
+
+        i0 = $r0.<android.media.AudioService: int mRingerMode>;
+
+        return i0;
+    }
+
+    static int access$1800(android.media.AudioService)
+    {
+        android.media.AudioService $r0;
+        int i0;
+
+        $r0 := @parameter0: android.media.AudioService;
+
+        i0 = $r0.<android.media.AudioService: int mVibrateSetting>;
+
+        return i0;
+    }
+
+    static java.lang.Object access$1900(android.media.AudioService)
+    {
+        android.media.AudioService $r0;
+        java.lang.Object r1;
+
+        $r0 := @parameter0: android.media.AudioService;
+
+        r1 = $r0.<android.media.AudioService: java.lang.Object mSoundEffectsLock>;
+
+        return r1;
+    }
+
+    static void access$200(android.os.Handler, int, int, int, int, int, java.lang.Object, int)
+    {
+        android.os.Handler $r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        java.lang.Object $r1;
+
+        $r0 := @parameter0: android.os.Handler;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        $i3 := @parameter4: int;
+
+        $i4 := @parameter5: int;
+
+        $r1 := @parameter6: java.lang.Object;
+
+        $i5 := @parameter7: int;
+
+        staticinvoke <android.media.AudioService: void sendMsg(android.os.Handler,int,int,int,int,int,java.lang.Object,int)>($r0, $i0, $i1, $i2, $i3, $i4, $r1, $i5);
+
+        return;
+    }
+
+    static android.media.SoundPool access$2000(android.media.AudioService)
+    {
+        android.media.AudioService $r0;
+        android.media.SoundPool r1;
+
+        $r0 := @parameter0: android.media.AudioService;
+
+        r1 = $r0.<android.media.AudioService: android.media.SoundPool mSoundPool>;
+
+        return r1;
+    }
+
+    static int[][] access$2100(android.media.AudioService)
+    {
+        android.media.AudioService $r0;
+        int[][] r1;
+
+        $r0 := @parameter0: android.media.AudioService;
+
+        r1 = $r0.<android.media.AudioService: int[][] SOUND_EFFECT_FILES_MAP>;
+
+        return r1;
+    }
+
+    static java.lang.String[] access$2200()
+    {
+        java.lang.String[] r0;
+
+        r0 = <android.media.AudioService: java.lang.String[] SOUND_EFFECT_FILES>;
+
+        return r0;
+    }
+
+    static int access$2400(int)
+    {
+        int $i0;
+
+        $i0 := @parameter0: int;
+
+        $i0 = staticinvoke <android.media.AudioService: int getMsgBase(int)>($i0);
+
+        return $i0;
+    }
+
+    static void access$2500(android.media.AudioService)
+    {
+        android.media.AudioService $r0;
+
+        $r0 := @parameter0: android.media.AudioService;
+
+        specialinvoke $r0.<android.media.AudioService: void applyAudioSettings()>();
+
+        return;
+    }
+
+    static android.media.AudioService$VolumeStreamState[] access$2600(android.media.AudioService)
+    {
+        android.media.AudioService $r0;
+        android.media.AudioService$VolumeStreamState[] r1;
+
+        $r0 := @parameter0: android.media.AudioService;
+
+        r1 = $r0.<android.media.AudioService: android.media.AudioService$VolumeStreamState[] mStreamStates>;
+
+        return r1;
+    }
+
+    static void access$2700(android.media.AudioService, int)
+    {
+        android.media.AudioService $r0;
+        int $i0;
+
+        $r0 := @parameter0: android.media.AudioService;
+
+        $i0 := @parameter1: int;
+
+        specialinvoke $r0.<android.media.AudioService: void setRingerModeInt(int)>($i0);
+
+        return;
+    }
+
+    static android.content.ContentResolver access$800(android.media.AudioService)
+    {
+        android.media.AudioService $r0;
+        android.content.ContentResolver r1;
+
+        $r0 := @parameter0: android.media.AudioService;
+
+        r1 = $r0.<android.media.AudioService: android.content.ContentResolver mContentResolver>;
+
+        return r1;
+    }
+
+    private void applyAudioSettings()
+    {
+        android.media.AudioService $r0;
+        java.lang.Object $r1;
+        boolean $z0;
+        int $i0, $i1;
+        int[] $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.media.AudioService;
+
+        $r1 = $r0.<android.media.AudioService: java.lang.Object mSettingsLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = $r0.<android.media.AudioService: boolean mMicMute>;
+
+        staticinvoke <android.media.AudioSystem: int muteMicrophone(boolean)>($z0);
+
+        $i0 = $r0.<android.media.AudioService: int mMode>;
+
+        staticinvoke <android.media.AudioSystem: int setMode(int)>($i0);
+
+        $i0 = 0;
+
+     label2:
+        if $i0 >= 3 goto label3;
+
+        $r2 = $r0.<android.media.AudioService: int[] mRoutes>;
+
+        $i1 = $r2[$i0];
+
+        staticinvoke <android.media.AudioSystem: int setRouting(int,int,int)>($i0, $i1, -1);
+
+        $i0 = $i0 + 1;
+
+        goto label2;
+
+     label3:
+        exitmonitor $r1;
+
+     label4:
+        return;
+
+     label5:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    private void broadcastRingerMode()
+    {
+        android.media.AudioService $r0;
+        android.content.Intent $r1;
+        int $i0;
+        boolean $z0;
+        long $l1;
+        android.content.Context $r2;
+
+        $r0 := @this: android.media.AudioService;
+
+        $z0 = staticinvoke <android.app.ActivityManagerNative: boolean isSystemReady()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = new android.content.Intent;
+
+        specialinvoke $r1.<android.content.Intent: void <init>(java.lang.String)>("android.media.RINGER_MODE_CHANGED");
+
+        $i0 = $r0.<android.media.AudioService: int mRingerMode>;
+
+        virtualinvoke $r1.<android.content.Intent: android.content.Intent putExtra(java.lang.String,int)>("android.media.EXTRA_RINGER_MODE", $i0);
+
+        $l1 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+        $r2 = $r0.<android.media.AudioService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void sendStickyBroadcast(android.content.Intent)>($r1);
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    private void broadcastVibrateSetting(int)
+    {
+        android.media.AudioService $r0;
+        int $i0;
+        android.content.Intent $r1;
+        boolean $z0;
+        android.content.Context $r2;
+
+        $r0 := @this: android.media.AudioService;
+
+        $i0 := @parameter0: int;
+
+        $z0 = staticinvoke <android.app.ActivityManagerNative: boolean isSystemReady()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = new android.content.Intent;
+
+        specialinvoke $r1.<android.content.Intent: void <init>(java.lang.String)>("android.media.VIBRATE_SETTING_CHANGED");
+
+        virtualinvoke $r1.<android.content.Intent: android.content.Intent putExtra(java.lang.String,int)>("android.media.EXTRA_VIBRATE_TYPE", $i0);
+
+        $i0 = virtualinvoke $r0.<android.media.AudioService: int getVibrateSetting(int)>($i0);
+
+        virtualinvoke $r1.<android.content.Intent: android.content.Intent putExtra(java.lang.String,int)>("android.media.EXTRA_VIBRATE_SETTING", $i0);
+
+        $r2 = $r0.<android.media.AudioService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void sendBroadcast(android.content.Intent)>($r1);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    private boolean checkForRingerModeChange(int, int)
+    {
+        android.media.AudioService $r0;
+        int $i0, $i1, $i2, $i3;
+
+        $r0 := @this: android.media.AudioService;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i2 = $r0.<android.media.AudioService: int mRingerMode>;
+
+        $i3 = $r0.<android.media.AudioService: int mRingerMode>;
+
+        if $i3 != 2 goto label2;
+
+        if $i0 != 1 goto label2;
+
+        if $i1 != -1 goto label2;
+
+        $i2 = 1;
+
+     label1:
+        $i0 = $r0.<android.media.AudioService: int mRingerMode>;
+
+        if $i2 == $i0 goto label5;
+
+        virtualinvoke $r0.<android.media.AudioService: void setRingerMode(int)>($i2);
+
+        return 0;
+
+     label2:
+        $i0 = $r0.<android.media.AudioService: int mRingerMode>;
+
+        if $i0 != 1 goto label4;
+
+        if $i1 != 1 goto label3;
+
+        $i2 = 2;
+
+        goto label1;
+
+     label3:
+        if $i1 != -1 goto label1;
+
+        $i2 = 0;
+
+        goto label1;
+
+     label4:
+        if $i1 != 1 goto label1;
+
+        $i0 = $r0.<android.media.AudioService: int mRingerMode>;
+
+        if $i0 != 0 goto label1;
+
+        $i2 = 1;
+
+        goto label1;
+
+     label5:
+        return 1;
+    }
+
+    private void createAudioSystemThread()
+    {
+        android.media.AudioService $r0;
+        android.media.AudioService$AudioSystemThread $r1;
+
+        $r0 := @this: android.media.AudioService;
+
+        $r1 = new android.media.AudioService$AudioSystemThread;
+
+        specialinvoke $r1.<android.media.AudioService$AudioSystemThread: void <init>(android.media.AudioService)>($r0);
+
+        $r0.<android.media.AudioService: android.media.AudioService$AudioSystemThread mAudioSystemThread> = $r1;
+
+        $r1 = $r0.<android.media.AudioService: android.media.AudioService$AudioSystemThread mAudioSystemThread>;
+
+        virtualinvoke $r1.<java.lang.Thread: void start()>();
+
+        specialinvoke $r0.<android.media.AudioService: void waitForAudioHandlerCreation()>();
+
+        return;
+    }
+
+    private void createStreamStates()
+    {
+        android.media.AudioService $r0;
+        android.media.AudioService$VolumeStreamState[] $r1;
+        int[] $r2, $r3, $r4, $r5, $r6, $r8;
+        int $i0, $i1, $i2;
+        android.media.AudioService$VolumeStreamState $r7;
+        java.lang.String[] $r9;
+        java.lang.String $r10;
+
+        $r0 := @this: android.media.AudioService;
+
+        $r2 = <android.media.AudioManager: int[] MAX_STREAM_VOLUME>;
+
+        $i0 = $r2[0];
+
+        $r2 = staticinvoke <android.media.AudioService: int[] createVolumeLevels(int,int)>(0, $i0);
+
+        $r3 = <android.media.AudioManager: int[] MAX_STREAM_VOLUME>;
+
+        $i0 = $r3[1];
+
+        $r3 = staticinvoke <android.media.AudioService: int[] createVolumeLevels(int,int)>(0, $i0);
+
+        $r4 = <android.media.AudioManager: int[] MAX_STREAM_VOLUME>;
+
+        $i0 = $r4[3];
+
+        $r4 = staticinvoke <android.media.AudioService: int[] createVolumeLevels(int,int)>(0, $i0);
+
+        $r5 = <android.media.AudioManager: int[] MAX_STREAM_VOLUME>;
+
+        $i0 = $r5[6];
+
+        $r5 = staticinvoke <android.media.AudioService: int[] createVolumeLevels(int,int)>(0, $i0);
+
+        $i0 = staticinvoke <android.media.AudioSystem: int getNumStreamTypes()>();
+
+        $r1 = newarray (android.media.AudioService$VolumeStreamState)[$i0];
+
+        $r0.<android.media.AudioService: android.media.AudioService$VolumeStreamState[] mStreamStates> = $r1;
+
+        $i1 = 0;
+
+     label1:
+        if $i1 >= $i0 goto label9;
+
+        lookupswitch($i1)
+        {
+            case 0: goto label6;
+            case 3: goto label5;
+            case 6: goto label7;
+            default: goto label2;
+        };
+
+     label2:
+        $r6 = $r3;
+
+     label3:
+        if $i1 != 6 goto label8;
+
+        $r7 = new android.media.AudioService$VolumeStreamState;
+
+        $r8 = <android.media.AudioManager: int[] DEFAULT_STREAM_VOLUME>;
+
+        $i2 = $r8[$i1];
+
+        specialinvoke $r7.<android.media.AudioService$VolumeStreamState: void <init>(android.media.AudioService,int,int,int[],android.media.AudioService$1)>($r0, $i2, $i1, $r6, null);
+
+        $r1[$i1] = $r7;
+
+     label4:
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label5:
+        $r6 = $r4;
+
+        goto label3;
+
+     label6:
+        $r6 = $r2;
+
+        goto label3;
+
+     label7:
+        $r6 = $r5;
+
+        goto label3;
+
+     label8:
+        $r7 = new android.media.AudioService$VolumeStreamState;
+
+        $r9 = <android.provider.Settings$System: java.lang.String[] VOLUME_SETTINGS>;
+
+        $r10 = $r9[$i1];
+
+        specialinvoke $r7.<android.media.AudioService$VolumeStreamState: void <init>(android.media.AudioService,java.lang.String,int,int[],android.media.AudioService$1)>($r0, $r10, $i1, $r6, null);
+
+        $r1[$i1] = $r7;
+
+        goto label4;
+
+     label9:
+        return;
+    }
+
+    private static int[] createVolumeLevels(int, int)
+    {
+        int $i0, $i1, $i2, $i3, $i4;
+        int[] $r0;
+        double $d0, $d1;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i2 = $i1 + $i0;
+
+        $r0 = newarray (int)[$i2];
+
+        $i2 = 0;
+
+     label1:
+        if $i2 >= $i0 goto label2;
+
+        $r0[$i2] = 0;
+
+        $i2 = $i2 + 1;
+
+        goto label1;
+
+     label2:
+        $i2 = $i1 - 1;
+
+        $d0 = (double) $i2;
+
+        $d0 = staticinvoke <java.lang.Math: double pow(double,double)>($d0, 1.0);
+
+        $i2 = 0;
+
+     label3:
+        if $i2 >= $i1 goto label4;
+
+        $d1 = (double) $i2;
+
+        $d1 = staticinvoke <java.lang.Math: double pow(double,double)>($d1, 1.0);
+
+        $d1 = $d1 / $d0;
+
+        $i3 = $i0 + $i2;
+
+        $d1 = 100.0 * $d1;
+
+        $i4 = (int) $d1;
+
+        $r0[$i3] = $i4;
+
+        $i2 = $i2 + 1;
+
+        goto label3;
+
+     label4:
+        return $r0;
+    }
+
+    private void ensureValidDirection(int)
+    {
+        android.media.AudioService $r0;
+        int $i0;
+        java.lang.IllegalArgumentException $r1;
+        java.lang.StringBuilder $r2;
+        java.lang.String $r3;
+
+        $r0 := @this: android.media.AudioService;
+
+        $i0 := @parameter0: int;
+
+        if $i0 < -1 goto label1;
+
+        if $i0 <= 1 goto label2;
+
+     label1:
+        $r1 = new java.lang.IllegalArgumentException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Bad direction ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r3);
+
+        throw $r1;
+
+     label2:
+        return;
+    }
+
+    private void ensureValidStreamType(int)
+    {
+        android.media.AudioService $r0;
+        int $i0, $i1;
+        android.media.AudioService$VolumeStreamState[] $r1;
+        java.lang.IllegalArgumentException $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+
+        $r0 := @this: android.media.AudioService;
+
+        $i0 := @parameter0: int;
+
+        if $i0 < 0 goto label1;
+
+        $r1 = $r0.<android.media.AudioService: android.media.AudioService$VolumeStreamState[] mStreamStates>;
+
+        $i1 = lengthof $r1;
+
+        if $i0 < $i1 goto label2;
+
+     label1:
+        $r2 = new java.lang.IllegalArgumentException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Bad stream type ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r4);
+
+        throw $r2;
+
+     label2:
+        return;
+    }
+
+    private int getActiveStreamType(int)
+    {
+        android.media.AudioService $r0;
+        int $i0, $i1;
+        boolean $z0;
+        android.os.IBinder $r1;
+        com.android.internal.telephony.ITelephony $r2;
+        android.os.RemoteException $r3;
+
+        $r0 := @this: android.media.AudioService;
+
+        $i0 := @parameter0: int;
+
+        $z0 = 0;
+
+     label1:
+        $r1 = staticinvoke <android.os.ServiceManager: android.os.IBinder checkService(java.lang.String)>("phone");
+
+        $r2 = staticinvoke <com.android.internal.telephony.ITelephony$Stub: com.android.internal.telephony.ITelephony asInterface(android.os.IBinder)>($r1);
+
+        if $r2 == null goto label2;
+
+        $z0 = interfaceinvoke $r2.<com.android.internal.telephony.ITelephony: boolean isOffhook()>();
+
+     label2:
+        $i1 = virtualinvoke $r0.<android.media.AudioService: int getRouting(int)>(2);
+
+        $i1 = $i1 & 4;
+
+        if $i1 == 0 goto label4;
+
+        return 6;
+
+     label3:
+        $r3 := @caughtexception;
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String,java.lang.Throwable)>("AudioService", "Couldn\'t connect to phone service", $r3);
+
+        goto label2;
+
+     label4:
+        if $z0 == 0 goto label5;
+
+        return 0;
+
+     label5:
+        $z0 = staticinvoke <android.media.AudioSystem: boolean isMusicActive()>();
+
+        if $z0 == 0 goto label6;
+
+        return 3;
+
+     label6:
+        if $i0 != -2147483648 goto label7;
+
+        return 2;
+
+     label7:
+        return $i0;
+
+        catch android.os.RemoteException from label1 to label2 with label3;
+    }
+
+    private static int getMsg(int, int)
+    {
+        int $i0, $i1;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i0 = 65535 & $i0;
+
+        $i1 = $i1 << 16;
+
+        $i0 = $i0 | $i1;
+
+        return $i0;
+    }
+
+    private static int getMsgBase(int)
+    {
+        int $i0;
+
+        $i0 := @parameter0: int;
+
+        $i0 = 65535 & $i0;
+
+        return $i0;
+    }
+
+    public static int getValueForVibrateSetting(int, int, int)
+    {
+        int $i0, $i1, $i2, $i3;
+
+        $i2 := @parameter0: int;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i3 = $i0 * 2;
+
+        $i3 = 3 << $i3;
+
+        $i3 = $i3 ^ -1;
+
+        $i2 = $i2 & $i3;
+
+        $i1 = $i1 & 3;
+
+        $i0 = $i0 * 2;
+
+        $i0 = $i1 << $i0;
+
+        $i2 = $i2 | $i0;
+
+        return $i2;
+    }
+
+    private void readAudioSettings()
+    {
+        android.media.AudioService $r0;
+        java.lang.Object $r1;
+        boolean $z0;
+        int $i0, $i1;
+        int[] $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.media.AudioService;
+
+        $r1 = $r0.<android.media.AudioService: java.lang.Object mSettingsLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = staticinvoke <android.media.AudioSystem: boolean isMicrophoneMuted()>();
+
+        $r0.<android.media.AudioService: boolean mMicMute> = $z0;
+
+        $i0 = staticinvoke <android.media.AudioSystem: int getMode()>();
+
+        $r0.<android.media.AudioService: int mMode> = $i0;
+
+        $i0 = 0;
+
+     label2:
+        if $i0 >= 3 goto label3;
+
+        $r2 = $r0.<android.media.AudioService: int[] mRoutes>;
+
+        $i1 = staticinvoke <android.media.AudioSystem: int getRouting(int)>($i0);
+
+        $r2[$i0] = $i1;
+
+        $i0 = $i0 + 1;
+
+        goto label2;
+
+     label3:
+        exitmonitor $r1;
+
+     label4:
+        return;
+
+     label5:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    private void readPersistedSettings()
+    {
+        android.media.AudioService $r0;
+        android.content.ContentResolver $r1;
+        int $i0;
+
+        $r0 := @this: android.media.AudioService;
+
+        $r1 = $r0.<android.media.AudioService: android.content.ContentResolver mContentResolver>;
+
+        $i0 = staticinvoke <android.provider.Settings$System: int getInt(android.content.ContentResolver,java.lang.String,int)>($r1, "mode_ringer", 2);
+
+        $r0.<android.media.AudioService: int mRingerMode> = $i0;
+
+        $i0 = staticinvoke <android.provider.Settings$System: int getInt(android.content.ContentResolver,java.lang.String,int)>($r1, "vibrate_on", 0);
+
+        $r0.<android.media.AudioService: int mVibrateSetting> = $i0;
+
+        $i0 = staticinvoke <android.provider.Settings$System: int getInt(android.content.ContentResolver,java.lang.String,int)>($r1, "mute_streams_affected", 14);
+
+        $r0.<android.media.AudioService: int mMuteAffectedStreams> = $i0;
+
+        specialinvoke $r0.<android.media.AudioService: void broadcastRingerMode()>();
+
+        specialinvoke $r0.<android.media.AudioService: void broadcastVibrateSetting(int)>(0);
+
+        specialinvoke $r0.<android.media.AudioService: void broadcastVibrateSetting(int)>(1);
+
+        return;
+    }
+
+    private static void sendMsg(android.os.Handler, int, int, int, int, int, java.lang.Object, int)
+    {
+        android.os.Handler $r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        java.lang.Object $r1;
+        long $l6;
+        android.os.Message $r2;
+        boolean $z0;
+
+        $r0 := @parameter0: android.os.Handler;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        $i3 := @parameter4: int;
+
+        $i4 := @parameter5: int;
+
+        $r1 := @parameter6: java.lang.Object;
+
+        $i5 := @parameter7: int;
+
+        if $i1 != -1 goto label3;
+
+     label1:
+        if $i2 != 0 goto label4;
+
+        virtualinvoke $r0.<android.os.Handler: void removeMessages(int)>($i0);
+
+     label2:
+        $r2 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,int,int,java.lang.Object)>($i0, $i3, $i4, $r1);
+
+        $l6 = (long) $i5;
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessageDelayed(android.os.Message,long)>($r2, $l6);
+
+        return;
+
+     label3:
+        $i0 = staticinvoke <android.media.AudioService: int getMsg(int,int)>($i0, $i1);
+
+        goto label1;
+
+     label4:
+        if $i2 != 1 goto label2;
+
+        $z0 = virtualinvoke $r0.<android.os.Handler: boolean hasMessages(int)>($i0);
+
+        if $z0 == 0 goto label2;
+
+        return;
+    }
+
+    private void sendVolumeUpdate(int)
+    {
+        android.media.AudioService $r0;
+        int $i0, $i1;
+        android.content.Intent $r1;
+        android.content.Context $r2;
+
+        $r0 := @this: android.media.AudioService;
+
+        $i0 := @parameter0: int;
+
+        $r1 = new android.content.Intent;
+
+        specialinvoke $r1.<android.content.Intent: void <init>(java.lang.String)>("android.media.VOLUME_CHANGED_ACTION");
+
+        virtualinvoke $r1.<android.content.Intent: android.content.Intent putExtra(java.lang.String,int)>("android.media.EXTRA_VOLUME_STREAM_TYPE", $i0);
+
+        $i1 = virtualinvoke $r0.<android.media.AudioService: int getStreamVolume(int)>($i0);
+
+        virtualinvoke $r1.<android.content.Intent: android.content.Intent putExtra(java.lang.String,int)>("android.media.EXTRA_VOLUME_STREAM_VALUE", $i1);
+
+        if $i0 != 6 goto label1;
+
+        $r2 = $r0.<android.media.AudioService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void sendBroadcast(android.content.Intent)>($r1);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    private void setRingerModeInt(int)
+    {
+        android.media.AudioService $r0;
+        int $i0, $i1;
+        boolean $z0;
+        android.media.AudioService$VolumeStreamState[] $r1;
+        android.media.AudioService$VolumeStreamState $r2;
+        android.media.AudioService$AudioHandler $r3;
+
+        $r0 := @this: android.media.AudioService;
+
+        $i0 := @parameter0: int;
+
+        $r0.<android.media.AudioService: int mRingerMode> = $i0;
+
+        $i0 = staticinvoke <android.media.AudioSystem: int getNumStreamTypes()>();
+
+        $i1 = $r0.<android.media.AudioService: int mRingerMode>;
+
+        if $i1 != 2 goto label4;
+
+        $i0 = $i0 - 1;
+
+     label1:
+        if $i0 < 0 goto label8;
+
+        $z0 = virtualinvoke $r0.<android.media.AudioService: boolean isStreamAffectedByRingerMode(int)>($i0);
+
+        if $z0 != 0 goto label3;
+
+     label2:
+        $i0 = $i0 + -1;
+
+        goto label1;
+
+     label3:
+        $r1 = $r0.<android.media.AudioService: android.media.AudioService$VolumeStreamState[] mStreamStates>;
+
+        $r2 = $r1[$i0];
+
+        $i1 = staticinvoke <android.media.AudioService$VolumeStreamState: int access$700(android.media.AudioService$VolumeStreamState)>($r2);
+
+        specialinvoke $r0.<android.media.AudioService: void setStreamVolumeInt(int,int,boolean)>($i0, $i1, 0);
+
+        goto label2;
+
+     label4:
+        $i0 = $i0 - 1;
+
+     label5:
+        if $i0 < 0 goto label8;
+
+        $z0 = virtualinvoke $r0.<android.media.AudioService: boolean isStreamAffectedByRingerMode(int)>($i0);
+
+        if $z0 != 0 goto label7;
+
+     label6:
+        $i0 = $i0 + -1;
+
+        goto label5;
+
+     label7:
+        specialinvoke $r0.<android.media.AudioService: void setStreamVolumeInt(int,int,boolean)>($i0, 0, 0);
+
+        goto label6;
+
+     label8:
+        $r3 = $r0.<android.media.AudioService: android.media.AudioService$AudioHandler mAudioHandler>;
+
+        staticinvoke <android.media.AudioService: void sendMsg(android.os.Handler,int,int,int,int,int,java.lang.Object,int)>($r3, 3, -1, 0, 0, 0, null, 3000);
+
+        return;
+    }
+
+    private void setStreamVolumeInt(int, int, boolean)
+    {
+        android.media.AudioService $r0;
+        int $i0, $i1;
+        boolean $z0, $z1;
+        android.media.AudioService$VolumeStreamState $r1;
+        android.media.AudioService$VolumeStreamState[] $r2;
+        android.media.AudioService$AudioHandler $r3;
+
+        $r0 := @this: android.media.AudioService;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $z0 := @parameter2: boolean;
+
+        $r2 = $r0.<android.media.AudioService: android.media.AudioService$VolumeStreamState[] mStreamStates>;
+
+        $r1 = $r2[$i0];
+
+        $z1 = virtualinvoke $r1.<android.media.AudioService$VolumeStreamState: boolean setIndex(int)>($i1);
+
+        if $z1 != 0 goto label1;
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        $i1 = staticinvoke <android.media.AudioService$VolumeStreamState: int access$600(android.media.AudioService$VolumeStreamState)>($r1);
+
+        if $i1 != 0 goto label3;
+
+        $r3 = $r0.<android.media.AudioService: android.media.AudioService$AudioHandler mAudioHandler>;
+
+        staticinvoke <android.media.AudioService: void sendMsg(android.os.Handler,int,int,int,int,int,java.lang.Object,int)>($r3, 0, $i0, 1, 0, 0, $r1, 0);
+
+        return;
+
+     label2:
+        return;
+
+     label3:
+        return;
+    }
+
+    private void syncRingerAndNotificationStreamVolume(int, int, boolean)
+    {
+        android.media.AudioService $r0;
+        int $i0, $i1, $i2;
+        boolean $z0, $z1;
+        android.content.ContentResolver $r1;
+
+        $r0 := @this: android.media.AudioService;
+
+        $i2 := @parameter0: int;
+
+        $i0 := @parameter1: int;
+
+        $z0 := @parameter2: boolean;
+
+        $r1 = $r0.<android.media.AudioService: android.content.ContentResolver mContentResolver>;
+
+        $i1 = staticinvoke <android.provider.Settings$System: int getInt(android.content.ContentResolver,java.lang.String,int)>($r1, "notifications_use_ring_volume", 1);
+
+        if $i1 != 1 goto label3;
+
+        $z1 = 1;
+
+     label1:
+        if $z1 == 0 goto label4;
+
+        if $i2 != 5 goto label2;
+
+        $i2 = 2;
+
+     label2:
+        if $i2 != 2 goto label5;
+
+        specialinvoke $r0.<android.media.AudioService: void setStreamVolumeInt(int,int,boolean)>(5, $i0, $z0);
+
+        return;
+
+     label3:
+        $z1 = 0;
+
+        goto label1;
+
+     label4:
+        return;
+
+     label5:
+        return;
+    }
+
+    private void waitForAudioHandlerCreation()
+    {
+        android.media.AudioService $r0;
+        java.lang.InterruptedException $r1;
+        android.media.AudioService$AudioHandler $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.media.AudioService;
+
+        entermonitor $r0;
+
+     label01:
+        $r2 = $r0.<android.media.AudioService: android.media.AudioService$AudioHandler mAudioHandler>;
+
+     label02:
+        if $r2 != null goto label09;
+
+     label03:
+        virtualinvoke $r0.<java.lang.Object: void wait()>();
+
+     label04:
+        goto label01;
+
+     label05:
+        $r1 := @caughtexception;
+
+     label06:
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("AudioService", "Interrupted while waiting on volume handler.");
+
+        goto label01;
+
+     label07:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label08:
+        throw $r3;
+
+     label09:
+        exitmonitor $r0;
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label07;
+        catch java.lang.InterruptedException from label03 to label04 with label05;
+        catch java.lang.Throwable from label03 to label04 with label07;
+        catch java.lang.Throwable from label06 to label08 with label07;
+        catch java.lang.Throwable from label09 to label10 with label07;
+    }
+
+    public void adjustStreamVolume(int, int, int)
+    {
+        android.media.AudioService $r0;
+        int $i0, $i1, $i2, $i3, $i4;
+        android.media.AudioService$VolumeStreamState $r1, $r4;
+        android.content.ContentResolver $r2;
+        boolean $z0, $z1;
+        android.media.AudioService$VolumeStreamState[] $r3;
+        android.media.AudioService$AudioHandler $r5;
+        android.view.VolumePanel $r6;
+
+        $r0 := @this: android.media.AudioService;
+
+        $i2 := @parameter0: int;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        specialinvoke $r0.<android.media.AudioService: void ensureValidDirection(int)>($i0);
+
+        specialinvoke $r0.<android.media.AudioService: void ensureValidStreamType(int)>($i2);
+
+        $r2 = $r0.<android.media.AudioService: android.content.ContentResolver mContentResolver>;
+
+        $i3 = staticinvoke <android.provider.Settings$System: int getInt(android.content.ContentResolver,java.lang.String,int)>($r2, "notifications_use_ring_volume", 1);
+
+        if $i3 != 1 goto label8;
+
+        $z0 = 1;
+
+     label1:
+        if $z0 == 0 goto label2;
+
+        if $i2 != 5 goto label2;
+
+        $i2 = 2;
+
+     label2:
+        $r3 = $r0.<android.media.AudioService: android.media.AudioService$VolumeStreamState[] mStreamStates>;
+
+        $r1 = $r3[$i2];
+
+        $i3 = staticinvoke <android.media.AudioService$VolumeStreamState: int access$500(android.media.AudioService$VolumeStreamState)>($r1);
+
+        $z1 = 1;
+
+        $i4 = $i1 & 2;
+
+        if $i4 != 0 goto label3;
+
+        if $i2 != 2 goto label4;
+
+     label3:
+        $z1 = specialinvoke $r0.<android.media.AudioService: boolean checkForRingerModeChange(int,int)>($i3, $i0);
+
+     label4:
+        if $z1 == 0 goto label7;
+
+        $z1 = virtualinvoke $r1.<android.media.AudioService$VolumeStreamState: boolean adjustIndex(int)>($i0);
+
+        if $z1 == 0 goto label7;
+
+        if $z0 == 0 goto label9;
+
+        if $i2 != 2 goto label9;
+
+        $z0 = 1;
+
+     label5:
+        if $z0 == 0 goto label6;
+
+        $r3 = $r0.<android.media.AudioService: android.media.AudioService$VolumeStreamState[] mStreamStates>;
+
+        $r4 = $r3[5];
+
+        virtualinvoke $r4.<android.media.AudioService$VolumeStreamState: boolean adjustIndex(int)>($i0);
+
+     label6:
+        $i0 = staticinvoke <android.media.AudioService$VolumeStreamState: int access$600(android.media.AudioService$VolumeStreamState)>($r1);
+
+        if $i0 != 0 goto label7;
+
+        $r5 = $r0.<android.media.AudioService: android.media.AudioService$AudioHandler mAudioHandler>;
+
+        staticinvoke <android.media.AudioService: void sendMsg(android.os.Handler,int,int,int,int,int,java.lang.Object,int)>($r5, 0, $i2, 1, 0, 0, $r1, 0);
+
+        if $z0 == 0 goto label7;
+
+        $r5 = $r0.<android.media.AudioService: android.media.AudioService$AudioHandler mAudioHandler>;
+
+        $r3 = $r0.<android.media.AudioService: android.media.AudioService$VolumeStreamState[] mStreamStates>;
+
+        $r1 = $r3[5];
+
+        staticinvoke <android.media.AudioService: void sendMsg(android.os.Handler,int,int,int,int,int,java.lang.Object,int)>($r5, 0, 5, 1, 0, 0, $r1, 0);
+
+     label7:
+        $r6 = $r0.<android.media.AudioService: android.view.VolumePanel mVolumePanel>;
+
+        virtualinvoke $r6.<android.view.VolumePanel: void postVolumeChanged(int,int)>($i2, $i1);
+
+        specialinvoke $r0.<android.media.AudioService: void sendVolumeUpdate(int)>($i2);
+
+        return;
+
+     label8:
+        $z0 = 0;
+
+        goto label1;
+
+     label9:
+        $z0 = 0;
+
+        goto label5;
+    }
+
+    public void adjustSuggestedStreamVolume(int, int, int)
+    {
+        android.media.AudioService $r0;
+        int $i0, $i1, $i2, $i3;
+
+        $r0 := @this: android.media.AudioService;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i2 := @parameter2: int;
+
+        $i1 = specialinvoke $r0.<android.media.AudioService: int getActiveStreamType(int)>($i1);
+
+        if $i1 == 2 goto label1;
+
+        $i3 = $i2 & 4;
+
+        if $i3 == 0 goto label1;
+
+        $i2 = $i2 & -5;
+
+     label1:
+        virtualinvoke $r0.<android.media.AudioService: void adjustStreamVolume(int,int,int)>($i1, $i0, $i2);
+
+        return;
+    }
+
+    public void adjustVolume(int, int)
+    {
+        android.media.AudioService $r0;
+        int $i0, $i1;
+
+        $r0 := @this: android.media.AudioService;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        virtualinvoke $r0.<android.media.AudioService: void adjustSuggestedStreamVolume(int,int,int)>($i0, -2147483648, $i1);
+
+        return;
+    }
+
+    boolean checkAudioSettingsPermission(java.lang.String)
+    {
+        android.media.AudioService $r0;
+        java.lang.String $r1;
+        android.content.Context $r2;
+        int $i0;
+        java.lang.StringBuilder $r3;
+
+        $r0 := @this: android.media.AudioService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = $r0.<android.media.AudioService: android.content.Context mContext>;
+
+        $i0 = virtualinvoke $r2.<android.content.Context: int checkCallingOrSelfPermission(java.lang.String)>("android.permission.MODIFY_AUDIO_SETTINGS");
+
+        if $i0 != 0 goto label1;
+
+        return 1;
+
+     label1:
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Audio Settings Permission Denial: ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" from pid=");
+
+        $i0 = staticinvoke <android.os.Binder: int getCallingPid()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", uid=");
+
+        $i0 = staticinvoke <android.os.Binder: int getCallingUid()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("AudioService", $r1);
+
+        return 0;
+    }
+
+    public int getMode()
+    {
+        android.media.AudioService $r0;
+        int i0;
+
+        $r0 := @this: android.media.AudioService;
+
+        i0 = $r0.<android.media.AudioService: int mMode>;
+
+        return i0;
+    }
+
+    public int getRingerMode()
+    {
+        android.media.AudioService $r0;
+        int i0;
+
+        $r0 := @this: android.media.AudioService;
+
+        i0 = $r0.<android.media.AudioService: int mRingerMode>;
+
+        return i0;
+    }
+
+    public int getRouting(int)
+    {
+        android.media.AudioService $r0;
+        int $i0;
+        int[] $r1;
+
+        $r0 := @this: android.media.AudioService;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<android.media.AudioService: int[] mRoutes>;
+
+        $i0 = $r1[$i0];
+
+        return $i0;
+    }
+
+    public int getStreamMaxVolume(int)
+    {
+        android.media.AudioService $r0;
+        int $i0;
+        android.media.AudioService$VolumeStreamState[] $r1;
+        android.media.AudioService$VolumeStreamState $r2;
+
+        $r0 := @this: android.media.AudioService;
+
+        $i0 := @parameter0: int;
+
+        specialinvoke $r0.<android.media.AudioService: void ensureValidStreamType(int)>($i0);
+
+        $r1 = $r0.<android.media.AudioService: android.media.AudioService$VolumeStreamState[] mStreamStates>;
+
+        $r2 = $r1[$i0];
+
+        $i0 = virtualinvoke $r2.<android.media.AudioService$VolumeStreamState: int getMaxIndex()>();
+
+        return $i0;
+    }
+
+    public int getStreamVolume(int)
+    {
+        android.media.AudioService $r0;
+        int $i0;
+        android.media.AudioService$VolumeStreamState[] $r1;
+        android.media.AudioService$VolumeStreamState $r2;
+
+        $r0 := @this: android.media.AudioService;
+
+        $i0 := @parameter0: int;
+
+        specialinvoke $r0.<android.media.AudioService: void ensureValidStreamType(int)>($i0);
+
+        $r1 = $r0.<android.media.AudioService: android.media.AudioService$VolumeStreamState[] mStreamStates>;
+
+        $r2 = $r1[$i0];
+
+        $i0 = staticinvoke <android.media.AudioService$VolumeStreamState: int access$500(android.media.AudioService$VolumeStreamState)>($r2);
+
+        return $i0;
+    }
+
+    public int getVibrateSetting(int)
+    {
+        android.media.AudioService $r0;
+        int $i0, $i1;
+
+        $r0 := @this: android.media.AudioService;
+
+        $i0 := @parameter0: int;
+
+        $i1 = $r0.<android.media.AudioService: int mVibrateSetting>;
+
+        $i0 = $i0 * 2;
+
+        $i0 = $i1 >> $i0;
+
+        $i0 = $i0 & 3;
+
+        return $i0;
+    }
+
+    public boolean isMicrophoneMute()
+    {
+        android.media.AudioService $r0;
+        boolean z0;
+
+        $r0 := @this: android.media.AudioService;
+
+        z0 = $r0.<android.media.AudioService: boolean mMicMute>;
+
+        return z0;
+    }
+
+    public boolean isMusicActive()
+    {
+        android.media.AudioService $r0;
+        boolean $z0;
+
+        $r0 := @this: android.media.AudioService;
+
+        $z0 = staticinvoke <android.media.AudioSystem: boolean isMusicActive()>();
+
+        return $z0;
+    }
+
+    public boolean isStreamAffectedByMute(int)
+    {
+        android.media.AudioService $r0;
+        int $i0, $i1;
+
+        $r0 := @this: android.media.AudioService;
+
+        $i0 := @parameter0: int;
+
+        $i1 = $r0.<android.media.AudioService: int mMuteAffectedStreams>;
+
+        $i0 = 1 << $i0;
+
+        $i0 = $i1 & $i0;
+
+        if $i0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    public boolean isStreamAffectedByRingerMode(int)
+    {
+        android.media.AudioService $r0;
+        int $i0, $i1;
+        android.content.ContentResolver $r1;
+
+        $r0 := @this: android.media.AudioService;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<android.media.AudioService: android.content.ContentResolver mContentResolver>;
+
+        $i1 = staticinvoke <android.provider.Settings$System: int getInt(android.content.ContentResolver,java.lang.String,int)>($r1, "mode_ringer_streams_affected", 0);
+
+        $i0 = 1 << $i0;
+
+        $i0 = $i0 & $i1;
+
+        if $i0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    public boolean loadSoundEffects()
+    {
+        android.media.AudioService $r0;
+        int[] $r1, $r6, $r11;
+        java.lang.Object $r2;
+        android.media.SoundPool $r3;
+        java.lang.String[] $r4;
+        int $i0, $i1, $i2;
+        int[][] $r5;
+        java.lang.StringBuilder $r7;
+        java.io.File $r8;
+        java.lang.String $r9;
+        java.lang.Throwable $r10;
+
+        $r0 := @this: android.media.AudioService;
+
+        $r2 = $r0.<android.media.AudioService: java.lang.Object mSoundEffectsLock>;
+
+        entermonitor $r2;
+
+     label01:
+        $r3 = new android.media.SoundPool;
+
+        specialinvoke $r3.<android.media.SoundPool: void <init>(int,int,int)>(4, 1, 0);
+
+        $r0.<android.media.AudioService: android.media.SoundPool mSoundPool> = $r3;
+
+        $r3 = $r0.<android.media.AudioService: android.media.SoundPool mSoundPool>;
+
+        if $r3 != null goto label03;
+
+        exitmonitor $r2;
+
+     label02:
+        return 0;
+
+     label03:
+        $r4 = <android.media.AudioService: java.lang.String[] SOUND_EFFECT_FILES>;
+
+        $i0 = lengthof $r4;
+
+        $r1 = newarray (int)[$i0];
+
+        $i0 = 0;
+
+     label04:
+        $r4 = <android.media.AudioService: java.lang.String[] SOUND_EFFECT_FILES>;
+
+        $i1 = lengthof $r4;
+
+        if $i0 >= $i1 goto label05;
+
+        $r1[$i0] = -1;
+
+        $i0 = $i0 + 1;
+
+        goto label04;
+
+     label05:
+        $i0 = 0;
+
+     label06:
+        if $i0 >= 9 goto label12;
+
+        $r5 = $r0.<android.media.AudioService: int[][] SOUND_EFFECT_FILES_MAP>;
+
+        $r6 = $r5[$i0];
+
+        $i1 = $r6[1];
+
+        if $i1 != 0 goto label08;
+
+     label07:
+        $i0 = $i0 + 1;
+
+        goto label06;
+
+     label08:
+        $r5 = $r0.<android.media.AudioService: int[][] SOUND_EFFECT_FILES_MAP>;
+
+        $r6 = $r5[$i0];
+
+        $i1 = $r6[0];
+
+        $i1 = $r1[$i1];
+
+        if $i1 != -1 goto label11;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = staticinvoke <android.os.Environment: java.io.File getRootDirectory()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/media/audio/ui/");
+
+        $r4 = <android.media.AudioService: java.lang.String[] SOUND_EFFECT_FILES>;
+
+        $r5 = $r0.<android.media.AudioService: int[][] SOUND_EFFECT_FILES_MAP>;
+
+        $r6 = $r5[$i0];
+
+        $i1 = $r6[0];
+
+        $r9 = $r4[$i1];
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r3 = $r0.<android.media.AudioService: android.media.SoundPool mSoundPool>;
+
+        $i1 = virtualinvoke $r3.<android.media.SoundPool: int load(java.lang.String,int)>($r9, 0);
+
+        $r5 = $r0.<android.media.AudioService: int[][] SOUND_EFFECT_FILES_MAP>;
+
+        $r6 = $r5[$i0];
+
+        $r6[1] = $i1;
+
+        $r5 = $r0.<android.media.AudioService: int[][] SOUND_EFFECT_FILES_MAP>;
+
+        $r6 = $r5[$i0];
+
+        $i2 = $r6[0];
+
+        $r1[$i2] = $i1;
+
+        if $i1 > 0 goto label07;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Soundpool could not load file: ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("AudioService", $r9);
+
+        goto label07;
+
+     label09:
+        $r10 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label10:
+        throw $r10;
+
+     label11:
+        $r5 = $r0.<android.media.AudioService: int[][] SOUND_EFFECT_FILES_MAP>;
+
+        $r6 = $r5[$i0];
+
+        $r5 = $r0.<android.media.AudioService: int[][] SOUND_EFFECT_FILES_MAP>;
+
+        $r11 = $r5[$i0];
+
+        $i1 = $r11[0];
+
+        $i1 = $r1[$i1];
+
+        $r6[1] = $i1;
+
+        goto label07;
+
+     label12:
+        exitmonitor $r2;
+
+     label13:
+        return 1;
+
+        catch java.lang.Throwable from label01 to label02 with label09;
+        catch java.lang.Throwable from label03 to label10 with label09;
+        catch java.lang.Throwable from label11 to label13 with label09;
+    }
+
+    public void playSoundEffect(int)
+    {
+        android.media.AudioService $r0;
+        int $i0;
+        android.media.AudioService$AudioHandler $r1;
+
+        $r0 := @this: android.media.AudioService;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<android.media.AudioService: android.media.AudioService$AudioHandler mAudioHandler>;
+
+        staticinvoke <android.media.AudioService: void sendMsg(android.os.Handler,int,int,int,int,int,java.lang.Object,int)>($r1, 7, -1, 1, $i0, 1000, null, 0);
+
+        return;
+    }
+
+    public void playSoundEffectVolume(int, float)
+    {
+        android.media.AudioService $r0;
+        int $i0, $i1;
+        float $f0;
+        android.media.AudioService$AudioHandler $r1;
+
+        $r0 := @this: android.media.AudioService;
+
+        $i0 := @parameter0: int;
+
+        $f0 := @parameter1: float;
+
+        $r1 = $r0.<android.media.AudioService: android.media.AudioService$AudioHandler mAudioHandler>;
+
+        $f0 = 1000.0F * $f0;
+
+        $i1 = (int) $f0;
+
+        staticinvoke <android.media.AudioService: void sendMsg(android.os.Handler,int,int,int,int,int,java.lang.Object,int)>($r1, 7, -1, 1, $i0, $i1, null, 0);
+
+        return;
+    }
+
+    public void setMicrophoneMute(boolean)
+    {
+        android.media.AudioService $r0;
+        boolean $z0, $z1;
+        java.lang.Object $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: android.media.AudioService;
+
+        $z0 := @parameter0: boolean;
+
+        $z1 = virtualinvoke $r0.<android.media.AudioService: boolean checkAudioSettingsPermission(java.lang.String)>("setMicrophoneMute()");
+
+        if $z1 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = $r0.<android.media.AudioService: java.lang.Object mSettingsLock>;
+
+        entermonitor $r1;
+
+     label2:
+        $z1 = $r0.<android.media.AudioService: boolean mMicMute>;
+
+        if $z0 == $z1 goto label3;
+
+        staticinvoke <android.media.AudioSystem: int muteMicrophone(boolean)>($z0);
+
+        $r0.<android.media.AudioService: boolean mMicMute> = $z0;
+
+     label3:
+        exitmonitor $r1;
+
+     label4:
+        return;
+
+     label5:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r2;
+
+        catch java.lang.Throwable from label2 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public void setMode(int)
+    {
+        android.media.AudioService $r0;
+        int $i0, $i1;
+        boolean $z0;
+        java.lang.Object $r1;
+        android.media.AudioService$VolumeStreamState[] $r2;
+        android.media.AudioService$VolumeStreamState $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: android.media.AudioService;
+
+        $i0 := @parameter0: int;
+
+        $z0 = virtualinvoke $r0.<android.media.AudioService: boolean checkAudioSettingsPermission(java.lang.String)>("setMode()");
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = $r0.<android.media.AudioService: java.lang.Object mSettingsLock>;
+
+        entermonitor $r1;
+
+     label2:
+        $i1 = $r0.<android.media.AudioService: int mMode>;
+
+        if $i0 == $i1 goto label3;
+
+        staticinvoke <android.media.AudioSystem: int setMode(int)>($i0);
+
+        $r0.<android.media.AudioService: int mMode> = $i0;
+
+     label3:
+        $i0 = specialinvoke $r0.<android.media.AudioService: int getActiveStreamType(int)>(-2147483648);
+
+        $r2 = $r0.<android.media.AudioService: android.media.AudioService$VolumeStreamState[] mStreamStates>;
+
+        $r3 = $r2[$i0];
+
+        $i1 = staticinvoke <android.media.AudioService$VolumeStreamState: int access$500(android.media.AudioService$VolumeStreamState)>($r3);
+
+        specialinvoke $r0.<android.media.AudioService: void syncRingerAndNotificationStreamVolume(int,int,boolean)>($i0, $i1, 1);
+
+        specialinvoke $r0.<android.media.AudioService: void setStreamVolumeInt(int,int,boolean)>($i0, $i1, 1);
+
+        exitmonitor $r1;
+
+     label4:
+        return;
+
+     label5:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r4;
+
+        catch java.lang.Throwable from label2 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public void setParameter(java.lang.String, java.lang.String)
+    {
+        android.media.AudioService $r0;
+        java.lang.String $r1, $r2;
+
+        $r0 := @this: android.media.AudioService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        staticinvoke <android.media.AudioSystem: void setParameter(java.lang.String,java.lang.String)>($r1, $r2);
+
+        return;
+    }
+
+    public void setRingerMode(int)
+    {
+        android.media.AudioService $r0;
+        int $i0, $i1;
+
+        $r0 := @this: android.media.AudioService;
+
+        $i0 := @parameter0: int;
+
+        $i1 = $r0.<android.media.AudioService: int mRingerMode>;
+
+        if $i0 == $i1 goto label1;
+
+        specialinvoke $r0.<android.media.AudioService: void setRingerModeInt(int)>($i0);
+
+        specialinvoke $r0.<android.media.AudioService: void broadcastRingerMode()>();
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public void setRouting(int, int, int)
+    {
+        android.media.AudioService $r0;
+        int $i0, $i1, $i2, $i3, $i4;
+        boolean $z0;
+        java.lang.Object $r1;
+        int[] $r2, $r3;
+        android.media.AudioService$VolumeStreamState[] $r4;
+        android.media.AudioService$VolumeStreamState $r5;
+        java.lang.Throwable $r6;
+
+        $r0 := @this: android.media.AudioService;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i2 := @parameter2: int;
+
+        $z0 = virtualinvoke $r0.<android.media.AudioService: boolean checkAudioSettingsPermission(java.lang.String)>("setRouting()");
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = $r0.<android.media.AudioService: java.lang.Object mSettingsLock>;
+
+        entermonitor $r1;
+
+     label2:
+        $r2 = $r0.<android.media.AudioService: int[] mRoutes>;
+
+        $i3 = $r2[$i0];
+
+        $i3 = $i3 & $i2;
+
+        $i4 = $i1 & $i2;
+
+        if $i3 == $i4 goto label3;
+
+        staticinvoke <android.media.AudioSystem: int setRouting(int,int,int)>($i0, $i1, $i2);
+
+        $r2 = $r0.<android.media.AudioService: int[] mRoutes>;
+
+        $r3 = $r0.<android.media.AudioService: int[] mRoutes>;
+
+        $i3 = $r3[$i0];
+
+        $i4 = $i2 ^ -1;
+
+        $i3 = $i3 & $i4;
+
+        $i1 = $i1 & $i2;
+
+        $i1 = $i3 | $i1;
+
+        $r2[$i0] = $i1;
+
+     label3:
+        $i0 = specialinvoke $r0.<android.media.AudioService: int getActiveStreamType(int)>(-2147483648);
+
+        $r4 = $r0.<android.media.AudioService: android.media.AudioService$VolumeStreamState[] mStreamStates>;
+
+        $r5 = $r4[$i0];
+
+        $i1 = staticinvoke <android.media.AudioService$VolumeStreamState: int access$500(android.media.AudioService$VolumeStreamState)>($r5);
+
+        specialinvoke $r0.<android.media.AudioService: void syncRingerAndNotificationStreamVolume(int,int,boolean)>($i0, $i1, 1);
+
+        specialinvoke $r0.<android.media.AudioService: void setStreamVolumeInt(int,int,boolean)>($i0, $i1, 1);
+
+        exitmonitor $r1;
+
+     label4:
+        return;
+
+     label5:
+        $r6 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r6;
+
+        catch java.lang.Throwable from label2 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public void setStreamMute(int, boolean, android.os.IBinder)
+    {
+        android.media.AudioService $r0;
+        int $i0;
+        boolean $z0, $z1;
+        android.os.IBinder $r1;
+        android.media.AudioService$VolumeStreamState[] $r2;
+        android.media.AudioService$VolumeStreamState $r3;
+
+        $r0 := @this: android.media.AudioService;
+
+        $i0 := @parameter0: int;
+
+        $z0 := @parameter1: boolean;
+
+        $r1 := @parameter2: android.os.IBinder;
+
+        $z1 = virtualinvoke $r0.<android.media.AudioService: boolean isStreamAffectedByMute(int)>($i0);
+
+        if $z1 == 0 goto label1;
+
+        $r2 = $r0.<android.media.AudioService: android.media.AudioService$VolumeStreamState[] mStreamStates>;
+
+        $r3 = $r2[$i0];
+
+        virtualinvoke $r3.<android.media.AudioService$VolumeStreamState: void mute(android.os.IBinder,boolean)>($r1, $z0);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public void setStreamSolo(int, boolean, android.os.IBinder)
+    {
+        android.media.AudioService $r0;
+        int $i0, $i1, $i2;
+        boolean $z0, $z1;
+        android.os.IBinder $r1;
+        android.media.AudioService$VolumeStreamState[] $r2;
+        android.media.AudioService$VolumeStreamState $r3;
+
+        $r0 := @this: android.media.AudioService;
+
+        $i0 := @parameter0: int;
+
+        $z0 := @parameter1: boolean;
+
+        $r1 := @parameter2: android.os.IBinder;
+
+        $i1 = 0;
+
+     label1:
+        $r2 = $r0.<android.media.AudioService: android.media.AudioService$VolumeStreamState[] mStreamStates>;
+
+        $i2 = lengthof $r2;
+
+        if $i1 >= $i2 goto label4;
+
+        $z1 = virtualinvoke $r0.<android.media.AudioService: boolean isStreamAffectedByMute(int)>($i1);
+
+        if $z1 == 0 goto label2;
+
+        if $i1 != $i0 goto label3;
+
+     label2:
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label3:
+        $r2 = $r0.<android.media.AudioService: android.media.AudioService$VolumeStreamState[] mStreamStates>;
+
+        $r3 = $r2[$i1];
+
+        virtualinvoke $r3.<android.media.AudioService$VolumeStreamState: void mute(android.os.IBinder,boolean)>($r1, $z0);
+
+        goto label2;
+
+     label4:
+        return;
+    }
+
+    public void setStreamVolume(int, int, int)
+    {
+        android.media.AudioService $r0;
+        int $i0, $i1, $i2;
+        android.view.VolumePanel $r1;
+
+        $r0 := @this: android.media.AudioService;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i2 := @parameter2: int;
+
+        specialinvoke $r0.<android.media.AudioService: void ensureValidStreamType(int)>($i0);
+
+        specialinvoke $r0.<android.media.AudioService: void syncRingerAndNotificationStreamVolume(int,int,boolean)>($i0, $i1, 0);
+
+        specialinvoke $r0.<android.media.AudioService: void setStreamVolumeInt(int,int,boolean)>($i0, $i1, 0);
+
+        $r1 = $r0.<android.media.AudioService: android.view.VolumePanel mVolumePanel>;
+
+        virtualinvoke $r1.<android.view.VolumePanel: void postVolumeChanged(int,int)>($i0, $i2);
+
+        specialinvoke $r0.<android.media.AudioService: void sendVolumeUpdate(int)>($i0);
+
+        return;
+    }
+
+    public void setVibrateSetting(int, int)
+    {
+        android.media.AudioService $r0;
+        int $i0, $i1, $i2;
+        android.media.AudioService$AudioHandler $r1;
+
+        $r0 := @this: android.media.AudioService;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i2 = $r0.<android.media.AudioService: int mVibrateSetting>;
+
+        $i1 = staticinvoke <android.media.AudioService: int getValueForVibrateSetting(int,int,int)>($i2, $i0, $i1);
+
+        $r0.<android.media.AudioService: int mVibrateSetting> = $i1;
+
+        specialinvoke $r0.<android.media.AudioService: void broadcastVibrateSetting(int)>($i0);
+
+        $r1 = $r0.<android.media.AudioService: android.media.AudioService$AudioHandler mAudioHandler>;
+
+        staticinvoke <android.media.AudioService: void sendMsg(android.os.Handler,int,int,int,int,int,java.lang.Object,int)>($r1, 4, -1, 1, 0, 0, null, 0);
+
+        return;
+    }
+
+    public boolean shouldVibrate(int)
+    {
+        android.media.AudioService $r0;
+        int $i0, $i1;
+
+        $r0 := @this: android.media.AudioService;
+
+        $i0 := @parameter0: int;
+
+        $i1 = virtualinvoke $r0.<android.media.AudioService: int getVibrateSetting(int)>($i0);
+
+        lookupswitch($i1)
+        {
+            case 0: goto label6;
+            case 1: goto label2;
+            case 2: goto label4;
+            default: goto label1;
+        };
+
+     label1:
+        return 0;
+
+     label2:
+        $i0 = $r0.<android.media.AudioService: int mRingerMode>;
+
+        if $i0 == 0 goto label3;
+
+        return 1;
+
+     label3:
+        return 0;
+
+     label4:
+        $i0 = $r0.<android.media.AudioService: int mRingerMode>;
+
+        if $i0 != 1 goto label5;
+
+        return 1;
+
+     label5:
+        return 0;
+
+     label6:
+        if $i0 != 0 goto label1;
+
+        $i0 = $r0.<android.media.AudioService: int mRingerMode>;
+
+        if $i0 != 1 goto label7;
+
+        return 1;
+
+     label7:
+        return 0;
+    }
+
+    public void unloadSoundEffects()
+    {
+        android.media.AudioService $r0;
+        int[] $r1, $r6;
+        java.lang.Object $r2;
+        android.media.SoundPool $r3;
+        java.lang.String[] $r4;
+        int $i0, $i1;
+        int[][] $r5;
+        java.lang.Throwable $r7;
+
+        $r0 := @this: android.media.AudioService;
+
+        $r2 = $r0.<android.media.AudioService: java.lang.Object mSoundEffectsLock>;
+
+        entermonitor $r2;
+
+     label01:
+        $r3 = $r0.<android.media.AudioService: android.media.SoundPool mSoundPool>;
+
+        if $r3 != null goto label03;
+
+        exitmonitor $r2;
+
+     label02:
+        return;
+
+     label03:
+        $r4 = <android.media.AudioService: java.lang.String[] SOUND_EFFECT_FILES>;
+
+        $i0 = lengthof $r4;
+
+        $r1 = newarray (int)[$i0];
+
+        $i0 = 0;
+
+     label04:
+        $r4 = <android.media.AudioService: java.lang.String[] SOUND_EFFECT_FILES>;
+
+        $i1 = lengthof $r4;
+
+        if $i0 >= $i1 goto label05;
+
+        $r1[$i0] = 0;
+
+        $i0 = $i0 + 1;
+
+        goto label04;
+
+     label05:
+        $i0 = 0;
+
+     label06:
+        if $i0 >= 9 goto label11;
+
+        $r5 = $r0.<android.media.AudioService: int[][] SOUND_EFFECT_FILES_MAP>;
+
+        $r6 = $r5[$i0];
+
+        $i1 = $r6[1];
+
+        if $i1 > 0 goto label08;
+
+     label07:
+        $i0 = $i0 + 1;
+
+        goto label06;
+
+     label08:
+        $r5 = $r0.<android.media.AudioService: int[][] SOUND_EFFECT_FILES_MAP>;
+
+        $r6 = $r5[$i0];
+
+        $i1 = $r6[0];
+
+        $i1 = $r1[$i1];
+
+        if $i1 != 0 goto label07;
+
+        $r3 = $r0.<android.media.AudioService: android.media.SoundPool mSoundPool>;
+
+        $r5 = $r0.<android.media.AudioService: int[][] SOUND_EFFECT_FILES_MAP>;
+
+        $r6 = $r5[$i0];
+
+        $i1 = $r6[1];
+
+        virtualinvoke $r3.<android.media.SoundPool: boolean unload(int)>($i1);
+
+        $r5 = $r0.<android.media.AudioService: int[][] SOUND_EFFECT_FILES_MAP>;
+
+        $r6 = $r5[$i0];
+
+        $r6[1] = -1;
+
+        $r5 = $r0.<android.media.AudioService: int[][] SOUND_EFFECT_FILES_MAP>;
+
+        $r6 = $r5[$i0];
+
+        $i1 = $r6[0];
+
+        $r1[$i1] = -1;
+
+        goto label07;
+
+     label09:
+        $r7 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label10:
+        throw $r7;
+
+     label11:
+        $r0.<android.media.AudioService: android.media.SoundPool mSoundPool> = null;
+
+        exitmonitor $r2;
+
+     label12:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label09;
+        catch java.lang.Throwable from label03 to label10 with label09;
+        catch java.lang.Throwable from label11 to label12 with label09;
+    }
+}

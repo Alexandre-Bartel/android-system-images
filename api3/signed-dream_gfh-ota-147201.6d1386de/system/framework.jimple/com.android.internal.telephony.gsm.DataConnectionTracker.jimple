@@ -1,0 +1,4536 @@
+final class com.android.internal.telephony.gsm.DataConnectionTracker extends android.os.Handler
+{
+    private static int APN_DEFAULT_ID;
+    static final java.lang.String APN_ID;
+    private static int APN_MMS_ID;
+    private static int APN_NUM_TYPES;
+    private static final java.lang.String APN_RESTORE_DELAY_PROP_NAME;
+    private static final boolean DBG;
+    private static final int DEFAULT_MAX_PDP_RESET_FAIL;
+    private static final int DEFAULT_PING_DEADLINE;
+    static final int EVENT_APN_CHANGED;
+    static final int EVENT_DATA_SETUP_COMPLETE;
+    static final int EVENT_DISCONNECT_DONE;
+    static final int EVENT_ENABLE_NEW_APN;
+    static final int EVENT_GET_PDP_LIST_COMPLETE;
+    static final int EVENT_GPRS_ATTACHED;
+    static final int EVENT_GPRS_DETACHED;
+    static final int EVENT_LINK_STATE_CHANGED;
+    static final int EVENT_PDP_STATE_CHANGED;
+    static final int EVENT_POLL_PDP;
+    static final int EVENT_PS_RESTRICT_DISABLED;
+    static final int EVENT_PS_RESTRICT_ENABLED;
+    static final int EVENT_RADIO_AVAILABLE;
+    static final int EVENT_RADIO_OFF_OR_NOT_AVAILABLE;
+    static final int EVENT_RECORDS_LOADED;
+    static final int EVENT_RESTORE_DEFAULT_APN;
+    static final int EVENT_ROAMING_OFF;
+    static final int EVENT_ROAMING_ON;
+    static final int EVENT_START_NETSTAT_POLL;
+    static final int EVENT_START_RECOVERY;
+    static final int EVENT_TRY_SETUP_DATA;
+    static final int EVENT_VOICE_CALL_ENDED;
+    static final int EVENT_VOICE_CALL_STARTED;
+    private static final java.lang.String INTENT_RECONNECT_ALARM;
+    private static final java.lang.String INTENT_RECONNECT_ALARM_EXTRA_REASON;
+    private static final java.lang.String LOG_TAG;
+    private static final int NO_RECV_POLL_LIMIT;
+    private static final java.lang.String NULL_IP;
+    private static final int NUMBER_SENT_PACKETS_OF_HANG;
+    private static final int PDP_CONNECTION_POOL_SIZE;
+    private static final int POLL_LONGEST_RTT;
+    private static final int POLL_NETSTAT_MILLIS;
+    private static final int POLL_NETSTAT_SCREEN_OFF_MILLIS;
+    private static final int POLL_NETSTAT_SLOW_MILLIS;
+    private static final int POLL_PDP_MILLIS;
+    static final android.net.Uri PREFERAPN_URI;
+    private static final int RECONNECT_DELAY_INITIAL_MILLIS;
+    private static final int RECONNECT_DELAY_MAX_MILLIS;
+    private static final int RESTORE_DEFAULT_APN_DELAY;
+    com.android.internal.telephony.gsm.DataConnectionTracker$Activity activity;
+    private java.util.ArrayList allApns;
+    private com.android.internal.telephony.gsm.DataConnectionTracker$ApnChangeObserver apnObserver;
+    private boolean canSetPreferApn;
+    int cidActive;
+    private boolean[] dataEnabled;
+    boolean failNextConnect;
+    private com.android.internal.telephony.gsm.ApnSetting mActiveApn;
+    private com.android.internal.telephony.gsm.PdpConnection mActivePdp;
+    android.os.Handler mDataConnectionTracker;
+    android.content.BroadcastReceiver mIntentReceiver;
+    private boolean mIsPsRestricted;
+    private boolean mIsScreenOn;
+    private boolean mIsWifiConnected;
+    private int mNoRecvPollCount;
+    private int mPdpResetCount;
+    private boolean mPingTestActive;
+    java.lang.Runnable mPollNetStat;
+    private android.app.PendingIntent mReconnectIntent;
+    private java.lang.String mRequestedApnType;
+    private android.content.ContentResolver mResolver;
+    boolean netStatPollEnabled;
+    int netStatPollPeriod;
+    android.os.INetStatService netstat;
+    long nextReconnectDelay;
+    private boolean noAutoAttach;
+    private java.util.ArrayList pdpList;
+    com.android.internal.telephony.gsm.GSMPhone phone;
+    private com.android.internal.telephony.gsm.ApnSetting preferredApn;
+    long rxPkts;
+    long sentSinceLastRecv;
+    com.android.internal.telephony.gsm.DataConnectionTracker$State state;
+    long txPkts;
+    private java.util.ArrayList waitingApns;
+
+    static void <clinit>()
+    {
+        android.net.Uri $r0;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int RESTORE_DEFAULT_APN_DELAY> = 60000;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int RECONNECT_DELAY_MAX_MILLIS> = 3600000;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int RECONNECT_DELAY_INITIAL_MILLIS> = 5000;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int POLL_PDP_MILLIS> = 5000;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int POLL_NETSTAT_SLOW_MILLIS> = 5000;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int POLL_NETSTAT_SCREEN_OFF_MILLIS> = 600000;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int POLL_NETSTAT_MILLIS> = 1000;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int POLL_LONGEST_RTT> = 120000;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int PDP_CONNECTION_POOL_SIZE> = 1;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int NUMBER_SENT_PACKETS_OF_HANG> = 10;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: java.lang.String NULL_IP> = "0.0.0.0";
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int NO_RECV_POLL_LIMIT> = 24;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: java.lang.String LOG_TAG> = "GSM";
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: java.lang.String INTENT_RECONNECT_ALARM_EXTRA_REASON> = "reason";
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: java.lang.String INTENT_RECONNECT_ALARM> = "com.android.internal.telephony.gprs-reconnect";
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int EVENT_VOICE_CALL_STARTED> = 14;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int EVENT_VOICE_CALL_ENDED> = 15;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int EVENT_TRY_SETUP_DATA> = 5;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int EVENT_START_RECOVERY> = 28;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int EVENT_START_NETSTAT_POLL> = 27;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int EVENT_ROAMING_ON> = 21;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int EVENT_ROAMING_OFF> = 22;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int EVENT_RESTORE_DEFAULT_APN> = 24;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int EVENT_RECORDS_LOADED> = 4;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int EVENT_RADIO_OFF_OR_NOT_AVAILABLE> = 12;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int EVENT_RADIO_AVAILABLE> = 3;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int EVENT_PS_RESTRICT_ENABLED> = 30;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int EVENT_PS_RESTRICT_DISABLED> = 31;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int EVENT_POLL_PDP> = 7;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int EVENT_PDP_STATE_CHANGED> = 6;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int EVENT_LINK_STATE_CHANGED> = 20;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int EVENT_GPRS_DETACHED> = 19;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int EVENT_GPRS_ATTACHED> = 26;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int EVENT_GET_PDP_LIST_COMPLETE> = 11;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int EVENT_ENABLE_NEW_APN> = 23;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int EVENT_DISCONNECT_DONE> = 25;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int EVENT_DATA_SETUP_COMPLETE> = 1;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int EVENT_APN_CHANGED> = 29;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int DEFAULT_PING_DEADLINE> = 5;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int DEFAULT_MAX_PDP_RESET_FAIL> = 3;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: boolean DBG> = 1;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: java.lang.String APN_RESTORE_DELAY_PROP_NAME> = "android.telephony.apn-restore";
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: java.lang.String APN_ID> = "apn_id";
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int APN_DEFAULT_ID> = 0;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int APN_MMS_ID> = 1;
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: int APN_NUM_TYPES> = 2;
+
+        $r0 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>("content://telephony/carriers/preferapn");
+
+        <com.android.internal.telephony.gsm.DataConnectionTracker: android.net.Uri PREFERAPN_URI> = $r0;
+
+        return;
+    }
+
+    void <init>(com.android.internal.telephony.gsm.GSMPhone)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        com.android.internal.telephony.gsm.GSMPhone $r1;
+        android.content.IntentFilter $r2;
+        com.android.internal.telephony.gsm.DataConnectionTracker$State $r3;
+        com.android.internal.telephony.gsm.DataConnectionTracker$Activity $r4;
+        int $i0;
+        boolean[] $r5;
+        com.android.internal.telephony.gsm.DataConnectionTracker$1 $r6;
+        com.android.internal.telephony.gsm.DataConnectionTracker$2 $r7;
+        com.android.internal.telephony.gsm.CommandsInterface $r8;
+        com.android.internal.telephony.gsm.SIMRecords $r9;
+        com.android.internal.telephony.gsm.CallTracker $r10;
+        com.android.internal.telephony.gsm.ServiceStateTracker $r11;
+        android.os.IBinder $r12;
+        android.os.INetStatService $r13;
+        android.content.Context $r14;
+        android.content.BroadcastReceiver $r15;
+        com.android.internal.telephony.gsm.GSMPhone$MyHandler $r16;
+        android.content.ContentResolver $r17;
+        com.android.internal.telephony.gsm.DataConnectionTracker$ApnChangeObserver $r18;
+        android.net.Uri $r19;
+        android.content.SharedPreferences $r20;
+        boolean $z0;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 := @parameter0: com.android.internal.telephony.gsm.GSMPhone;
+
+        specialinvoke $r0.<android.os.Handler: void <init>()>();
+
+        $r3 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State IDLE>;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$State state> = $r3;
+
+        $r4 = <com.android.internal.telephony.gsm.DataConnectionTracker$Activity: com.android.internal.telephony.gsm.DataConnectionTracker$Activity NONE>;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$Activity activity> = $r4;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean netStatPollEnabled> = 0;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean noAutoAttach> = 0;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: long nextReconnectDelay> = 5000L;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: android.os.Handler mDataConnectionTracker> = null;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: int mNoRecvPollCount> = 0;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean mPingTestActive> = 0;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: int mPdpResetCount> = 0;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean mIsScreenOn> = 1;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean failNextConnect> = 0;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.util.ArrayList allApns> = null;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.util.ArrayList waitingApns> = null;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting preferredApn> = null;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.lang.String mRequestedApnType> = "default";
+
+        $i0 = <com.android.internal.telephony.gsm.DataConnectionTracker: int APN_NUM_TYPES>;
+
+        $r5 = newarray (boolean)[$i0];
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean[] dataEnabled> = $r5;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean mIsWifiConnected> = 0;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: android.app.PendingIntent mReconnectIntent> = null;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean mIsPsRestricted> = 0;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean canSetPreferApn> = 0;
+
+        $r6 = new com.android.internal.telephony.gsm.DataConnectionTracker$1;
+
+        specialinvoke $r6.<com.android.internal.telephony.gsm.DataConnectionTracker$1: void <init>(com.android.internal.telephony.gsm.DataConnectionTracker)>($r0);
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: android.content.BroadcastReceiver mIntentReceiver> = $r6;
+
+        $r7 = new com.android.internal.telephony.gsm.DataConnectionTracker$2;
+
+        specialinvoke $r7.<com.android.internal.telephony.gsm.DataConnectionTracker$2: void <init>(com.android.internal.telephony.gsm.DataConnectionTracker)>($r0);
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.lang.Runnable mPollNetStat> = $r7;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone> = $r1;
+
+        $r8 = $r1.<com.android.internal.telephony.gsm.GSMPhone: com.android.internal.telephony.gsm.CommandsInterface mCM>;
+
+        interfaceinvoke $r8.<com.android.internal.telephony.gsm.CommandsInterface: void registerForAvailable(android.os.Handler,int,java.lang.Object)>($r0, 3, null);
+
+        $r8 = $r1.<com.android.internal.telephony.gsm.GSMPhone: com.android.internal.telephony.gsm.CommandsInterface mCM>;
+
+        interfaceinvoke $r8.<com.android.internal.telephony.gsm.CommandsInterface: void registerForOffOrNotAvailable(android.os.Handler,int,java.lang.Object)>($r0, 12, null);
+
+        $r9 = $r1.<com.android.internal.telephony.gsm.GSMPhone: com.android.internal.telephony.gsm.SIMRecords mSIMRecords>;
+
+        virtualinvoke $r9.<com.android.internal.telephony.gsm.SIMRecords: void registerForRecordsLoaded(android.os.Handler,int,java.lang.Object)>($r0, 4, null);
+
+        $r8 = $r1.<com.android.internal.telephony.gsm.GSMPhone: com.android.internal.telephony.gsm.CommandsInterface mCM>;
+
+        interfaceinvoke $r8.<com.android.internal.telephony.gsm.CommandsInterface: void registerForPDPStateChanged(android.os.Handler,int,java.lang.Object)>($r0, 6, null);
+
+        $r10 = $r1.<com.android.internal.telephony.gsm.GSMPhone: com.android.internal.telephony.gsm.CallTracker mCT>;
+
+        virtualinvoke $r10.<com.android.internal.telephony.gsm.CallTracker: void registerForVoiceCallEnded(android.os.Handler,int,java.lang.Object)>($r0, 15, null);
+
+        $r10 = $r1.<com.android.internal.telephony.gsm.GSMPhone: com.android.internal.telephony.gsm.CallTracker mCT>;
+
+        virtualinvoke $r10.<com.android.internal.telephony.gsm.CallTracker: void registerForVoiceCallStarted(android.os.Handler,int,java.lang.Object)>($r0, 14, null);
+
+        $r11 = $r1.<com.android.internal.telephony.gsm.GSMPhone: com.android.internal.telephony.gsm.ServiceStateTracker mSST>;
+
+        virtualinvoke $r11.<com.android.internal.telephony.gsm.ServiceStateTracker: void registerForGprsAttached(android.os.Handler,int,java.lang.Object)>($r0, 26, null);
+
+        $r11 = $r1.<com.android.internal.telephony.gsm.GSMPhone: com.android.internal.telephony.gsm.ServiceStateTracker mSST>;
+
+        virtualinvoke $r11.<com.android.internal.telephony.gsm.ServiceStateTracker: void registerForGprsDetached(android.os.Handler,int,java.lang.Object)>($r0, 19, null);
+
+        $r11 = $r1.<com.android.internal.telephony.gsm.GSMPhone: com.android.internal.telephony.gsm.ServiceStateTracker mSST>;
+
+        virtualinvoke $r11.<com.android.internal.telephony.gsm.ServiceStateTracker: void registerForRoamingOn(android.os.Handler,int,java.lang.Object)>($r0, 21, null);
+
+        $r11 = $r1.<com.android.internal.telephony.gsm.GSMPhone: com.android.internal.telephony.gsm.ServiceStateTracker mSST>;
+
+        virtualinvoke $r11.<com.android.internal.telephony.gsm.ServiceStateTracker: void registerForRoamingOff(android.os.Handler,int,java.lang.Object)>($r0, 22, null);
+
+        $r11 = $r1.<com.android.internal.telephony.gsm.GSMPhone: com.android.internal.telephony.gsm.ServiceStateTracker mSST>;
+
+        virtualinvoke $r11.<com.android.internal.telephony.gsm.ServiceStateTracker: void registerForPsRestrictedEnabled(android.os.Handler,int,java.lang.Object)>($r0, 30, null);
+
+        $r11 = $r1.<com.android.internal.telephony.gsm.GSMPhone: com.android.internal.telephony.gsm.ServiceStateTracker mSST>;
+
+        virtualinvoke $r11.<com.android.internal.telephony.gsm.ServiceStateTracker: void registerForPsRestrictedDisabled(android.os.Handler,int,java.lang.Object)>($r0, 31, null);
+
+        $r12 = staticinvoke <android.os.ServiceManager: android.os.IBinder getService(java.lang.String)>("netstat");
+
+        $r13 = staticinvoke <android.os.INetStatService$Stub: android.os.INetStatService asInterface(android.os.IBinder)>($r12);
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: android.os.INetStatService netstat> = $r13;
+
+        $r2 = new android.content.IntentFilter;
+
+        specialinvoke $r2.<android.content.IntentFilter: void <init>()>();
+
+        virtualinvoke $r2.<android.content.IntentFilter: void addAction(java.lang.String)>("com.android.internal.telephony.gprs-reconnect");
+
+        virtualinvoke $r2.<android.content.IntentFilter: void addAction(java.lang.String)>("android.intent.action.SCREEN_ON");
+
+        virtualinvoke $r2.<android.content.IntentFilter: void addAction(java.lang.String)>("android.intent.action.SCREEN_OFF");
+
+        virtualinvoke $r2.<android.content.IntentFilter: void addAction(java.lang.String)>("android.net.wifi.STATE_CHANGE");
+
+        virtualinvoke $r2.<android.content.IntentFilter: void addAction(java.lang.String)>("android.net.wifi.WIFI_STATE_CHANGED");
+
+        $r14 = virtualinvoke $r1.<com.android.internal.telephony.PhoneBase: android.content.Context getContext()>();
+
+        $r15 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: android.content.BroadcastReceiver mIntentReceiver>;
+
+        $r16 = $r1.<com.android.internal.telephony.gsm.GSMPhone: com.android.internal.telephony.gsm.GSMPhone$MyHandler h>;
+
+        virtualinvoke $r14.<android.content.Context: android.content.Intent registerReceiver(android.content.BroadcastReceiver,android.content.IntentFilter,java.lang.String,android.os.Handler)>($r15, $r2, null, $r16);
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: android.os.Handler mDataConnectionTracker> = $r0;
+
+        $r14 = virtualinvoke $r1.<com.android.internal.telephony.PhoneBase: android.content.Context getContext()>();
+
+        $r17 = virtualinvoke $r14.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: android.content.ContentResolver mResolver> = $r17;
+
+        $r18 = new com.android.internal.telephony.gsm.DataConnectionTracker$ApnChangeObserver;
+
+        specialinvoke $r18.<com.android.internal.telephony.gsm.DataConnectionTracker$ApnChangeObserver: void <init>(com.android.internal.telephony.gsm.DataConnectionTracker)>($r0);
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$ApnChangeObserver apnObserver> = $r18;
+
+        $r14 = virtualinvoke $r1.<com.android.internal.telephony.PhoneBase: android.content.Context getContext()>();
+
+        $r17 = virtualinvoke $r14.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r19 = <android.provider.Telephony$Carriers: android.net.Uri CONTENT_URI>;
+
+        $r18 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$ApnChangeObserver apnObserver>;
+
+        virtualinvoke $r17.<android.content.ContentResolver: void registerContentObserver(android.net.Uri,boolean,android.database.ContentObserver)>($r19, 1, $r18);
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void createAllPdpList()>();
+
+        $r14 = virtualinvoke $r1.<com.android.internal.telephony.PhoneBase: android.content.Context getContext()>();
+
+        $r20 = staticinvoke <android.preference.PreferenceManager: android.content.SharedPreferences getDefaultSharedPreferences(android.content.Context)>($r14);
+
+        $r5 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean[] dataEnabled>;
+
+        $i0 = <com.android.internal.telephony.gsm.DataConnectionTracker: int APN_DEFAULT_ID>;
+
+        $z0 = interfaceinvoke $r20.<android.content.SharedPreferences: boolean getBoolean(java.lang.String,boolean)>("disabled_on_boot_key", 0);
+
+        if $z0 != 0 goto label3;
+
+        $z0 = 1;
+
+     label1:
+        $r5[$i0] = $z0;
+
+        $r5 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean[] dataEnabled>;
+
+        $i0 = <com.android.internal.telephony.gsm.DataConnectionTracker: int APN_DEFAULT_ID>;
+
+        $z0 = $r5[$i0];
+
+        if $z0 != 0 goto label4;
+
+        $z0 = 1;
+
+     label2:
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean noAutoAttach> = $z0;
+
+        return;
+
+     label3:
+        $z0 = 0;
+
+        goto label1;
+
+     label4:
+        $z0 = 0;
+
+        goto label2;
+    }
+
+    static boolean access$000(com.android.internal.telephony.gsm.DataConnectionTracker)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        boolean z0;
+
+        $r0 := @parameter0: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        z0 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean mIsScreenOn>;
+
+        return z0;
+    }
+
+    static boolean access$002(com.android.internal.telephony.gsm.DataConnectionTracker, boolean)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $z0 := @parameter1: boolean;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean mIsScreenOn> = $z0;
+
+        return $z0;
+    }
+
+    static void access$100(com.android.internal.telephony.gsm.DataConnectionTracker)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+
+        $r0 := @parameter0: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void stopNetStatPoll()>();
+
+        return;
+    }
+
+    static void access$1000(com.android.internal.telephony.gsm.DataConnectionTracker)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+
+        $r0 := @parameter0: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void runPingTest()>();
+
+        return;
+    }
+
+    static boolean access$1102(com.android.internal.telephony.gsm.DataConnectionTracker, boolean)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $z0 := @parameter1: boolean;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean mPingTestActive> = $z0;
+
+        return $z0;
+    }
+
+    static void access$200(com.android.internal.telephony.gsm.DataConnectionTracker)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+
+        $r0 := @parameter0: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void startNetStatPoll()>();
+
+        return;
+    }
+
+    static void access$300(com.android.internal.telephony.gsm.DataConnectionTracker, boolean, java.lang.String)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        boolean $z0;
+        java.lang.String $r1;
+
+        $r0 := @parameter0: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $z0 := @parameter1: boolean;
+
+        $r1 := @parameter2: java.lang.String;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void cleanUpConnection(boolean,java.lang.String)>($z0, $r1);
+
+        return;
+    }
+
+    static boolean access$400(com.android.internal.telephony.gsm.DataConnectionTracker, java.lang.String)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        java.lang.String $r1;
+        boolean $z0;
+
+        $r0 := @parameter0: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $z0 = specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean trySetupData(java.lang.String)>($r1);
+
+        return $z0;
+    }
+
+    static boolean access$502(com.android.internal.telephony.gsm.DataConnectionTracker, boolean)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $z0 := @parameter1: boolean;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean mIsWifiConnected> = $z0;
+
+        return $z0;
+    }
+
+    static int access$602(com.android.internal.telephony.gsm.DataConnectionTracker, int)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        int $i0;
+
+        $r0 := @parameter0: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $i0 := @parameter1: int;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: int mPdpResetCount> = $i0;
+
+        return $i0;
+    }
+
+    static android.content.ContentResolver access$700(com.android.internal.telephony.gsm.DataConnectionTracker)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        android.content.ContentResolver r1;
+
+        $r0 := @parameter0: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        r1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: android.content.ContentResolver mResolver>;
+
+        return r1;
+    }
+
+    static int access$800(com.android.internal.telephony.gsm.DataConnectionTracker)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        int i0;
+
+        $r0 := @parameter0: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        i0 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: int mNoRecvPollCount>;
+
+        return i0;
+    }
+
+    static int access$802(com.android.internal.telephony.gsm.DataConnectionTracker, int)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        int $i0;
+
+        $r0 := @parameter0: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $i0 := @parameter1: int;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: int mNoRecvPollCount> = $i0;
+
+        return $i0;
+    }
+
+    static int access$808(com.android.internal.telephony.gsm.DataConnectionTracker)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        int $i0, $i1;
+
+        $r0 := @parameter0: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $i0 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: int mNoRecvPollCount>;
+
+        $i1 = $i0 + 1;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: int mNoRecvPollCount> = $i1;
+
+        return $i0;
+    }
+
+    static void access$900(com.android.internal.telephony.gsm.DataConnectionTracker, java.lang.String)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        java.lang.String $r1;
+
+        $r0 := @parameter0: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 := @parameter1: java.lang.String;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void log(java.lang.String)>($r1);
+
+        return;
+    }
+
+    private java.lang.String apnListToString(java.util.ArrayList)
+    {
+        java.util.ArrayList $r0;
+        java.lang.StringBuilder $r1, $r3;
+        com.android.internal.telephony.gsm.DataConnectionTracker $r2;
+        int $i0, $i1;
+        java.lang.Object $r4;
+        com.android.internal.telephony.gsm.ApnSetting $r5;
+        java.lang.String $r6;
+
+        $r2 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r0 := @parameter0: java.util.ArrayList;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $i0 = 0;
+
+        $i1 = virtualinvoke $r0.<java.util.ArrayList: int size()>();
+
+     label1:
+        if $i0 >= $i1 goto label2;
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(91);
+
+        $r4 = virtualinvoke $r0.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r5 = (com.android.internal.telephony.gsm.ApnSetting) $r4;
+
+        $r6 = virtualinvoke $r5.<com.android.internal.telephony.gsm.ApnSetting: java.lang.String toString()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(93);
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label2:
+        $r6 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r6;
+    }
+
+    private java.util.ArrayList buildWaitingApns()
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        java.util.ArrayList $r1, $r8;
+        com.android.internal.telephony.gsm.GSMPhone $r2;
+        com.android.internal.telephony.gsm.SIMRecords $r3;
+        java.lang.String $r4, $r5;
+        boolean $z0;
+        com.android.internal.telephony.gsm.ApnSetting $r6;
+        java.lang.StringBuilder $r7;
+        java.util.Iterator $r9;
+        java.lang.Object $r10;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        $r2 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r3 = $r2.<com.android.internal.telephony.gsm.GSMPhone: com.android.internal.telephony.gsm.SIMRecords mSIMRecords>;
+
+        $r4 = virtualinvoke $r3.<com.android.internal.telephony.gsm.SIMRecords: java.lang.String getSIMOperatorNumeric()>();
+
+        $r5 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.lang.String mRequestedApnType>;
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("default");
+
+        if $z0 == 0 goto label2;
+
+        $z0 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean canSetPreferApn>;
+
+        if $z0 == 0 goto label2;
+
+        $r6 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting preferredApn>;
+
+        if $r6 == null goto label2;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Preferred APN:");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r6 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting preferredApn>;
+
+        $r5 = $r6.<com.android.internal.telephony.gsm.ApnSetting: java.lang.String numeric>;
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r6 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting preferredApn>;
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r6);
+
+        $r5 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("GSM", $r5);
+
+        $r6 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting preferredApn>;
+
+        $r5 = $r6.<com.android.internal.telephony.gsm.ApnSetting: java.lang.String numeric>;
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 == 0 goto label1;
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("GSM", "Waiting APN set to preferred APN");
+
+        $r6 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting preferredApn>;
+
+        virtualinvoke $r1.<java.util.ArrayList: boolean add(java.lang.Object)>($r6);
+
+        return $r1;
+
+     label1:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void setPreferredApn(int)>(-1);
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting preferredApn> = null;
+
+     label2:
+        $r8 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.util.ArrayList allApns>;
+
+        if $r8 == null goto label4;
+
+        $r8 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.util.ArrayList allApns>;
+
+        $r9 = virtualinvoke $r8.<java.util.AbstractList: java.util.Iterator iterator()>();
+
+     label3:
+        $z0 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label5;
+
+        $r10 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+        $r6 = (com.android.internal.telephony.gsm.ApnSetting) $r10;
+
+        $r4 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.lang.String mRequestedApnType>;
+
+        $z0 = virtualinvoke $r6.<com.android.internal.telephony.gsm.ApnSetting: boolean canHandleType(java.lang.String)>($r4);
+
+        if $z0 == 0 goto label3;
+
+        virtualinvoke $r1.<java.util.ArrayList: boolean add(java.lang.Object)>($r6);
+
+        goto label3;
+
+     label4:
+        return $r1;
+
+     label5:
+        return $r1;
+    }
+
+    private void cleanUpConnection(boolean, java.lang.String)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        boolean $z0, $z1;
+        java.lang.String $r1, $r3;
+        java.lang.StringBuilder $r2;
+        android.app.PendingIntent $r4;
+        com.android.internal.telephony.gsm.GSMPhone $r5;
+        android.content.Context $r6;
+        java.lang.Object $r7;
+        android.app.AlarmManager $r8;
+        java.util.ArrayList $r9;
+        java.util.Iterator $r10;
+        com.android.internal.telephony.gsm.PdpConnection $r11;
+        android.os.Message $r12;
+        com.android.internal.telephony.gsm.DataConnectionTracker$State $r13, $r14;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Clean up connection due to ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void log(java.lang.String)>($r3);
+
+        $r4 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: android.app.PendingIntent mReconnectIntent>;
+
+        if $r4 == null goto label1;
+
+        $r5 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r6 = virtualinvoke $r5.<com.android.internal.telephony.PhoneBase: android.content.Context getContext()>();
+
+        $r7 = virtualinvoke $r6.<android.content.Context: java.lang.Object getSystemService(java.lang.String)>("alarm");
+
+        $r8 = (android.app.AlarmManager) $r7;
+
+        $r4 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: android.app.PendingIntent mReconnectIntent>;
+
+        virtualinvoke $r8.<android.app.AlarmManager: void cancel(android.app.PendingIntent)>($r4);
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: android.app.PendingIntent mReconnectIntent> = null;
+
+     label1:
+        $r9 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.util.ArrayList pdpList>;
+
+        $r10 = virtualinvoke $r9.<java.util.AbstractList: java.util.Iterator iterator()>();
+
+     label2:
+        $z1 = interfaceinvoke $r10.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label4;
+
+        $r7 = interfaceinvoke $r10.<java.util.Iterator: java.lang.Object next()>();
+
+        $r11 = (com.android.internal.telephony.gsm.PdpConnection) $r7;
+
+        if $z0 == 0 goto label3;
+
+        $r12 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,java.lang.Object)>(25, $r1);
+
+        virtualinvoke $r11.<com.android.internal.telephony.gsm.PdpConnection: void disconnect(android.os.Message)>($r12);
+
+        goto label2;
+
+     label3:
+        virtualinvoke $r11.<com.android.internal.telephony.gsm.PdpConnection: void clearSettings()>();
+
+        goto label2;
+
+     label4:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void stopNetStatPoll()>();
+
+        if $z0 != 0 goto label5;
+
+        $r13 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State IDLE>;
+
+        virtualinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void setState(com.android.internal.telephony.gsm.DataConnectionTracker$State)>($r13);
+
+        $r5 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        virtualinvoke $r5.<com.android.internal.telephony.gsm.GSMPhone: void notifyDataConnection(java.lang.String)>($r1);
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting mActiveApn> = null;
+
+        return;
+
+     label5:
+        $r13 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$State state>;
+
+        $r14 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State IDLE>;
+
+        if $r13 == $r14 goto label6;
+
+        $r13 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State DISCONNECTING>;
+
+        virtualinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void setState(com.android.internal.telephony.gsm.DataConnectionTracker$State)>($r13);
+
+        return;
+
+     label6:
+        return;
+    }
+
+    private void createAllApnList()
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        java.util.ArrayList $r1;
+        com.android.internal.telephony.gsm.GSMPhone $r2;
+        com.android.internal.telephony.gsm.SIMRecords $r3;
+        java.lang.String $r4, $r6;
+        java.lang.StringBuilder $r5;
+        android.content.Context $r7;
+        android.content.ContentResolver $r8;
+        android.net.Uri $r9;
+        android.database.Cursor $r10;
+        int $i0;
+        boolean $z0;
+        com.android.internal.telephony.gsm.PdpConnection$PdpFailCause $r11;
+        com.android.internal.telephony.gsm.ApnSetting $r12;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.util.ArrayList allApns> = $r1;
+
+        $r2 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r3 = $r2.<com.android.internal.telephony.gsm.GSMPhone: com.android.internal.telephony.gsm.SIMRecords mSIMRecords>;
+
+        $r4 = virtualinvoke $r3.<com.android.internal.telephony.gsm.SIMRecords: java.lang.String getSIMOperatorNumeric()>();
+
+        if $r4 == null goto label2;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("numeric = \'");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r2 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r7 = virtualinvoke $r2.<com.android.internal.telephony.PhoneBase: android.content.Context getContext()>();
+
+        $r8 = virtualinvoke $r7.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r9 = <android.provider.Telephony$Carriers: android.net.Uri CONTENT_URI>;
+
+        $r10 = virtualinvoke $r8.<android.content.ContentResolver: android.database.Cursor query(android.net.Uri,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String)>($r9, null, $r6, null, null);
+
+        if $r10 == null goto label2;
+
+        $i0 = interfaceinvoke $r10.<android.database.Cursor: int getCount()>();
+
+        if $i0 <= 0 goto label1;
+
+        $r1 = specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.util.ArrayList createApnList(android.database.Cursor)>($r10);
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.util.ArrayList allApns> = $r1;
+
+     label1:
+        interfaceinvoke $r10.<android.database.Cursor: void close()>();
+
+     label2:
+        $r1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.util.ArrayList allApns>;
+
+        $z0 = virtualinvoke $r1.<java.util.ArrayList: boolean isEmpty()>();
+
+        if $z0 == 0 goto label3;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No APN found for carrier: ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void log(java.lang.String)>($r4);
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting preferredApn> = null;
+
+        $r11 = <com.android.internal.telephony.gsm.PdpConnection$PdpFailCause: com.android.internal.telephony.gsm.PdpConnection$PdpFailCause BAD_APN>;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void notifyNoData(com.android.internal.telephony.gsm.PdpConnection$PdpFailCause)>($r11);
+
+        return;
+
+     label3:
+        $r12 = specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting getPreferredApn()>();
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting preferredApn> = $r12;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GSM", "Get PreferredAPN");
+
+        $r12 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting preferredApn>;
+
+        if $r12 == null goto label4;
+
+        $r12 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting preferredApn>;
+
+        $r6 = $r12.<com.android.internal.telephony.gsm.ApnSetting: java.lang.String numeric>;
+
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 != 0 goto label5;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting preferredApn> = null;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void setPreferredApn(int)>(-1);
+
+        return;
+
+     label4:
+        return;
+
+     label5:
+        return;
+    }
+
+    private void createAllPdpList()
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        com.android.internal.telephony.gsm.PdpConnection $r1;
+        java.util.ArrayList $r2;
+        int $i0;
+        com.android.internal.telephony.gsm.GSMPhone $r3;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.util.ArrayList pdpList> = $r2;
+
+        $i0 = 0;
+
+     label1:
+        if $i0 >= 1 goto label2;
+
+        $r1 = new com.android.internal.telephony.gsm.PdpConnection;
+
+        $r3 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        specialinvoke $r1.<com.android.internal.telephony.gsm.PdpConnection: void <init>(com.android.internal.telephony.gsm.GSMPhone)>($r3);
+
+        $r2 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.util.ArrayList pdpList>;
+
+        virtualinvoke $r2.<java.util.ArrayList: boolean add(java.lang.Object)>($r1);
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    private java.util.ArrayList createApnList(android.database.Cursor)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        android.database.Cursor $r1;
+        com.android.internal.telephony.gsm.ApnSetting $r2;
+        java.util.ArrayList $r3;
+        boolean $z0;
+        int $i0, $i1;
+        java.lang.String $r4, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14;
+        java.lang.String[] $r5;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 := @parameter0: android.database.Cursor;
+
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>()>();
+
+        $z0 = interfaceinvoke $r1.<android.database.Cursor: boolean moveToFirst()>();
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        $i0 = interfaceinvoke $r1.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("type");
+
+        $r4 = interfaceinvoke $r1.<android.database.Cursor: java.lang.String getString(int)>($i0);
+
+        $r5 = specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.lang.String[] parseTypes(java.lang.String)>($r4);
+
+        $r2 = new com.android.internal.telephony.gsm.ApnSetting;
+
+        $i0 = interfaceinvoke $r1.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("_id");
+
+        $i0 = interfaceinvoke $r1.<android.database.Cursor: int getInt(int)>($i0);
+
+        $i1 = interfaceinvoke $r1.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("numeric");
+
+        $r4 = interfaceinvoke $r1.<android.database.Cursor: java.lang.String getString(int)>($i1);
+
+        $i1 = interfaceinvoke $r1.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("name");
+
+        $r6 = interfaceinvoke $r1.<android.database.Cursor: java.lang.String getString(int)>($i1);
+
+        $i1 = interfaceinvoke $r1.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("apn");
+
+        $r7 = interfaceinvoke $r1.<android.database.Cursor: java.lang.String getString(int)>($i1);
+
+        $i1 = interfaceinvoke $r1.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("proxy");
+
+        $r8 = interfaceinvoke $r1.<android.database.Cursor: java.lang.String getString(int)>($i1);
+
+        $i1 = interfaceinvoke $r1.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("port");
+
+        $r9 = interfaceinvoke $r1.<android.database.Cursor: java.lang.String getString(int)>($i1);
+
+        $i1 = interfaceinvoke $r1.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("mmsc");
+
+        $r10 = interfaceinvoke $r1.<android.database.Cursor: java.lang.String getString(int)>($i1);
+
+        $i1 = interfaceinvoke $r1.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("mmsproxy");
+
+        $r11 = interfaceinvoke $r1.<android.database.Cursor: java.lang.String getString(int)>($i1);
+
+        $i1 = interfaceinvoke $r1.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("mmsport");
+
+        $r12 = interfaceinvoke $r1.<android.database.Cursor: java.lang.String getString(int)>($i1);
+
+        $i1 = interfaceinvoke $r1.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("user");
+
+        $r13 = interfaceinvoke $r1.<android.database.Cursor: java.lang.String getString(int)>($i1);
+
+        $i1 = interfaceinvoke $r1.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("password");
+
+        $r14 = interfaceinvoke $r1.<android.database.Cursor: java.lang.String getString(int)>($i1);
+
+        specialinvoke $r2.<com.android.internal.telephony.gsm.ApnSetting: void <init>(int,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String[])>($i0, $r4, $r6, $r7, $r8, $r9, $r10, $r11, $r12, $r13, $r14, $r5);
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>($r2);
+
+        $z0 = interfaceinvoke $r1.<android.database.Cursor: boolean moveToNext()>();
+
+        if $z0 != 0 goto label1;
+
+        return $r3;
+
+     label2:
+        return $r3;
+    }
+
+    private void doRecovery()
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        int $i0, $i1;
+        com.android.internal.telephony.gsm.DataConnectionTracker$State $r1, $r2;
+        android.content.ContentResolver $r3;
+        long $l2;
+        com.android.internal.telephony.gsm.GSMPhone $r4;
+        com.android.internal.telephony.gsm.ServiceStateTracker $r5;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$State state>;
+
+        $r2 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State CONNECTED>;
+
+        if $r1 != $r2 goto label2;
+
+        $r3 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: android.content.ContentResolver mResolver>;
+
+        $i0 = staticinvoke <android.provider.Settings$Gservices: int getInt(android.content.ContentResolver,java.lang.String,int)>($r3, "pdp_watchdog_max_pdp_reset_fail_count", 3);
+
+        $i1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: int mPdpResetCount>;
+
+        if $i1 >= $i0 goto label1;
+
+        $i0 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: int mPdpResetCount>;
+
+        $i0 = $i0 + 1;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: int mPdpResetCount> = $i0;
+
+        $l2 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: long sentSinceLastRecv>;
+
+        staticinvoke <android.util.EventLog: int writeEvent(int,long)>(50103, $l2);
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void cleanUpConnection(boolean,java.lang.String)>(1, "pdpReset");
+
+        return;
+
+     label1:
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: int mPdpResetCount> = 0;
+
+        $l2 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: long sentSinceLastRecv>;
+
+        staticinvoke <android.util.EventLog: int writeEvent(int,long)>(50104, $l2);
+
+        $r4 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r5 = $r4.<com.android.internal.telephony.gsm.GSMPhone: com.android.internal.telephony.gsm.ServiceStateTracker mSST>;
+
+        virtualinvoke $r5.<com.android.internal.telephony.gsm.ServiceStateTracker: void reRegisterNetwork(android.os.Message)>(null);
+
+        return;
+
+     label2:
+        return;
+    }
+
+    private com.android.internal.telephony.gsm.PdpConnection findFreePdp()
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        com.android.internal.telephony.gsm.PdpConnection$PdpState $r1, $r6;
+        java.util.ArrayList $r2;
+        java.util.Iterator $r3;
+        boolean $z0;
+        java.lang.Object $r4;
+        com.android.internal.telephony.gsm.PdpConnection $r5;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r2 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.util.ArrayList pdpList>;
+
+        $r3 = virtualinvoke $r2.<java.util.AbstractList: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        $r5 = (com.android.internal.telephony.gsm.PdpConnection) $r4;
+
+        $r6 = virtualinvoke $r5.<com.android.internal.telephony.gsm.PdpConnection: com.android.internal.telephony.gsm.PdpConnection$PdpState getState()>();
+
+        $r1 = <com.android.internal.telephony.gsm.PdpConnection$PdpState: com.android.internal.telephony.gsm.PdpConnection$PdpState INACTIVE>;
+
+        if $r6 != $r1 goto label1;
+
+        return $r5;
+
+     label2:
+        return null;
+    }
+
+    private com.android.internal.telephony.gsm.ApnSetting getNextApn()
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        java.util.ArrayList $r1;
+        com.android.internal.telephony.gsm.ApnSetting $r2;
+        boolean $z0;
+        java.lang.Object $r3;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.util.ArrayList waitingApns>;
+
+        if $r1 == null goto label1;
+
+        $z0 = virtualinvoke $r1.<java.util.ArrayList: boolean isEmpty()>();
+
+        if $z0 != 0 goto label2;
+
+        $r3 = virtualinvoke $r1.<java.util.ArrayList: java.lang.Object get(int)>(0);
+
+        $r2 = (com.android.internal.telephony.gsm.ApnSetting) $r3;
+
+        return $r2;
+
+     label1:
+        return null;
+
+     label2:
+        return null;
+    }
+
+    private com.android.internal.telephony.gsm.ApnSetting getPreferredApn()
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        android.net.Uri $r1;
+        java.util.ArrayList $r2;
+        boolean $z0;
+        com.android.internal.telephony.gsm.GSMPhone $r3;
+        android.content.Context $r4;
+        android.content.ContentResolver $r5;
+        java.lang.String[] $r6;
+        android.database.Cursor $r7;
+        int $i0, $i1;
+        java.util.Iterator $r8;
+        java.lang.Object $r9;
+        com.android.internal.telephony.gsm.ApnSetting $r10;
+        java.lang.String $r11;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r2 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.util.ArrayList allApns>;
+
+        $z0 = virtualinvoke $r2.<java.util.ArrayList: boolean isEmpty()>();
+
+        if $z0 == 0 goto label1;
+
+        return null;
+
+     label1:
+        $r3 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r4 = virtualinvoke $r3.<com.android.internal.telephony.PhoneBase: android.content.Context getContext()>();
+
+        $r5 = virtualinvoke $r4.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r1 = <com.android.internal.telephony.gsm.DataConnectionTracker: android.net.Uri PREFERAPN_URI>;
+
+        $r6 = newarray (java.lang.String)[3];
+
+        $r6[0] = "_id";
+
+        $r6[1] = "name";
+
+        $r6[2] = "apn";
+
+        $r7 = virtualinvoke $r5.<android.content.ContentResolver: android.database.Cursor query(android.net.Uri,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String)>($r1, $r6, null, null, "name ASC");
+
+        if $r7 == null goto label4;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean canSetPreferApn> = 1;
+
+     label2:
+        $z0 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean canSetPreferApn>;
+
+        if $z0 == 0 goto label5;
+
+        $i0 = interfaceinvoke $r7.<android.database.Cursor: int getCount()>();
+
+        if $i0 <= 0 goto label5;
+
+        interfaceinvoke $r7.<android.database.Cursor: boolean moveToFirst()>();
+
+        $i0 = interfaceinvoke $r7.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("_id");
+
+        $i0 = interfaceinvoke $r7.<android.database.Cursor: int getInt(int)>($i0);
+
+        $r2 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.util.ArrayList allApns>;
+
+        $r8 = virtualinvoke $r2.<java.util.AbstractList: java.util.Iterator iterator()>();
+
+     label3:
+        $z0 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label5;
+
+        $r9 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        $r10 = (com.android.internal.telephony.gsm.ApnSetting) $r9;
+
+        $i1 = $r10.<com.android.internal.telephony.gsm.ApnSetting: int id>;
+
+        if $i1 != $i0 goto label3;
+
+        $r11 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.lang.String mRequestedApnType>;
+
+        $z0 = virtualinvoke $r10.<com.android.internal.telephony.gsm.ApnSetting: boolean canHandleType(java.lang.String)>($r11);
+
+        if $z0 == 0 goto label3;
+
+        interfaceinvoke $r7.<android.database.Cursor: void close()>();
+
+        return $r10;
+
+     label4:
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean canSetPreferApn> = 0;
+
+        goto label2;
+
+     label5:
+        if $r7 == null goto label6;
+
+        interfaceinvoke $r7.<android.database.Cursor: void close()>();
+
+     label6:
+        return null;
+    }
+
+    private int getRestoreDefaultApnDelay()
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        java.lang.String $r1;
+        int $i0;
+        java.lang.Integer $r2;
+        java.lang.NumberFormatException $r3;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 = staticinvoke <android.os.SystemProperties: java.lang.String get(java.lang.String)>("android.telephony.apn-restore");
+
+        if $r1 == null goto label4;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 == 0 goto label4;
+
+     label1:
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(java.lang.String)>($r1);
+
+        $i0 = virtualinvoke $r2.<java.lang.Integer: int intValue()>();
+
+     label2:
+        return $i0;
+
+     label3:
+        $r3 := @caughtexception;
+
+     label4:
+        return 60000;
+
+        catch java.lang.NumberFormatException from label1 to label2 with label3;
+    }
+
+    private boolean isApnTypeActive(java.lang.String)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        java.lang.String $r1;
+        boolean $z0;
+        com.android.internal.telephony.gsm.ApnSetting $r2;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting mActiveApn>;
+
+        if $r2 == null goto label1;
+
+        $r2 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting mActiveApn>;
+
+        $z0 = virtualinvoke $r2.<com.android.internal.telephony.gsm.ApnSetting: boolean canHandleType(java.lang.String)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    private boolean isApnTypeAvailable(java.lang.String)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        java.lang.String $r1;
+        java.util.ArrayList $r2;
+        java.util.Iterator $r3;
+        boolean $z0;
+        java.lang.Object $r4;
+        com.android.internal.telephony.gsm.ApnSetting $r5;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.util.ArrayList allApns>;
+
+        if $r2 == null goto label2;
+
+        $r2 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.util.ArrayList allApns>;
+
+        $r3 = virtualinvoke $r2.<java.util.AbstractList: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        $r5 = (com.android.internal.telephony.gsm.ApnSetting) $r4;
+
+        $z0 = virtualinvoke $r5.<com.android.internal.telephony.gsm.ApnSetting: boolean canHandleType(java.lang.String)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    private boolean isDataAllowed()
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        com.android.internal.telephony.gsm.GSMPhone $r1;
+        android.telephony.ServiceState $r2;
+        boolean $z0, $z1;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r2 = virtualinvoke $r1.<com.android.internal.telephony.gsm.GSMPhone: android.telephony.ServiceState getServiceState()>();
+
+        $z0 = virtualinvoke $r2.<android.telephony.ServiceState: boolean getRoaming()>();
+
+        $z1 = virtualinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean getAnyDataEnabled()>();
+
+        if $z1 == 0 goto label2;
+
+        if $z0 == 0 goto label1;
+
+        $z0 = virtualinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean getDataOnRoamingEnabled()>();
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    private boolean isEnabled(java.lang.String)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        java.lang.String $r1;
+        boolean $z0;
+        boolean[] $r2;
+        int $i0;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean equals(java.lang.CharSequence,java.lang.CharSequence)>($r1, "default");
+
+        if $z0 == 0 goto label1;
+
+        $r2 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean[] dataEnabled>;
+
+        $i0 = <com.android.internal.telephony.gsm.DataConnectionTracker: int APN_DEFAULT_ID>;
+
+        $z0 = $r2[$i0];
+
+        return $z0;
+
+     label1:
+        $z0 = staticinvoke <android.text.TextUtils: boolean equals(java.lang.CharSequence,java.lang.CharSequence)>($r1, "mms");
+
+        if $z0 == 0 goto label2;
+
+        $r2 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean[] dataEnabled>;
+
+        $i0 = <com.android.internal.telephony.gsm.DataConnectionTracker: int APN_MMS_ID>;
+
+        $z0 = $r2[$i0];
+
+        return $z0;
+
+     label2:
+        return 0;
+    }
+
+    private void log(java.lang.String)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        java.lang.String $r1;
+        java.lang.StringBuilder $r2;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[DataConnectionTracker] ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GSM", $r1);
+
+        return;
+    }
+
+    private void notifyDefaultData(java.lang.String)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        java.lang.String $r1;
+        com.android.internal.telephony.gsm.DataConnectionTracker$State $r2;
+        com.android.internal.telephony.gsm.GSMPhone $r3;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 := @parameter0: java.lang.String;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void setupDnsProperties()>();
+
+        $r2 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State CONNECTED>;
+
+        virtualinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void setState(com.android.internal.telephony.gsm.DataConnectionTracker$State)>($r2);
+
+        $r3 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        virtualinvoke $r3.<com.android.internal.telephony.gsm.GSMPhone: void notifyDataConnection(java.lang.String)>($r1);
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void startNetStatPoll()>();
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: long nextReconnectDelay> = 5000L;
+
+        return;
+    }
+
+    private void notifyNoData(com.android.internal.telephony.gsm.PdpConnection$PdpFailCause)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        com.android.internal.telephony.gsm.PdpConnection$PdpFailCause $r1;
+        com.android.internal.telephony.gsm.DataConnectionTracker$State $r2;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 := @parameter0: com.android.internal.telephony.gsm.PdpConnection$PdpFailCause;
+
+        $r2 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State FAILED>;
+
+        virtualinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void setState(com.android.internal.telephony.gsm.DataConnectionTracker$State)>($r2);
+
+        return;
+    }
+
+    private void onApnChanged()
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        com.android.internal.telephony.gsm.DataConnectionTracker$State $r1, $r2;
+        boolean $z0;
+        com.android.internal.telephony.gsm.GSMPhone $r3;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$State state>;
+
+        $r2 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State IDLE>;
+
+        if $r1 == $r2 goto label2;
+
+        $r1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$State state>;
+
+        $r2 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State FAILED>;
+
+        if $r1 == $r2 goto label2;
+
+        $z0 = 1;
+
+     label1:
+        $r3 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        virtualinvoke $r3.<com.android.internal.telephony.gsm.GSMPhone: boolean updateCurrentCarrierInProvider()>();
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void createAllApnList()>();
+
+        $r1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$State state>;
+
+        $r2 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State DISCONNECTING>;
+
+        if $r1 == $r2 goto label3;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void cleanUpConnection(boolean,java.lang.String)>($z0, "apnChanged");
+
+        if $z0 != 0 goto label4;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean trySetupData(java.lang.String)>("apnChanged");
+
+        return;
+
+     label2:
+        $z0 = 0;
+
+        goto label1;
+
+     label3:
+        return;
+
+     label4:
+        return;
+    }
+
+    private void onGprsAttached()
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        com.android.internal.telephony.gsm.DataConnectionTracker$State $r1, $r2;
+        com.android.internal.telephony.gsm.GSMPhone $r3;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$State state>;
+
+        $r2 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State CONNECTED>;
+
+        if $r1 != $r2 goto label1;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void startNetStatPoll()>();
+
+        $r3 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        virtualinvoke $r3.<com.android.internal.telephony.gsm.GSMPhone: void notifyDataConnection(java.lang.String)>("gprsAttached");
+
+        return;
+
+     label1:
+        $r1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$State state>;
+
+        $r2 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State FAILED>;
+
+        if $r1 != $r2 goto label2;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void cleanUpConnection(boolean,java.lang.String)>(0, "gprsAttached");
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: long nextReconnectDelay> = 5000L;
+
+     label2:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean trySetupData(java.lang.String)>("gprsAttached");
+
+        return;
+    }
+
+    private void onGprsDetached()
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        com.android.internal.telephony.gsm.GSMPhone $r1;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void stopNetStatPoll()>();
+
+        $r1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        virtualinvoke $r1.<com.android.internal.telephony.gsm.GSMPhone: void notifyDataConnection(java.lang.String)>("gprsDetached");
+
+        return;
+    }
+
+    private void onPdpStateChanged(android.os.AsyncResult, boolean)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        android.os.AsyncResult $r1;
+        boolean $z0, $z1;
+        java.lang.Object $r2;
+        java.util.ArrayList $r3;
+        java.lang.Throwable $r4;
+        com.android.internal.telephony.gsm.DataConnectionTracker$State $r5, $r6;
+        int $i0;
+        com.android.internal.telephony.gsm.GSMPhone $r7;
+        android.telephony.CellLocation $r8;
+        android.telephony.gsm.GsmCellLocation $r9;
+        android.util.EventLog$List $r10;
+        java.lang.Object[] $r11;
+        java.lang.Integer $r12;
+        android.telephony.TelephonyManager $r13;
+        com.android.internal.telephony.gsm.CommandsInterface $r14;
+        android.os.Message $r15;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 := @parameter0: android.os.AsyncResult;
+
+        $z0 := @parameter1: boolean;
+
+        $r2 = $r1.<android.os.AsyncResult: java.lang.Object result>;
+
+        $r3 = (java.util.ArrayList) $r2;
+
+        $r3 = (java.util.ArrayList) $r3;
+
+        $r4 = $r1.<android.os.AsyncResult: java.lang.Throwable exception>;
+
+        if $r4 == null goto label1;
+
+        return;
+
+     label1:
+        $r5 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$State state>;
+
+        $r6 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State CONNECTED>;
+
+        if $r5 != $r6 goto label3;
+
+        $i0 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: int cidActive>;
+
+        $z1 = specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean pdpStatesHasCID(java.util.ArrayList,int)>($r3, $i0);
+
+        if $z1 != 0 goto label3;
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("GSM", "PDP connection has dropped. Reconnecting");
+
+        $i0 = -1;
+
+        $r7 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r8 = virtualinvoke $r7.<com.android.internal.telephony.gsm.GSMPhone: android.telephony.CellLocation getCellLocation()>();
+
+        $r9 = (android.telephony.gsm.GsmCellLocation) $r8;
+
+        if $r9 == null goto label2;
+
+        $i0 = virtualinvoke $r9.<android.telephony.gsm.GsmCellLocation: int getCid()>();
+
+     label2:
+        $r10 = new android.util.EventLog$List;
+
+        $r11 = newarray (java.lang.Object)[2];
+
+        $r12 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r11[0] = $r12;
+
+        $r13 = staticinvoke <android.telephony.TelephonyManager: android.telephony.TelephonyManager getDefault()>();
+
+        $i0 = virtualinvoke $r13.<android.telephony.TelephonyManager: int getNetworkType()>();
+
+        $r12 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r11[1] = $r12;
+
+        specialinvoke $r10.<android.util.EventLog$List: void <init>(java.lang.Object[])>($r11);
+
+        staticinvoke <android.util.EventLog: int writeEvent(int,android.util.EventLog$List)>(50109, $r10);
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void cleanUpConnection(boolean,java.lang.String)>(1, null);
+
+        return;
+
+     label3:
+        $r5 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$State state>;
+
+        $r6 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State CONNECTED>;
+
+        if $r5 != $r6 goto label6;
+
+        $i0 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: int cidActive>;
+
+        $z1 = specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean pdpStatesHasActiveCID(java.util.ArrayList,int)>($r3, $i0);
+
+        if $z1 != 0 goto label7;
+
+        if $z0 != 0 goto label4;
+
+        $r7 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r14 = $r7.<com.android.internal.telephony.gsm.GSMPhone: com.android.internal.telephony.gsm.CommandsInterface mCM>;
+
+        $r15 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(11);
+
+        interfaceinvoke $r14.<com.android.internal.telephony.gsm.CommandsInterface: void getPDPContextList(android.os.Message)>($r15);
+
+        return;
+
+     label4:
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("GSM", "PDP connection has dropped (active=false case).  Reconnecting");
+
+        $i0 = -1;
+
+        $r7 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r8 = virtualinvoke $r7.<com.android.internal.telephony.gsm.GSMPhone: android.telephony.CellLocation getCellLocation()>();
+
+        $r9 = (android.telephony.gsm.GsmCellLocation) $r8;
+
+        if $r9 == null goto label5;
+
+        $i0 = virtualinvoke $r9.<android.telephony.gsm.GsmCellLocation: int getCid()>();
+
+     label5:
+        $r10 = new android.util.EventLog$List;
+
+        $r11 = newarray (java.lang.Object)[2];
+
+        $r12 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r11[0] = $r12;
+
+        $r13 = staticinvoke <android.telephony.TelephonyManager: android.telephony.TelephonyManager getDefault()>();
+
+        $i0 = virtualinvoke $r13.<android.telephony.TelephonyManager: int getNetworkType()>();
+
+        $r12 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r11[1] = $r12;
+
+        specialinvoke $r10.<android.util.EventLog$List: void <init>(java.lang.Object[])>($r11);
+
+        staticinvoke <android.util.EventLog: int writeEvent(int,android.util.EventLog$List)>(50109, $r10);
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void cleanUpConnection(boolean,java.lang.String)>(1, null);
+
+        return;
+
+     label6:
+        return;
+
+     label7:
+        return;
+    }
+
+    private java.lang.String[] parseTypes(java.lang.String)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        java.lang.String $r1;
+        boolean $z0;
+        java.lang.String[] $r2;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 := @parameter0: java.lang.String;
+
+        if $r1 == null goto label1;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        $r2 = newarray (java.lang.String)[1];
+
+        $r2[0] = "*";
+
+        return $r2;
+
+     label2:
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String[] split(java.lang.String)>(",");
+
+        return $r2;
+    }
+
+    private boolean pdpStatesHasActiveCID(java.util.ArrayList, int)
+    {
+        java.util.ArrayList $r0;
+        int $i0, $i1, $i2, $i3;
+        com.android.internal.telephony.gsm.DataConnectionTracker $r1;
+        java.lang.Object $r2;
+        com.android.internal.telephony.gsm.PDPContextState $r3;
+        boolean z0;
+
+        $r1 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r0 := @parameter0: java.util.ArrayList;
+
+        $i0 := @parameter1: int;
+
+        $i1 = 0;
+
+        $i2 = virtualinvoke $r0.<java.util.ArrayList: int size()>();
+
+     label1:
+        if $i1 >= $i2 goto label3;
+
+        $r2 = virtualinvoke $r0.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r3 = (com.android.internal.telephony.gsm.PDPContextState) $r2;
+
+        $i3 = $r3.<com.android.internal.telephony.gsm.PDPContextState: int cid>;
+
+        if $i3 != $i0 goto label2;
+
+        $r2 = virtualinvoke $r0.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r3 = (com.android.internal.telephony.gsm.PDPContextState) $r2;
+
+        z0 = $r3.<com.android.internal.telephony.gsm.PDPContextState: boolean active>;
+
+        return z0;
+
+     label2:
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    private boolean pdpStatesHasCID(java.util.ArrayList, int)
+    {
+        java.util.ArrayList $r0;
+        int $i0, $i1, $i2, $i3;
+        com.android.internal.telephony.gsm.DataConnectionTracker $r1;
+        java.lang.Object $r2;
+        com.android.internal.telephony.gsm.PDPContextState $r3;
+
+        $r1 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r0 := @parameter0: java.util.ArrayList;
+
+        $i0 := @parameter1: int;
+
+        $i1 = 0;
+
+        $i2 = virtualinvoke $r0.<java.util.ArrayList: int size()>();
+
+     label1:
+        if $i1 >= $i2 goto label3;
+
+        $r2 = virtualinvoke $r0.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r3 = (com.android.internal.telephony.gsm.PDPContextState) $r2;
+
+        $i3 = $r3.<com.android.internal.telephony.gsm.PDPContextState: int cid>;
+
+        if $i3 != $i0 goto label2;
+
+        return 1;
+
+     label2:
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    private void reconnectAfterFail(com.android.internal.telephony.gsm.PdpConnection$PdpFailCause, java.lang.String)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        com.android.internal.telephony.gsm.PdpConnection$PdpFailCause $r1;
+        java.lang.String $r2, $r7;
+        android.content.Intent $r3;
+        com.android.internal.telephony.gsm.DataConnectionTracker$State $r4, $r5;
+        java.lang.StringBuilder $r6;
+        long $l0, $l1;
+        com.android.internal.telephony.gsm.GSMPhone $r8;
+        android.content.Context $r9;
+        java.lang.Object $r10;
+        android.app.AlarmManager $r11;
+        android.app.PendingIntent $r12;
+        byte $b2;
+        boolean $z0;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 := @parameter0: com.android.internal.telephony.gsm.PdpConnection$PdpFailCause;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r4 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$State state>;
+
+        $r5 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State FAILED>;
+
+        if $r4 != $r5 goto label3;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PDP activate failed. Scheduling next attempt for ");
+
+        $l0 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: long nextReconnectDelay>;
+
+        $l0 = $l0 / 1000L;
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("s");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GSM", $r7);
+
+        $r8 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r9 = virtualinvoke $r8.<com.android.internal.telephony.PhoneBase: android.content.Context getContext()>();
+
+        $r10 = virtualinvoke $r9.<android.content.Context: java.lang.Object getSystemService(java.lang.String)>("alarm");
+
+        $r11 = (android.app.AlarmManager) $r10;
+
+        $r3 = new android.content.Intent;
+
+        specialinvoke $r3.<android.content.Intent: void <init>(java.lang.String)>("com.android.internal.telephony.gprs-reconnect");
+
+        virtualinvoke $r3.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("reason", $r2);
+
+        $r8 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r9 = virtualinvoke $r8.<com.android.internal.telephony.PhoneBase: android.content.Context getContext()>();
+
+        $r12 = staticinvoke <android.app.PendingIntent: android.app.PendingIntent getBroadcast(android.content.Context,int,android.content.Intent,int)>($r9, 0, $r3, 0);
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: android.app.PendingIntent mReconnectIntent> = $r12;
+
+        $l0 = staticinvoke <android.os.SystemClock: long elapsedRealtime()>();
+
+        $l1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: long nextReconnectDelay>;
+
+        $l0 = $l0 + $l1;
+
+        $r12 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: android.app.PendingIntent mReconnectIntent>;
+
+        virtualinvoke $r11.<android.app.AlarmManager: void set(int,long,android.app.PendingIntent)>(2, $l0, $r12);
+
+        $l0 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: long nextReconnectDelay>;
+
+        $l0 = $l0 * 2L;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: long nextReconnectDelay> = $l0;
+
+        $l0 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: long nextReconnectDelay>;
+
+        $b2 = $l0 cmp 3600000L;
+
+        if $b2 <= 0 goto label1;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: long nextReconnectDelay> = 3600000L;
+
+     label1:
+        $z0 = specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean shouldPostNotification(com.android.internal.telephony.gsm.PdpConnection$PdpFailCause)>($r1);
+
+        if $z0 != 0 goto label2;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GSM", "NOT Posting GPRS Unavailable notification -- likely transient error");
+
+        return;
+
+     label2:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void notifyNoData(com.android.internal.telephony.gsm.PdpConnection$PdpFailCause)>($r1);
+
+        return;
+
+     label3:
+        return;
+    }
+
+    private void resetPollStats()
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: long txPkts> = -1L;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: long rxPkts> = -1L;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: long sentSinceLastRecv> = 0L;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: int mNoRecvPollCount> = 0;
+
+        return;
+    }
+
+    private void restartRadio()
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        com.android.internal.telephony.gsm.GSMPhone $r1;
+        com.android.internal.telephony.gsm.CommandsInterface $r2;
+        java.lang.String $r3;
+        int $i0;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GSM", "************TURN OFF RADIO**************");
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void cleanUpConnection(boolean,java.lang.String)>(1, "radioTurnedOff");
+
+        $r1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r2 = $r1.<com.android.internal.telephony.gsm.GSMPhone: com.android.internal.telephony.gsm.CommandsInterface mCM>;
+
+        interfaceinvoke $r2.<com.android.internal.telephony.gsm.CommandsInterface: void setRadioPower(boolean,android.os.Message)>(0, null);
+
+        $r3 = staticinvoke <android.os.SystemProperties: java.lang.String get(java.lang.String,java.lang.String)>("net.ppp.reset-by-timeout", "0");
+
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r3);
+
+        $i0 = $i0 + 1;
+
+        $r3 = staticinvoke <java.lang.String: java.lang.String valueOf(int)>($i0);
+
+        staticinvoke <android.os.SystemProperties: void set(java.lang.String,java.lang.String)>("net.ppp.reset-by-timeout", $r3);
+
+        return;
+    }
+
+    private boolean retryAfterDisconnected(java.lang.String)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        java.lang.String $r1, $r2;
+        boolean $z0;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = "radioTurnedOff";
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 != 0 goto label1;
+
+        $r2 = "dataDisabled";
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 != 0 goto label1;
+
+        $r2 = "psRestrictEnabled";
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        return 1;
+    }
+
+    private void runPingTest()
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        int $i0, $i1;
+        android.content.ContentResolver $r1;
+        java.lang.String $r2, $r4;
+        java.lang.StringBuilder $r3;
+        boolean $z0;
+        java.lang.Runtime $r5;
+        java.lang.Process $r6;
+        android.os.Message $r7;
+        java.io.IOException $r8;
+        java.lang.Exception $r9;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $i0 = -1;
+
+     label1:
+        $r1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: android.content.ContentResolver mResolver>;
+
+     label2:
+        $r2 = staticinvoke <android.provider.Settings$Gservices: java.lang.String getString(android.content.ContentResolver,java.lang.String)>($r1, "pdp_watchdog_ping_address");
+
+        $r1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: android.content.ContentResolver mResolver>;
+
+        $i1 = staticinvoke <android.provider.Settings$Gservices: int getInt(android.content.ContentResolver,java.lang.String,int)>($r1, "pdp_watchdog_ping_deadline", 5);
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("pinging ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" for ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("s");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void log(java.lang.String)>($r4);
+
+     label3:
+        if $r2 == null goto label5;
+
+     label4:
+        $r4 = "0.0.0.0";
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 != 0 goto label5;
+
+        $r5 = staticinvoke <java.lang.Runtime: java.lang.Runtime getRuntime()>();
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ping -c 1 -i 1 -w ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.Runtime: java.lang.Process exec(java.lang.String)>($r2);
+
+        $i0 = virtualinvoke $r6.<java.lang.Process: int waitFor()>();
+
+     label5:
+        if $i0 != 0 goto label8;
+
+        staticinvoke <android.util.EventLog: int writeEvent(int,int)>(50103, -1);
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: int mPdpResetCount> = 0;
+
+        $r7 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(27);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r7);
+
+        return;
+
+     label6:
+        $r8 := @caughtexception;
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("GSM", "ping failed: IOException");
+
+        goto label5;
+
+     label7:
+        $r9 := @caughtexception;
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("GSM", "exception trying to ping");
+
+        goto label5;
+
+     label8:
+        $r7 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(28);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r7);
+
+        return;
+
+        catch java.io.IOException from label2 to label3 with label6;
+        catch java.io.IOException from label4 to label5 with label6;
+        catch java.lang.Exception from label1 to label3 with label7;
+        catch java.lang.Exception from label4 to label5 with label7;
+    }
+
+    private void setEnabled(java.lang.String, boolean)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        java.lang.String $r1, $r3;
+        boolean $z0, $z1;
+        java.lang.StringBuilder $r2;
+        boolean[] $r4;
+        int $i0;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $z0 := @parameter1: boolean;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("setEnabled(");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(41);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GSM", $r3);
+
+        $z1 = staticinvoke <android.text.TextUtils: boolean equals(java.lang.CharSequence,java.lang.CharSequence)>($r1, "default");
+
+        if $z1 == 0 goto label2;
+
+        $r4 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean[] dataEnabled>;
+
+        $i0 = <com.android.internal.telephony.gsm.DataConnectionTracker: int APN_DEFAULT_ID>;
+
+        $r4[$i0] = $z0;
+
+     label1:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("dataEnabled[DEFAULT_APN]=");
+
+        $r4 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean[] dataEnabled>;
+
+        $i0 = <com.android.internal.telephony.gsm.DataConnectionTracker: int APN_DEFAULT_ID>;
+
+        $z0 = $r4[$i0];
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" dataEnabled[MMS_APN]=");
+
+        $r4 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean[] dataEnabled>;
+
+        $i0 = <com.android.internal.telephony.gsm.DataConnectionTracker: int APN_MMS_ID>;
+
+        $z0 = $r4[$i0];
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r1 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GSM", $r1);
+
+        return;
+
+     label2:
+        $z1 = staticinvoke <android.text.TextUtils: boolean equals(java.lang.CharSequence,java.lang.CharSequence)>($r1, "mms");
+
+        if $z1 == 0 goto label1;
+
+        $r4 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean[] dataEnabled>;
+
+        $i0 = <com.android.internal.telephony.gsm.DataConnectionTracker: int APN_MMS_ID>;
+
+        $r4[$i0] = $z0;
+
+        goto label1;
+    }
+
+    private void setPreferredApn(int)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        int $i0;
+        android.content.ContentValues $r1;
+        boolean $z0;
+        com.android.internal.telephony.gsm.GSMPhone $r2;
+        android.content.Context $r3;
+        android.content.ContentResolver $r4;
+        android.net.Uri $r5;
+        java.lang.Integer $r6;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $i0 := @parameter0: int;
+
+        $z0 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean canSetPreferApn>;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r2 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r3 = virtualinvoke $r2.<com.android.internal.telephony.PhoneBase: android.content.Context getContext()>();
+
+        $r4 = virtualinvoke $r3.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r5 = <com.android.internal.telephony.gsm.DataConnectionTracker: android.net.Uri PREFERAPN_URI>;
+
+        virtualinvoke $r4.<android.content.ContentResolver: int delete(android.net.Uri,java.lang.String,java.lang.String[])>($r5, null, null);
+
+        if $i0 < 0 goto label2;
+
+        $r1 = new android.content.ContentValues;
+
+        specialinvoke $r1.<android.content.ContentValues: void <init>()>();
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        virtualinvoke $r1.<android.content.ContentValues: void put(java.lang.String,java.lang.Integer)>("apn_id", $r6);
+
+        $r5 = <com.android.internal.telephony.gsm.DataConnectionTracker: android.net.Uri PREFERAPN_URI>;
+
+        virtualinvoke $r4.<android.content.ContentResolver: android.net.Uri insert(android.net.Uri,android.content.ContentValues)>($r5, $r1);
+
+        return;
+
+     label2:
+        return;
+    }
+
+    private boolean setupData(java.lang.String)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        java.lang.String $r1;
+        com.android.internal.telephony.gsm.ApnSetting $r2;
+        com.android.internal.telephony.gsm.PdpConnection $r3;
+        android.os.Message $r4;
+        com.android.internal.telephony.gsm.DataConnectionTracker$State $r5;
+        com.android.internal.telephony.gsm.GSMPhone $r6;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting getNextApn()>();
+
+        if $r2 != null goto label1;
+
+        return 0;
+
+     label1:
+        $r3 = specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.PdpConnection findFreePdp()>();
+
+        if $r3 != null goto label2;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void log(java.lang.String)>("setupData: No free PdpConnection found!");
+
+        return 0;
+
+     label2:
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting mActiveApn> = $r2;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.PdpConnection mActivePdp> = $r3;
+
+        $r4 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage()>();
+
+        $r4.<android.os.Message: int what> = 1;
+
+        $r4.<android.os.Message: java.lang.Object obj> = $r1;
+
+        virtualinvoke $r3.<com.android.internal.telephony.gsm.PdpConnection: void connect(com.android.internal.telephony.gsm.ApnSetting,android.os.Message)>($r2, $r4);
+
+        $r5 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State INITING>;
+
+        virtualinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void setState(com.android.internal.telephony.gsm.DataConnectionTracker$State)>($r5);
+
+        $r6 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        virtualinvoke $r6.<com.android.internal.telephony.gsm.GSMPhone: void notifyDataConnection(java.lang.String)>($r1);
+
+        return 1;
+    }
+
+    private void setupDnsProperties()
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        java.lang.String $r1, $r4;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String[] $r2;
+        boolean $z0;
+        java.lang.StringBuilder $r3;
+        java.lang.NumberFormatException $r5;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $i0 = staticinvoke <android.os.Process: int myPid()>();
+
+        $r2 = virtualinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.lang.String[] getDnsServers(java.lang.String)>(null);
+
+        $i1 = 0;
+
+        $i2 = 0;
+
+     label01:
+        $i3 = lengthof $r2;
+
+        if $i2 >= $i3 goto label03;
+
+        $r1 = $r2[$i2];
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean equals(java.lang.CharSequence,java.lang.CharSequence)>($r1, "0.0.0.0");
+
+        if $z0 != 0 goto label02;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("net.dns");
+
+        $i3 = $i2 + 1;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.os.SystemProperties: void set(java.lang.String,java.lang.String)>($r4, $r1);
+
+        $i1 = $i1 + 1;
+
+     label02:
+        $i2 = $i2 + 1;
+
+        goto label01;
+
+     label03:
+        $i1 = $i1 + 1;
+
+     label04:
+        if $i1 > 4 goto label06;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("net.dns");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r4 = staticinvoke <android.os.SystemProperties: java.lang.String get(java.lang.String)>($r1);
+
+        $i2 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        if $i2 == 0 goto label05;
+
+        staticinvoke <android.os.SystemProperties: void set(java.lang.String,java.lang.String)>($r1, "");
+
+     label05:
+        $i1 = $i1 + 1;
+
+        goto label04;
+
+     label06:
+        $r1 = staticinvoke <android.os.SystemProperties: java.lang.String get(java.lang.String)>("net.dnschange");
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 == 0 goto label10;
+
+     label07:
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r1);
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $i0 = $i0 + 1;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.os.SystemProperties: void set(java.lang.String,java.lang.String)>("net.dnschange", $r1);
+
+     label08:
+        return;
+
+     label09:
+        $r5 := @caughtexception;
+
+        return;
+
+     label10:
+        return;
+
+        catch java.lang.NumberFormatException from label07 to label08 with label09;
+    }
+
+    private boolean shouldPostNotification(com.android.internal.telephony.gsm.PdpConnection$PdpFailCause)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        com.android.internal.telephony.gsm.PdpConnection$PdpFailCause $r1, $r2;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 := @parameter0: com.android.internal.telephony.gsm.PdpConnection$PdpFailCause;
+
+        $r2 = <com.android.internal.telephony.gsm.PdpConnection$PdpFailCause: com.android.internal.telephony.gsm.PdpConnection$PdpFailCause UNKNOWN>;
+
+        if $r1 == $r2 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    private void startDelayedRetry(com.android.internal.telephony.gsm.PdpConnection$PdpFailCause, java.lang.String)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        com.android.internal.telephony.gsm.PdpConnection$PdpFailCause $r1;
+        java.lang.String $r2, $r4;
+        android.os.Message $r3;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 := @parameter0: com.android.internal.telephony.gsm.PdpConnection$PdpFailCause;
+
+        $r2 := @parameter1: java.lang.String;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void notifyNoData(com.android.internal.telephony.gsm.PdpConnection$PdpFailCause)>($r1);
+
+        $r4 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.lang.String mRequestedApnType>;
+
+        if $r4 == "default" goto label1;
+
+        $r3 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(24);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r3);
+
+        return;
+
+     label1:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void reconnectAfterFail(com.android.internal.telephony.gsm.PdpConnection$PdpFailCause,java.lang.String)>($r1, $r2);
+
+        return;
+    }
+
+    private void startNetStatPoll()
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        com.android.internal.telephony.gsm.DataConnectionTracker$State $r1, $r2;
+        boolean $z0;
+        java.lang.Runnable $r3;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$State state>;
+
+        $r2 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State CONNECTED>;
+
+        if $r1 != $r2 goto label1;
+
+        $z0 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean mPingTestActive>;
+
+        if $z0 != 0 goto label2;
+
+        $z0 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean netStatPollEnabled>;
+
+        if $z0 != 0 goto label3;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GSM", "[DataConnection] Start poll NetStat");
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void resetPollStats()>();
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean netStatPollEnabled> = 1;
+
+        $r3 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.lang.Runnable mPollNetStat>;
+
+        interfaceinvoke $r3.<java.lang.Runnable: void run()>();
+
+        return;
+
+     label1:
+        return;
+
+     label2:
+        return;
+
+     label3:
+        return;
+    }
+
+    private void startPeriodicPdpPoll()
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        android.os.Message $r1;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        virtualinvoke $r0.<android.os.Handler: void removeMessages(int)>(7);
+
+        $r1 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(7);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessageDelayed(android.os.Message,long)>($r1, 5000L);
+
+        return;
+    }
+
+    private void stopNetStatPoll()
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        java.lang.Runnable $r1;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean netStatPollEnabled> = 0;
+
+        $r1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.lang.Runnable mPollNetStat>;
+
+        virtualinvoke $r0.<android.os.Handler: void removeCallbacks(java.lang.Runnable)>($r1);
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GSM", "[DataConnection] Stop poll NetStat");
+
+        return;
+    }
+
+    private boolean tryNextApn(com.android.internal.telephony.gsm.PdpConnection$PdpFailCause)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        com.android.internal.telephony.gsm.PdpConnection$PdpFailCause $r1, $r2;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 := @parameter0: com.android.internal.telephony.gsm.PdpConnection$PdpFailCause;
+
+        $r2 = <com.android.internal.telephony.gsm.PdpConnection$PdpFailCause: com.android.internal.telephony.gsm.PdpConnection$PdpFailCause RADIO_NOT_AVIALABLE>;
+
+        if $r1 == $r2 goto label1;
+
+        $r2 = <com.android.internal.telephony.gsm.PdpConnection$PdpFailCause: com.android.internal.telephony.gsm.PdpConnection$PdpFailCause RADIO_OFF>;
+
+        if $r1 == $r2 goto label1;
+
+        $r2 = <com.android.internal.telephony.gsm.PdpConnection$PdpFailCause: com.android.internal.telephony.gsm.PdpConnection$PdpFailCause RADIO_ERROR_RETRY>;
+
+        if $r1 == $r2 goto label1;
+
+        $r2 = <com.android.internal.telephony.gsm.PdpConnection$PdpFailCause: com.android.internal.telephony.gsm.PdpConnection$PdpFailCause NO_SIGNAL>;
+
+        if $r1 == $r2 goto label1;
+
+        $r2 = <com.android.internal.telephony.gsm.PdpConnection$PdpFailCause: com.android.internal.telephony.gsm.PdpConnection$PdpFailCause SIM_LOCKED>;
+
+        if $r1 == $r2 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    private boolean trySetupData(java.lang.String)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        java.lang.String $r1, $r3;
+        java.lang.StringBuilder $r2;
+        boolean $z0, $z1;
+        com.android.internal.telephony.gsm.GSMPhone $r4;
+        com.android.internal.telephony.test.SimulatedRadioControl $r5;
+        com.android.internal.telephony.gsm.DataConnectionTracker$State $r6, $r9;
+        com.android.internal.telephony.gsm.ServiceStateTracker $r7;
+        int $i0;
+        android.telephony.ServiceState $r8;
+        com.android.internal.telephony.gsm.SIMRecords $r10;
+        com.android.internal.telephony.Phone$State $r11, $r12;
+        java.util.ArrayList $r13;
+        com.android.internal.telephony.gsm.PdpConnection$PdpFailCause $r14;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("***trySetupData due to ");
+
+        if $r1 != null goto label2;
+
+        $r3 = "(unspecified)";
+
+     label1:
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void log(java.lang.String)>($r3);
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[DSAC DEB] trySetupData with mIsPsRestricted=");
+
+        $z0 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean mIsPsRestricted>;
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GSM", $r3);
+
+        $r4 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r5 = virtualinvoke $r4.<com.android.internal.telephony.PhoneBase: com.android.internal.telephony.test.SimulatedRadioControl getSimulatedRadioControl()>();
+
+        if $r5 == null goto label3;
+
+        $r6 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State CONNECTED>;
+
+        virtualinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void setState(com.android.internal.telephony.gsm.DataConnectionTracker$State)>($r6);
+
+        $r4 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        virtualinvoke $r4.<com.android.internal.telephony.gsm.GSMPhone: void notifyDataConnection(java.lang.String)>($r1);
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("GSM", "(fix?) We\'re on the simulator; assuming data is connected");
+
+        return 1;
+
+     label2:
+        $r3 = $r1;
+
+        goto label1;
+
+     label3:
+        $r4 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r7 = $r4.<com.android.internal.telephony.gsm.GSMPhone: com.android.internal.telephony.gsm.ServiceStateTracker mSST>;
+
+        $i0 = virtualinvoke $r7.<com.android.internal.telephony.gsm.ServiceStateTracker: int getCurrentGprsState()>();
+
+        $r4 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r8 = virtualinvoke $r4.<com.android.internal.telephony.gsm.GSMPhone: android.telephony.ServiceState getServiceState()>();
+
+        $z0 = virtualinvoke $r8.<android.telephony.ServiceState: boolean getRoaming()>();
+
+        $r6 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$State state>;
+
+        $r9 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State IDLE>;
+
+        if $r6 == $r9 goto label4;
+
+        $r6 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$State state>;
+
+        $r9 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State SCANNING>;
+
+        if $r6 != $r9 goto label8;
+
+     label4:
+        if $i0 == 0 goto label5;
+
+        $z1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean noAutoAttach>;
+
+        if $z1 == 0 goto label8;
+
+     label5:
+        $r4 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r10 = $r4.<com.android.internal.telephony.gsm.GSMPhone: com.android.internal.telephony.gsm.SIMRecords mSIMRecords>;
+
+        $z1 = virtualinvoke $r10.<com.android.internal.telephony.gsm.SIMRecords: boolean getRecordsLoaded()>();
+
+        if $z1 == 0 goto label8;
+
+        $r4 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r11 = virtualinvoke $r4.<com.android.internal.telephony.gsm.GSMPhone: com.android.internal.telephony.Phone$State getState()>();
+
+        $r12 = <com.android.internal.telephony.Phone$State: com.android.internal.telephony.Phone$State IDLE>;
+
+        if $r11 != $r12 goto label8;
+
+        $z1 = specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean isDataAllowed()>();
+
+        if $z1 == 0 goto label8;
+
+        $z1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean mIsPsRestricted>;
+
+        if $z1 != 0 goto label8;
+
+        $r6 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$State state>;
+
+        $r9 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State IDLE>;
+
+        if $r6 != $r9 goto label7;
+
+        $r13 = specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.util.ArrayList buildWaitingApns()>();
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.util.ArrayList waitingApns> = $r13;
+
+        $r13 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.util.ArrayList waitingApns>;
+
+        $z0 = virtualinvoke $r13.<java.util.ArrayList: boolean isEmpty()>();
+
+        if $z0 == 0 goto label6;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void log(java.lang.String)>("No APN found");
+
+        $r14 = <com.android.internal.telephony.gsm.PdpConnection$PdpFailCause: com.android.internal.telephony.gsm.PdpConnection$PdpFailCause BAD_APN>;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void notifyNoData(com.android.internal.telephony.gsm.PdpConnection$PdpFailCause)>($r14);
+
+        return 0;
+
+     label6:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Create from allApns : ");
+
+        $r13 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.util.ArrayList allApns>;
+
+        $r3 = specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.lang.String apnListToString(java.util.ArrayList)>($r13);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void log(java.lang.String)>($r3);
+
+     label7:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Setup watingApns : ");
+
+        $r13 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.util.ArrayList waitingApns>;
+
+        $r3 = specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.lang.String apnListToString(java.util.ArrayList)>($r13);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void log(java.lang.String)>($r3);
+
+        $z0 = specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean setupData(java.lang.String)>($r1);
+
+        return $z0;
+
+     label8:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("trySetupData: Not ready for data:  dataState=");
+
+        $r6 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$State state>;
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r6);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" gprsState=");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" sim=");
+
+        $r4 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r10 = $r4.<com.android.internal.telephony.gsm.GSMPhone: com.android.internal.telephony.gsm.SIMRecords mSIMRecords>;
+
+        $z1 = virtualinvoke $r10.<com.android.internal.telephony.gsm.SIMRecords: boolean getRecordsLoaded()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z1);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" UMTS=");
+
+        $r4 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r7 = $r4.<com.android.internal.telephony.gsm.GSMPhone: com.android.internal.telephony.gsm.ServiceStateTracker mSST>;
+
+        $z1 = virtualinvoke $r7.<com.android.internal.telephony.gsm.ServiceStateTracker: boolean isConcurrentVoiceAndData()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z1);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" phoneState=");
+
+        $r4 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r11 = virtualinvoke $r4.<com.android.internal.telephony.gsm.GSMPhone: com.android.internal.telephony.Phone$State getState()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r11);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" dataEnabled=");
+
+        $z1 = virtualinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean getAnyDataEnabled()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z1);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" roaming=");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" dataOnRoamingEnable=");
+
+        $z0 = virtualinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean getDataOnRoamingEnabled()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ps restricted=");
+
+        $z0 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean mIsPsRestricted>;
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r1 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void log(java.lang.String)>($r1);
+
+        return 0;
+    }
+
+    public void cleanConnectionBeforeRadioOff()
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void cleanUpConnection(boolean,java.lang.String)>(1, "radioTurnedOff");
+
+        return;
+    }
+
+    int disableApnType(java.lang.String)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        java.lang.String $r1, $r3;
+        java.lang.StringBuilder $r2;
+        boolean $z0;
+        boolean[] $r4;
+        int $i0;
+        android.os.Message $r5;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("disableApnType(");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GSM", $r3);
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean equals(java.lang.CharSequence,java.lang.CharSequence)>($r1, "mms");
+
+        if $z0 == 0 goto label3;
+
+        virtualinvoke $r0.<android.os.Handler: void removeMessages(int)>(24);
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void setEnabled(java.lang.String,boolean)>($r1, 0);
+
+        $z0 = specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean isApnTypeActive(java.lang.String)>("default");
+
+        if $z0 == 0 goto label2;
+
+        $r4 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean[] dataEnabled>;
+
+        $i0 = <com.android.internal.telephony.gsm.DataConnectionTracker: int APN_DEFAULT_ID>;
+
+        $z0 = $r4[$i0];
+
+        if $z0 == 0 goto label1;
+
+        return 0;
+
+     label1:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void cleanUpConnection(boolean,java.lang.String)>(1, "dataDisabled");
+
+        return 1;
+
+     label2:
+        $r5 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(24);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r5);
+
+        return 1;
+
+     label3:
+        return 3;
+    }
+
+    int enableApnType(java.lang.String)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        java.lang.String $r1, $r3;
+        boolean $z0;
+        java.lang.StringBuilder $r2;
+        android.os.Message $r4;
+        int $i0;
+        long $l1;
+        com.android.internal.telephony.gsm.DataConnectionTracker$State $r5, $r6;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean equals(java.lang.CharSequence,java.lang.CharSequence)>($r1, "mms");
+
+        if $z0 != 0 goto label1;
+
+        return 3;
+
+     label1:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("enableApnType(");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GSM", $r3);
+
+        $z0 = specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean isApnTypeActive(java.lang.String)>($r1);
+
+        if $z0 == 0 goto label3;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void setEnabled(java.lang.String,boolean)>($r1, 1);
+
+        virtualinvoke $r0.<android.os.Handler: void removeMessages(int)>(24);
+
+        $r4 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(24);
+
+        $i0 = specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: int getRestoreDefaultApnDelay()>();
+
+        $l1 = (long) $i0;
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessageDelayed(android.os.Message,long)>($r4, $l1);
+
+        $r5 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$State state>;
+
+        $r6 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State INITING>;
+
+        if $r5 != $r6 goto label2;
+
+        return 1;
+
+     label2:
+        $r5 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$State state>;
+
+        $r6 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State CONNECTED>;
+
+        if $r5 != $r6 goto label3;
+
+        return 0;
+
+     label3:
+        $z0 = specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean isApnTypeAvailable(java.lang.String)>($r1);
+
+        if $z0 != 0 goto label4;
+
+        return 2;
+
+     label4:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void setEnabled(java.lang.String,boolean)>($r1, 1);
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.lang.String mRequestedApnType> = $r1;
+
+        $r4 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(23);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r4);
+
+        return 1;
+    }
+
+    java.lang.String getActiveApnString()
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        com.android.internal.telephony.gsm.ApnSetting $r1;
+        java.lang.String r2;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting mActiveApn>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting mActiveApn>;
+
+        r2 = $r1.<com.android.internal.telephony.gsm.ApnSetting: java.lang.String apn>;
+
+        return r2;
+
+     label1:
+        return null;
+    }
+
+    java.lang.String[] getActiveApnTypes()
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        com.android.internal.telephony.gsm.ApnSetting $r1;
+        java.lang.String[] $r2;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting mActiveApn>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting mActiveApn>;
+
+        $r2 = $r1.<com.android.internal.telephony.gsm.ApnSetting: java.lang.String[] types>;
+
+        return $r2;
+
+     label1:
+        $r2 = newarray (java.lang.String)[1];
+
+        $r2[0] = "default";
+
+        return $r2;
+    }
+
+    public java.util.ArrayList getAllPdps()
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        java.util.ArrayList $r1;
+        java.lang.Object $r2;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.util.ArrayList pdpList>;
+
+        $r2 = virtualinvoke $r1.<java.util.ArrayList: java.lang.Object clone()>();
+
+        $r1 = (java.util.ArrayList) $r2;
+
+        return $r1;
+    }
+
+    public boolean getAnyDataEnabled()
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        boolean[] $r1;
+        int $i0;
+        boolean $z0;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean[] dataEnabled>;
+
+        $i0 = <com.android.internal.telephony.gsm.DataConnectionTracker: int APN_DEFAULT_ID>;
+
+        $z0 = $r1[$i0];
+
+        if $z0 != 0 goto label1;
+
+        $r1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean[] dataEnabled>;
+
+        $i0 = <com.android.internal.telephony.gsm.DataConnectionTracker: int APN_MMS_ID>;
+
+        $z0 = $r1[$i0];
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    public boolean getDataEnabled()
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        int $i0;
+        boolean[] $r1;
+        boolean $z0;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean[] dataEnabled>;
+
+        $i0 = <com.android.internal.telephony.gsm.DataConnectionTracker: int APN_DEFAULT_ID>;
+
+        $z0 = $r1[$i0];
+
+        return $z0;
+    }
+
+    public boolean getDataOnRoamingEnabled()
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        com.android.internal.telephony.gsm.GSMPhone $r1;
+        android.content.Context $r2;
+        android.content.ContentResolver $r3;
+        int $i0;
+        android.provider.Settings$SettingNotFoundException $r4;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+     label1:
+        $r2 = virtualinvoke $r1.<com.android.internal.telephony.PhoneBase: android.content.Context getContext()>();
+
+        $r3 = virtualinvoke $r2.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $i0 = staticinvoke <android.provider.Settings$Secure: int getInt(android.content.ContentResolver,java.lang.String)>($r3, "data_roaming");
+
+     label2:
+        if $i0 <= 0 goto label3;
+
+        return 1;
+
+     label3:
+        return 0;
+
+     label4:
+        $r4 := @caughtexception;
+
+        return 0;
+
+        catch android.provider.Settings$SettingNotFoundException from label1 to label2 with label4;
+    }
+
+    java.lang.String[] getDnsServers(java.lang.String)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        java.lang.String $r1;
+        com.android.internal.telephony.gsm.PdpConnection $r2;
+        com.android.internal.telephony.gsm.ApnSetting $r3;
+        boolean $z0;
+        java.lang.String[] $r4;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.PdpConnection mActivePdp>;
+
+        if $r2 == null goto label2;
+
+        if $r1 == null goto label1;
+
+        $r3 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting mActiveApn>;
+
+        $z0 = virtualinvoke $r3.<com.android.internal.telephony.gsm.ApnSetting: boolean canHandleType(java.lang.String)>($r1);
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        $r2 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.PdpConnection mActivePdp>;
+
+        $r4 = virtualinvoke $r2.<com.android.internal.telephony.gsm.PdpConnection: java.lang.String[] getDnsServers()>();
+
+        return $r4;
+
+     label2:
+        return null;
+    }
+
+    java.lang.String getGateway(java.lang.String)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        java.lang.String $r1;
+        com.android.internal.telephony.gsm.PdpConnection $r2;
+        com.android.internal.telephony.gsm.ApnSetting $r3;
+        boolean $z0;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.PdpConnection mActivePdp>;
+
+        if $r2 == null goto label2;
+
+        if $r1 == null goto label1;
+
+        $r3 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting mActiveApn>;
+
+        $z0 = virtualinvoke $r3.<com.android.internal.telephony.gsm.ApnSetting: boolean canHandleType(java.lang.String)>($r1);
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        $r2 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.PdpConnection mActivePdp>;
+
+        $r1 = virtualinvoke $r2.<com.android.internal.telephony.gsm.PdpConnection: java.lang.String getGatewayAddress()>();
+
+        return $r1;
+
+     label2:
+        return null;
+    }
+
+    java.lang.String getInterfaceName(java.lang.String)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        java.lang.String $r1;
+        com.android.internal.telephony.gsm.PdpConnection $r2;
+        com.android.internal.telephony.gsm.ApnSetting $r3;
+        boolean $z0;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.PdpConnection mActivePdp>;
+
+        if $r2 == null goto label2;
+
+        if $r1 == null goto label1;
+
+        $r3 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting mActiveApn>;
+
+        $z0 = virtualinvoke $r3.<com.android.internal.telephony.gsm.ApnSetting: boolean canHandleType(java.lang.String)>($r1);
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        $r2 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.PdpConnection mActivePdp>;
+
+        $r1 = virtualinvoke $r2.<com.android.internal.telephony.gsm.PdpConnection: java.lang.String getInterface()>();
+
+        return $r1;
+
+     label2:
+        return null;
+    }
+
+    java.lang.String getIpAddress(java.lang.String)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        java.lang.String $r1;
+        com.android.internal.telephony.gsm.PdpConnection $r2;
+        com.android.internal.telephony.gsm.ApnSetting $r3;
+        boolean $z0;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.PdpConnection mActivePdp>;
+
+        if $r2 == null goto label2;
+
+        if $r1 == null goto label1;
+
+        $r3 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting mActiveApn>;
+
+        $z0 = virtualinvoke $r3.<com.android.internal.telephony.gsm.ApnSetting: boolean canHandleType(java.lang.String)>($r1);
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        $r2 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.PdpConnection mActivePdp>;
+
+        $r1 = virtualinvoke $r2.<com.android.internal.telephony.gsm.PdpConnection: java.lang.String getIpAddress()>();
+
+        return $r1;
+
+     label2:
+        return null;
+    }
+
+    java.lang.String getStateInString()
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        int $i0;
+        int[] $r1;
+        com.android.internal.telephony.gsm.DataConnectionTracker$State $r2;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 = <com.android.internal.telephony.gsm.DataConnectionTracker$3: int[] $SwitchMap$com$android$internal$telephony$gsm$DataConnectionTracker$State>;
+
+        $r2 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$State state>;
+
+        $i0 = virtualinvoke $r2.<java.lang.Enum: int ordinal()>();
+
+        $i0 = $r1[$i0];
+
+        lookupswitch($i0)
+        {
+            case 1: goto label2;
+            case 2: goto label3;
+            case 3: goto label4;
+            case 4: goto label5;
+            case 5: goto label6;
+            case 6: goto label7;
+            case 7: goto label8;
+            default: goto label1;
+        };
+
+     label1:
+        return "ERRO";
+
+     label2:
+        return "IDLE";
+
+     label3:
+        return "INIT";
+
+     label4:
+        return "CING";
+
+     label5:
+        return "SCAN";
+
+     label6:
+        return "CNTD";
+
+     label7:
+        return "DING";
+
+     label8:
+        return "FAIL";
+    }
+
+    public void handleMessage(android.os.Message)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        android.os.Message $r1;
+        android.util.EventLog$List $r2;
+        java.lang.String $r3, $r15;
+        int $i0, $i2;
+        com.android.internal.telephony.gsm.DataConnectionTracker$State $r4, $r5;
+        java.lang.Object $r6;
+        boolean $z0;
+        com.android.internal.telephony.gsm.GSMPhone $r7;
+        com.android.internal.telephony.test.SimulatedRadioControl $r8;
+        android.os.AsyncResult $r9;
+        java.lang.Throwable $r10;
+        boolean[] $r11;
+        long $l1;
+        com.android.internal.telephony.gsm.ApnSetting $r12;
+        com.android.internal.telephony.gsm.PdpConnection$PdpFailCause $r13, $r16;
+        java.lang.StringBuilder $r14;
+        android.telephony.CellLocation $r17;
+        android.telephony.gsm.GsmCellLocation $r18;
+        java.lang.Object[] $r19;
+        java.lang.Integer $r20;
+        android.telephony.TelephonyManager $r21;
+        java.util.ArrayList $r22;
+        com.android.internal.telephony.gsm.CommandsInterface $r23;
+        com.android.internal.telephony.gsm.ServiceStateTracker $r24;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 := @parameter0: android.os.Message;
+
+        $r3 = null;
+
+        $i0 = $r1.<android.os.Message: int what>;
+
+        lookupswitch($i0)
+        {
+            case 1: goto label17;
+            case 2: goto label01;
+            case 3: goto label13;
+            case 4: goto label02;
+            case 5: goto label05;
+            case 6: goto label31;
+            case 7: goto label33;
+            case 8: goto label01;
+            case 9: goto label01;
+            case 10: goto label01;
+            case 11: goto label32;
+            case 12: goto label15;
+            case 13: goto label01;
+            case 14: goto label34;
+            case 15: goto label35;
+            case 16: goto label01;
+            case 17: goto label01;
+            case 18: goto label01;
+            case 19: goto label09;
+            case 20: goto label01;
+            case 21: goto label11;
+            case 22: goto label08;
+            case 23: goto label04;
+            case 24: goto label07;
+            case 25: goto label29;
+            case 26: goto label10;
+            case 27: goto label38;
+            case 28: goto label39;
+            case 29: goto label40;
+            case 30: goto label41;
+            case 31: goto label42;
+            default: goto label01;
+        };
+
+     label01:
+        return;
+
+     label02:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void createAllApnList()>();
+
+        $r4 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$State state>;
+
+        $r5 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State FAILED>;
+
+        if $r4 != $r5 goto label03;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void cleanUpConnection(boolean,java.lang.String)>(0, null);
+
+     label03:
+        $r1 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,java.lang.Object)>(5, "simLoaded");
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r1);
+
+        return;
+
+     label04:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void cleanUpConnection(boolean,java.lang.String)>(1, "apnSwitched");
+
+        return;
+
+     label05:
+        $r6 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $z0 = $r6 instanceof java.lang.String;
+
+        if $z0 == 0 goto label06;
+
+        $r6 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r3 = (java.lang.String) $r6;
+
+     label06:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean trySetupData(java.lang.String)>($r3);
+
+        return;
+
+     label07:
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GSM", "Restore default APN");
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void setEnabled(java.lang.String,boolean)>("mms", 0);
+
+        $z0 = specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean isApnTypeActive(java.lang.String)>("default");
+
+        if $z0 != 0 goto label45;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void cleanUpConnection(boolean,java.lang.String)>(1, "restoreDefaultApn");
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.lang.String mRequestedApnType> = "default";
+
+        return;
+
+     label08:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean trySetupData(java.lang.String)>("roamingOff");
+
+        return;
+
+     label09:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void onGprsDetached()>();
+
+        return;
+
+     label10:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void onGprsAttached()>();
+
+        return;
+
+     label11:
+        $z0 = virtualinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean getDataOnRoamingEnabled()>();
+
+        if $z0 == 0 goto label12;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean trySetupData(java.lang.String)>("roamingOn");
+
+        return;
+
+     label12:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void log(java.lang.String)>("Tear down data connection on roaming.");
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void cleanUpConnection(boolean,java.lang.String)>(1, "roamingOn");
+
+        return;
+
+     label13:
+        $r7 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r8 = virtualinvoke $r7.<com.android.internal.telephony.PhoneBase: com.android.internal.telephony.test.SimulatedRadioControl getSimulatedRadioControl()>();
+
+        if $r8 == null goto label14;
+
+        $r4 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State CONNECTED>;
+
+        virtualinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void setState(com.android.internal.telephony.gsm.DataConnectionTracker$State)>($r4);
+
+        $r7 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        virtualinvoke $r7.<com.android.internal.telephony.gsm.GSMPhone: void notifyDataConnection(java.lang.String)>(null);
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("GSM", "We\'re on the simulator; assuming data is connected");
+
+     label14:
+        $r4 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$State state>;
+
+        $r5 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State IDLE>;
+
+        if $r4 == $r5 goto label46;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void cleanUpConnection(boolean,java.lang.String)>(1, null);
+
+        return;
+
+     label15:
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: long nextReconnectDelay> = 5000L;
+
+        $r7 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r8 = virtualinvoke $r7.<com.android.internal.telephony.PhoneBase: com.android.internal.telephony.test.SimulatedRadioControl getSimulatedRadioControl()>();
+
+        if $r8 == null goto label16;
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("GSM", "We\'re on the simulator; assuming radio off is meaningless");
+
+        return;
+
+     label16:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void log(java.lang.String)>("Radio is off and clean up all connection");
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void cleanUpConnection(boolean,java.lang.String)>(0, "radioTurnedOff");
+
+        return;
+
+     label17:
+        $r6 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r9 = (android.os.AsyncResult) $r6;
+
+        $r6 = $r9.<android.os.AsyncResult: java.lang.Object userObj>;
+
+        $z0 = $r6 instanceof java.lang.String;
+
+        if $z0 == 0 goto label18;
+
+        $r6 = $r9.<android.os.AsyncResult: java.lang.Object userObj>;
+
+        $r3 = (java.lang.String) $r6;
+
+     label18:
+        $r10 = $r9.<android.os.AsyncResult: java.lang.Throwable exception>;
+
+        if $r10 != null goto label22;
+
+        $i0 = $r1.<android.os.Message: int arg1>;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: int cidActive> = $i0;
+
+        $r11 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean[] dataEnabled>;
+
+        $i0 = <com.android.internal.telephony.gsm.DataConnectionTracker: int APN_MMS_ID>;
+
+        $z0 = $r11[$i0];
+
+        if $z0 == 0 goto label19;
+
+        virtualinvoke $r0.<android.os.Handler: void removeMessages(int)>(24);
+
+        $r1 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(24);
+
+        $i0 = specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: int getRestoreDefaultApnDelay()>();
+
+        $l1 = (long) $i0;
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessageDelayed(android.os.Message,long)>($r1, $l1);
+
+     label19:
+        $z0 = specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean isApnTypeActive(java.lang.String)>("default");
+
+        if $z0 == 0 goto label21;
+
+        staticinvoke <android.os.SystemProperties: void set(java.lang.String,java.lang.String)>("gsm.defaultpdpcontext.active", "true");
+
+        $z0 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean canSetPreferApn>;
+
+        if $z0 == 0 goto label20;
+
+        $r12 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting preferredApn>;
+
+        if $r12 != null goto label20;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GSM", "PREFERED APN is null");
+
+        $r12 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting mActiveApn>;
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting preferredApn> = $r12;
+
+        $r12 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting preferredApn>;
+
+        $i0 = $r12.<com.android.internal.telephony.gsm.ApnSetting: int id>;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void setPreferredApn(int)>($i0);
+
+     label20:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void notifyDefaultData(java.lang.String)>($r3);
+
+        return;
+
+     label21:
+        staticinvoke <android.os.SystemProperties: void set(java.lang.String,java.lang.String)>("gsm.defaultpdpcontext.active", "false");
+
+        goto label20;
+
+     label22:
+        $r6 = $r9.<android.os.AsyncResult: java.lang.Object result>;
+
+        $r13 = (com.android.internal.telephony.gsm.PdpConnection$PdpFailCause) $r6;
+
+        $r13 = (com.android.internal.telephony.gsm.PdpConnection$PdpFailCause) $r13;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PDP setup failed ");
+
+        $r14 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r13);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void log(java.lang.String)>($r15);
+
+        $r16 = <com.android.internal.telephony.gsm.PdpConnection$PdpFailCause: com.android.internal.telephony.gsm.PdpConnection$PdpFailCause BAD_APN>;
+
+        if $r13 == $r16 goto label23;
+
+        $r16 = <com.android.internal.telephony.gsm.PdpConnection$PdpFailCause: com.android.internal.telephony.gsm.PdpConnection$PdpFailCause BAD_PAP_SECRET>;
+
+        if $r13 == $r16 goto label23;
+
+        $r16 = <com.android.internal.telephony.gsm.PdpConnection$PdpFailCause: com.android.internal.telephony.gsm.PdpConnection$PdpFailCause BARRED>;
+
+        if $r13 == $r16 goto label23;
+
+        $r16 = <com.android.internal.telephony.gsm.PdpConnection$PdpFailCause: com.android.internal.telephony.gsm.PdpConnection$PdpFailCause RADIO_ERROR_RETRY>;
+
+        if $r13 == $r16 goto label23;
+
+        $r16 = <com.android.internal.telephony.gsm.PdpConnection$PdpFailCause: com.android.internal.telephony.gsm.PdpConnection$PdpFailCause SUSPENED_TEMPORARY>;
+
+        if $r13 == $r16 goto label23;
+
+        $r16 = <com.android.internal.telephony.gsm.PdpConnection$PdpFailCause: com.android.internal.telephony.gsm.PdpConnection$PdpFailCause UNKNOWN>;
+
+        if $r13 == $r16 goto label23;
+
+        $r16 = <com.android.internal.telephony.gsm.PdpConnection$PdpFailCause: com.android.internal.telephony.gsm.PdpConnection$PdpFailCause USER_AUTHENTICATION>;
+
+        if $r13 != $r16 goto label25;
+
+     label23:
+        $i0 = -1;
+
+        $r7 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r17 = virtualinvoke $r7.<com.android.internal.telephony.gsm.GSMPhone: android.telephony.CellLocation getCellLocation()>();
+
+        $r18 = (android.telephony.gsm.GsmCellLocation) $r17;
+
+        if $r18 == null goto label24;
+
+        $i0 = virtualinvoke $r18.<android.telephony.gsm.GsmCellLocation: int getCid()>();
+
+     label24:
+        $r2 = new android.util.EventLog$List;
+
+        $r19 = newarray (java.lang.Object)[3];
+
+        $i2 = virtualinvoke $r13.<java.lang.Enum: int ordinal()>();
+
+        $r20 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r19[0] = $r20;
+
+        $r20 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r19[1] = $r20;
+
+        $r21 = staticinvoke <android.telephony.TelephonyManager: android.telephony.TelephonyManager getDefault()>();
+
+        $i0 = virtualinvoke $r21.<android.telephony.TelephonyManager: int getNetworkType()>();
+
+        $r20 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r19[2] = $r20;
+
+        specialinvoke $r2.<android.util.EventLog$List: void <init>(java.lang.Object[])>($r19);
+
+        staticinvoke <android.util.EventLog: int writeEvent(int,android.util.EventLog$List)>(50105, $r2);
+
+     label25:
+        $z0 = virtualinvoke $r13.<com.android.internal.telephony.gsm.PdpConnection$PdpFailCause: boolean isPermanentFail()>();
+
+        if $z0 == 0 goto label26;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void notifyNoData(com.android.internal.telephony.gsm.PdpConnection$PdpFailCause)>($r13);
+
+     label26:
+        $z0 = specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean tryNextApn(com.android.internal.telephony.gsm.PdpConnection$PdpFailCause)>($r13);
+
+        if $z0 == 0 goto label28;
+
+        $r22 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.util.ArrayList waitingApns>;
+
+        virtualinvoke $r22.<java.util.ArrayList: java.lang.Object remove(int)>(0);
+
+        $r22 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.util.ArrayList waitingApns>;
+
+        $z0 = virtualinvoke $r22.<java.util.ArrayList: boolean isEmpty()>();
+
+        if $z0 == 0 goto label27;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void startDelayedRetry(com.android.internal.telephony.gsm.PdpConnection$PdpFailCause,java.lang.String)>($r13, $r3);
+
+        return;
+
+     label27:
+        $r4 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State SCANNING>;
+
+        virtualinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void setState(com.android.internal.telephony.gsm.DataConnectionTracker$State)>($r4);
+
+        $r1 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,java.lang.Object)>(5, $r3);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessageDelayed(android.os.Message,long)>($r1, 5000L);
+
+        return;
+
+     label28:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void startDelayedRetry(com.android.internal.telephony.gsm.PdpConnection$PdpFailCause,java.lang.String)>($r13, $r3);
+
+        return;
+
+     label29:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void log(java.lang.String)>("EVENT_DISCONNECT_DONE");
+
+        $r6 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r9 = (android.os.AsyncResult) $r6;
+
+        $r6 = $r9.<android.os.AsyncResult: java.lang.Object userObj>;
+
+        $z0 = $r6 instanceof java.lang.String;
+
+        if $z0 == 0 goto label30;
+
+        $r6 = $r9.<android.os.AsyncResult: java.lang.Object userObj>;
+
+        $r3 = (java.lang.String) $r6;
+
+     label30:
+        $r4 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State IDLE>;
+
+        virtualinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void setState(com.android.internal.telephony.gsm.DataConnectionTracker$State)>($r4);
+
+        $r7 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        virtualinvoke $r7.<com.android.internal.telephony.gsm.GSMPhone: void notifyDataConnection(java.lang.String)>($r3);
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.ApnSetting mActiveApn> = null;
+
+        $z0 = specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean retryAfterDisconnected(java.lang.String)>($r3);
+
+        if $z0 == 0 goto label47;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean trySetupData(java.lang.String)>($r3);
+
+        return;
+
+     label31:
+        $r6 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r9 = (android.os.AsyncResult) $r6;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void onPdpStateChanged(android.os.AsyncResult,boolean)>($r9, 0);
+
+        return;
+
+     label32:
+        $r6 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r9 = (android.os.AsyncResult) $r6;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void onPdpStateChanged(android.os.AsyncResult,boolean)>($r9, 1);
+
+        return;
+
+     label33:
+        $r6 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r9 = (android.os.AsyncResult) $r6;
+
+        $r4 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$State state>;
+
+        $r5 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State CONNECTED>;
+
+        if $r4 != $r5 goto label48;
+
+        $r7 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r23 = $r7.<com.android.internal.telephony.gsm.GSMPhone: com.android.internal.telephony.gsm.CommandsInterface mCM>;
+
+        $r1 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(11);
+
+        interfaceinvoke $r23.<com.android.internal.telephony.gsm.CommandsInterface: void getPDPContextList(android.os.Message)>($r1);
+
+        $r1 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(7);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessageDelayed(android.os.Message,long)>($r1, 5000L);
+
+        return;
+
+     label34:
+        $r4 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$State state>;
+
+        $r5 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State CONNECTED>;
+
+        if $r4 != $r5 goto label49;
+
+        $r7 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r24 = $r7.<com.android.internal.telephony.gsm.GSMPhone: com.android.internal.telephony.gsm.ServiceStateTracker mSST>;
+
+        $z0 = virtualinvoke $r24.<com.android.internal.telephony.gsm.ServiceStateTracker: boolean isConcurrentVoiceAndData()>();
+
+        if $z0 != 0 goto label50;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void stopNetStatPoll()>();
+
+        $r7 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        virtualinvoke $r7.<com.android.internal.telephony.gsm.GSMPhone: void notifyDataConnection(java.lang.String)>("2GVoiceCallStarted");
+
+        return;
+
+     label35:
+        $r4 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$State state>;
+
+        $r5 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State CONNECTED>;
+
+        if $r4 != $r5 goto label37;
+
+        $r7 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r24 = $r7.<com.android.internal.telephony.gsm.GSMPhone: com.android.internal.telephony.gsm.ServiceStateTracker mSST>;
+
+        $z0 = virtualinvoke $r24.<com.android.internal.telephony.gsm.ServiceStateTracker: boolean isConcurrentVoiceAndData()>();
+
+        if $z0 != 0 goto label36;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void startNetStatPoll()>();
+
+        $r7 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        virtualinvoke $r7.<com.android.internal.telephony.gsm.GSMPhone: void notifyDataConnection(java.lang.String)>("2GVoiceCallEnded");
+
+        return;
+
+     label36:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void resetPollStats()>();
+
+        return;
+
+     label37:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean trySetupData(java.lang.String)>("2GVoiceCallEnded");
+
+        return;
+
+     label38:
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean mPingTestActive> = 0;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void startNetStatPoll()>();
+
+        return;
+
+     label39:
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean mPingTestActive> = 0;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void doRecovery()>();
+
+        return;
+
+     label40:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void onApnChanged()>();
+
+        return;
+
+     label41:
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[DSAC DEB] EVENT_PS_RESTRICT_ENABLED ");
+
+        $z0 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean mIsPsRestricted>;
+
+        $r14 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r3 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GSM", $r3);
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void stopNetStatPoll()>();
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean mIsPsRestricted> = 1;
+
+        return;
+
+     label42:
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[DSAC DEB] EVENT_PS_RESTRICT_DISABLED ");
+
+        $z0 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean mIsPsRestricted>;
+
+        $r14 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r3 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GSM", $r3);
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean mIsPsRestricted> = 0;
+
+        $r4 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$State state>;
+
+        $r5 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State CONNECTED>;
+
+        if $r4 != $r5 goto label43;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void startNetStatPoll()>();
+
+        return;
+
+     label43:
+        $r4 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$State state>;
+
+        $r5 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State FAILED>;
+
+        if $r4 != $r5 goto label44;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void cleanUpConnection(boolean,java.lang.String)>(0, "psRestrictEnabled");
+
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: long nextReconnectDelay> = 5000L;
+
+     label44:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean trySetupData(java.lang.String)>("psRestrictEnabled");
+
+        return;
+
+     label45:
+        return;
+
+     label46:
+        return;
+
+     label47:
+        return;
+
+     label48:
+        return;
+
+     label49:
+        return;
+
+     label50:
+        return;
+    }
+
+    boolean isDataConnectionAsDesired()
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        com.android.internal.telephony.gsm.DataConnectionTracker$State $r1, $r6;
+        com.android.internal.telephony.gsm.GSMPhone $r2;
+        android.telephony.ServiceState $r3;
+        boolean $z0, $z1;
+        com.android.internal.telephony.gsm.SIMRecords $r4;
+        com.android.internal.telephony.gsm.ServiceStateTracker $r5;
+        int $i0;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r2 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r3 = virtualinvoke $r2.<com.android.internal.telephony.gsm.GSMPhone: android.telephony.ServiceState getServiceState()>();
+
+        $z0 = virtualinvoke $r3.<android.telephony.ServiceState: boolean getRoaming()>();
+
+        $r2 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r4 = $r2.<com.android.internal.telephony.gsm.GSMPhone: com.android.internal.telephony.gsm.SIMRecords mSIMRecords>;
+
+        $z1 = virtualinvoke $r4.<com.android.internal.telephony.gsm.SIMRecords: boolean getRecordsLoaded()>();
+
+        if $z1 == 0 goto label3;
+
+        $r2 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r5 = $r2.<com.android.internal.telephony.gsm.GSMPhone: com.android.internal.telephony.gsm.ServiceStateTracker mSST>;
+
+        $i0 = virtualinvoke $r5.<com.android.internal.telephony.gsm.ServiceStateTracker: int getCurrentGprsState()>();
+
+        if $i0 != 0 goto label3;
+
+        if $z0 == 0 goto label1;
+
+        $z0 = virtualinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean getDataOnRoamingEnabled()>();
+
+        if $z0 == 0 goto label3;
+
+     label1:
+        $z0 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean mIsWifiConnected>;
+
+        if $z0 != 0 goto label3;
+
+        $z0 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean mIsPsRestricted>;
+
+        if $z0 != 0 goto label3;
+
+        $r6 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$State state>;
+
+        $r1 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State CONNECTED>;
+
+        if $r6 != $r1 goto label2;
+
+        return 1;
+
+     label2:
+        return 0;
+
+     label3:
+        return 1;
+    }
+
+    public boolean setDataEnabled(boolean)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        boolean $z0, $z1;
+        java.lang.StringBuilder $r1;
+        java.lang.String $r2;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $z0 := @parameter0: boolean;
+
+        $z1 = specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean isEnabled(java.lang.String)>("default");
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("setDataEnabled(");
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") isEnabled=");
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z1);
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GSM", $r2);
+
+        if $z1 != 0 goto label1;
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void setEnabled(java.lang.String,boolean)>("default", 1);
+
+        $z0 = specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean trySetupData(java.lang.String)>("dataEnabled");
+
+        return $z0;
+
+     label1:
+        if $z0 != 0 goto label4;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void setEnabled(java.lang.String,boolean)>("default", 0);
+
+        $z0 = specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean isApnTypeActive(java.lang.String)>("mms");
+
+        if $z0 == 0 goto label2;
+
+        $z0 = specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean isEnabled(java.lang.String)>("mms");
+
+        if $z0 != 0 goto label3;
+
+     label2:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void cleanUpConnection(boolean,java.lang.String)>(1, "dataDisabled");
+
+        return 1;
+
+     label3:
+        return 0;
+
+     label4:
+        return 1;
+    }
+
+    public void setDataOnRoamingEnabled(boolean)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        boolean $z0, $z1;
+        com.android.internal.telephony.gsm.GSMPhone $r1;
+        android.content.Context $r2;
+        android.content.ContentResolver $r3;
+        byte $b0;
+        android.telephony.ServiceState $r4;
+        android.os.Message $r5;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $z0 := @parameter0: boolean;
+
+        $z1 = virtualinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: boolean getDataOnRoamingEnabled()>();
+
+        if $z1 == $z0 goto label2;
+
+        $r1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r2 = virtualinvoke $r1.<com.android.internal.telephony.PhoneBase: android.content.Context getContext()>();
+
+        $r3 = virtualinvoke $r2.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        if $z0 == 0 goto label4;
+
+        $b0 = 1;
+
+     label1:
+        staticinvoke <android.provider.Settings$Secure: boolean putInt(android.content.ContentResolver,java.lang.String,int)>($r3, "data_roaming", $b0);
+
+     label2:
+        $r1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r4 = virtualinvoke $r1.<com.android.internal.telephony.gsm.GSMPhone: android.telephony.ServiceState getServiceState()>();
+
+        $z0 = virtualinvoke $r4.<android.telephony.ServiceState: boolean getRoaming()>();
+
+        if $z0 == 0 goto label5;
+
+        $r5 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(21);
+
+     label3:
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r5);
+
+        return;
+
+     label4:
+        $b0 = 0;
+
+        goto label1;
+
+     label5:
+        $r5 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(22);
+
+        goto label3;
+    }
+
+    void setState(com.android.internal.telephony.gsm.DataConnectionTracker$State)
+    {
+        com.android.internal.telephony.gsm.DataConnectionTracker $r0;
+        com.android.internal.telephony.gsm.DataConnectionTracker$State $r1, $r4;
+        java.lang.StringBuilder $r2;
+        java.lang.String $r3;
+        com.android.internal.telephony.gsm.GSMPhone $r5;
+        android.content.Context $r6;
+        android.content.ContentResolver $r7;
+        android.provider.Checkin$Stats$Tag $r8;
+        java.util.ArrayList $r9;
+
+        $r0 := @this: com.android.internal.telephony.gsm.DataConnectionTracker;
+
+        $r1 := @parameter0: com.android.internal.telephony.gsm.DataConnectionTracker$State;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("setState: ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: void log(java.lang.String)>($r3);
+
+        $r4 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$State state>;
+
+        if $r4 == $r1 goto label2;
+
+        $r4 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State INITING>;
+
+        if $r1 != $r4 goto label1;
+
+        $r5 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r6 = virtualinvoke $r5.<com.android.internal.telephony.PhoneBase: android.content.Context getContext()>();
+
+        $r7 = virtualinvoke $r6.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r8 = <android.provider.Checkin$Stats$Tag: android.provider.Checkin$Stats$Tag PHONE_GPRS_ATTEMPTED>;
+
+        staticinvoke <android.provider.Checkin: android.net.Uri updateStats(android.content.ContentResolver,android.provider.Checkin$Stats$Tag,int,double)>($r7, $r8, 1, 0.0);
+
+     label1:
+        $r4 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State CONNECTED>;
+
+        if $r1 != $r4 goto label2;
+
+        $r5 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.GSMPhone phone>;
+
+        $r6 = virtualinvoke $r5.<com.android.internal.telephony.PhoneBase: android.content.Context getContext()>();
+
+        $r7 = virtualinvoke $r6.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r8 = <android.provider.Checkin$Stats$Tag: android.provider.Checkin$Stats$Tag PHONE_GPRS_CONNECTED>;
+
+        staticinvoke <android.provider.Checkin: android.net.Uri updateStats(android.content.ContentResolver,android.provider.Checkin$Stats$Tag,int,double)>($r7, $r8, 1, 0.0);
+
+     label2:
+        $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$State state> = $r1;
+
+        $r1 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: com.android.internal.telephony.gsm.DataConnectionTracker$State state>;
+
+        $r4 = <com.android.internal.telephony.gsm.DataConnectionTracker$State: com.android.internal.telephony.gsm.DataConnectionTracker$State FAILED>;
+
+        if $r1 != $r4 goto label3;
+
+        $r9 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.util.ArrayList waitingApns>;
+
+        if $r9 == null goto label4;
+
+        $r9 = $r0.<com.android.internal.telephony.gsm.DataConnectionTracker: java.util.ArrayList waitingApns>;
+
+        virtualinvoke $r9.<java.util.ArrayList: void clear()>();
+
+        return;
+
+     label3:
+        return;
+
+     label4:
+        return;
+    }
+}

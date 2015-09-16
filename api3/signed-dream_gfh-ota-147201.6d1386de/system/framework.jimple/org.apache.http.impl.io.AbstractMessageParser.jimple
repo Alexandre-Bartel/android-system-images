@@ -1,0 +1,313 @@
+public abstract class org.apache.http.impl.io.AbstractMessageParser extends java.lang.Object implements org.apache.http.io.HttpMessageParser
+{
+    protected final org.apache.http.message.LineParser lineParser;
+    private final int maxHeaderCount;
+    private final int maxLineLen;
+    private final org.apache.http.io.SessionInputBuffer sessionBuffer;
+
+    public void <init>(org.apache.http.io.SessionInputBuffer, org.apache.http.message.LineParser, org.apache.http.params.HttpParams)
+    {
+        org.apache.http.impl.io.AbstractMessageParser $r0;
+        org.apache.http.io.SessionInputBuffer $r1;
+        org.apache.http.message.LineParser $r2;
+        org.apache.http.params.HttpParams $r3;
+        java.lang.IllegalArgumentException $r4;
+        int $i0;
+
+        $r0 := @this: org.apache.http.impl.io.AbstractMessageParser;
+
+        $r1 := @parameter0: org.apache.http.io.SessionInputBuffer;
+
+        $r2 := @parameter1: org.apache.http.message.LineParser;
+
+        $r3 := @parameter2: org.apache.http.params.HttpParams;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        if $r1 != null goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Session input buffer may not be null");
+
+        throw $r4;
+
+     label1:
+        if $r3 != null goto label2;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("HTTP parameters may not be null");
+
+        throw $r4;
+
+     label2:
+        $r0.<org.apache.http.impl.io.AbstractMessageParser: org.apache.http.io.SessionInputBuffer sessionBuffer> = $r1;
+
+        $i0 = interfaceinvoke $r3.<org.apache.http.params.HttpParams: int getIntParameter(java.lang.String,int)>("http.connection.max-header-count", -1);
+
+        $r0.<org.apache.http.impl.io.AbstractMessageParser: int maxHeaderCount> = $i0;
+
+        $i0 = interfaceinvoke $r3.<org.apache.http.params.HttpParams: int getIntParameter(java.lang.String,int)>("http.connection.max-line-length", -1);
+
+        $r0.<org.apache.http.impl.io.AbstractMessageParser: int maxLineLen> = $i0;
+
+        if $r2 == null goto label4;
+
+     label3:
+        $r0.<org.apache.http.impl.io.AbstractMessageParser: org.apache.http.message.LineParser lineParser> = $r2;
+
+        return;
+
+     label4:
+        $r2 = <org.apache.http.message.BasicLineParser: org.apache.http.message.BasicLineParser DEFAULT>;
+
+        goto label3;
+    }
+
+    public static org.apache.http.Header[] parseHeaders(org.apache.http.io.SessionInputBuffer, int, int, org.apache.http.message.LineParser) throws org.apache.http.HttpException, java.io.IOException
+    {
+        java.util.ArrayList $r0;
+        org.apache.http.io.SessionInputBuffer $r1;
+        int $i0, $i1, $i2, $i4, $i5;
+        org.apache.http.message.LineParser $r2;
+        java.lang.IllegalArgumentException $r3;
+        org.apache.http.util.CharArrayBuffer $r4, $r5;
+        org.apache.http.Header[] $r6;
+        java.lang.Object $r7;
+        org.apache.http.Header $r8;
+        char $c3;
+        java.io.IOException $r9;
+        org.apache.http.ParseException $r10;
+        org.apache.http.ProtocolException $r11;
+        java.lang.String $r12;
+
+        $r1 := @parameter0: org.apache.http.io.SessionInputBuffer;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $r2 := @parameter3: org.apache.http.message.LineParser;
+
+        if $r1 != null goto label01;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Session input buffer may not be null");
+
+        throw $r3;
+
+     label01:
+        if $r2 != null goto label02;
+
+        $r2 = <org.apache.http.message.BasicLineParser: org.apache.http.message.BasicLineParser DEFAULT>;
+
+     label02:
+        $r0 = new java.util.ArrayList;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>()>();
+
+        $r4 = null;
+
+        $r5 = null;
+
+     label03:
+        if $r4 != null goto label09;
+
+        $r4 = new org.apache.http.util.CharArrayBuffer;
+
+        specialinvoke $r4.<org.apache.http.util.CharArrayBuffer: void <init>(int)>(64);
+
+     label04:
+        $i2 = interfaceinvoke $r1.<org.apache.http.io.SessionInputBuffer: int readLine(org.apache.http.util.CharArrayBuffer)>($r4);
+
+        if $i2 == -1 goto label05;
+
+        $i2 = virtualinvoke $r4.<org.apache.http.util.CharArrayBuffer: int length()>();
+
+        if $i2 >= 1 goto label10;
+
+     label05:
+        $i0 = virtualinvoke $r0.<java.util.ArrayList: int size()>();
+
+        $r6 = newarray (org.apache.http.Header)[$i0];
+
+        $i0 = 0;
+
+     label06:
+        $i1 = virtualinvoke $r0.<java.util.ArrayList: int size()>();
+
+        if $i0 >= $i1 goto label20;
+
+        $r7 = virtualinvoke $r0.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r5 = (org.apache.http.util.CharArrayBuffer) $r7;
+
+     label07:
+        $r8 = interfaceinvoke $r2.<org.apache.http.message.LineParser: org.apache.http.Header parseHeader(org.apache.http.util.CharArrayBuffer)>($r5);
+
+     label08:
+        $r6[$i0] = $r8;
+
+        $i0 = $i0 + 1;
+
+        goto label06;
+
+     label09:
+        virtualinvoke $r4.<org.apache.http.util.CharArrayBuffer: void clear()>();
+
+        goto label04;
+
+     label10:
+        $c3 = virtualinvoke $r4.<org.apache.http.util.CharArrayBuffer: char charAt(int)>(0);
+
+        if $c3 == 32 goto label11;
+
+        $c3 = virtualinvoke $r4.<org.apache.http.util.CharArrayBuffer: char charAt(int)>(0);
+
+        if $c3 != 9 goto label17;
+
+     label11:
+        if $r5 == null goto label17;
+
+        $i2 = 0;
+
+     label12:
+        $i4 = virtualinvoke $r4.<org.apache.http.util.CharArrayBuffer: int length()>();
+
+        if $i2 >= $i4 goto label13;
+
+        $c3 = virtualinvoke $r4.<org.apache.http.util.CharArrayBuffer: char charAt(int)>($i2);
+
+        if $c3 == 32 goto label14;
+
+        if $c3 == 9 goto label14;
+
+     label13:
+        if $i1 <= 0 goto label15;
+
+        $i4 = virtualinvoke $r5.<org.apache.http.util.CharArrayBuffer: int length()>();
+
+        $i4 = $i4 + 1;
+
+        $i5 = virtualinvoke $r4.<org.apache.http.util.CharArrayBuffer: int length()>();
+
+        $i4 = $i4 + $i5;
+
+        $i4 = $i4 - $i2;
+
+        if $i4 <= $i1 goto label15;
+
+        $r9 = new java.io.IOException;
+
+        specialinvoke $r9.<java.io.IOException: void <init>(java.lang.String)>("Maximum line length limit exceeded");
+
+        throw $r9;
+
+     label14:
+        $i2 = $i2 + 1;
+
+        goto label12;
+
+     label15:
+        virtualinvoke $r5.<org.apache.http.util.CharArrayBuffer: void append(char)>(32);
+
+        $i4 = virtualinvoke $r4.<org.apache.http.util.CharArrayBuffer: int length()>();
+
+        $i4 = $i4 - $i2;
+
+        virtualinvoke $r5.<org.apache.http.util.CharArrayBuffer: void append(org.apache.http.util.CharArrayBuffer,int,int)>($r4, $i2, $i4);
+
+     label16:
+        if $i0 <= 0 goto label18;
+
+        $i2 = virtualinvoke $r0.<java.util.ArrayList: int size()>();
+
+        if $i2 < $i0 goto label18;
+
+        $r9 = new java.io.IOException;
+
+        specialinvoke $r9.<java.io.IOException: void <init>(java.lang.String)>("Maximum header count exceeded");
+
+        throw $r9;
+
+     label17:
+        virtualinvoke $r0.<java.util.ArrayList: boolean add(java.lang.Object)>($r4);
+
+        $r5 = $r4;
+
+        $r4 = null;
+
+        goto label16;
+
+     label18:
+        goto label03;
+
+     label19:
+        $r10 := @caughtexception;
+
+        $r11 = new org.apache.http.ProtocolException;
+
+        $r12 = virtualinvoke $r10.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        specialinvoke $r11.<org.apache.http.ProtocolException: void <init>(java.lang.String)>($r12);
+
+        throw $r11;
+
+     label20:
+        return $r6;
+
+        catch org.apache.http.ParseException from label07 to label08 with label19;
+    }
+
+    public org.apache.http.HttpMessage parse() throws java.io.IOException, org.apache.http.HttpException
+    {
+        org.apache.http.impl.io.AbstractMessageParser $r0;
+        int $i0, $i1;
+        org.apache.http.message.LineParser $r1;
+        org.apache.http.io.SessionInputBuffer $r2;
+        org.apache.http.HttpMessage $r3;
+        org.apache.http.Header[] $r4;
+        org.apache.http.ParseException $r5;
+        org.apache.http.ProtocolException $r6;
+        java.lang.String $r7;
+
+        $r0 := @this: org.apache.http.impl.io.AbstractMessageParser;
+
+        $r2 = $r0.<org.apache.http.impl.io.AbstractMessageParser: org.apache.http.io.SessionInputBuffer sessionBuffer>;
+
+     label1:
+        $r3 = virtualinvoke $r0.<org.apache.http.impl.io.AbstractMessageParser: org.apache.http.HttpMessage parseHead(org.apache.http.io.SessionInputBuffer)>($r2);
+
+     label2:
+        $r2 = $r0.<org.apache.http.impl.io.AbstractMessageParser: org.apache.http.io.SessionInputBuffer sessionBuffer>;
+
+        $i1 = $r0.<org.apache.http.impl.io.AbstractMessageParser: int maxHeaderCount>;
+
+        $i0 = $r0.<org.apache.http.impl.io.AbstractMessageParser: int maxLineLen>;
+
+        $r1 = $r0.<org.apache.http.impl.io.AbstractMessageParser: org.apache.http.message.LineParser lineParser>;
+
+        $r4 = staticinvoke <org.apache.http.impl.io.AbstractMessageParser: org.apache.http.Header[] parseHeaders(org.apache.http.io.SessionInputBuffer,int,int,org.apache.http.message.LineParser)>($r2, $i1, $i0, $r1);
+
+        interfaceinvoke $r3.<org.apache.http.HttpMessage: void setHeaders(org.apache.http.Header[])>($r4);
+
+        return $r3;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = new org.apache.http.ProtocolException;
+
+        $r7 = virtualinvoke $r5.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        specialinvoke $r6.<org.apache.http.ProtocolException: void <init>(java.lang.String,java.lang.Throwable)>($r7, $r5);
+
+        throw $r6;
+
+        catch org.apache.http.ParseException from label1 to label2 with label3;
+    }
+
+    protected abstract org.apache.http.HttpMessage parseHead(org.apache.http.io.SessionInputBuffer) throws java.io.IOException, org.apache.http.HttpException, org.apache.http.ParseException;
+}

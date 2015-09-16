@@ -1,0 +1,874 @@
+class com.android.server.ServerThread extends java.lang.Thread
+{
+    private static final boolean INCLUDE_DEMO;
+    private static final int LOG_BOOT_PROGRESS_SYSTEM_RUN;
+    private static final java.lang.String TAG;
+    private android.content.ContentResolver mContentResolver;
+
+    void <init>()
+    {
+        com.android.server.ServerThread $r0;
+
+        $r0 := @this: com.android.server.ServerThread;
+
+        specialinvoke $r0.<java.lang.Thread: void <init>()>();
+
+        return;
+    }
+
+    static android.content.ContentResolver access$000(com.android.server.ServerThread)
+    {
+        com.android.server.ServerThread $r0;
+        android.content.ContentResolver r1;
+
+        $r0 := @parameter0: com.android.server.ServerThread;
+
+        r1 = $r0.<com.android.server.ServerThread: android.content.ContentResolver mContentResolver>;
+
+        return r1;
+    }
+
+    public void run()
+    {
+        com.android.server.ServerThread $r0;
+        com.android.server.AppWidgetService $r1, $r28, r91;
+        android.server.BluetoothDeviceService $r2, r93;
+        android.server.BluetoothA2dpService $r3, r94;
+        com.android.server.HardwareService $r4, $r10, r73;
+        com.android.server.InputMethodManagerService $r6, $r27, r78;
+        com.android.server.status.StatusBarService $r7, $r26, r76;
+        long $l0;
+        java.lang.String $r8, $r9;
+        boolean $z0;
+        int $i1, $i3;
+        android.content.pm.IPackageManager $r11;
+        android.content.Context $r12, $r15;
+        com.android.server.WindowManagerService $r13, $r24;
+        com.android.server.PowerManagerService $r14, r70;
+        android.content.ContentResolver $r17;
+        com.android.server.BatteryService $r18, r72;
+        android.app.IActivityManager $r19;
+        com.android.server.AlarmManagerService $r20, r74;
+        com.android.server.Watchdog $r21;
+        com.android.server.am.ActivityManagerService $r22;
+        android.os.IBinder $r25;
+        com.android.server.ConnectivityService $r31;
+        android.content.Intent $r37, r85;
+        android.content.ComponentName $r38, r86;
+        byte $b2;
+        android.net.Uri $r42;
+        java.lang.RuntimeException $r44, $r66, $r67, $r68, $r69;
+        java.lang.Throwable $r45, $r46, $r47, $r48, $r49, $r50, $r51, $r52, $r53, $r54, $r55, $r56, $r57, $r58, $r59, $r60, $r63, $r64, $r65;
+        android.os.RemoteException $r61, $r62;
+        com.android.server.TelephonyRegistry r71;
+        com.android.server.SensorService r75;
+        com.android.server.ClipboardService r77;
+        com.android.server.NetStatService r79;
+        com.android.server.NotificationManagerService r80;
+        com.android.server.MountService r81;
+        com.android.server.DeviceStorageMonitorService r82;
+        com.android.server.LocationManagerService r83;
+        android.server.search.SearchManagerService r84;
+        com.android.server.FallbackCheckinService r87;
+        com.android.server.WallpaperService r88;
+        android.media.AudioService r89;
+        com.android.server.HeadsetObserver r90;
+        com.android.server.ServerThread$AdbSettingsObserver r92;
+
+        $r0 := @this: com.android.server.ServerThread;
+
+        $l0 = staticinvoke <android.os.SystemClock: long uptimeMillis()>();
+
+        staticinvoke <android.util.EventLog: int writeEvent(int,long)>(3010, $l0);
+
+        staticinvoke <com.android.server.am.ActivityManagerService: boolean prepareTraceFile(boolean)>(0);
+
+        staticinvoke <android.os.Looper: void prepare()>();
+
+        staticinvoke <android.os.Process: void setThreadPriority(int)>(-2);
+
+        $r8 = staticinvoke <android.os.SystemProperties: java.lang.String get(java.lang.String)>("ro.factorytest");
+
+        $r9 = "";
+
+        $z0 = virtualinvoke $r9.<java.lang.String: boolean equals(java.lang.Object)>($r8);
+
+        if $z0 == 0 goto label058;
+
+        $i1 = 0;
+
+     label001:
+        $r10 = null;
+
+        $r11 = null;
+
+        $r12 = null;
+
+        $r13 = null;
+
+     label002:
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SystemServer", "Starting Power Manager.");
+
+     label003:
+        r70 = new com.android.server.PowerManagerService;
+
+     label004:
+        $r14 = r70;
+
+        specialinvoke r70.<com.android.server.PowerManagerService: void <init>()>();
+
+     label005:
+        $r25 = (android.os.IBinder) $r14;
+
+        staticinvoke <android.os.ServiceManager: void addService(java.lang.String,android.os.IBinder)>("power", $r25);
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SystemServer", "Starting Activity Manager.");
+
+        $r15 = staticinvoke <com.android.server.am.ActivityManagerService: android.content.Context main(int)>($i1);
+
+        $r12 = $r15;
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SystemServer", "Starting telephony registry");
+
+     label006:
+        r71 = new com.android.server.TelephonyRegistry;
+
+     label007:
+        specialinvoke r71.<com.android.server.TelephonyRegistry: void <init>(android.content.Context)>($r15);
+
+        $r25 = (android.os.IBinder) r71;
+
+        staticinvoke <android.os.ServiceManager: void addService(java.lang.String,android.os.IBinder)>("telephony.registry", $r25);
+
+        staticinvoke <com.android.server.AttributeCache: void init(android.content.Context)>($r15);
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SystemServer", "Starting Package Manager.");
+
+     label008:
+        if $i1 == 0 goto label059;
+
+     label009:
+        $z0 = 1;
+
+     label010:
+        $r11 = staticinvoke <com.android.server.PackageManagerService: android.content.pm.IPackageManager main(android.content.Context,boolean)>($r15, $z0);
+
+        staticinvoke <com.android.server.am.ActivityManagerService: void setSystemProcess()>();
+
+        $r17 = virtualinvoke $r15.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r0.<com.android.server.ServerThread: android.content.ContentResolver mContentResolver> = $r17;
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SystemServer", "Starting Content Manager.");
+
+     label011:
+        if $i1 != 1 goto label060;
+
+     label012:
+        $z0 = 1;
+
+     label013:
+        staticinvoke <android.content.ContentService: android.content.IContentService main(android.content.Context,boolean)>($r15, $z0);
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SystemServer", "Starting System Content Providers.");
+
+        staticinvoke <com.android.server.am.ActivityManagerService: void installSystemProviders()>();
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SystemServer", "Starting Battery Service.");
+
+     label014:
+        r72 = new com.android.server.BatteryService;
+
+     label015:
+        $r18 = r72;
+
+        specialinvoke r72.<com.android.server.BatteryService: void <init>(android.content.Context)>($r15);
+
+        staticinvoke <android.os.ServiceManager: void addService(java.lang.String,android.os.IBinder)>("battery", $r18);
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SystemServer", "Starting Hardware Service.");
+
+     label016:
+        r73 = new com.android.server.HardwareService;
+
+     label017:
+        $r4 = r73;
+
+        specialinvoke r73.<com.android.server.HardwareService: void <init>(android.content.Context)>($r15);
+
+     label018:
+        $r25 = (android.os.IBinder) $r4;
+
+        staticinvoke <android.os.ServiceManager: void addService(java.lang.String,android.os.IBinder)>("hardware", $r25);
+
+        $r19 = staticinvoke <com.android.server.am.ActivityManagerService: android.app.IActivityManager getDefault()>();
+
+        virtualinvoke $r14.<com.android.server.PowerManagerService: void init(android.content.Context,com.android.server.HardwareService,android.app.IActivityManager,com.android.server.BatteryService)>($r15, $r4, $r19, $r18);
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SystemServer", "Starting Alarm Manager.");
+
+     label019:
+        r74 = new com.android.server.AlarmManagerService;
+
+     label020:
+        $r20 = r74;
+
+        specialinvoke r74.<com.android.server.AlarmManagerService: void <init>(android.content.Context)>($r15);
+
+        $r25 = (android.os.IBinder) $r20;
+
+        staticinvoke <android.os.ServiceManager: void addService(java.lang.String,android.os.IBinder)>("alarm", $r25);
+
+        $r21 = staticinvoke <com.android.server.Watchdog: com.android.server.Watchdog getInstance()>();
+
+        $r22 = staticinvoke <com.android.server.am.ActivityManagerService: com.android.server.am.ActivityManagerService self()>();
+
+        virtualinvoke $r21.<com.android.server.Watchdog: void init(android.content.Context,com.android.server.BatteryService,com.android.server.PowerManagerService,com.android.server.AlarmManagerService,com.android.server.am.ActivityManagerService)>($r15, $r18, $r14, $r20, $r22);
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SystemServer", "Starting Sensor Service.");
+
+     label021:
+        r75 = new com.android.server.SensorService;
+
+     label022:
+        specialinvoke r75.<com.android.server.SensorService: void <init>(android.content.Context)>($r15);
+
+        $r25 = (android.os.IBinder) r75;
+
+        staticinvoke <android.os.ServiceManager: void addService(java.lang.String,android.os.IBinder)>("sensor", $r25);
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SystemServer", "Starting Window Manager.");
+
+     label023:
+        if $i1 == 1 goto label061;
+
+     label024:
+        $z0 = 1;
+
+     label025:
+        $r24 = staticinvoke <com.android.server.WindowManagerService: com.android.server.WindowManagerService main(android.content.Context,com.android.server.PowerManagerService,boolean)>($r15, $r14, $z0);
+
+        $r13 = $r24;
+
+        $r25 = (android.os.IBinder) $r24;
+
+        staticinvoke <android.os.ServiceManager: void addService(java.lang.String,android.os.IBinder)>("window", $r25);
+
+        $r25 = staticinvoke <android.os.ServiceManager: android.os.IBinder getService(java.lang.String)>("activity");
+
+        $r22 = (com.android.server.am.ActivityManagerService) $r25;
+
+        virtualinvoke $r22.<com.android.server.am.ActivityManagerService: void setWindowManager(com.android.server.WindowManagerService)>($r24);
+
+        $r8 = staticinvoke <android.os.SystemProperties: java.lang.String get(java.lang.String)>("ro.kernel.qemu");
+
+        $z0 = virtualinvoke $r8.<java.lang.String: boolean equals(java.lang.Object)>("1");
+
+        if $z0 == 0 goto label062;
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SystemServer", "Registering null Bluetooth Service (emulator)");
+
+        staticinvoke <android.os.ServiceManager: void addService(java.lang.String,android.os.IBinder)>("bluetooth", null);
+
+     label026:
+        $r10 = $r4;
+
+     label027:
+        $r26 = null;
+
+        $r27 = null;
+
+        $r28 = null;
+
+        if $i1 == 1 goto label050;
+
+     label028:
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SystemServer", "Starting Status Bar Service.");
+
+        r76 = new com.android.server.status.StatusBarService;
+
+        $r7 = r76;
+
+        specialinvoke r76.<com.android.server.status.StatusBarService: void <init>(android.content.Context)>($r12);
+
+     label029:
+        $r25 = (android.os.IBinder) $r7;
+
+        staticinvoke <android.os.ServiceManager: void addService(java.lang.String,android.os.IBinder)>("statusbar", $r25);
+
+     label030:
+        $r26 = $r7;
+
+     label031:
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SystemServer", "Starting Clipboard Service.");
+
+        r77 = new com.android.server.ClipboardService;
+
+        specialinvoke r77.<com.android.server.ClipboardService: void <init>(android.content.Context)>($r12);
+
+        $r25 = (android.os.IBinder) r77;
+
+        staticinvoke <android.os.ServiceManager: void addService(java.lang.String,android.os.IBinder)>("clipboard", $r25);
+
+     label032:
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SystemServer", "Starting Input Method Service.");
+
+        r78 = new com.android.server.InputMethodManagerService;
+
+        $r6 = r78;
+
+        specialinvoke r78.<com.android.server.InputMethodManagerService: void <init>(android.content.Context,com.android.server.status.StatusBarService)>($r12, $r26);
+
+     label033:
+        $r25 = (android.os.IBinder) $r6;
+
+        staticinvoke <android.os.ServiceManager: void addService(java.lang.String,android.os.IBinder)>("input_method", $r25);
+
+     label034:
+        $r27 = $r6;
+
+     label035:
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SystemServer", "Starting NetStat Service.");
+
+        r79 = new com.android.server.NetStatService;
+
+        specialinvoke r79.<com.android.server.NetStatService: void <init>(android.content.Context)>($r12);
+
+        $r25 = (android.os.IBinder) r79;
+
+        staticinvoke <android.os.ServiceManager: void addService(java.lang.String,android.os.IBinder)>("netstat", $r25);
+
+     label036:
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SystemServer", "Starting Connectivity Service.");
+
+        $r31 = staticinvoke <com.android.server.ConnectivityService: com.android.server.ConnectivityService getInstance(android.content.Context)>($r12);
+
+        $r25 = (android.os.IBinder) $r31;
+
+        staticinvoke <android.os.ServiceManager: void addService(java.lang.String,android.os.IBinder)>("connectivity", $r25);
+
+     label037:
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SystemServer", "Starting Notification Manager.");
+
+        r80 = new com.android.server.NotificationManagerService;
+
+        specialinvoke r80.<com.android.server.NotificationManagerService: void <init>(android.content.Context,com.android.server.status.StatusBarService,com.android.server.HardwareService)>($r12, $r26, $r10);
+
+        $r25 = (android.os.IBinder) r80;
+
+        staticinvoke <android.os.ServiceManager: void addService(java.lang.String,android.os.IBinder)>("notification", $r25);
+
+     label038:
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SystemServer", "Starting Mount Service.");
+
+        r81 = new com.android.server.MountService;
+
+        specialinvoke r81.<com.android.server.MountService: void <init>(android.content.Context)>($r12);
+
+        $r25 = (android.os.IBinder) r81;
+
+        staticinvoke <android.os.ServiceManager: void addService(java.lang.String,android.os.IBinder)>("mount", $r25);
+
+     label039:
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SystemServer", "Starting DeviceStorageMonitor service");
+
+        r82 = new com.android.server.DeviceStorageMonitorService;
+
+        specialinvoke r82.<com.android.server.DeviceStorageMonitorService: void <init>(android.content.Context)>($r12);
+
+        staticinvoke <android.os.ServiceManager: void addService(java.lang.String,android.os.IBinder)>("devicestoragemonitor", r82);
+
+     label040:
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SystemServer", "Starting Location Manager.");
+
+        r83 = new com.android.server.LocationManagerService;
+
+        specialinvoke r83.<com.android.server.LocationManagerService: void <init>(android.content.Context)>($r12);
+
+        $r25 = (android.os.IBinder) r83;
+
+        staticinvoke <android.os.ServiceManager: void addService(java.lang.String,android.os.IBinder)>("location", $r25);
+
+     label041:
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SystemServer", "Starting Search Service.");
+
+        r84 = new android.server.search.SearchManagerService;
+
+        specialinvoke r84.<android.server.search.SearchManagerService: void <init>(android.content.Context)>($r12);
+
+        $r25 = (android.os.IBinder) r84;
+
+        staticinvoke <android.os.ServiceManager: void addService(java.lang.String,android.os.IBinder)>("search", $r25);
+
+     label042:
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SystemServer", "Starting Checkin Service.");
+
+        r85 = new android.content.Intent;
+
+        specialinvoke r85.<android.content.Intent: void <init>()>();
+
+        r86 = new android.content.ComponentName;
+
+        specialinvoke r86.<android.content.ComponentName: void <init>(java.lang.String,java.lang.String)>("com.google.android.server.checkin", "com.google.android.server.checkin.CheckinService");
+
+        $r37 = virtualinvoke r85.<android.content.Intent: android.content.Intent setComponent(android.content.ComponentName)>(r86);
+
+        $r38 = virtualinvoke $r12.<android.content.Context: android.content.ComponentName startService(android.content.Intent)>($r37);
+
+        if $r38 != null goto label043;
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("SystemServer", "Using fallback Checkin Service.");
+
+        r87 = new com.android.server.FallbackCheckinService;
+
+        specialinvoke r87.<com.android.server.FallbackCheckinService: void <init>(android.content.Context)>($r12);
+
+        $r25 = (android.os.IBinder) r87;
+
+        staticinvoke <android.os.ServiceManager: void addService(java.lang.String,android.os.IBinder)>("checkin", $r25);
+
+     label043:
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SystemServer", "Starting Wallpaper Service");
+
+        r88 = new com.android.server.WallpaperService;
+
+        specialinvoke r88.<com.android.server.WallpaperService: void <init>(android.content.Context)>($r12);
+
+        $r25 = (android.os.IBinder) r88;
+
+        staticinvoke <android.os.ServiceManager: void addService(java.lang.String,android.os.IBinder)>("wallpaper", $r25);
+
+     label044:
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SystemServer", "Starting Audio Service");
+
+        r89 = new android.media.AudioService;
+
+        specialinvoke r89.<android.media.AudioService: void <init>(android.content.Context)>($r12);
+
+        $r25 = (android.os.IBinder) r89;
+
+        staticinvoke <android.os.ServiceManager: void addService(java.lang.String,android.os.IBinder)>("audio", $r25);
+
+     label045:
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SystemServer", "Starting HeadsetObserver");
+
+        r90 = new com.android.server.HeadsetObserver;
+
+        specialinvoke r90.<com.android.server.HeadsetObserver: void <init>(android.content.Context)>($r12);
+
+     label046:
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SystemServer", "Starting AppWidget Service");
+
+        r91 = new com.android.server.AppWidgetService;
+
+        $r1 = r91;
+
+        specialinvoke r91.<com.android.server.AppWidgetService: void <init>(android.content.Context)>($r12);
+
+     label047:
+        $r25 = (android.os.IBinder) $r1;
+
+        staticinvoke <android.os.ServiceManager: void addService(java.lang.String,android.os.IBinder)>("appwidget", $r25);
+
+     label048:
+        $r28 = $r1;
+
+     label049:
+        staticinvoke <com.android.server.status.StatusBarPolicy: void installIcons(android.content.Context,com.android.server.status.StatusBarService)>($r12, $r26);
+
+     label050:
+        $r17 = $r0.<com.android.server.ServerThread: android.content.ContentResolver mContentResolver>;
+
+        $r8 = "1";
+
+        $r9 = staticinvoke <android.os.SystemProperties: java.lang.String get(java.lang.String)>("persist.service.adb.enable");
+
+        $z0 = virtualinvoke $r8.<java.lang.String: boolean equals(java.lang.Object)>($r9);
+
+        if $z0 == 0 goto label094;
+
+        $b2 = 1;
+
+     label051:
+        staticinvoke <android.provider.Settings$Secure: boolean putInt(android.content.ContentResolver,java.lang.String,int)>($r17, "adb_enabled", $b2);
+
+        $r17 = $r0.<com.android.server.ServerThread: android.content.ContentResolver mContentResolver>;
+
+        $r42 = staticinvoke <android.provider.Settings$Secure: android.net.Uri getUriFor(java.lang.String)>("adb_enabled");
+
+        r92 = new com.android.server.ServerThread$AdbSettingsObserver;
+
+        specialinvoke r92.<com.android.server.ServerThread$AdbSettingsObserver: void <init>(com.android.server.ServerThread)>($r0);
+
+        virtualinvoke $r17.<android.content.ContentResolver: void registerContentObserver(android.net.Uri,boolean,android.database.ContentObserver)>($r42, 0, r92);
+
+        $z0 = virtualinvoke $r13.<com.android.server.WindowManagerService: boolean detectSafeMode()>();
+
+        if $r26 == null goto label052;
+
+        virtualinvoke $r26.<com.android.server.status.StatusBarService: void systemReady()>();
+
+     label052:
+        if $r27 == null goto label053;
+
+        virtualinvoke $r27.<com.android.server.InputMethodManagerService: void systemReady()>();
+
+     label053:
+        virtualinvoke $r13.<com.android.server.WindowManagerService: void systemReady()>();
+
+        virtualinvoke $r14.<com.android.server.PowerManagerService: void systemReady()>();
+
+     label054:
+        interfaceinvoke $r11.<android.content.pm.IPackageManager: void systemReady()>();
+
+     label055:
+        if $r28 == null goto label056;
+
+        virtualinvoke $r28.<com.android.server.AppWidgetService: void systemReady(boolean)>($z0);
+
+     label056:
+        $r19 = staticinvoke <android.app.ActivityManagerNative: android.app.IActivityManager getDefault()>();
+
+        interfaceinvoke $r19.<android.app.IActivityManager: void systemReady()>();
+
+     label057:
+        $r21 = staticinvoke <com.android.server.Watchdog: com.android.server.Watchdog getInstance()>();
+
+        virtualinvoke $r21.<java.lang.Thread: void start()>();
+
+        staticinvoke <android.os.Looper: void loop()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("SystemServer", "System ServerThread is exiting!");
+
+        return;
+
+     label058:
+        $i1 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r8);
+
+        goto label001;
+
+     label059:
+        $z0 = 0;
+
+        goto label010;
+
+     label060:
+        $z0 = 0;
+
+        goto label013;
+
+     label061:
+        $z0 = 0;
+
+        goto label025;
+
+     label062:
+        if $i1 != 1 goto label067;
+
+     label063:
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SystemServer", "Registering null Bluetooth Service (factory test)");
+
+        staticinvoke <android.os.ServiceManager: void addService(java.lang.String,android.os.IBinder)>("bluetooth", null);
+
+     label064:
+        goto label026;
+
+     label065:
+        $r44 := @caughtexception;
+
+        $r10 = $r4;
+
+     label066:
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("System", "Failure starting core service", $r44);
+
+        goto label027;
+
+     label067:
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SystemServer", "Starting Bluetooth Service.");
+
+     label068:
+        r93 = new android.server.BluetoothDeviceService;
+
+     label069:
+        $r2 = r93;
+
+        specialinvoke r93.<android.server.BluetoothDeviceService: void <init>(android.content.Context)>($r15);
+
+     label070:
+        virtualinvoke $r2.<android.server.BluetoothDeviceService: void init()>();
+
+        $r25 = (android.os.IBinder) $r2;
+
+        staticinvoke <android.os.ServiceManager: void addService(java.lang.String,android.os.IBinder)>("bluetooth", $r25);
+
+     label071:
+        r94 = new android.server.BluetoothA2dpService;
+
+     label072:
+        $r3 = r94;
+
+        specialinvoke r94.<android.server.BluetoothA2dpService: void <init>(android.content.Context)>($r15);
+
+     label073:
+        $r25 = (android.os.IBinder) $r3;
+
+        staticinvoke <android.os.ServiceManager: void addService(java.lang.String,android.os.IBinder)>("bluetooth_a2dp", $r25);
+
+        $r17 = $r0.<com.android.server.ServerThread: android.content.ContentResolver mContentResolver>;
+
+        $i3 = staticinvoke <android.provider.Settings$Secure: int getInt(android.content.ContentResolver,java.lang.String,int)>($r17, "bluetooth_on", 0);
+
+        if $i3 <= 0 goto label074;
+
+        virtualinvoke $r2.<android.server.BluetoothDeviceService: boolean enable()>();
+
+     label074:
+        goto label026;
+
+     label075:
+        $r45 := @caughtexception;
+
+     label076:
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("SystemServer", "Failure starting StatusBarService", $r45);
+
+        goto label031;
+
+     label077:
+        $r46 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("SystemServer", "Failure starting Clipboard Service", $r46);
+
+        goto label032;
+
+     label078:
+        $r47 := @caughtexception;
+
+        $r45 = $r47;
+
+     label079:
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("SystemServer", "Failure starting Input Manager Service", $r45);
+
+        goto label035;
+
+     label080:
+        $r48 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("SystemServer", "Failure starting NetStat Service", $r48);
+
+        goto label036;
+
+     label081:
+        $r49 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("SystemServer", "Failure starting Connectivity Service", $r49);
+
+        goto label037;
+
+     label082:
+        $r50 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("SystemServer", "Failure starting Notification Manager", $r50);
+
+        goto label038;
+
+     label083:
+        $r51 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("SystemServer", "Failure starting Mount Service", $r51);
+
+        goto label039;
+
+     label084:
+        $r52 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("SystemServer", "Failure starting DeviceStorageMonitor service", $r52);
+
+        goto label040;
+
+     label085:
+        $r53 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("SystemServer", "Failure starting Location Manager", $r53);
+
+        goto label041;
+
+     label086:
+        $r54 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("SystemServer", "Failure starting Search Service", $r54);
+
+        goto label042;
+
+     label087:
+        $r55 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("SystemServer", "Failure starting Checkin Service", $r55);
+
+        goto label043;
+
+     label088:
+        $r56 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("SystemServer", "Failure starting Wallpaper Service", $r56);
+
+        goto label044;
+
+     label089:
+        $r57 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("SystemServer", "Failure starting Audio Service", $r57);
+
+        goto label045;
+
+     label090:
+        $r58 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("SystemServer", "Failure starting HeadsetObserver", $r58);
+
+        goto label046;
+
+     label091:
+        $r59 := @caughtexception;
+
+        $r45 = $r59;
+
+     label092:
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("SystemServer", "Failure starting AppWidget Service", $r45);
+
+        goto label049;
+
+     label093:
+        $r60 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("SystemServer", "Failure installing status bar icons", $r60);
+
+        goto label050;
+
+     label094:
+        $b2 = 0;
+
+        goto label051;
+
+     label095:
+        $r61 := @caughtexception;
+
+        goto label055;
+
+     label096:
+        $r62 := @caughtexception;
+
+        goto label057;
+
+     label097:
+        $r63 := @caughtexception;
+
+        $r45 = $r63;
+
+        $r28 = $r1;
+
+        goto label092;
+
+     label098:
+        $r64 := @caughtexception;
+
+        $r45 = $r64;
+
+        $r27 = $r6;
+
+        goto label079;
+
+     label099:
+        $r65 := @caughtexception;
+
+        $r45 = $r65;
+
+        $r26 = $r7;
+
+        goto label076;
+
+     label100:
+        $r66 := @caughtexception;
+
+        $r44 = $r66;
+
+        $r14 = null;
+
+        goto label066;
+
+     label101:
+        $r67 := @caughtexception;
+
+        $r44 = $r67;
+
+        goto label066;
+
+     label102:
+        $r68 := @caughtexception;
+
+        $r44 = $r68;
+
+        $r10 = $r4;
+
+        goto label066;
+
+     label103:
+        $r69 := @caughtexception;
+
+        $r44 = $r69;
+
+        $r10 = $r4;
+
+        goto label066;
+
+        catch java.lang.RuntimeException from label002 to label003 with label100;
+        catch java.lang.RuntimeException from label004 to label005 with label100;
+        catch java.lang.RuntimeException from label005 to label006 with label101;
+        catch java.lang.RuntimeException from label007 to label008 with label101;
+        catch java.lang.RuntimeException from label009 to label011 with label101;
+        catch java.lang.RuntimeException from label012 to label014 with label101;
+        catch java.lang.RuntimeException from label015 to label016 with label101;
+        catch java.lang.RuntimeException from label017 to label018 with label101;
+        catch java.lang.RuntimeException from label018 to label019 with label065;
+        catch java.lang.RuntimeException from label020 to label021 with label065;
+        catch java.lang.RuntimeException from label022 to label023 with label065;
+        catch java.lang.RuntimeException from label024 to label026 with label065;
+        catch java.lang.Throwable from label028 to label029 with label075;
+        catch java.lang.Throwable from label029 to label030 with label099;
+        catch java.lang.Throwable from label031 to label032 with label077;
+        catch java.lang.Throwable from label032 to label033 with label078;
+        catch java.lang.Throwable from label033 to label034 with label098;
+        catch java.lang.Throwable from label035 to label036 with label080;
+        catch java.lang.Throwable from label036 to label037 with label081;
+        catch java.lang.Throwable from label037 to label038 with label082;
+        catch java.lang.Throwable from label038 to label039 with label083;
+        catch java.lang.Throwable from label039 to label040 with label084;
+        catch java.lang.Throwable from label040 to label041 with label085;
+        catch java.lang.Throwable from label041 to label042 with label086;
+        catch java.lang.Throwable from label042 to label043 with label087;
+        catch java.lang.Throwable from label043 to label044 with label088;
+        catch java.lang.Throwable from label044 to label045 with label089;
+        catch java.lang.Throwable from label045 to label046 with label090;
+        catch java.lang.Throwable from label046 to label047 with label091;
+        catch java.lang.Throwable from label047 to label048 with label097;
+        catch java.lang.Throwable from label049 to label050 with label093;
+        catch android.os.RemoteException from label054 to label055 with label095;
+        catch android.os.RemoteException from label056 to label057 with label096;
+        catch java.lang.RuntimeException from label063 to label064 with label065;
+        catch java.lang.RuntimeException from label067 to label068 with label065;
+        catch java.lang.RuntimeException from label069 to label070 with label065;
+        catch java.lang.RuntimeException from label070 to label071 with label102;
+        catch java.lang.RuntimeException from label072 to label073 with label102;
+        catch java.lang.RuntimeException from label073 to label074 with label103;
+    }
+
+    public static void <clinit>()
+    {
+        <com.android.server.ServerThread: java.lang.String TAG> = "SystemServer";
+
+        <com.android.server.ServerThread: int LOG_BOOT_PROGRESS_SYSTEM_RUN> = 3010;
+
+        <com.android.server.ServerThread: boolean INCLUDE_DEMO> = 0;
+
+        return;
+    }
+}

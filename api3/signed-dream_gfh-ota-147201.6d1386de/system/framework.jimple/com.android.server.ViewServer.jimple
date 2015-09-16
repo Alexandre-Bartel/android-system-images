@@ -1,0 +1,539 @@
+class com.android.server.ViewServer extends java.lang.Object implements java.lang.Runnable
+{
+    private static final java.lang.String COMMAND_PROTOCOL_VERSION;
+    private static final java.lang.String COMMAND_SERVER_VERSION;
+    private static final java.lang.String COMMAND_WINDOW_MANAGER_LIST;
+    private static final java.lang.String LOG_TAG;
+    private static final java.lang.String VALUE_PROTOCOL_VERSION;
+    private static final java.lang.String VALUE_SERVER_VERSION;
+    public static final int VIEW_SERVER_DEFAULT_PORT;
+    private final int mPort;
+    private java.net.ServerSocket mServer;
+    private java.lang.Thread mThread;
+    private final com.android.server.WindowManagerService mWindowManager;
+
+    void <init>(com.android.server.WindowManagerService)
+    {
+        com.android.server.ViewServer $r0;
+        com.android.server.WindowManagerService $r1;
+
+        $r0 := @this: com.android.server.ViewServer;
+
+        $r1 := @parameter0: com.android.server.WindowManagerService;
+
+        specialinvoke $r0.<com.android.server.ViewServer: void <init>(com.android.server.WindowManagerService,int)>($r1, 4939);
+
+        return;
+    }
+
+    void <init>(com.android.server.WindowManagerService, int)
+    {
+        com.android.server.ViewServer $r0;
+        com.android.server.WindowManagerService $r1;
+        int $i0;
+
+        $r0 := @this: com.android.server.ViewServer;
+
+        $r1 := @parameter0: com.android.server.WindowManagerService;
+
+        $i0 := @parameter1: int;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r0.<com.android.server.ViewServer: com.android.server.WindowManagerService mWindowManager> = $r1;
+
+        $r0.<com.android.server.ViewServer: int mPort> = $i0;
+
+        return;
+    }
+
+    private static boolean writeValue(java.net.Socket, java.lang.String)
+    {
+        java.net.Socket $r0;
+        java.lang.String $r1;
+        java.io.BufferedWriter $r2, $r4;
+        java.io.OutputStream $r3;
+        java.io.OutputStreamWriter $r5;
+        java.io.IOException $r6, $r8, $r10;
+        java.lang.Exception $r7, $r11;
+        java.lang.Throwable $r9;
+
+        $r0 := @parameter0: java.net.Socket;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $r4 = null;
+
+     label01:
+        $r3 = virtualinvoke $r0.<java.net.Socket: java.io.OutputStream getOutputStream()>();
+
+     label02:
+        $r2 = new java.io.BufferedWriter;
+
+     label03:
+        $r5 = new java.io.OutputStreamWriter;
+
+        specialinvoke $r5.<java.io.OutputStreamWriter: void <init>(java.io.OutputStream)>($r3);
+
+        specialinvoke $r2.<java.io.BufferedWriter: void <init>(java.io.Writer,int)>($r5, 8192);
+
+     label04:
+        virtualinvoke $r2.<java.io.Writer: void write(java.lang.String)>($r1);
+
+        virtualinvoke $r2.<java.io.Writer: void write(java.lang.String)>("\n");
+
+        virtualinvoke $r2.<java.io.BufferedWriter: void flush()>();
+
+     label05:
+        if $r2 == null goto label21;
+
+     label06:
+        virtualinvoke $r2.<java.io.BufferedWriter: void close()>();
+
+     label07:
+        return 1;
+
+     label08:
+        $r6 := @caughtexception;
+
+        return 0;
+
+     label09:
+        $r7 := @caughtexception;
+
+     label10:
+        if $r4 == null goto label22;
+
+     label11:
+        virtualinvoke $r4.<java.io.BufferedWriter: void close()>();
+
+     label12:
+        return 0;
+
+     label13:
+        $r8 := @caughtexception;
+
+        return 0;
+
+     label14:
+        $r9 := @caughtexception;
+
+     label15:
+        if $r4 == null goto label17;
+
+     label16:
+        virtualinvoke $r4.<java.io.BufferedWriter: void close()>();
+
+     label17:
+        throw $r9;
+
+     label18:
+        $r10 := @caughtexception;
+
+        goto label17;
+
+     label19:
+        $r9 := @caughtexception;
+
+        $r4 = $r2;
+
+        goto label15;
+
+     label20:
+        $r11 := @caughtexception;
+
+        $r4 = $r2;
+
+        goto label10;
+
+     label21:
+        return 1;
+
+     label22:
+        return 0;
+
+        catch java.lang.Exception from label01 to label02 with label09;
+        catch java.lang.Exception from label03 to label04 with label09;
+        catch java.lang.Throwable from label01 to label04 with label14;
+        catch java.lang.Exception from label04 to label05 with label20;
+        catch java.lang.Throwable from label04 to label05 with label19;
+        catch java.io.IOException from label06 to label07 with label08;
+        catch java.io.IOException from label11 to label12 with label13;
+        catch java.io.IOException from label16 to label17 with label18;
+    }
+
+    boolean isRunning()
+    {
+        com.android.server.ViewServer $r0;
+        boolean $z0;
+        java.lang.Thread $r1;
+
+        $r0 := @this: com.android.server.ViewServer;
+
+        $r1 = $r0.<com.android.server.ViewServer: java.lang.Thread mThread>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<com.android.server.ViewServer: java.lang.Thread mThread>;
+
+        $z0 = virtualinvoke $r1.<java.lang.Thread: boolean isAlive()>();
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    public void run()
+    {
+        com.android.server.ViewServer $r0;
+        java.io.BufferedReader $r1, $r7;
+        java.net.ServerSocket $r2;
+        java.lang.Thread $r3, $r4;
+        java.net.Socket $r5, $r6;
+        java.io.InputStreamReader $r8;
+        java.io.InputStream $r9;
+        java.lang.String $r10, $r11, $r12;
+        int $i0;
+        boolean $z0;
+        java.lang.StringBuilder $r13;
+        java.io.IOException $r14, $r18, $r20;
+        com.android.server.WindowManagerService $r15;
+        java.lang.Throwable $r16, $r19;
+        java.lang.Exception $r17;
+
+        $r0 := @this: com.android.server.ViewServer;
+
+        $r2 = $r0.<com.android.server.ViewServer: java.net.ServerSocket mServer>;
+
+     label01:
+        $r3 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r4 = $r0.<com.android.server.ViewServer: java.lang.Thread mThread>;
+
+        if $r3 != $r4 goto label38;
+
+        $r5 = null;
+
+     label02:
+        $r6 = virtualinvoke $r2.<java.net.ServerSocket: java.net.Socket accept()>();
+
+     label03:
+        $r5 = $r6;
+
+        $r7 = null;
+
+     label04:
+        $r1 = new java.io.BufferedReader;
+
+        $r8 = new java.io.InputStreamReader;
+
+        $r9 = virtualinvoke $r6.<java.net.Socket: java.io.InputStream getInputStream()>();
+
+        specialinvoke $r8.<java.io.InputStreamReader: void <init>(java.io.InputStream)>($r9);
+
+        specialinvoke $r1.<java.io.BufferedReader: void <init>(java.io.Reader,int)>($r8, 1024);
+
+     label05:
+        $r10 = virtualinvoke $r1.<java.io.BufferedReader: java.lang.String readLine()>();
+
+        $i0 = virtualinvoke $r10.<java.lang.String: int indexOf(int)>(32);
+
+        if $i0 != -1 goto label15;
+
+     label06:
+        $r11 = $r10;
+
+        $r10 = "";
+
+     label07:
+        $r12 = "PROTOCOL";
+
+        $z0 = virtualinvoke $r12.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r11);
+
+        if $z0 == 0 goto label18;
+
+        $z0 = staticinvoke <com.android.server.ViewServer: boolean writeValue(java.net.Socket,java.lang.String)>($r6, "2");
+
+     label08:
+        if $z0 != 0 goto label09;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("An error occured with the command: ");
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r11 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("ViewServer", $r11);
+
+     label09:
+        if $r1 == null goto label11;
+
+     label10:
+        virtualinvoke $r1.<java.io.BufferedReader: void close()>();
+
+     label11:
+        if $r6 == null goto label01;
+
+     label12:
+        virtualinvoke $r6.<java.net.Socket: void close()>();
+
+     label13:
+        goto label01;
+
+     label14:
+        $r14 := @caughtexception;
+
+        virtualinvoke $r14.<java.lang.Throwable: void printStackTrace()>();
+
+        goto label01;
+
+     label15:
+        $r11 = virtualinvoke $r10.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+     label16:
+        $i0 = $i0 + 1;
+
+        $r10 = virtualinvoke $r10.<java.lang.String: java.lang.String substring(int)>($i0);
+
+     label17:
+        goto label07;
+
+     label18:
+        $r12 = "SERVER";
+
+        $z0 = virtualinvoke $r12.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r11);
+
+        if $z0 == 0 goto label20;
+
+        $z0 = staticinvoke <com.android.server.ViewServer: boolean writeValue(java.net.Socket,java.lang.String)>($r6, "2");
+
+     label19:
+        goto label08;
+
+     label20:
+        $r12 = "LIST";
+
+        $z0 = virtualinvoke $r12.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r11);
+
+        if $z0 == 0 goto label22;
+
+        $r15 = $r0.<com.android.server.ViewServer: com.android.server.WindowManagerService mWindowManager>;
+
+        $z0 = virtualinvoke $r15.<com.android.server.WindowManagerService: boolean viewServerListWindows(java.net.Socket)>($r6);
+
+     label21:
+        goto label08;
+
+     label22:
+        $r15 = $r0.<com.android.server.ViewServer: com.android.server.WindowManagerService mWindowManager>;
+
+        $z0 = virtualinvoke $r15.<com.android.server.WindowManagerService: boolean viewServerWindowCommand(java.net.Socket,java.lang.String,java.lang.String)>($r6, $r11, $r10);
+
+     label23:
+        goto label08;
+
+     label24:
+        $r16 := @caughtexception;
+
+     label25:
+        if $r7 == null goto label27;
+
+     label26:
+        virtualinvoke $r7.<java.io.BufferedReader: void close()>();
+
+     label27:
+        throw $r16;
+
+     label28:
+        $r17 := @caughtexception;
+
+     label29:
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String,java.lang.Throwable)>("ViewServer", "Connection error: ", $r17);
+
+     label30:
+        if $r5 == null goto label01;
+
+     label31:
+        virtualinvoke $r5.<java.net.Socket: void close()>();
+
+     label32:
+        goto label01;
+
+     label33:
+        $r18 := @caughtexception;
+
+        virtualinvoke $r18.<java.lang.Throwable: void printStackTrace()>();
+
+        goto label01;
+
+     label34:
+        $r19 := @caughtexception;
+
+        if $r5 == null goto label36;
+
+     label35:
+        virtualinvoke $r5.<java.net.Socket: void close()>();
+
+     label36:
+        throw $r19;
+
+     label37:
+        $r20 := @caughtexception;
+
+        virtualinvoke $r20.<java.lang.Throwable: void printStackTrace()>();
+
+        goto label36;
+
+     label38:
+        return;
+
+     label39:
+        $r16 := @caughtexception;
+
+        $r7 = $r1;
+
+        goto label25;
+
+        catch java.lang.Exception from label02 to label03 with label28;
+        catch java.lang.Throwable from label02 to label03 with label34;
+        catch java.lang.Throwable from label04 to label05 with label24;
+        catch java.lang.Throwable from label05 to label06 with label39;
+        catch java.lang.Throwable from label07 to label08 with label39;
+        catch java.lang.Throwable from label08 to label09 with label39;
+        catch java.lang.Exception from label10 to label11 with label28;
+        catch java.lang.Throwable from label10 to label11 with label34;
+        catch java.io.IOException from label12 to label13 with label14;
+        catch java.lang.Throwable from label15 to label16 with label39;
+        catch java.lang.Throwable from label16 to label17 with label39;
+        catch java.lang.Throwable from label18 to label19 with label39;
+        catch java.lang.Throwable from label20 to label21 with label39;
+        catch java.lang.Throwable from label22 to label23 with label39;
+        catch java.lang.Exception from label26 to label28 with label28;
+        catch java.lang.Throwable from label26 to label28 with label34;
+        catch java.lang.Throwable from label29 to label30 with label34;
+        catch java.io.IOException from label31 to label32 with label33;
+        catch java.io.IOException from label35 to label36 with label37;
+    }
+
+    boolean start() throws java.io.IOException
+    {
+        com.android.server.ViewServer $r0;
+        java.lang.Thread $r1;
+        java.net.ServerSocket $r2;
+        int $i0;
+        java.net.InetAddress $r3;
+        java.lang.StringBuilder $r4;
+        java.lang.String $r5;
+
+        $r0 := @this: com.android.server.ViewServer;
+
+        $r1 = $r0.<com.android.server.ViewServer: java.lang.Thread mThread>;
+
+        if $r1 == null goto label1;
+
+        return 0;
+
+     label1:
+        $r2 = new java.net.ServerSocket;
+
+        $i0 = $r0.<com.android.server.ViewServer: int mPort>;
+
+        $r3 = staticinvoke <java.net.InetAddress: java.net.InetAddress getLocalHost()>();
+
+        specialinvoke $r2.<java.net.ServerSocket: void <init>(int,int,java.net.InetAddress)>($i0, 1, $r3);
+
+        $r0.<com.android.server.ViewServer: java.net.ServerSocket mServer> = $r2;
+
+        $r1 = new java.lang.Thread;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Remote View Server [port=");
+
+        $i0 = $r0.<com.android.server.ViewServer: int mPort>;
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.lang.Thread: void <init>(java.lang.Runnable,java.lang.String)>($r0, $r5);
+
+        $r0.<com.android.server.ViewServer: java.lang.Thread mThread> = $r1;
+
+        $r1 = $r0.<com.android.server.ViewServer: java.lang.Thread mThread>;
+
+        virtualinvoke $r1.<java.lang.Thread: void start()>();
+
+        return 1;
+    }
+
+    boolean stop()
+    {
+        com.android.server.ViewServer $r0;
+        java.lang.Thread $r1;
+        java.net.ServerSocket $r2;
+        java.io.IOException $r3;
+
+        $r0 := @this: com.android.server.ViewServer;
+
+        $r1 = $r0.<com.android.server.ViewServer: java.lang.Thread mThread>;
+
+        if $r1 == null goto label4;
+
+        $r1 = $r0.<com.android.server.ViewServer: java.lang.Thread mThread>;
+
+        virtualinvoke $r1.<java.lang.Thread: void interrupt()>();
+
+        $r0.<com.android.server.ViewServer: java.lang.Thread mThread> = null;
+
+        $r2 = $r0.<com.android.server.ViewServer: java.net.ServerSocket mServer>;
+
+     label1:
+        virtualinvoke $r2.<java.net.ServerSocket: void close()>();
+
+     label2:
+        $r0.<com.android.server.ViewServer: java.net.ServerSocket mServer> = null;
+
+        return 1;
+
+     label3:
+        $r3 := @caughtexception;
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("ViewServer", "Could not close the view server");
+
+     label4:
+        return 0;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public static void <clinit>()
+    {
+        <com.android.server.ViewServer: int VIEW_SERVER_DEFAULT_PORT> = 4939;
+
+        <com.android.server.ViewServer: java.lang.String VALUE_SERVER_VERSION> = "2";
+
+        <com.android.server.ViewServer: java.lang.String VALUE_PROTOCOL_VERSION> = "2";
+
+        <com.android.server.ViewServer: java.lang.String LOG_TAG> = "ViewServer";
+
+        <com.android.server.ViewServer: java.lang.String COMMAND_WINDOW_MANAGER_LIST> = "LIST";
+
+        <com.android.server.ViewServer: java.lang.String COMMAND_SERVER_VERSION> = "SERVER";
+
+        <com.android.server.ViewServer: java.lang.String COMMAND_PROTOCOL_VERSION> = "PROTOCOL";
+
+        return;
+    }
+}

@@ -1,0 +1,1011 @@
+public class com.android.commands.monkey.MonkeySourceScript extends java.lang.Object implements com.android.commands.monkey.MonkeyEventSource
+{
+    private static final java.lang.String EVENT_KEYWORD_FLIP;
+    private static final java.lang.String EVENT_KEYWORD_KEY;
+    private static final java.lang.String EVENT_KEYWORD_POINTER;
+    private static final java.lang.String EVENT_KEYWORD_TRACKBALL;
+    private static final java.lang.String HEADER_COUNT;
+    private static final java.lang.String HEADER_SPEED;
+    private static final java.lang.String HEADER_TYPE;
+    private static final int MAX_ONE_TIME_READS;
+    private static final int POLICY_ADDITIONAL_EVENT_COUNT;
+    private static final long SLEEP_COMPENSATE_DIFF;
+    private static final java.lang.String STARTING_DATA_LINE;
+    private static final boolean THIS_DEBUG;
+    java.io.BufferedReader mBufferReader;
+    private int mEventCountInScript;
+    java.io.FileInputStream mFStream;
+    private boolean mFileOpened;
+    java.io.DataInputStream mInputStream;
+    private long mLastExportDownTimeKey;
+    private long mLastExportDownTimeMotion;
+    private long mLastExportEventTime;
+    private long mLastRecordedDownTimeKey;
+    private long mLastRecordedDownTimeMotion;
+    private long mLastRecordedEventTime;
+    private java.util.LinkedList mQ;
+    private java.lang.String mScriptFileName;
+    private double mSpeed;
+    private int mVerbose;
+
+    public void <init>(java.lang.String)
+    {
+        com.android.commands.monkey.MonkeySourceScript $r0;
+        java.lang.String $r1;
+        java.util.LinkedList $r2;
+
+        $r0 := @this: com.android.commands.monkey.MonkeySourceScript;
+
+        $r1 := @parameter0: java.lang.String;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: int mEventCountInScript> = 0;
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: int mVerbose> = 0;
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: double mSpeed> = 1.0;
+
+        $r2 = new java.util.LinkedList;
+
+        specialinvoke $r2.<java.util.LinkedList: void <init>()>();
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: java.util.LinkedList mQ> = $r2;
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: long mLastRecordedDownTimeKey> = 0L;
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: long mLastRecordedDownTimeMotion> = 0L;
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: long mLastExportDownTimeKey> = 0L;
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: long mLastExportDownTimeMotion> = 0L;
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: long mLastExportEventTime> = -1L;
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: long mLastRecordedEventTime> = -1L;
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: boolean mFileOpened> = 0;
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: java.lang.String mScriptFileName> = $r1;
+
+        return;
+    }
+
+    private void addHomeKeyEvent()
+    {
+        com.android.commands.monkey.MonkeySourceScript $r0;
+        com.android.commands.monkey.MonkeyKeyEvent $r1;
+        java.util.LinkedList $r2;
+
+        $r0 := @this: com.android.commands.monkey.MonkeySourceScript;
+
+        $r1 = new com.android.commands.monkey.MonkeyKeyEvent;
+
+        specialinvoke $r1.<com.android.commands.monkey.MonkeyKeyEvent: void <init>(int,int)>(0, 3);
+
+        $r2 = $r0.<com.android.commands.monkey.MonkeySourceScript: java.util.LinkedList mQ>;
+
+        virtualinvoke $r2.<java.util.LinkedList: void addLast(java.lang.Object)>($r1);
+
+        $r1 = new com.android.commands.monkey.MonkeyKeyEvent;
+
+        specialinvoke $r1.<com.android.commands.monkey.MonkeyKeyEvent: void <init>(int,int)>(1, 3);
+
+        $r2 = $r0.<com.android.commands.monkey.MonkeySourceScript: java.util.LinkedList mQ>;
+
+        virtualinvoke $r2.<java.util.LinkedList: void addLast(java.lang.Object)>($r1);
+
+        return;
+    }
+
+    private void adjustKeyEventTime(com.android.commands.monkey.MonkeyKeyEvent)
+    {
+        com.android.commands.monkey.MonkeySourceScript $r0;
+        com.android.commands.monkey.MonkeyKeyEvent $r1;
+        long $l0, $l2, $l3;
+        byte $b1;
+        double $d0, $d1;
+
+        $r0 := @this: com.android.commands.monkey.MonkeySourceScript;
+
+        $r1 := @parameter0: com.android.commands.monkey.MonkeyKeyEvent;
+
+        $l0 = virtualinvoke $r1.<com.android.commands.monkey.MonkeyKeyEvent: long getEventTime()>();
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 >= 0 goto label1;
+
+        return;
+
+     label1:
+        $l0 = $r0.<com.android.commands.monkey.MonkeySourceScript: long mLastRecordedEventTime>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 > 0 goto label3;
+
+        $l2 = staticinvoke <android.os.SystemClock: long uptimeMillis()>();
+
+        $l0 = $l2;
+
+     label2:
+        $l3 = virtualinvoke $r1.<com.android.commands.monkey.MonkeyKeyEvent: long getDownTime()>();
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: long mLastRecordedDownTimeKey> = $l3;
+
+        $l3 = virtualinvoke $r1.<com.android.commands.monkey.MonkeyKeyEvent: long getEventTime()>();
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: long mLastRecordedEventTime> = $l3;
+
+        virtualinvoke $r1.<com.android.commands.monkey.MonkeyKeyEvent: void setDownTime(long)>($l0);
+
+        virtualinvoke $r1.<com.android.commands.monkey.MonkeyKeyEvent: void setEventTime(long)>($l2);
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: long mLastExportDownTimeKey> = $l0;
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: long mLastExportEventTime> = $l2;
+
+        return;
+
+     label3:
+        $l0 = virtualinvoke $r1.<com.android.commands.monkey.MonkeyKeyEvent: long getDownTime()>();
+
+        $l2 = $r0.<com.android.commands.monkey.MonkeySourceScript: long mLastRecordedDownTimeKey>;
+
+        $b1 = $l0 cmp $l2;
+
+        if $b1 == 0 goto label5;
+
+        $l0 = virtualinvoke $r1.<com.android.commands.monkey.MonkeyKeyEvent: long getDownTime()>();
+
+     label4:
+        $l2 = virtualinvoke $r1.<com.android.commands.monkey.MonkeyKeyEvent: long getEventTime()>();
+
+        $l3 = $r0.<com.android.commands.monkey.MonkeySourceScript: long mLastRecordedEventTime>;
+
+        $l2 = $l2 - $l3;
+
+        $d0 = (double) $l2;
+
+        $d1 = $r0.<com.android.commands.monkey.MonkeySourceScript: double mSpeed>;
+
+        $d0 = $d0 * $d1;
+
+        $l3 = (long) $d0;
+
+        $l2 = $r0.<com.android.commands.monkey.MonkeySourceScript: long mLastExportEventTime>;
+
+        $l2 = $l2 + $l3;
+
+        $l3 = $l3 - 16L;
+
+        specialinvoke $r0.<com.android.commands.monkey.MonkeySourceScript: void needSleep(long)>($l3);
+
+        goto label2;
+
+     label5:
+        $l0 = $r0.<com.android.commands.monkey.MonkeySourceScript: long mLastExportDownTimeKey>;
+
+        goto label4;
+    }
+
+    private void adjustMotionEventTime(com.android.commands.monkey.MonkeyMotionEvent)
+    {
+        com.android.commands.monkey.MonkeySourceScript $r0;
+        com.android.commands.monkey.MonkeyMotionEvent $r1;
+        long $l0, $l2, $l3;
+        byte $b1;
+        double $d0, $d1;
+
+        $r0 := @this: com.android.commands.monkey.MonkeySourceScript;
+
+        $r1 := @parameter0: com.android.commands.monkey.MonkeyMotionEvent;
+
+        $l0 = virtualinvoke $r1.<com.android.commands.monkey.MonkeyMotionEvent: long getEventTime()>();
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 >= 0 goto label1;
+
+        return;
+
+     label1:
+        $l0 = $r0.<com.android.commands.monkey.MonkeySourceScript: long mLastRecordedEventTime>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 > 0 goto label3;
+
+        $l2 = staticinvoke <android.os.SystemClock: long uptimeMillis()>();
+
+        $l0 = $l2;
+
+     label2:
+        $l3 = virtualinvoke $r1.<com.android.commands.monkey.MonkeyMotionEvent: long getDownTime()>();
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: long mLastRecordedDownTimeMotion> = $l3;
+
+        $l3 = virtualinvoke $r1.<com.android.commands.monkey.MonkeyMotionEvent: long getEventTime()>();
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: long mLastRecordedEventTime> = $l3;
+
+        virtualinvoke $r1.<com.android.commands.monkey.MonkeyMotionEvent: void setDownTime(long)>($l0);
+
+        virtualinvoke $r1.<com.android.commands.monkey.MonkeyMotionEvent: void setEventTime(long)>($l2);
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: long mLastExportDownTimeMotion> = $l0;
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: long mLastExportEventTime> = $l2;
+
+        return;
+
+     label3:
+        $l0 = virtualinvoke $r1.<com.android.commands.monkey.MonkeyMotionEvent: long getDownTime()>();
+
+        $l2 = $r0.<com.android.commands.monkey.MonkeySourceScript: long mLastRecordedDownTimeMotion>;
+
+        $b1 = $l0 cmp $l2;
+
+        if $b1 == 0 goto label5;
+
+        $l0 = virtualinvoke $r1.<com.android.commands.monkey.MonkeyMotionEvent: long getDownTime()>();
+
+     label4:
+        $l2 = virtualinvoke $r1.<com.android.commands.monkey.MonkeyMotionEvent: long getEventTime()>();
+
+        $l3 = $r0.<com.android.commands.monkey.MonkeySourceScript: long mLastRecordedEventTime>;
+
+        $l2 = $l2 - $l3;
+
+        $d0 = (double) $l2;
+
+        $d1 = $r0.<com.android.commands.monkey.MonkeySourceScript: double mSpeed>;
+
+        $d0 = $d0 * $d1;
+
+        $l3 = (long) $d0;
+
+        $l2 = $r0.<com.android.commands.monkey.MonkeySourceScript: long mLastExportEventTime>;
+
+        $l2 = $l2 + $l3;
+
+        $l3 = $l3 - 16L;
+
+        specialinvoke $r0.<com.android.commands.monkey.MonkeySourceScript: void needSleep(long)>($l3);
+
+        goto label2;
+
+     label5:
+        $l0 = $r0.<com.android.commands.monkey.MonkeySourceScript: long mLastExportDownTimeMotion>;
+
+        goto label4;
+    }
+
+    private void closeFile()
+    {
+        com.android.commands.monkey.MonkeySourceScript $r0;
+        java.io.FileInputStream $r1;
+        java.io.DataInputStream $r2;
+        java.io.IOException $r3;
+        java.io.PrintStream $r4;
+
+        $r0 := @this: com.android.commands.monkey.MonkeySourceScript;
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: boolean mFileOpened> = 0;
+
+        $r1 = $r0.<com.android.commands.monkey.MonkeySourceScript: java.io.FileInputStream mFStream>;
+
+     label1:
+        virtualinvoke $r1.<java.io.FileInputStream: void close()>();
+
+        $r2 = $r0.<com.android.commands.monkey.MonkeySourceScript: java.io.DataInputStream mInputStream>;
+
+        virtualinvoke $r2.<java.io.FilterInputStream: void close()>();
+
+     label2:
+        return;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r4.<java.io.PrintStream: void println(java.lang.Object)>($r3);
+
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    private void needSleep(long)
+    {
+        com.android.commands.monkey.MonkeySourceScript $r0;
+        long $l0;
+        byte $b1;
+        java.lang.InterruptedException $r1;
+
+        $r0 := @this: com.android.commands.monkey.MonkeySourceScript;
+
+        $l0 := @parameter0: long;
+
+        $b1 = $l0 cmp 1L;
+
+        if $b1 >= 0 goto label1;
+
+        return;
+
+     label1:
+        staticinvoke <java.lang.Thread: void sleep(long)>($l0);
+
+     label2:
+        return;
+
+     label3:
+        $r1 := @caughtexception;
+
+        return;
+
+        catch java.lang.InterruptedException from label1 to label2 with label3;
+    }
+
+    private void processLine(java.lang.String)
+    {
+        com.android.commands.monkey.MonkeySourceScript $r0;
+        java.lang.String $r1, $r3;
+        java.util.StringTokenizer $r2;
+        int $i0, $i1, $i4, $i5, $i6, $i7;
+        long $l2, $l3;
+        com.android.commands.monkey.MonkeyKeyEvent $r4;
+        java.util.LinkedList $r5;
+        java.lang.NumberFormatException $r6, $r8;
+        float $f0, $f1, $f2, $f3, $f4, $f5;
+        byte $b8;
+        com.android.commands.monkey.MonkeyMotionEvent $r7;
+        boolean $z0;
+        com.android.commands.monkey.MonkeyFlipEvent $r9;
+
+        $r0 := @this: com.android.commands.monkey.MonkeySourceScript;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int indexOf(int)>(40);
+
+        $i1 = virtualinvoke $r1.<java.lang.String: int indexOf(int)>(41);
+
+        if $i0 < 0 goto label12;
+
+        if $i1 >= 0 goto label01;
+
+        return;
+
+     label01:
+        $r2 = new java.util.StringTokenizer;
+
+        $i0 = $i0 + 1;
+
+        $r3 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>($i0, $i1);
+
+        specialinvoke $r2.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>($r3, ",");
+
+        $i1 = virtualinvoke $r1.<java.lang.String: int indexOf(java.lang.String)>("DispatchKey");
+
+        if $i1 < 0 goto label05;
+
+     label02:
+        $r1 = virtualinvoke $r2.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $l2 = staticinvoke <java.lang.Long: long parseLong(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r2.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $l3 = staticinvoke <java.lang.Long: long parseLong(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r2.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $i1 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r2.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r2.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $i4 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r2.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $i5 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r2.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $i6 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r2.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $i7 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r1);
+
+        $r4 = new com.android.commands.monkey.MonkeyKeyEvent;
+
+        specialinvoke $r4.<com.android.commands.monkey.MonkeyKeyEvent: void <init>(long,long,int,int,int,int,int,int)>($l2, $l3, $i1, $i0, $i4, $i5, $i6, $i7);
+
+        $r5 = $r0.<com.android.commands.monkey.MonkeySourceScript: java.util.LinkedList mQ>;
+
+        virtualinvoke $r5.<java.util.LinkedList: void addLast(java.lang.Object)>($r4);
+
+     label03:
+        return;
+
+     label04:
+        $r6 := @caughtexception;
+
+        return;
+
+     label05:
+        $i1 = virtualinvoke $r1.<java.lang.String: int indexOf(java.lang.String)>("DispatchPointer");
+
+        if $i1 >= 0 goto label06;
+
+        $i1 = virtualinvoke $r1.<java.lang.String: int indexOf(java.lang.String)>("DispatchTrackball");
+
+        if $i1 < 0 goto label11;
+
+     label06:
+        $r3 = virtualinvoke $r2.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $l2 = staticinvoke <java.lang.Long: long parseLong(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r2.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $l3 = staticinvoke <java.lang.Long: long parseLong(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r2.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $i1 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r2.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $f0 = staticinvoke <java.lang.Float: float parseFloat(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r2.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $f1 = staticinvoke <java.lang.Float: float parseFloat(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r2.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $f2 = staticinvoke <java.lang.Float: float parseFloat(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r2.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $f3 = staticinvoke <java.lang.Float: float parseFloat(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r2.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r2.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $f4 = staticinvoke <java.lang.Float: float parseFloat(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r2.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $f5 = staticinvoke <java.lang.Float: float parseFloat(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r2.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $i4 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r2.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $i5 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r3);
+
+        $b8 = 2;
+
+        $i6 = virtualinvoke $r1.<java.lang.String: int indexOf(java.lang.String)>("Pointer");
+
+     label07:
+        if $i6 <= 0 goto label08;
+
+        $b8 = 1;
+
+     label08:
+        $r7 = new com.android.commands.monkey.MonkeyMotionEvent;
+
+        specialinvoke $r7.<com.android.commands.monkey.MonkeyMotionEvent: void <init>(int,long,long,int,float,float,float,float,int,float,float,int,int)>($b8, $l2, $l3, $i1, $f0, $f1, $f2, $f3, $i0, $f4, $f5, $i4, $i5);
+
+        $r5 = $r0.<com.android.commands.monkey.MonkeySourceScript: java.util.LinkedList mQ>;
+
+        virtualinvoke $r5.<java.util.LinkedList: void addLast(java.lang.Object)>($r7);
+
+     label09:
+        return;
+
+     label10:
+        $r8 := @caughtexception;
+
+        return;
+
+     label11:
+        $i1 = virtualinvoke $r1.<java.lang.String: int indexOf(java.lang.String)>("DispatchFlip");
+
+        if $i1 < 0 goto label13;
+
+        $r1 = virtualinvoke $r2.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $z0 = staticinvoke <java.lang.Boolean: boolean parseBoolean(java.lang.String)>($r1);
+
+        $r9 = new com.android.commands.monkey.MonkeyFlipEvent;
+
+        specialinvoke $r9.<com.android.commands.monkey.MonkeyFlipEvent: void <init>(boolean)>($z0);
+
+        $r5 = $r0.<com.android.commands.monkey.MonkeySourceScript: java.util.LinkedList mQ>;
+
+        virtualinvoke $r5.<java.util.LinkedList: void addLast(java.lang.Object)>($r9);
+
+        return;
+
+     label12:
+        return;
+
+     label13:
+        return;
+
+        catch java.lang.NumberFormatException from label02 to label03 with label04;
+        catch java.lang.NumberFormatException from label06 to label07 with label10;
+        catch java.lang.NumberFormatException from label08 to label09 with label10;
+    }
+
+    private boolean readNextBatch()
+    {
+        com.android.commands.monkey.MonkeySourceScript $r0;
+        java.lang.String $r1, $r3;
+        boolean $z0;
+        int $i0;
+        java.io.BufferedReader $r2;
+        java.io.IOException $r4;
+        java.io.PrintStream $r5;
+
+        $r0 := @this: com.android.commands.monkey.MonkeySourceScript;
+
+        $r1 = null;
+
+        $z0 = $r0.<com.android.commands.monkey.MonkeySourceScript: boolean mFileOpened>;
+
+        if $z0 != 0 goto label02;
+
+        $z0 = specialinvoke $r0.<com.android.commands.monkey.MonkeySourceScript: boolean readScriptHeader()>();
+
+        if $z0 != 0 goto label01;
+
+        specialinvoke $r0.<com.android.commands.monkey.MonkeySourceScript: void closeFile()>();
+
+        return 0;
+
+     label01:
+        specialinvoke $r0.<com.android.commands.monkey.MonkeySourceScript: void resetValue()>();
+
+        specialinvoke $r0.<com.android.commands.monkey.MonkeySourceScript: void addHomeKeyEvent()>();
+
+     label02:
+        $i0 = 0;
+
+     label03:
+        if $i0 >= 100 goto label09;
+
+        $r2 = $r0.<com.android.commands.monkey.MonkeySourceScript: java.io.BufferedReader mBufferReader>;
+
+     label04:
+        $r3 = virtualinvoke $r2.<java.io.BufferedReader: java.lang.String readLine()>();
+
+     label05:
+        $r1 = $r3;
+
+     label06:
+        if $r3 == null goto label09;
+
+        $r3 = virtualinvoke $r3.<java.lang.String: java.lang.String trim()>();
+
+        $r1 = $r3;
+
+        specialinvoke $r0.<com.android.commands.monkey.MonkeySourceScript: void processLine(java.lang.String)>($r3);
+
+     label07:
+        $i0 = $i0 + 1;
+
+        goto label03;
+
+     label08:
+        $r4 := @caughtexception;
+
+        $r5 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r5.<java.io.PrintStream: void println(java.lang.Object)>($r4);
+
+        return 0;
+
+     label09:
+        if $r1 != null goto label10;
+
+        specialinvoke $r0.<com.android.commands.monkey.MonkeySourceScript: void closeFile()>();
+
+     label10:
+        return 1;
+
+        catch java.io.IOException from label04 to label05 with label08;
+        catch java.io.IOException from label06 to label07 with label08;
+    }
+
+    private boolean readScriptHeader()
+    {
+        com.android.commands.monkey.MonkeySourceScript $r0;
+        java.io.DataInputStream $r1;
+        java.io.FileInputStream $r2;
+        java.lang.String $r3, $r6;
+        java.io.BufferedReader $r4;
+        java.io.InputStreamReader $r5;
+        int $i0;
+        java.lang.NumberFormatException $r7, $r10;
+        java.io.PrintStream $r8;
+        java.io.FileNotFoundException $r9;
+        double $d0;
+        java.io.IOException $r11;
+
+        $r0 := @this: com.android.commands.monkey.MonkeySourceScript;
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: int mEventCountInScript> = -1;
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: boolean mFileOpened> = 0;
+
+        $r2 = new java.io.FileInputStream;
+
+        $r3 = $r0.<com.android.commands.monkey.MonkeySourceScript: java.lang.String mScriptFileName>;
+
+     label01:
+        specialinvoke $r2.<java.io.FileInputStream: void <init>(java.lang.String)>($r3);
+
+     label02:
+        $r0.<com.android.commands.monkey.MonkeySourceScript: java.io.FileInputStream mFStream> = $r2;
+
+        $r1 = new java.io.DataInputStream;
+
+     label03:
+        $r2 = $r0.<com.android.commands.monkey.MonkeySourceScript: java.io.FileInputStream mFStream>;
+
+        specialinvoke $r1.<java.io.DataInputStream: void <init>(java.io.InputStream)>($r2);
+
+     label04:
+        $r0.<com.android.commands.monkey.MonkeySourceScript: java.io.DataInputStream mInputStream> = $r1;
+
+        $r4 = new java.io.BufferedReader;
+
+        $r5 = new java.io.InputStreamReader;
+
+     label05:
+        $r1 = $r0.<com.android.commands.monkey.MonkeySourceScript: java.io.DataInputStream mInputStream>;
+
+        specialinvoke $r5.<java.io.InputStreamReader: void <init>(java.io.InputStream)>($r1);
+
+        specialinvoke $r4.<java.io.BufferedReader: void <init>(java.io.Reader)>($r5);
+
+     label06:
+        $r0.<com.android.commands.monkey.MonkeySourceScript: java.io.BufferedReader mBufferReader> = $r4;
+
+     label07:
+        $r4 = $r0.<com.android.commands.monkey.MonkeySourceScript: java.io.BufferedReader mBufferReader>;
+
+        $r3 = virtualinvoke $r4.<java.io.BufferedReader: java.lang.String readLine()>();
+
+        if $r3 == null goto label15;
+
+        $r3 = virtualinvoke $r3.<java.lang.String: java.lang.String trim()>();
+
+        $i0 = virtualinvoke $r3.<java.lang.String: int indexOf(java.lang.String)>("type=");
+
+        if $i0 >= 0 goto label07;
+
+        $i0 = virtualinvoke $r3.<java.lang.String: int indexOf(java.lang.String)>("count=");
+
+     label08:
+        if $i0 < 0 goto label16;
+
+        $r6 = "count=";
+
+     label09:
+        $i0 = virtualinvoke $r6.<java.lang.String: int length()>();
+
+        $i0 = $i0 + 1;
+
+        $r3 = virtualinvoke $r3.<java.lang.String: java.lang.String substring(int)>($i0);
+
+        $r3 = virtualinvoke $r3.<java.lang.String: java.lang.String trim()>();
+
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r3);
+
+     label10:
+        $r0.<com.android.commands.monkey.MonkeySourceScript: int mEventCountInScript> = $i0;
+
+        goto label07;
+
+     label11:
+        $r7 := @caughtexception;
+
+        $r8 = <java.lang.System: java.io.PrintStream err>;
+
+     label12:
+        virtualinvoke $r8.<java.io.PrintStream: void println(java.lang.Object)>($r7);
+
+     label13:
+        goto label07;
+
+     label14:
+        $r9 := @caughtexception;
+
+        $r8 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r8.<java.io.PrintStream: void println(java.lang.Object)>($r9);
+
+     label15:
+        return 0;
+
+     label16:
+        $i0 = virtualinvoke $r3.<java.lang.String: int indexOf(java.lang.String)>("speed=");
+
+     label17:
+        if $i0 < 0 goto label24;
+
+        $r6 = "speed=";
+
+     label18:
+        $i0 = virtualinvoke $r6.<java.lang.String: int length()>();
+
+        $i0 = $i0 + 1;
+
+        $r3 = virtualinvoke $r3.<java.lang.String: java.lang.String substring(int)>($i0);
+
+        $r3 = virtualinvoke $r3.<java.lang.String: java.lang.String trim()>();
+
+        $d0 = staticinvoke <java.lang.Double: double parseDouble(java.lang.String)>($r3);
+
+     label19:
+        $r0.<com.android.commands.monkey.MonkeySourceScript: double mSpeed> = $d0;
+
+        goto label07;
+
+     label20:
+        $r10 := @caughtexception;
+
+        $r8 = <java.lang.System: java.io.PrintStream err>;
+
+     label21:
+        virtualinvoke $r8.<java.io.PrintStream: void println(java.lang.Object)>($r10);
+
+     label22:
+        goto label07;
+
+     label23:
+        $r11 := @caughtexception;
+
+        $r8 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r8.<java.io.PrintStream: void println(java.lang.Object)>($r11);
+
+        goto label15;
+
+     label24:
+        $i0 = virtualinvoke $r3.<java.lang.String: int indexOf(java.lang.String)>("start data >>");
+
+     label25:
+        if $i0 < 0 goto label07;
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: boolean mFileOpened> = 1;
+
+        return 1;
+
+        catch java.io.FileNotFoundException from label01 to label02 with label14;
+        catch java.io.FileNotFoundException from label03 to label04 with label14;
+        catch java.io.FileNotFoundException from label05 to label06 with label14;
+        catch java.io.FileNotFoundException from label07 to label08 with label14;
+        catch java.io.IOException from label01 to label02 with label23;
+        catch java.io.IOException from label03 to label04 with label23;
+        catch java.io.IOException from label05 to label06 with label23;
+        catch java.io.IOException from label07 to label08 with label23;
+        catch java.lang.NumberFormatException from label09 to label10 with label11;
+        catch java.io.FileNotFoundException from label09 to label10 with label14;
+        catch java.io.IOException from label09 to label10 with label23;
+        catch java.io.FileNotFoundException from label12 to label13 with label14;
+        catch java.io.IOException from label12 to label13 with label23;
+        catch java.io.FileNotFoundException from label16 to label17 with label14;
+        catch java.io.IOException from label16 to label17 with label23;
+        catch java.lang.NumberFormatException from label18 to label19 with label20;
+        catch java.io.FileNotFoundException from label18 to label19 with label14;
+        catch java.io.IOException from label18 to label19 with label23;
+        catch java.io.FileNotFoundException from label21 to label22 with label14;
+        catch java.io.IOException from label21 to label22 with label23;
+        catch java.io.FileNotFoundException from label24 to label25 with label14;
+        catch java.io.IOException from label24 to label25 with label23;
+    }
+
+    private void resetValue()
+    {
+        com.android.commands.monkey.MonkeySourceScript $r0;
+
+        $r0 := @this: com.android.commands.monkey.MonkeySourceScript;
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: long mLastRecordedDownTimeKey> = 0L;
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: long mLastRecordedDownTimeMotion> = 0L;
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: long mLastExportDownTimeKey> = 0L;
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: long mLastExportDownTimeMotion> = 0L;
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: long mLastRecordedEventTime> = -1L;
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: long mLastExportEventTime> = -1L;
+
+        return;
+    }
+
+    public com.android.commands.monkey.MonkeyEvent getNextEvent()
+    {
+        com.android.commands.monkey.MonkeySourceScript $r0;
+        java.util.LinkedList $r1;
+        boolean $z0;
+        java.lang.Object $r2;
+        com.android.commands.monkey.MonkeyEvent $r3;
+        int $i0;
+        com.android.commands.monkey.MonkeyKeyEvent $r4;
+        com.android.commands.monkey.MonkeyMotionEvent $r5;
+
+        $r0 := @this: com.android.commands.monkey.MonkeySourceScript;
+
+        $r1 = $r0.<com.android.commands.monkey.MonkeySourceScript: java.util.LinkedList mQ>;
+
+        $z0 = virtualinvoke $r1.<java.util.AbstractCollection: boolean isEmpty()>();
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke $r0.<com.android.commands.monkey.MonkeySourceScript: boolean readNextBatch()>();
+
+     label1:
+        $r1 = $r0.<com.android.commands.monkey.MonkeySourceScript: java.util.LinkedList mQ>;
+
+        $r2 = virtualinvoke $r1.<java.util.LinkedList: java.lang.Object getFirst()>();
+
+        $r3 = (com.android.commands.monkey.MonkeyEvent) $r2;
+
+        $r1 = $r0.<com.android.commands.monkey.MonkeySourceScript: java.util.LinkedList mQ>;
+
+        virtualinvoke $r1.<java.util.LinkedList: java.lang.Object removeFirst()>();
+
+        $i0 = virtualinvoke $r3.<com.android.commands.monkey.MonkeyEvent: int getEventType()>();
+
+        if $i0 != 0 goto label2;
+
+        $r4 = (com.android.commands.monkey.MonkeyKeyEvent) $r3;
+
+        specialinvoke $r0.<com.android.commands.monkey.MonkeySourceScript: void adjustKeyEventTime(com.android.commands.monkey.MonkeyKeyEvent)>($r4);
+
+        return $r3;
+
+     label2:
+        $i0 = virtualinvoke $r3.<com.android.commands.monkey.MonkeyEvent: int getEventType()>();
+
+        if $i0 == 1 goto label3;
+
+        $i0 = virtualinvoke $r3.<com.android.commands.monkey.MonkeyEvent: int getEventType()>();
+
+        if $i0 != 2 goto label4;
+
+     label3:
+        $r5 = (com.android.commands.monkey.MonkeyMotionEvent) $r3;
+
+        specialinvoke $r0.<com.android.commands.monkey.MonkeySourceScript: void adjustMotionEventTime(com.android.commands.monkey.MonkeyMotionEvent)>($r5);
+
+        return $r3;
+
+     label4:
+        return $r3;
+    }
+
+    public int getOneRoundEventCount()
+    {
+        com.android.commands.monkey.MonkeySourceScript $r0;
+        int $i0;
+
+        $r0 := @this: com.android.commands.monkey.MonkeySourceScript;
+
+        $i0 = $r0.<com.android.commands.monkey.MonkeySourceScript: int mEventCountInScript>;
+
+        $i0 = $i0 + 2;
+
+        return $i0;
+    }
+
+    public void setVerbose(int)
+    {
+        com.android.commands.monkey.MonkeySourceScript $r0;
+        int $i0;
+
+        $r0 := @this: com.android.commands.monkey.MonkeySourceScript;
+
+        $i0 := @parameter0: int;
+
+        $r0.<com.android.commands.monkey.MonkeySourceScript: int mVerbose> = $i0;
+
+        return;
+    }
+
+    public boolean validate()
+    {
+        com.android.commands.monkey.MonkeySourceScript $r0;
+        boolean $z0;
+        int $i0;
+        java.io.PrintStream $r1;
+        java.lang.StringBuilder $r2;
+        double $d0;
+        java.lang.String $r3;
+
+        $r0 := @this: com.android.commands.monkey.MonkeySourceScript;
+
+        $z0 = specialinvoke $r0.<com.android.commands.monkey.MonkeySourceScript: boolean readNextBatch()>();
+
+        $i0 = $r0.<com.android.commands.monkey.MonkeySourceScript: int mVerbose>;
+
+        if $i0 <= 0 goto label1;
+
+        $r1 = <java.lang.System: java.io.PrintStream out>;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Replaying ");
+
+        $i0 = $r0.<com.android.commands.monkey.MonkeySourceScript: int mEventCountInScript>;
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" events with speed ");
+
+        $d0 = $r0.<com.android.commands.monkey.MonkeySourceScript: double mSpeed>;
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>($d0);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>($r3);
+
+        return $z0;
+
+     label1:
+        return $z0;
+    }
+
+    public static void <clinit>()
+    {
+        <com.android.commands.monkey.MonkeySourceScript: java.lang.String STARTING_DATA_LINE> = "start data >>";
+
+        <com.android.commands.monkey.MonkeySourceScript: long SLEEP_COMPENSATE_DIFF> = 16L;
+
+        <com.android.commands.monkey.MonkeySourceScript: int POLICY_ADDITIONAL_EVENT_COUNT> = 2;
+
+        <com.android.commands.monkey.MonkeySourceScript: int MAX_ONE_TIME_READS> = 100;
+
+        <com.android.commands.monkey.MonkeySourceScript: java.lang.String HEADER_TYPE> = "type=";
+
+        <com.android.commands.monkey.MonkeySourceScript: java.lang.String HEADER_SPEED> = "speed=";
+
+        <com.android.commands.monkey.MonkeySourceScript: java.lang.String HEADER_COUNT> = "count=";
+
+        <com.android.commands.monkey.MonkeySourceScript: java.lang.String EVENT_KEYWORD_TRACKBALL> = "DispatchTrackball";
+
+        <com.android.commands.monkey.MonkeySourceScript: java.lang.String EVENT_KEYWORD_POINTER> = "DispatchPointer";
+
+        <com.android.commands.monkey.MonkeySourceScript: java.lang.String EVENT_KEYWORD_KEY> = "DispatchKey";
+
+        <com.android.commands.monkey.MonkeySourceScript: java.lang.String EVENT_KEYWORD_FLIP> = "DispatchFlip";
+
+        return;
+    }
+}

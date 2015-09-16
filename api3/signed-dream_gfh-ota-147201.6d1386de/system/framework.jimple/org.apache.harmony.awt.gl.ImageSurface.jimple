@@ -1,0 +1,725 @@
+public class org.apache.harmony.awt.gl.ImageSurface extends org.apache.harmony.awt.gl.Surface implements org.apache.harmony.awt.gl.image.DataBufferListener
+{
+    private boolean alphaPre;
+    private long cachedDataPtr;
+    java.awt.image.ColorModel cm;
+    int csType;
+    java.lang.Object data;
+    boolean dataTaken;
+    boolean nativeDrawable;
+    boolean needToRefresh;
+    java.awt.image.WritableRaster raster;
+    int surfaceType;
+
+    public void <init>(java.awt.image.ColorModel, java.awt.image.WritableRaster)
+    {
+        org.apache.harmony.awt.gl.ImageSurface $r0;
+        java.awt.image.ColorModel $r1;
+        java.awt.image.WritableRaster $r2;
+        int $i0;
+
+        $r0 := @this: org.apache.harmony.awt.gl.ImageSurface;
+
+        $r1 := @parameter0: java.awt.image.ColorModel;
+
+        $r2 := @parameter1: java.awt.image.WritableRaster;
+
+        $i0 = staticinvoke <org.apache.harmony.awt.gl.Surface: int getType(java.awt.image.ColorModel,java.awt.image.WritableRaster)>($r1, $r2);
+
+        specialinvoke $r0.<org.apache.harmony.awt.gl.ImageSurface: void <init>(java.awt.image.ColorModel,java.awt.image.WritableRaster,int)>($r1, $r2, $i0);
+
+        return;
+    }
+
+    public void <init>(java.awt.image.ColorModel, java.awt.image.WritableRaster, int)
+    {
+        org.apache.harmony.awt.gl.ImageSurface $r0;
+        java.awt.image.ColorModel $r1;
+        java.awt.image.WritableRaster $r2;
+        int $i0, $i1;
+        boolean $z0;
+        java.lang.IllegalArgumentException $r3;
+        java.lang.String $r4;
+        org.apache.harmony.awt.gl.AwtImageBackdoorAccessor $r5;
+        java.awt.image.DataBuffer $r6;
+        java.lang.Object $r7;
+        java.awt.color.ColorSpace $r8, $r9;
+
+        $r0 := @this: org.apache.harmony.awt.gl.ImageSurface;
+
+        $r1 := @parameter0: java.awt.image.ColorModel;
+
+        $r2 := @parameter1: java.awt.image.WritableRaster;
+
+        $i0 := @parameter2: int;
+
+        specialinvoke $r0.<org.apache.harmony.awt.gl.Surface: void <init>()>();
+
+        $r0.<org.apache.harmony.awt.gl.ImageSurface: boolean nativeDrawable> = 1;
+
+        $r0.<org.apache.harmony.awt.gl.ImageSurface: boolean needToRefresh> = 1;
+
+        $r0.<org.apache.harmony.awt.gl.ImageSurface: boolean dataTaken> = 0;
+
+        $z0 = virtualinvoke $r1.<java.awt.image.ColorModel: boolean isCompatibleRaster(java.awt.image.Raster)>($r2);
+
+        if $z0 != 0 goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        $r4 = staticinvoke <org.apache.harmony.awt.internal.nls.Messages: java.lang.String getString(java.lang.String)>("awt.4D");
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r4);
+
+        throw $r3;
+
+     label1:
+        $r0.<org.apache.harmony.awt.gl.ImageSurface: java.awt.image.ColorModel cm> = $r1;
+
+        $r0.<org.apache.harmony.awt.gl.ImageSurface: java.awt.image.WritableRaster raster> = $r2;
+
+        $r0.<org.apache.harmony.awt.gl.ImageSurface: int surfaceType> = $i0;
+
+        $r5 = staticinvoke <org.apache.harmony.awt.gl.AwtImageBackdoorAccessor: org.apache.harmony.awt.gl.AwtImageBackdoorAccessor getInstance()>();
+
+        $r6 = virtualinvoke $r2.<java.awt.image.Raster: java.awt.image.DataBuffer getDataBuffer()>();
+
+        $r7 = virtualinvoke $r5.<org.apache.harmony.awt.gl.AwtImageBackdoorAccessor: java.lang.Object getData(java.awt.image.DataBuffer)>($r6);
+
+        $r0.<org.apache.harmony.awt.gl.ImageSurface: java.lang.Object data> = $r7;
+
+        $r8 = virtualinvoke $r1.<java.awt.image.ColorModel: java.awt.color.ColorSpace getColorSpace()>();
+
+        $i1 = virtualinvoke $r1.<java.awt.image.ColorModel: int getTransparency()>();
+
+        $r0.<org.apache.harmony.awt.gl.Surface: int transparency> = $i1;
+
+        $i1 = virtualinvoke $r2.<java.awt.image.Raster: int getWidth()>();
+
+        $r0.<org.apache.harmony.awt.gl.Surface: int width> = $i1;
+
+        $i1 = virtualinvoke $r2.<java.awt.image.Raster: int getHeight()>();
+
+        $r0.<org.apache.harmony.awt.gl.Surface: int height> = $i1;
+
+        $r9 = <org.apache.harmony.awt.gl.color.LUTColorConverter: java.awt.color.ColorSpace sRGB_CS>;
+
+        if $r8 != $r9 goto label3;
+
+        $r0.<org.apache.harmony.awt.gl.ImageSurface: int csType> = 1;
+
+     label2:
+        if $i0 != 0 goto label6;
+
+        $r0.<org.apache.harmony.awt.gl.ImageSurface: boolean nativeDrawable> = 0;
+
+        return;
+
+     label3:
+        $r9 = <org.apache.harmony.awt.gl.color.LUTColorConverter: java.awt.color.ColorSpace LINEAR_RGB_CS>;
+
+        if $r8 != $r9 goto label4;
+
+        $r0.<org.apache.harmony.awt.gl.ImageSurface: int csType> = 2;
+
+        goto label2;
+
+     label4:
+        $r9 = <org.apache.harmony.awt.gl.color.LUTColorConverter: java.awt.color.ColorSpace LINEAR_GRAY_CS>;
+
+        if $r8 != $r9 goto label5;
+
+        $r0.<org.apache.harmony.awt.gl.ImageSurface: int csType> = 3;
+
+        goto label2;
+
+     label5:
+        $r0.<org.apache.harmony.awt.gl.ImageSurface: int csType> = 0;
+
+        $r0.<org.apache.harmony.awt.gl.ImageSurface: boolean nativeDrawable> = 0;
+
+        goto label2;
+
+     label6:
+        return;
+    }
+
+    private void createSufaceStructure()
+    {
+        org.apache.harmony.awt.gl.ImageSurface $r0;
+        java.awt.image.ColorModel $r1;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i9, $i10, $i11, $i12, $i13;
+        boolean $z0, $z1, $z2, $z3;
+        int[] $r2, $r3, $r4, $r7, $r8, $r13;
+        java.awt.image.WritableRaster $r5;
+        java.awt.image.SampleModel $r6;
+        java.awt.image.DataBuffer $r9;
+        byte $b7, $b8;
+        java.awt.image.DirectColorModel $r10;
+        java.awt.image.SinglePixelPackedSampleModel $r11;
+        long $l14;
+        java.awt.image.IndexColorModel $r12;
+        java.awt.image.MultiPixelPackedSampleModel $r14;
+        java.awt.image.ComponentSampleModel $r15;
+        java.lang.IllegalArgumentException $r16;
+        java.lang.String $r17;
+
+        $r0 := @this: org.apache.harmony.awt.gl.ImageSurface;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.ImageSurface: java.awt.image.ColorModel cm>;
+
+        $i0 = virtualinvoke $r1.<java.awt.image.ColorModel: int getNumComponents()>();
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.ImageSurface: java.awt.image.ColorModel cm>;
+
+        $z0 = virtualinvoke $r1.<java.awt.image.ColorModel: boolean hasAlpha()>();
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.ImageSurface: java.awt.image.ColorModel cm>;
+
+        $z1 = virtualinvoke $r1.<java.awt.image.ColorModel: boolean isAlphaPremultiplied()>();
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.ImageSurface: java.awt.image.ColorModel cm>;
+
+        $i1 = virtualinvoke $r1.<java.awt.image.ColorModel: int getTransparency()>();
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.ImageSurface: java.awt.image.ColorModel cm>;
+
+        $r2 = virtualinvoke $r1.<java.awt.image.ColorModel: int[] getComponentSize()>();
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.ImageSurface: java.awt.image.ColorModel cm>;
+
+        $i2 = virtualinvoke $r1.<java.awt.image.ColorModel: int getPixelSize()>();
+
+        $r3 = null;
+
+        $r4 = null;
+
+        $i3 = 0;
+
+        $i4 = -1;
+
+        $z2 = 0;
+
+        $r5 = $r0.<org.apache.harmony.awt.gl.ImageSurface: java.awt.image.WritableRaster raster>;
+
+        $r6 = virtualinvoke $r5.<java.awt.image.Raster: java.awt.image.SampleModel getSampleModel()>();
+
+        $i5 = virtualinvoke $r6.<java.awt.image.SampleModel: int getDataType()>();
+
+        $r7 = null;
+
+        $r8 = null;
+
+        $r5 = $r0.<org.apache.harmony.awt.gl.ImageSurface: java.awt.image.WritableRaster raster>;
+
+        $r9 = virtualinvoke $r5.<java.awt.image.Raster: java.awt.image.DataBuffer getDataBuffer()>();
+
+        $i6 = virtualinvoke $r9.<java.awt.image.DataBuffer: int getOffset()>();
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.ImageSurface: java.awt.image.ColorModel cm>;
+
+        $z3 = $r1 instanceof java.awt.image.DirectColorModel;
+
+        if $z3 == 0 goto label2;
+
+        $b7 = 1;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.ImageSurface: java.awt.image.ColorModel cm>;
+
+        $r10 = (java.awt.image.DirectColorModel) $r1;
+
+        $r3 = virtualinvoke $r10.<java.awt.image.PackedColorModel: int[] getMasks()>();
+
+        $b8 = 1;
+
+        $r11 = (java.awt.image.SinglePixelPackedSampleModel) $r6;
+
+        $i9 = virtualinvoke $r11.<java.awt.image.SinglePixelPackedSampleModel: int getScanlineStride()>();
+
+     label1:
+        $i10 = $r0.<org.apache.harmony.awt.gl.ImageSurface: int surfaceType>;
+
+        $i11 = $r0.<org.apache.harmony.awt.gl.Surface: int width>;
+
+        $i12 = $r0.<org.apache.harmony.awt.gl.Surface: int height>;
+
+        $i13 = $r0.<org.apache.harmony.awt.gl.ImageSurface: int csType>;
+
+        $l14 = specialinvoke $r0.<org.apache.harmony.awt.gl.ImageSurface: long createSurfStruct(int,int,int,int,int,int,int,int,int,int,int[],int[],int,int[],int,boolean,int[],int[],int,boolean,boolean,int)>($i10, $i11, $i12, $b7, $i13, $b8, $i5, $i0, $i2, $i9, $r2, $r3, $i3, $r4, $i4, $z2, $r7, $r8, $i6, $z0, $z1, $i1);
+
+        $r0.<org.apache.harmony.awt.gl.Surface: long surfaceDataPtr> = $l14;
+
+        return;
+
+     label2:
+        $r1 = $r0.<org.apache.harmony.awt.gl.ImageSurface: java.awt.image.ColorModel cm>;
+
+        $z3 = $r1 instanceof java.awt.image.IndexColorModel;
+
+        if $z3 == 0 goto label5;
+
+        $b7 = 2;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.ImageSurface: java.awt.image.ColorModel cm>;
+
+        $r12 = (java.awt.image.IndexColorModel) $r1;
+
+        $i4 = virtualinvoke $r12.<java.awt.image.IndexColorModel: int getMapSize()>();
+
+        $i3 = $i4;
+
+        $r13 = newarray (int)[$i4];
+
+        $r4 = $r13;
+
+        virtualinvoke $r12.<java.awt.image.IndexColorModel: void getRGBs(int[])>($r13);
+
+        $i4 = virtualinvoke $r12.<java.awt.image.IndexColorModel: int getTransparentPixel()>();
+
+        $z2 = staticinvoke <org.apache.harmony.awt.gl.Surface: boolean isGrayPallete(java.awt.image.IndexColorModel)>($r12);
+
+        $z3 = $r6 instanceof java.awt.image.MultiPixelPackedSampleModel;
+
+        if $z3 == 0 goto label3;
+
+        $b8 = 2;
+
+        $r14 = (java.awt.image.MultiPixelPackedSampleModel) $r6;
+
+        $i9 = virtualinvoke $r14.<java.awt.image.MultiPixelPackedSampleModel: int getScanlineStride()>();
+
+        goto label1;
+
+     label3:
+        $z3 = $r6 instanceof java.awt.image.ComponentSampleModel;
+
+        if $z3 == 0 goto label4;
+
+        $b8 = 3;
+
+        $r15 = (java.awt.image.ComponentSampleModel) $r6;
+
+        $i9 = virtualinvoke $r15.<java.awt.image.ComponentSampleModel: int getScanlineStride()>();
+
+        goto label1;
+
+     label4:
+        $r16 = new java.lang.IllegalArgumentException;
+
+        $r17 = staticinvoke <org.apache.harmony.awt.internal.nls.Messages: java.lang.String getString(java.lang.String)>("awt.4D");
+
+        specialinvoke $r16.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r17);
+
+        throw $r16;
+
+     label5:
+        $r1 = $r0.<org.apache.harmony.awt.gl.ImageSurface: java.awt.image.ColorModel cm>;
+
+        $z3 = $r1 instanceof java.awt.image.ComponentColorModel;
+
+        if $z3 == 0 goto label9;
+
+        $b7 = 3;
+
+        $z3 = $r6 instanceof java.awt.image.ComponentSampleModel;
+
+        if $z3 == 0 goto label8;
+
+        $r15 = (java.awt.image.ComponentSampleModel) $r6;
+
+        $i9 = virtualinvoke $r15.<java.awt.image.ComponentSampleModel: int getScanlineStride()>();
+
+        $r7 = virtualinvoke $r15.<java.awt.image.ComponentSampleModel: int[] getBankIndices()>();
+
+        $r8 = virtualinvoke $r15.<java.awt.image.ComponentSampleModel: int[] getBandOffsets()>();
+
+        $z3 = $r6 instanceof java.awt.image.PixelInterleavedSampleModel;
+
+        if $z3 == 0 goto label6;
+
+        $b8 = 4;
+
+        goto label1;
+
+     label6:
+        $z3 = $r6 instanceof java.awt.image.BandedSampleModel;
+
+        if $z3 == 0 goto label7;
+
+        $b8 = 5;
+
+        goto label1;
+
+     label7:
+        $b8 = 3;
+
+        goto label1;
+
+     label8:
+        $r16 = new java.lang.IllegalArgumentException;
+
+        $r17 = staticinvoke <org.apache.harmony.awt.internal.nls.Messages: java.lang.String getString(java.lang.String)>("awt.4D");
+
+        specialinvoke $r16.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r17);
+
+        throw $r16;
+
+     label9:
+        $r0.<org.apache.harmony.awt.gl.Surface: long surfaceDataPtr> = 0L;
+
+        return;
+    }
+
+    private native long createSurfStruct(int, int, int, int, int, int, int, int, int, int, int[], int[], int, int[], int, boolean, int[], int[], int, boolean, boolean, int);
+
+    private native void dispose(long);
+
+    private native void setImageSize(long, int, int);
+
+    private native long updateCache(long, java.lang.Object, boolean);
+
+    public void dataChanged()
+    {
+        org.apache.harmony.awt.gl.ImageSurface $r0;
+
+        $r0 := @this: org.apache.harmony.awt.gl.ImageSurface;
+
+        $r0.<org.apache.harmony.awt.gl.ImageSurface: boolean needToRefresh> = 1;
+
+        virtualinvoke $r0.<org.apache.harmony.awt.gl.Surface: void clearValidCaches()>();
+
+        return;
+    }
+
+    public void dataReleased()
+    {
+        org.apache.harmony.awt.gl.ImageSurface $r0;
+
+        $r0 := @this: org.apache.harmony.awt.gl.ImageSurface;
+
+        $r0.<org.apache.harmony.awt.gl.ImageSurface: boolean dataTaken> = 0;
+
+        $r0.<org.apache.harmony.awt.gl.ImageSurface: boolean needToRefresh> = 1;
+
+        virtualinvoke $r0.<org.apache.harmony.awt.gl.Surface: void clearValidCaches()>();
+
+        return;
+    }
+
+    public void dataTaken()
+    {
+        org.apache.harmony.awt.gl.ImageSurface $r0;
+
+        $r0 := @this: org.apache.harmony.awt.gl.ImageSurface;
+
+        $r0.<org.apache.harmony.awt.gl.ImageSurface: boolean dataTaken> = 1;
+
+        $r0.<org.apache.harmony.awt.gl.ImageSurface: boolean needToRefresh> = 1;
+
+        virtualinvoke $r0.<org.apache.harmony.awt.gl.Surface: void clearValidCaches()>();
+
+        return;
+    }
+
+    public void dispose()
+    {
+        org.apache.harmony.awt.gl.ImageSurface $r0;
+        long $l0;
+        byte $b1;
+
+        $r0 := @this: org.apache.harmony.awt.gl.ImageSurface;
+
+        $l0 = $r0.<org.apache.harmony.awt.gl.Surface: long surfaceDataPtr>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 == 0 goto label1;
+
+        $l0 = $r0.<org.apache.harmony.awt.gl.Surface: long surfaceDataPtr>;
+
+        specialinvoke $r0.<org.apache.harmony.awt.gl.ImageSurface: void dispose(long)>($l0);
+
+        $r0.<org.apache.harmony.awt.gl.Surface: long surfaceDataPtr> = 0L;
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public long getCachedData(boolean)
+    {
+        org.apache.harmony.awt.gl.ImageSurface $r0;
+        boolean $z0, $z1;
+        long $l0;
+        byte $b1;
+        java.lang.Object $r1;
+
+        $r0 := @this: org.apache.harmony.awt.gl.ImageSurface;
+
+        $z0 := @parameter0: boolean;
+
+        $z1 = $r0.<org.apache.harmony.awt.gl.ImageSurface: boolean nativeDrawable>;
+
+        if $z1 == 0 goto label2;
+
+        $l0 = $r0.<org.apache.harmony.awt.gl.ImageSurface: long cachedDataPtr>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 == 0 goto label1;
+
+        $z1 = $r0.<org.apache.harmony.awt.gl.ImageSurface: boolean needToRefresh>;
+
+        if $z1 != 0 goto label1;
+
+        $z1 = $r0.<org.apache.harmony.awt.gl.ImageSurface: boolean alphaPre>;
+
+        if $z1 == $z0 goto label2;
+
+     label1:
+        $l0 = virtualinvoke $r0.<org.apache.harmony.awt.gl.ImageSurface: long getSurfaceDataPtr()>();
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.ImageSurface: java.lang.Object data>;
+
+        $l0 = specialinvoke $r0.<org.apache.harmony.awt.gl.ImageSurface: long updateCache(long,java.lang.Object,boolean)>($l0, $r1, $z0);
+
+        $r0.<org.apache.harmony.awt.gl.ImageSurface: long cachedDataPtr> = $l0;
+
+        $r0.<org.apache.harmony.awt.gl.ImageSurface: boolean alphaPre> = $z0;
+
+        virtualinvoke $r0.<org.apache.harmony.awt.gl.ImageSurface: void validate()>();
+
+     label2:
+        $l0 = $r0.<org.apache.harmony.awt.gl.ImageSurface: long cachedDataPtr>;
+
+        return $l0;
+    }
+
+    public java.awt.image.ColorModel getColorModel()
+    {
+        org.apache.harmony.awt.gl.ImageSurface $r0;
+        java.awt.image.ColorModel r1;
+
+        $r0 := @this: org.apache.harmony.awt.gl.ImageSurface;
+
+        r1 = $r0.<org.apache.harmony.awt.gl.ImageSurface: java.awt.image.ColorModel cm>;
+
+        return r1;
+    }
+
+    public java.lang.Object getData()
+    {
+        org.apache.harmony.awt.gl.ImageSurface $r0;
+        java.lang.Object r1;
+
+        $r0 := @this: org.apache.harmony.awt.gl.ImageSurface;
+
+        r1 = $r0.<org.apache.harmony.awt.gl.ImageSurface: java.lang.Object data>;
+
+        return r1;
+    }
+
+    public org.apache.harmony.awt.gl.Surface getImageSurface()
+    {
+        org.apache.harmony.awt.gl.ImageSurface $r0;
+
+        $r0 := @this: org.apache.harmony.awt.gl.ImageSurface;
+
+        return $r0;
+    }
+
+    public java.awt.image.WritableRaster getRaster()
+    {
+        org.apache.harmony.awt.gl.ImageSurface $r0;
+        java.awt.image.WritableRaster r1;
+
+        $r0 := @this: org.apache.harmony.awt.gl.ImageSurface;
+
+        r1 = $r0.<org.apache.harmony.awt.gl.ImageSurface: java.awt.image.WritableRaster raster>;
+
+        return r1;
+    }
+
+    public long getSurfaceDataPtr()
+    {
+        org.apache.harmony.awt.gl.ImageSurface $r0;
+        long $l0;
+        byte $b1;
+        boolean $z0;
+
+        $r0 := @this: org.apache.harmony.awt.gl.ImageSurface;
+
+        $l0 = $r0.<org.apache.harmony.awt.gl.Surface: long surfaceDataPtr>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        $z0 = $r0.<org.apache.harmony.awt.gl.ImageSurface: boolean nativeDrawable>;
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke $r0.<org.apache.harmony.awt.gl.ImageSurface: void createSufaceStructure()>();
+
+     label1:
+        $l0 = $r0.<org.apache.harmony.awt.gl.Surface: long surfaceDataPtr>;
+
+        return $l0;
+    }
+
+    public int getSurfaceType()
+    {
+        org.apache.harmony.awt.gl.ImageSurface $r0;
+        int i0;
+
+        $r0 := @this: org.apache.harmony.awt.gl.ImageSurface;
+
+        i0 = $r0.<org.apache.harmony.awt.gl.ImageSurface: int surfaceType>;
+
+        return i0;
+    }
+
+    public void invalidate()
+    {
+        org.apache.harmony.awt.gl.ImageSurface $r0;
+
+        $r0 := @this: org.apache.harmony.awt.gl.ImageSurface;
+
+        $r0.<org.apache.harmony.awt.gl.ImageSurface: boolean needToRefresh> = 1;
+
+        virtualinvoke $r0.<org.apache.harmony.awt.gl.Surface: void clearValidCaches()>();
+
+        return;
+    }
+
+    public boolean invalidated()
+    {
+        org.apache.harmony.awt.gl.ImageSurface $r0;
+        boolean z0;
+
+        $r0 := @this: org.apache.harmony.awt.gl.ImageSurface;
+
+        z0 = $r0.<org.apache.harmony.awt.gl.ImageSurface: boolean needToRefresh>;
+
+        return z0;
+    }
+
+    public boolean isNativeDrawable()
+    {
+        org.apache.harmony.awt.gl.ImageSurface $r0;
+        boolean z0;
+
+        $r0 := @this: org.apache.harmony.awt.gl.ImageSurface;
+
+        z0 = $r0.<org.apache.harmony.awt.gl.ImageSurface: boolean nativeDrawable>;
+
+        return z0;
+    }
+
+    public long lock()
+    {
+        org.apache.harmony.awt.gl.ImageSurface $r0;
+
+        $r0 := @this: org.apache.harmony.awt.gl.ImageSurface;
+
+        return 0L;
+    }
+
+    public void setRaster(java.awt.image.WritableRaster)
+    {
+        org.apache.harmony.awt.gl.ImageSurface $r0;
+        java.awt.image.WritableRaster $r1;
+        org.apache.harmony.awt.gl.AwtImageBackdoorAccessor $r2;
+        java.awt.image.DataBuffer $r3;
+        java.lang.Object $r4;
+        long $l0;
+        byte $b1;
+        int $i2, $i3;
+
+        $r0 := @this: org.apache.harmony.awt.gl.ImageSurface;
+
+        $r1 := @parameter0: java.awt.image.WritableRaster;
+
+        $r0.<org.apache.harmony.awt.gl.ImageSurface: java.awt.image.WritableRaster raster> = $r1;
+
+        $r2 = staticinvoke <org.apache.harmony.awt.gl.AwtImageBackdoorAccessor: org.apache.harmony.awt.gl.AwtImageBackdoorAccessor getInstance()>();
+
+        $r3 = virtualinvoke $r1.<java.awt.image.Raster: java.awt.image.DataBuffer getDataBuffer()>();
+
+        $r4 = virtualinvoke $r2.<org.apache.harmony.awt.gl.AwtImageBackdoorAccessor: java.lang.Object getData(java.awt.image.DataBuffer)>($r3);
+
+        $r0.<org.apache.harmony.awt.gl.ImageSurface: java.lang.Object data> = $r4;
+
+        $l0 = $r0.<org.apache.harmony.awt.gl.Surface: long surfaceDataPtr>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 == 0 goto label1;
+
+        $l0 = $r0.<org.apache.harmony.awt.gl.Surface: long surfaceDataPtr>;
+
+        $i2 = virtualinvoke $r1.<java.awt.image.Raster: int getWidth()>();
+
+        $i3 = virtualinvoke $r1.<java.awt.image.Raster: int getHeight()>();
+
+        specialinvoke $r0.<org.apache.harmony.awt.gl.ImageSurface: void setImageSize(long,int,int)>($l0, $i2, $i3);
+
+     label1:
+        $i2 = virtualinvoke $r1.<java.awt.image.Raster: int getWidth()>();
+
+        $r0.<org.apache.harmony.awt.gl.Surface: int width> = $i2;
+
+        $i2 = virtualinvoke $r1.<java.awt.image.Raster: int getHeight()>();
+
+        $r0.<org.apache.harmony.awt.gl.Surface: int height> = $i2;
+
+        return;
+    }
+
+    public void unlock()
+    {
+        org.apache.harmony.awt.gl.ImageSurface $r0;
+
+        $r0 := @this: org.apache.harmony.awt.gl.ImageSurface;
+
+        return;
+    }
+
+    public void validate()
+    {
+        org.apache.harmony.awt.gl.ImageSurface $r0;
+        boolean $z0;
+        org.apache.harmony.awt.gl.AwtImageBackdoorAccessor $r1;
+        java.awt.image.WritableRaster $r2;
+        java.awt.image.DataBuffer $r3;
+
+        $r0 := @this: org.apache.harmony.awt.gl.ImageSurface;
+
+        $z0 = $r0.<org.apache.harmony.awt.gl.ImageSurface: boolean needToRefresh>;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $z0 = $r0.<org.apache.harmony.awt.gl.ImageSurface: boolean dataTaken>;
+
+        if $z0 != 0 goto label2;
+
+        $r0.<org.apache.harmony.awt.gl.ImageSurface: boolean needToRefresh> = 0;
+
+        $r1 = staticinvoke <org.apache.harmony.awt.gl.AwtImageBackdoorAccessor: org.apache.harmony.awt.gl.AwtImageBackdoorAccessor getInstance()>();
+
+        $r2 = $r0.<org.apache.harmony.awt.gl.ImageSurface: java.awt.image.WritableRaster raster>;
+
+        $r3 = virtualinvoke $r2.<java.awt.image.Raster: java.awt.image.DataBuffer getDataBuffer()>();
+
+        virtualinvoke $r1.<org.apache.harmony.awt.gl.AwtImageBackdoorAccessor: void validate(java.awt.image.DataBuffer)>($r3);
+
+        return;
+
+     label2:
+        return;
+    }
+}

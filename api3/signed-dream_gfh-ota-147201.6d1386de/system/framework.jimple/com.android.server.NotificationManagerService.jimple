@@ -1,0 +1,2648 @@
+class com.android.server.NotificationManagerService extends android.app.INotificationManager$Stub
+{
+    private static final int BATTERY_BLINK_OFF;
+    private static final int BATTERY_BLINK_ON;
+    private static final int BATTERY_FULL_ARGB;
+    private static final int BATTERY_LOW_ARGB;
+    private static final int BATTERY_MEDIUM_ARGB;
+    private static final boolean DBG;
+    private static final int DEFAULT_STREAM_TYPE;
+    private static final long[] DEFAULT_VIBRATE_PATTERN;
+    private static final int EVENT_LOG_CANCEL;
+    private static final int EVENT_LOG_CANCEL_ALL;
+    private static final int EVENT_LOG_ENQUEUE;
+    private static final int LONG_DELAY;
+    private static final int MESSAGE_TIMEOUT;
+    private static final int SHORT_DELAY;
+    private static final java.lang.String TAG;
+    final android.app.IActivityManager mAm;
+    private boolean mBatteryCharging;
+    private boolean mBatteryFull;
+    private boolean mBatteryLow;
+    final android.content.Context mContext;
+    private int mDisabledNotifications;
+    final android.os.IBinder mForegroundToken;
+    private com.android.server.NotificationManagerService$WorkerHandler mHandler;
+    private com.android.server.HardwareService mHardware;
+    private android.content.BroadcastReceiver mIntentReceiver;
+    private com.android.server.NotificationManagerService$NotificationRecord mLedNotification;
+    private java.util.ArrayList mLights;
+    private com.android.server.status.StatusBarService$NotificationCallbacks mNotificationCallbacks;
+    private java.util.ArrayList mNotificationList;
+    private android.media.AsyncPlayer mSound;
+    private com.android.server.NotificationManagerService$NotificationRecord mSoundNotification;
+    private com.android.server.status.StatusBarService mStatusBarService;
+    private java.util.ArrayList mToastQueue;
+    private com.android.server.NotificationManagerService$NotificationRecord mVibrateNotification;
+    private android.os.Vibrator mVibrator;
+
+    static void <clinit>()
+    {
+        long[] $r0;
+
+        <com.android.server.NotificationManagerService: java.lang.String TAG> = "NotificationService";
+
+        <com.android.server.NotificationManagerService: int SHORT_DELAY> = 2000;
+
+        <com.android.server.NotificationManagerService: int MESSAGE_TIMEOUT> = 2;
+
+        <com.android.server.NotificationManagerService: int LONG_DELAY> = 3500;
+
+        <com.android.server.NotificationManagerService: int EVENT_LOG_ENQUEUE> = 2750;
+
+        <com.android.server.NotificationManagerService: int EVENT_LOG_CANCEL_ALL> = 2752;
+
+        <com.android.server.NotificationManagerService: int EVENT_LOG_CANCEL> = 2751;
+
+        <com.android.server.NotificationManagerService: int DEFAULT_STREAM_TYPE> = 5;
+
+        <com.android.server.NotificationManagerService: boolean DBG> = 0;
+
+        <com.android.server.NotificationManagerService: int BATTERY_MEDIUM_ARGB> = -256;
+
+        <com.android.server.NotificationManagerService: int BATTERY_LOW_ARGB> = -65536;
+
+        <com.android.server.NotificationManagerService: int BATTERY_FULL_ARGB> = -16711936;
+
+        <com.android.server.NotificationManagerService: int BATTERY_BLINK_ON> = 125;
+
+        <com.android.server.NotificationManagerService: int BATTERY_BLINK_OFF> = 2875;
+
+        $r0 = newarray (long)[4];
+
+        $r0[0] = 0L;
+
+        $r0[1] = 250L;
+
+        $r0[2] = 250L;
+
+        $r0[3] = 250L;
+
+        <com.android.server.NotificationManagerService: long[] DEFAULT_VIBRATE_PATTERN> = $r0;
+
+        return;
+    }
+
+    void <init>(android.content.Context, com.android.server.status.StatusBarService, com.android.server.HardwareService)
+    {
+        com.android.server.NotificationManagerService $r0;
+        android.content.Context $r1;
+        com.android.server.status.StatusBarService $r2;
+        com.android.server.HardwareService $r3;
+        android.content.IntentFilter $r4;
+        android.app.IActivityManager $r5;
+        android.os.Binder $r6;
+        android.os.Vibrator $r7;
+        java.util.ArrayList $r8;
+        com.android.server.NotificationManagerService$1 $r9;
+        com.android.server.NotificationManagerService$2 $r10;
+        android.media.AsyncPlayer $r11;
+        com.android.server.NotificationManagerService$WorkerHandler $r12;
+        com.android.server.status.StatusBarService$NotificationCallbacks $r13;
+        android.content.BroadcastReceiver $r14;
+
+        $r0 := @this: com.android.server.NotificationManagerService;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: com.android.server.status.StatusBarService;
+
+        $r3 := @parameter2: com.android.server.HardwareService;
+
+        specialinvoke $r0.<android.app.INotificationManager$Stub: void <init>()>();
+
+        $r6 = new android.os.Binder;
+
+        specialinvoke $r6.<android.os.Binder: void <init>()>();
+
+        $r0.<com.android.server.NotificationManagerService: android.os.IBinder mForegroundToken> = $r6;
+
+        $r7 = new android.os.Vibrator;
+
+        specialinvoke $r7.<android.os.Vibrator: void <init>()>();
+
+        $r0.<com.android.server.NotificationManagerService: android.os.Vibrator mVibrator> = $r7;
+
+        $r8 = new java.util.ArrayList;
+
+        specialinvoke $r8.<java.util.ArrayList: void <init>()>();
+
+        $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mLights> = $r8;
+
+        $r9 = new com.android.server.NotificationManagerService$1;
+
+        specialinvoke $r9.<com.android.server.NotificationManagerService$1: void <init>(com.android.server.NotificationManagerService)>($r0);
+
+        $r0.<com.android.server.NotificationManagerService: com.android.server.status.StatusBarService$NotificationCallbacks mNotificationCallbacks> = $r9;
+
+        $r10 = new com.android.server.NotificationManagerService$2;
+
+        specialinvoke $r10.<com.android.server.NotificationManagerService$2: void <init>(com.android.server.NotificationManagerService)>($r0);
+
+        $r0.<com.android.server.NotificationManagerService: android.content.BroadcastReceiver mIntentReceiver> = $r10;
+
+        $r0.<com.android.server.NotificationManagerService: android.content.Context mContext> = $r1;
+
+        $r0.<com.android.server.NotificationManagerService: com.android.server.HardwareService mHardware> = $r3;
+
+        $r5 = staticinvoke <android.app.ActivityManagerNative: android.app.IActivityManager getDefault()>();
+
+        $r0.<com.android.server.NotificationManagerService: android.app.IActivityManager mAm> = $r5;
+
+        $r11 = new android.media.AsyncPlayer;
+
+        specialinvoke $r11.<android.media.AsyncPlayer: void <init>(java.lang.String)>("NotificationService");
+
+        $r0.<com.android.server.NotificationManagerService: android.media.AsyncPlayer mSound> = $r11;
+
+        $r11 = $r0.<com.android.server.NotificationManagerService: android.media.AsyncPlayer mSound>;
+
+        virtualinvoke $r11.<android.media.AsyncPlayer: void setUsesWakeLock(android.content.Context)>($r1);
+
+        $r8 = new java.util.ArrayList;
+
+        specialinvoke $r8.<java.util.ArrayList: void <init>()>();
+
+        $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mToastQueue> = $r8;
+
+        $r8 = new java.util.ArrayList;
+
+        specialinvoke $r8.<java.util.ArrayList: void <init>()>();
+
+        $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mNotificationList> = $r8;
+
+        $r12 = new com.android.server.NotificationManagerService$WorkerHandler;
+
+        specialinvoke $r12.<com.android.server.NotificationManagerService$WorkerHandler: void <init>(com.android.server.NotificationManagerService,com.android.server.NotificationManagerService$1)>($r0, null);
+
+        $r0.<com.android.server.NotificationManagerService: com.android.server.NotificationManagerService$WorkerHandler mHandler> = $r12;
+
+        $r0.<com.android.server.NotificationManagerService: com.android.server.status.StatusBarService mStatusBarService> = $r2;
+
+        $r13 = $r0.<com.android.server.NotificationManagerService: com.android.server.status.StatusBarService$NotificationCallbacks mNotificationCallbacks>;
+
+        virtualinvoke $r2.<com.android.server.status.StatusBarService: void setNotificationCallbacks(com.android.server.status.StatusBarService$NotificationCallbacks)>($r13);
+
+        $r4 = new android.content.IntentFilter;
+
+        specialinvoke $r4.<android.content.IntentFilter: void <init>()>();
+
+        virtualinvoke $r4.<android.content.IntentFilter: void addAction(java.lang.String)>("android.intent.action.BATTERY_CHANGED");
+
+        virtualinvoke $r4.<android.content.IntentFilter: void addAction(java.lang.String)>("android.intent.action.PACKAGE_REMOVED");
+
+        virtualinvoke $r4.<android.content.IntentFilter: void addAction(java.lang.String)>("android.intent.action.PACKAGE_RESTARTED");
+
+        $r1 = $r0.<com.android.server.NotificationManagerService: android.content.Context mContext>;
+
+        $r14 = $r0.<com.android.server.NotificationManagerService: android.content.BroadcastReceiver mIntentReceiver>;
+
+        virtualinvoke $r1.<android.content.Context: android.content.Intent registerReceiver(android.content.BroadcastReceiver,android.content.IntentFilter)>($r14, $r4);
+
+        return;
+    }
+
+    static java.lang.String access$000(android.content.Context, java.lang.String, int)
+    {
+        android.content.Context $r0;
+        java.lang.String $r1;
+        int $i0;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $i0 := @parameter2: int;
+
+        $r1 = staticinvoke <com.android.server.NotificationManagerService: java.lang.String idDebugString(android.content.Context,java.lang.String,int)>($r0, $r1, $i0);
+
+        return $r1;
+    }
+
+    static java.util.ArrayList access$100(com.android.server.NotificationManagerService)
+    {
+        com.android.server.NotificationManagerService $r0;
+        java.util.ArrayList r1;
+
+        $r0 := @parameter0: com.android.server.NotificationManagerService;
+
+        r1 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mNotificationList>;
+
+        return r1;
+    }
+
+    static void access$1000(com.android.server.NotificationManagerService)
+    {
+        com.android.server.NotificationManagerService $r0;
+
+        $r0 := @parameter0: com.android.server.NotificationManagerService;
+
+        specialinvoke $r0.<com.android.server.NotificationManagerService: void updateLightsLocked()>();
+
+        return;
+    }
+
+    static boolean access$1100(com.android.server.NotificationManagerService)
+    {
+        com.android.server.NotificationManagerService $r0;
+        boolean z0;
+
+        $r0 := @parameter0: com.android.server.NotificationManagerService;
+
+        z0 = $r0.<com.android.server.NotificationManagerService: boolean mBatteryCharging>;
+
+        return z0;
+    }
+
+    static boolean access$1102(com.android.server.NotificationManagerService, boolean)
+    {
+        com.android.server.NotificationManagerService $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: com.android.server.NotificationManagerService;
+
+        $z0 := @parameter1: boolean;
+
+        $r0.<com.android.server.NotificationManagerService: boolean mBatteryCharging> = $z0;
+
+        return $z0;
+    }
+
+    static boolean access$1200(com.android.server.NotificationManagerService)
+    {
+        com.android.server.NotificationManagerService $r0;
+        boolean z0;
+
+        $r0 := @parameter0: com.android.server.NotificationManagerService;
+
+        z0 = $r0.<com.android.server.NotificationManagerService: boolean mBatteryLow>;
+
+        return z0;
+    }
+
+    static boolean access$1202(com.android.server.NotificationManagerService, boolean)
+    {
+        com.android.server.NotificationManagerService $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: com.android.server.NotificationManagerService;
+
+        $z0 := @parameter1: boolean;
+
+        $r0.<com.android.server.NotificationManagerService: boolean mBatteryLow> = $z0;
+
+        return $z0;
+    }
+
+    static boolean access$1300(com.android.server.NotificationManagerService)
+    {
+        com.android.server.NotificationManagerService $r0;
+        boolean z0;
+
+        $r0 := @parameter0: com.android.server.NotificationManagerService;
+
+        z0 = $r0.<com.android.server.NotificationManagerService: boolean mBatteryFull>;
+
+        return z0;
+    }
+
+    static boolean access$1302(com.android.server.NotificationManagerService, boolean)
+    {
+        com.android.server.NotificationManagerService $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: com.android.server.NotificationManagerService;
+
+        $z0 := @parameter1: boolean;
+
+        $r0.<com.android.server.NotificationManagerService: boolean mBatteryFull> = $z0;
+
+        return $z0;
+    }
+
+    static void access$1400(com.android.server.NotificationManagerService)
+    {
+        com.android.server.NotificationManagerService $r0;
+
+        $r0 := @parameter0: com.android.server.NotificationManagerService;
+
+        specialinvoke $r0.<com.android.server.NotificationManagerService: void updateLights()>();
+
+        return;
+    }
+
+    static void access$1600(com.android.server.NotificationManagerService, com.android.server.NotificationManagerService$ToastRecord)
+    {
+        com.android.server.NotificationManagerService $r0;
+        com.android.server.NotificationManagerService$ToastRecord $r1;
+
+        $r0 := @parameter0: com.android.server.NotificationManagerService;
+
+        $r1 := @parameter1: com.android.server.NotificationManagerService$ToastRecord;
+
+        specialinvoke $r0.<com.android.server.NotificationManagerService: void handleTimeout(com.android.server.NotificationManagerService$ToastRecord)>($r1);
+
+        return;
+    }
+
+    static int access$200(com.android.server.NotificationManagerService)
+    {
+        com.android.server.NotificationManagerService $r0;
+        int i0;
+
+        $r0 := @parameter0: com.android.server.NotificationManagerService;
+
+        i0 = $r0.<com.android.server.NotificationManagerService: int mDisabledNotifications>;
+
+        return i0;
+    }
+
+    static int access$202(com.android.server.NotificationManagerService, int)
+    {
+        com.android.server.NotificationManagerService $r0;
+        int $i0;
+
+        $r0 := @parameter0: com.android.server.NotificationManagerService;
+
+        $i0 := @parameter1: int;
+
+        $r0.<com.android.server.NotificationManagerService: int mDisabledNotifications> = $i0;
+
+        return $i0;
+    }
+
+    static android.media.AsyncPlayer access$300(com.android.server.NotificationManagerService)
+    {
+        com.android.server.NotificationManagerService $r0;
+        android.media.AsyncPlayer r1;
+
+        $r0 := @parameter0: com.android.server.NotificationManagerService;
+
+        r1 = $r0.<com.android.server.NotificationManagerService: android.media.AsyncPlayer mSound>;
+
+        return r1;
+    }
+
+    static android.os.Vibrator access$400(com.android.server.NotificationManagerService)
+    {
+        com.android.server.NotificationManagerService $r0;
+        android.os.Vibrator r1;
+
+        $r0 := @parameter0: com.android.server.NotificationManagerService;
+
+        r1 = $r0.<com.android.server.NotificationManagerService: android.os.Vibrator mVibrator>;
+
+        return r1;
+    }
+
+    static void access$500(com.android.server.NotificationManagerService, java.lang.String, int, int)
+    {
+        com.android.server.NotificationManagerService $r0;
+        java.lang.String $r1;
+        int $i0, $i1;
+
+        $r0 := @parameter0: com.android.server.NotificationManagerService;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $i0 := @parameter2: int;
+
+        $i1 := @parameter3: int;
+
+        specialinvoke $r0.<com.android.server.NotificationManagerService: void cancelNotification(java.lang.String,int,int)>($r1, $i0, $i1);
+
+        return;
+    }
+
+    static com.android.server.NotificationManagerService$NotificationRecord access$602(com.android.server.NotificationManagerService, com.android.server.NotificationManagerService$NotificationRecord)
+    {
+        com.android.server.NotificationManagerService $r0;
+        com.android.server.NotificationManagerService$NotificationRecord $r1;
+
+        $r0 := @parameter0: com.android.server.NotificationManagerService;
+
+        $r1 := @parameter1: com.android.server.NotificationManagerService$NotificationRecord;
+
+        $r0.<com.android.server.NotificationManagerService: com.android.server.NotificationManagerService$NotificationRecord mSoundNotification> = $r1;
+
+        return $r1;
+    }
+
+    static com.android.server.NotificationManagerService$NotificationRecord access$702(com.android.server.NotificationManagerService, com.android.server.NotificationManagerService$NotificationRecord)
+    {
+        com.android.server.NotificationManagerService $r0;
+        com.android.server.NotificationManagerService$NotificationRecord $r1;
+
+        $r0 := @parameter0: com.android.server.NotificationManagerService;
+
+        $r1 := @parameter1: com.android.server.NotificationManagerService$NotificationRecord;
+
+        $r0.<com.android.server.NotificationManagerService: com.android.server.NotificationManagerService$NotificationRecord mVibrateNotification> = $r1;
+
+        return $r1;
+    }
+
+    static java.util.ArrayList access$800(com.android.server.NotificationManagerService)
+    {
+        com.android.server.NotificationManagerService $r0;
+        java.util.ArrayList r1;
+
+        $r0 := @parameter0: com.android.server.NotificationManagerService;
+
+        r1 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mLights>;
+
+        return r1;
+    }
+
+    static com.android.server.NotificationManagerService$NotificationRecord access$902(com.android.server.NotificationManagerService, com.android.server.NotificationManagerService$NotificationRecord)
+    {
+        com.android.server.NotificationManagerService $r0;
+        com.android.server.NotificationManagerService$NotificationRecord $r1;
+
+        $r0 := @parameter0: com.android.server.NotificationManagerService;
+
+        $r1 := @parameter1: com.android.server.NotificationManagerService$NotificationRecord;
+
+        $r0.<com.android.server.NotificationManagerService: com.android.server.NotificationManagerService$NotificationRecord mLedNotification> = $r1;
+
+        return $r1;
+    }
+
+    private void cancelAllNotificationsInt(java.lang.String, int)
+    {
+        com.android.server.NotificationManagerService $r0;
+        java.lang.String $r1, $r9;
+        int $i0, $i1, $i2;
+        java.lang.Object[] $r2;
+        java.lang.Integer $r3;
+        java.util.ArrayList $r4, $r5;
+        boolean $z0, $z1;
+        java.lang.Object $r6;
+        com.android.server.NotificationManagerService$NotificationRecord $r7;
+        android.app.Notification $r8;
+        java.lang.Throwable $r10;
+
+        $r0 := @this: com.android.server.NotificationManagerService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $r2 = newarray (java.lang.Object)[2];
+
+        $r2[0] = $r1;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r2[1] = $r3;
+
+        staticinvoke <android.util.EventLog: int writeEvent(int,java.lang.Object[])>(2752, $r2);
+
+        $r4 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mNotificationList>;
+
+        entermonitor $r4;
+
+     label1:
+        $r5 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mNotificationList>;
+
+        $i1 = virtualinvoke $r5.<java.util.ArrayList: int size()>();
+
+        $z0 = 0;
+
+        $i1 = $i1 - 1;
+
+     label2:
+        if $i1 < 0 goto label5;
+
+        $r5 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mNotificationList>;
+
+        $r6 = virtualinvoke $r5.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r7 = (com.android.server.NotificationManagerService$NotificationRecord) $r6;
+
+        $r8 = $r7.<com.android.server.NotificationManagerService$NotificationRecord: android.app.Notification notification>;
+
+        $i2 = $r8.<android.app.Notification: int flags>;
+
+        $i2 = $i2 & $i0;
+
+        if $i2 == $i0 goto label4;
+
+     label3:
+        $i1 = $i1 + -1;
+
+        goto label2;
+
+     label4:
+        $r9 = $r7.<com.android.server.NotificationManagerService$NotificationRecord: java.lang.String pkg>;
+
+        $z1 = virtualinvoke $r9.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z1 == 0 goto label3;
+
+        $r5 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mNotificationList>;
+
+        virtualinvoke $r5.<java.util.ArrayList: java.lang.Object remove(int)>($i1);
+
+        specialinvoke $r0.<com.android.server.NotificationManagerService: void cancelNotificationLocked(com.android.server.NotificationManagerService$NotificationRecord)>($r7);
+
+        $z0 = 1;
+
+        goto label3;
+
+     label5:
+        if $z0 == 0 goto label6;
+
+        specialinvoke $r0.<com.android.server.NotificationManagerService: void updateLightsLocked()>();
+
+     label6:
+        exitmonitor $r4;
+
+     label7:
+        return;
+
+     label8:
+        $r10 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label9:
+        throw $r10;
+
+        catch java.lang.Throwable from label1 to label7 with label8;
+        catch java.lang.Throwable from label8 to label9 with label8;
+    }
+
+    private void cancelNotification(java.lang.String, int, int)
+    {
+        com.android.server.NotificationManagerService $r0;
+        java.lang.String $r1;
+        int $i0, $i1, $i2;
+        java.lang.Object[] $r2;
+        java.lang.Integer $r3;
+        java.util.ArrayList $r4, $r5;
+        java.lang.Object $r6;
+        com.android.server.NotificationManagerService$NotificationRecord $r7;
+        android.app.Notification $r8;
+        java.lang.Throwable $r9;
+
+        $r0 := @this: com.android.server.NotificationManagerService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $r2 = newarray (java.lang.Object)[3];
+
+        $r2[0] = $r1;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r2[1] = $r3;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r2[2] = $r3;
+
+        staticinvoke <android.util.EventLog: int writeEvent(int,java.lang.Object[])>(2751, $r2);
+
+        $r4 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mNotificationList>;
+
+        entermonitor $r4;
+
+     label1:
+        $i0 = specialinvoke $r0.<com.android.server.NotificationManagerService: int indexOfNotificationLocked(java.lang.String,int)>($r1, $i0);
+
+        if $i0 < 0 goto label4;
+
+        $r5 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mNotificationList>;
+
+        $r6 = virtualinvoke $r5.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r7 = (com.android.server.NotificationManagerService$NotificationRecord) $r6;
+
+        $r8 = $r7.<com.android.server.NotificationManagerService$NotificationRecord: android.app.Notification notification>;
+
+        $i2 = $r8.<android.app.Notification: int flags>;
+
+        $i2 = $i2 & $i1;
+
+        if $i2 == $i1 goto label3;
+
+        exitmonitor $r4;
+
+     label2:
+        return;
+
+     label3:
+        $r5 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mNotificationList>;
+
+        virtualinvoke $r5.<java.util.ArrayList: java.lang.Object remove(int)>($i0);
+
+        specialinvoke $r0.<com.android.server.NotificationManagerService: void cancelNotificationLocked(com.android.server.NotificationManagerService$NotificationRecord)>($r7);
+
+        specialinvoke $r0.<com.android.server.NotificationManagerService: void updateLightsLocked()>();
+
+     label4:
+        exitmonitor $r4;
+
+     label5:
+        return;
+
+     label6:
+        $r9 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label7:
+        throw $r9;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label3 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    private void cancelNotificationLocked(com.android.server.NotificationManagerService$NotificationRecord)
+    {
+        com.android.server.NotificationManagerService $r0;
+        com.android.server.NotificationManagerService$NotificationRecord $r1, $r5;
+        android.os.IBinder $r2;
+        android.app.Notification $r3;
+        int $i0;
+        long $l1;
+        com.android.server.status.StatusBarService $r4;
+        android.media.AsyncPlayer $r6;
+        android.os.Vibrator $r7;
+        java.util.ArrayList $r8;
+        java.lang.Throwable $r9, $r10, $r11;
+
+        $r0 := @this: com.android.server.NotificationManagerService;
+
+        $r1 := @parameter0: com.android.server.NotificationManagerService$NotificationRecord;
+
+        $r3 = $r1.<com.android.server.NotificationManagerService$NotificationRecord: android.app.Notification notification>;
+
+        $i0 = $r3.<android.app.Notification: int icon>;
+
+        if $i0 == 0 goto label03;
+
+        $l1 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label01:
+        $r4 = $r0.<com.android.server.NotificationManagerService: com.android.server.status.StatusBarService mStatusBarService>;
+
+        $r2 = $r1.<com.android.server.NotificationManagerService$NotificationRecord: android.os.IBinder statusBarKey>;
+
+        virtualinvoke $r4.<com.android.server.status.StatusBarService: void removeIcon(android.os.IBinder)>($r2);
+
+     label02:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        $r1.<com.android.server.NotificationManagerService$NotificationRecord: android.os.IBinder statusBarKey> = null;
+
+     label03:
+        $r5 = $r0.<com.android.server.NotificationManagerService: com.android.server.NotificationManagerService$NotificationRecord mSoundNotification>;
+
+        if $r5 != $r1 goto label06;
+
+        $r0.<com.android.server.NotificationManagerService: com.android.server.NotificationManagerService$NotificationRecord mSoundNotification> = null;
+
+        $l1 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label04:
+        $r6 = $r0.<com.android.server.NotificationManagerService: android.media.AsyncPlayer mSound>;
+
+        virtualinvoke $r6.<android.media.AsyncPlayer: void stop()>();
+
+     label05:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+     label06:
+        $r5 = $r0.<com.android.server.NotificationManagerService: com.android.server.NotificationManagerService$NotificationRecord mVibrateNotification>;
+
+        if $r5 != $r1 goto label09;
+
+        $r0.<com.android.server.NotificationManagerService: com.android.server.NotificationManagerService$NotificationRecord mVibrateNotification> = null;
+
+        $l1 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label07:
+        $r7 = $r0.<com.android.server.NotificationManagerService: android.os.Vibrator mVibrator>;
+
+        virtualinvoke $r7.<android.os.Vibrator: void cancel()>();
+
+     label08:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+     label09:
+        $r8 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mLights>;
+
+        virtualinvoke $r8.<java.util.ArrayList: boolean remove(java.lang.Object)>($r1);
+
+        $r5 = $r0.<com.android.server.NotificationManagerService: com.android.server.NotificationManagerService$NotificationRecord mLedNotification>;
+
+        if $r5 != $r1 goto label13;
+
+        $r0.<com.android.server.NotificationManagerService: com.android.server.NotificationManagerService$NotificationRecord mLedNotification> = null;
+
+        return;
+
+     label10:
+        $r9 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        throw $r9;
+
+     label11:
+        $r10 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        throw $r10;
+
+     label12:
+        $r11 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        throw $r11;
+
+     label13:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label10;
+        catch java.lang.Throwable from label04 to label05 with label11;
+        catch java.lang.Throwable from label07 to label08 with label12;
+    }
+
+    private void cancelToastLocked(int)
+    {
+        com.android.server.NotificationManagerService $r0;
+        int $i0;
+        java.util.ArrayList $r1;
+        java.lang.Object $r2;
+        com.android.server.NotificationManagerService$ToastRecord $r3;
+        android.app.ITransientNotification $r4;
+        android.os.RemoteException $r5;
+        java.lang.StringBuilder $r6;
+        java.lang.String $r7;
+
+        $r0 := @this: com.android.server.NotificationManagerService;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mToastQueue>;
+
+        $r2 = virtualinvoke $r1.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r3 = (com.android.server.NotificationManagerService$ToastRecord) $r2;
+
+        $r4 = $r3.<com.android.server.NotificationManagerService$ToastRecord: android.app.ITransientNotification callback>;
+
+     label1:
+        interfaceinvoke $r4.<android.app.ITransientNotification: void hide()>();
+
+     label2:
+        $r1 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mToastQueue>;
+
+        virtualinvoke $r1.<java.util.ArrayList: java.lang.Object remove(int)>($i0);
+
+        $i0 = $r3.<com.android.server.NotificationManagerService$ToastRecord: int pid>;
+
+        specialinvoke $r0.<com.android.server.NotificationManagerService: void keepProcessAliveLocked(int)>($i0);
+
+        $r1 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mToastQueue>;
+
+        $i0 = virtualinvoke $r1.<java.util.ArrayList: int size()>();
+
+        if $i0 <= 0 goto label4;
+
+        specialinvoke $r0.<com.android.server.NotificationManagerService: void showNextToastLocked()>();
+
+        return;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Object died trying to hide notification ");
+
+        $r4 = $r3.<com.android.server.NotificationManagerService$ToastRecord: android.app.ITransientNotification callback>;
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r4);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" in package ");
+
+        $r7 = $r3.<com.android.server.NotificationManagerService$ToastRecord: java.lang.String pkg>;
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("NotificationService", $r7);
+
+        goto label2;
+
+     label4:
+        return;
+
+        catch android.os.RemoteException from label1 to label2 with label3;
+    }
+
+    private void handleTimeout(com.android.server.NotificationManagerService$ToastRecord)
+    {
+        com.android.server.NotificationManagerService $r0;
+        com.android.server.NotificationManagerService$ToastRecord $r1;
+        java.util.ArrayList $r2;
+        android.app.ITransientNotification $r3;
+        int $i0;
+        java.lang.String $r4;
+        java.lang.Throwable $r5;
+
+        $r0 := @this: com.android.server.NotificationManagerService;
+
+        $r1 := @parameter0: com.android.server.NotificationManagerService$ToastRecord;
+
+        $r2 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mToastQueue>;
+
+        entermonitor $r2;
+
+     label1:
+        $r4 = $r1.<com.android.server.NotificationManagerService$ToastRecord: java.lang.String pkg>;
+
+        $r3 = $r1.<com.android.server.NotificationManagerService$ToastRecord: android.app.ITransientNotification callback>;
+
+        $i0 = specialinvoke $r0.<com.android.server.NotificationManagerService: int indexOfToastLocked(java.lang.String,android.app.ITransientNotification)>($r4, $r3);
+
+        if $i0 < 0 goto label2;
+
+        specialinvoke $r0.<com.android.server.NotificationManagerService: void cancelToastLocked(int)>($i0);
+
+     label2:
+        exitmonitor $r2;
+
+     label3:
+        return;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label5:
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    private static java.lang.String idDebugString(android.content.Context, java.lang.String, int)
+    {
+        android.content.Context $r0;
+        java.lang.String $r1;
+        int $i0;
+        android.content.res.Resources $r2;
+        android.content.pm.PackageManager$NameNotFoundException $r3;
+        android.content.res.Resources$NotFoundException $r4;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $i0 := @parameter2: int;
+
+        if $r1 == null goto label6;
+
+     label1:
+        $r0 = virtualinvoke $r0.<android.content.Context: android.content.Context createPackageContext(java.lang.String,int)>($r1, 0);
+
+     label2:
+        $r2 = virtualinvoke $r0.<android.content.Context: android.content.res.Resources getResources()>();
+
+     label3:
+        $r1 = virtualinvoke $r2.<android.content.res.Resources: java.lang.String getResourceName(int)>($i0);
+
+     label4:
+        return $r1;
+
+     label5:
+        $r3 := @caughtexception;
+
+        goto label2;
+
+     label6:
+        goto label2;
+
+     label7:
+        $r4 := @caughtexception;
+
+        return "<name unknown>";
+
+        catch android.content.pm.PackageManager$NameNotFoundException from label1 to label2 with label5;
+        catch android.content.res.Resources$NotFoundException from label3 to label4 with label7;
+    }
+
+    private int indexOfNotificationLocked(java.lang.String, int)
+    {
+        com.android.server.NotificationManagerService $r0;
+        java.lang.String $r1, $r5;
+        int $i0, $i1, $i2, $i3;
+        java.util.ArrayList $r2;
+        java.lang.Object $r3;
+        com.android.server.NotificationManagerService$NotificationRecord $r4;
+        boolean $z0;
+
+        $r0 := @this: com.android.server.NotificationManagerService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $r2 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mNotificationList>;
+
+        $i1 = virtualinvoke $r2.<java.util.ArrayList: int size()>();
+
+        $i2 = 0;
+
+     label1:
+        if $i2 >= $i1 goto label3;
+
+        $r3 = virtualinvoke $r2.<java.util.ArrayList: java.lang.Object get(int)>($i2);
+
+        $r4 = (com.android.server.NotificationManagerService$NotificationRecord) $r3;
+
+        $i3 = $r4.<com.android.server.NotificationManagerService$NotificationRecord: int id>;
+
+        if $i3 != $i0 goto label2;
+
+        $r5 = $r4.<com.android.server.NotificationManagerService$NotificationRecord: java.lang.String pkg>;
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label2;
+
+        return $i2;
+
+     label2:
+        $i2 = $i2 + 1;
+
+        goto label1;
+
+     label3:
+        return -1;
+    }
+
+    private int indexOfToastLocked(java.lang.String, android.app.ITransientNotification)
+    {
+        com.android.server.NotificationManagerService $r0;
+        java.lang.String $r1, $r7;
+        android.app.ITransientNotification $r2;
+        java.util.ArrayList $r3;
+        android.os.IBinder $r4, $r8;
+        int $i0, $i1;
+        java.lang.Object $r5;
+        com.android.server.NotificationManagerService$ToastRecord $r6;
+        boolean $z0;
+
+        $r0 := @this: com.android.server.NotificationManagerService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: android.app.ITransientNotification;
+
+        $r4 = interfaceinvoke $r2.<android.app.ITransientNotification: android.os.IBinder asBinder()>();
+
+        $r3 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mToastQueue>;
+
+        $i0 = virtualinvoke $r3.<java.util.ArrayList: int size()>();
+
+        $i1 = 0;
+
+     label1:
+        if $i1 >= $i0 goto label3;
+
+        $r5 = virtualinvoke $r3.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r6 = (com.android.server.NotificationManagerService$ToastRecord) $r5;
+
+        $r7 = $r6.<com.android.server.NotificationManagerService$ToastRecord: java.lang.String pkg>;
+
+        $z0 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label2;
+
+        $r2 = $r6.<com.android.server.NotificationManagerService$ToastRecord: android.app.ITransientNotification callback>;
+
+        $r8 = interfaceinvoke $r2.<android.app.ITransientNotification: android.os.IBinder asBinder()>();
+
+        if $r8 != $r4 goto label2;
+
+        return $i1;
+
+     label2:
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label3:
+        return -1;
+    }
+
+    private void keepProcessAliveLocked(int)
+    {
+        com.android.server.NotificationManagerService $r0;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.util.ArrayList $r1;
+        android.os.IBinder $r2;
+        java.lang.Object $r3;
+        com.android.server.NotificationManagerService$ToastRecord $r4;
+        android.app.IActivityManager $r5;
+        boolean $z0;
+        android.os.RemoteException $r6;
+
+        $r0 := @this: com.android.server.NotificationManagerService;
+
+        $i0 := @parameter0: int;
+
+        $i1 = 0;
+
+        $r1 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mToastQueue>;
+
+        $i2 = virtualinvoke $r1.<java.util.ArrayList: int size()>();
+
+        $i3 = 0;
+
+     label1:
+        if $i3 >= $i2 goto label3;
+
+        $r3 = virtualinvoke $r1.<java.util.ArrayList: java.lang.Object get(int)>($i3);
+
+        $r4 = (com.android.server.NotificationManagerService$ToastRecord) $r3;
+
+        $i4 = $r4.<com.android.server.NotificationManagerService$ToastRecord: int pid>;
+
+        if $i4 != $i0 goto label2;
+
+        $i1 = $i1 + 1;
+
+     label2:
+        $i3 = $i3 + 1;
+
+        goto label1;
+
+     label3:
+        $r5 = $r0.<com.android.server.NotificationManagerService: android.app.IActivityManager mAm>;
+
+        $r2 = $r0.<com.android.server.NotificationManagerService: android.os.IBinder mForegroundToken>;
+
+        if $i1 <= 0 goto label6;
+
+        $z0 = 1;
+
+     label4:
+        interfaceinvoke $r5.<android.app.IActivityManager: void setProcessForeground(android.os.IBinder,int,boolean)>($r2, $i0, $z0);
+
+     label5:
+        return;
+
+     label6:
+        $z0 = 0;
+
+        goto label4;
+
+     label7:
+        $r6 := @caughtexception;
+
+        return;
+
+        catch android.os.RemoteException from label4 to label5 with label7;
+    }
+
+    private void scheduleTimeoutLocked(com.android.server.NotificationManagerService$ToastRecord, boolean)
+    {
+        com.android.server.NotificationManagerService $r0;
+        com.android.server.NotificationManagerService$ToastRecord $r1;
+        boolean $z0;
+        android.os.Message $r2;
+        com.android.server.NotificationManagerService$WorkerHandler $r3;
+        long $l0;
+        int $i1;
+        short $s2;
+
+        $r0 := @this: com.android.server.NotificationManagerService;
+
+        $r1 := @parameter0: com.android.server.NotificationManagerService$ToastRecord;
+
+        $z0 := @parameter1: boolean;
+
+        $r3 = $r0.<com.android.server.NotificationManagerService: com.android.server.NotificationManagerService$WorkerHandler mHandler>;
+
+        $r2 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int,java.lang.Object)>($r3, 2, $r1);
+
+        if $z0 == 0 goto label2;
+
+        $l0 = 0L;
+
+     label1:
+        $r3 = $r0.<com.android.server.NotificationManagerService: com.android.server.NotificationManagerService$WorkerHandler mHandler>;
+
+        virtualinvoke $r3.<android.os.Handler: void removeCallbacksAndMessages(java.lang.Object)>($r1);
+
+        $r3 = $r0.<com.android.server.NotificationManagerService: com.android.server.NotificationManagerService$WorkerHandler mHandler>;
+
+        virtualinvoke $r3.<android.os.Handler: boolean sendMessageDelayed(android.os.Message,long)>($r2, $l0);
+
+        return;
+
+     label2:
+        $i1 = $r1.<com.android.server.NotificationManagerService$ToastRecord: int duration>;
+
+        if $i1 != 1 goto label4;
+
+        $s2 = 3500;
+
+     label3:
+        $l0 = (long) $s2;
+
+        goto label1;
+
+     label4:
+        $s2 = 2000;
+
+        goto label3;
+    }
+
+    private void showNextToastLocked()
+    {
+        com.android.server.NotificationManagerService $r0;
+        java.util.ArrayList $r1;
+        java.lang.Object $r2;
+        com.android.server.NotificationManagerService$ToastRecord $r3;
+        android.app.ITransientNotification $r4;
+        android.os.RemoteException $r5;
+        java.lang.StringBuilder $r6;
+        java.lang.String $r7;
+        int $i0;
+
+        $r0 := @this: com.android.server.NotificationManagerService;
+
+        $r1 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mToastQueue>;
+
+        $r2 = virtualinvoke $r1.<java.util.ArrayList: java.lang.Object get(int)>(0);
+
+        $r3 = (com.android.server.NotificationManagerService$ToastRecord) $r2;
+
+     label1:
+        if $r3 == null goto label7;
+
+        $r4 = $r3.<com.android.server.NotificationManagerService$ToastRecord: android.app.ITransientNotification callback>;
+
+     label2:
+        interfaceinvoke $r4.<android.app.ITransientNotification: void show()>();
+
+        specialinvoke $r0.<com.android.server.NotificationManagerService: void scheduleTimeoutLocked(com.android.server.NotificationManagerService$ToastRecord,boolean)>($r3, 0);
+
+     label3:
+        return;
+
+     label4:
+        $r5 := @caughtexception;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Object died trying to show notification ");
+
+        $r4 = $r3.<com.android.server.NotificationManagerService$ToastRecord: android.app.ITransientNotification callback>;
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r4);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" in package ");
+
+        $r7 = $r3.<com.android.server.NotificationManagerService$ToastRecord: java.lang.String pkg>;
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("NotificationService", $r7);
+
+        $r1 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mToastQueue>;
+
+        $i0 = virtualinvoke $r1.<java.util.ArrayList: int indexOf(java.lang.Object)>($r3);
+
+        if $i0 < 0 goto label5;
+
+        $r1 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mToastQueue>;
+
+        virtualinvoke $r1.<java.util.ArrayList: java.lang.Object remove(int)>($i0);
+
+     label5:
+        $i0 = $r3.<com.android.server.NotificationManagerService$ToastRecord: int pid>;
+
+        specialinvoke $r0.<com.android.server.NotificationManagerService: void keepProcessAliveLocked(int)>($i0);
+
+        $r1 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mToastQueue>;
+
+        $i0 = virtualinvoke $r1.<java.util.ArrayList: int size()>();
+
+        if $i0 <= 0 goto label6;
+
+        $r1 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mToastQueue>;
+
+        $r2 = virtualinvoke $r1.<java.util.ArrayList: java.lang.Object get(int)>(0);
+
+        $r3 = (com.android.server.NotificationManagerService$ToastRecord) $r2;
+
+        goto label1;
+
+     label6:
+        $r3 = null;
+
+        goto label1;
+
+     label7:
+        return;
+
+        catch android.os.RemoteException from label2 to label3 with label4;
+    }
+
+    private void updateLights()
+    {
+        com.android.server.NotificationManagerService $r0;
+        java.util.ArrayList $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: com.android.server.NotificationManagerService;
+
+        $r1 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mNotificationList>;
+
+        entermonitor $r1;
+
+     label1:
+        specialinvoke $r0.<com.android.server.NotificationManagerService: void updateLightsLocked()>();
+
+        exitmonitor $r1;
+
+     label2:
+        return;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private void updateLightsLocked()
+    {
+        com.android.server.NotificationManagerService $r0;
+        boolean $z0;
+        com.android.server.HardwareService $r1;
+        com.android.server.NotificationManagerService$NotificationRecord $r2;
+        java.util.ArrayList $r3;
+        int $i0, $i1, $i2;
+        java.lang.Object $r4;
+        android.app.Notification $r5;
+
+        $r0 := @this: com.android.server.NotificationManagerService;
+
+        $z0 = $r0.<com.android.server.NotificationManagerService: boolean mBatteryLow>;
+
+        if $z0 == 0 goto label3;
+
+        $r1 = $r0.<com.android.server.NotificationManagerService: com.android.server.HardwareService mHardware>;
+
+        virtualinvoke $r1.<com.android.server.HardwareService: void setLightFlashing_UNCHECKED(int,int,int,int,int)>(3, -65536, 1, 125, 2875);
+
+     label1:
+        $r2 = $r0.<com.android.server.NotificationManagerService: com.android.server.NotificationManagerService$NotificationRecord mLedNotification>;
+
+        if $r2 != null goto label2;
+
+        $r3 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mLights>;
+
+        $i0 = virtualinvoke $r3.<java.util.ArrayList: int size()>();
+
+        if $i0 <= 0 goto label2;
+
+        $r3 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mLights>;
+
+        $i0 = $i0 - 1;
+
+        $r4 = virtualinvoke $r3.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r2 = (com.android.server.NotificationManagerService$NotificationRecord) $r4;
+
+        $r0.<com.android.server.NotificationManagerService: com.android.server.NotificationManagerService$NotificationRecord mLedNotification> = $r2;
+
+     label2:
+        $r2 = $r0.<com.android.server.NotificationManagerService: com.android.server.NotificationManagerService$NotificationRecord mLedNotification>;
+
+        if $r2 != null goto label6;
+
+        $r1 = $r0.<com.android.server.NotificationManagerService: com.android.server.HardwareService mHardware>;
+
+        virtualinvoke $r1.<com.android.server.HardwareService: void setLightOff_UNCHECKED(int)>(4);
+
+        return;
+
+     label3:
+        $z0 = $r0.<com.android.server.NotificationManagerService: boolean mBatteryCharging>;
+
+        if $z0 == 0 goto label5;
+
+        $z0 = $r0.<com.android.server.NotificationManagerService: boolean mBatteryFull>;
+
+        if $z0 == 0 goto label4;
+
+        $r1 = $r0.<com.android.server.NotificationManagerService: com.android.server.HardwareService mHardware>;
+
+        virtualinvoke $r1.<com.android.server.HardwareService: void setLightColor_UNCHECKED(int,int)>(3, -16711936);
+
+        goto label1;
+
+     label4:
+        $r1 = $r0.<com.android.server.NotificationManagerService: com.android.server.HardwareService mHardware>;
+
+        virtualinvoke $r1.<com.android.server.HardwareService: void setLightColor_UNCHECKED(int,int)>(3, -256);
+
+        goto label1;
+
+     label5:
+        $r1 = $r0.<com.android.server.NotificationManagerService: com.android.server.HardwareService mHardware>;
+
+        virtualinvoke $r1.<com.android.server.HardwareService: void setLightOff_UNCHECKED(int)>(3);
+
+        goto label1;
+
+     label6:
+        $r1 = $r0.<com.android.server.NotificationManagerService: com.android.server.HardwareService mHardware>;
+
+        $r2 = $r0.<com.android.server.NotificationManagerService: com.android.server.NotificationManagerService$NotificationRecord mLedNotification>;
+
+        $r5 = $r2.<com.android.server.NotificationManagerService$NotificationRecord: android.app.Notification notification>;
+
+        $i0 = $r5.<android.app.Notification: int ledARGB>;
+
+        $r2 = $r0.<com.android.server.NotificationManagerService: com.android.server.NotificationManagerService$NotificationRecord mLedNotification>;
+
+        $r5 = $r2.<com.android.server.NotificationManagerService$NotificationRecord: android.app.Notification notification>;
+
+        $i1 = $r5.<android.app.Notification: int ledOnMS>;
+
+        $r2 = $r0.<com.android.server.NotificationManagerService: com.android.server.NotificationManagerService$NotificationRecord mLedNotification>;
+
+        $r5 = $r2.<com.android.server.NotificationManagerService$NotificationRecord: android.app.Notification notification>;
+
+        $i2 = $r5.<android.app.Notification: int ledOffMS>;
+
+        virtualinvoke $r1.<com.android.server.HardwareService: void setLightFlashing_UNCHECKED(int,int,int,int,int)>(4, $i0, 1, $i1, $i2);
+
+        return;
+    }
+
+    public void cancelAll()
+    {
+        com.android.server.NotificationManagerService $r0;
+        java.util.ArrayList $r1, $r2;
+        int $i0, $i1;
+        java.lang.Object $r3;
+        com.android.server.NotificationManagerService$NotificationRecord $r4;
+        android.app.Notification $r5;
+        android.app.PendingIntent $r6;
+        android.app.PendingIntent$CanceledException $r7;
+        java.lang.StringBuilder $r8;
+        java.lang.String $r9;
+        java.lang.Throwable $r10;
+
+        $r0 := @this: com.android.server.NotificationManagerService;
+
+        $r1 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mNotificationList>;
+
+        entermonitor $r1;
+
+     label01:
+        $r2 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mNotificationList>;
+
+        $i0 = virtualinvoke $r2.<java.util.ArrayList: int size()>();
+
+        $i0 = $i0 - 1;
+
+     label02:
+        if $i0 < 0 goto label11;
+
+        $r2 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mNotificationList>;
+
+        $r3 = virtualinvoke $r2.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r4 = (com.android.server.NotificationManagerService$NotificationRecord) $r3;
+
+        $r5 = $r4.<com.android.server.NotificationManagerService$NotificationRecord: android.app.Notification notification>;
+
+        $i1 = $r5.<android.app.Notification: int flags>;
+
+        $i1 = $i1 & 34;
+
+        if $i1 != 0 goto label07;
+
+        $r5 = $r4.<com.android.server.NotificationManagerService$NotificationRecord: android.app.Notification notification>;
+
+        $r6 = $r5.<android.app.Notification: android.app.PendingIntent deleteIntent>;
+
+     label03:
+        if $r6 == null goto label06;
+
+     label04:
+        $r5 = $r4.<com.android.server.NotificationManagerService$NotificationRecord: android.app.Notification notification>;
+
+        $r6 = $r5.<android.app.Notification: android.app.PendingIntent deleteIntent>;
+
+     label05:
+        virtualinvoke $r6.<android.app.PendingIntent: void send()>();
+
+     label06:
+        $r2 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mNotificationList>;
+
+        virtualinvoke $r2.<java.util.ArrayList: java.lang.Object remove(int)>($i0);
+
+        specialinvoke $r0.<com.android.server.NotificationManagerService: void cancelNotificationLocked(com.android.server.NotificationManagerService$NotificationRecord)>($r4);
+
+     label07:
+        $i0 = $i0 + -1;
+
+        goto label02;
+
+     label08:
+        $r7 := @caughtexception;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("canceled PendingIntent for ");
+
+        $r9 = $r4.<com.android.server.NotificationManagerService$NotificationRecord: java.lang.String pkg>;
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String,java.lang.Throwable)>("NotificationService", $r9, $r7);
+
+        goto label06;
+
+     label09:
+        $r10 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label10:
+        throw $r10;
+
+     label11:
+        specialinvoke $r0.<com.android.server.NotificationManagerService: void updateLightsLocked()>();
+
+        exitmonitor $r1;
+
+     label12:
+        return;
+
+        catch java.lang.Throwable from label01 to label03 with label09;
+        catch android.app.PendingIntent$CanceledException from label05 to label06 with label08;
+        catch java.lang.Throwable from label04 to label06 with label09;
+        catch java.lang.Throwable from label06 to label10 with label09;
+        catch java.lang.Throwable from label11 to label12 with label09;
+    }
+
+    public void cancelAllNotifications(java.lang.String)
+    {
+        com.android.server.NotificationManagerService $r0;
+        java.lang.String $r1;
+
+        $r0 := @this: com.android.server.NotificationManagerService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        specialinvoke $r0.<com.android.server.NotificationManagerService: void cancelAllNotificationsInt(java.lang.String,int)>($r1, 0);
+
+        return;
+    }
+
+    public void cancelNotification(java.lang.String, int)
+    {
+        com.android.server.NotificationManagerService $r0;
+        java.lang.String $r1;
+        int $i0;
+
+        $r0 := @this: com.android.server.NotificationManagerService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        specialinvoke $r0.<com.android.server.NotificationManagerService: void cancelNotification(java.lang.String,int,int)>($r1, $i0, 0);
+
+        return;
+    }
+
+    public void cancelToast(java.lang.String, android.app.ITransientNotification)
+    {
+        com.android.server.NotificationManagerService $r0;
+        java.lang.String $r1, $r4;
+        android.app.ITransientNotification $r2;
+        java.lang.StringBuilder $r3;
+        java.util.ArrayList $r5;
+        long $l0;
+        int $i1;
+        java.lang.Throwable $r6, $r7;
+
+        $r0 := @this: com.android.server.NotificationManagerService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: android.app.ITransientNotification;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("cancelToast pkg=");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" callback=");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("NotificationService", $r4);
+
+        if $r1 == null goto label01;
+
+        if $r2 != null goto label02;
+
+     label01:
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Not cancelling notification. pkg=");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" callback=");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("NotificationService", $r1);
+
+        return;
+
+     label02:
+        $r5 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mToastQueue>;
+
+        entermonitor $r5;
+
+     label03:
+        $l0 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label04:
+        $i1 = specialinvoke $r0.<com.android.server.NotificationManagerService: int indexOfToastLocked(java.lang.String,android.app.ITransientNotification)>($r1, $r2);
+
+        if $i1 < 0 goto label09;
+
+        specialinvoke $r0.<com.android.server.NotificationManagerService: void cancelToastLocked(int)>($i1);
+
+     label05:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l0);
+
+        exitmonitor $r5;
+
+     label06:
+        return;
+
+     label07:
+        $r6 := @caughtexception;
+
+        exitmonitor $r5;
+
+     label08:
+        throw $r6;
+
+     label09:
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Toast already cancelled. pkg=");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" callback=");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("NotificationService", $r1);
+
+     label10:
+        goto label05;
+
+     label11:
+        $r7 := @caughtexception;
+
+     label12:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l0);
+
+        throw $r7;
+
+     label13:
+        nop;
+
+        catch java.lang.Throwable from label03 to label04 with label07;
+        catch java.lang.Throwable from label04 to label05 with label11;
+        catch java.lang.Throwable from label05 to label06 with label07;
+        catch java.lang.Throwable from label07 to label08 with label07;
+        catch java.lang.Throwable from label09 to label10 with label11;
+        catch java.lang.Throwable from label12 to label13 with label07;
+    }
+
+    protected void dump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[])
+    {
+        com.android.server.NotificationManagerService $r0;
+        java.io.FileDescriptor $r1;
+        java.io.PrintWriter $r2;
+        java.lang.String[] $r3;
+        android.content.Context $r4;
+        int $i0, $i1;
+        java.lang.StringBuilder $r5;
+        java.lang.String $r6;
+        java.util.ArrayList $r7, $r8;
+        java.lang.Object $r9;
+        com.android.server.NotificationManagerService$ToastRecord $r10;
+        com.android.server.NotificationManagerService$NotificationRecord $r11;
+        java.lang.Throwable $r12, $r14;
+        android.media.AsyncPlayer $r13;
+
+        $r0 := @this: com.android.server.NotificationManagerService;
+
+        $r1 := @parameter0: java.io.FileDescriptor;
+
+        $r2 := @parameter1: java.io.PrintWriter;
+
+        $r3 := @parameter2: java.lang.String[];
+
+        $r4 = $r0.<com.android.server.NotificationManagerService: android.content.Context mContext>;
+
+        $i0 = virtualinvoke $r4.<android.content.Context: int checkCallingOrSelfPermission(java.lang.String)>("android.permission.DUMP");
+
+        if $i0 == 0 goto label01;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Permission Denial: can\'t dump NotificationManager from from pid=");
+
+        $i0 = staticinvoke <android.os.Binder: int getCallingPid()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", uid=");
+
+        $i0 = staticinvoke <android.os.Binder: int getCallingUid()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        return;
+
+     label01:
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("Current Notification Manager state:");
+
+        $r7 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mToastQueue>;
+
+        entermonitor $r7;
+
+     label02:
+        $r8 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mToastQueue>;
+
+        $i0 = virtualinvoke $r8.<java.util.ArrayList: int size()>();
+
+        if $i0 <= 0 goto label05;
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("  Toast Queue:");
+
+        $i1 = 0;
+
+     label03:
+        if $i1 >= $i0 goto label04;
+
+        $r8 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mToastQueue>;
+
+        $r9 = virtualinvoke $r8.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r10 = (com.android.server.NotificationManagerService$ToastRecord) $r9;
+
+        virtualinvoke $r10.<com.android.server.NotificationManagerService$ToastRecord: void dump(java.io.PrintWriter,java.lang.String)>($r2, "    ");
+
+        $i1 = $i1 + 1;
+
+        goto label03;
+
+     label04:
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("  ");
+
+     label05:
+        exitmonitor $r7;
+
+     label06:
+        $r7 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mNotificationList>;
+
+        entermonitor $r7;
+
+     label07:
+        $r8 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mNotificationList>;
+
+        $i0 = virtualinvoke $r8.<java.util.ArrayList: int size()>();
+
+        if $i0 <= 0 goto label14;
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("  Notification List:");
+
+        $i1 = 0;
+
+     label08:
+        if $i1 >= $i0 goto label13;
+
+        $r8 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mNotificationList>;
+
+        $r9 = virtualinvoke $r8.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r11 = (com.android.server.NotificationManagerService$NotificationRecord) $r9;
+
+        $r4 = $r0.<com.android.server.NotificationManagerService: android.content.Context mContext>;
+
+        virtualinvoke $r11.<com.android.server.NotificationManagerService$NotificationRecord: void dump(java.io.PrintWriter,java.lang.String,android.content.Context)>($r2, "    ", $r4);
+
+     label09:
+        $i1 = $i1 + 1;
+
+        goto label08;
+
+     label10:
+        $r12 := @caughtexception;
+
+     label11:
+        exitmonitor $r7;
+
+     label12:
+        throw $r12;
+
+     label13:
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("  ");
+
+     label14:
+        $r8 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mLights>;
+
+        $i0 = virtualinvoke $r8.<java.util.ArrayList: int size()>();
+
+        if $i0 <= 0 goto label17;
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("  Lights List:");
+
+        $i1 = 0;
+
+     label15:
+        if $i1 >= $i0 goto label16;
+
+        $r8 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mLights>;
+
+        $r9 = virtualinvoke $r8.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r11 = (com.android.server.NotificationManagerService$NotificationRecord) $r9;
+
+        $r4 = $r0.<com.android.server.NotificationManagerService: android.content.Context mContext>;
+
+        virtualinvoke $r11.<com.android.server.NotificationManagerService$NotificationRecord: void dump(java.io.PrintWriter,java.lang.String,android.content.Context)>($r2, "    ", $r4);
+
+        $i1 = $i1 + 1;
+
+        goto label15;
+
+     label16:
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("  ");
+
+     label17:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mSoundNotification=");
+
+        $r11 = $r0.<com.android.server.NotificationManagerService: com.android.server.NotificationManagerService$NotificationRecord mSoundNotification>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r11);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mSound=");
+
+        $r13 = $r0.<com.android.server.NotificationManagerService: android.media.AsyncPlayer mSound>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r13);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mVibrateNotification=");
+
+        $r11 = $r0.<com.android.server.NotificationManagerService: com.android.server.NotificationManagerService$NotificationRecord mVibrateNotification>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r11);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        exitmonitor $r7;
+
+     label18:
+        return;
+
+     label19:
+        $r14 := @caughtexception;
+
+        exitmonitor $r7;
+
+     label20:
+        throw $r14;
+
+        catch java.lang.Throwable from label02 to label06 with label10;
+        catch java.lang.Throwable from label07 to label09 with label19;
+        catch java.lang.Throwable from label11 to label12 with label10;
+        catch java.lang.Throwable from label13 to label18 with label19;
+        catch java.lang.Throwable from label19 to label20 with label19;
+    }
+
+    public void enqueueNotification(java.lang.String, int, android.app.Notification, int[])
+    {
+        com.android.server.NotificationManagerService $r0;
+        java.lang.String $r1, $r8;
+        int $i0, $i1, $i2, $i3;
+        android.app.Notification $r2;
+        int[] $r3;
+        com.android.server.status.NotificationData $r4;
+        com.android.server.NotificationManagerService$NotificationRecord $r5, $r14, $r28;
+        boolean $z0, $z1;
+        java.lang.Object[] $r6;
+        java.lang.Integer $r7;
+        java.lang.IllegalArgumentException $r9;
+        java.lang.StringBuilder $r10;
+        android.widget.RemoteViews $r11;
+        android.app.PendingIntent $r12;
+        java.util.ArrayList $r13, $r15;
+        com.android.server.status.IconData $r16;
+        java.lang.CharSequence $r17, $r18;
+        long $l4;
+        android.os.IBinder $r19;
+        com.android.server.status.StatusBarService $r20;
+        android.net.Uri $r21;
+        android.media.AsyncPlayer $r22;
+        android.content.Context $r23;
+        java.lang.Object $r24;
+        android.media.AudioManager $r25;
+        long[] $r26;
+        android.os.Vibrator $r27;
+        byte $b5;
+        java.lang.Throwable $r29, $r30, $r32, $r33, $r34;
+        com.android.server.HardwareService $r31;
+
+        $r0 := @this: com.android.server.NotificationManagerService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: android.app.Notification;
+
+        $r3 := @parameter3: int[];
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("com.android.providers.downloads");
+
+        if $z0 == 0 goto label01;
+
+        $z0 = staticinvoke <android.util.Log: boolean isLoggable(java.lang.String,int)>("DownloadManager", 2);
+
+        if $z0 == 0 goto label02;
+
+     label01:
+        $r6 = newarray (java.lang.Object)[3];
+
+        $r6[0] = $r1;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r6[1] = $r7;
+
+        $r8 = virtualinvoke $r2.<android.app.Notification: java.lang.String toString()>();
+
+        $r6[2] = $r8;
+
+        staticinvoke <android.util.EventLog: int writeEvent(int,java.lang.Object[])>(2750, $r6);
+
+     label02:
+        if $r1 == null goto label03;
+
+        if $r2 != null goto label04;
+
+     label03:
+        $r9 = new java.lang.IllegalArgumentException;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("null not allowed: pkg=");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" id=");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" notification=");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r1 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r9.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r1);
+
+        throw $r9;
+
+     label04:
+        $i1 = $r2.<android.app.Notification: int icon>;
+
+        if $i1 == 0 goto label06;
+
+        $r11 = $r2.<android.app.Notification: android.widget.RemoteViews contentView>;
+
+        if $r11 != null goto label05;
+
+        $r9 = new java.lang.IllegalArgumentException;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("contentView required: pkg=");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" id=");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" notification=");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r1 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r9.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r1);
+
+        throw $r9;
+
+     label05:
+        $r12 = $r2.<android.app.Notification: android.app.PendingIntent contentIntent>;
+
+        if $r12 != null goto label06;
+
+        $r9 = new java.lang.IllegalArgumentException;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("contentIntent required: pkg=");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" id=");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" notification=");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r1 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r9.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r1);
+
+        throw $r9;
+
+     label06:
+        $r13 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mNotificationList>;
+
+        entermonitor $r13;
+
+     label07:
+        $r5 = new com.android.server.NotificationManagerService$NotificationRecord;
+
+        specialinvoke $r5.<com.android.server.NotificationManagerService$NotificationRecord: void <init>(java.lang.String,int,android.app.Notification)>($r1, $i0, $r2);
+
+        $r14 = null;
+
+        $i1 = specialinvoke $r0.<com.android.server.NotificationManagerService: int indexOfNotificationLocked(java.lang.String,int)>($r1, $i0);
+
+        if $i1 >= 0 goto label32;
+
+        $r15 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mNotificationList>;
+
+        virtualinvoke $r15.<java.util.ArrayList: boolean add(java.lang.Object)>($r5);
+
+     label08:
+        $i1 = $r2.<android.app.Notification: int icon>;
+
+        if $i1 == 0 goto label42;
+
+        $i1 = $r2.<android.app.Notification: int icon>;
+
+        $i2 = $r2.<android.app.Notification: int iconLevel>;
+
+        $i3 = $r2.<android.app.Notification: int number>;
+
+        $r16 = staticinvoke <com.android.server.status.IconData: com.android.server.status.IconData makeIcon(java.lang.String,java.lang.String,int,int,int)>(null, $r1, $i1, $i2, $i3);
+
+        $r17 = $r2.<android.app.Notification: java.lang.CharSequence tickerText>;
+
+        $r18 = $r17;
+
+        if $r17 == null goto label09;
+
+        $i1 = interfaceinvoke $r17.<java.lang.CharSequence: int length()>();
+
+        if $i1 <= 80 goto label09;
+
+        $r18 = interfaceinvoke $r17.<java.lang.CharSequence: java.lang.CharSequence subSequence(int,int)>(0, 80);
+
+     label09:
+        $r4 = new com.android.server.status.NotificationData;
+
+        specialinvoke $r4.<com.android.server.status.NotificationData: void <init>()>();
+
+        $r4.<com.android.server.status.NotificationData: int id> = $i0;
+
+        $r4.<com.android.server.status.NotificationData: java.lang.String pkg> = $r1;
+
+        $l4 = $r2.<android.app.Notification: long when>;
+
+        $r4.<com.android.server.status.NotificationData: long when> = $l4;
+
+        $r4.<com.android.server.status.NotificationData: java.lang.CharSequence tickerText> = $r18;
+
+        $i1 = $r2.<android.app.Notification: int flags>;
+
+        $i1 = $i1 & 2;
+
+        if $i1 == 0 goto label35;
+
+        $z0 = 1;
+
+     label10:
+        $r4.<com.android.server.status.NotificationData: boolean ongoingEvent> = $z0;
+
+        $z0 = $r4.<com.android.server.status.NotificationData: boolean ongoingEvent>;
+
+        if $z0 != 0 goto label11;
+
+        $i1 = $r2.<android.app.Notification: int flags>;
+
+        $i1 = $i1 & 32;
+
+        if $i1 != 0 goto label11;
+
+        $r4.<com.android.server.status.NotificationData: boolean clearable> = 1;
+
+     label11:
+        $r11 = $r2.<android.app.Notification: android.widget.RemoteViews contentView>;
+
+        $r4.<com.android.server.status.NotificationData: android.widget.RemoteViews contentView> = $r11;
+
+        $r12 = $r2.<android.app.Notification: android.app.PendingIntent contentIntent>;
+
+        $r4.<com.android.server.status.NotificationData: android.app.PendingIntent contentIntent> = $r12;
+
+        $r12 = $r2.<android.app.Notification: android.app.PendingIntent deleteIntent>;
+
+        $r4.<com.android.server.status.NotificationData: android.app.PendingIntent deleteIntent> = $r12;
+
+        if $r14 == null goto label38;
+
+        $r19 = $r14.<com.android.server.NotificationManagerService$NotificationRecord: android.os.IBinder statusBarKey>;
+
+        if $r19 == null goto label38;
+
+        $r19 = $r14.<com.android.server.NotificationManagerService$NotificationRecord: android.os.IBinder statusBarKey>;
+
+        $r5.<com.android.server.NotificationManagerService$NotificationRecord: android.os.IBinder statusBarKey> = $r19;
+
+        $l4 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label12:
+        $r20 = $r0.<com.android.server.NotificationManagerService: com.android.server.status.StatusBarService mStatusBarService>;
+
+        $r19 = $r5.<com.android.server.NotificationManagerService$NotificationRecord: android.os.IBinder statusBarKey>;
+
+        virtualinvoke $r20.<com.android.server.status.StatusBarService: void updateIcon(android.os.IBinder,com.android.server.status.IconData,com.android.server.status.NotificationData)>($r19, $r16, $r4);
+
+     label13:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l4);
+
+     label14:
+        $i1 = $r0.<com.android.server.NotificationManagerService: int mDisabledNotifications>;
+
+        $i1 = $i1 & 4;
+
+        if $i1 != 0 goto label28;
+
+        if $r14 == null goto label15;
+
+        $i1 = $r2.<android.app.Notification: int flags>;
+
+        $i1 = $i1 & 8;
+
+        if $i1 != 0 goto label28;
+
+     label15:
+        $i1 = $r2.<android.app.Notification: int defaults>;
+
+        $i1 = $i1 & 1;
+
+        if $i1 == 0 goto label46;
+
+        $z0 = 1;
+
+     label16:
+        if $z0 != 0 goto label17;
+
+        $r21 = $r2.<android.app.Notification: android.net.Uri sound>;
+
+        if $r21 == null goto label23;
+
+     label17:
+        if $z0 == 0 goto label47;
+
+        $r21 = <android.provider.Settings$System: android.net.Uri DEFAULT_NOTIFICATION_URI>;
+
+     label18:
+        $i1 = $r2.<android.app.Notification: int flags>;
+
+        $i1 = $i1 & 4;
+
+        if $i1 == 0 goto label48;
+
+        $z0 = 1;
+
+     label19:
+        $i1 = $r2.<android.app.Notification: int audioStreamType>;
+
+        if $i1 < 0 goto label49;
+
+        $i1 = $r2.<android.app.Notification: int audioStreamType>;
+
+     label20:
+        $r0.<com.android.server.NotificationManagerService: com.android.server.NotificationManagerService$NotificationRecord mSoundNotification> = $r5;
+
+        $l4 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label21:
+        $r22 = $r0.<com.android.server.NotificationManagerService: android.media.AsyncPlayer mSound>;
+
+        $r23 = $r0.<com.android.server.NotificationManagerService: android.content.Context mContext>;
+
+        virtualinvoke $r22.<android.media.AsyncPlayer: void play(android.content.Context,android.net.Uri,boolean,int)>($r23, $r21, $z0, $i1);
+
+     label22:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l4);
+
+     label23:
+        $r23 = $r0.<com.android.server.NotificationManagerService: android.content.Context mContext>;
+
+        $r24 = virtualinvoke $r23.<android.content.Context: java.lang.Object getSystemService(java.lang.String)>("audio");
+
+        $r25 = (android.media.AudioManager) $r24;
+
+        $i1 = $r2.<android.app.Notification: int defaults>;
+
+        $i1 = $i1 & 2;
+
+        if $i1 == 0 goto label51;
+
+        $z0 = 1;
+
+     label24:
+        if $z0 != 0 goto label25;
+
+        $r26 = $r2.<android.app.Notification: long[] vibrate>;
+
+        if $r26 == null goto label28;
+
+     label25:
+        $z1 = virtualinvoke $r25.<android.media.AudioManager: boolean shouldVibrate(int)>(1);
+
+        if $z1 == 0 goto label28;
+
+        $r0.<com.android.server.NotificationManagerService: com.android.server.NotificationManagerService$NotificationRecord mVibrateNotification> = $r5;
+
+        $r27 = $r0.<com.android.server.NotificationManagerService: android.os.Vibrator mVibrator>;
+
+        if $z0 == 0 goto label52;
+
+        $r26 = <com.android.server.NotificationManagerService: long[] DEFAULT_VIBRATE_PATTERN>;
+
+     label26:
+        $i1 = $r2.<android.app.Notification: int flags>;
+
+        $i1 = $i1 & 4;
+
+        if $i1 == 0 goto label53;
+
+        $b5 = 0;
+
+     label27:
+        virtualinvoke $r27.<android.os.Vibrator: void vibrate(long[],int)>($r26, $b5);
+
+     label28:
+        $r15 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mLights>;
+
+        virtualinvoke $r15.<java.util.ArrayList: boolean remove(java.lang.Object)>($r14);
+
+        $r28 = $r0.<com.android.server.NotificationManagerService: com.android.server.NotificationManagerService$NotificationRecord mLedNotification>;
+
+        if $r28 != $r14 goto label29;
+
+        $r0.<com.android.server.NotificationManagerService: com.android.server.NotificationManagerService$NotificationRecord mLedNotification> = null;
+
+     label29:
+        $i1 = $r2.<android.app.Notification: int flags>;
+
+        $i1 = $i1 & 1;
+
+        if $i1 == 0 goto label54;
+
+        $r15 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mLights>;
+
+        virtualinvoke $r15.<java.util.ArrayList: boolean add(java.lang.Object)>($r5);
+
+        specialinvoke $r0.<com.android.server.NotificationManagerService: void updateLightsLocked()>();
+
+     label30:
+        exitmonitor $r13;
+
+     label31:
+        $r3[0] = $i0;
+
+        return;
+
+     label32:
+        $r15 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mNotificationList>;
+
+        $r24 = virtualinvoke $r15.<java.util.ArrayList: java.lang.Object remove(int)>($i1);
+
+        $r14 = (com.android.server.NotificationManagerService$NotificationRecord) $r24;
+
+        $r15 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mNotificationList>;
+
+        virtualinvoke $r15.<java.util.ArrayList: void add(int,java.lang.Object)>($i1, $r5);
+
+        goto label08;
+
+     label33:
+        $r29 := @caughtexception;
+
+        exitmonitor $r13;
+
+     label34:
+        throw $r29;
+
+     label35:
+        $z0 = 0;
+
+        goto label10;
+
+     label36:
+        $r30 := @caughtexception;
+
+     label37:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l4);
+
+        throw $r30;
+
+     label38:
+        $l4 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label39:
+        $r20 = $r0.<com.android.server.NotificationManagerService: com.android.server.status.StatusBarService mStatusBarService>;
+
+        $r19 = virtualinvoke $r20.<com.android.server.status.StatusBarService: android.os.IBinder addIcon(com.android.server.status.IconData,com.android.server.status.NotificationData)>($r16, $r4);
+
+        $r5.<com.android.server.NotificationManagerService$NotificationRecord: android.os.IBinder statusBarKey> = $r19;
+
+        $r31 = $r0.<com.android.server.NotificationManagerService: com.android.server.HardwareService mHardware>;
+
+        virtualinvoke $r31.<com.android.server.HardwareService: void pulseBreathingLight()>();
+
+     label40:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l4);
+
+        goto label14;
+
+     label41:
+        $r32 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l4);
+
+        throw $r32;
+
+     label42:
+        if $r14 == null goto label14;
+
+        $r19 = $r14.<com.android.server.NotificationManagerService$NotificationRecord: android.os.IBinder statusBarKey>;
+
+        if $r19 == null goto label14;
+
+        $l4 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label43:
+        $r20 = $r0.<com.android.server.NotificationManagerService: com.android.server.status.StatusBarService mStatusBarService>;
+
+        $r19 = $r14.<com.android.server.NotificationManagerService$NotificationRecord: android.os.IBinder statusBarKey>;
+
+        virtualinvoke $r20.<com.android.server.status.StatusBarService: void removeIcon(android.os.IBinder)>($r19);
+
+     label44:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l4);
+
+        goto label14;
+
+     label45:
+        $r33 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l4);
+
+        throw $r33;
+
+     label46:
+        $z0 = 0;
+
+        goto label16;
+
+     label47:
+        $r21 = $r2.<android.app.Notification: android.net.Uri sound>;
+
+        goto label18;
+
+     label48:
+        $z0 = 0;
+
+        goto label19;
+
+     label49:
+        $i1 = 5;
+
+        goto label20;
+
+     label50:
+        $r34 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l4);
+
+        throw $r34;
+
+     label51:
+        $z0 = 0;
+
+        goto label24;
+
+     label52:
+        $r26 = $r2.<android.app.Notification: long[] vibrate>;
+
+        goto label26;
+
+     label53:
+        $b5 = -1;
+
+        goto label27;
+
+     label54:
+        if $r14 == null goto label30;
+
+        $r2 = $r14.<com.android.server.NotificationManagerService$NotificationRecord: android.app.Notification notification>;
+
+        $i1 = $r2.<android.app.Notification: int flags>;
+
+        $i1 = $i1 & 1;
+
+        if $i1 == 0 goto label30;
+
+        specialinvoke $r0.<com.android.server.NotificationManagerService: void updateLightsLocked()>();
+
+     label55:
+        goto label30;
+
+        catch java.lang.Throwable from label07 to label12 with label33;
+        catch java.lang.Throwable from label12 to label13 with label36;
+        catch java.lang.Throwable from label13 to label21 with label33;
+        catch java.lang.Throwable from label21 to label22 with label50;
+        catch java.lang.Throwable from label22 to label31 with label33;
+        catch java.lang.Throwable from label32 to label34 with label33;
+        catch java.lang.Throwable from label37 to label39 with label33;
+        catch java.lang.Throwable from label39 to label40 with label41;
+        catch java.lang.Throwable from label40 to label43 with label33;
+        catch java.lang.Throwable from label43 to label44 with label45;
+        catch java.lang.Throwable from label44 to label55 with label33;
+    }
+
+    public void enqueueToast(java.lang.String, android.app.ITransientNotification, int)
+    {
+        com.android.server.NotificationManagerService $r0;
+        java.lang.String $r1, $r4;
+        android.app.ITransientNotification $r2;
+        int $i0, $i1, $i3, $i4;
+        java.lang.StringBuilder $r3;
+        java.util.ArrayList $r5, $r6;
+        long $l2;
+        java.lang.Object $r7;
+        com.android.server.NotificationManagerService$ToastRecord $r8;
+        java.lang.Throwable $r9, $r10;
+
+        $r0 := @this: com.android.server.NotificationManagerService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: android.app.ITransientNotification;
+
+        $i0 := @parameter2: int;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("enqueueToast pkg=");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" callback=");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" duration=");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("NotificationService", $r4);
+
+        if $r1 == null goto label01;
+
+        if $r2 != null goto label02;
+
+     label01:
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Not doing toast. pkg=");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" callback=");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("NotificationService", $r1);
+
+        return;
+
+     label02:
+        $r5 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mToastQueue>;
+
+        entermonitor $r5;
+
+     label03:
+        $i1 = staticinvoke <android.os.Binder: int getCallingPid()>();
+
+        $l2 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label04:
+        $i3 = specialinvoke $r0.<com.android.server.NotificationManagerService: int indexOfToastLocked(java.lang.String,android.app.ITransientNotification)>($r1, $r2);
+
+        $i4 = $i3;
+
+        if $i3 < 0 goto label10;
+
+        $r6 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mToastQueue>;
+
+        $r7 = virtualinvoke $r6.<java.util.ArrayList: java.lang.Object get(int)>($i3);
+
+        $r8 = (com.android.server.NotificationManagerService$ToastRecord) $r7;
+
+        virtualinvoke $r8.<com.android.server.NotificationManagerService$ToastRecord: void update(int)>($i0);
+
+     label05:
+        if $i4 != 0 goto label06;
+
+        specialinvoke $r0.<com.android.server.NotificationManagerService: void showNextToastLocked()>();
+
+     label06:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l2);
+
+        exitmonitor $r5;
+
+     label07:
+        return;
+
+     label08:
+        $r9 := @caughtexception;
+
+        exitmonitor $r5;
+
+     label09:
+        throw $r9;
+
+     label10:
+        $r8 = new com.android.server.NotificationManagerService$ToastRecord;
+
+        specialinvoke $r8.<com.android.server.NotificationManagerService$ToastRecord: void <init>(int,java.lang.String,android.app.ITransientNotification,int)>($i1, $r1, $r2, $i0);
+
+        $r6 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mToastQueue>;
+
+        virtualinvoke $r6.<java.util.ArrayList: boolean add(java.lang.Object)>($r8);
+
+        $r6 = $r0.<com.android.server.NotificationManagerService: java.util.ArrayList mToastQueue>;
+
+        $i0 = virtualinvoke $r6.<java.util.ArrayList: int size()>();
+
+        $i4 = $i0 - 1;
+
+        specialinvoke $r0.<com.android.server.NotificationManagerService: void keepProcessAliveLocked(int)>($i1);
+
+     label11:
+        goto label05;
+
+     label12:
+        $r10 := @caughtexception;
+
+     label13:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l2);
+
+        throw $r10;
+
+     label14:
+        nop;
+
+        catch java.lang.Throwable from label03 to label04 with label08;
+        catch java.lang.Throwable from label04 to label06 with label12;
+        catch java.lang.Throwable from label06 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+        catch java.lang.Throwable from label10 to label11 with label12;
+        catch java.lang.Throwable from label13 to label14 with label08;
+    }
+}

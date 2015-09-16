@@ -1,0 +1,2883 @@
+class android.webkit.LoadListener extends android.os.Handler implements android.net.http.EventHandler
+{
+    private static final java.util.regex.Pattern CONTENT_TYPE_PATTERN;
+    private static final int HTTP_AUTH;
+    private static final int HTTP_FOUND;
+    private static final int HTTP_MOVED_PERMANENTLY;
+    private static final int HTTP_NOT_FOUND;
+    private static final int HTTP_NOT_MODIFIED;
+    private static final int HTTP_OK;
+    private static final int HTTP_PROXY_AUTH;
+    private static final int HTTP_SEE_OTHER;
+    private static final int HTTP_TEMPORARY_REDIRECT;
+    private static final java.lang.String LOGTAG;
+    private static final int MSG_CONTENT_DATA;
+    private static final int MSG_CONTENT_ERROR;
+    private static final int MSG_CONTENT_FINISHED;
+    private static final int MSG_CONTENT_HEADERS;
+    private static final int MSG_LOCATION_CHANGED;
+    private static final int MSG_LOCATION_CHANGED_REQUEST;
+    private static final int MSG_SSL_CERTIFICATE;
+    private static final int MSG_SSL_ERROR;
+    private static final int MSG_STATUS;
+    private static int sNativeLoaderCount;
+    private boolean mAuthFailed;
+    private android.net.http.HttpAuthHeader mAuthHeader;
+    private android.webkit.BrowserFrame mBrowserFrame;
+    private android.webkit.CacheLoader mCacheLoader;
+    private int mCacheRedirectCount;
+    private android.webkit.CacheManager$CacheResult mCacheResult;
+    private boolean mCancelled;
+    public long mContentLength;
+    private android.content.Context mContext;
+    private final android.webkit.ByteArrayBuilder mDataBuilder;
+    private java.lang.String mEncoding;
+    private java.lang.String mErrorDescription;
+    private int mErrorID;
+    private android.net.http.Headers mHeaders;
+    private boolean mIsHighPriority;
+    private boolean mIsMainPageLoader;
+    private java.util.Vector mMessageQueue;
+    private java.lang.String mMethod;
+    private java.lang.String mMimeType;
+    private int mNativeLoader;
+    private java.lang.String mOriginalUrl;
+    private boolean mPermanent;
+    private byte[] mPostData;
+    private android.net.http.RequestHandle mRequestHandle;
+    private java.util.Map mRequestHeaders;
+    private android.net.http.SslError mSslError;
+    private int mStatusCode;
+    private java.lang.String mStatusText;
+    private boolean mSynchronous;
+    private java.lang.String mTransferEncoding;
+    private android.net.WebAddress mUri;
+    private java.lang.String mUrl;
+
+    static void <clinit>()
+    {
+        java.util.regex.Pattern $r0;
+
+        <android.webkit.LoadListener: int MSG_STATUS> = 160;
+
+        <android.webkit.LoadListener: int MSG_SSL_ERROR> = 180;
+
+        <android.webkit.LoadListener: int MSG_SSL_CERTIFICATE> = 170;
+
+        <android.webkit.LoadListener: int MSG_LOCATION_CHANGED_REQUEST> = 150;
+
+        <android.webkit.LoadListener: int MSG_LOCATION_CHANGED> = 140;
+
+        <android.webkit.LoadListener: int MSG_CONTENT_HEADERS> = 100;
+
+        <android.webkit.LoadListener: int MSG_CONTENT_FINISHED> = 120;
+
+        <android.webkit.LoadListener: int MSG_CONTENT_ERROR> = 130;
+
+        <android.webkit.LoadListener: int MSG_CONTENT_DATA> = 110;
+
+        <android.webkit.LoadListener: java.lang.String LOGTAG> = "webkit";
+
+        <android.webkit.LoadListener: int HTTP_TEMPORARY_REDIRECT> = 307;
+
+        <android.webkit.LoadListener: int HTTP_SEE_OTHER> = 303;
+
+        <android.webkit.LoadListener: int HTTP_PROXY_AUTH> = 407;
+
+        <android.webkit.LoadListener: int HTTP_OK> = 200;
+
+        <android.webkit.LoadListener: int HTTP_NOT_MODIFIED> = 304;
+
+        <android.webkit.LoadListener: int HTTP_NOT_FOUND> = 404;
+
+        <android.webkit.LoadListener: int HTTP_MOVED_PERMANENTLY> = 301;
+
+        <android.webkit.LoadListener: int HTTP_FOUND> = 302;
+
+        <android.webkit.LoadListener: int HTTP_AUTH> = 401;
+
+        $r0 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>("^((?:[xX]-)?[a-zA-Z\\*]+/[\\w\\+\\*-]+[\\.[\\w\\+-]+]*)$");
+
+        <android.webkit.LoadListener: java.util.regex.Pattern CONTENT_TYPE_PATTERN> = $r0;
+
+        return;
+    }
+
+    void <init>(android.content.Context, android.webkit.BrowserFrame, java.lang.String, int, boolean, boolean)
+    {
+        android.webkit.LoadListener $r0;
+        android.content.Context $r1;
+        android.webkit.BrowserFrame $r2;
+        java.lang.String $r3;
+        int $i0;
+        boolean $z0, $z1;
+        android.webkit.ByteArrayBuilder $r4;
+        java.util.Vector $r5;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: android.webkit.BrowserFrame;
+
+        $r3 := @parameter2: java.lang.String;
+
+        $i0 := @parameter3: int;
+
+        $z0 := @parameter4: boolean;
+
+        $z1 := @parameter5: boolean;
+
+        specialinvoke $r0.<android.os.Handler: void <init>()>();
+
+        $r4 = new android.webkit.ByteArrayBuilder;
+
+        specialinvoke $r4.<android.webkit.ByteArrayBuilder: void <init>(int)>(8192);
+
+        $r0.<android.webkit.LoadListener: android.webkit.ByteArrayBuilder mDataBuilder> = $r4;
+
+        $r0.<android.webkit.LoadListener: int mErrorID> = 0;
+
+        $r0.<android.webkit.LoadListener: android.content.Context mContext> = $r1;
+
+        $r0.<android.webkit.LoadListener: android.webkit.BrowserFrame mBrowserFrame> = $r2;
+
+        virtualinvoke $r0.<android.webkit.LoadListener: void setUrl(java.lang.String)>($r3);
+
+        $r0.<android.webkit.LoadListener: int mNativeLoader> = $i0;
+
+        $r0.<android.webkit.LoadListener: java.lang.String mMimeType> = "";
+
+        $r0.<android.webkit.LoadListener: java.lang.String mEncoding> = "";
+
+        $r0.<android.webkit.LoadListener: boolean mSynchronous> = $z0;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = new java.util.Vector;
+
+        specialinvoke $r5.<java.util.Vector: void <init>()>();
+
+        $r0.<android.webkit.LoadListener: java.util.Vector mMessageQueue> = $r5;
+
+     label1:
+        $r0.<android.webkit.LoadListener: boolean mIsMainPageLoader> = $z1;
+
+        return;
+    }
+
+    static void access$000(android.webkit.LoadListener, int, java.lang.String, java.lang.String)
+    {
+        android.webkit.LoadListener $r0;
+        int $i0;
+        java.lang.String $r1, $r2;
+
+        $r0 := @parameter0: android.webkit.LoadListener;
+
+        $i0 := @parameter1: int;
+
+        $r1 := @parameter2: java.lang.String;
+
+        $r2 := @parameter3: java.lang.String;
+
+        specialinvoke $r0.<android.webkit.LoadListener: void nativeSetResponseHeader(int,java.lang.String,java.lang.String)>($i0, $r1, $r2);
+
+        return;
+    }
+
+    private void clearNativeLoader()
+    {
+        android.webkit.LoadListener $r0;
+        int $i0;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $i0 = <android.webkit.LoadListener: int sNativeLoaderCount>;
+
+        $i0 = $i0 - 1;
+
+        <android.webkit.LoadListener: int sNativeLoaderCount> = $i0;
+
+        $r0.<android.webkit.LoadListener: int mNativeLoader> = 0;
+
+        return;
+    }
+
+    private void commitHeaders()
+    {
+        android.webkit.LoadListener $r0;
+        int $i0;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $i0 = specialinvoke $r0.<android.webkit.LoadListener: int createNativeResponse()>();
+
+        specialinvoke $r0.<android.webkit.LoadListener: void nativeReceivedResponse(int)>($i0);
+
+        return;
+    }
+
+    private void commitHeadersCheckRedirect()
+    {
+        android.webkit.LoadListener $r0;
+        boolean $z0;
+        int $i0;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $z0 = $r0.<android.webkit.LoadListener: boolean mCancelled>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $i0 = $r0.<android.webkit.LoadListener: int mStatusCode>;
+
+        if $i0 < 301 goto label2;
+
+        $i0 = $r0.<android.webkit.LoadListener: int mStatusCode>;
+
+        if $i0 <= 303 goto label3;
+
+     label2:
+        $i0 = $r0.<android.webkit.LoadListener: int mStatusCode>;
+
+        if $i0 == 307 goto label4;
+
+        specialinvoke $r0.<android.webkit.LoadListener: void commitHeaders()>();
+
+        return;
+
+     label3:
+        return;
+
+     label4:
+        return;
+    }
+
+    private void commitLoad()
+    {
+        android.webkit.LoadListener $r0;
+        android.webkit.PerfChecker $r1;
+        int $i0;
+        android.webkit.ByteArrayBuilder$Chunk $r2;
+        boolean $z0;
+        android.webkit.ByteArrayBuilder $r3;
+        android.webkit.CacheManager$CacheResult $r4;
+        java.io.OutputStream $r5;
+        byte[] $r6;
+        java.io.IOException $r7;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $z0 = $r0.<android.webkit.LoadListener: boolean mCancelled>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = new android.webkit.PerfChecker;
+
+        specialinvoke $r1.<android.webkit.PerfChecker: void <init>()>();
+
+     label2:
+        $r3 = $r0.<android.webkit.LoadListener: android.webkit.ByteArrayBuilder mDataBuilder>;
+
+        $r2 = virtualinvoke $r3.<android.webkit.ByteArrayBuilder: android.webkit.ByteArrayBuilder$Chunk getFirstChunk()>();
+
+        if $r2 == null goto label7;
+
+        $i0 = $r2.<android.webkit.ByteArrayBuilder$Chunk: int mLength>;
+
+        if $i0 == 0 goto label5;
+
+        $r4 = $r0.<android.webkit.LoadListener: android.webkit.CacheManager$CacheResult mCacheResult>;
+
+        if $r4 == null goto label4;
+
+        $r4 = $r0.<android.webkit.LoadListener: android.webkit.CacheManager$CacheResult mCacheResult>;
+
+        $r5 = $r4.<android.webkit.CacheManager$CacheResult: java.io.OutputStream outStream>;
+
+        $r6 = $r2.<android.webkit.ByteArrayBuilder$Chunk: byte[] mArray>;
+
+        $i0 = $r2.<android.webkit.ByteArrayBuilder$Chunk: int mLength>;
+
+     label3:
+        virtualinvoke $r5.<java.io.OutputStream: void write(byte[],int,int)>($r6, 0, $i0);
+
+     label4:
+        $r6 = $r2.<android.webkit.ByteArrayBuilder$Chunk: byte[] mArray>;
+
+        $i0 = $r2.<android.webkit.ByteArrayBuilder$Chunk: int mLength>;
+
+        specialinvoke $r0.<android.webkit.LoadListener: void nativeAddData(byte[],int)>($r6, $i0);
+
+     label5:
+        $r3 = $r0.<android.webkit.LoadListener: android.webkit.ByteArrayBuilder mDataBuilder>;
+
+        virtualinvoke $r3.<android.webkit.ByteArrayBuilder: void releaseChunk(android.webkit.ByteArrayBuilder$Chunk)>($r2);
+
+        virtualinvoke $r1.<android.webkit.PerfChecker: void responseAlert(java.lang.String)>("res nativeAddData");
+
+        goto label2;
+
+     label6:
+        $r7 := @caughtexception;
+
+        $r0.<android.webkit.LoadListener: android.webkit.CacheManager$CacheResult mCacheResult> = null;
+
+        goto label4;
+
+     label7:
+        return;
+
+        catch java.io.IOException from label3 to label4 with label6;
+    }
+
+    private int createNativeResponse()
+    {
+        android.webkit.LoadListener $r0;
+        java.lang.String $r1, $r2, $r3, $r5;
+        long $l0, $l2;
+        int $i1;
+        android.webkit.CacheLoader $r4;
+        android.webkit.CacheManager$CacheResult $r6;
+        android.net.http.Headers $r7;
+        android.webkit.LoadListener$1 $r8;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $i1 = $r0.<android.webkit.LoadListener: int mStatusCode>;
+
+        if $i1 != 304 goto label3;
+
+        $r4 = $r0.<android.webkit.LoadListener: android.webkit.CacheLoader mCacheLoader>;
+
+        if $r4 == null goto label3;
+
+        $i1 = 200;
+
+     label1:
+        $r5 = $r0.<android.webkit.LoadListener: java.lang.String mUrl>;
+
+        $r1 = $r0.<android.webkit.LoadListener: java.lang.String mStatusText>;
+
+        $r2 = $r0.<android.webkit.LoadListener: java.lang.String mMimeType>;
+
+        $l0 = $r0.<android.webkit.LoadListener: long mContentLength>;
+
+        $r3 = $r0.<android.webkit.LoadListener: java.lang.String mEncoding>;
+
+        $r6 = $r0.<android.webkit.LoadListener: android.webkit.CacheManager$CacheResult mCacheResult>;
+
+        if $r6 != null goto label4;
+
+        $l2 = 0L;
+
+     label2:
+        $i1 = specialinvoke $r0.<android.webkit.LoadListener: int nativeCreateResponse(java.lang.String,int,java.lang.String,java.lang.String,long,java.lang.String,long)>($r5, $i1, $r1, $r2, $l0, $r3, $l2);
+
+        $r7 = $r0.<android.webkit.LoadListener: android.net.http.Headers mHeaders>;
+
+        if $r7 == null goto label5;
+
+        $r7 = $r0.<android.webkit.LoadListener: android.net.http.Headers mHeaders>;
+
+        $r8 = new android.webkit.LoadListener$1;
+
+        specialinvoke $r8.<android.webkit.LoadListener$1: void <init>(android.webkit.LoadListener,int)>($r0, $i1);
+
+        virtualinvoke $r7.<android.net.http.Headers: void getHeaders(android.net.http.Headers$HeaderCallback)>($r8);
+
+        return $i1;
+
+     label3:
+        $i1 = $r0.<android.webkit.LoadListener: int mStatusCode>;
+
+        goto label1;
+
+     label4:
+        $r6 = $r0.<android.webkit.LoadListener: android.webkit.CacheManager$CacheResult mCacheResult>;
+
+        $l2 = $r6.<android.webkit.CacheManager$CacheResult: long expires>;
+
+        $l2 = $l2 / 1000L;
+
+        goto label2;
+
+     label5:
+        return $i1;
+    }
+
+    private void doRedirect()
+    {
+        android.webkit.LoadListener $r0;
+        boolean $z0, $z1;
+        int $i0;
+        android.content.Context $r1;
+        java.lang.String $r2, $r4;
+        android.net.http.Headers $r3;
+        java.lang.StringBuilder $r5;
+        byte[] $r6;
+        android.webkit.CacheManager$CacheResult $r7;
+        java.util.Map $r8;
+        java.util.HashMap $r9;
+        android.webkit.CacheLoader $r10;
+        android.net.http.RequestHandle $r11;
+        android.webkit.Network $r12;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $z1 = $r0.<android.webkit.LoadListener: boolean mCancelled>;
+
+        if $z1 == 0 goto label01;
+
+        return;
+
+     label01:
+        $i0 = $r0.<android.webkit.LoadListener: int mCacheRedirectCount>;
+
+        if $i0 < 16 goto label02;
+
+        $r1 = $r0.<android.webkit.LoadListener: android.content.Context mContext>;
+
+        $r2 = virtualinvoke $r1.<android.content.Context: java.lang.String getString(int)>(17039443);
+
+        specialinvoke $r0.<android.webkit.LoadListener: void handleError(int,java.lang.String)>(-9, $r2);
+
+        return;
+
+     label02:
+        $r3 = $r0.<android.webkit.LoadListener: android.net.http.Headers mHeaders>;
+
+        $r2 = virtualinvoke $r3.<android.net.http.Headers: java.lang.String getLocation()>();
+
+        if $r2 == null goto label13;
+
+        $i0 = specialinvoke $r0.<android.webkit.LoadListener: int createNativeResponse()>();
+
+        $r4 = $r0.<android.webkit.LoadListener: java.lang.String mUrl>;
+
+        $r2 = specialinvoke $r0.<android.webkit.LoadListener: java.lang.String nativeRedirectedToUrl(java.lang.String,java.lang.String,int)>($r4, $r2, $i0);
+
+        $z1 = $r0.<android.webkit.LoadListener: boolean mCancelled>;
+
+        if $z1 != 0 goto label14;
+
+        if $r2 != null goto label03;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Redirection failed for ");
+
+        $r3 = $r0.<android.webkit.LoadListener: android.net.http.Headers mHeaders>;
+
+        $r2 = virtualinvoke $r3.<android.net.http.Headers: java.lang.String getLocation()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("webkit", $r2);
+
+        virtualinvoke $r0.<android.webkit.LoadListener: void cancel()>();
+
+        return;
+
+     label03:
+        $z1 = staticinvoke <android.webkit.URLUtil: boolean isNetworkUrl(java.lang.String)>($r2);
+
+        if $z1 != 0 goto label04;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = $r0.<android.webkit.LoadListener: android.content.Context mContext>;
+
+        $r4 = virtualinvoke $r1.<android.content.Context: java.lang.String getString(int)>(17039762);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r6 = virtualinvoke $r2.<java.lang.String: byte[] getBytes()>();
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        specialinvoke $r0.<android.webkit.LoadListener: void nativeAddData(byte[],int)>($r6, $i0);
+
+        specialinvoke $r0.<android.webkit.LoadListener: void nativeFinished()>();
+
+        specialinvoke $r0.<android.webkit.LoadListener: void clearNativeLoader()>();
+
+        return;
+
+     label04:
+        $r4 = $r0.<android.webkit.LoadListener: java.lang.String mOriginalUrl>;
+
+        if $r4 != null goto label05;
+
+        $r4 = $r0.<android.webkit.LoadListener: java.lang.String mUrl>;
+
+        $r0.<android.webkit.LoadListener: java.lang.String mOriginalUrl> = $r4;
+
+     label05:
+        $r7 = $r0.<android.webkit.LoadListener: android.webkit.CacheManager$CacheResult mCacheResult>;
+
+        if $r7 == null goto label07;
+
+        $i0 = specialinvoke $r0.<android.webkit.LoadListener: int getErrorID()>();
+
+        if $i0 != 0 goto label06;
+
+        $r4 = $r0.<android.webkit.LoadListener: java.lang.String mUrl>;
+
+        $r7 = $r0.<android.webkit.LoadListener: android.webkit.CacheManager$CacheResult mCacheResult>;
+
+        staticinvoke <android.webkit.CacheManager: void saveCacheFile(java.lang.String,android.webkit.CacheManager$CacheResult)>($r4, $r7);
+
+     label06:
+        $r0.<android.webkit.LoadListener: android.webkit.CacheManager$CacheResult mCacheResult> = null;
+
+     label07:
+        virtualinvoke $r0.<android.webkit.LoadListener: void setUrl(java.lang.String)>($r2);
+
+        $r8 = $r0.<android.webkit.LoadListener: java.util.Map mRequestHeaders>;
+
+        if $r8 != null goto label08;
+
+        $r9 = new java.util.HashMap;
+
+        specialinvoke $r9.<java.util.HashMap: void <init>()>();
+
+        $r0.<android.webkit.LoadListener: java.util.Map mRequestHeaders> = $r9;
+
+     label08:
+        $z1 = 0;
+
+        $r10 = $r0.<android.webkit.LoadListener: android.webkit.CacheLoader mCacheLoader>;
+
+        if $r10 == null goto label09;
+
+        $i0 = $r0.<android.webkit.LoadListener: int mCacheRedirectCount>;
+
+        $i0 = $i0 + 1;
+
+        $r0.<android.webkit.LoadListener: int mCacheRedirectCount> = $i0;
+
+        $z1 = 1;
+
+     label09:
+        $r8 = $r0.<android.webkit.LoadListener: java.util.Map mRequestHeaders>;
+
+        $z0 = virtualinvoke $r0.<android.webkit.LoadListener: boolean checkCache(java.util.Map)>($r8);
+
+        if $z0 != 0 goto label12;
+
+        $r11 = $r0.<android.webkit.LoadListener: android.net.http.RequestHandle mRequestHandle>;
+
+        if $r11 == null goto label11;
+
+        $r11 = $r0.<android.webkit.LoadListener: android.net.http.RequestHandle mRequestHandle>;
+
+        $r2 = $r0.<android.webkit.LoadListener: java.lang.String mUrl>;
+
+        $i0 = $r0.<android.webkit.LoadListener: int mStatusCode>;
+
+        $r8 = $r0.<android.webkit.LoadListener: java.util.Map mRequestHeaders>;
+
+        virtualinvoke $r11.<android.net.http.RequestHandle: boolean setupRedirect(java.lang.String,int,java.util.Map)>($r2, $i0, $r8);
+
+     label10:
+        if $z1 == 0 goto label15;
+
+        $r11 = $r0.<android.webkit.LoadListener: android.net.http.RequestHandle mRequestHandle>;
+
+        $i0 = $r0.<android.webkit.LoadListener: int mCacheRedirectCount>;
+
+        virtualinvoke $r11.<android.net.http.RequestHandle: void setRedirectCount(int)>($i0);
+
+        return;
+
+     label11:
+        $r1 = virtualinvoke $r0.<android.webkit.LoadListener: android.content.Context getContext()>();
+
+        $r12 = staticinvoke <android.webkit.Network: android.webkit.Network getInstance(android.content.Context)>($r1);
+
+        $r2 = $r0.<android.webkit.LoadListener: java.lang.String mMethod>;
+
+        $r8 = $r0.<android.webkit.LoadListener: java.util.Map mRequestHeaders>;
+
+        $r6 = $r0.<android.webkit.LoadListener: byte[] mPostData>;
+
+        $z0 = $r0.<android.webkit.LoadListener: boolean mIsHighPriority>;
+
+        $z0 = virtualinvoke $r12.<android.webkit.Network: boolean requestURL(java.lang.String,java.util.Map,byte[],android.webkit.LoadListener,boolean)>($r2, $r8, $r6, $r0, $z0);
+
+        if $z0 != 0 goto label10;
+
+        $r1 = $r0.<android.webkit.LoadListener: android.content.Context mContext>;
+
+        $r2 = virtualinvoke $r1.<android.content.Context: java.lang.String getString(int)>(17039367);
+
+        specialinvoke $r0.<android.webkit.LoadListener: void handleError(int,java.lang.String)>(-12, $r2);
+
+        return;
+
+     label12:
+        if $z1 != 0 goto label16;
+
+        $r11 = $r0.<android.webkit.LoadListener: android.net.http.RequestHandle mRequestHandle>;
+
+        $i0 = virtualinvoke $r11.<android.net.http.RequestHandle: int getRedirectCount()>();
+
+        $i0 = $i0 + 1;
+
+        $r0.<android.webkit.LoadListener: int mCacheRedirectCount> = $i0;
+
+        return;
+
+     label13:
+        specialinvoke $r0.<android.webkit.LoadListener: void commitHeaders()>();
+
+        specialinvoke $r0.<android.webkit.LoadListener: void commitLoad()>();
+
+        virtualinvoke $r0.<android.webkit.LoadListener: void tearDown()>();
+
+        return;
+
+     label14:
+        return;
+
+     label15:
+        return;
+
+     label16:
+        return;
+    }
+
+    private java.lang.String getErrorDescription()
+    {
+        android.webkit.LoadListener $r0;
+        java.lang.String r1;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        r1 = $r0.<android.webkit.LoadListener: java.lang.String mErrorDescription>;
+
+        return r1;
+    }
+
+    private int getErrorID()
+    {
+        android.webkit.LoadListener $r0;
+        int i0;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        i0 = $r0.<android.webkit.LoadListener: int mErrorID>;
+
+        return i0;
+    }
+
+    public static android.webkit.LoadListener getLoadListener(android.content.Context, android.webkit.BrowserFrame, java.lang.String, int, boolean, boolean)
+    {
+        android.content.Context $r0;
+        android.webkit.BrowserFrame $r1;
+        java.lang.String $r2;
+        int $i0, $i1;
+        boolean $z0, $z1;
+        android.webkit.LoadListener $r3;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 := @parameter1: android.webkit.BrowserFrame;
+
+        $r2 := @parameter2: java.lang.String;
+
+        $i0 := @parameter3: int;
+
+        $z0 := @parameter4: boolean;
+
+        $z1 := @parameter5: boolean;
+
+        $i1 = <android.webkit.LoadListener: int sNativeLoaderCount>;
+
+        $i1 = $i1 + 1;
+
+        <android.webkit.LoadListener: int sNativeLoaderCount> = $i1;
+
+        $r3 = new android.webkit.LoadListener;
+
+        specialinvoke $r3.<android.webkit.LoadListener: void <init>(android.content.Context,android.webkit.BrowserFrame,java.lang.String,int,boolean,boolean)>($r0, $r1, $r2, $i0, $z0, $z1);
+
+        return $r3;
+    }
+
+    public static int getNativeLoaderCount()
+    {
+        int i0;
+
+        i0 = <android.webkit.LoadListener: int sNativeLoaderCount>;
+
+        return i0;
+    }
+
+    private void guessMimeType()
+    {
+        android.webkit.LoadListener $r0;
+        java.lang.String $r1;
+        boolean $z0;
+        int $i0;
+        android.content.Context $r2;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r1 = $r0.<android.webkit.LoadListener: java.lang.String mUrl>;
+
+        $z0 = staticinvoke <android.webkit.URLUtil: boolean isDataUrl(java.lang.String)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        $r1 = $r0.<android.webkit.LoadListener: java.lang.String mMimeType>;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 == 0 goto label1;
+
+        virtualinvoke $r0.<android.webkit.LoadListener: void cancel()>();
+
+        $r2 = $r0.<android.webkit.LoadListener: android.content.Context mContext>;
+
+        $r1 = virtualinvoke $r2.<android.content.Context: java.lang.String getString(int)>(17039367);
+
+        specialinvoke $r0.<android.webkit.LoadListener: void handleError(int,java.lang.String)>(-12, $r1);
+
+        return;
+
+     label1:
+        $r0.<android.webkit.LoadListener: java.lang.String mMimeType> = "text/html";
+
+        $r1 = specialinvoke $r0.<android.webkit.LoadListener: java.lang.String guessMimeTypeFromExtension()>();
+
+        if $r1 == null goto label2;
+
+        $r0.<android.webkit.LoadListener: java.lang.String mMimeType> = $r1;
+
+        return;
+
+     label2:
+        return;
+    }
+
+    private java.lang.String guessMimeTypeFromExtension()
+    {
+        android.webkit.LoadListener $r0;
+        android.webkit.MimeTypeMap $r1;
+        java.lang.String $r2;
+        boolean $z0;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r1 = staticinvoke <android.webkit.MimeTypeMap: android.webkit.MimeTypeMap getSingleton()>();
+
+        $r2 = $r0.<android.webkit.LoadListener: java.lang.String mUrl>;
+
+        $r2 = staticinvoke <android.webkit.MimeTypeMap: java.lang.String getFileExtensionFromUrl(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r1.<android.webkit.MimeTypeMap: java.lang.String getMimeTypeFromExtension(java.lang.String)>($r2);
+
+        if $r2 == null goto label1;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("application/xhtml+xml");
+
+        if $z0 == 0 goto label2;
+
+        return "text/html";
+
+     label1:
+        return $r2;
+
+     label2:
+        return $r2;
+    }
+
+    private void handleCertificate(android.net.http.SslCertificate)
+    {
+        android.webkit.LoadListener $r0;
+        android.net.http.SslCertificate $r1;
+        boolean $z0;
+        android.webkit.BrowserFrame $r2;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r1 := @parameter0: android.net.http.SslCertificate;
+
+        $z0 = $r0.<android.webkit.LoadListener: boolean mIsMainPageLoader>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = $r0.<android.webkit.LoadListener: android.webkit.BrowserFrame mBrowserFrame>;
+
+        virtualinvoke $r2.<android.webkit.BrowserFrame: void certificate(android.net.http.SslCertificate)>($r1);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    private void handleEndData()
+    {
+        android.webkit.LoadListener $r0;
+        boolean $z0;
+        int $i0;
+        android.net.http.RequestHandle $r1;
+        java.lang.String $r2;
+        android.os.Message $r3;
+        android.net.http.HttpAuthHeader $r4;
+        android.content.Context $r5;
+        android.webkit.Network $r6;
+        android.webkit.CacheLoader $r7;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $z0 = $r0.<android.webkit.LoadListener: boolean mCancelled>;
+
+        if $z0 == 0 goto label01;
+
+        return;
+
+     label01:
+        $i0 = $r0.<android.webkit.LoadListener: int mStatusCode>;
+
+        lookupswitch($i0)
+        {
+            case 301: goto label03;
+            case 302: goto label04;
+            case 303: goto label04;
+            case 304: goto label10;
+            case 307: goto label04;
+            case 401: goto label08;
+            case 407: goto label08;
+            default: goto label02;
+        };
+
+     label02:
+        virtualinvoke $r0.<android.webkit.LoadListener: void detachRequestHandle()>();
+
+        virtualinvoke $r0.<android.webkit.LoadListener: void tearDown()>();
+
+        return;
+
+     label03:
+        $r0.<android.webkit.LoadListener: boolean mPermanent> = 1;
+
+     label04:
+        $i0 = $r0.<android.webkit.LoadListener: int mStatusCode>;
+
+        if $i0 != 307 goto label07;
+
+        $r1 = $r0.<android.webkit.LoadListener: android.net.http.RequestHandle mRequestHandle>;
+
+        if $r1 == null goto label05;
+
+        $r1 = $r0.<android.webkit.LoadListener: android.net.http.RequestHandle mRequestHandle>;
+
+        $r2 = virtualinvoke $r1.<android.net.http.RequestHandle: java.lang.String getMethod()>();
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("POST");
+
+        if $z0 == 0 goto label05;
+
+        $r3 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(150);
+
+        specialinvoke $r0.<android.webkit.LoadListener: void sendMessageInternal(android.os.Message)>($r3);
+
+        return;
+
+     label05:
+        $r2 = $r0.<android.webkit.LoadListener: java.lang.String mMethod>;
+
+        if $r2 == null goto label06;
+
+        $r2 = $r0.<android.webkit.LoadListener: java.lang.String mMethod>;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("POST");
+
+        if $z0 == 0 goto label06;
+
+        $r3 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(150);
+
+        specialinvoke $r0.<android.webkit.LoadListener: void sendMessageInternal(android.os.Message)>($r3);
+
+        return;
+
+     label06:
+        $r3 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(140);
+
+        specialinvoke $r0.<android.webkit.LoadListener: void sendMessageInternal(android.os.Message)>($r3);
+
+        return;
+
+     label07:
+        $r3 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(140);
+
+        specialinvoke $r0.<android.webkit.LoadListener: void sendMessageInternal(android.os.Message)>($r3);
+
+        return;
+
+     label08:
+        $r4 = $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader mAuthHeader>;
+
+        if $r4 == null goto label02;
+
+        $r5 = $r0.<android.webkit.LoadListener: android.content.Context mContext>;
+
+        $r6 = staticinvoke <android.webkit.Network: android.webkit.Network getInstance(android.content.Context)>($r5);
+
+        $z0 = virtualinvoke $r6.<android.webkit.Network: boolean isValidProxySet()>();
+
+        if $z0 != 0 goto label09;
+
+        $r4 = $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader mAuthHeader>;
+
+        $z0 = virtualinvoke $r4.<android.net.http.HttpAuthHeader: boolean isProxy()>();
+
+        if $z0 != 0 goto label02;
+
+     label09:
+        $r5 = $r0.<android.webkit.LoadListener: android.content.Context mContext>;
+
+        $r6 = staticinvoke <android.webkit.Network: android.webkit.Network getInstance(android.content.Context)>($r5);
+
+        virtualinvoke $r6.<android.webkit.Network: void handleAuthRequest(android.webkit.LoadListener)>($r0);
+
+        return;
+
+     label10:
+        $r7 = $r0.<android.webkit.LoadListener: android.webkit.CacheLoader mCacheLoader>;
+
+        if $r7 == null goto label02;
+
+        $r7 = $r0.<android.webkit.LoadListener: android.webkit.CacheLoader mCacheLoader>;
+
+        virtualinvoke $r7.<android.webkit.StreamLoader: void load()>();
+
+        return;
+    }
+
+    private void handleError(int, java.lang.String)
+    {
+        android.webkit.LoadListener $r0;
+        int $i0;
+        java.lang.String $r1;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $r0.<android.webkit.LoadListener: int mErrorID> = $i0;
+
+        $r0.<android.webkit.LoadListener: java.lang.String mErrorDescription> = $r1;
+
+        virtualinvoke $r0.<android.webkit.LoadListener: void detachRequestHandle()>();
+
+        virtualinvoke $r0.<android.webkit.LoadListener: void notifyError()>();
+
+        virtualinvoke $r0.<android.webkit.LoadListener: void tearDown()>();
+
+        return;
+    }
+
+    private void handleHeaders(android.net.http.Headers)
+    {
+        android.webkit.LoadListener $r0;
+        android.net.http.Headers $r1;
+        java.lang.String $r2, $r10;
+        boolean $z0, $z1, $z2;
+        java.util.ArrayList $r3;
+        int $i0, $i1;
+        android.webkit.CookieManager $r4;
+        android.net.WebAddress $r5;
+        java.lang.Object $r6;
+        long $l2;
+        byte $b3;
+        android.net.http.HttpAuthHeader $r7;
+        android.content.Context $r8;
+        android.webkit.Network $r9;
+        android.webkit.CacheManager$CacheResult $r11;
+        java.lang.Throwable $r12;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r1 := @parameter0: android.net.http.Headers;
+
+        $z0 = $r0.<android.webkit.LoadListener: boolean mCancelled>;
+
+        if $z0 == 0 goto label01;
+
+        return;
+
+     label01:
+        $r0.<android.webkit.LoadListener: android.net.http.Headers mHeaders> = $r1;
+
+        $r0.<android.webkit.LoadListener: java.lang.String mMimeType> = "";
+
+        $r0.<android.webkit.LoadListener: java.lang.String mEncoding> = "";
+
+        $r3 = virtualinvoke $r1.<android.net.http.Headers: java.util.ArrayList getSetCookie()>();
+
+        $i0 = 0;
+
+     label02:
+        $i1 = virtualinvoke $r3.<java.util.ArrayList: int size()>();
+
+        if $i0 >= $i1 goto label03;
+
+        $r4 = staticinvoke <android.webkit.CookieManager: android.webkit.CookieManager getInstance()>();
+
+        $r5 = $r0.<android.webkit.LoadListener: android.net.WebAddress mUri>;
+
+        $r6 = virtualinvoke $r3.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r2 = (java.lang.String) $r6;
+
+        virtualinvoke $r4.<android.webkit.CookieManager: void setCookie(android.net.WebAddress,java.lang.String)>($r5, $r2);
+
+        $i0 = $i0 + 1;
+
+        goto label02;
+
+     label03:
+        $l2 = virtualinvoke $r1.<android.net.http.Headers: long getContentLength()>();
+
+        $b3 = $l2 cmp -1L;
+
+        if $b3 == 0 goto label16;
+
+        $r0.<android.webkit.LoadListener: long mContentLength> = $l2;
+
+     label04:
+        $r2 = virtualinvoke $r1.<android.net.http.Headers: java.lang.String getContentType()>();
+
+        if $r2 == null goto label20;
+
+        specialinvoke $r0.<android.webkit.LoadListener: void parseContentTypeHeader(java.lang.String)>($r2);
+
+        $r2 = $r0.<android.webkit.LoadListener: java.lang.String mMimeType>;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("text/plain");
+
+        if $z0 != 0 goto label05;
+
+        $r2 = $r0.<android.webkit.LoadListener: java.lang.String mMimeType>;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("application/octet-stream");
+
+        if $z0 == 0 goto label17;
+
+     label05:
+        $r2 = specialinvoke $r0.<android.webkit.LoadListener: java.lang.String guessMimeTypeFromExtension()>();
+
+        if $r2 == null goto label06;
+
+        $r0.<android.webkit.LoadListener: java.lang.String mMimeType> = $r2;
+
+     label06:
+        $i0 = $r0.<android.webkit.LoadListener: int mStatusCode>;
+
+        if $i0 == 401 goto label07;
+
+        $i0 = $r0.<android.webkit.LoadListener: int mStatusCode>;
+
+        if $i0 != 407 goto label21;
+
+     label07:
+        $z0 = 1;
+
+     label08:
+        $i0 = $r0.<android.webkit.LoadListener: int mStatusCode>;
+
+        if $i0 != 407 goto label22;
+
+        $z1 = 1;
+
+     label09:
+        $r0.<android.webkit.LoadListener: boolean mAuthFailed> = 0;
+
+        $r7 = $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader mAuthHeader>;
+
+        if $r7 == null goto label12;
+
+        if $z0 == 0 goto label23;
+
+        $r7 = $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader mAuthHeader>;
+
+        $z2 = virtualinvoke $r7.<android.net.http.HttpAuthHeader: boolean isProxy()>();
+
+        if $z1 != $z2 goto label23;
+
+        $z1 = 1;
+
+     label10:
+        $r0.<android.webkit.LoadListener: boolean mAuthFailed> = $z1;
+
+        $z1 = $r0.<android.webkit.LoadListener: boolean mAuthFailed>;
+
+        if $z1 != 0 goto label12;
+
+        $r7 = $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader mAuthHeader>;
+
+        $z1 = virtualinvoke $r7.<android.net.http.HttpAuthHeader: boolean isProxy()>();
+
+        if $z1 == 0 goto label12;
+
+        $r8 = $r0.<android.webkit.LoadListener: android.content.Context mContext>;
+
+        $r9 = staticinvoke <android.webkit.Network: android.webkit.Network getInstance(android.content.Context)>($r8);
+
+        $z1 = virtualinvoke $r9.<android.webkit.Network: boolean isValidProxySet()>();
+
+        if $z1 == 0 goto label12;
+
+        entermonitor $r9;
+
+     label11:
+        $r7 = $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader mAuthHeader>;
+
+        $r2 = virtualinvoke $r7.<android.net.http.HttpAuthHeader: java.lang.String getUsername()>();
+
+        virtualinvoke $r9.<android.webkit.Network: void setProxyUsername(java.lang.String)>($r2);
+
+        $r7 = $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader mAuthHeader>;
+
+        $r2 = virtualinvoke $r7.<android.net.http.HttpAuthHeader: java.lang.String getPassword()>();
+
+        virtualinvoke $r9.<android.webkit.Network: void setProxyPassword(java.lang.String)>($r2);
+
+        exitmonitor $r9;
+
+     label12:
+        $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader mAuthHeader> = null;
+
+        if $z0 == 0 goto label13;
+
+        $i0 = $r0.<android.webkit.LoadListener: int mStatusCode>;
+
+        if $i0 != 401 goto label27;
+
+        $r2 = virtualinvoke $r1.<android.net.http.Headers: java.lang.String getWwwAuthenticate()>();
+
+        $r7 = specialinvoke $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader parseAuthHeader(java.lang.String)>($r2);
+
+        $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader mAuthHeader> = $r7;
+
+     label13:
+        $i0 = $r0.<android.webkit.LoadListener: int mStatusCode>;
+
+        if $i0 == 200 goto label14;
+
+        $i0 = $r0.<android.webkit.LoadListener: int mStatusCode>;
+
+        if $i0 == 302 goto label14;
+
+        $i0 = $r0.<android.webkit.LoadListener: int mStatusCode>;
+
+        if $i0 == 301 goto label14;
+
+        $i0 = $r0.<android.webkit.LoadListener: int mStatusCode>;
+
+        if $i0 != 307 goto label15;
+
+     label14:
+        $i0 = $r0.<android.webkit.LoadListener: int mNativeLoader>;
+
+        if $i0 == 0 goto label15;
+
+        $r10 = $r0.<android.webkit.LoadListener: java.lang.String mUrl>;
+
+        $i0 = $r0.<android.webkit.LoadListener: int mStatusCode>;
+
+        $r2 = $r0.<android.webkit.LoadListener: java.lang.String mMimeType>;
+
+        $r11 = staticinvoke <android.webkit.CacheManager: android.webkit.CacheManager$CacheResult createCacheFile(java.lang.String,int,android.net.http.Headers,java.lang.String,boolean)>($r10, $i0, $r1, $r2, 0);
+
+        $r0.<android.webkit.LoadListener: android.webkit.CacheManager$CacheResult mCacheResult> = $r11;
+
+        $r11 = $r0.<android.webkit.LoadListener: android.webkit.CacheManager$CacheResult mCacheResult>;
+
+        if $r11 == null goto label15;
+
+        $r11 = $r0.<android.webkit.LoadListener: android.webkit.CacheManager$CacheResult mCacheResult>;
+
+        $r2 = $r0.<android.webkit.LoadListener: java.lang.String mEncoding>;
+
+        $r11.<android.webkit.CacheManager$CacheResult: java.lang.String encoding> = $r2;
+
+     label15:
+        specialinvoke $r0.<android.webkit.LoadListener: void commitHeadersCheckRedirect()>();
+
+        return;
+
+     label16:
+        $r0.<android.webkit.LoadListener: long mContentLength> = 0L;
+
+        goto label04;
+
+     label17:
+        $r2 = $r0.<android.webkit.LoadListener: java.lang.String mMimeType>;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("text/vnd.wap.wml");
+
+        if $z0 == 0 goto label18;
+
+        $r0.<android.webkit.LoadListener: java.lang.String mMimeType> = "text/plain";
+
+        goto label06;
+
+     label18:
+        $r2 = $r0.<android.webkit.LoadListener: java.lang.String mMimeType>;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("application/xhtml+xml");
+
+        if $z0 != 0 goto label19;
+
+        $r2 = $r0.<android.webkit.LoadListener: java.lang.String mMimeType>;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("application/vnd.wap.xhtml+xml");
+
+        if $z0 == 0 goto label06;
+
+     label19:
+        $r0.<android.webkit.LoadListener: java.lang.String mMimeType> = "text/html";
+
+        goto label06;
+
+     label20:
+        specialinvoke $r0.<android.webkit.LoadListener: void guessMimeType()>();
+
+        goto label06;
+
+     label21:
+        $z0 = 0;
+
+        goto label08;
+
+     label22:
+        $z1 = 0;
+
+        goto label09;
+
+     label23:
+        $z1 = 0;
+
+        goto label10;
+
+     label24:
+        $r12 := @caughtexception;
+
+     label25:
+        exitmonitor $r9;
+
+     label26:
+        throw $r12;
+
+     label27:
+        $r2 = virtualinvoke $r1.<android.net.http.Headers: java.lang.String getProxyAuthenticate()>();
+
+        $r7 = specialinvoke $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader parseAuthHeader(java.lang.String)>($r2);
+
+        $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader mAuthHeader> = $r7;
+
+        $r7 = $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader mAuthHeader>;
+
+        if $r7 == null goto label13;
+
+        $r7 = $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader mAuthHeader>;
+
+        virtualinvoke $r7.<android.net.http.HttpAuthHeader: void setProxy()>();
+
+        goto label13;
+
+        catch java.lang.Throwable from label11 to label12 with label24;
+        catch java.lang.Throwable from label25 to label26 with label24;
+    }
+
+    private void handleSslError(android.net.http.SslError)
+    {
+        android.webkit.LoadListener $r0;
+        android.net.http.SslError $r1;
+        android.webkit.Network $r2;
+        boolean $z0;
+        android.content.Context $r3;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r1 := @parameter0: android.net.http.SslError;
+
+        $z0 = $r0.<android.webkit.LoadListener: boolean mCancelled>;
+
+        if $z0 != 0 goto label1;
+
+        $r0.<android.webkit.LoadListener: android.net.http.SslError mSslError> = $r1;
+
+        $r3 = $r0.<android.webkit.LoadListener: android.content.Context mContext>;
+
+        $r2 = staticinvoke <android.webkit.Network: android.webkit.Network getInstance(android.content.Context)>($r3);
+
+        virtualinvoke $r2.<android.webkit.Network: void handleSslErrorRequest(android.webkit.LoadListener)>($r0);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    private void handleStatus(int, int, int, java.lang.String)
+    {
+        android.webkit.LoadListener $r0;
+        int $i0, $i1, $i2;
+        java.lang.String $r1;
+        boolean $z0;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i2 := @parameter2: int;
+
+        $r1 := @parameter3: java.lang.String;
+
+        $z0 = $r0.<android.webkit.LoadListener: boolean mCancelled>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r0.<android.webkit.LoadListener: int mStatusCode> = $i2;
+
+        $r0.<android.webkit.LoadListener: java.lang.String mStatusText> = $r1;
+
+        $r0.<android.webkit.LoadListener: boolean mPermanent> = 0;
+
+        return;
+    }
+
+    private boolean ignoreCallbacks()
+    {
+        android.webkit.LoadListener $r0;
+        boolean $z0;
+        android.net.http.HttpAuthHeader $r1;
+        int $i0;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $z0 = $r0.<android.webkit.LoadListener: boolean mCancelled>;
+
+        if $z0 != 0 goto label1;
+
+        $r1 = $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader mAuthHeader>;
+
+        if $r1 != null goto label1;
+
+        $i0 = $r0.<android.webkit.LoadListener: int mStatusCode>;
+
+        if $i0 <= 300 goto label2;
+
+        $i0 = $r0.<android.webkit.LoadListener: int mStatusCode>;
+
+        if $i0 >= 400 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    private native void nativeAddData(byte[], int);
+
+    private native int nativeCreateResponse(java.lang.String, int, java.lang.String, java.lang.String, long, java.lang.String, long);
+
+    private native void nativeError(int, java.lang.String, java.lang.String);
+
+    private native void nativeFinished();
+
+    private native void nativeReceivedResponse(int);
+
+    private native java.lang.String nativeRedirectedToUrl(java.lang.String, java.lang.String, int);
+
+    private native void nativeSetResponseHeader(int, java.lang.String, java.lang.String);
+
+    private android.net.http.HttpAuthHeader parseAuthHeader(java.lang.String)
+    {
+        android.webkit.LoadListener $r0;
+        java.lang.String $r1, $r3;
+        int $i0, $i1, $i2, $i4, $i5;
+        int[] $r2;
+        boolean $z0, $z1;
+        char $c3;
+        android.net.http.HttpAuthHeader $r4;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r1 := @parameter0: java.lang.String;
+
+        if $r1 == null goto label18;
+
+        $i0 = 0;
+
+        $r2 = newarray (int)[256];
+
+        $i1 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i1 <= 0 goto label08;
+
+        $z0 = 0;
+
+        $i0 = 0;
+
+        $i2 = 0;
+
+     label01:
+        if $i0 >= $i1 goto label07;
+
+        if $i2 >= 256 goto label07;
+
+        $c3 = virtualinvoke $r1.<java.lang.String: char charAt(int)>($i0);
+
+        if $c3 != 34 goto label05;
+
+        if $z0 != 0 goto label04;
+
+        $z0 = 1;
+
+     label02:
+        $i4 = $i2;
+
+     label03:
+        $i0 = $i0 + 1;
+
+        $i2 = $i4;
+
+        goto label01;
+
+     label04:
+        $z0 = 0;
+
+        goto label02;
+
+     label05:
+        if $z0 != 0 goto label19;
+
+        $r3 = "Basic";
+
+        $i4 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        $z1 = virtualinvoke $r1.<java.lang.String: boolean regionMatches(boolean,int,java.lang.String,int,int)>(1, $i0, "Basic", 0, $i4);
+
+        if $z1 == 0 goto label06;
+
+        $i4 = $i2 + 1;
+
+        $r2[$i2] = $i0;
+
+        goto label03;
+
+     label06:
+        $r3 = "Digest";
+
+        $i4 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        $z1 = virtualinvoke $r1.<java.lang.String: boolean regionMatches(boolean,int,java.lang.String,int,int)>(1, $i0, "Digest", 0, $i4);
+
+        if $z1 == 0 goto label19;
+
+        $i4 = $i2 + 1;
+
+        $r2[$i2] = $i0;
+
+        goto label03;
+
+     label07:
+        $i0 = $i2;
+
+     label08:
+        if $i0 <= 0 goto label18;
+
+        $i2 = 0;
+
+     label09:
+        if $i2 >= $i0 goto label13;
+
+        $i4 = $r2[$i2];
+
+        $r3 = "Digest";
+
+        $i5 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean regionMatches(boolean,int,java.lang.String,int,int)>(1, $i4, "Digest", 0, $i5);
+
+        if $z0 == 0 goto label12;
+
+        $i4 = $r2[$i2];
+
+        $i5 = $i2 + 1;
+
+        if $i5 >= $i0 goto label11;
+
+        $i5 = $i2 + 1;
+
+        $i5 = $r2[$i5];
+
+     label10:
+        $r3 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>($i4, $i5);
+
+        $r4 = new android.net.http.HttpAuthHeader;
+
+        specialinvoke $r4.<android.net.http.HttpAuthHeader: void <init>(java.lang.String)>($r3);
+
+        $z0 = virtualinvoke $r4.<android.net.http.HttpAuthHeader: boolean isSupportedScheme()>();
+
+        if $z0 == 0 goto label12;
+
+        return $r4;
+
+     label11:
+        $i5 = $i1;
+
+        goto label10;
+
+     label12:
+        $i2 = $i2 + 1;
+
+        goto label09;
+
+     label13:
+        $i2 = 0;
+
+     label14:
+        if $i2 >= $i0 goto label18;
+
+        $i4 = $r2[$i2];
+
+        $r3 = "Basic";
+
+        $i5 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean regionMatches(boolean,int,java.lang.String,int,int)>(1, $i4, "Basic", 0, $i5);
+
+        if $z0 == 0 goto label17;
+
+        $i4 = $r2[$i2];
+
+        $i5 = $i2 + 1;
+
+        if $i5 >= $i0 goto label16;
+
+        $i5 = $i2 + 1;
+
+        $i5 = $r2[$i5];
+
+     label15:
+        $r3 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>($i4, $i5);
+
+        $r4 = new android.net.http.HttpAuthHeader;
+
+        specialinvoke $r4.<android.net.http.HttpAuthHeader: void <init>(java.lang.String)>($r3);
+
+        $z0 = virtualinvoke $r4.<android.net.http.HttpAuthHeader: boolean isSupportedScheme()>();
+
+        if $z0 == 0 goto label17;
+
+        return $r4;
+
+     label16:
+        $i5 = $i1;
+
+        goto label15;
+
+     label17:
+        $i2 = $i2 + 1;
+
+        goto label14;
+
+     label18:
+        return null;
+
+     label19:
+        $i4 = $i2;
+
+        goto label03;
+    }
+
+    private void parseContentTypeHeader(java.lang.String)
+    {
+        android.webkit.LoadListener $r0;
+        java.lang.String $r1, $r2;
+        int $i0, $i1, $i2;
+        java.util.regex.Pattern $r3;
+        java.util.regex.Matcher $r4;
+        boolean $z0;
+        java.lang.IllegalStateException $r5;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r1 := @parameter0: java.lang.String;
+
+        if $r1 == null goto label11;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int indexOf(int)>(59);
+
+        $i1 = $i0;
+
+        if $i0 < 0 goto label07;
+
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $r0.<android.webkit.LoadListener: java.lang.String mMimeType> = $r2;
+
+        $i2 = virtualinvoke $r1.<java.lang.String: int indexOf(int,int)>(61, $i0);
+
+        if $i2 <= 0 goto label06;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int indexOf(int,int)>(59, $i2);
+
+        $i1 = $i0;
+
+        if $i0 >= $i2 goto label01;
+
+        $i1 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+     label01:
+        $i2 = $i2 + 1;
+
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>($i2, $i1);
+
+        $r0.<android.webkit.LoadListener: java.lang.String mEncoding> = $r2;
+
+     label02:
+        $r2 = $r0.<android.webkit.LoadListener: java.lang.String mEncoding>;
+
+        $r2 = virtualinvoke $r2.<java.lang.String: java.lang.String trim()>();
+
+        $r0.<android.webkit.LoadListener: java.lang.String mEncoding> = $r2;
+
+        $i2 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        $i2 = $i2 - 1;
+
+        if $i1 >= $i2 goto label03;
+
+        $i1 = $i1 + 1;
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int)>($i1);
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String trim()>();
+
+        $r0.<android.webkit.LoadListener: java.lang.String mTransferEncoding> = $r1;
+
+     label03:
+        $r1 = $r0.<android.webkit.LoadListener: java.lang.String mMimeType>;
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String trim()>();
+
+        $r0.<android.webkit.LoadListener: java.lang.String mMimeType> = $r1;
+
+        $r3 = <android.webkit.LoadListener: java.util.regex.Pattern CONTENT_TYPE_PATTERN>;
+
+        $r1 = $r0.<android.webkit.LoadListener: java.lang.String mMimeType>;
+
+     label04:
+        $r4 = virtualinvoke $r3.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>($r1);
+
+        $z0 = virtualinvoke $r4.<java.util.regex.Matcher: boolean find()>();
+
+        if $z0 == 0 goto label08;
+
+        $r1 = virtualinvoke $r4.<java.util.regex.Matcher: java.lang.String group(int)>(1);
+
+     label05:
+        $r0.<android.webkit.LoadListener: java.lang.String mMimeType> = $r1;
+
+        return;
+
+     label06:
+        $i2 = $i0 + 1;
+
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int)>($i2);
+
+        $r0.<android.webkit.LoadListener: java.lang.String mEncoding> = $r2;
+
+        goto label02;
+
+     label07:
+        $r0.<android.webkit.LoadListener: java.lang.String mMimeType> = $r1;
+
+        goto label03;
+
+     label08:
+        specialinvoke $r0.<android.webkit.LoadListener: void guessMimeType()>();
+
+     label09:
+        return;
+
+     label10:
+        $r5 := @caughtexception;
+
+        specialinvoke $r0.<android.webkit.LoadListener: void guessMimeType()>();
+
+        return;
+
+     label11:
+        return;
+
+        catch java.lang.IllegalStateException from label04 to label05 with label10;
+        catch java.lang.IllegalStateException from label08 to label09 with label10;
+    }
+
+    private void sendMessageInternal(android.os.Message)
+    {
+        android.webkit.LoadListener $r0;
+        android.os.Message $r1;
+        boolean $z0;
+        java.util.Vector $r2;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r1 := @parameter0: android.os.Message;
+
+        $z0 = $r0.<android.webkit.LoadListener: boolean mSynchronous>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = $r0.<android.webkit.LoadListener: java.util.Vector mMessageQueue>;
+
+        virtualinvoke $r2.<java.util.Vector: boolean add(java.lang.Object)>($r1);
+
+        return;
+
+     label1:
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r1);
+
+        return;
+    }
+
+    static boolean willLoadFromCache(java.lang.String)
+    {
+        java.lang.String $r0;
+        android.webkit.CacheManager$CacheResult $r1;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <android.webkit.CacheManager: android.webkit.CacheManager$CacheResult getCacheFile(java.lang.String,java.util.Map)>($r0, null);
+
+        if $r1 == null goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    void attachRequestHandle(android.net.http.RequestHandle)
+    {
+        android.webkit.LoadListener $r0;
+        android.net.http.RequestHandle $r1;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r1 := @parameter0: android.net.http.RequestHandle;
+
+        $r0.<android.webkit.LoadListener: android.net.http.RequestHandle mRequestHandle> = $r1;
+
+        return;
+    }
+
+    boolean authCredentialsInvalid()
+    {
+        android.webkit.LoadListener $r0;
+        boolean $z0;
+        android.net.http.HttpAuthHeader $r1;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $z0 = $r0.<android.webkit.LoadListener: boolean mAuthFailed>;
+
+        if $z0 == 0 goto label2;
+
+        $r1 = $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader mAuthHeader>;
+
+        $z0 = virtualinvoke $r1.<android.net.http.HttpAuthHeader: boolean isDigest()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader mAuthHeader>;
+
+        $z0 = virtualinvoke $r1.<android.net.http.HttpAuthHeader: boolean getStale()>();
+
+        if $z0 != 0 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    public void cancel()
+    {
+        android.webkit.LoadListener $r0;
+        android.net.http.RequestHandle $r1;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r1 = $r0.<android.webkit.LoadListener: android.net.http.RequestHandle mRequestHandle>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<android.webkit.LoadListener: android.net.http.RequestHandle mRequestHandle>;
+
+        virtualinvoke $r1.<android.net.http.RequestHandle: void cancel()>();
+
+        $r0.<android.webkit.LoadListener: android.net.http.RequestHandle mRequestHandle> = null;
+
+     label1:
+        $r0.<android.webkit.LoadListener: android.webkit.CacheManager$CacheResult mCacheResult> = null;
+
+        $r0.<android.webkit.LoadListener: boolean mCancelled> = 1;
+
+        specialinvoke $r0.<android.webkit.LoadListener: void clearNativeLoader()>();
+
+        return;
+    }
+
+    public boolean cancelled()
+    {
+        android.webkit.LoadListener $r0;
+        boolean z0;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        z0 = $r0.<android.webkit.LoadListener: boolean mCancelled>;
+
+        return z0;
+    }
+
+    public void certificate(android.net.http.SslCertificate)
+    {
+        android.webkit.LoadListener $r0;
+        android.net.http.SslCertificate $r1;
+        android.os.Message $r2;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r1 := @parameter0: android.net.http.SslCertificate;
+
+        $r2 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,java.lang.Object)>(170, $r1);
+
+        specialinvoke $r0.<android.webkit.LoadListener: void sendMessageInternal(android.os.Message)>($r2);
+
+        return;
+    }
+
+    boolean checkCache(java.util.Map)
+    {
+        android.webkit.LoadListener $r0;
+        java.util.Map $r1;
+        java.lang.String $r2;
+        android.webkit.CacheManager$CacheResult $r3;
+        android.webkit.CacheLoader $r4;
+        boolean $z0;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r1 := @parameter0: java.util.Map;
+
+        $r2 = virtualinvoke $r0.<android.webkit.LoadListener: java.lang.String url()>();
+
+        $r3 = staticinvoke <android.webkit.CacheManager: android.webkit.CacheManager$CacheResult getCacheFile(java.lang.String,java.util.Map)>($r2, $r1);
+
+        $r0.<android.webkit.LoadListener: android.webkit.CacheLoader mCacheLoader> = null;
+
+        if $r3 == null goto label1;
+
+        $r4 = new android.webkit.CacheLoader;
+
+        specialinvoke $r4.<android.webkit.CacheLoader: void <init>(android.webkit.LoadListener,android.webkit.CacheManager$CacheResult)>($r0, $r3);
+
+        $r0.<android.webkit.LoadListener: android.webkit.CacheLoader mCacheLoader> = $r4;
+
+        $z0 = interfaceinvoke $r1.<java.util.Map: boolean containsKey(java.lang.Object)>("if-none-match");
+
+        if $z0 != 0 goto label1;
+
+        $z0 = interfaceinvoke $r1.<java.util.Map: boolean containsKey(java.lang.Object)>("if-modified-since");
+
+        if $z0 != 0 goto label1;
+
+        $r4 = $r0.<android.webkit.LoadListener: android.webkit.CacheLoader mCacheLoader>;
+
+        virtualinvoke $r4.<android.webkit.StreamLoader: void load()>();
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    long contentLength()
+    {
+        android.webkit.LoadListener $r0;
+        long l0;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        l0 = $r0.<android.webkit.LoadListener: long mContentLength>;
+
+        return l0;
+    }
+
+    public void data(byte[], int)
+    {
+        android.webkit.LoadListener $r0;
+        byte[] $r1, $r2;
+        int $i0, $i1;
+        java.lang.String $r3, $r4;
+        boolean $z0;
+        android.webkit.ByteArrayBuilder $r5, $r6;
+        android.os.Message $r7;
+        java.lang.Throwable $r8;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r2 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $r3 = "base64";
+
+        $r4 = $r0.<android.webkit.LoadListener: java.lang.String mTransferEncoding>;
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r4);
+
+        if $z0 == 0 goto label2;
+
+        $i1 = lengthof $r2;
+
+        if $i0 >= $i1 goto label1;
+
+        $r1 = newarray (byte)[$i0];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, 0, $r1, 0, $i0);
+
+        $r2 = $r1;
+
+     label1:
+        $r1 = staticinvoke <org.apache.commons.codec.binary.Base64: byte[] decodeBase64(byte[])>($r2);
+
+        $r2 = $r1;
+
+        $i0 = lengthof $r1;
+
+     label2:
+        $r5 = $r0.<android.webkit.LoadListener: android.webkit.ByteArrayBuilder mDataBuilder>;
+
+        entermonitor $r5;
+
+     label3:
+        $r6 = $r0.<android.webkit.LoadListener: android.webkit.ByteArrayBuilder mDataBuilder>;
+
+        $z0 = virtualinvoke $r6.<android.webkit.ByteArrayBuilder: boolean isEmpty()>();
+
+        $r6 = $r0.<android.webkit.LoadListener: android.webkit.ByteArrayBuilder mDataBuilder>;
+
+        virtualinvoke $r6.<android.webkit.ByteArrayBuilder: void append(byte[],int,int)>($r2, 0, $i0);
+
+        exitmonitor $r5;
+
+     label4:
+        if $z0 == 0 goto label8;
+
+        $r7 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(110);
+
+        specialinvoke $r0.<android.webkit.LoadListener: void sendMessageInternal(android.os.Message)>($r7);
+
+        return;
+
+     label5:
+        $r8 := @caughtexception;
+
+     label6:
+        exitmonitor $r5;
+
+     label7:
+        throw $r8;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label6 to label7 with label5;
+    }
+
+    void detachRequestHandle()
+    {
+        android.webkit.LoadListener $r0;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r0.<android.webkit.LoadListener: android.net.http.RequestHandle mRequestHandle> = null;
+
+        return;
+    }
+
+    void downloadFile()
+    {
+        android.webkit.LoadListener $r0;
+        java.lang.String $r1, $r4, $r5, $r7;
+        long $l0;
+        android.webkit.BrowserFrame $r2;
+        android.webkit.CallbackProxy $r3;
+        android.net.http.Headers $r6;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r0.<android.webkit.LoadListener: android.webkit.CacheManager$CacheResult mCacheResult> = null;
+
+        $r2 = $r0.<android.webkit.LoadListener: android.webkit.BrowserFrame mBrowserFrame>;
+
+        $r3 = virtualinvoke $r2.<android.webkit.BrowserFrame: android.webkit.CallbackProxy getCallbackProxy()>();
+
+        $r4 = virtualinvoke $r0.<android.webkit.LoadListener: java.lang.String url()>();
+
+        $r2 = $r0.<android.webkit.LoadListener: android.webkit.BrowserFrame mBrowserFrame>;
+
+        $r5 = virtualinvoke $r2.<android.webkit.BrowserFrame: java.lang.String getUserAgentString()>();
+
+        $r6 = $r0.<android.webkit.LoadListener: android.net.http.Headers mHeaders>;
+
+        $r7 = virtualinvoke $r6.<android.net.http.Headers: java.lang.String getContentDisposition()>();
+
+        $r1 = $r0.<android.webkit.LoadListener: java.lang.String mMimeType>;
+
+        $l0 = $r0.<android.webkit.LoadListener: long mContentLength>;
+
+        virtualinvoke $r3.<android.webkit.CallbackProxy: boolean onDownloadStart(java.lang.String,java.lang.String,java.lang.String,java.lang.String,long)>($r4, $r5, $r7, $r1, $l0);
+
+        virtualinvoke $r0.<android.webkit.LoadListener: void cancel()>();
+
+        return;
+    }
+
+    public void endData()
+    {
+        android.webkit.LoadListener $r0;
+        android.os.Message $r1;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r1 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(120);
+
+        specialinvoke $r0.<android.webkit.LoadListener: void sendMessageInternal(android.os.Message)>($r1);
+
+        return;
+    }
+
+    public void error(int, java.lang.String)
+    {
+        android.webkit.LoadListener $r0;
+        int $i0;
+        java.lang.String $r1;
+        android.os.Message $r2;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $r2 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,int,int,java.lang.Object)>(130, $i0, 0, $r1);
+
+        specialinvoke $r0.<android.webkit.LoadListener: void sendMessageInternal(android.os.Message)>($r2);
+
+        return;
+    }
+
+    android.content.Context getContext()
+    {
+        android.webkit.LoadListener $r0;
+        android.content.Context r1;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        r1 = $r0.<android.webkit.LoadListener: android.content.Context mContext>;
+
+        return r1;
+    }
+
+    android.webkit.BrowserFrame getFrame()
+    {
+        android.webkit.LoadListener $r0;
+        android.webkit.BrowserFrame r1;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        r1 = $r0.<android.webkit.LoadListener: android.webkit.BrowserFrame mBrowserFrame>;
+
+        return r1;
+    }
+
+    android.net.WebAddress getWebAddress()
+    {
+        android.webkit.LoadListener $r0;
+        android.net.WebAddress r1;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        r1 = $r0.<android.webkit.LoadListener: android.net.WebAddress mUri>;
+
+        return r1;
+    }
+
+    void handleAuthResponse(java.lang.String, java.lang.String)
+    {
+        android.webkit.LoadListener $r0;
+        java.lang.String $r1, $r2, $r5, $r6, $r7, $r8, $r9;
+        android.net.http.HttpAuthHeader $r3;
+        android.net.http.RequestHandle $r4;
+        int $i0;
+        boolean $z0;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        if $r1 == null goto label2;
+
+        if $r2 == null goto label2;
+
+        $r3 = $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader mAuthHeader>;
+
+        if $r3 == null goto label3;
+
+        $r4 = $r0.<android.webkit.LoadListener: android.net.http.RequestHandle mRequestHandle>;
+
+        if $r4 == null goto label4;
+
+        $r3 = $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader mAuthHeader>;
+
+        virtualinvoke $r3.<android.net.http.HttpAuthHeader: void setUsername(java.lang.String)>($r1);
+
+        $r3 = $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader mAuthHeader>;
+
+        virtualinvoke $r3.<android.net.http.HttpAuthHeader: void setPassword(java.lang.String)>($r2);
+
+        $r3 = $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader mAuthHeader>;
+
+        $i0 = virtualinvoke $r3.<android.net.http.HttpAuthHeader: int getScheme()>();
+
+        if $i0 != 1 goto label1;
+
+        $r3 = $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader mAuthHeader>;
+
+        $z0 = virtualinvoke $r3.<android.net.http.HttpAuthHeader: boolean isProxy()>();
+
+        $r4 = $r0.<android.webkit.LoadListener: android.net.http.RequestHandle mRequestHandle>;
+
+        virtualinvoke $r4.<android.net.http.RequestHandle: void setupBasicAuthResponse(boolean,java.lang.String,java.lang.String)>($z0, $r1, $r2);
+
+        return;
+
+     label1:
+        if $i0 != 2 goto label5;
+
+        $r3 = $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader mAuthHeader>;
+
+        $z0 = virtualinvoke $r3.<android.net.http.HttpAuthHeader: boolean isProxy()>();
+
+        $r3 = $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader mAuthHeader>;
+
+        $r5 = virtualinvoke $r3.<android.net.http.HttpAuthHeader: java.lang.String getRealm()>();
+
+        $r3 = $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader mAuthHeader>;
+
+        $r6 = virtualinvoke $r3.<android.net.http.HttpAuthHeader: java.lang.String getNonce()>();
+
+        $r3 = $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader mAuthHeader>;
+
+        $r7 = virtualinvoke $r3.<android.net.http.HttpAuthHeader: java.lang.String getQop()>();
+
+        $r3 = $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader mAuthHeader>;
+
+        $r8 = virtualinvoke $r3.<android.net.http.HttpAuthHeader: java.lang.String getAlgorithm()>();
+
+        $r3 = $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader mAuthHeader>;
+
+        $r9 = virtualinvoke $r3.<android.net.http.HttpAuthHeader: java.lang.String getOpaque()>();
+
+        $r4 = $r0.<android.webkit.LoadListener: android.net.http.RequestHandle mRequestHandle>;
+
+        virtualinvoke $r4.<android.net.http.RequestHandle: void setupDigestAuthResponse(boolean,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)>($z0, $r1, $r2, $r5, $r6, $r7, $r8, $r9);
+
+        return;
+
+     label2:
+        specialinvoke $r0.<android.webkit.LoadListener: void commitLoad()>();
+
+        virtualinvoke $r0.<android.webkit.LoadListener: void tearDown()>();
+
+        return;
+
+     label3:
+        return;
+
+     label4:
+        return;
+
+     label5:
+        return;
+    }
+
+    public void handleMessage(android.os.Message)
+    {
+        android.webkit.LoadListener $r0;
+        android.os.Message $r1, $r5;
+        int $i0, $i1, $i2;
+        java.lang.Object $r2;
+        android.net.http.Headers $r3;
+        boolean $z0;
+        java.lang.String $r4;
+        android.webkit.BrowserFrame $r6;
+        android.webkit.CallbackProxy $r7;
+        java.util.HashMap $r8;
+        java.lang.Integer $r9;
+        android.net.http.SslCertificate $r10;
+        android.net.http.SslError $r11;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r1 := @parameter0: android.os.Message;
+
+        $i0 = $r1.<android.os.Message: int what>;
+
+        lookupswitch($i0)
+        {
+            case 100: goto label02;
+            case 110: goto label03;
+            case 120: goto label04;
+            case 130: goto label05;
+            case 140: goto label06;
+            case 150: goto label07;
+            case 160: goto label08;
+            case 170: goto label09;
+            case 180: goto label10;
+            default: goto label01;
+        };
+
+     label01:
+        return;
+
+     label02:
+        $r2 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r3 = (android.net.http.Headers) $r2;
+
+        specialinvoke $r0.<android.webkit.LoadListener: void handleHeaders(android.net.http.Headers)>($r3);
+
+        return;
+
+     label03:
+        $i0 = $r0.<android.webkit.LoadListener: int mNativeLoader>;
+
+        if $i0 == 0 goto label11;
+
+        $z0 = specialinvoke $r0.<android.webkit.LoadListener: boolean ignoreCallbacks()>();
+
+        if $z0 != 0 goto label12;
+
+        specialinvoke $r0.<android.webkit.LoadListener: void commitLoad()>();
+
+        return;
+
+     label04:
+        specialinvoke $r0.<android.webkit.LoadListener: void handleEndData()>();
+
+        return;
+
+     label05:
+        $i0 = $r1.<android.os.Message: int arg1>;
+
+        $r2 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r4 = (java.lang.String) $r2;
+
+        specialinvoke $r0.<android.webkit.LoadListener: void handleError(int,java.lang.String)>($i0, $r4);
+
+        return;
+
+     label06:
+        specialinvoke $r0.<android.webkit.LoadListener: void doRedirect()>();
+
+        return;
+
+     label07:
+        $r1 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(140);
+
+        $r5 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(120);
+
+        $r6 = $r0.<android.webkit.LoadListener: android.webkit.BrowserFrame mBrowserFrame>;
+
+        $r7 = virtualinvoke $r6.<android.webkit.BrowserFrame: android.webkit.CallbackProxy getCallbackProxy()>();
+
+        virtualinvoke $r7.<android.webkit.CallbackProxy: void onFormResubmission(android.os.Message,android.os.Message)>($r5, $r1);
+
+        return;
+
+     label08:
+        $r2 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r8 = (java.util.HashMap) $r2;
+
+        $r2 = virtualinvoke $r8.<java.util.HashMap: java.lang.Object get(java.lang.Object)>("major");
+
+        $r9 = (java.lang.Integer) $r2;
+
+        $i0 = virtualinvoke $r9.<java.lang.Integer: int intValue()>();
+
+        $r2 = virtualinvoke $r8.<java.util.HashMap: java.lang.Object get(java.lang.Object)>("minor");
+
+        $r9 = (java.lang.Integer) $r2;
+
+        $i1 = virtualinvoke $r9.<java.lang.Integer: int intValue()>();
+
+        $r2 = virtualinvoke $r8.<java.util.HashMap: java.lang.Object get(java.lang.Object)>("code");
+
+        $r9 = (java.lang.Integer) $r2;
+
+        $i2 = virtualinvoke $r9.<java.lang.Integer: int intValue()>();
+
+        $r2 = virtualinvoke $r8.<java.util.HashMap: java.lang.Object get(java.lang.Object)>("reason");
+
+        $r4 = (java.lang.String) $r2;
+
+        specialinvoke $r0.<android.webkit.LoadListener: void handleStatus(int,int,int,java.lang.String)>($i0, $i1, $i2, $r4);
+
+        return;
+
+     label09:
+        $r2 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r10 = (android.net.http.SslCertificate) $r2;
+
+        specialinvoke $r0.<android.webkit.LoadListener: void handleCertificate(android.net.http.SslCertificate)>($r10);
+
+        return;
+
+     label10:
+        $r2 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r11 = (android.net.http.SslError) $r2;
+
+        specialinvoke $r0.<android.webkit.LoadListener: void handleSslError(android.net.http.SslError)>($r11);
+
+        return;
+
+     label11:
+        return;
+
+     label12:
+        return;
+    }
+
+    public void handleSslErrorRequest(android.net.http.SslError)
+    {
+        android.webkit.LoadListener $r0;
+        android.net.http.SslError $r1;
+        android.os.Message $r2;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r1 := @parameter0: android.net.http.SslError;
+
+        $r2 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,java.lang.Object)>(180, $r1);
+
+        specialinvoke $r0.<android.webkit.LoadListener: void sendMessageInternal(android.os.Message)>($r2);
+
+        return;
+    }
+
+    void handleSslErrorResponse(boolean)
+    {
+        android.webkit.LoadListener $r0;
+        boolean $z0;
+        android.net.http.RequestHandle $r1;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 = $r0.<android.webkit.LoadListener: android.net.http.RequestHandle mRequestHandle>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<android.webkit.LoadListener: android.net.http.RequestHandle mRequestHandle>;
+
+        virtualinvoke $r1.<android.net.http.RequestHandle: void handleSslErrorResponse(boolean)>($z0);
+
+     label1:
+        if $z0 != 0 goto label2;
+
+        specialinvoke $r0.<android.webkit.LoadListener: void commitLoad()>();
+
+        virtualinvoke $r0.<android.webkit.LoadListener: void tearDown()>();
+
+        return;
+
+     label2:
+        return;
+    }
+
+    public void headers(android.net.http.Headers)
+    {
+        android.webkit.LoadListener $r0;
+        android.net.http.Headers $r1;
+        android.os.Message $r2;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r1 := @parameter0: android.net.http.Headers;
+
+        $r2 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,java.lang.Object)>(100, $r1);
+
+        specialinvoke $r0.<android.webkit.LoadListener: void sendMessageInternal(android.os.Message)>($r2);
+
+        return;
+    }
+
+    java.lang.String host()
+    {
+        android.webkit.LoadListener $r0;
+        android.net.WebAddress $r1;
+        java.lang.String r2;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r1 = $r0.<android.webkit.LoadListener: android.net.WebAddress mUri>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<android.webkit.LoadListener: android.net.WebAddress mUri>;
+
+        r2 = $r1.<android.net.WebAddress: java.lang.String mHost>;
+
+        return r2;
+
+     label1:
+        return null;
+    }
+
+    boolean isSynchronous()
+    {
+        android.webkit.LoadListener $r0;
+        boolean z0;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        z0 = $r0.<android.webkit.LoadListener: boolean mSynchronous>;
+
+        return z0;
+    }
+
+    void loadSynchronousMessages()
+    {
+        android.webkit.LoadListener $r0;
+        java.util.Vector $r1;
+        int $i0;
+        java.lang.Object $r2;
+        android.os.Message $r3;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r1 = $r0.<android.webkit.LoadListener: java.util.Vector mMessageQueue>;
+
+        $i0 = virtualinvoke $r1.<java.util.Vector: int size()>();
+
+     label1:
+        if $i0 <= 0 goto label2;
+
+        $r1 = $r0.<android.webkit.LoadListener: java.util.Vector mMessageQueue>;
+
+        $r2 = virtualinvoke $r1.<java.util.Vector: java.lang.Object remove(int)>(0);
+
+        $r3 = (android.os.Message) $r2;
+
+        virtualinvoke $r0.<android.webkit.LoadListener: void handleMessage(android.os.Message)>($r3);
+
+        $i0 = $i0 + -1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    java.lang.String mimeType()
+    {
+        android.webkit.LoadListener $r0;
+        java.lang.String r1;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        r1 = $r0.<android.webkit.LoadListener: java.lang.String mMimeType>;
+
+        return r1;
+    }
+
+    void notifyError()
+    {
+        android.webkit.LoadListener $r0;
+        int $i0;
+        java.lang.String $r1, $r2;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $i0 = $r0.<android.webkit.LoadListener: int mNativeLoader>;
+
+        if $i0 == 0 goto label2;
+
+        $r1 = specialinvoke $r0.<android.webkit.LoadListener: java.lang.String getErrorDescription()>();
+
+        $r2 = $r1;
+
+        if $r1 != null goto label1;
+
+        $r2 = "";
+
+     label1:
+        $i0 = specialinvoke $r0.<android.webkit.LoadListener: int getErrorID()>();
+
+        $r1 = virtualinvoke $r0.<android.webkit.LoadListener: java.lang.String url()>();
+
+        specialinvoke $r0.<android.webkit.LoadListener: void nativeError(int,java.lang.String,java.lang.String)>($i0, $r2, $r1);
+
+        specialinvoke $r0.<android.webkit.LoadListener: void clearNativeLoader()>();
+
+        return;
+
+     label2:
+        return;
+    }
+
+    java.lang.String originalUrl()
+    {
+        android.webkit.LoadListener $r0;
+        java.lang.String $r1;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r1 = $r0.<android.webkit.LoadListener: java.lang.String mOriginalUrl>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<android.webkit.LoadListener: java.lang.String mOriginalUrl>;
+
+        return $r1;
+
+     label1:
+        $r1 = $r0.<android.webkit.LoadListener: java.lang.String mUrl>;
+
+        return $r1;
+    }
+
+    boolean proxyAuthenticate()
+    {
+        android.webkit.LoadListener $r0;
+        boolean $z0;
+        android.net.http.HttpAuthHeader $r1;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r1 = $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader mAuthHeader>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader mAuthHeader>;
+
+        $z0 = virtualinvoke $r1.<android.net.http.HttpAuthHeader: boolean isProxy()>();
+
+        return $z0;
+
+     label1:
+        return 0;
+    }
+
+    java.lang.String realm()
+    {
+        android.webkit.LoadListener $r0;
+        java.lang.String $r1;
+        android.net.http.HttpAuthHeader $r2;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r2 = $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader mAuthHeader>;
+
+        if $r2 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = $r0.<android.webkit.LoadListener: android.net.http.HttpAuthHeader mAuthHeader>;
+
+        $r1 = virtualinvoke $r2.<android.net.http.HttpAuthHeader: java.lang.String getRealm()>();
+
+        return $r1;
+    }
+
+    void resetCancel()
+    {
+        android.webkit.LoadListener $r0;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r0.<android.webkit.LoadListener: boolean mCancelled> = 0;
+
+        return;
+    }
+
+    void setCacheLoader(android.webkit.CacheLoader)
+    {
+        android.webkit.LoadListener $r0;
+        android.webkit.CacheLoader $r1;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r1 := @parameter0: android.webkit.CacheLoader;
+
+        $r0.<android.webkit.LoadListener: android.webkit.CacheLoader mCacheLoader> = $r1;
+
+        return;
+    }
+
+    void setRequestData(java.lang.String, java.util.Map, byte[], boolean)
+    {
+        android.webkit.LoadListener $r0;
+        java.lang.String $r1;
+        java.util.Map $r2;
+        byte[] $r3;
+        boolean $z0;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.util.Map;
+
+        $r3 := @parameter2: byte[];
+
+        $z0 := @parameter3: boolean;
+
+        $r0.<android.webkit.LoadListener: java.lang.String mMethod> = $r1;
+
+        $r0.<android.webkit.LoadListener: java.util.Map mRequestHeaders> = $r2;
+
+        $r0.<android.webkit.LoadListener: byte[] mPostData> = $r3;
+
+        $r0.<android.webkit.LoadListener: boolean mIsHighPriority> = $z0;
+
+        return;
+    }
+
+    void setUrl(java.lang.String)
+    {
+        android.webkit.LoadListener $r0;
+        java.lang.String $r1;
+        boolean $z0;
+        android.net.WebAddress $r2;
+        android.net.ParseException $r3;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r1 := @parameter0: java.lang.String;
+
+        if $r1 == null goto label5;
+
+        $r0.<android.webkit.LoadListener: android.net.WebAddress mUri> = null;
+
+        $z0 = staticinvoke <android.webkit.URLUtil: boolean isNetworkUrl(java.lang.String)>($r1);
+
+        if $z0 == 0 goto label4;
+
+        $r1 = staticinvoke <android.webkit.URLUtil: java.lang.String stripAnchor(java.lang.String)>($r1);
+
+        $r0.<android.webkit.LoadListener: java.lang.String mUrl> = $r1;
+
+        $r2 = new android.net.WebAddress;
+
+        $r1 = $r0.<android.webkit.LoadListener: java.lang.String mUrl>;
+
+     label1:
+        specialinvoke $r2.<android.net.WebAddress: void <init>(java.lang.String)>($r1);
+
+     label2:
+        $r0.<android.webkit.LoadListener: android.net.WebAddress mUri> = $r2;
+
+        return;
+
+     label3:
+        $r3 := @caughtexception;
+
+        virtualinvoke $r3.<java.lang.Throwable: void printStackTrace()>();
+
+        return;
+
+     label4:
+        $r0.<android.webkit.LoadListener: java.lang.String mUrl> = $r1;
+
+        return;
+
+     label5:
+        return;
+
+        catch android.net.ParseException from label1 to label2 with label3;
+    }
+
+    android.net.http.SslError sslError()
+    {
+        android.webkit.LoadListener $r0;
+        android.net.http.SslError r1;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        r1 = $r0.<android.webkit.LoadListener: android.net.http.SslError mSslError>;
+
+        return r1;
+    }
+
+    public void status(int, int, int, java.lang.String)
+    {
+        android.webkit.LoadListener $r0;
+        int $i0, $i1, $i2;
+        java.lang.String $r1;
+        java.util.HashMap $r2;
+        java.lang.Integer $r3;
+        android.webkit.ByteArrayBuilder $r4;
+        android.os.Message $r5;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i2 := @parameter2: int;
+
+        $r1 := @parameter3: java.lang.String;
+
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>()>();
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        virtualinvoke $r2.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("major", $r3);
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        virtualinvoke $r2.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("minor", $r3);
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        virtualinvoke $r2.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("code", $r3);
+
+        virtualinvoke $r2.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("reason", $r1);
+
+        $r4 = $r0.<android.webkit.LoadListener: android.webkit.ByteArrayBuilder mDataBuilder>;
+
+        virtualinvoke $r4.<android.webkit.ByteArrayBuilder: void clear()>();
+
+        $r5 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,java.lang.Object)>(160, $r2);
+
+        specialinvoke $r0.<android.webkit.LoadListener: void sendMessageInternal(android.os.Message)>($r5);
+
+        return;
+    }
+
+    void tearDown()
+    {
+        android.webkit.LoadListener $r0;
+        android.webkit.PerfChecker $r1;
+        android.webkit.CacheManager$CacheResult $r2;
+        int $i0;
+        java.lang.String $r3;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        $r2 = $r0.<android.webkit.LoadListener: android.webkit.CacheManager$CacheResult mCacheResult>;
+
+        if $r2 == null goto label2;
+
+        $i0 = specialinvoke $r0.<android.webkit.LoadListener: int getErrorID()>();
+
+        if $i0 != 0 goto label1;
+
+        $r3 = $r0.<android.webkit.LoadListener: java.lang.String mUrl>;
+
+        $r2 = $r0.<android.webkit.LoadListener: android.webkit.CacheManager$CacheResult mCacheResult>;
+
+        staticinvoke <android.webkit.CacheManager: void saveCacheFile(java.lang.String,android.webkit.CacheManager$CacheResult)>($r3, $r2);
+
+     label1:
+        $r0.<android.webkit.LoadListener: android.webkit.CacheManager$CacheResult mCacheResult> = null;
+
+     label2:
+        $i0 = $r0.<android.webkit.LoadListener: int mNativeLoader>;
+
+        if $i0 == 0 goto label3;
+
+        $r1 = new android.webkit.PerfChecker;
+
+        specialinvoke $r1.<android.webkit.PerfChecker: void <init>()>();
+
+        specialinvoke $r0.<android.webkit.LoadListener: void nativeFinished()>();
+
+        virtualinvoke $r1.<android.webkit.PerfChecker: void responseAlert(java.lang.String)>("res nativeFinished");
+
+        specialinvoke $r0.<android.webkit.LoadListener: void clearNativeLoader()>();
+
+        return;
+
+     label3:
+        return;
+    }
+
+    java.lang.String url()
+    {
+        android.webkit.LoadListener $r0;
+        java.lang.String r1;
+
+        $r0 := @this: android.webkit.LoadListener;
+
+        r1 = $r0.<android.webkit.LoadListener: java.lang.String mUrl>;
+
+        return r1;
+    }
+}

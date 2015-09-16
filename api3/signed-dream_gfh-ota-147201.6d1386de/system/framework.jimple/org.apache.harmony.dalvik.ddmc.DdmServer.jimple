@@ -1,0 +1,419 @@
+public class org.apache.harmony.dalvik.ddmc.DdmServer extends java.lang.Object
+{
+    public static final int CLIENT_PROTOCOL_VERSION;
+    private static final int CONNECTED;
+    private static final int DISCONNECTED;
+    private static java.util.HashMap mHandlerMap;
+    private static volatile boolean mRegistrationComplete;
+    private static boolean mRegistrationTimedOut;
+
+    static void <clinit>()
+    {
+        java.util.HashMap $r0;
+
+        <org.apache.harmony.dalvik.ddmc.DdmServer: int DISCONNECTED> = 2;
+
+        <org.apache.harmony.dalvik.ddmc.DdmServer: int CONNECTED> = 1;
+
+        <org.apache.harmony.dalvik.ddmc.DdmServer: int CLIENT_PROTOCOL_VERSION> = 1;
+
+        $r0 = new java.util.HashMap;
+
+        specialinvoke $r0.<java.util.HashMap: void <init>()>();
+
+        <org.apache.harmony.dalvik.ddmc.DdmServer: java.util.HashMap mHandlerMap> = $r0;
+
+        <org.apache.harmony.dalvik.ddmc.DdmServer: boolean mRegistrationComplete> = 0;
+
+        <org.apache.harmony.dalvik.ddmc.DdmServer: boolean mRegistrationTimedOut> = 0;
+
+        return;
+    }
+
+    private void <init>()
+    {
+        org.apache.harmony.dalvik.ddmc.DdmServer $r0;
+
+        $r0 := @this: org.apache.harmony.dalvik.ddmc.DdmServer;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private static void broadcast(int)
+    {
+        int $i0;
+        java.util.HashMap $r0, $r1;
+        java.util.Collection $r2;
+        java.util.Iterator $r3;
+        boolean $z0;
+        java.lang.Object $r4;
+        org.apache.harmony.dalvik.ddmc.ChunkHandler $r5;
+        java.lang.UnsupportedOperationException $r6;
+        java.lang.Throwable $r7;
+
+        $i0 := @parameter0: int;
+
+        $r0 = <org.apache.harmony.dalvik.ddmc.DdmServer: java.util.HashMap mHandlerMap>;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = <org.apache.harmony.dalvik.ddmc.DdmServer: java.util.HashMap mHandlerMap>;
+
+        $r2 = virtualinvoke $r1.<java.util.HashMap: java.util.Collection values()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label8;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        $r5 = (org.apache.harmony.dalvik.ddmc.ChunkHandler) $r4;
+
+        lookupswitch($i0)
+        {
+            case 1: goto label6;
+            case 2: goto label7;
+            default: goto label3;
+        };
+
+     label3:
+        $r6 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r6.<java.lang.UnsupportedOperationException: void <init>()>();
+
+        throw $r6;
+
+     label4:
+        $r7 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label5:
+        throw $r7;
+
+     label6:
+        virtualinvoke $r5.<org.apache.harmony.dalvik.ddmc.ChunkHandler: void connected()>();
+
+        goto label2;
+
+     label7:
+        virtualinvoke $r5.<org.apache.harmony.dalvik.ddmc.ChunkHandler: void disconnected()>();
+
+        goto label2;
+
+     label8:
+        exitmonitor $r0;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label1 to label5 with label4;
+        catch java.lang.Throwable from label6 to label9 with label4;
+    }
+
+    private static org.apache.harmony.dalvik.ddmc.Chunk dispatch(int, byte[], int, int)
+    {
+        int $i0, $i1, $i2;
+        byte[] $r0;
+        org.apache.harmony.dalvik.ddmc.Chunk $r1;
+        java.util.HashMap $r2, $r3;
+        boolean $z0;
+        java.io.PrintStream $r4;
+        java.lang.Throwable $r5;
+        java.lang.InterruptedException $r6;
+        java.lang.Integer $r7;
+        java.lang.Object $r8;
+        org.apache.harmony.dalvik.ddmc.ChunkHandler $r9;
+        java.lang.StringBuilder $r10;
+        java.lang.String $r11;
+
+        $i0 := @parameter0: int;
+
+        $r0 := @parameter1: byte[];
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        $r2 = <org.apache.harmony.dalvik.ddmc.DdmServer: java.util.HashMap mHandlerMap>;
+
+        entermonitor $r2;
+
+     label01:
+        $z0 = <org.apache.harmony.dalvik.ddmc.DdmServer: boolean mRegistrationComplete>;
+
+        if $z0 != 0 goto label09;
+
+        $z0 = <org.apache.harmony.dalvik.ddmc.DdmServer: boolean mRegistrationTimedOut>;
+
+     label02:
+        if $z0 != 0 goto label09;
+
+     label03:
+        $r3 = <org.apache.harmony.dalvik.ddmc.DdmServer: java.util.HashMap mHandlerMap>;
+
+     label04:
+        virtualinvoke $r3.<java.lang.Object: void wait(long)>(1000L);
+
+     label05:
+        $z0 = <org.apache.harmony.dalvik.ddmc.DdmServer: boolean mRegistrationComplete>;
+
+        if $z0 != 0 goto label01;
+
+        $r4 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r4.<java.io.PrintStream: void println(java.lang.String)>("DDM dispatch reg wait timeout");
+
+        <org.apache.harmony.dalvik.ddmc.DdmServer: boolean mRegistrationTimedOut> = 1;
+
+        goto label01;
+
+     label06:
+        $r5 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label07:
+        throw $r5;
+
+     label08:
+        $r6 := @caughtexception;
+
+        goto label01;
+
+     label09:
+        $r3 = <org.apache.harmony.dalvik.ddmc.DdmServer: java.util.HashMap mHandlerMap>;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r8 = virtualinvoke $r3.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r7);
+
+        $r9 = (org.apache.harmony.dalvik.ddmc.ChunkHandler) $r8;
+
+        exitmonitor $r2;
+
+     label10:
+        if $r9 != null goto label11;
+
+        $r4 = <java.lang.System: java.io.PrintStream err>;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Can\'t dispatch DDM chunk ");
+
+        $r11 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i0);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": no handler defined");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r4.<java.io.PrintStream: void println(java.lang.String)>($r11);
+
+        return null;
+
+     label11:
+        $r1 = new org.apache.harmony.dalvik.ddmc.Chunk;
+
+        specialinvoke $r1.<org.apache.harmony.dalvik.ddmc.Chunk: void <init>(int,byte[],int,int)>($i0, $r0, $i1, $i2);
+
+        $r1 = virtualinvoke $r9.<org.apache.harmony.dalvik.ddmc.ChunkHandler: org.apache.harmony.dalvik.ddmc.Chunk handleChunk(org.apache.harmony.dalvik.ddmc.Chunk)>($r1);
+
+        return $r1;
+
+        catch java.lang.Throwable from label01 to label02 with label06;
+        catch java.lang.InterruptedException from label04 to label05 with label08;
+        catch java.lang.Throwable from label03 to label05 with label06;
+        catch java.lang.Throwable from label05 to label07 with label06;
+        catch java.lang.Throwable from label09 to label10 with label06;
+    }
+
+    private static native void nativeSendChunk(int, byte[], int, int);
+
+    public static void registerHandler(int, org.apache.harmony.dalvik.ddmc.ChunkHandler)
+    {
+        int $i0;
+        org.apache.harmony.dalvik.ddmc.ChunkHandler $r0;
+        java.lang.NullPointerException $r1;
+        java.util.HashMap $r2, $r3;
+        java.lang.Integer $r4;
+        java.lang.Object $r5;
+        java.lang.RuntimeException $r6;
+        java.lang.StringBuilder $r7;
+        java.lang.String $r8;
+        java.lang.Throwable $r9;
+
+        $i0 := @parameter0: int;
+
+        $r0 := @parameter1: org.apache.harmony.dalvik.ddmc.ChunkHandler;
+
+        if $r0 != null goto label1;
+
+        $r1 = new java.lang.NullPointerException;
+
+        specialinvoke $r1.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r1;
+
+     label1:
+        $r2 = <org.apache.harmony.dalvik.ddmc.DdmServer: java.util.HashMap mHandlerMap>;
+
+        entermonitor $r2;
+
+     label2:
+        $r3 = <org.apache.harmony.dalvik.ddmc.DdmServer: java.util.HashMap mHandlerMap>;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r5 = virtualinvoke $r3.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r4);
+
+        if $r5 == null goto label5;
+
+        $r6 = new java.lang.RuntimeException;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("type ");
+
+        $r8 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i0);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" already registered");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<java.lang.RuntimeException: void <init>(java.lang.String)>($r8);
+
+        throw $r6;
+
+     label3:
+        $r9 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label4:
+        throw $r9;
+
+     label5:
+        $r3 = <org.apache.harmony.dalvik.ddmc.DdmServer: java.util.HashMap mHandlerMap>;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        virtualinvoke $r3.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r4, $r0);
+
+        exitmonitor $r2;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label2 to label4 with label3;
+        catch java.lang.Throwable from label5 to label6 with label3;
+    }
+
+    public static void registrationComplete()
+    {
+        java.util.HashMap $r0, $r1;
+        java.lang.Throwable $r2;
+
+        $r0 = <org.apache.harmony.dalvik.ddmc.DdmServer: java.util.HashMap mHandlerMap>;
+
+        entermonitor $r0;
+
+     label1:
+        <org.apache.harmony.dalvik.ddmc.DdmServer: boolean mRegistrationComplete> = 1;
+
+        $r1 = <org.apache.harmony.dalvik.ddmc.DdmServer: java.util.HashMap mHandlerMap>;
+
+        virtualinvoke $r1.<java.lang.Object: void notifyAll()>();
+
+        exitmonitor $r0;
+
+     label2:
+        return;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public static void sendChunk(org.apache.harmony.dalvik.ddmc.Chunk)
+    {
+        org.apache.harmony.dalvik.ddmc.Chunk $r0;
+        int $i0, $i1, $i2;
+        byte[] $r1;
+
+        $r0 := @parameter0: org.apache.harmony.dalvik.ddmc.Chunk;
+
+        $i0 = $r0.<org.apache.harmony.dalvik.ddmc.Chunk: int type>;
+
+        $r1 = $r0.<org.apache.harmony.dalvik.ddmc.Chunk: byte[] data>;
+
+        $i1 = $r0.<org.apache.harmony.dalvik.ddmc.Chunk: int offset>;
+
+        $i2 = $r0.<org.apache.harmony.dalvik.ddmc.Chunk: int length>;
+
+        staticinvoke <org.apache.harmony.dalvik.ddmc.DdmServer: void nativeSendChunk(int,byte[],int,int)>($i0, $r1, $i1, $i2);
+
+        return;
+    }
+
+    public static org.apache.harmony.dalvik.ddmc.ChunkHandler unregisterHandler(int)
+    {
+        java.util.HashMap $r0, $r1;
+        int $i0;
+        java.lang.Integer $r2;
+        java.lang.Object $r3;
+        org.apache.harmony.dalvik.ddmc.ChunkHandler $r4;
+        java.lang.Throwable $r5;
+
+        $i0 := @parameter0: int;
+
+        $r0 = <org.apache.harmony.dalvik.ddmc.DdmServer: java.util.HashMap mHandlerMap>;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = <org.apache.harmony.dalvik.ddmc.DdmServer: java.util.HashMap mHandlerMap>;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3 = virtualinvoke $r1.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>($r2);
+
+        $r4 = (org.apache.harmony.dalvik.ddmc.ChunkHandler) $r3;
+
+        exitmonitor $r0;
+
+     label2:
+        return $r4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label4:
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+}

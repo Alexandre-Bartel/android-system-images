@@ -1,0 +1,81 @@
+public class com.android.server.MasterClearReceiver extends android.content.BroadcastReceiver
+{
+    private static final java.lang.String TAG;
+
+    public void <init>()
+    {
+        com.android.server.MasterClearReceiver $r0;
+
+        $r0 := @this: com.android.server.MasterClearReceiver;
+
+        specialinvoke $r0.<android.content.BroadcastReceiver: void <init>()>();
+
+        return;
+    }
+
+    public void onReceive(android.content.Context, android.content.Intent)
+    {
+        com.android.server.MasterClearReceiver $r0;
+        android.content.Context $r1;
+        android.content.Intent $r2;
+        android.os.RemoteException $r3;
+        java.lang.String $r4;
+        boolean $z0;
+        android.os.IBinder $r5;
+        android.os.ICheckinService $r6;
+
+        $r0 := @this: com.android.server.MasterClearReceiver;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: android.content.Intent;
+
+        $r4 = virtualinvoke $r2.<android.content.Intent: java.lang.String getAction()>();
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>("android.intent.action.GTALK_DATA_MESSAGE_RECEIVED");
+
+        if $z0 == 0 goto label1;
+
+        $z0 = virtualinvoke $r2.<android.content.Intent: boolean getBooleanExtra(java.lang.String,boolean)>("from_trusted_server", 0);
+
+        if $z0 != 0 goto label1;
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("MasterClear", "Ignoring master clear request -- not from trusted server.");
+
+        return;
+
+     label1:
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("MasterClear", "!!! FACTORY RESETTING DEVICE !!!");
+
+        $r5 = staticinvoke <android.os.ServiceManager: android.os.IBinder getService(java.lang.String)>("checkin");
+
+        $r6 = staticinvoke <android.os.ICheckinService$Stub: android.os.ICheckinService asInterface(android.os.IBinder)>($r5);
+
+        if $r6 == null goto label5;
+
+     label2:
+        interfaceinvoke $r6.<android.os.ICheckinService: void masterClear()>();
+
+     label3:
+        return;
+
+     label4:
+        $r3 := @caughtexception;
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("MasterClear", "Unable to invoke ICheckinService.masterClear()");
+
+        return;
+
+     label5:
+        return;
+
+        catch android.os.RemoteException from label2 to label3 with label4;
+    }
+
+    public static void <clinit>()
+    {
+        <com.android.server.MasterClearReceiver: java.lang.String TAG> = "MasterClear";
+
+        return;
+    }
+}

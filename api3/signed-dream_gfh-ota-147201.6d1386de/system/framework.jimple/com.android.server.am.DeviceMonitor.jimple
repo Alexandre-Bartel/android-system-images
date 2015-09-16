@@ -1,0 +1,661 @@
+class com.android.server.am.DeviceMonitor extends java.lang.Object
+{
+    private static final java.io.File BASE;
+    private static final int INTERVAL;
+    private static final java.lang.String LOG_TAG;
+    private static final int MAX_FILES;
+    private static final java.io.File[] PATHS;
+    private static final java.io.File PROC;
+    private static final int SAMPLE_COUNT;
+    private static com.android.server.am.DeviceMonitor instance;
+    private final byte[] buffer;
+    private boolean running;
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        java.lang.String $r1;
+        java.io.File $r2, $r6;
+        boolean $z0;
+        java.lang.AssertionError $r3;
+        java.lang.StringBuilder $r4;
+        java.io.File[] $r5;
+        com.android.server.am.DeviceMonitor $r7;
+
+        <com.android.server.am.DeviceMonitor: int SAMPLE_COUNT> = 10;
+
+        <com.android.server.am.DeviceMonitor: int MAX_FILES> = 30;
+
+        <com.android.server.am.DeviceMonitor: int INTERVAL> = 1000;
+
+        $r0 = class "com/android/server/am/DeviceMonitor";
+
+        $r1 = virtualinvoke $r0.<java.lang.Class: java.lang.String getName()>();
+
+        <com.android.server.am.DeviceMonitor: java.lang.String LOG_TAG> = $r1;
+
+        $r2 = new java.io.File;
+
+        specialinvoke $r2.<java.io.File: void <init>(java.lang.String)>("/proc");
+
+        <com.android.server.am.DeviceMonitor: java.io.File PROC> = $r2;
+
+        $r2 = new java.io.File;
+
+        specialinvoke $r2.<java.io.File: void <init>(java.lang.String)>("/data/anr/");
+
+        <com.android.server.am.DeviceMonitor: java.io.File BASE> = $r2;
+
+        $r2 = <com.android.server.am.DeviceMonitor: java.io.File BASE>;
+
+        $z0 = virtualinvoke $r2.<java.io.File: boolean isDirectory()>();
+
+        if $z0 != 0 goto label1;
+
+        $r2 = <com.android.server.am.DeviceMonitor: java.io.File BASE>;
+
+        $z0 = virtualinvoke $r2.<java.io.File: boolean mkdirs()>();
+
+        if $z0 != 0 goto label1;
+
+        $r3 = new java.lang.AssertionError;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Couldn\'t create ");
+
+        $r2 = <com.android.server.am.DeviceMonitor: java.io.File BASE>;
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r1 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>(java.lang.Object)>($r1);
+
+        throw $r3;
+
+     label1:
+        $r5 = newarray (java.io.File)[4];
+
+        $r2 = new java.io.File;
+
+        $r6 = <com.android.server.am.DeviceMonitor: java.io.File PROC>;
+
+        specialinvoke $r2.<java.io.File: void <init>(java.io.File,java.lang.String)>($r6, "zoneinfo");
+
+        $r5[0] = $r2;
+
+        $r2 = new java.io.File;
+
+        $r6 = <com.android.server.am.DeviceMonitor: java.io.File PROC>;
+
+        specialinvoke $r2.<java.io.File: void <init>(java.io.File,java.lang.String)>($r6, "interrupts");
+
+        $r5[1] = $r2;
+
+        $r2 = new java.io.File;
+
+        $r6 = <com.android.server.am.DeviceMonitor: java.io.File PROC>;
+
+        specialinvoke $r2.<java.io.File: void <init>(java.io.File,java.lang.String)>($r6, "meminfo");
+
+        $r5[2] = $r2;
+
+        $r2 = new java.io.File;
+
+        $r6 = <com.android.server.am.DeviceMonitor: java.io.File PROC>;
+
+        specialinvoke $r2.<java.io.File: void <init>(java.io.File,java.lang.String)>($r6, "slabinfo");
+
+        $r5[3] = $r2;
+
+        <com.android.server.am.DeviceMonitor: java.io.File[] PATHS> = $r5;
+
+        $r7 = new com.android.server.am.DeviceMonitor;
+
+        specialinvoke $r7.<com.android.server.am.DeviceMonitor: void <init>()>();
+
+        <com.android.server.am.DeviceMonitor: com.android.server.am.DeviceMonitor instance> = $r7;
+
+        return;
+    }
+
+    private void <init>()
+    {
+        com.android.server.am.DeviceMonitor $r0;
+        byte[] $r1;
+        com.android.server.am.DeviceMonitor$1 $r2;
+
+        $r0 := @this: com.android.server.am.DeviceMonitor;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r1 = newarray (byte)[1024];
+
+        $r0.<com.android.server.am.DeviceMonitor: byte[] buffer> = $r1;
+
+        $r0.<com.android.server.am.DeviceMonitor: boolean running> = 0;
+
+        $r2 = new com.android.server.am.DeviceMonitor$1;
+
+        specialinvoke $r2.<com.android.server.am.DeviceMonitor$1: void <init>(com.android.server.am.DeviceMonitor)>($r0);
+
+        virtualinvoke $r2.<java.lang.Thread: void start()>();
+
+        return;
+    }
+
+    static void access$000(com.android.server.am.DeviceMonitor)
+    {
+        com.android.server.am.DeviceMonitor $r0;
+
+        $r0 := @parameter0: com.android.server.am.DeviceMonitor;
+
+        specialinvoke $r0.<com.android.server.am.DeviceMonitor: void monitor()>();
+
+        return;
+    }
+
+    private static void closeQuietly(java.io.Closeable)
+    {
+        java.io.Closeable $r0;
+        java.io.IOException $r1;
+        java.lang.String $r2;
+
+        $r0 := @parameter0: java.io.Closeable;
+
+        if $r0 == null goto label4;
+
+     label1:
+        interfaceinvoke $r0.<java.io.Closeable: void close()>();
+
+     label2:
+        return;
+
+     label3:
+        $r1 := @caughtexception;
+
+        $r2 = <com.android.server.am.DeviceMonitor: java.lang.String LOG_TAG>;
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.Throwable)>($r2, $r1);
+
+        return;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    private void dump() throws java.io.IOException
+    {
+        com.android.server.am.DeviceMonitor $r0;
+        java.io.File $r1, $r3;
+        java.io.FileOutputStream $r2;
+        long $l0;
+        java.lang.String $r4;
+        java.io.File[] $r5;
+        int $i1, $i2;
+        boolean $z0;
+        java.lang.Throwable $r6;
+
+        $r0 := @this: com.android.server.am.DeviceMonitor;
+
+        $r2 = new java.io.FileOutputStream;
+
+        $r1 = new java.io.File;
+
+        $r3 = <com.android.server.am.DeviceMonitor: java.io.File BASE>;
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r4 = staticinvoke <java.lang.String: java.lang.String valueOf(long)>($l0);
+
+        specialinvoke $r1.<java.io.File: void <init>(java.io.File,java.lang.String)>($r3, $r4);
+
+        specialinvoke $r2.<java.io.FileOutputStream: void <init>(java.io.File)>($r1);
+
+     label01:
+        $r1 = <com.android.server.am.DeviceMonitor: java.io.File PROC>;
+
+        $r5 = virtualinvoke $r1.<java.io.File: java.io.File[] listFiles()>();
+
+        $i1 = lengthof $r5;
+
+     label02:
+        $i2 = 0;
+
+     label03:
+        if $i2 >= $i1 goto label05;
+
+        $r1 = $r5[$i2];
+
+        $z0 = staticinvoke <com.android.server.am.DeviceMonitor: boolean isProcessDirectory(java.io.File)>($r1);
+
+        if $z0 == 0 goto label04;
+
+        $r3 = new java.io.File;
+
+        specialinvoke $r3.<java.io.File: void <init>(java.io.File,java.lang.String)>($r1, "stat");
+
+        specialinvoke $r0.<com.android.server.am.DeviceMonitor: void dump(java.io.File,java.io.OutputStream)>($r3, $r2);
+
+     label04:
+        $i2 = $i2 + 1;
+
+        goto label03;
+
+     label05:
+        $r5 = <com.android.server.am.DeviceMonitor: java.io.File[] PATHS>;
+
+        $i1 = lengthof $r5;
+
+     label06:
+        $i2 = 0;
+
+     label07:
+        if $i2 >= $i1 goto label09;
+
+        $r1 = $r5[$i2];
+
+        specialinvoke $r0.<com.android.server.am.DeviceMonitor: void dump(java.io.File,java.io.OutputStream)>($r1, $r2);
+
+     label08:
+        $i2 = $i2 + 1;
+
+        goto label07;
+
+     label09:
+        staticinvoke <com.android.server.am.DeviceMonitor: void closeQuietly(java.io.Closeable)>($r2);
+
+        return;
+
+     label10:
+        $r6 := @caughtexception;
+
+        staticinvoke <com.android.server.am.DeviceMonitor: void closeQuietly(java.io.Closeable)>($r2);
+
+        throw $r6;
+
+        catch java.lang.Throwable from label01 to label02 with label10;
+        catch java.lang.Throwable from label03 to label04 with label10;
+        catch java.lang.Throwable from label05 to label06 with label10;
+        catch java.lang.Throwable from label07 to label08 with label10;
+    }
+
+    private void dump(java.io.File, java.io.OutputStream) throws java.io.IOException
+    {
+        com.android.server.am.DeviceMonitor $r0;
+        java.io.File $r1;
+        java.io.OutputStream $r2;
+        java.io.FileInputStream $r3, $r4;
+        int $i0;
+        byte[] $r5;
+        java.lang.Throwable $r6;
+
+        $r0 := @this: com.android.server.am.DeviceMonitor;
+
+        $r1 := @parameter0: java.io.File;
+
+        $r2 := @parameter1: java.io.OutputStream;
+
+        staticinvoke <com.android.server.am.DeviceMonitor: void writeHeader(java.io.File,java.io.OutputStream)>($r1, $r2);
+
+        $r4 = null;
+
+     label1:
+        $r3 = new java.io.FileInputStream;
+
+        specialinvoke $r3.<java.io.FileInputStream: void <init>(java.io.File)>($r1);
+
+     label2:
+        $r5 = $r0.<com.android.server.am.DeviceMonitor: byte[] buffer>;
+
+        $i0 = virtualinvoke $r3.<java.io.FileInputStream: int read(byte[])>($r5);
+
+        if $i0 == -1 goto label6;
+
+        $r5 = $r0.<com.android.server.am.DeviceMonitor: byte[] buffer>;
+
+        virtualinvoke $r2.<java.io.OutputStream: void write(byte[],int,int)>($r5, 0, $i0);
+
+     label3:
+        goto label2;
+
+     label4:
+        $r6 := @caughtexception;
+
+        $r4 = $r3;
+
+     label5:
+        staticinvoke <com.android.server.am.DeviceMonitor: void closeQuietly(java.io.Closeable)>($r4);
+
+        throw $r6;
+
+     label6:
+        staticinvoke <com.android.server.am.DeviceMonitor: void closeQuietly(java.io.Closeable)>($r3);
+
+        return;
+
+     label7:
+        $r6 := @caughtexception;
+
+        goto label5;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label2 to label3 with label4;
+    }
+
+    private static boolean isProcessDirectory(java.io.File)
+    {
+        java.io.File $r0;
+        java.lang.String $r1;
+        boolean $z0;
+        java.lang.NumberFormatException $r2;
+
+        $r0 := @parameter0: java.io.File;
+
+     label1:
+        $r1 = virtualinvoke $r0.<java.io.File: java.lang.String getName()>();
+
+        staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r1);
+
+        $z0 = virtualinvoke $r0.<java.io.File: boolean isDirectory()>();
+
+     label2:
+        return $z0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        return 0;
+
+        catch java.lang.NumberFormatException from label1 to label2 with label3;
+    }
+
+    private void monitor()
+    {
+        com.android.server.am.DeviceMonitor $r0;
+        java.io.IOException $r1;
+        int $i0;
+        java.lang.String $r2;
+
+        $r0 := @this: com.android.server.am.DeviceMonitor;
+
+     label1:
+        specialinvoke $r0.<com.android.server.am.DeviceMonitor: void waitForStart()>();
+
+        specialinvoke $r0.<com.android.server.am.DeviceMonitor: void purge()>();
+
+        $i0 = 0;
+
+     label2:
+        if $i0 >= 10 goto label6;
+
+     label3:
+        specialinvoke $r0.<com.android.server.am.DeviceMonitor: void dump()>();
+
+     label4:
+        specialinvoke $r0.<com.android.server.am.DeviceMonitor: void pause()>();
+
+        $i0 = $i0 + 1;
+
+        goto label2;
+
+     label5:
+        $r1 := @caughtexception;
+
+        $r2 = <com.android.server.am.DeviceMonitor: java.lang.String LOG_TAG>;
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String,java.lang.Throwable)>($r2, "Dump failed.", $r1);
+
+        goto label4;
+
+     label6:
+        specialinvoke $r0.<com.android.server.am.DeviceMonitor: void stop()>();
+
+        goto label1;
+
+        catch java.io.IOException from label3 to label4 with label5;
+    }
+
+    private void pause()
+    {
+        com.android.server.am.DeviceMonitor $r0;
+        java.lang.InterruptedException $r1;
+
+        $r0 := @this: com.android.server.am.DeviceMonitor;
+
+     label1:
+        staticinvoke <java.lang.Thread: void sleep(long)>(1000L);
+
+     label2:
+        return;
+
+     label3:
+        $r1 := @caughtexception;
+
+        return;
+
+        catch java.lang.InterruptedException from label1 to label2 with label3;
+    }
+
+    private void purge()
+    {
+        com.android.server.am.DeviceMonitor $r0;
+        int $i0, $i1;
+        java.io.File $r1;
+        java.io.File[] $r2;
+        boolean $z0;
+        java.lang.String $r3, $r5;
+        java.lang.StringBuilder $r4;
+
+        $r0 := @this: com.android.server.am.DeviceMonitor;
+
+        $r1 = <com.android.server.am.DeviceMonitor: java.io.File BASE>;
+
+        $r2 = virtualinvoke $r1.<java.io.File: java.io.File[] listFiles()>();
+
+        $i0 = lengthof $r2;
+
+        $i0 = $i0 - 30;
+
+        if $i0 <= 0 goto label3;
+
+        staticinvoke <java.util.Arrays: void sort(java.lang.Object[])>($r2);
+
+        $i1 = 0;
+
+     label1:
+        if $i1 >= $i0 goto label4;
+
+        $r1 = $r2[$i1];
+
+        $z0 = virtualinvoke $r1.<java.io.File: boolean delete()>();
+
+        if $z0 != 0 goto label2;
+
+        $r3 = <com.android.server.am.DeviceMonitor: java.lang.String LOG_TAG>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Couldn\'t delete ");
+
+        $r1 = $r2[$i1];
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>($r3, $r5);
+
+     label2:
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label3:
+        return;
+
+     label4:
+        return;
+    }
+
+    static void start()
+    {
+        com.android.server.am.DeviceMonitor $r0;
+
+        $r0 = <com.android.server.am.DeviceMonitor: com.android.server.am.DeviceMonitor instance>;
+
+        specialinvoke $r0.<com.android.server.am.DeviceMonitor: void startMonitoring()>();
+
+        return;
+    }
+
+    private void startMonitoring()
+    {
+        com.android.server.am.DeviceMonitor $r0;
+        boolean $z0;
+        java.lang.Throwable $r1;
+
+        $r0 := @this: com.android.server.am.DeviceMonitor;
+
+        entermonitor $r0;
+
+     label1:
+        $z0 = $r0.<com.android.server.am.DeviceMonitor: boolean running>;
+
+        if $z0 != 0 goto label2;
+
+        $r0.<com.android.server.am.DeviceMonitor: boolean running> = 1;
+
+        virtualinvoke $r0.<java.lang.Object: void notifyAll()>();
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    private void stop()
+    {
+        com.android.server.am.DeviceMonitor $r0;
+        java.lang.Throwable $r1;
+
+        $r0 := @this: com.android.server.am.DeviceMonitor;
+
+        entermonitor $r0;
+
+     label1:
+        $r0.<com.android.server.am.DeviceMonitor: boolean running> = 0;
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    private void waitForStart()
+    {
+        com.android.server.am.DeviceMonitor $r0;
+        boolean $z0;
+        java.lang.InterruptedException $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: com.android.server.am.DeviceMonitor;
+
+        entermonitor $r0;
+
+     label1:
+        $z0 = $r0.<com.android.server.am.DeviceMonitor: boolean running>;
+
+     label2:
+        if $z0 != 0 goto label6;
+
+     label3:
+        virtualinvoke $r0.<java.lang.Object: void wait()>();
+
+     label4:
+        goto label1;
+
+     label5:
+        $r1 := @caughtexception;
+
+        goto label1;
+
+     label6:
+        exitmonitor $r0;
+
+        return;
+
+     label7:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.InterruptedException from label3 to label4 with label5;
+        catch java.lang.Throwable from label3 to label4 with label7;
+    }
+
+    private static void writeHeader(java.io.File, java.io.OutputStream) throws java.io.IOException
+    {
+        java.io.File $r0;
+        java.io.OutputStream $r1;
+        java.lang.StringBuilder $r2;
+        java.lang.String $r3;
+        byte[] $r4;
+
+        $r0 := @parameter0: java.io.File;
+
+        $r1 := @parameter1: java.io.OutputStream;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("*** ");
+
+        $r3 = virtualinvoke $r0.<java.io.File: java.lang.String toString()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.String: byte[] getBytes()>();
+
+        virtualinvoke $r1.<java.io.OutputStream: void write(byte[])>($r4);
+
+        return;
+    }
+}

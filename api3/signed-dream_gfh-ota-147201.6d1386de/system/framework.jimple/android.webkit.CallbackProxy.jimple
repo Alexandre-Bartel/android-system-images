@@ -1,0 +1,2537 @@
+class android.webkit.CallbackProxy extends android.os.Handler
+{
+    private static final int ASYNC_KEYEVENTS;
+    private static final int AUTH_REQUEST;
+    private static final int CLOSE_WINDOW;
+    private static final int CREATE_WINDOW;
+    private static final int DOWNLOAD_FILE;
+    private static final int JS_ALERT;
+    private static final int JS_CONFIRM;
+    private static final int JS_PROMPT;
+    private static final int JS_UNLOAD;
+    private static final int LOAD_RESOURCE;
+    private static final java.lang.String LOGTAG;
+    private static final int NOTIFY;
+    private static final int OVERRIDE_URL;
+    private static final int PAGE_FINISHED;
+    private static final int PAGE_STARTED;
+    private static final int PROGRESS;
+    private static final int RECEIVED_CERTIFICATE;
+    private static final int RECEIVED_ICON;
+    private static final int RECEIVED_TITLE;
+    private static final int REPORT_ERROR;
+    private static final int REQUEST_FOCUS;
+    private static final int RESEND_POST_DATA;
+    private static final int SAVE_PASSWORD;
+    private static final int SCALE_CHANGED;
+    private static final int SSL_ERROR;
+    private static final int SWITCH_OUT_HISTORY;
+    private static final int TOO_MANY_REDIRECTS;
+    private static final int UPDATE_VISITED;
+    private final android.webkit.WebBackForwardList mBackForwardList;
+    private final android.content.Context mContext;
+    private volatile android.webkit.DownloadListener mDownloadListener;
+    private volatile int mLatestProgress;
+    private boolean mProgressUpdatePending;
+    private volatile android.webkit.WebChromeClient mWebChromeClient;
+    private long mWebCoreThreadTime;
+    private final android.webkit.WebView mWebView;
+    private volatile android.webkit.WebViewClient mWebViewClient;
+
+    public void <init>(android.content.Context, android.webkit.WebView)
+    {
+        android.webkit.CallbackProxy $r0;
+        android.content.Context $r1;
+        android.webkit.WebView $r2;
+        android.webkit.WebBackForwardList $r3;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: android.webkit.WebView;
+
+        specialinvoke $r0.<android.os.Handler: void <init>()>();
+
+        $r0.<android.webkit.CallbackProxy: android.content.Context mContext> = $r1;
+
+        $r0.<android.webkit.CallbackProxy: android.webkit.WebView mWebView> = $r2;
+
+        $r3 = new android.webkit.WebBackForwardList;
+
+        specialinvoke $r3.<android.webkit.WebBackForwardList: void <init>()>();
+
+        $r0.<android.webkit.CallbackProxy: android.webkit.WebBackForwardList mBackForwardList> = $r3;
+
+        return;
+    }
+
+    private java.lang.String getJsDialogTitle(java.lang.String)
+    {
+        android.webkit.CallbackProxy $r0;
+        java.lang.String $r1, $r6;
+        java.net.URL $r2;
+        boolean $z0;
+        android.content.Context $r3;
+        java.lang.Object[] $r4;
+        java.lang.StringBuilder $r5;
+        java.net.MalformedURLException $r7;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $z0 = staticinvoke <android.webkit.URLUtil: boolean isDataUrl(java.lang.String)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.content.Context mContext>;
+
+        $r1 = virtualinvoke $r3.<android.content.Context: java.lang.String getString(int)>(17039755);
+
+        return $r1;
+
+     label1:
+        $r2 = new java.net.URL;
+
+     label2:
+        specialinvoke $r2.<java.net.URL: void <init>(java.lang.String)>($r1);
+
+     label3:
+        $r3 = $r0.<android.webkit.CallbackProxy: android.content.Context mContext>;
+
+        $r4 = newarray (java.lang.Object)[1];
+
+     label4:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r2.<java.net.URL: java.lang.String getProtocol()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("://");
+
+        $r6 = virtualinvoke $r2.<java.net.URL: java.lang.String getHost()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r4[0] = $r6;
+
+        $r1 = virtualinvoke $r3.<android.content.Context: java.lang.String getString(int,java.lang.Object[])>(17039754, $r4);
+
+     label5:
+        return $r1;
+
+     label6:
+        $r7 := @caughtexception;
+
+        return $r1;
+
+        catch java.net.MalformedURLException from label2 to label3 with label6;
+        catch java.net.MalformedURLException from label4 to label5 with label6;
+    }
+
+    public android.webkit.WebView createWindow(boolean, boolean)
+    {
+        android.webkit.CallbackProxy $r0;
+        boolean $z0, $z1;
+        java.lang.InterruptedException $r1;
+        android.webkit.WebView$WebViewTransport $r2;
+        byte $b0, $b1;
+        android.webkit.WebChromeClient $r3;
+        android.webkit.WebView $r4;
+        android.os.Message $r5;
+        android.webkit.WebViewCore $r6;
+        java.lang.String $r7;
+        java.lang.Throwable $r8;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $z0 := @parameter0: boolean;
+
+        $z1 := @parameter1: boolean;
+
+        $b0 = 0;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient>;
+
+        if $r3 != null goto label01;
+
+        return null;
+
+     label01:
+        $r2 = new android.webkit.WebView$WebViewTransport;
+
+        $r4 = $r0.<android.webkit.CallbackProxy: android.webkit.WebView mWebView>;
+
+        virtualinvoke $r4.<java.lang.Object: java.lang.Class getClass()>();
+
+        specialinvoke $r2.<android.webkit.WebView$WebViewTransport: void <init>(android.webkit.WebView)>($r4);
+
+        $r5 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(200);
+
+        $r5.<android.os.Message: java.lang.Object obj> = $r2;
+
+        entermonitor $r0;
+
+        if $z0 == 0 goto label08;
+
+        $b1 = 1;
+
+     label02:
+        if $z1 == 0 goto label03;
+
+        $b0 = 1;
+
+     label03:
+        $r5 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,int,int,java.lang.Object)>(109, $b1, $b0, $r5);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r5);
+
+     label04:
+        virtualinvoke $r0.<java.lang.Object: void wait()>();
+
+     label05:
+        exitmonitor $r0;
+
+     label06:
+        $r4 = virtualinvoke $r2.<android.webkit.WebView$WebViewTransport: android.webkit.WebView getWebView()>();
+
+        if $r4 == null goto label07;
+
+        $r6 = virtualinvoke $r4.<android.webkit.WebView: android.webkit.WebViewCore getWebViewCore()>();
+
+        virtualinvoke $r6.<android.webkit.WebViewCore: void initializeSubwindow()>();
+
+     label07:
+        return $r4;
+
+     label08:
+        $b1 = 0;
+
+        goto label02;
+
+     label09:
+        $r1 := @caughtexception;
+
+     label10:
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("CallbackProxy", "Caught exception while waiting for createWindow");
+
+        $r7 = staticinvoke <android.util.Log: java.lang.String getStackTraceString(java.lang.Throwable)>($r1);
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("CallbackProxy", $r7);
+
+        goto label05;
+
+     label11:
+        $r8 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label12:
+        throw $r8;
+
+        catch java.lang.Throwable from label03 to label04 with label11;
+        catch java.lang.InterruptedException from label04 to label05 with label09;
+        catch java.lang.Throwable from label04 to label05 with label11;
+        catch java.lang.Throwable from label05 to label06 with label11;
+        catch java.lang.Throwable from label10 to label12 with label11;
+    }
+
+    public void doUpdateVisitedHistory(java.lang.String, boolean)
+    {
+        android.webkit.CallbackProxy $r0;
+        java.lang.String $r1;
+        boolean $z0;
+        android.os.Message $r2;
+        android.webkit.WebViewClient $r3;
+        byte $b0;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $z0 := @parameter1: boolean;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        if $r3 != null goto label1;
+
+        return;
+
+     label1:
+        if $z0 == 0 goto label3;
+
+        $b0 = 1;
+
+     label2:
+        $r2 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,int,int,java.lang.Object)>(107, $b0, 0, $r1);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r2);
+
+        return;
+
+     label3:
+        $b0 = 0;
+
+        goto label2;
+    }
+
+    public android.webkit.WebBackForwardList getBackForwardList()
+    {
+        android.webkit.CallbackProxy $r0;
+        android.webkit.WebBackForwardList r1;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        r1 = $r0.<android.webkit.CallbackProxy: android.webkit.WebBackForwardList mBackForwardList>;
+
+        return r1;
+    }
+
+    public int getProgress()
+    {
+        android.webkit.CallbackProxy $r0;
+        int i0;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        i0 = $r0.<android.webkit.CallbackProxy: int mLatestProgress>;
+
+        return i0;
+    }
+
+    public void handleMessage(android.os.Message)
+    {
+        android.webkit.CallbackProxy $r0;
+        android.os.Message $r1, $r10;
+        int $i0;
+        android.webkit.WebViewClient $r2;
+        android.webkit.WebView $r3;
+        android.os.Bundle $r4;
+        java.lang.String $r5, $r11, $r21, $r22;
+        java.lang.Object $r6;
+        android.graphics.Bitmap $r7;
+        android.webkit.WebChromeClient $r8;
+        android.os.Parcelable $r9;
+        boolean $z0, $z1;
+        android.webkit.CallbackProxy$ResultTransport $r12;
+        java.lang.Boolean $r13;
+        java.lang.Throwable $r14, $r19, $r24, $r25, $r46;
+        android.webkit.HttpAuthHandler $r15;
+        java.util.HashMap $r16;
+        android.webkit.SslErrorHandler $r17;
+        android.net.http.SslError $r18;
+        android.webkit.DownloadListener $r20;
+        long $l1;
+        java.lang.Long $r23;
+        android.view.KeyEvent $r26;
+        android.webkit.JsResult $r27;
+        android.app.AlertDialog$Builder $r28;
+        android.content.Context $r29;
+        android.webkit.CallbackProxy$1 $r30;
+        android.webkit.CallbackProxy$3 $r31;
+        android.webkit.CallbackProxy$2 $r32;
+        android.webkit.JsPromptResult $r33;
+        android.view.LayoutInflater $r34;
+        android.view.View $r35, $r36;
+        android.widget.EditText $r37;
+        android.widget.TextView $r38;
+        android.webkit.CallbackProxy$6 $r39;
+        android.webkit.CallbackProxy$5 $r40;
+        android.webkit.CallbackProxy$4 $r41;
+        java.lang.Object[] $r42;
+        android.webkit.CallbackProxy$8 $r43;
+        android.webkit.CallbackProxy$7 $r44;
+        android.net.http.SslCertificate $r45;
+        float $f0, $f1;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $r1 := @parameter0: android.os.Message;
+
+        $i0 = $r1.<android.os.Message: int what>;
+
+        lookupswitch($i0)
+        {
+            case 100: goto label02;
+            case 101: goto label04;
+            case 102: goto label05;
+            case 103: goto label11;
+            case 104: goto label16;
+            case 105: goto label17;
+            case 106: goto label18;
+            case 107: goto label24;
+            case 108: goto label27;
+            case 109: goto label29;
+            case 110: goto label39;
+            case 111: goto label40;
+            case 112: goto label46;
+            case 113: goto label48;
+            case 114: goto label50;
+            case 115: goto label52;
+            case 116: goto label45;
+            case 117: goto label06;
+            case 118: goto label28;
+            case 119: goto label08;
+            case 120: goto label09;
+            case 121: goto label03;
+            case 122: goto label38;
+            case 123: goto label60;
+            case 124: goto label54;
+            case 125: goto label61;
+            case 200: goto label55;
+            default: goto label01;
+        };
+
+     label01:
+        return;
+
+     label02:
+        $r2 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        if $r2 == null goto label62;
+
+        $r2 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebView mWebView>;
+
+        $r4 = virtualinvoke $r1.<android.os.Message: android.os.Bundle getData()>();
+
+        $r5 = virtualinvoke $r4.<android.os.Bundle: java.lang.String getString(java.lang.String)>("url");
+
+        $r6 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r7 = (android.graphics.Bitmap) $r6;
+
+        virtualinvoke $r2.<android.webkit.WebViewClient: void onPageStarted(android.webkit.WebView,java.lang.String,android.graphics.Bitmap)>($r3, $r5, $r7);
+
+        return;
+
+     label03:
+        $r2 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        if $r2 == null goto label63;
+
+        $r2 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebView mWebView>;
+
+        $r6 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r5 = (java.lang.String) $r6;
+
+        virtualinvoke $r2.<android.webkit.WebViewClient: void onPageFinished(android.webkit.WebView,java.lang.String)>($r3, $r5);
+
+        return;
+
+     label04:
+        $r8 = $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient>;
+
+        if $r8 == null goto label64;
+
+        $r8 = $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient>;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebView mWebView>;
+
+        $r6 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r7 = (android.graphics.Bitmap) $r6;
+
+        virtualinvoke $r8.<android.webkit.WebChromeClient: void onReceivedIcon(android.webkit.WebView,android.graphics.Bitmap)>($r3, $r7);
+
+        return;
+
+     label05:
+        $r8 = $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient>;
+
+        if $r8 == null goto label65;
+
+        $r8 = $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient>;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebView mWebView>;
+
+        $r6 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r5 = (java.lang.String) $r6;
+
+        virtualinvoke $r8.<android.webkit.WebChromeClient: void onReceivedTitle(android.webkit.WebView,java.lang.String)>($r3, $r5);
+
+        return;
+
+     label06:
+        $r4 = virtualinvoke $r1.<android.os.Message: android.os.Bundle getData()>();
+
+        $r9 = virtualinvoke $r4.<android.os.Bundle: android.os.Parcelable getParcelable(java.lang.String)>("cancelMsg");
+
+        $r10 = (android.os.Message) $r9;
+
+        $r4 = virtualinvoke $r1.<android.os.Message: android.os.Bundle getData()>();
+
+        $r9 = virtualinvoke $r4.<android.os.Bundle: android.os.Parcelable getParcelable(java.lang.String)>("continueMsg");
+
+        $r1 = (android.os.Message) $r9;
+
+        $r2 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        if $r2 == null goto label07;
+
+        $r2 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebView mWebView>;
+
+        virtualinvoke $r2.<android.webkit.WebViewClient: void onTooManyRedirects(android.webkit.WebView,android.os.Message,android.os.Message)>($r3, $r10, $r1);
+
+        return;
+
+     label07:
+        virtualinvoke $r10.<android.os.Message: void sendToTarget()>();
+
+        return;
+
+     label08:
+        $r2 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        if $r2 == null goto label66;
+
+        $i0 = $r1.<android.os.Message: int arg1>;
+
+        $r4 = virtualinvoke $r1.<android.os.Message: android.os.Bundle getData()>();
+
+        $r5 = virtualinvoke $r4.<android.os.Bundle: java.lang.String getString(java.lang.String)>("description");
+
+        $r4 = virtualinvoke $r1.<android.os.Message: android.os.Bundle getData()>();
+
+        $r11 = virtualinvoke $r4.<android.os.Bundle: java.lang.String getString(java.lang.String)>("failingUrl");
+
+        $r2 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebView mWebView>;
+
+        virtualinvoke $r2.<android.webkit.WebViewClient: void onReceivedError(android.webkit.WebView,int,java.lang.String,java.lang.String)>($r3, $i0, $r5, $r11);
+
+        return;
+
+     label09:
+        $r4 = virtualinvoke $r1.<android.os.Message: android.os.Bundle getData()>();
+
+        $r9 = virtualinvoke $r4.<android.os.Bundle: android.os.Parcelable getParcelable(java.lang.String)>("resend");
+
+        $r10 = (android.os.Message) $r9;
+
+        $r4 = virtualinvoke $r1.<android.os.Message: android.os.Bundle getData()>();
+
+        $r9 = virtualinvoke $r4.<android.os.Bundle: android.os.Parcelable getParcelable(java.lang.String)>("dontResend");
+
+        $r1 = (android.os.Message) $r9;
+
+        $r2 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        if $r2 == null goto label10;
+
+        $r2 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebView mWebView>;
+
+        virtualinvoke $r2.<android.webkit.WebViewClient: void onFormResubmission(android.webkit.WebView,android.os.Message,android.os.Message)>($r3, $r1, $r10);
+
+        return;
+
+     label10:
+        virtualinvoke $r1.<android.os.Message: void sendToTarget()>();
+
+        return;
+
+     label11:
+        $r4 = virtualinvoke $r1.<android.os.Message: android.os.Bundle getData()>();
+
+        $r5 = virtualinvoke $r4.<android.os.Bundle: java.lang.String getString(java.lang.String)>("url");
+
+        $z0 = virtualinvoke $r0.<android.webkit.CallbackProxy: boolean uiOverrideUrlLoading(java.lang.String)>($r5);
+
+        $r6 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r12 = (android.webkit.CallbackProxy$ResultTransport) $r6;
+
+        entermonitor $r0;
+
+     label12:
+        $r13 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z0);
+
+        virtualinvoke $r12.<android.webkit.CallbackProxy$ResultTransport: void setResult(java.lang.Object)>($r13);
+
+        virtualinvoke $r0.<java.lang.Object: void notify()>();
+
+        exitmonitor $r0;
+
+     label13:
+        return;
+
+     label14:
+        $r14 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label15:
+        throw $r14;
+
+     label16:
+        $r2 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        if $r2 == null goto label67;
+
+        $r6 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r15 = (android.webkit.HttpAuthHandler) $r6;
+
+        $r4 = virtualinvoke $r1.<android.os.Message: android.os.Bundle getData()>();
+
+        $r5 = virtualinvoke $r4.<android.os.Bundle: java.lang.String getString(java.lang.String)>("host");
+
+        $r4 = virtualinvoke $r1.<android.os.Message: android.os.Bundle getData()>();
+
+        $r11 = virtualinvoke $r4.<android.os.Bundle: java.lang.String getString(java.lang.String)>("realm");
+
+        $r2 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebView mWebView>;
+
+        virtualinvoke $r2.<android.webkit.WebViewClient: void onReceivedHttpAuthRequest(android.webkit.WebView,android.webkit.HttpAuthHandler,java.lang.String,java.lang.String)>($r3, $r15, $r5, $r11);
+
+        return;
+
+     label17:
+        $r2 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        if $r2 == null goto label68;
+
+        $r6 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r16 = (java.util.HashMap) $r6;
+
+        $r2 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebView mWebView>;
+
+        $r6 = virtualinvoke $r16.<java.util.HashMap: java.lang.Object get(java.lang.Object)>("handler");
+
+        $r17 = (android.webkit.SslErrorHandler) $r6;
+
+        $r6 = virtualinvoke $r16.<java.util.HashMap: java.lang.Object get(java.lang.Object)>("error");
+
+        $r18 = (android.net.http.SslError) $r6;
+
+        virtualinvoke $r2.<android.webkit.WebViewClient: void onReceivedSslError(android.webkit.WebView,android.webkit.SslErrorHandler,android.net.http.SslError)>($r3, $r17, $r18);
+
+        return;
+
+     label18:
+        entermonitor $r0;
+
+     label19:
+        $r8 = $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient>;
+
+        if $r8 == null goto label20;
+
+        $r8 = $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient>;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebView mWebView>;
+
+        $i0 = $r0.<android.webkit.CallbackProxy: int mLatestProgress>;
+
+        virtualinvoke $r8.<android.webkit.WebChromeClient: void onProgressChanged(android.webkit.WebView,int)>($r3, $i0);
+
+     label20:
+        $r0.<android.webkit.CallbackProxy: boolean mProgressUpdatePending> = 0;
+
+        exitmonitor $r0;
+
+     label21:
+        return;
+
+     label22:
+        $r19 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label23:
+        throw $r19;
+
+     label24:
+        $r2 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        if $r2 == null goto label69;
+
+        $r2 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebView mWebView>;
+
+        $r6 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r5 = (java.lang.String) $r6;
+
+        $i0 = $r1.<android.os.Message: int arg1>;
+
+        if $i0 == 0 goto label26;
+
+        $z0 = 1;
+
+     label25:
+        virtualinvoke $r2.<android.webkit.WebViewClient: void doUpdateVisitedHistory(android.webkit.WebView,java.lang.String,boolean)>($r3, $r5, $z0);
+
+        return;
+
+     label26:
+        $z0 = 0;
+
+        goto label25;
+
+     label27:
+        $r2 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        if $r2 == null goto label70;
+
+        $r2 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebView mWebView>;
+
+        $r6 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r5 = (java.lang.String) $r6;
+
+        virtualinvoke $r2.<android.webkit.WebViewClient: void onLoadResource(android.webkit.WebView,java.lang.String)>($r3, $r5);
+
+        return;
+
+     label28:
+        $r20 = $r0.<android.webkit.CallbackProxy: android.webkit.DownloadListener mDownloadListener>;
+
+        if $r20 == null goto label71;
+
+        $r4 = virtualinvoke $r1.<android.os.Message: android.os.Bundle getData()>();
+
+        $r5 = virtualinvoke $r4.<android.os.Bundle: java.lang.String getString(java.lang.String)>("url");
+
+        $r4 = virtualinvoke $r1.<android.os.Message: android.os.Bundle getData()>();
+
+        $r11 = virtualinvoke $r4.<android.os.Bundle: java.lang.String getString(java.lang.String)>("userAgent");
+
+        $r4 = virtualinvoke $r1.<android.os.Message: android.os.Bundle getData()>();
+
+        $r21 = virtualinvoke $r4.<android.os.Bundle: java.lang.String getString(java.lang.String)>("contentDisposition");
+
+        $r4 = virtualinvoke $r1.<android.os.Message: android.os.Bundle getData()>();
+
+        $r22 = virtualinvoke $r4.<android.os.Bundle: java.lang.String getString(java.lang.String)>("mimetype");
+
+        $r4 = virtualinvoke $r1.<android.os.Message: android.os.Bundle getData()>();
+
+        $l1 = virtualinvoke $r4.<android.os.Bundle: long getLong(java.lang.String)>("contentLength");
+
+        $r23 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l1);
+
+        $r20 = $r0.<android.webkit.CallbackProxy: android.webkit.DownloadListener mDownloadListener>;
+
+        $l1 = virtualinvoke $r23.<java.lang.Long: long longValue()>();
+
+        interfaceinvoke $r20.<android.webkit.DownloadListener: void onDownloadStart(java.lang.String,java.lang.String,java.lang.String,java.lang.String,long)>($r5, $r11, $r21, $r22, $l1);
+
+        return;
+
+     label29:
+        $r8 = $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient>;
+
+        if $r8 == null goto label72;
+
+        $r8 = $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient>;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebView mWebView>;
+
+        $i0 = $r1.<android.os.Message: int arg1>;
+
+        if $i0 != 1 goto label36;
+
+        $z0 = 1;
+
+     label30:
+        $i0 = $r1.<android.os.Message: int arg2>;
+
+        if $i0 != 1 goto label37;
+
+        $z1 = 1;
+
+     label31:
+        $r6 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r1 = (android.os.Message) $r6;
+
+        $z0 = virtualinvoke $r8.<android.webkit.WebChromeClient: boolean onCreateWindow(android.webkit.WebView,boolean,boolean,android.os.Message)>($r3, $z0, $z1, $r1);
+
+        if $z0 != 0 goto label73;
+
+        entermonitor $r0;
+
+     label32:
+        virtualinvoke $r0.<java.lang.Object: void notify()>();
+
+        exitmonitor $r0;
+
+     label33:
+        return;
+
+     label34:
+        $r24 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label35:
+        throw $r24;
+
+     label36:
+        $z0 = 0;
+
+        goto label30;
+
+     label37:
+        $z1 = 0;
+
+        goto label31;
+
+     label38:
+        $r8 = $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient>;
+
+        if $r8 == null goto label74;
+
+        $r8 = $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient>;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebView mWebView>;
+
+        virtualinvoke $r8.<android.webkit.WebChromeClient: void onRequestFocus(android.webkit.WebView)>($r3);
+
+        return;
+
+     label39:
+        $r8 = $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient>;
+
+        if $r8 == null goto label75;
+
+        $r8 = $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient>;
+
+        $r6 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r3 = (android.webkit.WebView) $r6;
+
+        virtualinvoke $r8.<android.webkit.WebChromeClient: void onCloseWindow(android.webkit.WebView)>($r3);
+
+        return;
+
+     label40:
+        $r4 = virtualinvoke $r1.<android.os.Message: android.os.Bundle getData()>();
+
+        $r5 = virtualinvoke $r4.<android.os.Bundle: java.lang.String getString(java.lang.String)>("host");
+
+        $r11 = virtualinvoke $r4.<android.os.Bundle: java.lang.String getString(java.lang.String)>("username");
+
+        $r21 = virtualinvoke $r4.<android.os.Bundle: java.lang.String getString(java.lang.String)>("password");
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebView mWebView>;
+
+        $r6 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r1 = (android.os.Message) $r6;
+
+        $z0 = virtualinvoke $r3.<android.webkit.WebView: boolean onSavePassword(java.lang.String,java.lang.String,java.lang.String,android.os.Message)>($r5, $r11, $r21, $r1);
+
+        if $z0 != 0 goto label76;
+
+        entermonitor $r0;
+
+     label41:
+        virtualinvoke $r0.<java.lang.Object: void notify()>();
+
+        exitmonitor $r0;
+
+     label42:
+        return;
+
+     label43:
+        $r25 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label44:
+        throw $r25;
+
+     label45:
+        $r2 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        if $r2 == null goto label77;
+
+        $r2 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebView mWebView>;
+
+        $r6 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r26 = (android.view.KeyEvent) $r6;
+
+        virtualinvoke $r2.<android.webkit.WebViewClient: void onUnhandledKeyEvent(android.webkit.WebView,android.view.KeyEvent)>($r3, $r26);
+
+        return;
+
+     label46:
+        $r8 = $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient>;
+
+        if $r8 == null goto label78;
+
+        $r6 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r27 = (android.webkit.JsResult) $r6;
+
+        $r4 = virtualinvoke $r1.<android.os.Message: android.os.Bundle getData()>();
+
+        $r5 = virtualinvoke $r4.<android.os.Bundle: java.lang.String getString(java.lang.String)>("message");
+
+        $r4 = virtualinvoke $r1.<android.os.Message: android.os.Bundle getData()>();
+
+        $r11 = virtualinvoke $r4.<android.os.Bundle: java.lang.String getString(java.lang.String)>("url");
+
+        $r8 = $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient>;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebView mWebView>;
+
+        $z0 = virtualinvoke $r8.<android.webkit.WebChromeClient: boolean onJsAlert(android.webkit.WebView,java.lang.String,java.lang.String,android.webkit.JsResult)>($r3, $r11, $r5, $r27);
+
+        if $z0 != 0 goto label47;
+
+        $r28 = new android.app.AlertDialog$Builder;
+
+        $r29 = $r0.<android.webkit.CallbackProxy: android.content.Context mContext>;
+
+        specialinvoke $r28.<android.app.AlertDialog$Builder: void <init>(android.content.Context)>($r29);
+
+        $r11 = specialinvoke $r0.<android.webkit.CallbackProxy: java.lang.String getJsDialogTitle(java.lang.String)>($r11);
+
+        $r28 = virtualinvoke $r28.<android.app.AlertDialog$Builder: android.app.AlertDialog$Builder setTitle(java.lang.CharSequence)>($r11);
+
+        $r28 = virtualinvoke $r28.<android.app.AlertDialog$Builder: android.app.AlertDialog$Builder setMessage(java.lang.CharSequence)>($r5);
+
+        $r30 = new android.webkit.CallbackProxy$1;
+
+        specialinvoke $r30.<android.webkit.CallbackProxy$1: void <init>(android.webkit.CallbackProxy,android.webkit.JsResult)>($r0, $r27);
+
+        $r28 = virtualinvoke $r28.<android.app.AlertDialog$Builder: android.app.AlertDialog$Builder setPositiveButton(int,android.content.DialogInterface$OnClickListener)>(17039370, $r30);
+
+        $r28 = virtualinvoke $r28.<android.app.AlertDialog$Builder: android.app.AlertDialog$Builder setCancelable(boolean)>(0);
+
+        virtualinvoke $r28.<android.app.AlertDialog$Builder: android.app.AlertDialog show()>();
+
+     label47:
+        virtualinvoke $r27.<android.webkit.JsResult: void setReady()>();
+
+        return;
+
+     label48:
+        $r8 = $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient>;
+
+        if $r8 == null goto label79;
+
+        $r6 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r27 = (android.webkit.JsResult) $r6;
+
+        $r4 = virtualinvoke $r1.<android.os.Message: android.os.Bundle getData()>();
+
+        $r5 = virtualinvoke $r4.<android.os.Bundle: java.lang.String getString(java.lang.String)>("message");
+
+        $r4 = virtualinvoke $r1.<android.os.Message: android.os.Bundle getData()>();
+
+        $r11 = virtualinvoke $r4.<android.os.Bundle: java.lang.String getString(java.lang.String)>("url");
+
+        $r8 = $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient>;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebView mWebView>;
+
+        $z0 = virtualinvoke $r8.<android.webkit.WebChromeClient: boolean onJsConfirm(android.webkit.WebView,java.lang.String,java.lang.String,android.webkit.JsResult)>($r3, $r11, $r5, $r27);
+
+        if $z0 != 0 goto label49;
+
+        $r28 = new android.app.AlertDialog$Builder;
+
+        $r29 = $r0.<android.webkit.CallbackProxy: android.content.Context mContext>;
+
+        specialinvoke $r28.<android.app.AlertDialog$Builder: void <init>(android.content.Context)>($r29);
+
+        $r11 = specialinvoke $r0.<android.webkit.CallbackProxy: java.lang.String getJsDialogTitle(java.lang.String)>($r11);
+
+        $r28 = virtualinvoke $r28.<android.app.AlertDialog$Builder: android.app.AlertDialog$Builder setTitle(java.lang.CharSequence)>($r11);
+
+        $r28 = virtualinvoke $r28.<android.app.AlertDialog$Builder: android.app.AlertDialog$Builder setMessage(java.lang.CharSequence)>($r5);
+
+        $r31 = new android.webkit.CallbackProxy$3;
+
+        specialinvoke $r31.<android.webkit.CallbackProxy$3: void <init>(android.webkit.CallbackProxy,android.webkit.JsResult)>($r0, $r27);
+
+        $r28 = virtualinvoke $r28.<android.app.AlertDialog$Builder: android.app.AlertDialog$Builder setPositiveButton(int,android.content.DialogInterface$OnClickListener)>(17039370, $r31);
+
+        $r32 = new android.webkit.CallbackProxy$2;
+
+        specialinvoke $r32.<android.webkit.CallbackProxy$2: void <init>(android.webkit.CallbackProxy,android.webkit.JsResult)>($r0, $r27);
+
+        $r28 = virtualinvoke $r28.<android.app.AlertDialog$Builder: android.app.AlertDialog$Builder setNegativeButton(int,android.content.DialogInterface$OnClickListener)>(17039360, $r32);
+
+        virtualinvoke $r28.<android.app.AlertDialog$Builder: android.app.AlertDialog show()>();
+
+     label49:
+        virtualinvoke $r27.<android.webkit.JsResult: void setReady()>();
+
+        return;
+
+     label50:
+        $r8 = $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient>;
+
+        if $r8 == null goto label80;
+
+        $r6 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r33 = (android.webkit.JsPromptResult) $r6;
+
+        $r4 = virtualinvoke $r1.<android.os.Message: android.os.Bundle getData()>();
+
+        $r5 = virtualinvoke $r4.<android.os.Bundle: java.lang.String getString(java.lang.String)>("message");
+
+        $r4 = virtualinvoke $r1.<android.os.Message: android.os.Bundle getData()>();
+
+        $r11 = virtualinvoke $r4.<android.os.Bundle: java.lang.String getString(java.lang.String)>("default");
+
+        $r4 = virtualinvoke $r1.<android.os.Message: android.os.Bundle getData()>();
+
+        $r21 = virtualinvoke $r4.<android.os.Bundle: java.lang.String getString(java.lang.String)>("url");
+
+        $r8 = $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient>;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebView mWebView>;
+
+        $z0 = virtualinvoke $r8.<android.webkit.WebChromeClient: boolean onJsPrompt(android.webkit.WebView,java.lang.String,java.lang.String,java.lang.String,android.webkit.JsPromptResult)>($r3, $r21, $r5, $r11, $r33);
+
+        if $z0 != 0 goto label51;
+
+        $r29 = $r0.<android.webkit.CallbackProxy: android.content.Context mContext>;
+
+        $r34 = staticinvoke <android.view.LayoutInflater: android.view.LayoutInflater 'from'(android.content.Context)>($r29);
+
+        $r35 = virtualinvoke $r34.<android.view.LayoutInflater: android.view.View inflate(int,android.view.ViewGroup)>(17367084, null);
+
+        $r36 = virtualinvoke $r35.<android.view.View: android.view.View findViewById(int)>(16908666);
+
+        $r37 = (android.widget.EditText) $r36;
+
+        virtualinvoke $r37.<android.widget.TextView: void setText(java.lang.CharSequence)>($r11);
+
+        $r36 = virtualinvoke $r35.<android.view.View: android.view.View findViewById(int)>(16908299);
+
+        $r38 = (android.widget.TextView) $r36;
+
+        virtualinvoke $r38.<android.widget.TextView: void setText(java.lang.CharSequence)>($r5);
+
+        $r28 = new android.app.AlertDialog$Builder;
+
+        $r29 = $r0.<android.webkit.CallbackProxy: android.content.Context mContext>;
+
+        specialinvoke $r28.<android.app.AlertDialog$Builder: void <init>(android.content.Context)>($r29);
+
+        $r5 = specialinvoke $r0.<android.webkit.CallbackProxy: java.lang.String getJsDialogTitle(java.lang.String)>($r21);
+
+        $r28 = virtualinvoke $r28.<android.app.AlertDialog$Builder: android.app.AlertDialog$Builder setTitle(java.lang.CharSequence)>($r5);
+
+        $r28 = virtualinvoke $r28.<android.app.AlertDialog$Builder: android.app.AlertDialog$Builder setView(android.view.View)>($r35);
+
+        $r39 = new android.webkit.CallbackProxy$6;
+
+        specialinvoke $r39.<android.webkit.CallbackProxy$6: void <init>(android.webkit.CallbackProxy,android.webkit.JsPromptResult,android.widget.EditText)>($r0, $r33, $r37);
+
+        $r28 = virtualinvoke $r28.<android.app.AlertDialog$Builder: android.app.AlertDialog$Builder setPositiveButton(int,android.content.DialogInterface$OnClickListener)>(17039370, $r39);
+
+        $r40 = new android.webkit.CallbackProxy$5;
+
+        specialinvoke $r40.<android.webkit.CallbackProxy$5: void <init>(android.webkit.CallbackProxy,android.webkit.JsPromptResult)>($r0, $r33);
+
+        $r28 = virtualinvoke $r28.<android.app.AlertDialog$Builder: android.app.AlertDialog$Builder setNegativeButton(int,android.content.DialogInterface$OnClickListener)>(17039360, $r40);
+
+        $r41 = new android.webkit.CallbackProxy$4;
+
+        specialinvoke $r41.<android.webkit.CallbackProxy$4: void <init>(android.webkit.CallbackProxy,android.webkit.JsPromptResult)>($r0, $r33);
+
+        $r28 = virtualinvoke $r28.<android.app.AlertDialog$Builder: android.app.AlertDialog$Builder setOnCancelListener(android.content.DialogInterface$OnCancelListener)>($r41);
+
+        virtualinvoke $r28.<android.app.AlertDialog$Builder: android.app.AlertDialog show()>();
+
+     label51:
+        virtualinvoke $r33.<android.webkit.JsResult: void setReady()>();
+
+        return;
+
+     label52:
+        $r8 = $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient>;
+
+        if $r8 == null goto label81;
+
+        $r6 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r27 = (android.webkit.JsResult) $r6;
+
+        $r4 = virtualinvoke $r1.<android.os.Message: android.os.Bundle getData()>();
+
+        $r5 = virtualinvoke $r4.<android.os.Bundle: java.lang.String getString(java.lang.String)>("message");
+
+        $r4 = virtualinvoke $r1.<android.os.Message: android.os.Bundle getData()>();
+
+        $r11 = virtualinvoke $r4.<android.os.Bundle: java.lang.String getString(java.lang.String)>("url");
+
+        $r8 = $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient>;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebView mWebView>;
+
+        $z0 = virtualinvoke $r8.<android.webkit.WebChromeClient: boolean onJsBeforeUnload(android.webkit.WebView,java.lang.String,java.lang.String,android.webkit.JsResult)>($r3, $r11, $r5, $r27);
+
+        if $z0 != 0 goto label53;
+
+        $r29 = $r0.<android.webkit.CallbackProxy: android.content.Context mContext>;
+
+        $r42 = newarray (java.lang.Object)[1];
+
+        $r42[0] = $r5;
+
+        $r5 = virtualinvoke $r29.<android.content.Context: java.lang.String getString(int,java.lang.Object[])>(17039756, $r42);
+
+        $r28 = new android.app.AlertDialog$Builder;
+
+        $r29 = $r0.<android.webkit.CallbackProxy: android.content.Context mContext>;
+
+        specialinvoke $r28.<android.app.AlertDialog$Builder: void <init>(android.content.Context)>($r29);
+
+        $r28 = virtualinvoke $r28.<android.app.AlertDialog$Builder: android.app.AlertDialog$Builder setMessage(java.lang.CharSequence)>($r5);
+
+        $r43 = new android.webkit.CallbackProxy$8;
+
+        specialinvoke $r43.<android.webkit.CallbackProxy$8: void <init>(android.webkit.CallbackProxy,android.webkit.JsResult)>($r0, $r27);
+
+        $r28 = virtualinvoke $r28.<android.app.AlertDialog$Builder: android.app.AlertDialog$Builder setPositiveButton(int,android.content.DialogInterface$OnClickListener)>(17039370, $r43);
+
+        $r44 = new android.webkit.CallbackProxy$7;
+
+        specialinvoke $r44.<android.webkit.CallbackProxy$7: void <init>(android.webkit.CallbackProxy,android.webkit.JsResult)>($r0, $r27);
+
+        $r28 = virtualinvoke $r28.<android.app.AlertDialog$Builder: android.app.AlertDialog$Builder setNegativeButton(int,android.content.DialogInterface$OnClickListener)>(17039360, $r44);
+
+        virtualinvoke $r28.<android.app.AlertDialog$Builder: android.app.AlertDialog show()>();
+
+     label53:
+        virtualinvoke $r27.<android.webkit.JsResult: void setReady()>();
+
+        return;
+
+     label54:
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebView mWebView>;
+
+        $r6 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r45 = (android.net.http.SslCertificate) $r6;
+
+        virtualinvoke $r3.<android.webkit.WebView: void setCertificate(android.net.http.SslCertificate)>($r45);
+
+        return;
+
+     label55:
+        entermonitor $r0;
+
+     label56:
+        virtualinvoke $r0.<java.lang.Object: void notify()>();
+
+        exitmonitor $r0;
+
+     label57:
+        return;
+
+     label58:
+        $r46 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label59:
+        throw $r46;
+
+     label60:
+        $r2 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        if $r2 == null goto label82;
+
+        $r2 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebView mWebView>;
+
+        $r4 = virtualinvoke $r1.<android.os.Message: android.os.Bundle getData()>();
+
+        $f0 = virtualinvoke $r4.<android.os.Bundle: float getFloat(java.lang.String)>("old");
+
+        $r4 = virtualinvoke $r1.<android.os.Message: android.os.Bundle getData()>();
+
+        $f1 = virtualinvoke $r4.<android.os.Bundle: float getFloat(java.lang.String)>("new");
+
+        virtualinvoke $r2.<android.webkit.WebViewClient: void onScaleChanged(android.webkit.WebView,float,float)>($r3, $f0, $f1);
+
+        return;
+
+     label61:
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebView mWebView>;
+
+        virtualinvoke $r3.<android.webkit.WebView: void switchOutDrawHistory()>();
+
+        return;
+
+     label62:
+        return;
+
+     label63:
+        return;
+
+     label64:
+        return;
+
+     label65:
+        return;
+
+     label66:
+        return;
+
+     label67:
+        return;
+
+     label68:
+        return;
+
+     label69:
+        return;
+
+     label70:
+        return;
+
+     label71:
+        return;
+
+     label72:
+        return;
+
+     label73:
+        return;
+
+     label74:
+        return;
+
+     label75:
+        return;
+
+     label76:
+        return;
+
+     label77:
+        return;
+
+     label78:
+        return;
+
+     label79:
+        return;
+
+     label80:
+        return;
+
+     label81:
+        return;
+
+     label82:
+        return;
+
+        catch java.lang.Throwable from label12 to label13 with label14;
+        catch java.lang.Throwable from label14 to label15 with label14;
+        catch java.lang.Throwable from label19 to label21 with label22;
+        catch java.lang.Throwable from label22 to label23 with label22;
+        catch java.lang.Throwable from label32 to label33 with label34;
+        catch java.lang.Throwable from label34 to label35 with label34;
+        catch java.lang.Throwable from label41 to label42 with label43;
+        catch java.lang.Throwable from label43 to label44 with label43;
+        catch java.lang.Throwable from label56 to label57 with label58;
+        catch java.lang.Throwable from label58 to label59 with label58;
+    }
+
+    public void onCloseWindow(android.webkit.WebView)
+    {
+        android.webkit.CallbackProxy $r0;
+        android.webkit.WebView $r1;
+        android.os.Message $r2;
+        android.webkit.WebChromeClient $r3;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $r1 := @parameter0: android.webkit.WebView;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient>;
+
+        if $r3 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,java.lang.Object)>(110, $r1);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r2);
+
+        return;
+    }
+
+    public boolean onDownloadStart(java.lang.String, java.lang.String, java.lang.String, java.lang.String, long)
+    {
+        android.webkit.CallbackProxy $r0;
+        java.lang.String $r1, $r2, $r3, $r4;
+        long $l0;
+        android.webkit.DownloadListener $r5;
+        android.os.Message $r6;
+        android.os.Bundle $r7;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r4 := @parameter3: java.lang.String;
+
+        $l0 := @parameter4: long;
+
+        $r5 = $r0.<android.webkit.CallbackProxy: android.webkit.DownloadListener mDownloadListener>;
+
+        if $r5 != null goto label1;
+
+        return 0;
+
+     label1:
+        $r6 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(118);
+
+        $r7 = virtualinvoke $r6.<android.os.Message: android.os.Bundle getData()>();
+
+        virtualinvoke $r7.<android.os.Bundle: void putString(java.lang.String,java.lang.String)>("url", $r1);
+
+        virtualinvoke $r7.<android.os.Bundle: void putString(java.lang.String,java.lang.String)>("userAgent", $r2);
+
+        virtualinvoke $r7.<android.os.Bundle: void putString(java.lang.String,java.lang.String)>("mimetype", $r4);
+
+        virtualinvoke $r7.<android.os.Bundle: void putLong(java.lang.String,long)>("contentLength", $l0);
+
+        virtualinvoke $r7.<android.os.Bundle: void putString(java.lang.String,java.lang.String)>("contentDisposition", $r3);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r6);
+
+        return 1;
+    }
+
+    public void onFormResubmission(android.os.Message, android.os.Message)
+    {
+        android.webkit.CallbackProxy $r0;
+        android.os.Message $r1, $r2, $r4;
+        android.webkit.WebViewClient $r3;
+        android.os.Bundle $r5;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $r1 := @parameter0: android.os.Message;
+
+        $r2 := @parameter1: android.os.Message;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        if $r3 != null goto label1;
+
+        virtualinvoke $r1.<android.os.Message: void sendToTarget()>();
+
+        return;
+
+     label1:
+        $r4 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(120);
+
+        $r5 = virtualinvoke $r4.<android.os.Message: android.os.Bundle getData()>();
+
+        virtualinvoke $r5.<android.os.Bundle: void putParcelable(java.lang.String,android.os.Parcelable)>("resend", $r2);
+
+        virtualinvoke $r5.<android.os.Bundle: void putParcelable(java.lang.String,android.os.Parcelable)>("dontResend", $r1);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r4);
+
+        return;
+    }
+
+    public void onJsAlert(java.lang.String, java.lang.String)
+    {
+        android.webkit.CallbackProxy $r0;
+        java.lang.String $r1, $r2;
+        java.lang.InterruptedException $r3;
+        android.webkit.JsResult $r4;
+        android.webkit.WebChromeClient $r5;
+        android.os.Message $r6;
+        android.os.Bundle $r7;
+        java.lang.Throwable $r8;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r5 = $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient>;
+
+        if $r5 != null goto label01;
+
+        return;
+
+     label01:
+        $r4 = new android.webkit.JsResult;
+
+        specialinvoke $r4.<android.webkit.JsResult: void <init>(android.webkit.CallbackProxy,boolean)>($r0, 0);
+
+        $r6 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,java.lang.Object)>(112, $r4);
+
+        $r7 = virtualinvoke $r6.<android.os.Message: android.os.Bundle getData()>();
+
+        virtualinvoke $r7.<android.os.Bundle: void putString(java.lang.String,java.lang.String)>("message", $r2);
+
+        $r7 = virtualinvoke $r6.<android.os.Message: android.os.Bundle getData()>();
+
+        virtualinvoke $r7.<android.os.Bundle: void putString(java.lang.String,java.lang.String)>("url", $r1);
+
+        entermonitor $r0;
+
+     label02:
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r6);
+
+     label03:
+        virtualinvoke $r0.<java.lang.Object: void wait()>();
+
+     label04:
+        exitmonitor $r0;
+
+     label05:
+        return;
+
+     label06:
+        $r8 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label07:
+        throw $r8;
+
+     label08:
+        $r3 := @caughtexception;
+
+     label09:
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("CallbackProxy", "Caught exception while waiting for jsAlert");
+
+        $r1 = staticinvoke <android.util.Log: java.lang.String getStackTraceString(java.lang.Throwable)>($r3);
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("CallbackProxy", $r1);
+
+     label10:
+        goto label04;
+
+        catch java.lang.Throwable from label02 to label03 with label06;
+        catch java.lang.InterruptedException from label03 to label04 with label08;
+        catch java.lang.Throwable from label03 to label04 with label06;
+        catch java.lang.Throwable from label04 to label05 with label06;
+        catch java.lang.Throwable from label06 to label07 with label06;
+        catch java.lang.Throwable from label09 to label10 with label06;
+    }
+
+    public boolean onJsBeforeUnload(java.lang.String, java.lang.String)
+    {
+        android.webkit.CallbackProxy $r0;
+        java.lang.String $r1, $r2;
+        java.lang.InterruptedException $r3;
+        android.webkit.JsResult $r4;
+        android.webkit.WebChromeClient $r5;
+        android.os.Message $r6;
+        android.os.Bundle $r7;
+        boolean $z0;
+        java.lang.Throwable $r8;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r5 = $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient>;
+
+        if $r5 != null goto label1;
+
+        return 1;
+
+     label1:
+        $r4 = new android.webkit.JsResult;
+
+        specialinvoke $r4.<android.webkit.JsResult: void <init>(android.webkit.CallbackProxy,boolean)>($r0, 1);
+
+        $r6 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,java.lang.Object)>(115, $r4);
+
+        $r7 = virtualinvoke $r6.<android.os.Message: android.os.Bundle getData()>();
+
+        virtualinvoke $r7.<android.os.Bundle: void putString(java.lang.String,java.lang.String)>("message", $r2);
+
+        $r7 = virtualinvoke $r6.<android.os.Message: android.os.Bundle getData()>();
+
+        virtualinvoke $r7.<android.os.Bundle: void putString(java.lang.String,java.lang.String)>("url", $r1);
+
+        entermonitor $r0;
+
+     label2:
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r6);
+
+     label3:
+        virtualinvoke $r0.<java.lang.Object: void wait()>();
+
+     label4:
+        exitmonitor $r0;
+
+     label5:
+        $z0 = virtualinvoke $r4.<android.webkit.JsResult: boolean getResult()>();
+
+        return $z0;
+
+     label6:
+        $r3 := @caughtexception;
+
+     label7:
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("CallbackProxy", "Caught exception while waiting for jsUnload");
+
+        $r1 = staticinvoke <android.util.Log: java.lang.String getStackTraceString(java.lang.Throwable)>($r3);
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("CallbackProxy", $r1);
+
+        goto label4;
+
+     label8:
+        $r8 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label9:
+        throw $r8;
+
+        catch java.lang.Throwable from label2 to label3 with label8;
+        catch java.lang.InterruptedException from label3 to label4 with label6;
+        catch java.lang.Throwable from label3 to label4 with label8;
+        catch java.lang.Throwable from label4 to label5 with label8;
+        catch java.lang.Throwable from label7 to label9 with label8;
+    }
+
+    public boolean onJsConfirm(java.lang.String, java.lang.String)
+    {
+        android.webkit.CallbackProxy $r0;
+        java.lang.String $r1, $r2;
+        java.lang.InterruptedException $r3;
+        android.webkit.JsResult $r4;
+        android.webkit.WebChromeClient $r5;
+        android.os.Message $r6;
+        android.os.Bundle $r7;
+        boolean $z0;
+        java.lang.Throwable $r8;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r5 = $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient>;
+
+        if $r5 != null goto label1;
+
+        return 0;
+
+     label1:
+        $r4 = new android.webkit.JsResult;
+
+        specialinvoke $r4.<android.webkit.JsResult: void <init>(android.webkit.CallbackProxy,boolean)>($r0, 0);
+
+        $r6 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,java.lang.Object)>(113, $r4);
+
+        $r7 = virtualinvoke $r6.<android.os.Message: android.os.Bundle getData()>();
+
+        virtualinvoke $r7.<android.os.Bundle: void putString(java.lang.String,java.lang.String)>("message", $r2);
+
+        $r7 = virtualinvoke $r6.<android.os.Message: android.os.Bundle getData()>();
+
+        virtualinvoke $r7.<android.os.Bundle: void putString(java.lang.String,java.lang.String)>("url", $r1);
+
+        entermonitor $r0;
+
+     label2:
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r6);
+
+     label3:
+        virtualinvoke $r0.<java.lang.Object: void wait()>();
+
+     label4:
+        exitmonitor $r0;
+
+     label5:
+        $z0 = virtualinvoke $r4.<android.webkit.JsResult: boolean getResult()>();
+
+        return $z0;
+
+     label6:
+        $r3 := @caughtexception;
+
+     label7:
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("CallbackProxy", "Caught exception while waiting for jsConfirm");
+
+        $r1 = staticinvoke <android.util.Log: java.lang.String getStackTraceString(java.lang.Throwable)>($r3);
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("CallbackProxy", $r1);
+
+        goto label4;
+
+     label8:
+        $r8 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label9:
+        throw $r8;
+
+        catch java.lang.Throwable from label2 to label3 with label8;
+        catch java.lang.InterruptedException from label3 to label4 with label6;
+        catch java.lang.Throwable from label3 to label4 with label8;
+        catch java.lang.Throwable from label4 to label5 with label8;
+        catch java.lang.Throwable from label7 to label9 with label8;
+    }
+
+    public java.lang.String onJsPrompt(java.lang.String, java.lang.String, java.lang.String)
+    {
+        android.webkit.CallbackProxy $r0;
+        java.lang.String $r1, $r2, $r3;
+        java.lang.InterruptedException $r4;
+        android.webkit.JsPromptResult $r5;
+        android.webkit.WebChromeClient $r6;
+        android.os.Message $r7;
+        android.os.Bundle $r8;
+        java.lang.Throwable $r9;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r6 = $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient>;
+
+        if $r6 != null goto label1;
+
+        return null;
+
+     label1:
+        $r5 = new android.webkit.JsPromptResult;
+
+        specialinvoke $r5.<android.webkit.JsPromptResult: void <init>(android.webkit.CallbackProxy)>($r0);
+
+        $r7 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,java.lang.Object)>(114, $r5);
+
+        $r8 = virtualinvoke $r7.<android.os.Message: android.os.Bundle getData()>();
+
+        virtualinvoke $r8.<android.os.Bundle: void putString(java.lang.String,java.lang.String)>("message", $r2);
+
+        $r8 = virtualinvoke $r7.<android.os.Message: android.os.Bundle getData()>();
+
+        virtualinvoke $r8.<android.os.Bundle: void putString(java.lang.String,java.lang.String)>("default", $r3);
+
+        $r8 = virtualinvoke $r7.<android.os.Message: android.os.Bundle getData()>();
+
+        virtualinvoke $r8.<android.os.Bundle: void putString(java.lang.String,java.lang.String)>("url", $r1);
+
+        entermonitor $r0;
+
+     label2:
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r7);
+
+     label3:
+        virtualinvoke $r0.<java.lang.Object: void wait()>();
+
+     label4:
+        exitmonitor $r0;
+
+     label5:
+        $r1 = virtualinvoke $r5.<android.webkit.JsPromptResult: java.lang.String getStringResult()>();
+
+        return $r1;
+
+     label6:
+        $r4 := @caughtexception;
+
+     label7:
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("CallbackProxy", "Caught exception while waiting for jsPrompt");
+
+        $r1 = staticinvoke <android.util.Log: java.lang.String getStackTraceString(java.lang.Throwable)>($r4);
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("CallbackProxy", $r1);
+
+        goto label4;
+
+     label8:
+        $r9 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label9:
+        throw $r9;
+
+        catch java.lang.Throwable from label2 to label3 with label8;
+        catch java.lang.InterruptedException from label3 to label4 with label6;
+        catch java.lang.Throwable from label3 to label4 with label8;
+        catch java.lang.Throwable from label4 to label5 with label8;
+        catch java.lang.Throwable from label7 to label9 with label8;
+    }
+
+    public void onLoadResource(java.lang.String)
+    {
+        android.webkit.CallbackProxy $r0;
+        java.lang.String $r1;
+        android.os.Message $r2;
+        android.webkit.WebViewClient $r3;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        if $r3 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,java.lang.Object)>(108, $r1);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r2);
+
+        return;
+    }
+
+    public void onPageFinished(java.lang.String)
+    {
+        android.webkit.CallbackProxy $r0;
+        java.lang.String $r1;
+        android.os.Message $r2;
+        android.webkit.WebViewClient $r3;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        if $r3 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,java.lang.Object)>(121, $r1);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r2);
+
+        return;
+    }
+
+    public void onPageStarted(java.lang.String, android.graphics.Bitmap)
+    {
+        android.webkit.CallbackProxy $r0;
+        java.lang.String $r1;
+        android.graphics.Bitmap $r2;
+        android.webkit.WebViewClient $r3;
+        android.os.Message $r4;
+        android.os.Bundle $r5;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: android.graphics.Bitmap;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        if $r3 != null goto label1;
+
+        return;
+
+     label1:
+        $r4 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(100);
+
+        $r4.<android.os.Message: java.lang.Object obj> = $r2;
+
+        $r5 = virtualinvoke $r4.<android.os.Message: android.os.Bundle getData()>();
+
+        virtualinvoke $r5.<android.os.Bundle: void putString(java.lang.String,java.lang.String)>("url", $r1);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r4);
+
+        return;
+    }
+
+    public void onProgressChanged(int)
+    {
+        android.webkit.CallbackProxy $r0;
+        int $i0;
+        android.webkit.WebChromeClient $r1;
+        boolean $z0;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $i0 := @parameter0: int;
+
+        entermonitor $r0;
+
+     label1:
+        $r0.<android.webkit.CallbackProxy: int mLatestProgress> = $i0;
+
+        $r1 = $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient>;
+
+        if $r1 != null goto label3;
+
+        exitmonitor $r0;
+
+     label2:
+        return;
+
+     label3:
+        $z0 = $r0.<android.webkit.CallbackProxy: boolean mProgressUpdatePending>;
+
+        if $z0 != 0 goto label4;
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendEmptyMessage(int)>(106);
+
+        $r0.<android.webkit.CallbackProxy: boolean mProgressUpdatePending> = 1;
+
+     label4:
+        exitmonitor $r0;
+
+     label5:
+        return;
+
+     label6:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label7:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label3 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    public void onReceivedCertificate(android.net.http.SslCertificate)
+    {
+        android.webkit.CallbackProxy $r0;
+        android.net.http.SslCertificate $r1;
+        android.os.Message $r2;
+        android.webkit.WebViewClient $r3;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $r1 := @parameter0: android.net.http.SslCertificate;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        if $r3 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,java.lang.Object)>(124, $r1);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r2);
+
+        return;
+    }
+
+    public void onReceivedError(int, java.lang.String, java.lang.String)
+    {
+        android.webkit.CallbackProxy $r0;
+        int $i0;
+        java.lang.String $r1, $r2;
+        android.webkit.WebViewClient $r3;
+        android.os.Message $r4;
+        android.os.Bundle $r5;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $r2 := @parameter2: java.lang.String;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        if $r3 != null goto label1;
+
+        return;
+
+     label1:
+        $r4 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(119);
+
+        $r4.<android.os.Message: int arg1> = $i0;
+
+        $r5 = virtualinvoke $r4.<android.os.Message: android.os.Bundle getData()>();
+
+        virtualinvoke $r5.<android.os.Bundle: void putString(java.lang.String,java.lang.String)>("description", $r1);
+
+        $r5 = virtualinvoke $r4.<android.os.Message: android.os.Bundle getData()>();
+
+        virtualinvoke $r5.<android.os.Bundle: void putString(java.lang.String,java.lang.String)>("failingUrl", $r2);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r4);
+
+        return;
+    }
+
+    public void onReceivedHttpAuthRequest(android.webkit.HttpAuthHandler, java.lang.String, java.lang.String)
+    {
+        android.webkit.CallbackProxy $r0;
+        android.webkit.HttpAuthHandler $r1;
+        java.lang.String $r2, $r3;
+        android.webkit.WebViewClient $r4;
+        android.os.Message $r5;
+        android.os.Bundle $r6;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $r1 := @parameter0: android.webkit.HttpAuthHandler;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r4 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        if $r4 != null goto label1;
+
+        virtualinvoke $r1.<android.webkit.HttpAuthHandler: void cancel()>();
+
+        return;
+
+     label1:
+        $r5 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,java.lang.Object)>(104, $r1);
+
+        $r6 = virtualinvoke $r5.<android.os.Message: android.os.Bundle getData()>();
+
+        virtualinvoke $r6.<android.os.Bundle: void putString(java.lang.String,java.lang.String)>("host", $r2);
+
+        $r6 = virtualinvoke $r5.<android.os.Message: android.os.Bundle getData()>();
+
+        virtualinvoke $r6.<android.os.Bundle: void putString(java.lang.String,java.lang.String)>("realm", $r3);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r5);
+
+        return;
+    }
+
+    public void onReceivedIcon(android.graphics.Bitmap)
+    {
+        android.webkit.CallbackProxy $r0;
+        android.graphics.Bitmap $r1;
+        android.webkit.WebBackForwardList $r2;
+        android.webkit.WebHistoryItem $r3;
+        android.webkit.WebChromeClient $r4;
+        android.os.Message $r5;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $r1 := @parameter0: android.graphics.Bitmap;
+
+        $r2 = $r0.<android.webkit.CallbackProxy: android.webkit.WebBackForwardList mBackForwardList>;
+
+        $r3 = virtualinvoke $r2.<android.webkit.WebBackForwardList: android.webkit.WebHistoryItem getCurrentItem()>();
+
+        if $r3 == null goto label1;
+
+        virtualinvoke $r3.<android.webkit.WebHistoryItem: void setFavicon(android.graphics.Bitmap)>($r1);
+
+     label1:
+        $r4 = $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient>;
+
+        if $r4 != null goto label2;
+
+        return;
+
+     label2:
+        $r5 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,java.lang.Object)>(101, $r1);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r5);
+
+        return;
+    }
+
+    public void onReceivedSslError(android.webkit.SslErrorHandler, android.net.http.SslError)
+    {
+        android.webkit.CallbackProxy $r0;
+        android.webkit.SslErrorHandler $r1;
+        android.net.http.SslError $r2;
+        java.util.HashMap $r3;
+        android.os.Message $r4;
+        android.webkit.WebViewClient $r5;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $r1 := @parameter0: android.webkit.SslErrorHandler;
+
+        $r2 := @parameter1: android.net.http.SslError;
+
+        $r5 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        if $r5 != null goto label1;
+
+        virtualinvoke $r1.<android.webkit.SslErrorHandler: void cancel()>();
+
+        return;
+
+     label1:
+        $r4 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(105);
+
+        $r3 = new java.util.HashMap;
+
+        specialinvoke $r3.<java.util.HashMap: void <init>()>();
+
+        virtualinvoke $r3.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("handler", $r1);
+
+        virtualinvoke $r3.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("error", $r2);
+
+        $r4.<android.os.Message: java.lang.Object obj> = $r3;
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r4);
+
+        return;
+    }
+
+    public void onReceivedTitle(java.lang.String)
+    {
+        android.webkit.CallbackProxy $r0;
+        java.lang.String $r1;
+        android.os.Message $r2;
+        android.webkit.WebChromeClient $r3;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient>;
+
+        if $r3 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,java.lang.Object)>(102, $r1);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r2);
+
+        return;
+    }
+
+    public void onRequestFocus()
+    {
+        android.webkit.CallbackProxy $r0;
+        android.webkit.WebChromeClient $r1;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $r1 = $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient>;
+
+        if $r1 != null goto label1;
+
+        return;
+
+     label1:
+        virtualinvoke $r0.<android.os.Handler: boolean sendEmptyMessage(int)>(122);
+
+        return;
+    }
+
+    public boolean onSavePassword(java.lang.String, java.lang.String, java.lang.String, android.os.Message)
+    {
+        android.webkit.CallbackProxy $r0;
+        java.lang.String $r1, $r2, $r3;
+        java.lang.InterruptedException $r4;
+        android.os.Message $r5;
+        android.os.Bundle $r6;
+        java.lang.Throwable $r7;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r5 := @parameter3: android.os.Message;
+
+        $r5 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(200);
+
+        $r5 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,java.lang.Object)>(111, $r5);
+
+        $r6 = virtualinvoke $r5.<android.os.Message: android.os.Bundle getData()>();
+
+        virtualinvoke $r6.<android.os.Bundle: void putString(java.lang.String,java.lang.String)>("host", $r1);
+
+        virtualinvoke $r6.<android.os.Bundle: void putString(java.lang.String,java.lang.String)>("username", $r2);
+
+        virtualinvoke $r6.<android.os.Bundle: void putString(java.lang.String,java.lang.String)>("password", $r3);
+
+        entermonitor $r0;
+
+     label1:
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r5);
+
+     label2:
+        virtualinvoke $r0.<java.lang.Object: void wait()>();
+
+     label3:
+        exitmonitor $r0;
+
+     label4:
+        return 0;
+
+     label5:
+        $r4 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("CallbackProxy", "Caught exception while waiting for onSavePassword");
+
+        $r1 = staticinvoke <android.util.Log: java.lang.String getStackTraceString(java.lang.Throwable)>($r4);
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("CallbackProxy", $r1);
+
+        goto label3;
+
+     label6:
+        $r7 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label7:
+        throw $r7;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.InterruptedException from label2 to label3 with label5;
+        catch java.lang.Throwable from label2 to label3 with label6;
+        catch java.lang.Throwable from label3 to label4 with label6;
+        catch java.lang.Throwable from label5 to label7 with label6;
+    }
+
+    public void onScaleChanged(float, float)
+    {
+        android.webkit.CallbackProxy $r0;
+        float $f0, $f1;
+        android.webkit.WebViewClient $r1;
+        android.os.Message $r2;
+        android.os.Bundle $r3;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $f0 := @parameter0: float;
+
+        $f1 := @parameter1: float;
+
+        $r1 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        if $r1 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(123);
+
+        $r3 = virtualinvoke $r2.<android.os.Message: android.os.Bundle getData()>();
+
+        virtualinvoke $r3.<android.os.Bundle: void putFloat(java.lang.String,float)>("old", $f0);
+
+        virtualinvoke $r3.<android.os.Bundle: void putFloat(java.lang.String,float)>("new", $f1);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r2);
+
+        return;
+    }
+
+    public void onTooManyRedirects(android.os.Message, android.os.Message)
+    {
+        android.webkit.CallbackProxy $r0;
+        android.os.Message $r1, $r2, $r4;
+        android.webkit.WebViewClient $r3;
+        android.os.Bundle $r5;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $r1 := @parameter0: android.os.Message;
+
+        $r2 := @parameter1: android.os.Message;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        if $r3 != null goto label1;
+
+        virtualinvoke $r1.<android.os.Message: void sendToTarget()>();
+
+        return;
+
+     label1:
+        $r4 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(117);
+
+        $r5 = virtualinvoke $r4.<android.os.Message: android.os.Bundle getData()>();
+
+        virtualinvoke $r5.<android.os.Bundle: void putParcelable(java.lang.String,android.os.Parcelable)>("cancelMsg", $r1);
+
+        virtualinvoke $r5.<android.os.Bundle: void putParcelable(java.lang.String,android.os.Parcelable)>("continueMsg", $r2);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r4);
+
+        return;
+    }
+
+    public void onUnhandledKeyEvent(android.view.KeyEvent)
+    {
+        android.webkit.CallbackProxy $r0;
+        android.view.KeyEvent $r1;
+        android.os.Message $r2;
+        android.webkit.WebViewClient $r3;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $r1 := @parameter0: android.view.KeyEvent;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        if $r3 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,java.lang.Object)>(116, $r1);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r2);
+
+        return;
+    }
+
+    public void setDownloadListener(android.webkit.DownloadListener)
+    {
+        android.webkit.CallbackProxy $r0;
+        android.webkit.DownloadListener $r1;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $r1 := @parameter0: android.webkit.DownloadListener;
+
+        $r0.<android.webkit.CallbackProxy: android.webkit.DownloadListener mDownloadListener> = $r1;
+
+        return;
+    }
+
+    public void setWebChromeClient(android.webkit.WebChromeClient)
+    {
+        android.webkit.CallbackProxy $r0;
+        android.webkit.WebChromeClient $r1;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $r1 := @parameter0: android.webkit.WebChromeClient;
+
+        $r0.<android.webkit.CallbackProxy: android.webkit.WebChromeClient mWebChromeClient> = $r1;
+
+        return;
+    }
+
+    public void setWebViewClient(android.webkit.WebViewClient)
+    {
+        android.webkit.CallbackProxy $r0;
+        android.webkit.WebViewClient $r1;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $r1 := @parameter0: android.webkit.WebViewClient;
+
+        $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient> = $r1;
+
+        return;
+    }
+
+    public boolean shouldOverrideUrlLoading(java.lang.String)
+    {
+        java.lang.String $r0;
+        java.lang.InterruptedException $r1;
+        android.webkit.CallbackProxy$ResultTransport $r2;
+        android.webkit.CallbackProxy $r3;
+        android.os.Message $r4;
+        android.os.Bundle $r5;
+        java.lang.Object $r6;
+        java.lang.Boolean $r7;
+        boolean $z0;
+        java.lang.Throwable $r8;
+
+        $r3 := @this: android.webkit.CallbackProxy;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $r2 = new android.webkit.CallbackProxy$ResultTransport;
+
+        specialinvoke $r2.<android.webkit.CallbackProxy$ResultTransport: void <init>(android.webkit.CallbackProxy,android.webkit.CallbackProxy$1)>($r3, null);
+
+        $r4 = virtualinvoke $r3.<android.os.Handler: android.os.Message obtainMessage(int)>(103);
+
+        $r5 = virtualinvoke $r4.<android.os.Message: android.os.Bundle getData()>();
+
+        virtualinvoke $r5.<android.os.Bundle: void putString(java.lang.String,java.lang.String)>("url", $r0);
+
+        $r4.<android.os.Message: java.lang.Object obj> = $r2;
+
+        entermonitor $r3;
+
+     label1:
+        virtualinvoke $r3.<android.os.Handler: boolean sendMessage(android.os.Message)>($r4);
+
+     label2:
+        virtualinvoke $r3.<java.lang.Object: void wait()>();
+
+     label3:
+        exitmonitor $r3;
+
+     label4:
+        $r6 = virtualinvoke $r2.<android.webkit.CallbackProxy$ResultTransport: java.lang.Object getResult()>();
+
+        $r7 = (java.lang.Boolean) $r6;
+
+        $z0 = virtualinvoke $r7.<java.lang.Boolean: boolean booleanValue()>();
+
+        return $z0;
+
+     label5:
+        $r1 := @caughtexception;
+
+     label6:
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("CallbackProxy", "Caught exception while waiting for overrideUrl");
+
+        $r0 = staticinvoke <android.util.Log: java.lang.String getStackTraceString(java.lang.Throwable)>($r1);
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("CallbackProxy", $r0);
+
+        goto label3;
+
+     label7:
+        $r8 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label8:
+        throw $r8;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.InterruptedException from label2 to label3 with label5;
+        catch java.lang.Throwable from label2 to label3 with label7;
+        catch java.lang.Throwable from label3 to label4 with label7;
+        catch java.lang.Throwable from label6 to label8 with label7;
+    }
+
+    void switchOutDrawHistory()
+    {
+        android.webkit.CallbackProxy $r0;
+        android.os.Message $r1;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $r1 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(125);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r1);
+
+        return;
+    }
+
+    public boolean uiOverrideKeyEvent(android.view.KeyEvent)
+    {
+        android.webkit.CallbackProxy $r0;
+        android.view.KeyEvent $r1;
+        android.webkit.WebView $r2;
+        boolean $z0;
+        android.webkit.WebViewClient $r3;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $r1 := @parameter0: android.view.KeyEvent;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        if $r3 == null goto label1;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        $r2 = $r0.<android.webkit.CallbackProxy: android.webkit.WebView mWebView>;
+
+        $z0 = virtualinvoke $r3.<android.webkit.WebViewClient: boolean shouldOverrideKeyEvent(android.webkit.WebView,android.view.KeyEvent)>($r2, $r1);
+
+        return $z0;
+
+     label1:
+        return 0;
+    }
+
+    public boolean uiOverrideUrlLoading(java.lang.String)
+    {
+        android.webkit.CallbackProxy $r0;
+        java.lang.String $r1;
+        android.content.Intent $r2;
+        int $i0;
+        boolean $z0;
+        android.webkit.WebViewClient $r3;
+        android.webkit.WebView $r4;
+        android.net.Uri $r5;
+        android.content.Context $r6;
+        android.content.ActivityNotFoundException $r7;
+
+        $r0 := @this: android.webkit.CallbackProxy;
+
+        $r1 := @parameter0: java.lang.String;
+
+        if $r1 == null goto label1;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 != 0 goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $z0 = 0;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        if $r3 == null goto label4;
+
+        $r3 = $r0.<android.webkit.CallbackProxy: android.webkit.WebViewClient mWebViewClient>;
+
+        $r4 = $r0.<android.webkit.CallbackProxy: android.webkit.WebView mWebView>;
+
+        $z0 = virtualinvoke $r3.<android.webkit.WebViewClient: boolean shouldOverrideUrlLoading(android.webkit.WebView,java.lang.String)>($r4, $r1);
+
+     label3:
+        return $z0;
+
+     label4:
+        $r2 = new android.content.Intent;
+
+        $r5 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>($r1);
+
+        specialinvoke $r2.<android.content.Intent: void <init>(java.lang.String,android.net.Uri)>("android.intent.action.VIEW", $r5);
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent addCategory(java.lang.String)>("android.intent.category.BROWSABLE");
+
+        $r6 = $r0.<android.webkit.CallbackProxy: android.content.Context mContext>;
+
+        $r1 = virtualinvoke $r6.<android.content.Context: java.lang.String getPackageName()>();
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("com.android.browser.application_id", $r1);
+
+        $r6 = $r0.<android.webkit.CallbackProxy: android.content.Context mContext>;
+
+     label5:
+        virtualinvoke $r6.<android.content.Context: void startActivity(android.content.Intent)>($r2);
+
+     label6:
+        $z0 = 1;
+
+        goto label3;
+
+     label7:
+        $r7 := @caughtexception;
+
+        goto label3;
+
+        catch android.content.ActivityNotFoundException from label5 to label6 with label7;
+    }
+
+    public static void <clinit>()
+    {
+        <android.webkit.CallbackProxy: int UPDATE_VISITED> = 107;
+
+        <android.webkit.CallbackProxy: int TOO_MANY_REDIRECTS> = 117;
+
+        <android.webkit.CallbackProxy: int SWITCH_OUT_HISTORY> = 125;
+
+        <android.webkit.CallbackProxy: int SSL_ERROR> = 105;
+
+        <android.webkit.CallbackProxy: int SCALE_CHANGED> = 123;
+
+        <android.webkit.CallbackProxy: int SAVE_PASSWORD> = 111;
+
+        <android.webkit.CallbackProxy: int RESEND_POST_DATA> = 120;
+
+        <android.webkit.CallbackProxy: int REQUEST_FOCUS> = 122;
+
+        <android.webkit.CallbackProxy: int REPORT_ERROR> = 119;
+
+        <android.webkit.CallbackProxy: int RECEIVED_TITLE> = 102;
+
+        <android.webkit.CallbackProxy: int RECEIVED_ICON> = 101;
+
+        <android.webkit.CallbackProxy: int RECEIVED_CERTIFICATE> = 124;
+
+        <android.webkit.CallbackProxy: int PROGRESS> = 106;
+
+        <android.webkit.CallbackProxy: int PAGE_STARTED> = 100;
+
+        <android.webkit.CallbackProxy: int PAGE_FINISHED> = 121;
+
+        <android.webkit.CallbackProxy: int OVERRIDE_URL> = 103;
+
+        <android.webkit.CallbackProxy: int NOTIFY> = 200;
+
+        <android.webkit.CallbackProxy: java.lang.String LOGTAG> = "CallbackProxy";
+
+        <android.webkit.CallbackProxy: int LOAD_RESOURCE> = 108;
+
+        <android.webkit.CallbackProxy: int JS_UNLOAD> = 115;
+
+        <android.webkit.CallbackProxy: int JS_PROMPT> = 114;
+
+        <android.webkit.CallbackProxy: int JS_CONFIRM> = 113;
+
+        <android.webkit.CallbackProxy: int JS_ALERT> = 112;
+
+        <android.webkit.CallbackProxy: int DOWNLOAD_FILE> = 118;
+
+        <android.webkit.CallbackProxy: int CREATE_WINDOW> = 109;
+
+        <android.webkit.CallbackProxy: int CLOSE_WINDOW> = 110;
+
+        <android.webkit.CallbackProxy: int AUTH_REQUEST> = 104;
+
+        <android.webkit.CallbackProxy: int ASYNC_KEYEVENTS> = 116;
+
+        return;
+    }
+}

@@ -1,0 +1,2663 @@
+public class android.view.ViewDebug extends java.lang.Object
+{
+    private static final int CAPTURE_TIMEOUT;
+    private static final java.lang.String REMOTE_COMMAND_CAPTURE;
+    private static final java.lang.String REMOTE_COMMAND_DUMP;
+    private static final java.lang.String REMOTE_COMMAND_INVALIDATE;
+    private static final java.lang.String REMOTE_COMMAND_REQUEST_LAYOUT;
+    private static final java.lang.String REMOTE_PROFILE;
+    static final java.lang.String SYSTEM_PROPERTY_CAPTURE_EVENT;
+    static final java.lang.String SYSTEM_PROPERTY_CAPTURE_VIEW;
+    public static final boolean TRACE_HIERARCHY;
+    public static final boolean TRACE_RECYCLER;
+    private static java.util.HashMap mCapturedViewFieldsForClasses;
+    private static java.util.HashMap mCapturedViewMethodsForClasses;
+    private static java.util.HashMap sAnnotations;
+    private static java.util.HashMap sFieldsForClasses;
+    private static java.lang.String sHierarchyTracePrefix;
+    private static java.io.BufferedWriter sHierarchyTraces;
+    private static android.view.ViewRoot sHierarhcyRoot;
+    private static java.util.HashMap sMethodsForClasses;
+    private static android.view.View sRecyclerOwnerView;
+    private static java.lang.String sRecyclerTracePrefix;
+    private static java.util.List sRecyclerTraces;
+    private static java.util.List sRecyclerViews;
+
+    static void <clinit>()
+    {
+        <android.view.ViewDebug: java.lang.String SYSTEM_PROPERTY_CAPTURE_VIEW> = "debug.captureview";
+
+        <android.view.ViewDebug: java.lang.String SYSTEM_PROPERTY_CAPTURE_EVENT> = "debug.captureevent";
+
+        <android.view.ViewDebug: java.lang.String REMOTE_PROFILE> = "PROFILE";
+
+        <android.view.ViewDebug: java.lang.String REMOTE_COMMAND_REQUEST_LAYOUT> = "REQUEST_LAYOUT";
+
+        <android.view.ViewDebug: java.lang.String REMOTE_COMMAND_INVALIDATE> = "INVALIDATE";
+
+        <android.view.ViewDebug: java.lang.String REMOTE_COMMAND_DUMP> = "DUMP";
+
+        <android.view.ViewDebug: java.lang.String REMOTE_COMMAND_CAPTURE> = "CAPTURE";
+
+        <android.view.ViewDebug: int CAPTURE_TIMEOUT> = 4000;
+
+        <android.view.ViewDebug: java.util.HashMap mCapturedViewMethodsForClasses> = null;
+
+        <android.view.ViewDebug: java.util.HashMap mCapturedViewFieldsForClasses> = null;
+
+        return;
+    }
+
+    public void <init>()
+    {
+        android.view.ViewDebug $r0;
+
+        $r0 := @this: android.view.ViewDebug;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private static void capture(android.view.View, java.io.OutputStream, java.lang.String) throws java.io.IOException
+    {
+        android.view.View $r0, $r6;
+        java.io.OutputStream $r1;
+        java.lang.String $r2;
+        android.graphics.Bitmap[] $r3;
+        java.util.concurrent.CountDownLatch $r4;
+        java.io.BufferedOutputStream $r5, $r10;
+        android.view.ViewDebug$6 $r7;
+        java.util.concurrent.TimeUnit $r8;
+        android.graphics.Bitmap $r9;
+        android.graphics.Bitmap$CompressFormat $r11;
+        java.lang.Throwable $r12;
+        java.lang.InterruptedException $r13;
+        java.lang.StringBuilder $r14;
+        java.lang.Thread $r15;
+
+        $r0 := @parameter0: android.view.View;
+
+        $r1 := @parameter1: java.io.OutputStream;
+
+        $r2 := @parameter2: java.lang.String;
+
+        $r6 = staticinvoke <android.view.ViewDebug: android.view.View findView(android.view.View,java.lang.String)>($r0, $r2);
+
+        if $r6 == null goto label16;
+
+        $r4 = new java.util.concurrent.CountDownLatch;
+
+        specialinvoke $r4.<java.util.concurrent.CountDownLatch: void <init>(int)>(1);
+
+        $r3 = newarray (android.graphics.Bitmap)[1];
+
+        $r7 = new android.view.ViewDebug$6;
+
+        specialinvoke $r7.<android.view.ViewDebug$6: void <init>(android.graphics.Bitmap[],android.view.View,java.util.concurrent.CountDownLatch)>($r3, $r6, $r4);
+
+        virtualinvoke $r0.<android.view.View: boolean post(java.lang.Runnable)>($r7);
+
+        $r8 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit MILLISECONDS>;
+
+     label01:
+        virtualinvoke $r4.<java.util.concurrent.CountDownLatch: boolean await(long,java.util.concurrent.TimeUnit)>(4000L, $r8);
+
+     label02:
+        $r9 = $r3[0];
+
+        if $r9 == null goto label13;
+
+        $r10 = null;
+
+     label03:
+        $r5 = new java.io.BufferedOutputStream;
+
+        specialinvoke $r5.<java.io.BufferedOutputStream: void <init>(java.io.OutputStream,int)>($r1, 32768);
+
+     label04:
+        $r9 = $r3[0];
+
+        $r11 = <android.graphics.Bitmap$CompressFormat: android.graphics.Bitmap$CompressFormat PNG>;
+
+        virtualinvoke $r9.<android.graphics.Bitmap: boolean compress(android.graphics.Bitmap$CompressFormat,int,java.io.OutputStream)>($r11, 100, $r5);
+
+        virtualinvoke $r5.<java.io.BufferedOutputStream: void flush()>();
+
+     label05:
+        if $r5 == null goto label07;
+
+     label06:
+        virtualinvoke $r5.<java.io.FilterOutputStream: void close()>();
+
+     label07:
+        $r9 = $r3[0];
+
+        virtualinvoke $r9.<android.graphics.Bitmap: void recycle()>();
+
+     label08:
+        return;
+
+     label09:
+        $r12 := @caughtexception;
+
+     label10:
+        if $r10 == null goto label11;
+
+        virtualinvoke $r10.<java.io.FilterOutputStream: void close()>();
+
+     label11:
+        $r9 = $r3[0];
+
+        virtualinvoke $r9.<android.graphics.Bitmap: void recycle()>();
+
+        throw $r12;
+
+     label12:
+        $r13 := @caughtexception;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not complete the capture of the view ");
+
+        $r14 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r6);
+
+        $r2 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("View", $r2);
+
+        $r15 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r15.<java.lang.Thread: void interrupt()>();
+
+        return;
+
+     label13:
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("View", "Failed to create capture bitmap!");
+
+        virtualinvoke $r1.<java.io.OutputStream: void close()>();
+
+     label14:
+        return;
+
+     label15:
+        $r12 := @caughtexception;
+
+        $r10 = $r5;
+
+        goto label10;
+
+     label16:
+        return;
+
+        catch java.lang.InterruptedException from label01 to label02 with label12;
+        catch java.lang.Throwable from label03 to label04 with label09;
+        catch java.lang.Throwable from label04 to label05 with label15;
+        catch java.lang.InterruptedException from label06 to label08 with label12;
+        catch java.lang.InterruptedException from label10 to label12 with label12;
+        catch java.lang.InterruptedException from label13 to label14 with label12;
+    }
+
+    private static java.lang.String capturedViewExportFields(java.lang.Object, java.lang.Class, java.lang.String)
+    {
+        java.lang.Object $r0, $r6;
+        java.lang.Class $r1;
+        java.lang.String $r2, $r7;
+        int $i0, $i1;
+        java.lang.reflect.Field $r3;
+        java.lang.StringBuilder $r4;
+        java.lang.reflect.Field[] $r5;
+        java.lang.IllegalAccessException $r8;
+
+        $r0 := @parameter0: java.lang.Object;
+
+        $r1 := @parameter1: java.lang.Class;
+
+        $r2 := @parameter2: java.lang.String;
+
+        if $r0 != null goto label1;
+
+        return "null";
+
+     label1:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = staticinvoke <android.view.ViewDebug: java.lang.reflect.Field[] capturedViewGetPropertyFields(java.lang.Class)>($r1);
+
+        $i0 = lengthof $r5;
+
+        $i1 = 0;
+
+     label2:
+        if $i1 >= $i0 goto label9;
+
+        $r3 = $r5[$i1];
+
+     label3:
+        $r6 = virtualinvoke $r3.<java.lang.reflect.Field: java.lang.Object get(java.lang.Object)>($r0);
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r7 = virtualinvoke $r3.<java.lang.reflect.Field: java.lang.String getName()>();
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("=");
+
+        if $r6 == null goto label6;
+
+        $r7 = virtualinvoke $r6.<java.lang.Object: java.lang.String toString()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.String: java.lang.String replace(java.lang.CharSequence,java.lang.CharSequence)>("\n", "\\n");
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+     label4:
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(32);
+
+     label5:
+        $i1 = $i1 + 1;
+
+        goto label2;
+
+     label6:
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("null");
+
+     label7:
+        goto label4;
+
+     label8:
+        $r8 := @caughtexception;
+
+        goto label5;
+
+     label9:
+        $r2 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r2;
+
+        catch java.lang.IllegalAccessException from label3 to label5 with label8;
+        catch java.lang.IllegalAccessException from label6 to label7 with label8;
+    }
+
+    private static java.lang.String capturedViewExportMethods(java.lang.Object, java.lang.Class, java.lang.String)
+    {
+        java.lang.Object $r0, $r6;
+        java.lang.Class $r1;
+        java.lang.String $r2, $r10;
+        int $i0, $i1;
+        java.lang.reflect.Method $r3;
+        java.lang.StringBuilder $r4, $r9;
+        java.lang.reflect.Method[] $r5;
+        java.lang.annotation.Annotation $r7;
+        android.view.ViewDebug$CapturedViewProperty $r8;
+        boolean $z0;
+        java.lang.IllegalAccessException $r11;
+        java.lang.reflect.InvocationTargetException $r12;
+
+        $r0 := @parameter0: java.lang.Object;
+
+        $r1 := @parameter1: java.lang.Class;
+
+        $r2 := @parameter2: java.lang.String;
+
+        if $r0 != null goto label01;
+
+        return "null";
+
+     label01:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = staticinvoke <android.view.ViewDebug: java.lang.reflect.Method[] capturedViewGetPropertyMethods(java.lang.Class)>($r1);
+
+        $i0 = lengthof $r5;
+
+        $i1 = 0;
+
+     label02:
+        if $i1 >= $i0 goto label12;
+
+        $r3 = $r5[$i1];
+
+     label03:
+        $r6 = virtualinvoke $r3.<java.lang.reflect.Method: java.lang.Object invoke(java.lang.Object,java.lang.Object[])>($r0, null);
+
+        $r1 = virtualinvoke $r3.<java.lang.reflect.Method: java.lang.Class getReturnType()>();
+
+        $r7 = virtualinvoke $r3.<java.lang.reflect.AccessibleObject: java.lang.annotation.Annotation getAnnotation(java.lang.Class)>(class "android/view/ViewDebug$CapturedViewProperty");
+
+        $r8 = (android.view.ViewDebug$CapturedViewProperty) $r7;
+
+        $z0 = interfaceinvoke $r8.<android.view.ViewDebug$CapturedViewProperty: boolean retrieveReturn()>();
+
+        if $z0 == 0 goto label05;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r3.<java.lang.reflect.Method: java.lang.String getName()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("#");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r10 = staticinvoke <android.view.ViewDebug: java.lang.String capturedViewExportMethods(java.lang.Object,java.lang.Class,java.lang.String)>($r6, $r1, $r10);
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+     label04:
+        $i1 = $i1 + 1;
+
+        goto label02;
+
+     label05:
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r10 = virtualinvoke $r3.<java.lang.reflect.Method: java.lang.String getName()>();
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("()=");
+
+        if $r6 == null goto label09;
+
+        $r10 = virtualinvoke $r6.<java.lang.Object: java.lang.String toString()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.String: java.lang.String replace(java.lang.CharSequence,java.lang.CharSequence)>("\n", "\\n");
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+     label06:
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("; ");
+
+     label07:
+        goto label04;
+
+     label08:
+        $r11 := @caughtexception;
+
+        goto label04;
+
+     label09:
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("null");
+
+     label10:
+        goto label06;
+
+     label11:
+        $r12 := @caughtexception;
+
+        goto label04;
+
+     label12:
+        $r2 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r2;
+
+        catch java.lang.IllegalAccessException from label03 to label04 with label08;
+        catch java.lang.IllegalAccessException from label05 to label07 with label08;
+        catch java.lang.IllegalAccessException from label09 to label10 with label08;
+        catch java.lang.reflect.InvocationTargetException from label03 to label04 with label11;
+        catch java.lang.reflect.InvocationTargetException from label05 to label07 with label11;
+        catch java.lang.reflect.InvocationTargetException from label09 to label10 with label11;
+    }
+
+    private static java.lang.reflect.Field[] capturedViewGetPropertyFields(java.lang.Class)
+    {
+        java.lang.Class $r0;
+        int $i0, $i1;
+        java.lang.reflect.Field $r1;
+        java.util.ArrayList $r2;
+        java.util.HashMap $r3;
+        java.lang.Object $r4;
+        java.lang.reflect.Field[] $r5;
+        boolean $z0;
+        java.lang.Object[] $r6;
+
+        $r0 := @parameter0: java.lang.Class;
+
+        $r3 = <android.view.ViewDebug: java.util.HashMap mCapturedViewFieldsForClasses>;
+
+        if $r3 != null goto label1;
+
+        $r3 = new java.util.HashMap;
+
+        specialinvoke $r3.<java.util.HashMap: void <init>()>();
+
+        <android.view.ViewDebug: java.util.HashMap mCapturedViewFieldsForClasses> = $r3;
+
+     label1:
+        $r3 = <android.view.ViewDebug: java.util.HashMap mCapturedViewFieldsForClasses>;
+
+        $r4 = virtualinvoke $r3.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r0);
+
+        $r5 = (java.lang.reflect.Field[]) $r4;
+
+        if $r5 == null goto label2;
+
+        return $r5;
+
+     label2:
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        $r5 = virtualinvoke $r0.<java.lang.Class: java.lang.reflect.Field[] getFields()>();
+
+        $i0 = lengthof $r5;
+
+        $i1 = 0;
+
+     label3:
+        if $i1 >= $i0 goto label5;
+
+        $r1 = $r5[$i1];
+
+        $z0 = virtualinvoke $r1.<java.lang.reflect.AccessibleObject: boolean isAnnotationPresent(java.lang.Class)>(class "android/view/ViewDebug$CapturedViewProperty");
+
+        if $z0 == 0 goto label4;
+
+        virtualinvoke $r1.<java.lang.reflect.AccessibleObject: void setAccessible(boolean)>(1);
+
+        virtualinvoke $r2.<java.util.ArrayList: boolean add(java.lang.Object)>($r1);
+
+     label4:
+        $i1 = $i1 + 1;
+
+        goto label3;
+
+     label5:
+        $i0 = virtualinvoke $r2.<java.util.ArrayList: int size()>();
+
+        $r5 = newarray (java.lang.reflect.Field)[$i0];
+
+        $r6 = virtualinvoke $r2.<java.util.ArrayList: java.lang.Object[] toArray(java.lang.Object[])>($r5);
+
+        $r5 = (java.lang.reflect.Field[]) $r6;
+
+        virtualinvoke $r3.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r0, $r5);
+
+        return $r5;
+    }
+
+    private static java.lang.reflect.Method[] capturedViewGetPropertyMethods(java.lang.Class)
+    {
+        java.lang.Class $r0, $r7;
+        int $i0, $i1, $i2;
+        java.util.ArrayList $r1;
+        java.util.HashMap $r2;
+        java.lang.reflect.Method $r3;
+        java.lang.Object $r4;
+        java.lang.reflect.Method[] $r5;
+        java.lang.Class[] $r6;
+        boolean $z0;
+        java.lang.Object[] $r8;
+
+        $r0 := @parameter0: java.lang.Class;
+
+        $r2 = <android.view.ViewDebug: java.util.HashMap mCapturedViewMethodsForClasses>;
+
+        if $r2 != null goto label1;
+
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>()>();
+
+        <android.view.ViewDebug: java.util.HashMap mCapturedViewMethodsForClasses> = $r2;
+
+     label1:
+        $r2 = <android.view.ViewDebug: java.util.HashMap mCapturedViewMethodsForClasses>;
+
+        $r4 = virtualinvoke $r2.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r0);
+
+        $r5 = (java.lang.reflect.Method[]) $r4;
+
+        if $r5 == null goto label2;
+
+        return $r5;
+
+     label2:
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        $r5 = virtualinvoke $r0.<java.lang.Class: java.lang.reflect.Method[] getMethods()>();
+
+        $i0 = lengthof $r5;
+
+        $i1 = 0;
+
+     label3:
+        if $i1 >= $i0 goto label5;
+
+        $r3 = $r5[$i1];
+
+        $r6 = virtualinvoke $r3.<java.lang.reflect.Method: java.lang.Class[] getParameterTypes()>();
+
+        $i2 = lengthof $r6;
+
+        if $i2 != 0 goto label4;
+
+        $z0 = virtualinvoke $r3.<java.lang.reflect.AccessibleObject: boolean isAnnotationPresent(java.lang.Class)>(class "android/view/ViewDebug$CapturedViewProperty");
+
+        if $z0 == 0 goto label4;
+
+        $r7 = virtualinvoke $r3.<java.lang.reflect.Method: java.lang.Class getReturnType()>();
+
+        if $r7 == class "java/lang/Void" goto label4;
+
+        virtualinvoke $r3.<java.lang.reflect.AccessibleObject: void setAccessible(boolean)>(1);
+
+        virtualinvoke $r1.<java.util.ArrayList: boolean add(java.lang.Object)>($r3);
+
+     label4:
+        $i1 = $i1 + 1;
+
+        goto label3;
+
+     label5:
+        $i0 = virtualinvoke $r1.<java.util.ArrayList: int size()>();
+
+        $r5 = newarray (java.lang.reflect.Method)[$i0];
+
+        $r8 = virtualinvoke $r1.<java.util.ArrayList: java.lang.Object[] toArray(java.lang.Object[])>($r5);
+
+        $r5 = (java.lang.reflect.Method[]) $r8;
+
+        virtualinvoke $r2.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r0, $r5);
+
+        return $r5;
+    }
+
+    static void dispatchCommand(android.view.View, java.lang.String, java.lang.String, java.io.OutputStream) throws java.io.IOException
+    {
+        java.lang.String $r0, $r1, $r4;
+        java.io.OutputStream $r2;
+        android.view.View $r3;
+        boolean $z0;
+        java.lang.String[] $r5;
+
+        $r3 := @parameter0: android.view.View;
+
+        $r0 := @parameter1: java.lang.String;
+
+        $r1 := @parameter2: java.lang.String;
+
+        $r2 := @parameter3: java.io.OutputStream;
+
+        $r3 = virtualinvoke $r3.<android.view.View: android.view.View getRootView()>();
+
+        $r4 = "DUMP";
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r0);
+
+        if $z0 == 0 goto label1;
+
+        staticinvoke <android.view.ViewDebug: void dump(android.view.View,java.io.OutputStream)>($r3, $r2);
+
+        return;
+
+     label1:
+        $r5 = virtualinvoke $r1.<java.lang.String: java.lang.String[] split(java.lang.String)>(" ");
+
+        $r1 = "CAPTURE";
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r0);
+
+        if $z0 == 0 goto label2;
+
+        $r0 = $r5[0];
+
+        staticinvoke <android.view.ViewDebug: void capture(android.view.View,java.io.OutputStream,java.lang.String)>($r3, $r2, $r0);
+
+        return;
+
+     label2:
+        $r1 = "INVALIDATE";
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r0);
+
+        if $z0 == 0 goto label3;
+
+        $r0 = $r5[0];
+
+        staticinvoke <android.view.ViewDebug: void invalidate(android.view.View,java.lang.String)>($r3, $r0);
+
+        return;
+
+     label3:
+        $r1 = "REQUEST_LAYOUT";
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r0);
+
+        if $z0 == 0 goto label4;
+
+        $r0 = $r5[0];
+
+        staticinvoke <android.view.ViewDebug: void requestLayout(android.view.View,java.lang.String)>($r3, $r0);
+
+        return;
+
+     label4:
+        $r1 = "PROFILE";
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r0);
+
+        if $z0 == 0 goto label5;
+
+        $r0 = $r5[0];
+
+        staticinvoke <android.view.ViewDebug: void profile(android.view.View,java.io.OutputStream,java.lang.String)>($r3, $r2, $r0);
+
+        return;
+
+     label5:
+        return;
+    }
+
+    private static void dump(android.view.View, java.io.OutputStream) throws java.io.IOException
+    {
+        android.view.View $r0;
+        java.io.OutputStream $r1;
+        java.io.BufferedWriter $r2, $r3;
+        java.io.OutputStreamWriter $r4;
+        boolean $z0;
+        android.view.ViewGroup $r5;
+        android.content.Context $r6;
+        java.lang.Exception $r7, $r9;
+        java.lang.Throwable $r8;
+
+        $r0 := @parameter0: android.view.View;
+
+        $r1 := @parameter1: java.io.OutputStream;
+
+        $r3 = null;
+
+     label01:
+        $r2 = new java.io.BufferedWriter;
+
+        $r4 = new java.io.OutputStreamWriter;
+
+     label02:
+        specialinvoke $r4.<java.io.OutputStreamWriter: void <init>(java.io.OutputStream)>($r1);
+
+        specialinvoke $r2.<java.io.BufferedWriter: void <init>(java.io.Writer,int)>($r4, 32768);
+
+     label03:
+        $r0 = virtualinvoke $r0.<android.view.View: android.view.View getRootView()>();
+
+     label04:
+        $z0 = $r0 instanceof android.view.ViewGroup;
+
+     label05:
+        if $z0 == 0 goto label06;
+
+        $r5 = (android.view.ViewGroup) $r0;
+
+        $r6 = virtualinvoke $r5.<android.view.View: android.content.Context getContext()>();
+
+        staticinvoke <android.view.ViewDebug: void dumpViewHierarchyWithProperties(android.content.Context,android.view.ViewGroup,java.io.BufferedWriter,int)>($r6, $r5, $r2, 0);
+
+     label06:
+        virtualinvoke $r2.<java.io.Writer: void write(java.lang.String)>("DONE.");
+
+        virtualinvoke $r2.<java.io.BufferedWriter: void newLine()>();
+
+     label07:
+        if $r2 == null goto label16;
+
+        virtualinvoke $r2.<java.io.BufferedWriter: void close()>();
+
+        return;
+
+     label08:
+        $r7 := @caughtexception;
+
+     label09:
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String,java.lang.Throwable)>("View", "Problem dumping the view:", $r7);
+
+     label10:
+        if $r3 == null goto label17;
+
+        virtualinvoke $r3.<java.io.BufferedWriter: void close()>();
+
+        return;
+
+     label11:
+        $r8 := @caughtexception;
+
+     label12:
+        if $r3 == null goto label13;
+
+        virtualinvoke $r3.<java.io.BufferedWriter: void close()>();
+
+     label13:
+        throw $r8;
+
+     label14:
+        $r8 := @caughtexception;
+
+        $r3 = $r2;
+
+        goto label12;
+
+     label15:
+        $r9 := @caughtexception;
+
+        $r7 = $r9;
+
+        $r3 = $r2;
+
+        goto label09;
+
+     label16:
+        return;
+
+     label17:
+        return;
+
+        catch java.lang.Exception from label02 to label03 with label08;
+        catch java.lang.Throwable from label01 to label03 with label11;
+        catch java.lang.Exception from label03 to label04 with label15;
+        catch java.lang.Exception from label05 to label07 with label15;
+        catch java.lang.Throwable from label03 to label07 with label14;
+        catch java.lang.Throwable from label09 to label10 with label11;
+    }
+
+    public static void dumpCapturedView(java.lang.String, java.lang.Object)
+    {
+        java.lang.String $r0, $r5;
+        java.lang.Object $r1;
+        java.lang.StringBuilder $r2, $r4;
+        java.lang.Class $r3;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $r1 := @parameter1: java.lang.Object;
+
+        $r3 = virtualinvoke $r1.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r2 = new java.lang.StringBuilder;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r3.<java.lang.Class: java.lang.String getName()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>(java.lang.String)>($r5);
+
+        $r5 = staticinvoke <android.view.ViewDebug: java.lang.String capturedViewExportFields(java.lang.Object,java.lang.Class,java.lang.String)>($r1, $r3, "");
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = staticinvoke <android.view.ViewDebug: java.lang.String capturedViewExportMethods(java.lang.Object,java.lang.Class,java.lang.String)>($r1, $r3, "");
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>($r0, $r5);
+
+        return;
+    }
+
+    private static boolean dumpView(java.lang.Object, java.io.BufferedWriter, int)
+    {
+        java.lang.Object $r0;
+        java.io.BufferedWriter $r1;
+        int $i0, $i1;
+        java.lang.Class $r2;
+        java.lang.String $r3;
+        java.io.IOException $r4;
+
+        $r0 := @parameter0: java.lang.Object;
+
+        $r1 := @parameter1: java.io.BufferedWriter;
+
+        $i0 := @parameter2: int;
+
+        $i1 = 0;
+
+     label1:
+        if $i1 >= $i0 goto label4;
+
+     label2:
+        virtualinvoke $r1.<java.io.BufferedWriter: void write(int)>(32);
+
+     label3:
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label4:
+        $r2 = virtualinvoke $r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r1.<java.io.Writer: void write(java.lang.String)>($r3);
+
+        virtualinvoke $r1.<java.io.BufferedWriter: void write(int)>(64);
+
+        $i0 = virtualinvoke $r0.<java.lang.Object: int hashCode()>();
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i0);
+
+        virtualinvoke $r1.<java.io.Writer: void write(java.lang.String)>($r3);
+
+        virtualinvoke $r1.<java.io.BufferedWriter: void newLine()>();
+
+     label5:
+        return 1;
+
+     label6:
+        $r4 := @caughtexception;
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("View", "Error while dumping hierarchy tree");
+
+        return 0;
+
+        catch java.io.IOException from label2 to label3 with label6;
+        catch java.io.IOException from label4 to label5 with label6;
+    }
+
+    private static void dumpViewHierarchy(android.view.ViewGroup, java.io.BufferedWriter, int)
+    {
+        android.view.ViewGroup $r0, $r3;
+        java.io.BufferedWriter $r1;
+        int $i0, $i1, $i2, $i3;
+        boolean $z0;
+        android.view.View $r2;
+
+        $r0 := @parameter0: android.view.ViewGroup;
+
+        $r1 := @parameter1: java.io.BufferedWriter;
+
+        $i0 := @parameter2: int;
+
+        $z0 = staticinvoke <android.view.ViewDebug: boolean dumpView(java.lang.Object,java.io.BufferedWriter,int)>($r0, $r1, $i0);
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $i1 = virtualinvoke $r0.<android.view.ViewGroup: int getChildCount()>();
+
+        $i2 = 0;
+
+     label2:
+        if $i2 >= $i1 goto label5;
+
+        $r2 = virtualinvoke $r0.<android.view.ViewGroup: android.view.View getChildAt(int)>($i2);
+
+        $z0 = $r2 instanceof android.view.ViewGroup;
+
+        if $z0 == 0 goto label4;
+
+        $r3 = (android.view.ViewGroup) $r2;
+
+        $i3 = $i0 + 1;
+
+        staticinvoke <android.view.ViewDebug: void dumpViewHierarchy(android.view.ViewGroup,java.io.BufferedWriter,int)>($r3, $r1, $i3);
+
+     label3:
+        $i2 = $i2 + 1;
+
+        goto label2;
+
+     label4:
+        $i3 = $i0 + 1;
+
+        staticinvoke <android.view.ViewDebug: boolean dumpView(java.lang.Object,java.io.BufferedWriter,int)>($r2, $r1, $i3);
+
+        goto label3;
+
+     label5:
+        return;
+    }
+
+    private static void dumpViewHierarchyWithProperties(android.content.Context, android.view.ViewGroup, java.io.BufferedWriter, int)
+    {
+        android.content.Context $r0;
+        android.view.ViewGroup $r1, $r4;
+        java.io.BufferedWriter $r2;
+        int $i0, $i1, $i2, $i3;
+        boolean $z0;
+        android.view.View $r3;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 := @parameter1: android.view.ViewGroup;
+
+        $r2 := @parameter2: java.io.BufferedWriter;
+
+        $i0 := @parameter3: int;
+
+        $z0 = staticinvoke <android.view.ViewDebug: boolean dumpViewWithProperties(android.content.Context,android.view.View,java.io.BufferedWriter,int)>($r0, $r1, $r2, $i0);
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $i1 = virtualinvoke $r1.<android.view.ViewGroup: int getChildCount()>();
+
+        $i2 = 0;
+
+     label2:
+        if $i2 >= $i1 goto label5;
+
+        $r3 = virtualinvoke $r1.<android.view.ViewGroup: android.view.View getChildAt(int)>($i2);
+
+        $z0 = $r3 instanceof android.view.ViewGroup;
+
+        if $z0 == 0 goto label4;
+
+        $r4 = (android.view.ViewGroup) $r3;
+
+        $i3 = $i0 + 1;
+
+        staticinvoke <android.view.ViewDebug: void dumpViewHierarchyWithProperties(android.content.Context,android.view.ViewGroup,java.io.BufferedWriter,int)>($r0, $r4, $r2, $i3);
+
+     label3:
+        $i2 = $i2 + 1;
+
+        goto label2;
+
+     label4:
+        $i3 = $i0 + 1;
+
+        staticinvoke <android.view.ViewDebug: boolean dumpViewWithProperties(android.content.Context,android.view.View,java.io.BufferedWriter,int)>($r0, $r3, $r2, $i3);
+
+        goto label3;
+
+     label5:
+        return;
+    }
+
+    private static void dumpViewProperties(android.content.Context, java.lang.Object, java.io.BufferedWriter) throws java.io.IOException
+    {
+        android.content.Context $r0;
+        java.lang.Object $r1;
+        java.io.BufferedWriter $r2;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 := @parameter1: java.lang.Object;
+
+        $r2 := @parameter2: java.io.BufferedWriter;
+
+        staticinvoke <android.view.ViewDebug: void dumpViewProperties(android.content.Context,java.lang.Object,java.io.BufferedWriter,java.lang.String)>($r0, $r1, $r2, "");
+
+        return;
+    }
+
+    private static void dumpViewProperties(android.content.Context, java.lang.Object, java.io.BufferedWriter, java.lang.String) throws java.io.IOException
+    {
+        android.content.Context $r0;
+        java.lang.Object $r1;
+        java.io.BufferedWriter $r2;
+        java.lang.String $r3;
+        java.lang.Class $r4, $r5;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 := @parameter1: java.lang.Object;
+
+        $r2 := @parameter2: java.io.BufferedWriter;
+
+        $r3 := @parameter3: java.lang.String;
+
+        $r4 = virtualinvoke $r1.<java.lang.Object: java.lang.Class getClass()>();
+
+     label1:
+        staticinvoke <android.view.ViewDebug: void exportFields(android.content.Context,java.lang.Object,java.io.BufferedWriter,java.lang.Class,java.lang.String)>($r0, $r1, $r2, $r4, $r3);
+
+        staticinvoke <android.view.ViewDebug: void exportMethods(android.content.Context,java.lang.Object,java.io.BufferedWriter,java.lang.Class,java.lang.String)>($r0, $r1, $r2, $r4, $r3);
+
+        $r5 = virtualinvoke $r4.<java.lang.Class: java.lang.Class getSuperclass()>();
+
+        $r4 = $r5;
+
+        if $r5 != class "java/lang/Object" goto label1;
+
+        return;
+    }
+
+    private static boolean dumpViewWithProperties(android.content.Context, android.view.View, java.io.BufferedWriter, int)
+    {
+        android.content.Context $r0;
+        android.view.View $r1;
+        java.io.BufferedWriter $r2;
+        int $i0, $i1;
+        java.lang.Class $r3;
+        java.lang.String $r4;
+        java.io.IOException $r5;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 := @parameter1: android.view.View;
+
+        $r2 := @parameter2: java.io.BufferedWriter;
+
+        $i0 := @parameter3: int;
+
+        $i1 = 0;
+
+     label1:
+        if $i1 >= $i0 goto label4;
+
+     label2:
+        virtualinvoke $r2.<java.io.BufferedWriter: void write(int)>(32);
+
+     label3:
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label4:
+        $r3 = virtualinvoke $r1.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r2.<java.io.Writer: void write(java.lang.String)>($r4);
+
+        virtualinvoke $r2.<java.io.BufferedWriter: void write(int)>(64);
+
+        $i0 = virtualinvoke $r1.<java.lang.Object: int hashCode()>();
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i0);
+
+        virtualinvoke $r2.<java.io.Writer: void write(java.lang.String)>($r4);
+
+        virtualinvoke $r2.<java.io.BufferedWriter: void write(int)>(32);
+
+        staticinvoke <android.view.ViewDebug: void dumpViewProperties(android.content.Context,java.lang.Object,java.io.BufferedWriter)>($r0, $r1, $r2);
+
+        virtualinvoke $r2.<java.io.BufferedWriter: void newLine()>();
+
+     label5:
+        return 1;
+
+     label6:
+        $r5 := @caughtexception;
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("View", "Error while dumping hierarchy tree");
+
+        return 0;
+
+        catch java.io.IOException from label2 to label3 with label6;
+        catch java.io.IOException from label4 to label5 with label6;
+    }
+
+    private static void exportFields(android.content.Context, java.lang.Object, java.io.BufferedWriter, java.lang.Class, java.lang.String) throws java.io.IOException
+    {
+        android.content.Context $r0;
+        java.lang.Object $r1, $r7, $r10;
+        java.io.BufferedWriter $r2;
+        java.lang.String $r3, $r12;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        java.lang.Class $r4, $r8;
+        java.lang.reflect.Field[] $r5;
+        java.lang.reflect.Field $r6;
+        java.util.HashMap $r9;
+        android.view.ViewDebug$ExportedProperty $r11;
+        boolean $z0;
+        android.view.ViewDebug$IntToString[] $r13;
+        android.view.ViewDebug$IntToString $r14;
+        java.lang.Integer $r15;
+        int[] $r16;
+        java.lang.StringBuilder $r17;
+        java.lang.IllegalAccessException $r18;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 := @parameter1: java.lang.Object;
+
+        $r2 := @parameter2: java.io.BufferedWriter;
+
+        $r4 := @parameter3: java.lang.Class;
+
+        $r3 := @parameter4: java.lang.String;
+
+        $r5 = staticinvoke <android.view.ViewDebug: java.lang.reflect.Field[] getExportedPropertyFields(java.lang.Class)>($r4);
+
+        $i1 = lengthof $r5;
+
+        $i2 = 0;
+
+     label01:
+        if $i2 >= $i1 goto label27;
+
+        $r6 = $r5[$i2];
+
+        $r7 = null;
+
+     label02:
+        $r4 = virtualinvoke $r6.<java.lang.reflect.Field: java.lang.Class getType()>();
+
+     label03:
+        $r8 = <java.lang.Integer: java.lang.Class TYPE>;
+
+        if $r4 != $r8 goto label18;
+
+     label04:
+        $r9 = <android.view.ViewDebug: java.util.HashMap sAnnotations>;
+
+        $r10 = virtualinvoke $r9.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r6);
+
+        $r11 = (android.view.ViewDebug$ExportedProperty) $r10;
+
+        $z0 = interfaceinvoke $r11.<android.view.ViewDebug$ExportedProperty: boolean resolveId()>();
+
+        if $z0 == 0 goto label08;
+
+        if $r0 == null goto label08;
+
+        $i0 = virtualinvoke $r6.<java.lang.reflect.Field: int getInt(java.lang.Object)>($r1);
+
+        $r7 = staticinvoke <android.view.ViewDebug: java.lang.Object resolveId(android.content.Context,int)>($r0, $i0);
+
+     label05:
+        if $r7 != null goto label06;
+
+        $r7 = virtualinvoke $r6.<java.lang.reflect.Field: java.lang.Object get(java.lang.Object)>($r1);
+
+     label06:
+        $r12 = virtualinvoke $r6.<java.lang.reflect.Field: java.lang.String getName()>();
+
+        staticinvoke <android.view.ViewDebug: void writeEntry(java.io.BufferedWriter,java.lang.String,java.lang.String,java.lang.String,java.lang.Object)>($r2, $r3, $r12, "", $r7);
+
+     label07:
+        $i2 = $i2 + 1;
+
+        goto label01;
+
+     label08:
+        $r13 = interfaceinvoke $r11.<android.view.ViewDebug$ExportedProperty: android.view.ViewDebug$IntToString[] mapping()>();
+
+     label09:
+        $i0 = lengthof $r13;
+
+     label10:
+        if $i0 <= 0 goto label05;
+
+        $i3 = virtualinvoke $r6.<java.lang.reflect.Field: int getInt(java.lang.Object)>($r1);
+
+     label11:
+        $i0 = lengthof $r13;
+
+        $i4 = 0;
+
+     label12:
+        if $i4 >= $i0 goto label15;
+
+     label13:
+        $r14 = $r13[$i4];
+
+        $i5 = interfaceinvoke $r14.<android.view.ViewDebug$IntToString: int 'from'()>();
+
+        if $i5 != $i3 goto label17;
+
+        $r12 = interfaceinvoke $r14.<android.view.ViewDebug$IntToString: java.lang.String 'to'()>();
+
+     label14:
+        $r7 = $r12;
+
+     label15:
+        if $r7 != null goto label05;
+
+        $r15 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i3);
+
+     label16:
+        $r7 = $r15;
+
+        goto label05;
+
+     label17:
+        $i4 = $i4 + 1;
+
+        goto label12;
+
+     label18:
+        if $r4 != class "[I" goto label22;
+
+        $r9 = <android.view.ViewDebug: java.util.HashMap sAnnotations>;
+
+        $r7 = virtualinvoke $r9.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r6);
+
+        $r11 = (android.view.ViewDebug$ExportedProperty) $r7;
+
+        $r7 = virtualinvoke $r6.<java.lang.reflect.Field: java.lang.Object get(java.lang.Object)>($r1);
+
+     label19:
+        $r16 = (int[]) $r7;
+
+        $r16 = (int[]) $r16;
+
+     label20:
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r12 = virtualinvoke $r6.<java.lang.reflect.Field: java.lang.String getName()>();
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(95);
+
+        $r12 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.view.ViewDebug: void exportUnrolledArray(android.content.Context,java.io.BufferedWriter,android.view.ViewDebug$ExportedProperty,int[],java.lang.String,java.lang.String)>($r0, $r2, $r11, $r16, $r12, "");
+
+     label21:
+        return;
+
+     label22:
+        $z0 = virtualinvoke $r4.<java.lang.Class: boolean isPrimitive()>();
+
+     label23:
+        if $z0 != 0 goto label05;
+
+     label24:
+        $r9 = <android.view.ViewDebug: java.util.HashMap sAnnotations>;
+
+        $r10 = virtualinvoke $r9.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r6);
+
+        $r11 = (android.view.ViewDebug$ExportedProperty) $r10;
+
+        $z0 = interfaceinvoke $r11.<android.view.ViewDebug$ExportedProperty: boolean deepExport()>();
+
+        if $z0 == 0 goto label05;
+
+        $r7 = virtualinvoke $r6.<java.lang.reflect.Field: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r12 = interfaceinvoke $r11.<android.view.ViewDebug$ExportedProperty: java.lang.String prefix()>();
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r12 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.view.ViewDebug: void dumpViewProperties(android.content.Context,java.lang.Object,java.io.BufferedWriter,java.lang.String)>($r0, $r7, $r2, $r12);
+
+     label25:
+        goto label07;
+
+     label26:
+        $r18 := @caughtexception;
+
+        goto label07;
+
+     label27:
+        return;
+
+        catch java.lang.IllegalAccessException from label02 to label03 with label26;
+        catch java.lang.IllegalAccessException from label04 to label05 with label26;
+        catch java.lang.IllegalAccessException from label05 to label07 with label26;
+        catch java.lang.IllegalAccessException from label08 to label09 with label26;
+        catch java.lang.IllegalAccessException from label10 to label11 with label26;
+        catch java.lang.IllegalAccessException from label13 to label14 with label26;
+        catch java.lang.IllegalAccessException from label15 to label16 with label26;
+        catch java.lang.IllegalAccessException from label18 to label19 with label26;
+        catch java.lang.IllegalAccessException from label20 to label21 with label26;
+        catch java.lang.IllegalAccessException from label22 to label23 with label26;
+        catch java.lang.IllegalAccessException from label24 to label25 with label26;
+    }
+
+    private static void exportMethods(android.content.Context, java.lang.Object, java.io.BufferedWriter, java.lang.Class, java.lang.String) throws java.io.IOException
+    {
+        android.content.Context $r0;
+        java.lang.Object $r1, $r7, $r10;
+        java.io.BufferedWriter $r2;
+        java.lang.String $r3, $r13;
+        java.lang.reflect.Method $r4;
+        java.lang.Class $r5, $r8;
+        java.lang.reflect.Method[] $r6;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        java.util.HashMap $r9;
+        android.view.ViewDebug$ExportedProperty $r11;
+        boolean $z0;
+        java.lang.Integer $r12;
+        android.view.ViewDebug$IntToString[] $r14;
+        android.view.ViewDebug$IntToString $r15;
+        int[] $r16;
+        java.lang.StringBuilder $r17;
+        java.lang.IllegalAccessException $r18;
+        java.lang.reflect.InvocationTargetException $r19;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 := @parameter1: java.lang.Object;
+
+        $r2 := @parameter2: java.io.BufferedWriter;
+
+        $r5 := @parameter3: java.lang.Class;
+
+        $r3 := @parameter4: java.lang.String;
+
+        $r6 = staticinvoke <android.view.ViewDebug: java.lang.reflect.Method[] getExportedPropertyMethods(java.lang.Class)>($r5);
+
+        $i0 = lengthof $r6;
+
+        $i1 = 0;
+
+     label01:
+        if $i1 >= $i0 goto label29;
+
+        $r4 = $r6[$i1];
+
+     label02:
+        $r7 = virtualinvoke $r4.<java.lang.reflect.Method: java.lang.Object invoke(java.lang.Object,java.lang.Object[])>($r1, null);
+
+        $r5 = virtualinvoke $r4.<java.lang.reflect.Method: java.lang.Class getReturnType()>();
+
+     label03:
+        $r8 = <java.lang.Integer: java.lang.Class TYPE>;
+
+        if $r5 != $r8 goto label18;
+
+     label04:
+        $r9 = <android.view.ViewDebug: java.util.HashMap sAnnotations>;
+
+        $r10 = virtualinvoke $r9.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r4);
+
+        $r11 = (android.view.ViewDebug$ExportedProperty) $r10;
+
+        $z0 = interfaceinvoke $r11.<android.view.ViewDebug$ExportedProperty: boolean resolveId()>();
+
+        if $z0 == 0 goto label07;
+
+        if $r0 == null goto label07;
+
+        $r12 = (java.lang.Integer) $r7;
+
+        $i2 = virtualinvoke $r12.<java.lang.Integer: int intValue()>();
+
+        $r7 = staticinvoke <android.view.ViewDebug: java.lang.Object resolveId(android.content.Context,int)>($r0, $i2);
+
+     label05:
+        $r13 = virtualinvoke $r4.<java.lang.reflect.Method: java.lang.String getName()>();
+
+        staticinvoke <android.view.ViewDebug: void writeEntry(java.io.BufferedWriter,java.lang.String,java.lang.String,java.lang.String,java.lang.Object)>($r2, $r3, $r13, "()", $r7);
+
+     label06:
+        $i1 = $i1 + 1;
+
+        goto label01;
+
+     label07:
+        $r14 = interfaceinvoke $r11.<android.view.ViewDebug$ExportedProperty: android.view.ViewDebug$IntToString[] mapping()>();
+
+     label08:
+        $i2 = lengthof $r14;
+
+        if $i2 <= 0 goto label31;
+
+     label09:
+        $r12 = (java.lang.Integer) $r7;
+
+        $i2 = virtualinvoke $r12.<java.lang.Integer: int intValue()>();
+
+     label10:
+        $i3 = lengthof $r14;
+
+        $i4 = 0;
+
+     label11:
+        if $i4 >= $i3 goto label33;
+
+     label12:
+        $r15 = $r14[$i4];
+
+        $i5 = interfaceinvoke $r15.<android.view.ViewDebug$IntToString: int 'from'()>();
+
+        if $i5 != $i2 goto label17;
+
+        $r13 = interfaceinvoke $r15.<android.view.ViewDebug$IntToString: java.lang.String 'to'()>();
+
+     label13:
+        $r7 = $r13;
+
+        $z0 = 1;
+
+     label14:
+        if $z0 != 0 goto label32;
+
+        $r12 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+     label15:
+        $r7 = $r12;
+
+     label16:
+        goto label05;
+
+     label17:
+        $i4 = $i4 + 1;
+
+        goto label11;
+
+     label18:
+        if $r5 != class "[I" goto label22;
+
+        $r9 = <android.view.ViewDebug: java.util.HashMap sAnnotations>;
+
+        $r10 = virtualinvoke $r9.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r4);
+
+     label19:
+        $r11 = (android.view.ViewDebug$ExportedProperty) $r10;
+
+        $r16 = (int[]) $r7;
+
+        $r16 = (int[]) $r16;
+
+     label20:
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r13 = virtualinvoke $r4.<java.lang.reflect.Method: java.lang.String getName()>();
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(95);
+
+        $r13 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.view.ViewDebug: void exportUnrolledArray(android.content.Context,java.io.BufferedWriter,android.view.ViewDebug$ExportedProperty,int[],java.lang.String,java.lang.String)>($r0, $r2, $r11, $r16, $r13, "()");
+
+     label21:
+        goto label05;
+
+     label22:
+        $z0 = virtualinvoke $r5.<java.lang.Class: boolean isPrimitive()>();
+
+     label23:
+        if $z0 != 0 goto label31;
+
+     label24:
+        $r9 = <android.view.ViewDebug: java.util.HashMap sAnnotations>;
+
+        $r10 = virtualinvoke $r9.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r4);
+
+        $r11 = (android.view.ViewDebug$ExportedProperty) $r10;
+
+        $z0 = interfaceinvoke $r11.<android.view.ViewDebug$ExportedProperty: boolean deepExport()>();
+
+     label25:
+        if $z0 == 0 goto label31;
+
+     label26:
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r13 = interfaceinvoke $r11.<android.view.ViewDebug$ExportedProperty: java.lang.String prefix()>();
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r13 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.view.ViewDebug: void dumpViewProperties(android.content.Context,java.lang.Object,java.io.BufferedWriter,java.lang.String)>($r0, $r7, $r2, $r13);
+
+     label27:
+        goto label06;
+
+     label28:
+        $r18 := @caughtexception;
+
+        goto label06;
+
+     label29:
+        return;
+
+     label30:
+        $r19 := @caughtexception;
+
+        goto label06;
+
+     label31:
+        goto label05;
+
+     label32:
+        goto label05;
+
+     label33:
+        $z0 = 0;
+
+        goto label14;
+
+        catch java.lang.IllegalAccessException from label02 to label03 with label28;
+        catch java.lang.IllegalAccessException from label04 to label06 with label28;
+        catch java.lang.IllegalAccessException from label07 to label08 with label28;
+        catch java.lang.IllegalAccessException from label09 to label10 with label28;
+        catch java.lang.IllegalAccessException from label12 to label13 with label28;
+        catch java.lang.IllegalAccessException from label14 to label15 with label28;
+        catch java.lang.IllegalAccessException from label16 to label17 with label28;
+        catch java.lang.IllegalAccessException from label18 to label19 with label28;
+        catch java.lang.IllegalAccessException from label20 to label21 with label28;
+        catch java.lang.IllegalAccessException from label21 to label23 with label28;
+        catch java.lang.IllegalAccessException from label24 to label25 with label28;
+        catch java.lang.IllegalAccessException from label26 to label27 with label28;
+        catch java.lang.reflect.InvocationTargetException from label02 to label03 with label30;
+        catch java.lang.reflect.InvocationTargetException from label04 to label06 with label30;
+        catch java.lang.reflect.InvocationTargetException from label07 to label08 with label30;
+        catch java.lang.reflect.InvocationTargetException from label09 to label10 with label30;
+        catch java.lang.reflect.InvocationTargetException from label12 to label13 with label30;
+        catch java.lang.reflect.InvocationTargetException from label14 to label15 with label30;
+        catch java.lang.reflect.InvocationTargetException from label16 to label17 with label30;
+        catch java.lang.reflect.InvocationTargetException from label18 to label19 with label30;
+        catch java.lang.reflect.InvocationTargetException from label20 to label21 with label30;
+        catch java.lang.reflect.InvocationTargetException from label21 to label23 with label30;
+        catch java.lang.reflect.InvocationTargetException from label24 to label25 with label30;
+        catch java.lang.reflect.InvocationTargetException from label26 to label27 with label30;
+    }
+
+    private static void exportUnrolledArray(android.content.Context, java.io.BufferedWriter, android.view.ViewDebug$ExportedProperty, int[], java.lang.String, java.lang.String) throws java.io.IOException
+    {
+        android.content.Context $r0;
+        java.io.BufferedWriter $r1;
+        int[] $r2;
+        java.lang.String $r3, $r4, $r8, $r10;
+        android.view.ViewDebug$ExportedProperty $r5;
+        android.view.ViewDebug$IntToString[] $r6, $r7;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        boolean $z0, $z1, $z2;
+        android.view.ViewDebug$IntToString $r9;
+        java.lang.Object $r11;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 := @parameter1: java.io.BufferedWriter;
+
+        $r5 := @parameter2: android.view.ViewDebug$ExportedProperty;
+
+        $r2 := @parameter3: int[];
+
+        $r3 := @parameter4: java.lang.String;
+
+        $r4 := @parameter5: java.lang.String;
+
+        $r6 = interfaceinvoke $r5.<android.view.ViewDebug$ExportedProperty: android.view.ViewDebug$IntToString[] indexMapping()>();
+
+        $i0 = lengthof $r6;
+
+        if $i0 <= 0 goto label10;
+
+        $z0 = 1;
+
+     label01:
+        $r7 = interfaceinvoke $r5.<android.view.ViewDebug$ExportedProperty: android.view.ViewDebug$IntToString[] mapping()>();
+
+        $i0 = lengthof $r7;
+
+        if $i0 <= 0 goto label11;
+
+        $z1 = 1;
+
+     label02:
+        $z2 = interfaceinvoke $r5.<android.view.ViewDebug$ExportedProperty: boolean resolveId()>();
+
+        if $z2 == 0 goto label12;
+
+        if $r0 == null goto label12;
+
+        $z2 = 1;
+
+     label03:
+        $i0 = lengthof $r2;
+
+        $i1 = 0;
+
+     label04:
+        if $i1 >= $i0 goto label15;
+
+        $i2 = $r2[$i1];
+
+        $r8 = staticinvoke <java.lang.String: java.lang.String valueOf(int)>($i1);
+
+        if $z0 == 0 goto label06;
+
+        $i3 = lengthof $r6;
+
+        $i4 = 0;
+
+     label05:
+        if $i4 >= $i3 goto label06;
+
+        $r9 = $r6[$i4];
+
+        $i5 = interfaceinvoke $r9.<android.view.ViewDebug$IntToString: int 'from'()>();
+
+        if $i5 != $i1 goto label13;
+
+        $r8 = interfaceinvoke $r9.<android.view.ViewDebug$IntToString: java.lang.String 'to'()>();
+
+     label06:
+        $r10 = staticinvoke <java.lang.String: java.lang.String valueOf(int)>($i2);
+
+        if $z1 == 0 goto label17;
+
+        $i3 = lengthof $r7;
+
+        $i4 = 0;
+
+     label07:
+        if $i4 >= $i3 goto label17;
+
+        $r9 = $r7[$i4];
+
+        $i5 = interfaceinvoke $r9.<android.view.ViewDebug$IntToString: int 'from'()>();
+
+        if $i5 != $i2 goto label14;
+
+        $r10 = interfaceinvoke $r9.<android.view.ViewDebug$IntToString: java.lang.String 'to'()>();
+
+     label08:
+        if $z2 == 0 goto label16;
+
+        $r11 = staticinvoke <android.view.ViewDebug: java.lang.Object resolveId(android.content.Context,int)>($r0, $i2);
+
+        $r10 = (java.lang.String) $r11;
+
+     label09:
+        staticinvoke <android.view.ViewDebug: void writeEntry(java.io.BufferedWriter,java.lang.String,java.lang.String,java.lang.String,java.lang.Object)>($r1, $r3, $r8, $r4, $r10);
+
+        $i1 = $i1 + 1;
+
+        goto label04;
+
+     label10:
+        $z0 = 0;
+
+        goto label01;
+
+     label11:
+        $z1 = 0;
+
+        goto label02;
+
+     label12:
+        $z2 = 0;
+
+        goto label03;
+
+     label13:
+        $i4 = $i4 + 1;
+
+        goto label05;
+
+     label14:
+        $i4 = $i4 + 1;
+
+        goto label07;
+
+     label15:
+        return;
+
+     label16:
+        goto label09;
+
+     label17:
+        goto label08;
+    }
+
+    private static android.view.View findView(android.view.View, java.lang.String)
+    {
+        android.view.View $r0;
+        java.lang.String $r1, $r3;
+        int $i0;
+        java.lang.String[] $r2;
+        boolean $z0;
+        android.view.ViewGroup $r4;
+        android.content.res.Resources $r5;
+
+        $r0 := @parameter0: android.view.View;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int indexOf(int)>(64);
+
+        if $i0 == -1 goto label1;
+
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String[] split(java.lang.String)>("@");
+
+        $r1 = $r2[0];
+
+        $r3 = $r2[1];
+
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String,int)>($r3, 16);
+
+        $r0 = virtualinvoke $r0.<android.view.View: android.view.View getRootView()>();
+
+        $z0 = $r0 instanceof android.view.ViewGroup;
+
+        if $z0 == 0 goto label2;
+
+        $r4 = (android.view.ViewGroup) $r0;
+
+        $r0 = staticinvoke <android.view.ViewDebug: android.view.View findView(android.view.ViewGroup,java.lang.String,int)>($r4, $r1, $i0);
+
+        return $r0;
+
+     label1:
+        $r5 = virtualinvoke $r0.<android.view.View: android.content.res.Resources getResources()>();
+
+        $i0 = virtualinvoke $r5.<android.content.res.Resources: int getIdentifier(java.lang.String,java.lang.String,java.lang.String)>($r1, null, null);
+
+        $r0 = virtualinvoke $r0.<android.view.View: android.view.View getRootView()>();
+
+        $r0 = virtualinvoke $r0.<android.view.View: android.view.View findViewById(int)>($i0);
+
+        return $r0;
+
+     label2:
+        return null;
+    }
+
+    private static android.view.View findView(android.view.ViewGroup, java.lang.String, int)
+    {
+        android.view.ViewGroup $r0, $r3;
+        java.lang.String $r1;
+        int $i0, $i1, $i2;
+        boolean $z0;
+        android.view.View $r2;
+
+        $r0 := @parameter0: android.view.ViewGroup;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $i0 := @parameter2: int;
+
+        $z0 = staticinvoke <android.view.ViewDebug: boolean isRequestedView(android.view.View,java.lang.String,int)>($r0, $r1, $i0);
+
+        if $z0 == 0 goto label1;
+
+        return $r0;
+
+     label1:
+        $i1 = virtualinvoke $r0.<android.view.ViewGroup: int getChildCount()>();
+
+        $i2 = 0;
+
+     label2:
+        if $i2 >= $i1 goto label5;
+
+        $r2 = virtualinvoke $r0.<android.view.ViewGroup: android.view.View getChildAt(int)>($i2);
+
+        $z0 = $r2 instanceof android.view.ViewGroup;
+
+        if $z0 == 0 goto label3;
+
+        $r3 = (android.view.ViewGroup) $r2;
+
+        $r2 = staticinvoke <android.view.ViewDebug: android.view.View findView(android.view.ViewGroup,java.lang.String,int)>($r3, $r1, $i0);
+
+        if $r2 == null goto label4;
+
+        return $r2;
+
+     label3:
+        $z0 = staticinvoke <android.view.ViewDebug: boolean isRequestedView(android.view.View,java.lang.String,int)>($r2, $r1, $i0);
+
+        if $z0 == 0 goto label4;
+
+        return $r2;
+
+     label4:
+        $i2 = $i2 + 1;
+
+        goto label2;
+
+     label5:
+        return null;
+    }
+
+    private static java.lang.reflect.Field[] getExportedPropertyFields(java.lang.Class)
+    {
+        java.lang.Class $r0;
+        java.util.HashMap $r1, $r4;
+        int $i0, $i1;
+        java.lang.reflect.Field $r2;
+        java.util.ArrayList $r3;
+        java.lang.Object $r5;
+        java.lang.reflect.Field[] $r6;
+        boolean $z0;
+        java.lang.annotation.Annotation $r7;
+        java.lang.Object[] $r8;
+
+        $r0 := @parameter0: java.lang.Class;
+
+        $r1 = <android.view.ViewDebug: java.util.HashMap sFieldsForClasses>;
+
+        if $r1 != null goto label1;
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>()>();
+
+        <android.view.ViewDebug: java.util.HashMap sFieldsForClasses> = $r1;
+
+     label1:
+        $r1 = <android.view.ViewDebug: java.util.HashMap sAnnotations>;
+
+        if $r1 != null goto label2;
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>(int)>(512);
+
+        <android.view.ViewDebug: java.util.HashMap sAnnotations> = $r1;
+
+     label2:
+        $r4 = <android.view.ViewDebug: java.util.HashMap sFieldsForClasses>;
+
+        $r1 = <android.view.ViewDebug: java.util.HashMap sAnnotations>;
+
+        $r5 = virtualinvoke $r4.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r0);
+
+        $r6 = (java.lang.reflect.Field[]) $r5;
+
+        if $r6 == null goto label3;
+
+        return $r6;
+
+     label3:
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>()>();
+
+        $r6 = virtualinvoke $r0.<java.lang.Class: java.lang.reflect.Field[] getDeclaredFields()>();
+
+        $i0 = lengthof $r6;
+
+        $i1 = 0;
+
+     label4:
+        if $i1 >= $i0 goto label6;
+
+        $r2 = $r6[$i1];
+
+        $z0 = virtualinvoke $r2.<java.lang.reflect.AccessibleObject: boolean isAnnotationPresent(java.lang.Class)>(class "android/view/ViewDebug$ExportedProperty");
+
+        if $z0 == 0 goto label5;
+
+        virtualinvoke $r2.<java.lang.reflect.AccessibleObject: void setAccessible(boolean)>(1);
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>($r2);
+
+        $r7 = virtualinvoke $r2.<java.lang.reflect.AccessibleObject: java.lang.annotation.Annotation getAnnotation(java.lang.Class)>(class "android/view/ViewDebug$ExportedProperty");
+
+        virtualinvoke $r1.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r2, $r7);
+
+     label5:
+        $i1 = $i1 + 1;
+
+        goto label4;
+
+     label6:
+        $i0 = virtualinvoke $r3.<java.util.ArrayList: int size()>();
+
+        $r6 = newarray (java.lang.reflect.Field)[$i0];
+
+        $r8 = virtualinvoke $r3.<java.util.ArrayList: java.lang.Object[] toArray(java.lang.Object[])>($r6);
+
+        $r6 = (java.lang.reflect.Field[]) $r8;
+
+        virtualinvoke $r4.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r0, $r6);
+
+        return $r6;
+    }
+
+    private static java.lang.reflect.Method[] getExportedPropertyMethods(java.lang.Class)
+    {
+        java.lang.Class $r0, $r8;
+        java.util.HashMap $r1, $r3;
+        int $i0, $i1, $i2;
+        java.util.ArrayList $r2;
+        java.lang.reflect.Method $r4;
+        java.lang.Object $r5;
+        java.lang.reflect.Method[] $r6;
+        java.lang.Class[] $r7;
+        boolean $z0;
+        java.lang.annotation.Annotation $r9;
+        java.lang.Object[] $r10;
+
+        $r0 := @parameter0: java.lang.Class;
+
+        $r1 = <android.view.ViewDebug: java.util.HashMap sMethodsForClasses>;
+
+        if $r1 != null goto label1;
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>(int)>(100);
+
+        <android.view.ViewDebug: java.util.HashMap sMethodsForClasses> = $r1;
+
+     label1:
+        $r1 = <android.view.ViewDebug: java.util.HashMap sAnnotations>;
+
+        if $r1 != null goto label2;
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>(int)>(512);
+
+        <android.view.ViewDebug: java.util.HashMap sAnnotations> = $r1;
+
+     label2:
+        $r3 = <android.view.ViewDebug: java.util.HashMap sMethodsForClasses>;
+
+        $r1 = <android.view.ViewDebug: java.util.HashMap sAnnotations>;
+
+        $r5 = virtualinvoke $r3.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r0);
+
+        $r6 = (java.lang.reflect.Method[]) $r5;
+
+        if $r6 == null goto label3;
+
+        return $r6;
+
+     label3:
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        $r6 = virtualinvoke $r0.<java.lang.Class: java.lang.reflect.Method[] getDeclaredMethods()>();
+
+        $i0 = lengthof $r6;
+
+        $i1 = 0;
+
+     label4:
+        if $i1 >= $i0 goto label6;
+
+        $r4 = $r6[$i1];
+
+        $r7 = virtualinvoke $r4.<java.lang.reflect.Method: java.lang.Class[] getParameterTypes()>();
+
+        $i2 = lengthof $r7;
+
+        if $i2 != 0 goto label5;
+
+        $z0 = virtualinvoke $r4.<java.lang.reflect.AccessibleObject: boolean isAnnotationPresent(java.lang.Class)>(class "android/view/ViewDebug$ExportedProperty");
+
+        if $z0 == 0 goto label5;
+
+        $r8 = virtualinvoke $r4.<java.lang.reflect.Method: java.lang.Class getReturnType()>();
+
+        if $r8 == class "java/lang/Void" goto label5;
+
+        virtualinvoke $r4.<java.lang.reflect.AccessibleObject: void setAccessible(boolean)>(1);
+
+        virtualinvoke $r2.<java.util.ArrayList: boolean add(java.lang.Object)>($r4);
+
+        $r9 = virtualinvoke $r4.<java.lang.reflect.AccessibleObject: java.lang.annotation.Annotation getAnnotation(java.lang.Class)>(class "android/view/ViewDebug$ExportedProperty");
+
+        virtualinvoke $r1.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r4, $r9);
+
+     label5:
+        $i1 = $i1 + 1;
+
+        goto label4;
+
+     label6:
+        $i0 = virtualinvoke $r2.<java.util.ArrayList: int size()>();
+
+        $r6 = newarray (java.lang.reflect.Method)[$i0];
+
+        $r10 = virtualinvoke $r2.<java.util.ArrayList: java.lang.Object[] toArray(java.lang.Object[])>($r6);
+
+        $r6 = (java.lang.reflect.Method[]) $r10;
+
+        virtualinvoke $r3.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r0, $r6);
+
+        return $r6;
+    }
+
+    public static long getViewInstanceCount()
+    {
+        long l0;
+
+        l0 = <android.view.View: long sInstanceCount>;
+
+        return l0;
+    }
+
+    public static long getViewRootInstanceCount()
+    {
+        long $l0;
+
+        $l0 = staticinvoke <android.view.ViewRoot: long getInstanceCount()>();
+
+        return $l0;
+    }
+
+    private static void invalidate(android.view.View, java.lang.String)
+    {
+        android.view.View $r0;
+        java.lang.String $r1;
+
+        $r0 := @parameter0: android.view.View;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $r0 = staticinvoke <android.view.ViewDebug: android.view.View findView(android.view.View,java.lang.String)>($r0, $r1);
+
+        if $r0 == null goto label1;
+
+        virtualinvoke $r0.<android.view.View: void postInvalidate()>();
+
+        return;
+
+     label1:
+        return;
+    }
+
+    private static boolean isRequestedView(android.view.View, java.lang.String, int)
+    {
+        android.view.View $r0;
+        java.lang.String $r1, $r3;
+        int $i0, $i1;
+        java.lang.Class $r2;
+        boolean $z0;
+
+        $r0 := @parameter0: android.view.View;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $i0 := @parameter2: int;
+
+        $r2 = virtualinvoke $r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        $i1 = virtualinvoke $r0.<java.lang.Object: int hashCode()>();
+
+        if $i1 != $i0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    private static void profile(android.view.View, java.io.OutputStream, java.lang.String) throws java.io.IOException
+    {
+        android.view.View $r0;
+        java.io.OutputStream $r1;
+        java.lang.String $r2;
+        java.io.BufferedWriter $r3, $r4;
+        java.io.OutputStreamWriter $r5;
+        android.view.ViewDebug$2 $r6;
+        long $l0, $l1, $l2;
+        android.view.ViewDebug$3 $r7;
+        android.view.ViewDebug$4 $r8;
+        java.lang.Exception $r9, $r11;
+        java.lang.Throwable $r10;
+
+        $r0 := @parameter0: android.view.View;
+
+        $r1 := @parameter1: java.io.OutputStream;
+
+        $r2 := @parameter2: java.lang.String;
+
+        $r0 = staticinvoke <android.view.ViewDebug: android.view.View findView(android.view.View,java.lang.String)>($r0, $r2);
+
+        $r4 = null;
+
+     label01:
+        $r3 = new java.io.BufferedWriter;
+
+        $r5 = new java.io.OutputStreamWriter;
+
+     label02:
+        specialinvoke $r5.<java.io.OutputStreamWriter: void <init>(java.io.OutputStream)>($r1);
+
+        specialinvoke $r3.<java.io.BufferedWriter: void <init>(java.io.Writer,int)>($r5, 32768);
+
+     label03:
+        if $r0 == null goto label07;
+
+     label04:
+        $r6 = new android.view.ViewDebug$2;
+
+     label05:
+        specialinvoke $r6.<android.view.ViewDebug$2: void <init>(android.view.View)>($r0);
+
+        $l0 = staticinvoke <android.view.ViewDebug: long profileViewOperation(android.view.View,android.view.ViewDebug$ViewOperation)>($r0, $r6);
+
+        $r7 = new android.view.ViewDebug$3;
+
+        specialinvoke $r7.<android.view.ViewDebug$3: void <init>(android.view.View)>($r0);
+
+        $l1 = staticinvoke <android.view.ViewDebug: long profileViewOperation(android.view.View,android.view.ViewDebug$ViewOperation)>($r0, $r7);
+
+        $r8 = new android.view.ViewDebug$4;
+
+        specialinvoke $r8.<android.view.ViewDebug$4: void <init>(android.view.View)>($r0);
+
+        $l2 = staticinvoke <android.view.ViewDebug: long profileViewOperation(android.view.View,android.view.ViewDebug$ViewOperation)>($r0, $r8);
+
+        $r2 = staticinvoke <java.lang.String: java.lang.String valueOf(long)>($l0);
+
+        virtualinvoke $r3.<java.io.Writer: void write(java.lang.String)>($r2);
+
+        virtualinvoke $r3.<java.io.BufferedWriter: void write(int)>(32);
+
+        $r2 = staticinvoke <java.lang.String: java.lang.String valueOf(long)>($l1);
+
+        virtualinvoke $r3.<java.io.Writer: void write(java.lang.String)>($r2);
+
+        virtualinvoke $r3.<java.io.BufferedWriter: void write(int)>(32);
+
+        $r2 = staticinvoke <java.lang.String: java.lang.String valueOf(long)>($l2);
+
+        virtualinvoke $r3.<java.io.Writer: void write(java.lang.String)>($r2);
+
+        virtualinvoke $r3.<java.io.BufferedWriter: void newLine()>();
+
+     label06:
+        if $r3 == null goto label17;
+
+        virtualinvoke $r3.<java.io.BufferedWriter: void close()>();
+
+        return;
+
+     label07:
+        virtualinvoke $r3.<java.io.Writer: void write(java.lang.String)>("-1 -1 -1");
+
+        virtualinvoke $r3.<java.io.BufferedWriter: void newLine()>();
+
+     label08:
+        goto label06;
+
+     label09:
+        $r9 := @caughtexception;
+
+        $r4 = $r3;
+
+     label10:
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String,java.lang.Throwable)>("View", "Problem profiling the view:", $r9);
+
+     label11:
+        if $r4 == null goto label18;
+
+        virtualinvoke $r4.<java.io.BufferedWriter: void close()>();
+
+        return;
+
+     label12:
+        $r10 := @caughtexception;
+
+     label13:
+        if $r4 == null goto label14;
+
+        virtualinvoke $r4.<java.io.BufferedWriter: void close()>();
+
+     label14:
+        throw $r10;
+
+     label15:
+        $r10 := @caughtexception;
+
+        $r4 = $r3;
+
+        goto label13;
+
+     label16:
+        $r11 := @caughtexception;
+
+        $r9 = $r11;
+
+        goto label10;
+
+     label17:
+        return;
+
+     label18:
+        return;
+
+        catch java.lang.Exception from label02 to label03 with label16;
+        catch java.lang.Throwable from label01 to label03 with label12;
+        catch java.lang.Exception from label05 to label06 with label09;
+        catch java.lang.Throwable from label04 to label06 with label15;
+        catch java.lang.Exception from label07 to label08 with label09;
+        catch java.lang.Throwable from label07 to label08 with label15;
+        catch java.lang.Throwable from label10 to label11 with label12;
+    }
+
+    private static long profileViewOperation(android.view.View, android.view.ViewDebug$ViewOperation)
+    {
+        android.view.View $r0;
+        android.view.ViewDebug$ViewOperation $r1;
+        long[] $r2;
+        java.util.concurrent.CountDownLatch $r3;
+        android.view.ViewDebug$5 $r4;
+        java.util.concurrent.TimeUnit $r5;
+        long $l0;
+        java.lang.InterruptedException $r6;
+        java.lang.StringBuilder $r7;
+        java.lang.String $r8;
+        java.lang.Thread $r9;
+
+        $r0 := @parameter0: android.view.View;
+
+        $r1 := @parameter1: android.view.ViewDebug$ViewOperation;
+
+        $r3 = new java.util.concurrent.CountDownLatch;
+
+        specialinvoke $r3.<java.util.concurrent.CountDownLatch: void <init>(int)>(1);
+
+        $r2 = newarray (long)[1];
+
+        $r4 = new android.view.ViewDebug$5;
+
+        specialinvoke $r4.<android.view.ViewDebug$5: void <init>(android.view.ViewDebug$ViewOperation,long[],java.util.concurrent.CountDownLatch)>($r1, $r2, $r3);
+
+        virtualinvoke $r0.<android.view.View: boolean post(java.lang.Runnable)>($r4);
+
+        $r5 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit MILLISECONDS>;
+
+     label1:
+        virtualinvoke $r3.<java.util.concurrent.CountDownLatch: boolean await(long,java.util.concurrent.TimeUnit)>(4000L, $r5);
+
+     label2:
+        $l0 = $r2[0];
+
+        return $l0;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not complete the profiling of the view ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("View", $r8);
+
+        $r9 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r9.<java.lang.Thread: void interrupt()>();
+
+        return -1L;
+
+        catch java.lang.InterruptedException from label1 to label2 with label3;
+    }
+
+    private static void requestLayout(android.view.View, java.lang.String)
+    {
+        android.view.View $r0, $r3;
+        java.lang.String $r1;
+        android.view.ViewDebug$1 $r2;
+
+        $r0 := @parameter0: android.view.View;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $r3 = staticinvoke <android.view.ViewDebug: android.view.View findView(android.view.View,java.lang.String)>($r0, $r1);
+
+        if $r3 == null goto label1;
+
+        $r2 = new android.view.ViewDebug$1;
+
+        specialinvoke $r2.<android.view.ViewDebug$1: void <init>(android.view.View)>($r3);
+
+        virtualinvoke $r0.<android.view.View: boolean post(java.lang.Runnable)>($r2);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    private static java.lang.Object resolveId(android.content.Context, int)
+    {
+        android.content.Context $r0;
+        int $i0;
+        android.content.res.Resources $r1;
+        java.lang.StringBuilder $r2;
+        java.lang.String $r3;
+        android.content.res.Resources$NotFoundException $r4;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $i0 := @parameter1: int;
+
+        $r1 = virtualinvoke $r0.<android.content.Context: android.content.res.Resources getResources()>();
+
+        if $i0 < 0 goto label4;
+
+        $r2 = new java.lang.StringBuilder;
+
+     label1:
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r1.<android.content.res.Resources: java.lang.String getResourceTypeName(int)>($i0);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(47);
+
+        $r3 = virtualinvoke $r1.<android.content.res.Resources: java.lang.String getResourceEntryName(int)>($i0);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label2:
+        return $r3;
+
+     label3:
+        $r4 := @caughtexception;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("id/0x");
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i0);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r3;
+
+     label4:
+        return "NO_ID";
+
+        catch android.content.res.Resources$NotFoundException from label1 to label2 with label3;
+    }
+
+    public static void startHierarchyTracing(java.lang.String, android.view.View)
+    {
+        java.lang.String $r0;
+        android.view.View $r1;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $r1 := @parameter1: android.view.View;
+
+        return;
+    }
+
+    public static void startRecyclerTracing(java.lang.String, android.view.View)
+    {
+        java.lang.String $r0;
+        android.view.View $r1;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $r1 := @parameter1: android.view.View;
+
+        return;
+    }
+
+    public static void stopHierarchyTracing()
+    {
+        return;
+    }
+
+    public static void stopRecyclerTracing()
+    {
+        return;
+    }
+
+    public static void trace(android.view.View, android.view.ViewDebug$HierarchyTraceType)
+    {
+        android.view.View $r0;
+        android.view.ViewDebug$HierarchyTraceType $r1;
+        java.io.BufferedWriter $r2;
+        java.lang.String $r3;
+        java.lang.Class $r4;
+        int $i0;
+        java.io.IOException $r5;
+        java.lang.StringBuilder $r6;
+
+        $r0 := @parameter0: android.view.View;
+
+        $r1 := @parameter1: android.view.ViewDebug$HierarchyTraceType;
+
+        $r2 = <android.view.ViewDebug: java.io.BufferedWriter sHierarchyTraces>;
+
+        if $r2 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = <android.view.ViewDebug: java.io.BufferedWriter sHierarchyTraces>;
+
+     label2:
+        $r3 = virtualinvoke $r1.<java.lang.Enum: java.lang.String name()>();
+
+        virtualinvoke $r2.<java.io.Writer: void write(java.lang.String)>($r3);
+
+        $r2 = <android.view.ViewDebug: java.io.BufferedWriter sHierarchyTraces>;
+
+        virtualinvoke $r2.<java.io.BufferedWriter: void write(int)>(32);
+
+        $r2 = <android.view.ViewDebug: java.io.BufferedWriter sHierarchyTraces>;
+
+        $r4 = virtualinvoke $r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r4.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r2.<java.io.Writer: void write(java.lang.String)>($r3);
+
+        $r2 = <android.view.ViewDebug: java.io.BufferedWriter sHierarchyTraces>;
+
+        virtualinvoke $r2.<java.io.BufferedWriter: void write(int)>(64);
+
+        $r2 = <android.view.ViewDebug: java.io.BufferedWriter sHierarchyTraces>;
+
+        $i0 = virtualinvoke $r0.<java.lang.Object: int hashCode()>();
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i0);
+
+        virtualinvoke $r2.<java.io.Writer: void write(java.lang.String)>($r3);
+
+        $r2 = <android.view.ViewDebug: java.io.BufferedWriter sHierarchyTraces>;
+
+        virtualinvoke $r2.<java.io.BufferedWriter: void newLine()>();
+
+     label3:
+        return;
+
+     label4:
+        $r5 := @caughtexception;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error while dumping trace of type ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" for view ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r0);
+
+        $r3 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("View", $r3);
+
+        return;
+
+        catch java.io.IOException from label2 to label3 with label4;
+    }
+
+    public static transient void trace(android.view.View, android.view.ViewDebug$RecyclerTraceType, int[])
+    {
+        android.view.View $r0, $r4;
+        android.view.ViewDebug$RecyclerTraceType $r1;
+        int[] $r2;
+        android.view.ViewDebug$RecyclerTrace $r3;
+        java.util.List $r5;
+        boolean $z0;
+        int $i0;
+
+        $r0 := @parameter0: android.view.View;
+
+        $r1 := @parameter1: android.view.ViewDebug$RecyclerTraceType;
+
+        $r2 := @parameter2: int[];
+
+        $r4 = <android.view.ViewDebug: android.view.View sRecyclerOwnerView>;
+
+        if $r4 == null goto label3;
+
+        $r5 = <android.view.ViewDebug: java.util.List sRecyclerViews>;
+
+        if $r5 != null goto label1;
+
+        return;
+
+     label1:
+        $r5 = <android.view.ViewDebug: java.util.List sRecyclerViews>;
+
+        $z0 = interfaceinvoke $r5.<java.util.List: boolean contains(java.lang.Object)>($r0);
+
+        if $z0 != 0 goto label2;
+
+        $r5 = <android.view.ViewDebug: java.util.List sRecyclerViews>;
+
+        interfaceinvoke $r5.<java.util.List: boolean add(java.lang.Object)>($r0);
+
+     label2:
+        $r5 = <android.view.ViewDebug: java.util.List sRecyclerViews>;
+
+        $i0 = interfaceinvoke $r5.<java.util.List: int indexOf(java.lang.Object)>($r0);
+
+        $r3 = new android.view.ViewDebug$RecyclerTrace;
+
+        specialinvoke $r3.<android.view.ViewDebug$RecyclerTrace: void <init>(android.view.ViewDebug$1)>(null);
+
+        $r3.<android.view.ViewDebug$RecyclerTrace: int view> = $i0;
+
+        $r3.<android.view.ViewDebug$RecyclerTrace: android.view.ViewDebug$RecyclerTraceType type> = $r1;
+
+        $i0 = $r2[0];
+
+        $r3.<android.view.ViewDebug$RecyclerTrace: int position> = $i0;
+
+        $i0 = $r2[1];
+
+        $r3.<android.view.ViewDebug$RecyclerTrace: int indexOnScreen> = $i0;
+
+        $r5 = <android.view.ViewDebug: java.util.List sRecyclerTraces>;
+
+        interfaceinvoke $r5.<java.util.List: boolean add(java.lang.Object)>($r3);
+
+        return;
+
+     label3:
+        return;
+    }
+
+    private static void writeEntry(java.io.BufferedWriter, java.lang.String, java.lang.String, java.lang.String, java.lang.Object) throws java.io.IOException
+    {
+        java.io.BufferedWriter $r0;
+        java.lang.String $r1, $r2, $r3;
+        java.lang.Object $r4;
+
+        $r0 := @parameter0: java.io.BufferedWriter;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $r2 := @parameter2: java.lang.String;
+
+        $r3 := @parameter3: java.lang.String;
+
+        $r4 := @parameter4: java.lang.Object;
+
+        virtualinvoke $r0.<java.io.Writer: void write(java.lang.String)>($r1);
+
+        virtualinvoke $r0.<java.io.Writer: void write(java.lang.String)>($r2);
+
+        virtualinvoke $r0.<java.io.Writer: void write(java.lang.String)>($r3);
+
+        virtualinvoke $r0.<java.io.Writer: void write(java.lang.String)>("=");
+
+        staticinvoke <android.view.ViewDebug: void writeValue(java.io.BufferedWriter,java.lang.Object)>($r0, $r4);
+
+        virtualinvoke $r0.<java.io.BufferedWriter: void write(int)>(32);
+
+        return;
+    }
+
+    private static void writeValue(java.io.BufferedWriter, java.lang.Object) throws java.io.IOException
+    {
+        java.io.BufferedWriter $r0;
+        java.lang.Object $r1;
+        java.lang.String $r2, $r3;
+        int $i0;
+
+        $r0 := @parameter0: java.io.BufferedWriter;
+
+        $r1 := @parameter1: java.lang.Object;
+
+        if $r1 == null goto label1;
+
+        $r2 = virtualinvoke $r1.<java.lang.Object: java.lang.String toString()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.String: java.lang.String replace(java.lang.CharSequence,java.lang.CharSequence)>("\n", "\\n");
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        $r3 = staticinvoke <java.lang.String: java.lang.String valueOf(int)>($i0);
+
+        virtualinvoke $r0.<java.io.Writer: void write(java.lang.String)>($r3);
+
+        virtualinvoke $r0.<java.io.Writer: void write(java.lang.String)>(",");
+
+        virtualinvoke $r0.<java.io.Writer: void write(java.lang.String)>($r2);
+
+        return;
+
+     label1:
+        virtualinvoke $r0.<java.io.Writer: void write(java.lang.String)>("4,null");
+
+        return;
+    }
+}

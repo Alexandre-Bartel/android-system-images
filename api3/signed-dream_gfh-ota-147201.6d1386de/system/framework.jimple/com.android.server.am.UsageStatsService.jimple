@@ -1,0 +1,1634 @@
+public final class com.android.server.am.UsageStatsService extends com.android.internal.app.IUsageStats$Stub
+{
+    public static final java.lang.String SERVICE_NAME;
+    private static final java.lang.String TAG;
+    private static final int _MAX_NUM_FILES;
+    private static final java.lang.String _PREFIX_DELIMIT;
+    private static final boolean localLOGV;
+    static com.android.internal.app.IUsageStats sService;
+    private int _FILE_WRITE_INTERVAL;
+    private java.util.Calendar mCal;
+    private android.content.Context mContext;
+    private java.io.File mFile;
+    final java.lang.Object mFileLock;
+    private java.lang.String mFilePrefix;
+    private long mLastTime;
+    private long mLastWriteRealTime;
+    private java.lang.String mResumedPkg;
+    private final java.util.Map mStats;
+    final java.lang.Object mStatsLock;
+
+    void <init>(java.lang.String)
+    {
+        com.android.server.am.UsageStatsService $r0;
+        java.lang.String $r1;
+        java.util.HashMap $r2;
+        java.lang.Object $r3;
+        java.util.Calendar $r4;
+        java.io.File $r5;
+        long $l0;
+        java.util.Date $r6;
+
+        $r0 := @this: com.android.server.am.UsageStatsService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        specialinvoke $r0.<com.android.internal.app.IUsageStats$Stub: void <init>()>();
+
+        $r0.<com.android.server.am.UsageStatsService: int _FILE_WRITE_INTERVAL> = 1800000;
+
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>()>();
+
+        $r0.<com.android.server.am.UsageStatsService: java.util.Map mStats> = $r2;
+
+        $r3 = new java.lang.Object;
+
+        specialinvoke $r3.<java.lang.Object: void <init>()>();
+
+        $r0.<com.android.server.am.UsageStatsService: java.lang.Object mStatsLock> = $r3;
+
+        $r3 = new java.lang.Object;
+
+        specialinvoke $r3.<java.lang.Object: void <init>()>();
+
+        $r0.<com.android.server.am.UsageStatsService: java.lang.Object mFileLock> = $r3;
+
+        $r0.<com.android.server.am.UsageStatsService: java.lang.String mFilePrefix> = $r1;
+
+        $r4 = staticinvoke <java.util.Calendar: java.util.Calendar getInstance()>();
+
+        $r0.<com.android.server.am.UsageStatsService: java.util.Calendar mCal> = $r4;
+
+        $r1 = $r0.<com.android.server.am.UsageStatsService: java.lang.String mFilePrefix>;
+
+        $r1 = specialinvoke $r0.<com.android.server.am.UsageStatsService: java.lang.String getCurrentDateStr(java.lang.String)>($r1);
+
+        $r5 = new java.io.File;
+
+        specialinvoke $r5.<java.io.File: void <init>(java.lang.String)>($r1);
+
+        $r0.<com.android.server.am.UsageStatsService: java.io.File mFile> = $r5;
+
+        specialinvoke $r0.<com.android.server.am.UsageStatsService: void readStatsFromFile()>();
+
+        $l0 = staticinvoke <android.os.SystemClock: long elapsedRealtime()>();
+
+        $r0.<com.android.server.am.UsageStatsService: long mLastWriteRealTime> = $l0;
+
+        $r6 = new java.util.Date;
+
+        specialinvoke $r6.<java.util.Date: void <init>()>();
+
+        $l0 = virtualinvoke $r6.<java.util.Date: long getTime()>();
+
+        $r0.<com.android.server.am.UsageStatsService: long mLastTime> = $l0;
+
+        return;
+    }
+
+    private void checkFileLimitFLOCK()
+    {
+        com.android.server.am.UsageStatsService $r0;
+        java.io.File $r1, $r2;
+        java.util.ArrayList $r3;
+        int $i0, $i1;
+        java.lang.Object $r4;
+        java.lang.String $r5;
+        java.lang.StringBuilder $r6;
+
+        $r0 := @this: com.android.server.am.UsageStatsService;
+
+        $r2 = specialinvoke $r0.<com.android.server.am.UsageStatsService: java.io.File getUsageFilesDir()>();
+
+        if $r2 != null goto label1;
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("UsageStats", "Couldnt find writable directory for usage stats file");
+
+        return;
+
+     label1:
+        $r3 = specialinvoke $r0.<com.android.server.am.UsageStatsService: java.util.ArrayList getUsageStatsFileListFLOCK()>();
+
+        if $r3 == null goto label3;
+
+        $i0 = virtualinvoke $r3.<java.util.ArrayList: int size()>();
+
+        if $i0 <= 10 goto label4;
+
+        staticinvoke <java.util.Collections: void sort(java.util.List)>($r3);
+
+        $i0 = $i0 + -10;
+
+        $i1 = 0;
+
+     label2:
+        if $i1 >= $i0 goto label5;
+
+        $r4 = virtualinvoke $r3.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r5 = (java.lang.String) $r4;
+
+        $r1 = new java.io.File;
+
+        specialinvoke $r1.<java.io.File: void <init>(java.io.File,java.lang.String)>($r2, $r5);
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Deleting file : ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("UsageStats", $r5);
+
+        virtualinvoke $r1.<java.io.File: boolean delete()>();
+
+        $i1 = $i1 + 1;
+
+        goto label2;
+
+     label3:
+        return;
+
+     label4:
+        return;
+
+     label5:
+        return;
+    }
+
+    private void collectDumpInfoFLOCK(java.io.PrintWriter, java.lang.String[])
+    {
+        com.android.server.am.UsageStatsService $r0;
+        java.io.PrintWriter $r1;
+        java.lang.String[] $r2;
+        java.io.File $r3, $r4;
+        int $i0;
+        java.util.ArrayList $r5;
+        boolean $z0, $z1;
+        java.lang.String $r6, $r9, $r10;
+        java.util.Iterator $r7;
+        java.lang.Object $r8;
+        android.os.Parcel $r11;
+        java.io.FileNotFoundException $r12;
+        java.lang.StringBuilder $r13;
+        java.io.IOException $r14;
+
+        $r0 := @this: com.android.server.am.UsageStatsService;
+
+        $r1 := @parameter0: java.io.PrintWriter;
+
+        $r2 := @parameter1: java.lang.String[];
+
+        $r5 = specialinvoke $r0.<com.android.server.am.UsageStatsService: java.util.ArrayList getUsageStatsFileListFLOCK()>();
+
+        if $r5 != null goto label1;
+
+        return;
+
+     label1:
+        $z0 = staticinvoke <com.android.server.am.UsageStatsService: boolean scanArgs(java.lang.String[],java.lang.String)>($r2, "-c");
+
+        staticinvoke <java.util.Collections: void sort(java.util.List)>($r5);
+
+        $r3 = new java.io.File;
+
+        $r6 = $r0.<com.android.server.am.UsageStatsService: java.lang.String mFilePrefix>;
+
+        specialinvoke $r3.<java.io.File: void <init>(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r3.<java.io.File: java.lang.String getParent()>();
+
+        $r4 = new java.io.File;
+
+        specialinvoke $r4.<java.io.File: void <init>(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r3.<java.io.File: java.lang.String getName()>();
+
+        $i0 = virtualinvoke $r6.<java.lang.String: int length()>();
+
+        $i0 = $i0 + 1;
+
+        $r6 = specialinvoke $r0.<com.android.server.am.UsageStatsService: java.lang.String getCurrentDateStr(java.lang.String)>(null);
+
+        $r7 = interfaceinvoke $r5.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z1 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label7;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        $r9 = (java.lang.String) $r8;
+
+        $r3 = new java.io.File;
+
+        specialinvoke $r3.<java.io.File: void <init>(java.io.File,java.lang.String)>($r4, $r9);
+
+        $r10 = virtualinvoke $r9.<java.lang.String: java.lang.String substring(int)>($i0);
+
+     label3:
+        $r11 = specialinvoke $r0.<com.android.server.am.UsageStatsService: android.os.Parcel getParcelForFile(java.io.File)>($r3);
+
+        specialinvoke $r0.<com.android.server.am.UsageStatsService: void collectDumpInfoFromParcelFLOCK(android.os.Parcel,java.io.PrintWriter,java.lang.String,boolean)>($r11, $r1, $r10, $z0);
+
+        if $z0 == 0 goto label2;
+
+        $z1 = virtualinvoke $r6.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r10);
+
+        if $z1 != 0 goto label2;
+
+        virtualinvoke $r3.<java.io.File: boolean delete()>();
+
+     label4:
+        goto label2;
+
+     label5:
+        $r12 := @caughtexception;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed with ");
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r12);
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" when collecting dump info from file : ");
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r6 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("UsageStats", $r6);
+
+        return;
+
+     label6:
+        $r14 := @caughtexception;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed with ");
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r14);
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" when collecting dump info from file : ");
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r9 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("UsageStats", $r9);
+
+        goto label2;
+
+     label7:
+        return;
+
+        catch java.io.FileNotFoundException from label3 to label4 with label5;
+        catch java.io.IOException from label3 to label4 with label6;
+    }
+
+    private void collectDumpInfoFromParcelFLOCK(android.os.Parcel, java.io.PrintWriter, java.lang.String, boolean)
+    {
+        com.android.server.am.UsageStatsService $r0;
+        android.os.Parcel $r1;
+        java.io.PrintWriter $r2;
+        java.lang.String $r3;
+        boolean $z0, $z1;
+        java.lang.StringBuilder $r4;
+        int $i0;
+        long $l1;
+
+        $r0 := @this: com.android.server.am.UsageStatsService;
+
+        $r1 := @parameter0: android.os.Parcel;
+
+        $r2 := @parameter1: java.io.PrintWriter;
+
+        $r3 := @parameter2: java.lang.String;
+
+        $z0 := @parameter3: boolean;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Date:");
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $z1 = 1;
+
+     label1:
+        $i0 = virtualinvoke $r1.<android.os.Parcel: int dataAvail()>();
+
+        if $i0 <= 0 goto label6;
+
+        $r3 = virtualinvoke $r1.<android.os.Parcel: java.lang.String readString()>();
+
+        $i0 = virtualinvoke $r1.<android.os.Parcel: int readInt()>();
+
+        $l1 = virtualinvoke $r1.<android.os.Parcel: long readLong()>();
+
+        if $z0 == 0 goto label4;
+
+        if $z1 != 0 goto label2;
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",");
+
+     label2:
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",");
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",");
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l1);
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ms");
+
+     label3:
+        $z1 = 0;
+
+        goto label1;
+
+     label4:
+        if $z1 == 0 goto label5;
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+     label5:
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("pkg=");
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", launchCount=");
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", usageTime=");
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l1);
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ms\n");
+
+        goto label3;
+
+     label6:
+        $r3 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void write(java.lang.String)>($r3);
+
+        return;
+    }
+
+    private java.lang.String getCurrentDateStr(java.lang.String)
+    {
+        com.android.server.am.UsageStatsService $r0;
+        java.lang.String $r1;
+        int $i0;
+        java.lang.StringBuilder $r2;
+        java.util.Calendar $r3;
+        java.util.Date $r4;
+
+        $r0 := @this: com.android.server.am.UsageStatsService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r3 = $r0.<com.android.server.am.UsageStatsService: java.util.Calendar mCal>;
+
+        $r4 = new java.util.Date;
+
+        specialinvoke $r4.<java.util.Date: void <init>()>();
+
+        virtualinvoke $r3.<java.util.Calendar: void setTime(java.util.Date)>($r4);
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        if $r1 == null goto label1;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+     label1:
+        $r3 = $r0.<com.android.server.am.UsageStatsService: java.util.Calendar mCal>;
+
+        $i0 = virtualinvoke $r3.<java.util.Calendar: int get(int)>(2);
+
+        $i0 = $i0 - 0;
+
+        $i0 = $i0 + 1;
+
+        if $i0 >= 10 goto label2;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("0");
+
+     label2:
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r3 = $r0.<com.android.server.am.UsageStatsService: java.util.Calendar mCal>;
+
+        $i0 = virtualinvoke $r3.<java.util.Calendar: int get(int)>(5);
+
+        if $i0 >= 10 goto label3;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("0");
+
+     label3:
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r3 = $r0.<com.android.server.am.UsageStatsService: java.util.Calendar mCal>;
+
+        $i0 = virtualinvoke $r3.<java.util.Calendar: int get(int)>(1);
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r1 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r1;
+    }
+
+    private android.os.Parcel getParcelForFile(java.io.File) throws java.io.IOException
+    {
+        com.android.server.am.UsageStatsService $r0;
+        java.io.File $r1;
+        java.io.FileInputStream $r2;
+        int $i0;
+        byte[] $r3;
+        android.os.Parcel $r4;
+
+        $r0 := @this: com.android.server.am.UsageStatsService;
+
+        $r1 := @parameter0: java.io.File;
+
+        $r2 = new java.io.FileInputStream;
+
+        specialinvoke $r2.<java.io.FileInputStream: void <init>(java.io.File)>($r1);
+
+        $r3 = staticinvoke <com.android.server.am.UsageStatsService: byte[] readFully(java.io.FileInputStream)>($r2);
+
+        $r4 = staticinvoke <android.os.Parcel: android.os.Parcel obtain()>();
+
+        $i0 = lengthof $r3;
+
+        virtualinvoke $r4.<android.os.Parcel: void unmarshall(byte[],int,int)>($r3, 0, $i0);
+
+        virtualinvoke $r4.<android.os.Parcel: void setDataPosition(int)>(0);
+
+        virtualinvoke $r2.<java.io.FileInputStream: void close()>();
+
+        return $r4;
+    }
+
+    public static com.android.internal.app.IUsageStats getService()
+    {
+        com.android.internal.app.IUsageStats $r0;
+        android.os.IBinder $r1;
+
+        $r0 = <com.android.server.am.UsageStatsService: com.android.internal.app.IUsageStats sService>;
+
+        if $r0 == null goto label1;
+
+        $r0 = <com.android.server.am.UsageStatsService: com.android.internal.app.IUsageStats sService>;
+
+        return $r0;
+
+     label1:
+        $r1 = staticinvoke <android.os.ServiceManager: android.os.IBinder getService(java.lang.String)>("usagestats");
+
+        $r0 = staticinvoke <com.android.server.am.UsageStatsService: com.android.internal.app.IUsageStats asInterface(android.os.IBinder)>($r1);
+
+        <com.android.server.am.UsageStatsService: com.android.internal.app.IUsageStats sService> = $r0;
+
+        $r0 = <com.android.server.am.UsageStatsService: com.android.internal.app.IUsageStats sService>;
+
+        return $r0;
+    }
+
+    private java.io.File getUsageFilesDir()
+    {
+        com.android.server.am.UsageStatsService $r0;
+        java.io.File $r1, $r3;
+        java.lang.String $r2;
+
+        $r0 := @this: com.android.server.am.UsageStatsService;
+
+        $r2 = $r0.<com.android.server.am.UsageStatsService: java.lang.String mFilePrefix>;
+
+        if $r2 != null goto label1;
+
+        return null;
+
+     label1:
+        $r1 = new java.io.File;
+
+        $r2 = $r0.<com.android.server.am.UsageStatsService: java.lang.String mFilePrefix>;
+
+        specialinvoke $r1.<java.io.File: void <init>(java.lang.String)>($r2);
+
+        $r3 = new java.io.File;
+
+        $r2 = virtualinvoke $r1.<java.io.File: java.lang.String getParent()>();
+
+        specialinvoke $r3.<java.io.File: void <init>(java.lang.String)>($r2);
+
+        return $r3;
+    }
+
+    private java.util.ArrayList getUsageStatsFileListFLOCK()
+    {
+        com.android.server.am.UsageStatsService $r0;
+        java.lang.String $r1, $r5;
+        java.util.ArrayList $r2;
+        int $i0, $i1, $i2;
+        java.io.File $r3;
+        java.lang.String[] $r4;
+        boolean $z0;
+
+        $r0 := @this: com.android.server.am.UsageStatsService;
+
+        $r3 = specialinvoke $r0.<com.android.server.am.UsageStatsService: java.io.File getUsageFilesDir()>();
+
+        if $r3 != null goto label1;
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("UsageStats", "Couldnt find writable directory for usage stats file");
+
+        return null;
+
+     label1:
+        $r4 = virtualinvoke $r3.<java.io.File: java.lang.String[] list()>();
+
+        if $r4 != null goto label2;
+
+        return null;
+
+     label2:
+        $r3 = new java.io.File;
+
+        $r1 = $r0.<com.android.server.am.UsageStatsService: java.lang.String mFilePrefix>;
+
+        specialinvoke $r3.<java.io.File: void <init>(java.lang.String)>($r1);
+
+        $r5 = virtualinvoke $r3.<java.io.File: java.lang.String getName()>();
+
+        virtualinvoke $r5.<java.lang.String: int length()>();
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        $i0 = lengthof $r4;
+
+        $i1 = 0;
+
+     label3:
+        if $i1 >= $i0 goto label6;
+
+        $r1 = $r4[$i1];
+
+        $i2 = virtualinvoke $r1.<java.lang.String: int indexOf(java.lang.String)>($r5);
+
+        if $i2 != -1 goto label5;
+
+     label4:
+        $i1 = $i1 + 1;
+
+        goto label3;
+
+     label5:
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean endsWith(java.lang.String)>(".bak");
+
+        if $z0 != 0 goto label4;
+
+        virtualinvoke $r2.<java.util.ArrayList: boolean add(java.lang.Object)>($r1);
+
+        goto label4;
+
+     label6:
+        return $r2;
+    }
+
+    static byte[] readFully(java.io.FileInputStream) throws java.io.IOException
+    {
+        java.io.FileInputStream $r0;
+        byte[] $r1, $r2;
+        int $i0, $i1, $i2;
+
+        $r0 := @parameter0: java.io.FileInputStream;
+
+        $i0 = 0;
+
+        $i1 = virtualinvoke $r0.<java.io.FileInputStream: int available()>();
+
+        $r2 = newarray (byte)[$i1];
+
+     label1:
+        $i1 = lengthof $r2;
+
+        $i1 = $i1 - $i0;
+
+        $i1 = virtualinvoke $r0.<java.io.FileInputStream: int read(byte[],int,int)>($r2, $i0, $i1);
+
+        if $i1 > 0 goto label2;
+
+        return $r2;
+
+     label2:
+        $i0 = $i0 + $i1;
+
+        $i1 = virtualinvoke $r0.<java.io.FileInputStream: int available()>();
+
+        $i2 = lengthof $r2;
+
+        $i2 = $i2 - $i0;
+
+        if $i1 <= $i2 goto label1;
+
+        $i1 = $i0 + $i1;
+
+        $r1 = newarray (byte)[$i1];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, 0, $r1, 0, $i0);
+
+        $r2 = $r1;
+
+        goto label1;
+    }
+
+    private void readStatsFLOCK(java.io.File) throws java.io.IOException
+    {
+        com.android.server.am.UsageStatsService $r0;
+        java.io.File $r1;
+        com.android.server.am.UsageStatsService$PkgUsageStatsExtended $r2;
+        android.os.Parcel $r3;
+        int $i0;
+        java.lang.String $r4;
+        long $l1;
+        java.lang.Object $r5;
+        java.util.Map $r6;
+        java.lang.Throwable $r7;
+
+        $r0 := @this: com.android.server.am.UsageStatsService;
+
+        $r1 := @parameter0: java.io.File;
+
+        $r3 = specialinvoke $r0.<com.android.server.am.UsageStatsService: android.os.Parcel getParcelForFile(java.io.File)>($r1);
+
+     label1:
+        $i0 = virtualinvoke $r3.<android.os.Parcel: int dataAvail()>();
+
+        if $i0 <= 0 goto label6;
+
+        $r4 = virtualinvoke $r3.<android.os.Parcel: java.lang.String readString()>();
+
+        $r2 = new com.android.server.am.UsageStatsService$PkgUsageStatsExtended;
+
+        specialinvoke $r2.<com.android.server.am.UsageStatsService$PkgUsageStatsExtended: void <init>(com.android.server.am.UsageStatsService)>($r0);
+
+        $i0 = virtualinvoke $r3.<android.os.Parcel: int readInt()>();
+
+        $r2.<com.android.server.am.UsageStatsService$PkgUsageStatsExtended: int mLaunchCount> = $i0;
+
+        $l1 = virtualinvoke $r3.<android.os.Parcel: long readLong()>();
+
+        $r2.<com.android.server.am.UsageStatsService$PkgUsageStatsExtended: long mUsageTime> = $l1;
+
+        $r5 = $r0.<com.android.server.am.UsageStatsService: java.lang.Object mStatsLock>;
+
+        entermonitor $r5;
+
+     label2:
+        $r6 = $r0.<com.android.server.am.UsageStatsService: java.util.Map mStats>;
+
+        interfaceinvoke $r6.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r4, $r2);
+
+        exitmonitor $r5;
+
+     label3:
+        goto label1;
+
+     label4:
+        $r7 := @caughtexception;
+
+        exitmonitor $r5;
+
+     label5:
+        throw $r7;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    private void readStatsFromFile()
+    {
+        com.android.server.am.UsageStatsService $r0;
+        java.io.File $r1;
+        java.lang.Object $r2;
+        boolean $z0;
+        java.io.IOException $r3;
+        java.lang.StringBuilder $r4;
+        java.lang.String $r5;
+        java.lang.Throwable $r6;
+
+        $r0 := @this: com.android.server.am.UsageStatsService;
+
+        $r1 = $r0.<com.android.server.am.UsageStatsService: java.io.File mFile>;
+
+        $r2 = $r0.<com.android.server.am.UsageStatsService: java.lang.Object mFileLock>;
+
+        entermonitor $r2;
+
+     label1:
+        $z0 = virtualinvoke $r1.<java.io.File: boolean exists()>();
+
+        if $z0 == 0 goto label4;
+
+        specialinvoke $r0.<com.android.server.am.UsageStatsService: void readStatsFLOCK(java.io.File)>($r1);
+
+     label2:
+        exitmonitor $r2;
+
+     label3:
+        return;
+
+     label4:
+        specialinvoke $r0.<com.android.server.am.UsageStatsService: void checkFileLimitFLOCK()>();
+
+        virtualinvoke $r1.<java.io.File: boolean createNewFile()>();
+
+     label5:
+        goto label2;
+
+     label6:
+        $r3 := @caughtexception;
+
+     label7:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error : ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r3);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" reading data from file:");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("UsageStats", $r5);
+
+        goto label2;
+
+     label8:
+        $r6 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label9:
+        throw $r6;
+
+        catch java.io.IOException from label1 to label2 with label6;
+        catch java.lang.Throwable from label1 to label2 with label8;
+        catch java.lang.Throwable from label2 to label3 with label8;
+        catch java.io.IOException from label4 to label5 with label6;
+        catch java.lang.Throwable from label4 to label5 with label8;
+        catch java.lang.Throwable from label7 to label9 with label8;
+    }
+
+    private static boolean scanArgs(java.lang.String[], java.lang.String)
+    {
+        java.lang.String[] $r0;
+        java.lang.String $r1, $r2;
+        int $i0, $i1;
+        boolean $z0;
+
+        $r0 := @parameter0: java.lang.String[];
+
+        $r1 := @parameter1: java.lang.String;
+
+        if $r0 == null goto label3;
+
+        $i0 = lengthof $r0;
+
+        $i1 = 0;
+
+     label1:
+        if $i1 >= $i0 goto label3;
+
+        $r2 = $r0[$i1];
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 == 0 goto label2;
+
+        return 1;
+
+     label2:
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    private void writeStatsFLOCK() throws java.io.IOException
+    {
+        com.android.server.am.UsageStatsService $r0;
+        java.io.FileOutputStream $r1;
+        java.io.File $r2;
+        android.os.Parcel $r3;
+        byte[] $r4;
+
+        $r0 := @this: com.android.server.am.UsageStatsService;
+
+        $r1 = new java.io.FileOutputStream;
+
+        $r2 = $r0.<com.android.server.am.UsageStatsService: java.io.File mFile>;
+
+        specialinvoke $r1.<java.io.FileOutputStream: void <init>(java.io.File)>($r2);
+
+        $r3 = staticinvoke <android.os.Parcel: android.os.Parcel obtain()>();
+
+        specialinvoke $r0.<com.android.server.am.UsageStatsService: void writeStatsToParcelFLOCK(android.os.Parcel)>($r3);
+
+        $r4 = virtualinvoke $r3.<android.os.Parcel: byte[] marshall()>();
+
+        virtualinvoke $r1.<java.io.FileOutputStream: void write(byte[])>($r4);
+
+        virtualinvoke $r3.<android.os.Parcel: void recycle()>();
+
+        virtualinvoke $r1.<java.io.OutputStream: void flush()>();
+
+        virtualinvoke $r1.<java.io.FileOutputStream: void close()>();
+
+        return;
+    }
+
+    private void writeStatsToFile()
+    {
+        com.android.server.am.UsageStatsService $r0;
+        java.io.File $r1, $r6;
+        java.lang.Object $r2;
+        java.util.Date $r3;
+        long $l0, $l1, $l3, $l5;
+        byte $b2;
+        boolean $z0;
+        int $i4;
+        java.lang.String $r4, $r7;
+        java.lang.StringBuilder $r5;
+        java.util.Map $r8, $r9;
+        java.lang.Throwable $r10, $r11;
+        java.io.IOException $r12;
+
+        $r0 := @this: com.android.server.am.UsageStatsService;
+
+        $r2 = $r0.<com.android.server.am.UsageStatsService: java.lang.Object mFileLock>;
+
+        entermonitor $r2;
+
+     label01:
+        $r3 = new java.util.Date;
+
+        specialinvoke $r3.<java.util.Date: void <init>()>();
+
+        $l0 = virtualinvoke $r3.<java.util.Date: long getTime()>();
+
+        $l1 = $r0.<com.android.server.am.UsageStatsService: long mLastTime>;
+
+        $l1 = $l0 - $l1;
+
+        $b2 = $l1 cmp 86400000L;
+
+        if $b2 < 0 goto label04;
+
+        $z0 = 1;
+
+     label02:
+        $l1 = staticinvoke <android.os.SystemClock: long elapsedRealtime()>();
+
+        $l3 = $r0.<com.android.server.am.UsageStatsService: long mLastWriteRealTime>;
+
+        $l3 = $l1 - $l3;
+
+        $i4 = $r0.<com.android.server.am.UsageStatsService: int _FILE_WRITE_INTERVAL>;
+
+        $l5 = (long) $i4;
+
+        $b2 = $l3 cmp $l5;
+
+        if $b2 >= 0 goto label05;
+
+        if $z0 != 0 goto label05;
+
+        exitmonitor $r2;
+
+     label03:
+        return;
+
+     label04:
+        $z0 = 0;
+
+        goto label02;
+
+     label05:
+        $r4 = $r0.<com.android.server.am.UsageStatsService: java.lang.String mFilePrefix>;
+
+        $r4 = specialinvoke $r0.<com.android.server.am.UsageStatsService: java.lang.String getCurrentDateStr(java.lang.String)>($r4);
+
+        $r1 = new java.io.File;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = $r0.<com.android.server.am.UsageStatsService: java.io.File mFile>;
+
+        $r7 = virtualinvoke $r6.<java.io.File: java.lang.String getPath()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".bak");
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.io.File: void <init>(java.lang.String)>($r7);
+
+        $r6 = $r0.<com.android.server.am.UsageStatsService: java.io.File mFile>;
+
+        virtualinvoke $r6.<java.io.File: boolean renameTo(java.io.File)>($r1);
+
+     label06:
+        specialinvoke $r0.<com.android.server.am.UsageStatsService: void checkFileLimitFLOCK()>();
+
+        $r6 = $r0.<com.android.server.am.UsageStatsService: java.io.File mFile>;
+
+        virtualinvoke $r6.<java.io.File: boolean createNewFile()>();
+
+        specialinvoke $r0.<com.android.server.am.UsageStatsService: void writeStatsFLOCK()>();
+
+     label07:
+        $r0.<com.android.server.am.UsageStatsService: long mLastWriteRealTime> = $l1;
+
+        $r0.<com.android.server.am.UsageStatsService: long mLastTime> = $l0;
+
+        if $z0 == 0 goto label12;
+
+        $r8 = $r0.<com.android.server.am.UsageStatsService: java.util.Map mStats>;
+
+        entermonitor $r8;
+
+     label08:
+        $r9 = $r0.<com.android.server.am.UsageStatsService: java.util.Map mStats>;
+
+        interfaceinvoke $r9.<java.util.Map: void clear()>();
+
+        exitmonitor $r8;
+
+     label09:
+        $r6 = new java.io.File;
+
+     label10:
+        specialinvoke $r6.<java.io.File: void <init>(java.lang.String)>($r4);
+
+     label11:
+        $r0.<com.android.server.am.UsageStatsService: java.io.File mFile> = $r6;
+
+     label12:
+        if $r1 == null goto label13;
+
+        virtualinvoke $r1.<java.io.File: boolean delete()>();
+
+     label13:
+        exitmonitor $r2;
+
+     label14:
+        return;
+
+     label15:
+        $r10 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label16:
+        throw $r10;
+
+     label17:
+        $r11 := @caughtexception;
+
+     label18:
+        exitmonitor $r8;
+
+     label19:
+        throw $r11;
+
+     label20:
+        $r12 := @caughtexception;
+
+     label21:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed writing stats to file:");
+
+        $r6 = $r0.<com.android.server.am.UsageStatsService: java.io.File mFile>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r6);
+
+        $r4 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("UsageStats", $r4);
+
+        if $r1 == null goto label13;
+
+        $r6 = $r0.<com.android.server.am.UsageStatsService: java.io.File mFile>;
+
+        virtualinvoke $r1.<java.io.File: boolean renameTo(java.io.File)>($r6);
+
+     label22:
+        goto label13;
+
+        catch java.lang.Throwable from label01 to label03 with label15;
+        catch java.lang.Throwable from label04 to label06 with label15;
+        catch java.io.IOException from label06 to label07 with label20;
+        catch java.lang.Throwable from label06 to label08 with label15;
+        catch java.lang.Throwable from label08 to label09 with label17;
+        catch java.io.IOException from label10 to label11 with label20;
+        catch java.io.IOException from label12 to label13 with label20;
+        catch java.lang.Throwable from label09 to label13 with label15;
+        catch java.lang.Throwable from label13 to label14 with label15;
+        catch java.lang.Throwable from label15 to label16 with label15;
+        catch java.lang.Throwable from label18 to label19 with label17;
+        catch java.io.IOException from label19 to label20 with label20;
+        catch java.lang.Throwable from label19 to label20 with label15;
+        catch java.lang.Throwable from label21 to label22 with label15;
+    }
+
+    private void writeStatsToParcelFLOCK(android.os.Parcel)
+    {
+        com.android.server.am.UsageStatsService $r0;
+        android.os.Parcel $r1;
+        java.lang.Object $r2, $r6;
+        java.util.Map $r3;
+        java.util.Set $r4;
+        java.util.Iterator $r5;
+        boolean $z0;
+        java.lang.String $r7;
+        com.android.server.am.UsageStatsService$PkgUsageStatsExtended $r8;
+        int $i0;
+        long $l1;
+        java.lang.Throwable $r9;
+
+        $r0 := @this: com.android.server.am.UsageStatsService;
+
+        $r1 := @parameter0: android.os.Parcel;
+
+        $r2 = $r0.<com.android.server.am.UsageStatsService: java.lang.Object mStatsLock>;
+
+        entermonitor $r2;
+
+     label1:
+        $r3 = $r0.<com.android.server.am.UsageStatsService: java.util.Map mStats>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.util.Set keySet()>();
+
+        $r5 = interfaceinvoke $r4.<java.util.Set: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label5;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        $r7 = (java.lang.String) $r6;
+
+        $r3 = $r0.<com.android.server.am.UsageStatsService: java.util.Map mStats>;
+
+        $r6 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>($r7);
+
+        $r8 = (com.android.server.am.UsageStatsService$PkgUsageStatsExtended) $r6;
+
+        virtualinvoke $r1.<android.os.Parcel: void writeString(java.lang.String)>($r7);
+
+        $i0 = $r8.<com.android.server.am.UsageStatsService$PkgUsageStatsExtended: int mLaunchCount>;
+
+        virtualinvoke $r1.<android.os.Parcel: void writeInt(int)>($i0);
+
+        $l1 = $r8.<com.android.server.am.UsageStatsService$PkgUsageStatsExtended: long mUsageTime>;
+
+        virtualinvoke $r1.<android.os.Parcel: void writeLong(long)>($l1);
+
+        goto label2;
+
+     label3:
+        $r9 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label4:
+        throw $r9;
+
+     label5:
+        exitmonitor $r2;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label3;
+        catch java.lang.Throwable from label5 to label6 with label3;
+    }
+
+    protected void dump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[])
+    {
+        com.android.server.am.UsageStatsService $r0;
+        java.io.FileDescriptor $r1;
+        java.io.PrintWriter $r2;
+        java.lang.String[] $r3;
+        java.lang.Object $r4;
+        java.lang.Throwable $r5;
+
+        $r0 := @this: com.android.server.am.UsageStatsService;
+
+        $r1 := @parameter0: java.io.FileDescriptor;
+
+        $r2 := @parameter1: java.io.PrintWriter;
+
+        $r3 := @parameter2: java.lang.String[];
+
+        $r4 = $r0.<com.android.server.am.UsageStatsService: java.lang.Object mFileLock>;
+
+        entermonitor $r4;
+
+     label1:
+        specialinvoke $r0.<com.android.server.am.UsageStatsService: void collectDumpInfoFLOCK(java.io.PrintWriter,java.lang.String[])>($r2, $r3);
+
+        exitmonitor $r4;
+
+     label2:
+        return;
+
+     label3:
+        $r5 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label4:
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void enforceCallingPermission()
+    {
+        com.android.server.am.UsageStatsService $r0;
+        int $i0, $i1;
+        android.content.Context $r1;
+
+        $r0 := @this: com.android.server.am.UsageStatsService;
+
+        $i0 = staticinvoke <android.os.Binder: int getCallingPid()>();
+
+        $i1 = staticinvoke <android.os.Process: int myPid()>();
+
+        if $i0 != $i1 goto label1;
+
+        return;
+
+     label1:
+        $r1 = $r0.<com.android.server.am.UsageStatsService: android.content.Context mContext>;
+
+        $i0 = staticinvoke <android.os.Binder: int getCallingPid()>();
+
+        $i1 = staticinvoke <android.os.Binder: int getCallingUid()>();
+
+        virtualinvoke $r1.<android.content.Context: void enforcePermission(java.lang.String,int,int,java.lang.String)>("android.permission.UPDATE_DEVICE_STATS", $i0, $i1, null);
+
+        return;
+    }
+
+    public com.android.internal.os.PkgUsageStats[] getAllPkgUsageStats()
+    {
+        com.android.server.am.UsageStatsService $r0;
+        com.android.internal.os.PkgUsageStats[] $r1;
+        long $l0;
+        android.content.Context $r2;
+        java.lang.Object $r3, $r7;
+        java.util.Map $r4;
+        java.util.Set $r5;
+        int $i1, $i2;
+        java.util.Iterator $r6;
+        boolean $z0;
+        java.lang.String $r8;
+        com.android.server.am.UsageStatsService$PkgUsageStatsExtended $r9;
+        com.android.internal.os.PkgUsageStats $r10;
+        java.lang.Throwable $r11;
+
+        $r0 := @this: com.android.server.am.UsageStatsService;
+
+        $r2 = $r0.<com.android.server.am.UsageStatsService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.PACKAGE_USAGE_STATS", null);
+
+        $r3 = $r0.<com.android.server.am.UsageStatsService: java.lang.Object mStatsLock>;
+
+        entermonitor $r3;
+
+     label1:
+        $r4 = $r0.<com.android.server.am.UsageStatsService: java.util.Map mStats>;
+
+        $r5 = interfaceinvoke $r4.<java.util.Map: java.util.Set keySet()>();
+
+        $i1 = interfaceinvoke $r5.<java.util.Set: int size()>();
+
+        if $i1 > 0 goto label3;
+
+        exitmonitor $r3;
+
+     label2:
+        return null;
+
+     label3:
+        $r1 = newarray (com.android.internal.os.PkgUsageStats)[$i1];
+
+        $i1 = 0;
+
+        $r6 = interfaceinvoke $r5.<java.util.Set: java.util.Iterator iterator()>();
+
+     label4:
+        $z0 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label5;
+
+        $r7 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        $r8 = (java.lang.String) $r7;
+
+        $r4 = $r0.<com.android.server.am.UsageStatsService: java.util.Map mStats>;
+
+        $r7 = interfaceinvoke $r4.<java.util.Map: java.lang.Object get(java.lang.Object)>($r8);
+
+        $r9 = (com.android.server.am.UsageStatsService$PkgUsageStatsExtended) $r7;
+
+        $r10 = new com.android.internal.os.PkgUsageStats;
+
+        $i2 = $r9.<com.android.server.am.UsageStatsService$PkgUsageStatsExtended: int mLaunchCount>;
+
+        $l0 = $r9.<com.android.server.am.UsageStatsService$PkgUsageStatsExtended: long mUsageTime>;
+
+        specialinvoke $r10.<com.android.internal.os.PkgUsageStats: void <init>(java.lang.String,int,long)>($r8, $i2, $l0);
+
+        $r1[$i1] = $r10;
+
+        $i1 = $i1 + 1;
+
+        goto label4;
+
+     label5:
+        exitmonitor $r3;
+
+     label6:
+        return $r1;
+
+     label7:
+        $r11 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label8:
+        throw $r11;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label3 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    public com.android.internal.os.PkgUsageStats getPkgUsageStats(android.content.ComponentName)
+    {
+        com.android.server.am.UsageStatsService $r0;
+        android.content.ComponentName $r1;
+        long $l0;
+        android.content.Context $r2;
+        java.lang.String $r3;
+        java.lang.Object $r4, $r6;
+        java.util.Map $r5;
+        com.android.server.am.UsageStatsService$PkgUsageStatsExtended $r7;
+        com.android.internal.os.PkgUsageStats $r8;
+        int $i1;
+        java.lang.Throwable $r9;
+
+        $r0 := @this: com.android.server.am.UsageStatsService;
+
+        $r1 := @parameter0: android.content.ComponentName;
+
+        $r2 = $r0.<com.android.server.am.UsageStatsService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.PACKAGE_USAGE_STATS", null);
+
+        if $r1 == null goto label1;
+
+        $r3 = virtualinvoke $r1.<android.content.ComponentName: java.lang.String getPackageName()>();
+
+        if $r3 != null goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        $r4 = $r0.<com.android.server.am.UsageStatsService: java.lang.Object mStatsLock>;
+
+        entermonitor $r4;
+
+     label3:
+        $r5 = $r0.<com.android.server.am.UsageStatsService: java.util.Map mStats>;
+
+        $r6 = interfaceinvoke $r5.<java.util.Map: java.lang.Object get(java.lang.Object)>($r3);
+
+        $r7 = (com.android.server.am.UsageStatsService$PkgUsageStatsExtended) $r6;
+
+        if $r7 != null goto label5;
+
+        exitmonitor $r4;
+
+     label4:
+        return null;
+
+     label5:
+        $r8 = new com.android.internal.os.PkgUsageStats;
+
+        $i1 = $r7.<com.android.server.am.UsageStatsService$PkgUsageStatsExtended: int mLaunchCount>;
+
+        $l0 = $r7.<com.android.server.am.UsageStatsService$PkgUsageStatsExtended: long mUsageTime>;
+
+        specialinvoke $r8.<com.android.internal.os.PkgUsageStats: void <init>(java.lang.String,int,long)>($r3, $i1, $l0);
+
+        exitmonitor $r4;
+
+     label6:
+        return $r8;
+
+     label7:
+        $r9 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label8:
+        throw $r9;
+
+        catch java.lang.Throwable from label3 to label4 with label7;
+        catch java.lang.Throwable from label5 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    public void notePauseComponent(android.content.ComponentName)
+    {
+        com.android.server.am.UsageStatsService $r0;
+        android.content.ComponentName $r1;
+        java.lang.String $r2, $r3;
+        boolean $z0;
+        java.lang.StringBuilder $r4;
+        java.lang.Object $r5, $r7;
+        java.util.Map $r6;
+        com.android.server.am.UsageStatsService$PkgUsageStatsExtended $r8;
+        java.lang.Throwable $r9;
+
+        $r0 := @this: com.android.server.am.UsageStatsService;
+
+        $r1 := @parameter0: android.content.ComponentName;
+
+        virtualinvoke $r0.<com.android.server.am.UsageStatsService: void enforceCallingPermission()>();
+
+        if $r1 == null goto label10;
+
+        $r2 = virtualinvoke $r1.<android.content.ComponentName: java.lang.String getPackageName()>();
+
+        if $r2 != null goto label01;
+
+        return;
+
+     label01:
+        $r3 = $r0.<com.android.server.am.UsageStatsService: java.lang.String mResumedPkg>;
+
+        if $r3 == null goto label02;
+
+        $r3 = $r0.<com.android.server.am.UsageStatsService: java.lang.String mResumedPkg>;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r3);
+
+        if $z0 != 0 goto label03;
+
+     label02:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Something wrong here, Didn\'t expect ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" to be paused");
+
+        $r2 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("UsageStats", $r2);
+
+        return;
+
+     label03:
+        $r5 = $r0.<com.android.server.am.UsageStatsService: java.lang.Object mStatsLock>;
+
+        entermonitor $r5;
+
+     label04:
+        $r6 = $r0.<com.android.server.am.UsageStatsService: java.util.Map mStats>;
+
+        $r7 = interfaceinvoke $r6.<java.util.Map: java.lang.Object get(java.lang.Object)>($r2);
+
+        $r8 = (com.android.server.am.UsageStatsService$PkgUsageStatsExtended) $r7;
+
+        if $r8 != null goto label08;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No package stats for pkg:");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("UsageStats", $r2);
+
+        exitmonitor $r5;
+
+     label05:
+        return;
+
+     label06:
+        $r9 := @caughtexception;
+
+        exitmonitor $r5;
+
+     label07:
+        throw $r9;
+
+     label08:
+        virtualinvoke $r8.<com.android.server.am.UsageStatsService$PkgUsageStatsExtended: void updatePause()>();
+
+        exitmonitor $r5;
+
+     label09:
+        specialinvoke $r0.<com.android.server.am.UsageStatsService: void writeStatsToFile()>();
+
+        return;
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label04 to label05 with label06;
+        catch java.lang.Throwable from label06 to label07 with label06;
+        catch java.lang.Throwable from label08 to label09 with label06;
+    }
+
+    public void noteResumeComponent(android.content.ComponentName)
+    {
+        com.android.server.am.UsageStatsService $r0;
+        android.content.ComponentName $r1;
+        java.lang.String $r2, $r3;
+        boolean $z0;
+        java.lang.Object $r4, $r6;
+        java.util.Map $r5;
+        com.android.server.am.UsageStatsService$PkgUsageStatsExtended $r7;
+        java.lang.Throwable $r8;
+
+        $r0 := @this: com.android.server.am.UsageStatsService;
+
+        $r1 := @parameter0: android.content.ComponentName;
+
+        virtualinvoke $r0.<com.android.server.am.UsageStatsService: void enforceCallingPermission()>();
+
+        if $r1 == null goto label09;
+
+        $r2 = virtualinvoke $r1.<android.content.ComponentName: java.lang.String getPackageName()>();
+
+        if $r2 != null goto label01;
+
+        return;
+
+     label01:
+        $r3 = $r0.<com.android.server.am.UsageStatsService: java.lang.String mResumedPkg>;
+
+        if $r3 == null goto label02;
+
+        $r3 = $r0.<com.android.server.am.UsageStatsService: java.lang.String mResumedPkg>;
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r2);
+
+        if $z0 != 0 goto label10;
+
+     label02:
+        $r4 = $r0.<com.android.server.am.UsageStatsService: java.lang.Object mStatsLock>;
+
+        entermonitor $r4;
+
+     label03:
+        $r5 = $r0.<com.android.server.am.UsageStatsService: java.util.Map mStats>;
+
+        $r6 = interfaceinvoke $r5.<java.util.Map: java.lang.Object get(java.lang.Object)>($r2);
+
+        $r7 = (com.android.server.am.UsageStatsService$PkgUsageStatsExtended) $r6;
+
+        if $r7 != null goto label04;
+
+        $r7 = new com.android.server.am.UsageStatsService$PkgUsageStatsExtended;
+
+        specialinvoke $r7.<com.android.server.am.UsageStatsService$PkgUsageStatsExtended: void <init>(com.android.server.am.UsageStatsService)>($r0);
+
+        $r5 = $r0.<com.android.server.am.UsageStatsService: java.util.Map mStats>;
+
+        interfaceinvoke $r5.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r2, $r7);
+
+     label04:
+        virtualinvoke $r7.<com.android.server.am.UsageStatsService$PkgUsageStatsExtended: void updateResume()>();
+
+        exitmonitor $r4;
+
+     label05:
+        $r0.<com.android.server.am.UsageStatsService: java.lang.String mResumedPkg> = $r2;
+
+        return;
+
+     label06:
+        $r8 := @caughtexception;
+
+     label07:
+        exitmonitor $r4;
+
+     label08:
+        throw $r8;
+
+     label09:
+        return;
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label03 to label05 with label06;
+        catch java.lang.Throwable from label07 to label08 with label06;
+    }
+
+    public void publish(android.content.Context)
+    {
+        com.android.server.am.UsageStatsService $r0;
+        android.content.Context $r1;
+        android.os.IBinder $r2;
+
+        $r0 := @this: com.android.server.am.UsageStatsService;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r0.<com.android.server.am.UsageStatsService: android.content.Context mContext> = $r1;
+
+        $r2 = virtualinvoke $r0.<com.android.internal.app.IUsageStats$Stub: android.os.IBinder asBinder()>();
+
+        staticinvoke <android.os.ServiceManager: void addService(java.lang.String,android.os.IBinder)>("usagestats", $r2);
+
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <com.android.server.am.UsageStatsService: java.lang.String _PREFIX_DELIMIT> = ".";
+
+        <com.android.server.am.UsageStatsService: int _MAX_NUM_FILES> = 10;
+
+        <com.android.server.am.UsageStatsService: java.lang.String TAG> = "UsageStats";
+
+        <com.android.server.am.UsageStatsService: java.lang.String SERVICE_NAME> = "usagestats";
+
+        return;
+    }
+}

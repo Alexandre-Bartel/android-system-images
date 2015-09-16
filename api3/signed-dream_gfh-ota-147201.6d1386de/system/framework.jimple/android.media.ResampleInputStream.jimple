@@ -1,0 +1,332 @@
+public final class android.media.ResampleInputStream extends java.io.InputStream
+{
+    private static final java.lang.String TAG;
+    private static final int mFirLength;
+    private byte[] mBuf;
+    private int mBufCount;
+    private java.io.InputStream mInputStream;
+    private final byte[] mOneByte;
+    private final int mRateIn;
+    private final int mRateOut;
+
+    static void <clinit>()
+    {
+        <android.media.ResampleInputStream: int mFirLength> = 29;
+
+        <android.media.ResampleInputStream: java.lang.String TAG> = "ResampleInputStream";
+
+        staticinvoke <java.lang.System: void loadLibrary(java.lang.String)>("media_jni");
+
+        return;
+    }
+
+    public void <init>(java.io.InputStream, int, int)
+    {
+        android.media.ResampleInputStream $r0;
+        java.io.InputStream $r1;
+        int $i0, $i1;
+        byte[] $r2;
+        java.lang.IllegalArgumentException $r3;
+
+        $r0 := @this: android.media.ResampleInputStream;
+
+        $r1 := @parameter0: java.io.InputStream;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        specialinvoke $r0.<java.io.InputStream: void <init>()>();
+
+        $r2 = newarray (byte)[1];
+
+        $r0.<android.media.ResampleInputStream: byte[] mOneByte> = $r2;
+
+        $i1 = $i1 * 2;
+
+        if $i0 == $i1 goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("only support 2:1 at the moment");
+
+        throw $r3;
+
+     label1:
+        $r0.<android.media.ResampleInputStream: java.io.InputStream mInputStream> = $r1;
+
+        $r0.<android.media.ResampleInputStream: int mRateIn> = 2;
+
+        $r0.<android.media.ResampleInputStream: int mRateOut> = 1;
+
+        return;
+    }
+
+    private static native void fir21(byte[], int, byte[], int, int);
+
+    public void close() throws java.io.IOException
+    {
+        android.media.ResampleInputStream $r0;
+        java.io.InputStream $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: android.media.ResampleInputStream;
+
+     label1:
+        $r1 = $r0.<android.media.ResampleInputStream: java.io.InputStream mInputStream>;
+
+        if $r1 == null goto label2;
+
+        $r1 = $r0.<android.media.ResampleInputStream: java.io.InputStream mInputStream>;
+
+        virtualinvoke $r1.<java.io.InputStream: void close()>();
+
+     label2:
+        $r0.<android.media.ResampleInputStream: java.io.InputStream mInputStream> = null;
+
+        return;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r0.<android.media.ResampleInputStream: java.io.InputStream mInputStream> = null;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    protected void finalize() throws java.lang.Throwable
+    {
+        android.media.ResampleInputStream $r0;
+        java.io.InputStream $r1;
+        java.lang.IllegalStateException $r2;
+
+        $r0 := @this: android.media.ResampleInputStream;
+
+        $r1 = $r0.<android.media.ResampleInputStream: java.io.InputStream mInputStream>;
+
+        if $r1 == null goto label1;
+
+        virtualinvoke $r0.<android.media.ResampleInputStream: void close()>();
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("someone forgot to close ResampleInputStream");
+
+        throw $r2;
+
+     label1:
+        return;
+    }
+
+    public int read() throws java.io.IOException
+    {
+        android.media.ResampleInputStream $r0;
+        int $i0;
+        byte[] $r1;
+        byte $b1;
+        short $s2;
+
+        $r0 := @this: android.media.ResampleInputStream;
+
+        $r1 = $r0.<android.media.ResampleInputStream: byte[] mOneByte>;
+
+        $i0 = virtualinvoke $r0.<android.media.ResampleInputStream: int read(byte[],int,int)>($r1, 0, 1);
+
+        if $i0 != 1 goto label1;
+
+        $r1 = $r0.<android.media.ResampleInputStream: byte[] mOneByte>;
+
+        $b1 = $r1[0];
+
+        $s2 = $b1 & 255;
+
+        return $s2;
+
+     label1:
+        return -1;
+    }
+
+    public int read(byte[]) throws java.io.IOException
+    {
+        android.media.ResampleInputStream $r0;
+        byte[] $r1;
+        int $i0;
+
+        $r0 := @this: android.media.ResampleInputStream;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 = lengthof $r1;
+
+        $i0 = virtualinvoke $r0.<android.media.ResampleInputStream: int read(byte[],int,int)>($r1, 0, $i0);
+
+        return $i0;
+    }
+
+    public int read(byte[], int, int) throws java.io.IOException
+    {
+        android.media.ResampleInputStream $r0;
+        byte[] $r1, $r2, $r5;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.io.InputStream $r3;
+        java.lang.IllegalStateException $r4;
+
+        $r0 := @this: android.media.ResampleInputStream;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i3 := @parameter2: int;
+
+        $r3 = $r0.<android.media.ResampleInputStream: java.io.InputStream mInputStream>;
+
+        if $r3 != null goto label1;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>("not open");
+
+        throw $r4;
+
+     label1:
+        $i1 = $i3 / 2;
+
+        $i2 = $r0.<android.media.ResampleInputStream: int mRateIn>;
+
+        $i1 = $i1 * $i2;
+
+        $i2 = $r0.<android.media.ResampleInputStream: int mRateOut>;
+
+        $i1 = $i1 / $i2;
+
+        $i1 = $i1 + 29;
+
+        $i1 = $i1 * 2;
+
+        $r2 = $r0.<android.media.ResampleInputStream: byte[] mBuf>;
+
+        if $r2 != null goto label5;
+
+        $r2 = newarray (byte)[$i1];
+
+        $r0.<android.media.ResampleInputStream: byte[] mBuf> = $r2;
+
+     label2:
+        $i1 = $r0.<android.media.ResampleInputStream: int mBufCount>;
+
+        $i1 = $i1 / 2;
+
+        $i1 = $i1 - 29;
+
+        $i2 = $r0.<android.media.ResampleInputStream: int mRateOut>;
+
+        $i1 = $i1 * $i2;
+
+        $i2 = $r0.<android.media.ResampleInputStream: int mRateIn>;
+
+        $i1 = $i1 / $i2;
+
+        $i1 = $i1 * 2;
+
+        if $i1 <= 0 goto label7;
+
+        if $i1 >= $i3 goto label6;
+
+        $i3 = $i1;
+
+     label3:
+        $r2 = $r0.<android.media.ResampleInputStream: byte[] mBuf>;
+
+        $i1 = $i3 / 2;
+
+        staticinvoke <android.media.ResampleInputStream: void fir21(byte[],int,byte[],int,int)>($r2, 0, $r1, $i0, $i1);
+
+        $i0 = $r0.<android.media.ResampleInputStream: int mRateIn>;
+
+        $i0 = $i0 * $i3;
+
+        $i1 = $r0.<android.media.ResampleInputStream: int mRateOut>;
+
+        $i0 = $i0 / $i1;
+
+        $i1 = $r0.<android.media.ResampleInputStream: int mBufCount>;
+
+        $i1 = $i1 - $i0;
+
+        $r0.<android.media.ResampleInputStream: int mBufCount> = $i1;
+
+        $i1 = $r0.<android.media.ResampleInputStream: int mBufCount>;
+
+        if $i1 <= 0 goto label4;
+
+        $r1 = $r0.<android.media.ResampleInputStream: byte[] mBuf>;
+
+        $r2 = $r0.<android.media.ResampleInputStream: byte[] mBuf>;
+
+        $i1 = $r0.<android.media.ResampleInputStream: int mBufCount>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, $i0, $r2, 0, $i1);
+
+     label4:
+        return $i3;
+
+     label5:
+        $r2 = $r0.<android.media.ResampleInputStream: byte[] mBuf>;
+
+        $i2 = lengthof $r2;
+
+        if $i1 <= $i2 goto label2;
+
+        $r2 = newarray (byte)[$i1];
+
+        $r5 = $r0.<android.media.ResampleInputStream: byte[] mBuf>;
+
+        $i1 = $r0.<android.media.ResampleInputStream: int mBufCount>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r5, 0, $r2, 0, $i1);
+
+        $r0.<android.media.ResampleInputStream: byte[] mBuf> = $r2;
+
+        goto label2;
+
+     label6:
+        $i3 = $i3 / 2;
+
+        $i3 = $i3 * 2;
+
+        goto label3;
+
+     label7:
+        $r3 = $r0.<android.media.ResampleInputStream: java.io.InputStream mInputStream>;
+
+        $r2 = $r0.<android.media.ResampleInputStream: byte[] mBuf>;
+
+        $i1 = $r0.<android.media.ResampleInputStream: int mBufCount>;
+
+        $r5 = $r0.<android.media.ResampleInputStream: byte[] mBuf>;
+
+        $i4 = lengthof $r5;
+
+        $i2 = $r0.<android.media.ResampleInputStream: int mBufCount>;
+
+        $i2 = $i4 - $i2;
+
+        $i1 = virtualinvoke $r3.<java.io.InputStream: int read(byte[],int,int)>($r2, $i1, $i2);
+
+        if $i1 != -1 goto label8;
+
+        return -1;
+
+     label8:
+        $i2 = $r0.<android.media.ResampleInputStream: int mBufCount>;
+
+        $i1 = $i2 + $i1;
+
+        $r0.<android.media.ResampleInputStream: int mBufCount> = $i1;
+
+        goto label2;
+    }
+}

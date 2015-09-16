@@ -1,0 +1,2211 @@
+public class SQLite.Shell extends java.lang.Object implements SQLite.Callback
+{
+    static final int MODE_Column;
+    static final int MODE_Html;
+    static final int MODE_Insert;
+    static final int MODE_Insert2;
+    static final int MODE_Line;
+    static final int MODE_List;
+    static final int MODE_Semi;
+    java.lang.String[] cols;
+    int[] colwidth;
+    int count;
+    SQLite.Database db;
+    java.lang.String destTable;
+    boolean echo;
+    java.io.PrintWriter err;
+    int mode;
+    java.io.PrintWriter pw;
+    java.lang.String sep;
+    boolean showHeader;
+    java.lang.String tableName;
+
+    public void <init>(java.io.PrintStream, java.io.PrintStream)
+    {
+        SQLite.Shell $r0;
+        java.io.PrintStream $r1, $r2;
+        java.io.PrintWriter $r3;
+
+        $r0 := @this: SQLite.Shell;
+
+        $r1 := @parameter0: java.io.PrintStream;
+
+        $r2 := @parameter1: java.io.PrintStream;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r3 = new java.io.PrintWriter;
+
+        specialinvoke $r3.<java.io.PrintWriter: void <init>(java.io.OutputStream)>($r1);
+
+        $r0.<SQLite.Shell: java.io.PrintWriter pw> = $r3;
+
+        $r3 = new java.io.PrintWriter;
+
+        specialinvoke $r3.<java.io.PrintWriter: void <init>(java.io.OutputStream)>($r2);
+
+        $r0.<SQLite.Shell: java.io.PrintWriter err> = $r3;
+
+        return;
+    }
+
+    public void <init>(java.io.PrintWriter, java.io.PrintWriter)
+    {
+        SQLite.Shell $r0;
+        java.io.PrintWriter $r1, $r2;
+
+        $r0 := @this: SQLite.Shell;
+
+        $r1 := @parameter0: java.io.PrintWriter;
+
+        $r2 := @parameter1: java.io.PrintWriter;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r0.<SQLite.Shell: java.io.PrintWriter pw> = $r1;
+
+        $r0.<SQLite.Shell: java.io.PrintWriter err> = $r2;
+
+        return;
+    }
+
+    static java.lang.String html_quote(java.lang.String)
+    {
+        java.lang.String $r0, $r3;
+        java.lang.StringBuffer $r1;
+        int $i0, $i1;
+        char $c2;
+        java.lang.StringBuilder $r2;
+
+        $r0 := @parameter0: java.lang.String;
+
+        if $r0 != null goto label1;
+
+        return "NULL";
+
+     label1:
+        $r1 = new java.lang.StringBuffer;
+
+        specialinvoke $r1.<java.lang.StringBuffer: void <init>()>();
+
+        $i0 = 0;
+
+     label2:
+        $i1 = virtualinvoke $r0.<java.lang.String: int length()>();
+
+        if $i0 >= $i1 goto label9;
+
+        $c2 = virtualinvoke $r0.<java.lang.String: char charAt(int)>($i0);
+
+        if $c2 != 60 goto label4;
+
+        virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("&lt;");
+
+     label3:
+        $i0 = $i0 + 1;
+
+        goto label2;
+
+     label4:
+        if $c2 != 62 goto label5;
+
+        virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("&gt;");
+
+        goto label3;
+
+     label5:
+        if $c2 != 38 goto label6;
+
+        virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("&amp;");
+
+        goto label3;
+
+     label6:
+        if $c2 < 32 goto label7;
+
+        if $c2 <= 127 goto label8;
+
+     label7:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("&#");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($c2);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(";");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r3);
+
+        goto label3;
+
+     label8:
+        virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c2);
+
+        goto label3;
+
+     label9:
+        $r0 = virtualinvoke $r1.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r0;
+    }
+
+    static boolean is_numeric(java.lang.String)
+    {
+        java.lang.String $r0;
+        java.lang.Exception $r1;
+
+        $r0 := @parameter0: java.lang.String;
+
+     label1:
+        staticinvoke <java.lang.Double: java.lang.Double valueOf(java.lang.String)>($r0);
+
+     label2:
+        return 1;
+
+     label3:
+        $r1 := @caughtexception;
+
+        return 0;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public static void main(java.lang.String[])
+    {
+        java.lang.String[] $r0;
+        java.io.BufferedReader $r1;
+        SQLite.Shell $r2;
+        java.io.PrintStream $r3, $r4;
+        SQLite.Database $r5;
+        java.lang.String $r6, $r7, $r8;
+        int $i0, $i1;
+        SQLite.Exception $r9, $r13;
+        java.lang.StringBuilder $r10;
+        java.io.InputStreamReader $r11;
+        java.io.InputStream $r12;
+
+        $r0 := @parameter0: java.lang.String[];
+
+        $r2 = new SQLite.Shell;
+
+        $r3 = <java.lang.System: java.io.PrintStream out>;
+
+        $r4 = <java.lang.System: java.io.PrintStream err>;
+
+        specialinvoke $r2.<SQLite.Shell: void <init>(java.io.PrintStream,java.io.PrintStream)>($r3, $r4);
+
+        $r2.<SQLite.Shell: int mode> = 2;
+
+        $r2.<SQLite.Shell: java.lang.String sep> = "|";
+
+        $r2.<SQLite.Shell: boolean showHeader> = 0;
+
+        $r5 = new SQLite.Database;
+
+        specialinvoke $r5.<SQLite.Database: void <init>()>();
+
+        $r2.<SQLite.Shell: SQLite.Database db> = $r5;
+
+        $r6 = null;
+
+        $r7 = null;
+
+        $i0 = 0;
+
+     label01:
+        $i1 = lengthof $r0;
+
+        if $i0 >= $i1 goto label12;
+
+        $r8 = $r0[$i0];
+
+        $i1 = virtualinvoke $r8.<java.lang.String: int compareTo(java.lang.String)>("-html");
+
+        if $i1 != 0 goto label03;
+
+        $r2.<SQLite.Shell: int mode> = 4;
+
+     label02:
+        $i0 = $i0 + 1;
+
+        goto label01;
+
+     label03:
+        $r8 = $r0[$i0];
+
+        $i1 = virtualinvoke $r8.<java.lang.String: int compareTo(java.lang.String)>("-list");
+
+        if $i1 != 0 goto label04;
+
+        $r2.<SQLite.Shell: int mode> = 2;
+
+        goto label02;
+
+     label04:
+        $r8 = $r0[$i0];
+
+        $i1 = virtualinvoke $r8.<java.lang.String: int compareTo(java.lang.String)>("-line");
+
+        if $i1 != 0 goto label05;
+
+        $r2.<SQLite.Shell: int mode> = 0;
+
+        goto label02;
+
+     label05:
+        $i1 = lengthof $r0;
+
+        $i1 = $i1 - 1;
+
+        if $i0 >= $i1 goto label06;
+
+        $r8 = $r0[$i0];
+
+        $i1 = virtualinvoke $r8.<java.lang.String: int compareTo(java.lang.String)>("-separator");
+
+        if $i1 != 0 goto label06;
+
+        $i0 = $i0 + 1;
+
+        $r8 = $r0[$i0];
+
+        $r2.<SQLite.Shell: java.lang.String sep> = $r8;
+
+        goto label02;
+
+     label06:
+        $r8 = $r0[$i0];
+
+        $i1 = virtualinvoke $r8.<java.lang.String: int compareTo(java.lang.String)>("-header");
+
+        if $i1 != 0 goto label07;
+
+        $r2.<SQLite.Shell: boolean showHeader> = 1;
+
+        goto label02;
+
+     label07:
+        $r8 = $r0[$i0];
+
+        $i1 = virtualinvoke $r8.<java.lang.String: int compareTo(java.lang.String)>("-noheader");
+
+        if $i1 != 0 goto label08;
+
+        $r2.<SQLite.Shell: boolean showHeader> = 0;
+
+        goto label02;
+
+     label08:
+        $r8 = $r0[$i0];
+
+        $i1 = virtualinvoke $r8.<java.lang.String: int compareTo(java.lang.String)>("-echo");
+
+        if $i1 != 0 goto label09;
+
+        $r2.<SQLite.Shell: boolean echo> = 1;
+
+        goto label02;
+
+     label09:
+        if $r6 != null goto label10;
+
+        $r6 = $r0[$i0];
+
+        goto label02;
+
+     label10:
+        if $r7 != null goto label11;
+
+        $r7 = $r0[$i0];
+
+        goto label02;
+
+     label11:
+        $r3 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>("Arguments: ?OPTIONS? FILENAME ?SQL?");
+
+        staticinvoke <java.lang.System: void exit(int)>(1);
+
+        goto label02;
+
+     label12:
+        if $r6 != null goto label13;
+
+        $r3 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>("No database file given");
+
+        staticinvoke <java.lang.System: void exit(int)>(1);
+
+     label13:
+        $r5 = $r2.<SQLite.Shell: SQLite.Database db>;
+
+     label14:
+        virtualinvoke $r5.<SQLite.Database: void open(java.lang.String,int)>($r6, 0);
+
+     label15:
+        if $r7 == null goto label20;
+
+        virtualinvoke $r2.<SQLite.Shell: void do_cmd(java.lang.String)>($r7);
+
+     label16:
+        $r5 = $r2.<SQLite.Shell: SQLite.Database db>;
+
+     label17:
+        virtualinvoke $r5.<SQLite.Database: void close()>();
+
+     label18:
+        return;
+
+     label19:
+        $r9 := @caughtexception;
+
+        $r3 = <java.lang.System: java.io.PrintStream err>;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to open database: ");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $r6 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>($r6);
+
+        staticinvoke <java.lang.System: void exit(int)>(1);
+
+        goto label15;
+
+     label20:
+        $r1 = new java.io.BufferedReader;
+
+        $r11 = new java.io.InputStreamReader;
+
+        $r12 = <java.lang.System: java.io.InputStream in>;
+
+        specialinvoke $r11.<java.io.InputStreamReader: void <init>(java.io.InputStream)>($r12);
+
+        specialinvoke $r1.<java.io.BufferedReader: void <init>(java.io.Reader,int)>($r11, 8192);
+
+        virtualinvoke $r2.<SQLite.Shell: void do_input(java.io.BufferedReader)>($r1);
+
+        goto label16;
+
+     label21:
+        $r13 := @caughtexception;
+
+        return;
+
+        catch SQLite.Exception from label14 to label15 with label19;
+        catch SQLite.Exception from label17 to label18 with label21;
+    }
+
+    public static java.lang.String sql_quote(java.lang.String)
+    {
+        java.lang.String $r0;
+        java.lang.StringBuffer $r1;
+        int $i0, $i1, $i2, $i3;
+        char $c4;
+        java.lang.StringBuilder $r2;
+
+        $r0 := @parameter0: java.lang.String;
+
+        if $r0 != null goto label01;
+
+        return "NULL";
+
+     label01:
+        $i0 = 0;
+
+        $i1 = 0;
+
+        $i2 = 0;
+
+     label02:
+        $i3 = virtualinvoke $r0.<java.lang.String: int length()>();
+
+        if $i2 >= $i3 goto label05;
+
+        $c4 = virtualinvoke $r0.<java.lang.String: char charAt(int)>($i2);
+
+        if $c4 != 39 goto label04;
+
+        $i0 = $i0 + 1;
+
+     label03:
+        $i2 = $i2 + 1;
+
+        goto label02;
+
+     label04:
+        $c4 = virtualinvoke $r0.<java.lang.String: char charAt(int)>($i2);
+
+        if $c4 != 34 goto label03;
+
+        $i1 = $i1 + 1;
+
+        goto label03;
+
+     label05:
+        if $i0 != 0 goto label06;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r0);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r0 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r0;
+
+     label06:
+        if $i1 != 0 goto label07;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r0);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $r0 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r0;
+
+     label07:
+        $r1 = new java.lang.StringBuffer;
+
+        specialinvoke $r1.<java.lang.StringBuffer: void <init>(java.lang.String)>("\'");
+
+        $i0 = 0;
+
+     label08:
+        $i1 = virtualinvoke $r0.<java.lang.String: int length()>();
+
+        if $i0 >= $i1 goto label11;
+
+        $c4 = virtualinvoke $r0.<java.lang.String: char charAt(int)>($i0);
+
+        if $c4 != 39 goto label10;
+
+        virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("\'\'");
+
+     label09:
+        $i0 = $i0 + 1;
+
+        goto label08;
+
+     label10:
+        virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c4);
+
+        goto label09;
+
+     label11:
+        $r0 = virtualinvoke $r1.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r0;
+    }
+
+    public static java.lang.String sql_quote_dbl(java.lang.String)
+    {
+        java.lang.String $r0;
+        java.lang.StringBuffer $r1;
+        int $i0, $i1, $i2;
+        char $c3;
+        java.lang.StringBuilder $r2;
+
+        $r0 := @parameter0: java.lang.String;
+
+        if $r0 != null goto label01;
+
+        return "NULL";
+
+     label01:
+        $i0 = 0;
+
+        $i1 = 0;
+
+     label02:
+        $i2 = virtualinvoke $r0.<java.lang.String: int length()>();
+
+        if $i1 >= $i2 goto label05;
+
+        $c3 = virtualinvoke $r0.<java.lang.String: char charAt(int)>($i1);
+
+        if $c3 != 39 goto label04;
+
+     label03:
+        $i1 = $i1 + 1;
+
+        goto label02;
+
+     label04:
+        $c3 = virtualinvoke $r0.<java.lang.String: char charAt(int)>($i1);
+
+        if $c3 != 34 goto label03;
+
+        $i0 = $i0 + 1;
+
+        goto label03;
+
+     label05:
+        if $i0 != 0 goto label06;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r0);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $r0 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r0;
+
+     label06:
+        $r1 = new java.lang.StringBuffer;
+
+        specialinvoke $r1.<java.lang.StringBuffer: void <init>(java.lang.String)>("\"");
+
+        $i0 = 0;
+
+     label07:
+        $i1 = virtualinvoke $r0.<java.lang.String: int length()>();
+
+        if $i0 >= $i1 goto label10;
+
+        $c3 = virtualinvoke $r0.<java.lang.String: char charAt(int)>($i0);
+
+        if $c3 != 34 goto label09;
+
+        virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("\"\"");
+
+     label08:
+        $i0 = $i0 + 1;
+
+        goto label07;
+
+     label09:
+        virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c3);
+
+        goto label08;
+
+     label10:
+        $r0 = virtualinvoke $r1.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r0;
+    }
+
+    protected java.lang.Object clone()
+    {
+        SQLite.Shell $r0, $r1;
+        java.io.PrintWriter $r2, $r3;
+        SQLite.Database $r4;
+        boolean $z0;
+        int $i0;
+        java.lang.String $r5;
+        int[] $r6;
+
+        $r0 := @this: SQLite.Shell;
+
+        $r1 = new SQLite.Shell;
+
+        $r3 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        $r2 = $r0.<SQLite.Shell: java.io.PrintWriter err>;
+
+        specialinvoke $r1.<SQLite.Shell: void <init>(java.io.PrintWriter,java.io.PrintWriter)>($r3, $r2);
+
+        $r4 = $r0.<SQLite.Shell: SQLite.Database db>;
+
+        $r1.<SQLite.Shell: SQLite.Database db> = $r4;
+
+        $z0 = $r0.<SQLite.Shell: boolean echo>;
+
+        $r1.<SQLite.Shell: boolean echo> = $z0;
+
+        $i0 = $r0.<SQLite.Shell: int mode>;
+
+        $r1.<SQLite.Shell: int mode> = $i0;
+
+        $r1.<SQLite.Shell: int count> = 0;
+
+        $z0 = $r0.<SQLite.Shell: boolean showHeader>;
+
+        $r1.<SQLite.Shell: boolean showHeader> = $z0;
+
+        $r5 = $r0.<SQLite.Shell: java.lang.String tableName>;
+
+        $r1.<SQLite.Shell: java.lang.String tableName> = $r5;
+
+        $r5 = $r0.<SQLite.Shell: java.lang.String sep>;
+
+        $r1.<SQLite.Shell: java.lang.String sep> = $r5;
+
+        $r6 = $r0.<SQLite.Shell: int[] colwidth>;
+
+        $r1.<SQLite.Shell: int[] colwidth> = $r6;
+
+        return $r1;
+    }
+
+    public void columns(java.lang.String[])
+    {
+        SQLite.Shell $r0;
+        java.lang.String[] $r1;
+
+        $r0 := @this: SQLite.Shell;
+
+        $r1 := @parameter0: java.lang.String[];
+
+        $r0.<SQLite.Shell: java.lang.String[] cols> = $r1;
+
+        return;
+    }
+
+    void do_cmd(java.lang.String)
+    {
+        SQLite.Shell $r0;
+        java.lang.String $r1;
+        SQLite.Database $r2;
+        int $i0;
+        char $c1;
+        SQLite.Exception $r3;
+        java.io.PrintWriter $r4;
+        java.lang.StringBuilder $r5;
+
+        $r0 := @this: SQLite.Shell;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = $r0.<SQLite.Shell: SQLite.Database db>;
+
+        if $r2 != null goto label1;
+
+        return;
+
+     label1:
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 <= 0 goto label2;
+
+        $c1 = virtualinvoke $r1.<java.lang.String: char charAt(int)>(0);
+
+        if $c1 != 46 goto label2;
+
+        virtualinvoke $r0.<SQLite.Shell: void do_meta(java.lang.String)>($r1);
+
+        return;
+
+     label2:
+        $r2 = $r0.<SQLite.Shell: SQLite.Database db>;
+
+     label3:
+        virtualinvoke $r2.<SQLite.Database: void exec(java.lang.String,SQLite.Callback)>($r1, $r0);
+
+     label4:
+        return;
+
+     label5:
+        $r3 := @caughtexception;
+
+        $r4 = $r0.<SQLite.Shell: java.io.PrintWriter err>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SQL Error: ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r3);
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r4.<java.io.PrintWriter: void println(java.lang.String)>($r1);
+
+        $r4 = $r0.<SQLite.Shell: java.io.PrintWriter err>;
+
+        virtualinvoke $r4.<java.io.PrintWriter: void flush()>();
+
+        return;
+
+        catch SQLite.Exception from label3 to label4 with label5;
+    }
+
+    void do_input(java.io.BufferedReader)
+    {
+        SQLite.Shell $r0;
+        java.io.BufferedReader $r1;
+        java.lang.String $r2, $r3, $r4;
+        boolean $z0;
+        java.io.PrintWriter $r5;
+        int $i0;
+        char $c1;
+        SQLite.Database $r6;
+        java.lang.StringBuilder $r7;
+        SQLite.Exception $r8;
+
+        $r0 := @this: SQLite.Shell;
+
+        $r1 := @parameter0: java.io.BufferedReader;
+
+        $r2 = null;
+
+        $r3 = "SQLITE> ";
+
+     label01:
+        $r4 = virtualinvoke $r0.<SQLite.Shell: java.lang.String read_line(java.io.BufferedReader,java.lang.String)>($r1, $r3);
+
+        if $r4 == null goto label12;
+
+        $z0 = $r0.<SQLite.Shell: boolean echo>;
+
+        if $z0 == 0 goto label02;
+
+        $r5 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        virtualinvoke $r5.<java.io.PrintWriter: void println(java.lang.String)>($r4);
+
+     label02:
+        $i0 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        if $i0 <= 0 goto label04;
+
+        $c1 = virtualinvoke $r4.<java.lang.String: char charAt(int)>(0);
+
+        if $c1 != 46 goto label04;
+
+        virtualinvoke $r0.<SQLite.Shell: void do_meta(java.lang.String)>($r4);
+
+     label03:
+        $r5 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        virtualinvoke $r5.<java.io.PrintWriter: void flush()>();
+
+        goto label01;
+
+     label04:
+        if $r2 != null goto label08;
+
+        $r2 = $r4;
+
+     label05:
+        $z0 = staticinvoke <SQLite.Database: boolean complete(java.lang.String)>($r2);
+
+        if $z0 == 0 goto label11;
+
+        $r6 = $r0.<SQLite.Shell: SQLite.Database db>;
+
+     label06:
+        virtualinvoke $r6.<SQLite.Database: void exec(java.lang.String,SQLite.Callback)>($r2, $r0);
+
+     label07:
+        $r2 = null;
+
+        $r3 = "SQLITE> ";
+
+        goto label03;
+
+     label08:
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r2 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label05;
+
+     label09:
+        $r8 := @caughtexception;
+
+        $z0 = $r0.<SQLite.Shell: boolean echo>;
+
+        if $z0 != 0 goto label10;
+
+        $r5 = $r0.<SQLite.Shell: java.io.PrintWriter err>;
+
+        virtualinvoke $r5.<java.io.PrintWriter: void println(java.lang.String)>($r2);
+
+     label10:
+        $r5 = $r0.<SQLite.Shell: java.io.PrintWriter err>;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SQL Error: ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+        $r2 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.io.PrintWriter: void println(java.lang.String)>($r2);
+
+        $r5 = $r0.<SQLite.Shell: java.io.PrintWriter err>;
+
+        virtualinvoke $r5.<java.io.PrintWriter: void flush()>();
+
+        goto label07;
+
+     label11:
+        $r3 = "SQLITE? ";
+
+        goto label03;
+
+     label12:
+        if $r2 == null goto label13;
+
+        $r5 = $r0.<SQLite.Shell: java.io.PrintWriter err>;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Incomplete SQL: ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.io.PrintWriter: void println(java.lang.String)>($r2);
+
+        $r5 = $r0.<SQLite.Shell: java.io.PrintWriter err>;
+
+        virtualinvoke $r5.<java.io.PrintWriter: void flush()>();
+
+        return;
+
+     label13:
+        return;
+
+        catch SQLite.Exception from label06 to label07 with label09;
+    }
+
+    void do_meta(java.lang.String)
+    {
+        SQLite.Shell $r0;
+        java.lang.String[] $r1, $r9;
+        java.util.StringTokenizer $r2;
+        java.lang.String $r3, $r4;
+        int $i0, $i1;
+        boolean $z0;
+        SQLite.DBDump $r5;
+        SQLite.Database $r6;
+        java.io.PrintWriter $r7;
+        SQLite.TableResult $r8;
+        java.util.Vector $r10;
+        java.lang.Object $r11;
+        SQLite.Exception $r12, $r14, $r15, $r16, $r17, $r18;
+        java.lang.StringBuilder $r13;
+
+        $r0 := @this: SQLite.Shell;
+
+        $r3 := @parameter0: java.lang.String;
+
+        $r2 = new java.util.StringTokenizer;
+
+        $r3 = virtualinvoke $r3.<java.lang.String: java.lang.String toLowerCase()>();
+
+        specialinvoke $r2.<java.util.StringTokenizer: void <init>(java.lang.String)>($r3);
+
+        $i0 = virtualinvoke $r2.<java.util.StringTokenizer: int countTokens()>();
+
+        if $i0 > 0 goto label01;
+
+        return;
+
+     label01:
+        $r3 = virtualinvoke $r2.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $i0 = $i0 - 1;
+
+        $r1 = newarray (java.lang.String)[$i0];
+
+        $i0 = 0;
+
+     label02:
+        $z0 = virtualinvoke $r2.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z0 == 0 goto label03;
+
+        $r4 = virtualinvoke $r2.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $r1[$i0] = $r4;
+
+        $i0 = $i0 + 1;
+
+        goto label02;
+
+     label03:
+        $i0 = virtualinvoke $r3.<java.lang.String: int compareTo(java.lang.String)>(".dump");
+
+        if $i0 != 0 goto label04;
+
+        $r5 = new SQLite.DBDump;
+
+        specialinvoke $r5.<SQLite.DBDump: void <init>(SQLite.Shell,java.lang.String[])>($r0, $r1);
+
+        return;
+
+     label04:
+        $i0 = virtualinvoke $r3.<java.lang.String: int compareTo(java.lang.String)>(".echo");
+
+        if $i0 != 0 goto label06;
+
+        $i0 = lengthof $r1;
+
+        if $i0 <= 0 goto label43;
+
+        $r3 = $r1[0];
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean startsWith(java.lang.String)>("y");
+
+        if $z0 != 0 goto label05;
+
+        $r3 = $r1[0];
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean startsWith(java.lang.String)>("on");
+
+        if $z0 == 0 goto label44;
+
+     label05:
+        $r0.<SQLite.Shell: boolean echo> = 1;
+
+        return;
+
+     label06:
+        $i0 = virtualinvoke $r3.<java.lang.String: int compareTo(java.lang.String)>(".exit");
+
+        if $i0 != 0 goto label09;
+
+        $r6 = $r0.<SQLite.Shell: SQLite.Database db>;
+
+     label07:
+        virtualinvoke $r6.<SQLite.Database: void close()>();
+
+     label08:
+        staticinvoke <java.lang.System: void exit(int)>(0);
+
+     label09:
+        $i0 = virtualinvoke $r3.<java.lang.String: int compareTo(java.lang.String)>(".header");
+
+        if $i0 != 0 goto label11;
+
+        $i0 = lengthof $r1;
+
+        if $i0 <= 0 goto label45;
+
+        $r3 = $r1[0];
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean startsWith(java.lang.String)>("y");
+
+        if $z0 != 0 goto label10;
+
+        $r3 = $r1[0];
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean startsWith(java.lang.String)>("on");
+
+        if $z0 == 0 goto label46;
+
+     label10:
+        $r0.<SQLite.Shell: boolean showHeader> = 1;
+
+        return;
+
+     label11:
+        $i0 = virtualinvoke $r3.<java.lang.String: int compareTo(java.lang.String)>(".help");
+
+        if $i0 != 0 goto label12;
+
+        $r7 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        virtualinvoke $r7.<java.io.PrintWriter: void println(java.lang.String)>(".dump ?TABLE? ...  Dump database in text fmt");
+
+        $r7 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        virtualinvoke $r7.<java.io.PrintWriter: void println(java.lang.String)>(".echo ON|OFF       Command echo on or off");
+
+        $r7 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        virtualinvoke $r7.<java.io.PrintWriter: void println(java.lang.String)>(".enc ?NAME?        Change encoding");
+
+        $r7 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        virtualinvoke $r7.<java.io.PrintWriter: void println(java.lang.String)>(".exit              Exit program");
+
+        $r7 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        virtualinvoke $r7.<java.io.PrintWriter: void println(java.lang.String)>(".header ON|OFF     Display headers on or off");
+
+        $r7 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        virtualinvoke $r7.<java.io.PrintWriter: void println(java.lang.String)>(".help              This message");
+
+        $r7 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        virtualinvoke $r7.<java.io.PrintWriter: void println(java.lang.String)>(".mode MODE         Set output mode to\n                   line, column, insert\n                   list, or html");
+
+        $r7 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        virtualinvoke $r7.<java.io.PrintWriter: void println(java.lang.String)>(".mode insert TABLE Generate SQL insert stmts");
+
+        $r7 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        virtualinvoke $r7.<java.io.PrintWriter: void println(java.lang.String)>(".schema ?PATTERN?  List table schema");
+
+        $r7 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        virtualinvoke $r7.<java.io.PrintWriter: void println(java.lang.String)>(".separator STRING  Set separator string");
+
+        $r7 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        virtualinvoke $r7.<java.io.PrintWriter: void println(java.lang.String)>(".tables ?PATTERN?  List table names");
+
+        return;
+
+     label12:
+        $i0 = virtualinvoke $r3.<java.lang.String: int compareTo(java.lang.String)>(".mode");
+
+        if $i0 != 0 goto label17;
+
+        $i0 = lengthof $r1;
+
+        if $i0 <= 0 goto label47;
+
+        $r3 = $r1[0];
+
+        $i0 = virtualinvoke $r3.<java.lang.String: int compareTo(java.lang.String)>("line");
+
+        if $i0 != 0 goto label13;
+
+        $r0.<SQLite.Shell: int mode> = 0;
+
+        return;
+
+     label13:
+        $r3 = $r1[0];
+
+        $i0 = virtualinvoke $r3.<java.lang.String: int compareTo(java.lang.String)>("column");
+
+        if $i0 != 0 goto label14;
+
+        $r0.<SQLite.Shell: int mode> = 1;
+
+        return;
+
+     label14:
+        $r3 = $r1[0];
+
+        $i0 = virtualinvoke $r3.<java.lang.String: int compareTo(java.lang.String)>("list");
+
+        if $i0 != 0 goto label15;
+
+        $r0.<SQLite.Shell: int mode> = 2;
+
+        return;
+
+     label15:
+        $r3 = $r1[0];
+
+        $i0 = virtualinvoke $r3.<java.lang.String: int compareTo(java.lang.String)>("html");
+
+        if $i0 != 0 goto label16;
+
+        $r0.<SQLite.Shell: int mode> = 4;
+
+        return;
+
+     label16:
+        $r3 = $r1[0];
+
+        $i0 = virtualinvoke $r3.<java.lang.String: int compareTo(java.lang.String)>("insert");
+
+        if $i0 != 0 goto label48;
+
+        $r0.<SQLite.Shell: int mode> = 5;
+
+        $i0 = lengthof $r1;
+
+        if $i0 <= 1 goto label49;
+
+        $r3 = $r1[1];
+
+        $r0.<SQLite.Shell: java.lang.String destTable> = $r3;
+
+        return;
+
+     label17:
+        $i0 = virtualinvoke $r3.<java.lang.String: int compareTo(java.lang.String)>(".separator");
+
+        if $i0 != 0 goto label18;
+
+        $i0 = lengthof $r1;
+
+        if $i0 <= 0 goto label50;
+
+        $r3 = $r1[0];
+
+        $r0.<SQLite.Shell: java.lang.String sep> = $r3;
+
+        return;
+
+     label18:
+        $i0 = virtualinvoke $r3.<java.lang.String: int compareTo(java.lang.String)>(".tables");
+
+        if $i0 != 0 goto label28;
+
+        $r8 = null;
+
+        $i0 = lengthof $r1;
+
+        if $i0 <= 0 goto label24;
+
+        $r9 = newarray (java.lang.String)[1];
+
+        $r3 = $r1[0];
+
+        $r9[0] = $r3;
+
+        $r6 = $r0.<SQLite.Shell: SQLite.Database db>;
+
+     label19:
+        $r8 = virtualinvoke $r6.<SQLite.Database: SQLite.TableResult get_table(java.lang.String,java.lang.String[])>("SELECT name FROM sqlite_master WHERE type=\'table\' AND name LIKE \'%%%q%%\' ORDER BY name", $r9);
+
+     label20:
+        if $r8 == null goto label51;
+
+        $i0 = 0;
+
+     label21:
+        $i1 = $r8.<SQLite.TableResult: int nrows>;
+
+        if $i0 >= $i1 goto label52;
+
+        $r10 = $r8.<SQLite.TableResult: java.util.Vector rows>;
+
+        $r11 = virtualinvoke $r10.<java.util.Vector: java.lang.Object elementAt(int)>($i0);
+
+        $r1 = (java.lang.String[]) $r11;
+
+        $r1 = (java.lang.String[]) $r1;
+
+        $r3 = $r1[0];
+
+        if $r3 == null goto label22;
+
+        $r7 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        virtualinvoke $r7.<java.io.PrintWriter: void println(java.lang.String)>($r3);
+
+     label22:
+        $i0 = $i0 + 1;
+
+        goto label21;
+
+     label23:
+        $r12 := @caughtexception;
+
+        $r7 = $r0.<SQLite.Shell: java.io.PrintWriter err>;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SQL Error: ");
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r12);
+
+        $r3 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r7.<java.io.PrintWriter: void println(java.lang.String)>($r3);
+
+        $r7 = $r0.<SQLite.Shell: java.io.PrintWriter err>;
+
+        virtualinvoke $r7.<java.io.PrintWriter: void flush()>();
+
+        goto label20;
+
+     label24:
+        $r6 = $r0.<SQLite.Shell: SQLite.Database db>;
+
+     label25:
+        $r8 = virtualinvoke $r6.<SQLite.Database: SQLite.TableResult get_table(java.lang.String)>("SELECT name FROM sqlite_master WHERE type=\'table\' ORDER BY name");
+
+     label26:
+        goto label20;
+
+     label27:
+        $r14 := @caughtexception;
+
+        $r7 = $r0.<SQLite.Shell: java.io.PrintWriter err>;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SQL Error: ");
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r14);
+
+        $r3 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r7.<java.io.PrintWriter: void println(java.lang.String)>($r3);
+
+        $r7 = $r0.<SQLite.Shell: java.io.PrintWriter err>;
+
+        virtualinvoke $r7.<java.io.PrintWriter: void flush()>();
+
+        goto label20;
+
+     label28:
+        $i0 = virtualinvoke $r3.<java.lang.String: int compareTo(java.lang.String)>(".schema");
+
+        if $i0 != 0 goto label36;
+
+        $i0 = lengthof $r1;
+
+        if $i0 <= 0 goto label32;
+
+        $r9 = newarray (java.lang.String)[1];
+
+        $r3 = $r1[0];
+
+        $r9[0] = $r3;
+
+        $r6 = $r0.<SQLite.Shell: SQLite.Database db>;
+
+     label29:
+        virtualinvoke $r6.<SQLite.Database: void exec(java.lang.String,SQLite.Callback,java.lang.String[])>("SELECT sql FROM sqlite_master WHERE type!=\'meta\' AND name LIKE \'%%%q%%\' AND sql NOTNULL ORDER BY type DESC, name", $r0, $r9);
+
+     label30:
+        return;
+
+     label31:
+        $r15 := @caughtexception;
+
+        $r7 = $r0.<SQLite.Shell: java.io.PrintWriter err>;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SQL Error: ");
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r15);
+
+        $r3 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r7.<java.io.PrintWriter: void println(java.lang.String)>($r3);
+
+        $r7 = $r0.<SQLite.Shell: java.io.PrintWriter err>;
+
+        virtualinvoke $r7.<java.io.PrintWriter: void flush()>();
+
+        return;
+
+     label32:
+        $r6 = $r0.<SQLite.Shell: SQLite.Database db>;
+
+     label33:
+        virtualinvoke $r6.<SQLite.Database: void exec(java.lang.String,SQLite.Callback)>("SELECT sql FROM sqlite_master WHERE type!=\'meta\' AND sql NOTNULL ORDER BY tbl_name, type DESC, name", $r0);
+
+     label34:
+        return;
+
+     label35:
+        $r16 := @caughtexception;
+
+        $r7 = $r0.<SQLite.Shell: java.io.PrintWriter err>;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SQL Error: ");
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r16);
+
+        $r3 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r7.<java.io.PrintWriter: void println(java.lang.String)>($r3);
+
+        $r7 = $r0.<SQLite.Shell: java.io.PrintWriter err>;
+
+        virtualinvoke $r7.<java.io.PrintWriter: void flush()>();
+
+        return;
+
+     label36:
+        $i0 = virtualinvoke $r3.<java.lang.String: int compareTo(java.lang.String)>(".enc");
+
+        if $i0 != 0 goto label41;
+
+        $r6 = $r0.<SQLite.Shell: SQLite.Database db>;
+
+        $i0 = lengthof $r1;
+
+        if $i0 <= 0 goto label40;
+
+        $r3 = $r1[0];
+
+     label37:
+        virtualinvoke $r6.<SQLite.Database: void set_encoding(java.lang.String)>($r3);
+
+     label38:
+        return;
+
+     label39:
+        $r17 := @caughtexception;
+
+        $r7 = $r0.<SQLite.Shell: java.io.PrintWriter err>;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r17);
+
+        $r3 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r7.<java.io.PrintWriter: void println(java.lang.String)>($r3);
+
+        $r7 = $r0.<SQLite.Shell: java.io.PrintWriter err>;
+
+        virtualinvoke $r7.<java.io.PrintWriter: void flush()>();
+
+        return;
+
+     label40:
+        $r3 = null;
+
+        goto label37;
+
+     label41:
+        $r7 = $r0.<SQLite.Shell: java.io.PrintWriter err>;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown command \'");
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r3 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r7.<java.io.PrintWriter: void println(java.lang.String)>($r3);
+
+        $r7 = $r0.<SQLite.Shell: java.io.PrintWriter err>;
+
+        virtualinvoke $r7.<java.io.PrintWriter: void flush()>();
+
+        return;
+
+     label42:
+        $r18 := @caughtexception;
+
+        goto label08;
+
+     label43:
+        return;
+
+     label44:
+        return;
+
+     label45:
+        return;
+
+     label46:
+        return;
+
+     label47:
+        return;
+
+     label48:
+        return;
+
+     label49:
+        return;
+
+     label50:
+        return;
+
+     label51:
+        return;
+
+     label52:
+        return;
+
+        catch SQLite.Exception from label07 to label08 with label42;
+        catch SQLite.Exception from label19 to label20 with label23;
+        catch SQLite.Exception from label25 to label26 with label27;
+        catch SQLite.Exception from label29 to label30 with label31;
+        catch SQLite.Exception from label33 to label34 with label35;
+        catch SQLite.Exception from label37 to label38 with label39;
+    }
+
+    public boolean newrow(java.lang.String[])
+    {
+        SQLite.Shell $r0;
+        java.lang.String[] $r1, $r4;
+        int $i0, $i1, $i2;
+        java.io.PrintWriter $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r5, $r7;
+        int[] $r6;
+        boolean $z0;
+
+        $r0 := @this: SQLite.Shell;
+
+        $r1 := @parameter0: java.lang.String[];
+
+        $i0 = $r0.<SQLite.Shell: int mode>;
+
+        lookupswitch($i0)
+        {
+            case 0: goto label02;
+            case 1: goto label07;
+            case 2: goto label17;
+            case 3: goto label17;
+            case 4: goto label28;
+            case 5: goto label34;
+            case 6: goto label43;
+            default: goto label01;
+        };
+
+     label01:
+        return 0;
+
+     label02:
+        $i0 = lengthof $r1;
+
+        if $i0 == 0 goto label01;
+
+        $i0 = $r0.<SQLite.Shell: int count>;
+
+        $i1 = $i0 + 1;
+
+        $r0.<SQLite.Shell: int count> = $i1;
+
+        if $i0 <= 0 goto label03;
+
+        $r2 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("");
+
+     label03:
+        $i0 = 0;
+
+     label04:
+        $i1 = lengthof $r1;
+
+        if $i0 >= $i1 goto label01;
+
+        $r2 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = $r0.<SQLite.Shell: java.lang.String[] cols>;
+
+        $r5 = $r4[$i0];
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" = ");
+
+        $r5 = $r1[$i0];
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        if $r5 != null goto label06;
+
+        $r5 = "NULL";
+
+     label05:
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r5);
+
+        $i0 = $i0 + 1;
+
+        goto label04;
+
+     label06:
+        $r5 = $r1[$i0];
+
+        goto label05;
+
+     label07:
+        $r5 = "";
+
+        $i0 = $r0.<SQLite.Shell: int count>;
+
+        $i1 = $i0 + 1;
+
+        $r0.<SQLite.Shell: int count> = $i1;
+
+        if $i0 != 0 goto label12;
+
+        $i0 = lengthof $r1;
+
+        $r6 = newarray (int)[$i0];
+
+        $r0.<SQLite.Shell: int[] colwidth> = $r6;
+
+        $i0 = 0;
+
+     label08:
+        $i1 = lengthof $r1;
+
+        if $i0 >= $i1 goto label11;
+
+        $r4 = $r0.<SQLite.Shell: java.lang.String[] cols>;
+
+        $r7 = $r4[$i0];
+
+        $i1 = virtualinvoke $r7.<java.lang.String: int length()>();
+
+        $i2 = $i1;
+
+        if $i1 >= 10 goto label09;
+
+        $i2 = 10;
+
+     label09:
+        $r6 = $r0.<SQLite.Shell: int[] colwidth>;
+
+        $r6[$i0] = $i2;
+
+        $z0 = $r0.<SQLite.Shell: boolean showHeader>;
+
+        if $z0 == 0 goto label10;
+
+        $r2 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r4 = $r0.<SQLite.Shell: java.lang.String[] cols>;
+
+        $r5 = $r4[$i0];
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void print(java.lang.String)>($r5);
+
+        $r5 = " ";
+
+     label10:
+        $i0 = $i0 + 1;
+
+        goto label08;
+
+     label11:
+        $z0 = $r0.<SQLite.Shell: boolean showHeader>;
+
+        if $z0 == 0 goto label12;
+
+        $r2 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("");
+
+     label12:
+        $i0 = lengthof $r1;
+
+        if $i0 == 0 goto label01;
+
+        $r5 = "";
+
+        $i0 = 0;
+
+     label13:
+        $i1 = lengthof $r1;
+
+        if $i0 >= $i1 goto label16;
+
+        $r2 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = $r1[$i0];
+
+        if $r5 != null goto label15;
+
+        $r5 = "NULL";
+
+     label14:
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void print(java.lang.String)>($r5);
+
+        $r5 = " ";
+
+        $i0 = $i0 + 1;
+
+        goto label13;
+
+     label15:
+        $r5 = $r1[$i0];
+
+        goto label14;
+
+     label16:
+        $r2 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("");
+
+        goto label01;
+
+     label17:
+        $i0 = $r0.<SQLite.Shell: int count>;
+
+        $i1 = $i0 + 1;
+
+        $r0.<SQLite.Shell: int count> = $i1;
+
+        if $i0 != 0 goto label21;
+
+        $z0 = $r0.<SQLite.Shell: boolean showHeader>;
+
+        if $z0 == 0 goto label21;
+
+        $i0 = 0;
+
+     label18:
+        $i1 = lengthof $r1;
+
+        if $i0 >= $i1 goto label21;
+
+        $r2 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = $r0.<SQLite.Shell: java.lang.String[] cols>;
+
+        $r5 = $r4[$i0];
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $i1 = lengthof $r1;
+
+        $i1 = $i1 - 1;
+
+        if $i0 != $i1 goto label20;
+
+        $r5 = "\n";
+
+     label19:
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void print(java.lang.String)>($r5);
+
+        $i0 = $i0 + 1;
+
+        goto label18;
+
+     label20:
+        $r5 = $r0.<SQLite.Shell: java.lang.String sep>;
+
+        goto label19;
+
+     label21:
+        $i0 = lengthof $r1;
+
+        if $i0 == 0 goto label01;
+
+        $i0 = 0;
+
+     label22:
+        $i1 = lengthof $r1;
+
+        if $i0 >= $i1 goto label27;
+
+        $r2 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        $r5 = $r1[$i0];
+
+        if $r5 != null goto label25;
+
+        $r5 = "NULL";
+
+     label23:
+        virtualinvoke $r2.<java.io.PrintWriter: void print(java.lang.String)>($r5);
+
+        $i1 = $r0.<SQLite.Shell: int mode>;
+
+        if $i1 != 3 goto label26;
+
+        $r2 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        virtualinvoke $r2.<java.io.PrintWriter: void print(java.lang.String)>(";");
+
+     label24:
+        $i0 = $i0 + 1;
+
+        goto label22;
+
+     label25:
+        $r5 = $r1[$i0];
+
+        goto label23;
+
+     label26:
+        $i1 = lengthof $r1;
+
+        $i1 = $i1 - 1;
+
+        if $i0 >= $i1 goto label24;
+
+        $r2 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        $r5 = $r0.<SQLite.Shell: java.lang.String sep>;
+
+        virtualinvoke $r2.<java.io.PrintWriter: void print(java.lang.String)>($r5);
+
+        goto label24;
+
+     label27:
+        $r2 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("");
+
+        goto label01;
+
+     label28:
+        $i0 = $r0.<SQLite.Shell: int count>;
+
+        $i1 = $i0 + 1;
+
+        $r0.<SQLite.Shell: int count> = $i1;
+
+        if $i0 != 0 goto label31;
+
+        $z0 = $r0.<SQLite.Shell: boolean showHeader>;
+
+        if $z0 == 0 goto label31;
+
+        $r2 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        virtualinvoke $r2.<java.io.PrintWriter: void print(java.lang.String)>("<TR>");
+
+        $i0 = 0;
+
+     label29:
+        $i1 = lengthof $r1;
+
+        if $i0 >= $i1 goto label30;
+
+        $r2 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<TH>");
+
+        $r4 = $r0.<SQLite.Shell: java.lang.String[] cols>;
+
+        $r5 = $r4[$i0];
+
+        $r5 = staticinvoke <SQLite.Shell: java.lang.String html_quote(java.lang.String)>($r5);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("</TH>");
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void print(java.lang.String)>($r5);
+
+        $i0 = $i0 + 1;
+
+        goto label29;
+
+     label30:
+        $r2 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("</TR>");
+
+     label31:
+        $i0 = lengthof $r1;
+
+        if $i0 == 0 goto label01;
+
+        $r2 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        virtualinvoke $r2.<java.io.PrintWriter: void print(java.lang.String)>("<TR>");
+
+        $i0 = 0;
+
+     label32:
+        $i1 = lengthof $r1;
+
+        if $i0 >= $i1 goto label33;
+
+        $r2 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<TD>");
+
+        $r5 = $r1[$i0];
+
+        $r5 = staticinvoke <SQLite.Shell: java.lang.String html_quote(java.lang.String)>($r5);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("</TD>");
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void print(java.lang.String)>($r5);
+
+        $i0 = $i0 + 1;
+
+        goto label32;
+
+     label33:
+        $r2 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("</TR>");
+
+        goto label01;
+
+     label34:
+        $i0 = lengthof $r1;
+
+        if $i0 == 0 goto label01;
+
+        $r5 = $r0.<SQLite.Shell: java.lang.String tableName>;
+
+        $r7 = $r0.<SQLite.Shell: java.lang.String destTable>;
+
+        if $r7 == null goto label35;
+
+        $r5 = $r0.<SQLite.Shell: java.lang.String destTable>;
+
+     label35:
+        $r2 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("INSERT INTO ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" VALUES(");
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void print(java.lang.String)>($r5);
+
+        $i0 = 0;
+
+     label36:
+        $i1 = lengthof $r1;
+
+        if $i0 >= $i1 goto label42;
+
+        if $i0 <= 0 goto label39;
+
+        $r5 = ",";
+
+     label37:
+        $r7 = $r1[$i0];
+
+        if $r7 != null goto label40;
+
+        $r2 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("NULL");
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void print(java.lang.String)>($r5);
+
+     label38:
+        $i0 = $i0 + 1;
+
+        goto label36;
+
+     label39:
+        $r5 = "";
+
+        goto label37;
+
+     label40:
+        $r7 = $r1[$i0];
+
+        $z0 = staticinvoke <SQLite.Shell: boolean is_numeric(java.lang.String)>($r7);
+
+        if $z0 == 0 goto label41;
+
+        $r2 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = $r1[$i0];
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void print(java.lang.String)>($r5);
+
+        goto label38;
+
+     label41:
+        $r2 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = $r1[$i0];
+
+        $r5 = staticinvoke <SQLite.Shell: java.lang.String sql_quote(java.lang.String)>($r5);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void print(java.lang.String)>($r5);
+
+        goto label38;
+
+     label42:
+        $r2 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>(");");
+
+        goto label01;
+
+     label43:
+        $i0 = lengthof $r1;
+
+        if $i0 == 0 goto label01;
+
+        $r5 = $r0.<SQLite.Shell: java.lang.String tableName>;
+
+        $r7 = $r0.<SQLite.Shell: java.lang.String destTable>;
+
+        if $r7 == null goto label44;
+
+        $r5 = $r0.<SQLite.Shell: java.lang.String destTable>;
+
+     label44:
+        $r2 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("INSERT INTO ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" VALUES(");
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void print(java.lang.String)>($r5);
+
+        $i0 = 0;
+
+     label45:
+        $i1 = lengthof $r1;
+
+        if $i0 >= $i1 goto label48;
+
+        if $i0 <= 0 goto label47;
+
+        $r5 = ",";
+
+     label46:
+        $r2 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = $r1[$i0];
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void print(java.lang.String)>($r5);
+
+        $i0 = $i0 + 1;
+
+        goto label45;
+
+     label47:
+        $r5 = "";
+
+        goto label46;
+
+     label48:
+        $r2 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>(");");
+
+        goto label01;
+    }
+
+    java.lang.String read_line(java.io.BufferedReader, java.lang.String)
+    {
+        SQLite.Shell $r0;
+        java.io.BufferedReader $r1;
+        java.lang.String $r2;
+        java.io.PrintWriter $r3;
+        java.io.IOException $r4;
+
+        $r0 := @this: SQLite.Shell;
+
+        $r1 := @parameter0: java.io.BufferedReader;
+
+        $r2 := @parameter1: java.lang.String;
+
+        if $r2 == null goto label2;
+
+        $r3 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+     label1:
+        virtualinvoke $r3.<java.io.PrintWriter: void print(java.lang.String)>($r2);
+
+        $r3 = $r0.<SQLite.Shell: java.io.PrintWriter pw>;
+
+        virtualinvoke $r3.<java.io.PrintWriter: void flush()>();
+
+     label2:
+        $r2 = virtualinvoke $r1.<java.io.BufferedReader: java.lang.String readLine()>();
+
+     label3:
+        return $r2;
+
+     label4:
+        $r4 := @caughtexception;
+
+        return null;
+
+        catch java.io.IOException from label1 to label3 with label4;
+    }
+
+    void set_table_name(java.lang.String)
+    {
+        SQLite.Shell $r0;
+        java.lang.String $r1;
+
+        $r0 := @this: SQLite.Shell;
+
+        $r1 := @parameter0: java.lang.String;
+
+        if $r1 != null goto label1;
+
+        $r0.<SQLite.Shell: java.lang.String tableName> = "";
+
+        return;
+
+     label1:
+        $r1 = staticinvoke <SQLite.Shell: java.lang.String sql_quote(java.lang.String)>($r1);
+
+        $r0.<SQLite.Shell: java.lang.String tableName> = $r1;
+
+        return;
+    }
+
+    public void types(java.lang.String[])
+    {
+        SQLite.Shell $r0;
+        java.lang.String[] $r1;
+
+        $r0 := @this: SQLite.Shell;
+
+        $r1 := @parameter0: java.lang.String[];
+
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <SQLite.Shell: int MODE_Semi> = 3;
+
+        <SQLite.Shell: int MODE_List> = 2;
+
+        <SQLite.Shell: int MODE_Line> = 0;
+
+        <SQLite.Shell: int MODE_Insert2> = 6;
+
+        <SQLite.Shell: int MODE_Insert> = 5;
+
+        <SQLite.Shell: int MODE_Html> = 4;
+
+        <SQLite.Shell: int MODE_Column> = 1;
+
+        return;
+    }
+}

@@ -1,0 +1,3072 @@
+public abstract class com.google.android.providers.AbstractGDataSyncAdapter extends android.content.TempProviderSyncAdapter
+{
+    public static final int ENTRY_DELETED;
+    public static final int ENTRY_INVALID;
+    public static final int ENTRY_OK;
+    private static final java.lang.String SCHEMA_HTTP;
+    private static final java.lang.String SCHEMA_HTTPS;
+    private static final android.net.Uri SYNC_STATE_CONTENT_URI;
+    protected static final java.lang.String TAG;
+    private java.lang.String mAccount;
+    private java.lang.String mAuthToken;
+    protected int mServerEntries;
+    protected int mServerQueries;
+    protected volatile boolean mSyncCanceled;
+
+    static void <clinit>()
+    {
+        android.net.Uri $r0;
+
+        <com.google.android.providers.AbstractGDataSyncAdapter: java.lang.String TAG> = "Sync";
+
+        <com.google.android.providers.AbstractGDataSyncAdapter: java.lang.String SCHEMA_HTTPS> = "https://";
+
+        <com.google.android.providers.AbstractGDataSyncAdapter: java.lang.String SCHEMA_HTTP> = "http://";
+
+        <com.google.android.providers.AbstractGDataSyncAdapter: int ENTRY_OK> = 0;
+
+        <com.google.android.providers.AbstractGDataSyncAdapter: int ENTRY_INVALID> = 2;
+
+        <com.google.android.providers.AbstractGDataSyncAdapter: int ENTRY_DELETED> = 1;
+
+        $r0 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>("content://syncstate/state");
+
+        <com.google.android.providers.AbstractGDataSyncAdapter: android.net.Uri SYNC_STATE_CONTENT_URI> = $r0;
+
+        return;
+    }
+
+    protected void <init>(android.content.Context, android.content.SyncableContentProvider)
+    {
+        com.google.android.providers.AbstractGDataSyncAdapter $r0;
+        android.content.Context $r1;
+        android.content.SyncableContentProvider $r2;
+
+        $r0 := @this: com.google.android.providers.AbstractGDataSyncAdapter;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: android.content.SyncableContentProvider;
+
+        specialinvoke $r0.<android.content.TempProviderSyncAdapter: void <init>(android.content.SyncableContentProvider)>($r2);
+
+        $r0.<com.google.android.providers.AbstractGDataSyncAdapter: java.lang.String mAccount> = null;
+
+        $r0.<com.google.android.providers.AbstractGDataSyncAdapter: java.lang.String mAuthToken> = null;
+
+        $r0.<com.google.android.providers.AbstractGDataSyncAdapter: boolean mSyncCanceled> = 0;
+
+        virtualinvoke $r0.<android.content.TempProviderSyncAdapter: void setContext(android.content.Context)>($r1);
+
+        return;
+    }
+
+    private com.google.wireless.gdata.data.Entry getSingleEntry(java.lang.Class, java.lang.String)
+    {
+        com.google.android.providers.AbstractGDataSyncAdapter $r0;
+        java.lang.Class $r1;
+        java.lang.String $r2, $r4;
+        com.google.wireless.gdata.client.GDataServiceClient $r3;
+        com.google.wireless.gdata.data.Entry $r5;
+        java.lang.Exception $r6;
+        java.lang.StringBuilder $r7;
+
+        $r0 := @this: com.google.android.providers.AbstractGDataSyncAdapter;
+
+        $r1 := @parameter0: java.lang.Class;
+
+        $r2 := @parameter1: java.lang.String;
+
+     label1:
+        $r3 = virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: com.google.wireless.gdata.client.GDataServiceClient getGDataServiceClient()>();
+
+        $r4 = $r0.<com.google.android.providers.AbstractGDataSyncAdapter: java.lang.String mAuthToken>;
+
+        $r5 = virtualinvoke $r3.<com.google.wireless.gdata.client.GDataServiceClient: com.google.wireless.gdata.data.Entry getEntry(java.lang.Class,java.lang.String,java.lang.String)>($r1, $r2, $r4);
+
+     label2:
+        return $r5;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("error while fetching ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" as type ");
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.String getName()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String,java.lang.Throwable)>("Sync", $r2, $r6);
+
+        return null;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public static byte[] newBytesFromGDataSyncData(com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData)
+    {
+        com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData $r0;
+        android.os.Parcel $r1;
+        byte[] $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @parameter0: com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData;
+
+        $r1 = staticinvoke <android.os.Parcel: android.os.Parcel obtain()>();
+
+     label1:
+        virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData: void writeToParcel(android.os.Parcel,int)>($r1, 0);
+
+        $r2 = virtualinvoke $r1.<android.os.Parcel: byte[] marshall()>();
+
+     label2:
+        virtualinvoke $r1.<android.os.Parcel: void recycle()>();
+
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        virtualinvoke $r1.<android.os.Parcel: void recycle()>();
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public static com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData newGDataSyncDataFromBytes(byte[])
+    {
+        byte[] $r0;
+        android.os.Parcel $r1;
+        int $i0;
+        android.os.Parcelable$Creator $r2;
+        java.lang.Object $r3;
+        com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData $r4;
+        java.lang.RuntimeException $r5;
+        java.lang.Throwable $r6;
+
+        $r0 := @parameter0: byte[];
+
+        if $r0 == null goto label5;
+
+        $r1 = staticinvoke <android.os.Parcel: android.os.Parcel obtain()>();
+
+        $i0 = lengthof $r0;
+
+        virtualinvoke $r1.<android.os.Parcel: void unmarshall(byte[],int,int)>($r0, 0, $i0);
+
+        virtualinvoke $r1.<android.os.Parcel: void setDataPosition(int)>(0);
+
+     label1:
+        $r2 = <com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData: android.os.Parcelable$Creator CREATOR>;
+
+     label2:
+        $r3 = interfaceinvoke $r2.<android.os.Parcelable$Creator: java.lang.Object createFromParcel(android.os.Parcel)>($r1);
+
+        $r4 = (com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData) $r3;
+
+     label3:
+        virtualinvoke $r1.<android.os.Parcel: void recycle()>();
+
+        return $r4;
+
+     label4:
+        $r5 := @caughtexception;
+
+        virtualinvoke $r1.<android.os.Parcel: void recycle()>();
+
+     label5:
+        return null;
+
+     label6:
+        $r6 := @caughtexception;
+
+        virtualinvoke $r1.<android.os.Parcel: void recycle()>();
+
+        throw $r6;
+
+        catch java.lang.RuntimeException from label2 to label3 with label4;
+        catch java.lang.Throwable from label1 to label3 with label6;
+    }
+
+    public static java.lang.String rewriteUrlforAccount(java.lang.String, java.lang.String)
+    {
+        java.lang.String $r0, $r1, $r2, $r6;
+        boolean $z0;
+        java.lang.IllegalArgumentException $r3;
+        java.lang.String[] $r4;
+        int $i0;
+        java.lang.StringBuilder $r5;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $r2 = "http://";
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r0);
+
+        if $z0 == 0 goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("account is empty");
+
+        throw $r3;
+
+     label1:
+        $r4 = virtualinvoke $r0.<java.lang.String: java.lang.String[] split(java.lang.String)>("@");
+
+        $i0 = lengthof $r4;
+
+        if $i0 == 2 goto label2;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("invalid account parameter, unable to find domain, ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r0);
+
+        $r0 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r0);
+
+        throw $r3;
+
+     label2:
+        $r0 = $r4[1];
+
+        $r6 = "gmail.com";
+
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>($r0);
+
+        if $z0 != 0 goto label3;
+
+        $r6 = "googlemail.com";
+
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>($r0);
+
+        if $z0 == 0 goto label4;
+
+     label3:
+        return $r1;
+
+     label4:
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>("https://");
+
+        if $z0 == 0 goto label5;
+
+        return $r1;
+
+     label5:
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>("http://");
+
+        if $z0 != 0 goto label6;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("invalid url parameter, unknown scheme: ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r0 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r0);
+
+        throw $r3;
+
+     label6:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("https://");
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        $r0 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r0);
+
+        $r0 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r0;
+    }
+
+    protected abstract java.lang.String cursorToEntry(android.content.SyncContext, android.database.Cursor, com.google.wireless.gdata.data.Entry, java.lang.Object) throws com.google.wireless.gdata.parser.ParseException;
+
+    protected abstract void deletedCursorToEntry(android.content.SyncContext, android.database.Cursor, com.google.wireless.gdata.data.Entry) throws com.google.wireless.gdata.parser.ParseException;
+
+    protected java.lang.String getAccount()
+    {
+        com.google.android.providers.AbstractGDataSyncAdapter $r0;
+        java.lang.String r1;
+
+        $r0 := @this: com.google.android.providers.AbstractGDataSyncAdapter;
+
+        r1 = $r0.<com.google.android.providers.AbstractGDataSyncAdapter: java.lang.String mAccount>;
+
+        return r1;
+    }
+
+    protected java.lang.String getAuthToken()
+    {
+        com.google.android.providers.AbstractGDataSyncAdapter $r0;
+        java.lang.String r1;
+
+        $r0 := @this: com.google.android.providers.AbstractGDataSyncAdapter;
+
+        r1 = $r0.<com.google.android.providers.AbstractGDataSyncAdapter: java.lang.String mAuthToken>;
+
+        return r1;
+    }
+
+    protected abstract android.database.Cursor getCursorForDeletedTable(android.content.ContentProvider, java.lang.Class);
+
+    protected abstract android.database.Cursor getCursorForTable(android.content.ContentProvider, java.lang.Class);
+
+    protected abstract java.lang.Class getFeedEntryClass();
+
+    protected abstract java.lang.String getFeedUrl(java.lang.String);
+
+    protected abstract com.google.wireless.gdata.client.GDataServiceClient getGDataServiceClient();
+
+    public int getMaxEntriesPerSync()
+    {
+        com.google.android.providers.AbstractGDataSyncAdapter $r0;
+
+        $r0 := @this: com.google.android.providers.AbstractGDataSyncAdapter;
+
+        return 200;
+    }
+
+    public void getServerDiffs(android.content.SyncContext, android.content.TempProviderSyncAdapter$SyncData, android.content.SyncableContentProvider, android.os.Bundle, java.lang.Object, android.content.SyncResult)
+    {
+        com.google.android.providers.AbstractGDataSyncAdapter $r0;
+        android.content.SyncContext $r1;
+        android.content.TempProviderSyncAdapter$SyncData $r2;
+        android.content.SyncableContentProvider $r3;
+        android.os.Bundle $r4;
+        java.lang.Object $r5, $r8;
+        android.content.SyncResult $r6;
+        java.lang.String $r7;
+        boolean $z0;
+        java.lang.Class $r9;
+        int $i0;
+        com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData $r10;
+
+        $r0 := @this: com.google.android.providers.AbstractGDataSyncAdapter;
+
+        $r1 := @parameter0: android.content.SyncContext;
+
+        $r2 := @parameter1: android.content.TempProviderSyncAdapter$SyncData;
+
+        $r3 := @parameter2: android.content.SyncableContentProvider;
+
+        $r4 := @parameter3: android.os.Bundle;
+
+        $r5 := @parameter4: java.lang.Object;
+
+        $r6 := @parameter5: android.content.SyncResult;
+
+        $r7 = virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: java.lang.String getAccount()>();
+
+        $r7 = virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: java.lang.String getFeedUrl(java.lang.String)>($r7);
+
+        if $r4 == null goto label1;
+
+        $z0 = virtualinvoke $r4.<android.os.Bundle: boolean containsKey(java.lang.String)>("feed");
+
+        if $z0 == 0 goto label1;
+
+        $r8 = virtualinvoke $r4.<android.os.Bundle: java.lang.Object get(java.lang.String)>("feed");
+
+        $r7 = (java.lang.String) $r8;
+
+     label1:
+        virtualinvoke $r1.<android.content.SyncContext: void setStatusText(java.lang.String)>("Downloading\u2026");
+
+        $r9 = virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: java.lang.Class getFeedEntryClass()>();
+
+        $i0 = virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: int getMaxEntriesPerSync()>();
+
+        $r10 = (com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData) $r2;
+
+        virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: void getServerDiffsImpl(android.content.SyncContext,android.content.SyncableContentProvider,java.lang.Class,java.lang.String,java.lang.Object,int,com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData,android.content.SyncResult)>($r1, $r3, $r9, $r7, $r5, $i0, $r10, $r6);
+
+        return;
+    }
+
+    protected void getServerDiffsImpl(android.content.SyncContext, android.content.SyncableContentProvider, java.lang.Class, java.lang.String, java.lang.Object, int, com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData, android.content.SyncResult)
+    {
+        com.google.android.providers.AbstractGDataSyncAdapter $r0;
+        android.content.SyncContext $r1;
+        android.content.SyncableContentProvider $r2;
+        java.lang.Class $r3;
+        java.lang.String $r4, $r12, $r15, $r18, $r20, $r22;
+        java.lang.Object $r5, $r10;
+        com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData $r6;
+        android.content.SyncResult $r7;
+        int $i0, $i1, $i2, $i5, $i6;
+        android.text.format.Time $r8, r41;
+        boolean $z0;
+        java.util.Map $r9;
+        com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData$FeedData $r11, r46;
+        long $l3, $l7, $l8, $l9, $l10;
+        com.google.wireless.gdata.client.GDataServiceClient $r13;
+        com.google.wireless.gdata.client.QueryParams $r14;
+        byte $b4;
+        java.lang.StringBuilder $r17, r42;
+        com.google.wireless.gdata.parser.GDataParser $r19, $r23;
+        com.google.wireless.gdata.data.Feed $r24;
+        com.google.wireless.gdata.data.Entry $r25, $r28;
+        java.net.URISyntaxException $r26;
+        android.content.SyncStats $r27;
+        com.google.wireless.gdata.parser.ParseException $r29, $r30, $r35;
+        android.database.sqlite.SQLiteDatabase $r31;
+        java.lang.IllegalStateException $r32, r45;
+        java.io.IOException $r33;
+        com.google.wireless.gdata.client.HttpException $r34;
+        java.lang.Throwable $r36, $r38;
+        java.lang.RuntimeException $r37;
+        android.content.Context $r39;
+        com.google.android.googlelogin.GoogleLoginServiceNotFoundException $r40;
+        java.lang.IllegalArgumentException r43;
+        java.net.URI r44;
+        android.content.ContentProvider r47;
+
+        $r0 := @this: com.google.android.providers.AbstractGDataSyncAdapter;
+
+        $r1 := @parameter0: android.content.SyncContext;
+
+        $r2 := @parameter1: android.content.SyncableContentProvider;
+
+        $r3 := @parameter2: java.lang.Class;
+
+        $r4 := @parameter3: java.lang.String;
+
+        $r5 := @parameter4: java.lang.Object;
+
+        $i2 := @parameter5: int;
+
+        $r6 := @parameter6: com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData;
+
+        $r7 := @parameter7: android.content.SyncResult;
+
+        $z0 = $r0.<com.google.android.providers.AbstractGDataSyncAdapter: boolean mSyncCanceled>;
+
+        if $z0 == 0 goto label001;
+
+        return;
+
+     label001:
+        $r9 = $r6.<com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData: java.util.Map feedData>;
+
+        $r10 = interfaceinvoke $r9.<java.util.Map: java.lang.Object get(java.lang.Object)>($r4);
+
+        $r11 = (com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData$FeedData) $r10;
+
+        if $r11 != null goto label002;
+
+        $r12 = virtualinvoke $r4.<java.lang.String: java.lang.String replaceFirst(java.lang.String,java.lang.String)>("^https://", "http://");
+
+        $r9 = $r6.<com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData: java.util.Map feedData>;
+
+        $r10 = interfaceinvoke $r9.<java.util.Map: java.lang.Object get(java.lang.Object)>($r12);
+
+        $r11 = (com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData$FeedData) $r10;
+
+     label002:
+        $l3 = 0L;
+
+        if $r11 == null goto label003;
+
+        $l3 = $r11.<com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData$FeedData: long lastUpdatedTime>;
+
+     label003:
+        r41 = new android.text.format.Time;
+
+        $r8 = r41;
+
+        specialinvoke r41.<android.text.format.Time: void <init>(java.lang.String)>("UTC");
+
+        $r13 = virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: com.google.wireless.gdata.client.GDataServiceClient getGDataServiceClient()>();
+
+        $r14 = virtualinvoke $r13.<com.google.wireless.gdata.client.GDataServiceClient: com.google.wireless.gdata.client.QueryParams createQueryParams()>();
+
+        $z0 = virtualinvoke $r2.<android.content.SyncableContentProvider: boolean getContainsDiffs()>();
+
+        if $z0 == 0 goto label004;
+
+        $b4 = $l3 cmp 0L;
+
+        if $b4 <= 0 goto label004;
+
+        virtualinvoke $r8.<android.text.format.Time: void set(long)>($l3);
+
+        $r12 = virtualinvoke $r8.<android.text.format.Time: java.lang.String format3339(boolean)>(0);
+
+        virtualinvoke $r14.<com.google.wireless.gdata.client.QueryParams: void setUpdatedMin(java.lang.String)>($r12);
+
+        virtualinvoke $r14.<com.google.wireless.gdata.client.QueryParams: void setParamValue(java.lang.String,java.lang.String)>("requirealldeleted", "true");
+
+     label004:
+        $i0 = 1;
+
+        $r15 = null;
+
+        if $r11 == null goto label006;
+
+        $z0 = $r11.<com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData$FeedData: boolean hasMoreEntriesToFetch>;
+
+        if $z0 == 0 goto label006;
+
+        $i5 = $r11.<com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData$FeedData: int endIndex>;
+
+        $i0 = $i5;
+
+        if $i5 > 0 goto label005;
+
+        r43 = new java.lang.IllegalArgumentException;
+
+        r42 = new java.lang.StringBuilder;
+
+        specialinvoke r42.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("bad startIndex, ");
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", it must be greater than 0, SyncData is ");
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r11);
+
+        $r4 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r43.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r4);
+
+        throw r43;
+
+     label005:
+        $r12 = staticinvoke <java.lang.String: java.lang.String valueOf(int)>($i5);
+
+        virtualinvoke $r14.<com.google.wireless.gdata.client.QueryParams: void setStartIndex(java.lang.String)>($r12);
+
+        $i2 = $i2 + 1;
+
+        $r15 = $r11.<com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData$FeedData: java.lang.String lastId>;
+
+     label006:
+        $r12 = staticinvoke <java.lang.String: java.lang.String valueOf(int)>($i2);
+
+        virtualinvoke $r14.<com.google.wireless.gdata.client.QueryParams: void setMaxResults(java.lang.String)>($r12);
+
+        $r18 = null;
+
+        $i5 = 0;
+
+        $r19 = null;
+
+        $r12 = null;
+
+     label007:
+        virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: void updateQueryParameters(com.google.wireless.gdata.client.QueryParams)>($r14);
+
+        $r20 = virtualinvoke $r14.<com.google.wireless.gdata.client.QueryParams: java.lang.String generateQueryUrl(java.lang.String)>($r4);
+
+     label008:
+        $r12 = $r20;
+
+     label009:
+        r44 = new java.net.URI;
+
+     label010:
+        specialinvoke r44.<java.net.URI: void <init>(java.lang.String)>($r20);
+
+     label011:
+        $z0 = staticinvoke <android.util.Log: boolean isLoggable(java.lang.String,int)>("Sync", 2);
+
+        if $z0 == 0 goto label016;
+
+     label012:
+        r42 = new java.lang.StringBuilder;
+
+     label013:
+        specialinvoke r42.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Requesting feed ");
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r20);
+
+        $r22 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("Sync", $r22);
+
+     label014:
+        r42 = new java.lang.StringBuilder;
+
+     label015:
+        specialinvoke r42.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Using auth token ");
+
+        $r22 = virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: java.lang.String getAuthToken()>();
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        $r22 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("Sync", $r22);
+
+     label016:
+        $r22 = virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: java.lang.String getAuthToken()>();
+
+        $r23 = virtualinvoke $r13.<com.google.wireless.gdata.client.GDataServiceClient: com.google.wireless.gdata.parser.GDataParser getParserForFeed(java.lang.Class,java.lang.String,java.lang.String)>($r3, $r20, $r22);
+
+     label017:
+        $r19 = $r23;
+
+        $i6 = $r0.<com.google.android.providers.AbstractGDataSyncAdapter: int mServerQueries>;
+
+        $i6 = $i6 + 1;
+
+     label018:
+        $r0.<com.google.android.providers.AbstractGDataSyncAdapter: int mServerQueries> = $i6;
+
+        $r24 = interfaceinvoke $r23.<com.google.wireless.gdata.parser.GDataParser: com.google.wireless.gdata.data.Feed init()>();
+
+        $i6 = virtualinvoke $r24.<com.google.wireless.gdata.data.Feed: int getTotalResults()>();
+
+        $r20 = virtualinvoke $r24.<com.google.wireless.gdata.data.Feed: java.lang.String getLastUpdated()>();
+
+     label019:
+        $r25 = null;
+
+     label020:
+        $l7 = $l3;
+
+     label021:
+        $z0 = interfaceinvoke $r23.<com.google.wireless.gdata.parser.GDataParser: boolean hasMoreData()>();
+
+     label022:
+        if $z0 == 0 goto label085;
+
+     label023:
+        if $i5 >= $i2 goto label085;
+
+        $z0 = $r0.<com.google.android.providers.AbstractGDataSyncAdapter: boolean mSyncCanceled>;
+
+     label024:
+        if $z0 == 0 goto label030;
+
+        if $r23 == null goto label112;
+
+        interfaceinvoke $r23.<com.google.wireless.gdata.parser.GDataParser: void close()>();
+
+        return;
+
+     label025:
+        $r26 := @caughtexception;
+
+     label026:
+        r42 = new java.lang.StringBuilder;
+
+        $r17 = r42;
+
+     label027:
+        specialinvoke r42.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("the feed url ");
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r20);
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is not a valid URI");
+
+        $r15 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String,java.lang.Throwable)>("Sync", $r15, $r26);
+
+     label028:
+        $r27 = $r7.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l3 = $r27.<android.content.SyncStats: long numParseExceptions>;
+
+        $l3 = $l3 + 1L;
+
+        $r27.<android.content.SyncStats: long numParseExceptions> = $l3;
+
+     label029:
+        goto label113;
+
+     label030:
+        $i1 = $r0.<com.google.android.providers.AbstractGDataSyncAdapter: int mServerEntries>;
+
+        $i1 = $i1 + 1;
+
+        $r0.<com.google.android.providers.AbstractGDataSyncAdapter: int mServerEntries> = $i1;
+
+     label031:
+        $i5 = $i5 + 1;
+
+     label032:
+        $r28 = interfaceinvoke $r23.<com.google.wireless.gdata.parser.GDataParser: com.google.wireless.gdata.data.Entry readNextEntry(com.google.wireless.gdata.data.Entry)>($r25);
+
+     label033:
+        $r25 = $r28;
+
+        $i1 = $i5 + $i0;
+
+        $i1 = $i1 - 1;
+
+     label034:
+        r42 = new java.lang.StringBuilder;
+
+        $r17 = r42;
+
+     label035:
+        specialinvoke r42.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Downloading ");
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i6);
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        $r18 = virtualinvoke $r28.<com.google.wireless.gdata.data.Entry: java.lang.String getTitle()>();
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r18);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<android.content.SyncContext: void setStatusText(java.lang.String)>($r18);
+
+        $z0 = staticinvoke <android.util.Log: boolean isLoggable(java.lang.String,int)>("Sync", 2);
+
+        if $z0 == 0 goto label038;
+
+     label036:
+        r42 = new java.lang.StringBuilder;
+
+     label037:
+        specialinvoke r42.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Read entry: ");
+
+        $r18 = virtualinvoke $r28.<com.google.wireless.gdata.data.Entry: java.lang.String getTitle()>();
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r18);
+
+        $r18 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("Sync", $r18);
+
+     label038:
+        $r22 = virtualinvoke $r28.<com.google.wireless.gdata.data.Entry: java.lang.String getId()>();
+
+     label039:
+        $r18 = $r22;
+
+     label040:
+        if $i5 != 1 goto label051;
+
+        if $r15 == null goto label051;
+
+        $z0 = virtualinvoke $r15.<java.lang.String: boolean equals(java.lang.Object)>($r22);
+
+        if $z0 != 0 goto label051;
+
+     label041:
+        r42 = new java.lang.StringBuilder;
+
+     label042:
+        specialinvoke r42.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("aborting paging since the first record is ");
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" instead of the expected ");
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r15 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Sync", $r15);
+
+        $r11.<com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData$FeedData: boolean hasMoreEntriesToFetch> = 0;
+
+        virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: void getServerDiffsImpl(android.content.SyncContext,android.content.SyncableContentProvider,java.lang.Class,java.lang.String,java.lang.Object,int,com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData,android.content.SyncResult)>($r1, $r2, $r3, $r4, $r5, $i2, $r6, $r7);
+
+     label043:
+        if $r23 == null goto label114;
+
+        interfaceinvoke $r23.<com.google.wireless.gdata.parser.GDataParser: void close()>();
+
+        return;
+
+     label044:
+        $r29 := @caughtexception;
+
+     label045:
+        $r27 = $r7.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l8 = $r27.<android.content.SyncStats: long numSkippedEntries>;
+
+        $l8 = $l8 + 1L;
+
+        $r27.<android.content.SyncStats: long numSkippedEntries> = $l8;
+
+        r42 = new java.lang.StringBuilder;
+
+        $r17 = r42;
+
+     label046:
+        specialinvoke r42.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("error while parsing entry from account ");
+
+        $r22 = virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: java.lang.String getAccount()>();
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", feed ");
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", skipping");
+
+        $r22 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r36 = (java.lang.Throwable) $r29;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("Sync", $r22, $r36);
+
+     label047:
+        goto label021;
+
+     label048:
+        $r30 := @caughtexception;
+
+     label049:
+        $r36 = (java.lang.Throwable) $r30;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("Sync", "Unable to process gdata feed", $r36);
+
+        virtualinvoke $r1.<android.content.SyncContext: void setStatusText(java.lang.String)>("Could not parse feed.");
+
+        $r27 = $r7.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l3 = $r27.<android.content.SyncStats: long numParseExceptions>;
+
+        $l3 = $l3 + 1L;
+
+        $r27.<android.content.SyncStats: long numParseExceptions> = $l3;
+
+     label050:
+        if $r19 == null goto label115;
+
+        interfaceinvoke $r19.<com.google.wireless.gdata.parser.GDataParser: void close()>();
+
+        return;
+
+     label051:
+        $z0 = staticinvoke <android.util.Log: boolean isLoggable(java.lang.String,int)>("Sync", 2);
+
+        if $z0 == 0 goto label054;
+
+     label052:
+        r42 = new java.lang.StringBuilder;
+
+     label053:
+        specialinvoke r42.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("getServerDiffs: updating provider with entry ");
+
+        $r22 = virtualinvoke $r28.<com.google.wireless.gdata.data.Entry: java.lang.String getEditUri()>();
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        $r22 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("Sync", $r22);
+
+     label054:
+        $r31 = virtualinvoke $r2.<android.content.SyncableContentProvider: android.database.sqlite.SQLiteDatabase getDatabase()>();
+
+        $z0 = virtualinvoke $r31.<android.database.sqlite.SQLiteDatabase: boolean inTransaction()>();
+
+        if $z0 == 0 goto label061;
+
+     label055:
+        r45 = new java.lang.IllegalStateException;
+
+     label056:
+        $r32 = r45;
+
+        specialinvoke r45.<java.lang.IllegalStateException: void <init>(java.lang.String)>("we should not be in a transaction");
+
+     label057:
+        throw $r32;
+
+     label058:
+        $r33 := @caughtexception;
+
+     label059:
+        r42 = new java.lang.StringBuilder;
+
+        specialinvoke r42.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to process gdata feed: ");
+
+        $r4 = virtualinvoke $r33.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Sync", $r4);
+
+        virtualinvoke $r1.<android.content.SyncContext: void setStatusText(java.lang.String)>("Could not download entire feed.");
+
+        $r27 = $r7.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l3 = $r27.<android.content.SyncStats: long numIoExceptions>;
+
+        $l3 = $l3 + 1L;
+
+        $r27.<android.content.SyncStats: long numIoExceptions> = $l3;
+
+     label060:
+        if $r19 == null goto label116;
+
+        interfaceinvoke $r19.<com.google.wireless.gdata.parser.GDataParser: void close()>();
+
+        return;
+
+     label061:
+        virtualinvoke $r31.<android.database.sqlite.SQLiteDatabase: void beginTransaction()>();
+
+     label062:
+        r47 = (android.content.ContentProvider) $r2;
+
+     label063:
+        virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: void updateProvider(com.google.wireless.gdata.data.Feed,java.lang.Long,com.google.wireless.gdata.data.Entry,android.content.ContentProvider,java.lang.Object)>($r24, null, $r28, r47, $r5);
+
+     label064:
+        $r27 = $r7.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l8 = $r27.<android.content.SyncStats: long numEntries>;
+
+        $l8 = $l8 + 1L;
+
+     label065:
+        $r27.<android.content.SyncStats: long numEntries> = $l8;
+
+        $r22 = virtualinvoke $r28.<com.google.wireless.gdata.data.Entry: java.lang.String getUpdateDate()>();
+
+        if $r22 == null goto label068;
+
+        virtualinvoke $r8.<android.text.format.Time: boolean parse3339(java.lang.String)>($r22);
+
+        $l8 = virtualinvoke $r8.<android.text.format.Time: long toMillis(boolean)>(0);
+
+     label066:
+        $b4 = $l8 cmp $l7;
+
+     label067:
+        if $b4 <= 0 goto label068;
+
+        $l7 = $l8;
+
+     label068:
+        virtualinvoke $r31.<android.database.sqlite.SQLiteDatabase: void setTransactionSuccessful()>();
+
+     label069:
+        virtualinvoke $r31.<android.database.sqlite.SQLiteDatabase: void endTransaction()>();
+
+     label070:
+        goto label021;
+
+     label071:
+        $r34 := @caughtexception;
+
+     label072:
+        $i0 = virtualinvoke $r34.<com.google.wireless.gdata.client.HttpException: int getStatusCode()>();
+
+        lookupswitch($i0)
+        {
+            case 401: goto label104;
+            case 403: goto label104;
+            case 410: goto label108;
+            default: goto label073;
+        };
+
+     label073:
+        r42 = new java.lang.StringBuilder;
+
+        specialinvoke r42.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to process gdata feed: ");
+
+        $r36 = (java.lang.Throwable) $r34;
+
+        $r4 = virtualinvoke $r36.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Sync", $r4);
+
+        virtualinvoke $r1.<android.content.SyncContext: void setStatusText(java.lang.String)>("Could not download entire feed.");
+
+        $r27 = $r7.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l3 = $r27.<android.content.SyncStats: long numIoExceptions>;
+
+        $l3 = $l3 + 1L;
+
+        $r27.<android.content.SyncStats: long numIoExceptions> = $l3;
+
+     label074:
+        if $r19 == null goto label117;
+
+        interfaceinvoke $r19.<com.google.wireless.gdata.parser.GDataParser: void close()>();
+
+        return;
+
+     label075:
+        $r35 := @caughtexception;
+
+     label076:
+        r42 = new java.lang.StringBuilder;
+
+        specialinvoke r42.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("updateProvider failed, ");
+
+        $r22 = virtualinvoke $r28.<com.google.wireless.gdata.data.Entry: java.lang.String getEditUri()>();
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        $r22 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r36 = (java.lang.Throwable) $r35;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String,java.lang.Throwable)>("Sync", $r22, $r36);
+
+        $r27 = $r7.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l8 = $r27.<android.content.SyncStats: long numSkippedEntries>;
+
+        $l8 = $l8 + 1L;
+
+        $r27.<android.content.SyncStats: long numSkippedEntries> = $l8;
+
+        r42 = new java.lang.StringBuilder;
+
+        specialinvoke r42.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failure: ");
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i6);
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r22 = virtualinvoke $r28.<com.google.wireless.gdata.data.Entry: java.lang.String getTitle()>();
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        $r22 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<android.content.SyncContext: void setStatusText(java.lang.String)>($r22);
+
+     label077:
+        virtualinvoke $r31.<android.database.sqlite.SQLiteDatabase: void endTransaction()>();
+
+     label078:
+        goto label021;
+
+     label079:
+        $r36 := @caughtexception;
+
+        if $r19 == null goto label080;
+
+        interfaceinvoke $r19.<com.google.wireless.gdata.parser.GDataParser: void close()>();
+
+     label080:
+        throw $r36;
+
+     label081:
+        $r37 := @caughtexception;
+
+     label082:
+        r42 = new java.lang.StringBuilder;
+
+        specialinvoke r42.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("updateProvider failed,  ");
+
+        $r22 = virtualinvoke $r28.<com.google.wireless.gdata.data.Entry: java.lang.String getEditUri()>();
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        $r22 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String,java.lang.Throwable)>("Sync", $r22, $r37);
+
+        $r27 = $r7.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l8 = $r27.<android.content.SyncStats: long numSkippedEntries>;
+
+        $l8 = $l8 + 1L;
+
+        $r27.<android.content.SyncStats: long numSkippedEntries> = $l8;
+
+        r42 = new java.lang.StringBuilder;
+
+        specialinvoke r42.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failure: ");
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i6);
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r22 = virtualinvoke $r28.<com.google.wireless.gdata.data.Entry: java.lang.String getTitle()>();
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r22);
+
+        $r22 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<android.content.SyncContext: void setStatusText(java.lang.String)>($r22);
+
+     label083:
+        virtualinvoke $r31.<android.database.sqlite.SQLiteDatabase: void endTransaction()>();
+
+        goto label021;
+
+     label084:
+        $r38 := @caughtexception;
+
+        virtualinvoke $r31.<android.database.sqlite.SQLiteDatabase: void endTransaction()>();
+
+        throw $r38;
+
+     label085:
+        if $r20 != null goto label099;
+
+     label086:
+        $l7 = 0L;
+
+     label087:
+        if $i5 != $i2 goto label102;
+
+     label088:
+        $z0 = 1;
+
+     label089:
+        r46 = new com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData$FeedData;
+
+     label090:
+        $r11 = r46;
+
+        if $z0 == 0 goto label103;
+
+     label091:
+        $l7 = (long) $i5;
+
+     label092:
+        $i0 = $i0 + $i5;
+
+     label093:
+        $i0 = $i0 - 1;
+
+        specialinvoke r46.<com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData$FeedData: void <init>(long,long,boolean,java.lang.String,int)>($l3, $l7, $z0, $r18, $i0);
+
+     label094:
+        $z0 = $r11.<com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData$FeedData: boolean hasMoreEntriesToFetch>;
+
+        $r7.<android.content.SyncResult: boolean moreRecordsToGet> = $z0;
+
+     label095:
+        $r9 = $r6.<com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData: java.util.Map feedData>;
+
+        interfaceinvoke $r9.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r4, $r11);
+
+        $z0 = staticinvoke <android.util.Log: boolean isLoggable(java.lang.String,int)>("Sync", 2);
+
+     label096:
+        if $z0 == 0 goto label098;
+
+        r42 = new java.lang.StringBuilder;
+
+     label097:
+        specialinvoke r42.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("This call to getServerDiffsImpl for feed ");
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is returning ");
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r6);
+
+        $r15 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("Sync", $r15);
+
+     label098:
+        if $r23 == null goto label118;
+
+        interfaceinvoke $r23.<com.google.wireless.gdata.parser.GDataParser: void close()>();
+
+        return;
+
+     label099:
+        virtualinvoke $r8.<android.text.format.Time: boolean parse3339(java.lang.String)>($r20);
+
+        $l7 = virtualinvoke $r8.<android.text.format.Time: long toMillis(boolean)>(0);
+
+        $l8 = $l7;
+
+        $l9 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+     label100:
+        $l10 = 300000L + $l7;
+
+        $b4 = $l10 cmp $l9;
+
+        if $b4 >= 0 goto label101;
+
+        $l8 = $l7 + 1000L;
+
+     label101:
+        $l7 = $l8;
+
+        goto label087;
+
+     label102:
+        $z0 = 0;
+
+        goto label089;
+
+     label103:
+        $l3 = $l7;
+
+        goto label091;
+
+     label104:
+        $r39 = virtualinvoke $r0.<android.content.TempProviderSyncAdapter: android.content.Context getContext()>();
+
+        $r4 = $r0.<com.google.android.providers.AbstractGDataSyncAdapter: java.lang.String mAuthToken>;
+
+        staticinvoke <com.google.android.googlelogin.GoogleLoginServiceBlockingHelper: void invalidateAuthToken(android.content.Context,java.lang.String)>($r39, $r4);
+
+     label105:
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Sync", "Bad authentication token");
+
+        virtualinvoke $r1.<android.content.SyncContext: void setStatusText(java.lang.String)>("Bad authentication token");
+
+        $r27 = $r7.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l3 = $r27.<android.content.SyncStats: long numAuthExceptions>;
+
+        $l3 = $l3 + 1L;
+
+        $r27.<android.content.SyncStats: long numAuthExceptions> = $l3;
+
+     label106:
+        goto label074;
+
+     label107:
+        $r40 := @caughtexception;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String,java.lang.Throwable)>("Sync", "Could not invalidate auth token", $r40);
+
+        goto label105;
+
+     label108:
+        r42 = new java.lang.StringBuilder;
+
+        specialinvoke r42.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke r42.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("The tombstones have expired for ");
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r12 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Sync", $r12);
+
+        $z0 = virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: boolean handleAllDeletedUnavailable(com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData,java.lang.String)>($r6, $r4);
+
+        if $z0 == 0 goto label110;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Sync", "handleAllDeletedUnavailable returned true, recursively calling getServerDiffsImpl");
+
+        virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: void getServerDiffsImpl(android.content.SyncContext,android.content.SyncableContentProvider,java.lang.Class,java.lang.String,java.lang.Object,int,com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData,android.content.SyncResult)>($r1, $r2, $r3, $r4, $r5, $i2, $r6, $r7);
+
+     label109:
+        goto label074;
+
+     label110:
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Sync", "handleAllDeletedUnavailable returned false, setting partialSyncUnavailable");
+
+        $r7.<android.content.SyncResult: boolean partialSyncUnavailable> = 1;
+
+     label111:
+        goto label074;
+
+     label112:
+        return;
+
+     label113:
+        return;
+
+     label114:
+        return;
+
+     label115:
+        return;
+
+     label116:
+        return;
+
+     label117:
+        return;
+
+     label118:
+        return;
+
+        catch com.google.wireless.gdata.parser.ParseException from label007 to label008 with label048;
+        catch java.io.IOException from label007 to label008 with label058;
+        catch com.google.wireless.gdata.client.HttpException from label007 to label008 with label071;
+        catch java.lang.Throwable from label007 to label008 with label079;
+        catch java.net.URISyntaxException from label010 to label011 with label025;
+        catch com.google.wireless.gdata.parser.ParseException from label010 to label011 with label048;
+        catch java.io.IOException from label010 to label011 with label058;
+        catch com.google.wireless.gdata.client.HttpException from label010 to label011 with label071;
+        catch java.lang.Throwable from label009 to label011 with label079;
+        catch com.google.wireless.gdata.parser.ParseException from label011 to label012 with label048;
+        catch com.google.wireless.gdata.parser.ParseException from label013 to label014 with label048;
+        catch com.google.wireless.gdata.parser.ParseException from label015 to label017 with label048;
+        catch com.google.wireless.gdata.parser.ParseException from label018 to label019 with label048;
+        catch com.google.wireless.gdata.parser.ParseException from label020 to label022 with label048;
+        catch java.io.IOException from label011 to label012 with label058;
+        catch java.io.IOException from label013 to label014 with label058;
+        catch java.io.IOException from label015 to label017 with label058;
+        catch java.io.IOException from label018 to label019 with label058;
+        catch java.io.IOException from label020 to label022 with label058;
+        catch com.google.wireless.gdata.client.HttpException from label011 to label012 with label071;
+        catch com.google.wireless.gdata.client.HttpException from label013 to label014 with label071;
+        catch com.google.wireless.gdata.client.HttpException from label015 to label017 with label071;
+        catch com.google.wireless.gdata.client.HttpException from label018 to label019 with label071;
+        catch com.google.wireless.gdata.client.HttpException from label020 to label022 with label071;
+        catch java.lang.Throwable from label011 to label019 with label079;
+        catch java.lang.Throwable from label020 to label022 with label079;
+        catch java.lang.Throwable from label023 to label024 with label079;
+        catch com.google.wireless.gdata.parser.ParseException from label027 to label028 with label048;
+        catch java.io.IOException from label027 to label028 with label058;
+        catch com.google.wireless.gdata.client.HttpException from label027 to label028 with label071;
+        catch java.lang.Throwable from label026 to label029 with label079;
+        catch java.lang.Throwable from label030 to label031 with label079;
+        catch com.google.wireless.gdata.parser.ParseException from label032 to label033 with label044;
+        catch java.io.IOException from label032 to label033 with label058;
+        catch com.google.wireless.gdata.client.HttpException from label032 to label033 with label071;
+        catch java.lang.Throwable from label032 to label033 with label079;
+        catch com.google.wireless.gdata.parser.ParseException from label035 to label036 with label048;
+        catch com.google.wireless.gdata.parser.ParseException from label037 to label039 with label048;
+        catch com.google.wireless.gdata.parser.ParseException from label040 to label041 with label048;
+        catch com.google.wireless.gdata.parser.ParseException from label042 to label043 with label048;
+        catch java.io.IOException from label035 to label036 with label058;
+        catch java.io.IOException from label037 to label039 with label058;
+        catch java.io.IOException from label040 to label041 with label058;
+        catch java.io.IOException from label042 to label043 with label058;
+        catch com.google.wireless.gdata.client.HttpException from label035 to label036 with label071;
+        catch com.google.wireless.gdata.client.HttpException from label037 to label039 with label071;
+        catch com.google.wireless.gdata.client.HttpException from label040 to label041 with label071;
+        catch com.google.wireless.gdata.client.HttpException from label042 to label043 with label071;
+        catch java.lang.Throwable from label034 to label039 with label079;
+        catch java.lang.Throwable from label040 to label043 with label079;
+        catch com.google.wireless.gdata.parser.ParseException from label046 to label047 with label048;
+        catch java.io.IOException from label046 to label047 with label058;
+        catch com.google.wireless.gdata.client.HttpException from label046 to label047 with label071;
+        catch java.lang.Throwable from label045 to label047 with label079;
+        catch java.lang.Throwable from label049 to label050 with label079;
+        catch com.google.wireless.gdata.parser.ParseException from label051 to label052 with label048;
+        catch com.google.wireless.gdata.parser.ParseException from label053 to label055 with label048;
+        catch com.google.wireless.gdata.parser.ParseException from label056 to label057 with label048;
+        catch java.io.IOException from label051 to label052 with label058;
+        catch java.io.IOException from label053 to label055 with label058;
+        catch java.io.IOException from label056 to label057 with label058;
+        catch com.google.wireless.gdata.client.HttpException from label051 to label052 with label071;
+        catch com.google.wireless.gdata.client.HttpException from label053 to label055 with label071;
+        catch com.google.wireless.gdata.client.HttpException from label056 to label057 with label071;
+        catch java.lang.Throwable from label051 to label058 with label079;
+        catch java.lang.Throwable from label059 to label060 with label079;
+        catch com.google.wireless.gdata.parser.ParseException from label061 to label062 with label048;
+        catch java.io.IOException from label061 to label062 with label058;
+        catch com.google.wireless.gdata.client.HttpException from label061 to label062 with label071;
+        catch java.lang.Throwable from label061 to label062 with label079;
+        catch com.google.wireless.gdata.parser.ParseException from label063 to label064 with label075;
+        catch com.google.wireless.gdata.parser.ParseException from label065 to label066 with label075;
+        catch com.google.wireless.gdata.parser.ParseException from label067 to label069 with label075;
+        catch java.lang.RuntimeException from label062 to label066 with label081;
+        catch java.lang.RuntimeException from label067 to label069 with label081;
+        catch java.lang.Throwable from label062 to label066 with label084;
+        catch java.lang.Throwable from label067 to label069 with label084;
+        catch com.google.wireless.gdata.parser.ParseException from label069 to label070 with label048;
+        catch java.io.IOException from label069 to label070 with label058;
+        catch com.google.wireless.gdata.client.HttpException from label069 to label070 with label071;
+        catch java.lang.Throwable from label069 to label070 with label079;
+        catch java.lang.Throwable from label072 to label074 with label079;
+        catch java.lang.Throwable from label076 to label077 with label084;
+        catch com.google.wireless.gdata.parser.ParseException from label077 to label078 with label048;
+        catch java.io.IOException from label077 to label078 with label058;
+        catch com.google.wireless.gdata.client.HttpException from label077 to label078 with label071;
+        catch java.lang.Throwable from label077 to label078 with label079;
+        catch java.lang.Throwable from label082 to label083 with label084;
+        catch com.google.wireless.gdata.parser.ParseException from label083 to label086 with label048;
+        catch com.google.wireless.gdata.parser.ParseException from label093 to label094 with label048;
+        catch com.google.wireless.gdata.parser.ParseException from label095 to label096 with label048;
+        catch com.google.wireless.gdata.parser.ParseException from label097 to label098 with label048;
+        catch java.io.IOException from label083 to label086 with label058;
+        catch java.io.IOException from label093 to label094 with label058;
+        catch java.io.IOException from label095 to label096 with label058;
+        catch java.io.IOException from label097 to label098 with label058;
+        catch com.google.wireless.gdata.client.HttpException from label083 to label086 with label071;
+        catch com.google.wireless.gdata.client.HttpException from label093 to label094 with label071;
+        catch com.google.wireless.gdata.client.HttpException from label095 to label096 with label071;
+        catch com.google.wireless.gdata.client.HttpException from label097 to label098 with label071;
+        catch java.lang.Throwable from label083 to label086 with label079;
+        catch java.lang.Throwable from label088 to label090 with label079;
+        catch java.lang.Throwable from label091 to label092 with label079;
+        catch java.lang.Throwable from label093 to label098 with label079;
+        catch com.google.wireless.gdata.parser.ParseException from label099 to label100 with label048;
+        catch java.io.IOException from label099 to label100 with label058;
+        catch com.google.wireless.gdata.client.HttpException from label099 to label100 with label071;
+        catch java.lang.Throwable from label099 to label100 with label079;
+        catch com.google.android.googlelogin.GoogleLoginServiceNotFoundException from label104 to label105 with label107;
+        catch java.lang.Throwable from label104 to label105 with label079;
+        catch java.lang.Throwable from label105 to label106 with label079;
+        catch java.lang.Throwable from label107 to label109 with label079;
+        catch java.lang.Throwable from label110 to label111 with label079;
+    }
+
+    protected void getStatsString(java.lang.StringBuffer, android.content.SyncResult)
+    {
+        com.google.android.providers.AbstractGDataSyncAdapter $r0;
+        java.lang.StringBuffer $r1, $r3;
+        android.content.SyncResult $r2;
+        int $i0;
+        android.content.SyncStats $r4;
+        long $l1;
+        byte $b2;
+        java.lang.String $r5;
+
+        $r0 := @this: com.google.android.providers.AbstractGDataSyncAdapter;
+
+        $r1 := @parameter0: java.lang.StringBuffer;
+
+        $r2 := @parameter1: android.content.SyncResult;
+
+        $i0 = $r0.<com.google.android.providers.AbstractGDataSyncAdapter: int mServerQueries>;
+
+        if $i0 <= 0 goto label1;
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("Q");
+
+        $i0 = $r0.<com.google.android.providers.AbstractGDataSyncAdapter: int mServerQueries>;
+
+        virtualinvoke $r3.<java.lang.StringBuffer: java.lang.StringBuffer append(int)>($i0);
+
+     label1:
+        $i0 = $r0.<com.google.android.providers.AbstractGDataSyncAdapter: int mServerEntries>;
+
+        if $i0 <= 0 goto label2;
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("E");
+
+        $i0 = $r0.<com.google.android.providers.AbstractGDataSyncAdapter: int mServerEntries>;
+
+        virtualinvoke $r3.<java.lang.StringBuffer: java.lang.StringBuffer append(int)>($i0);
+
+     label2:
+        $r4 = $r2.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l1 = $r4.<android.content.SyncStats: long numUpdates>;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 <= 0 goto label3;
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("u");
+
+        $r4 = $r2.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l1 = $r4.<android.content.SyncStats: long numUpdates>;
+
+        virtualinvoke $r3.<java.lang.StringBuffer: java.lang.StringBuffer append(long)>($l1);
+
+     label3:
+        $r4 = $r2.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l1 = $r4.<android.content.SyncStats: long numInserts>;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 <= 0 goto label4;
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("i");
+
+        $r4 = $r2.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l1 = $r4.<android.content.SyncStats: long numInserts>;
+
+        virtualinvoke $r3.<java.lang.StringBuffer: java.lang.StringBuffer append(long)>($l1);
+
+     label4:
+        $r4 = $r2.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l1 = $r4.<android.content.SyncStats: long numDeletes>;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 <= 0 goto label5;
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("d");
+
+        $r4 = $r2.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l1 = $r4.<android.content.SyncStats: long numDeletes>;
+
+        virtualinvoke $r3.<java.lang.StringBuffer: java.lang.StringBuffer append(long)>($l1);
+
+     label5:
+        $r5 = virtualinvoke $r2.<android.content.SyncResult: java.lang.String toDebugString()>();
+
+        virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r5);
+
+        return;
+    }
+
+    protected abstract boolean handleAllDeletedUnavailable(com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData, java.lang.String);
+
+    void invalidateAndUpdateAuthToken() throws com.google.android.googlelogin.GoogleLoginServiceNotFoundException, com.google.android.googlelogin.GoogleLoginServiceBlockingHelper$AuthenticationException
+    {
+        com.google.android.providers.AbstractGDataSyncAdapter $r0;
+        android.content.Context $r1;
+        java.lang.String $r2, $r4;
+        com.google.wireless.gdata.client.GDataServiceClient $r3;
+
+        $r0 := @this: com.google.android.providers.AbstractGDataSyncAdapter;
+
+        $r1 = virtualinvoke $r0.<android.content.TempProviderSyncAdapter: android.content.Context getContext()>();
+
+        $r2 = $r0.<com.google.android.providers.AbstractGDataSyncAdapter: java.lang.String mAuthToken>;
+
+        staticinvoke <com.google.android.googlelogin.GoogleLoginServiceBlockingHelper: void invalidateAuthToken(android.content.Context,java.lang.String)>($r1, $r2);
+
+        $r1 = virtualinvoke $r0.<android.content.TempProviderSyncAdapter: android.content.Context getContext()>();
+
+        $r2 = $r0.<com.google.android.providers.AbstractGDataSyncAdapter: java.lang.String mAccount>;
+
+        $r3 = virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: com.google.wireless.gdata.client.GDataServiceClient getGDataServiceClient()>();
+
+        $r4 = virtualinvoke $r3.<com.google.wireless.gdata.client.GDataServiceClient: java.lang.String getServiceName()>();
+
+        $r2 = staticinvoke <com.google.android.googlelogin.GoogleLoginServiceBlockingHelper: java.lang.String getAuthToken(android.content.Context,java.lang.String,java.lang.String)>($r1, $r2, $r4);
+
+        $r0.<com.google.android.providers.AbstractGDataSyncAdapter: java.lang.String mAuthToken> = $r2;
+
+        return;
+    }
+
+    public boolean isReadOnly()
+    {
+        com.google.android.providers.AbstractGDataSyncAdapter $r0;
+
+        $r0 := @this: com.google.android.providers.AbstractGDataSyncAdapter;
+
+        return 0;
+    }
+
+    protected void logSyncDetails(long, long, android.content.SyncResult)
+    {
+        com.google.android.providers.AbstractGDataSyncAdapter $r0;
+        long $l0, $l1;
+        android.content.SyncResult $r1;
+        java.lang.StringBuffer $r2;
+        java.lang.Object[] $r3;
+        com.google.wireless.gdata.client.GDataServiceClient $r4;
+        java.lang.String $r5;
+        java.lang.Long $r6;
+
+        $r0 := @this: com.google.android.providers.AbstractGDataSyncAdapter;
+
+        $l0 := @parameter0: long;
+
+        $l1 := @parameter1: long;
+
+        $r1 := @parameter2: android.content.SyncResult;
+
+        $r2 = new java.lang.StringBuffer;
+
+        specialinvoke $r2.<java.lang.StringBuffer: void <init>()>();
+
+        virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: void getStatsString(java.lang.StringBuffer,android.content.SyncResult)>($r2, $r1);
+
+        $r3 = newarray (java.lang.Object)[4];
+
+        $r4 = virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: com.google.wireless.gdata.client.GDataServiceClient getGDataServiceClient()>();
+
+        $r5 = virtualinvoke $r4.<com.google.wireless.gdata.client.GDataServiceClient: java.lang.String getServiceName()>();
+
+        $r3[0] = $r5;
+
+        $r6 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l0);
+
+        $r3[1] = $r6;
+
+        $r6 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l1);
+
+        $r3[2] = $r6;
+
+        $r5 = virtualinvoke $r2.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        $r3[3] = $r5;
+
+        staticinvoke <android.util.EventLog: int writeEvent(int,java.lang.Object[])>(2743, $r3);
+
+        return;
+    }
+
+    protected abstract com.google.wireless.gdata.data.Entry newEntry();
+
+    public volatile android.content.TempProviderSyncAdapter$SyncData newSyncData()
+    {
+        com.google.android.providers.AbstractGDataSyncAdapter $r0;
+        com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData $r1;
+
+        $r0 := @this: com.google.android.providers.AbstractGDataSyncAdapter;
+
+        $r1 = virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData newSyncData()>();
+
+        return $r1;
+    }
+
+    public com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData newSyncData()
+    {
+        com.google.android.providers.AbstractGDataSyncAdapter $r0;
+        com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData $r1;
+
+        $r0 := @this: com.google.android.providers.AbstractGDataSyncAdapter;
+
+        $r1 = new com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData;
+
+        specialinvoke $r1.<com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData: void <init>()>();
+
+        return $r1;
+    }
+
+    public void onSyncCanceled()
+    {
+        com.google.android.providers.AbstractGDataSyncAdapter $r0;
+
+        $r0 := @this: com.google.android.providers.AbstractGDataSyncAdapter;
+
+        $r0.<com.google.android.providers.AbstractGDataSyncAdapter: boolean mSyncCanceled> = 1;
+
+        return;
+    }
+
+    public void onSyncEnding(android.content.SyncContext, boolean)
+    {
+        com.google.android.providers.AbstractGDataSyncAdapter $r0;
+        android.content.SyncContext $r1;
+        boolean $z0;
+
+        $r0 := @this: com.google.android.providers.AbstractGDataSyncAdapter;
+
+        $r1 := @parameter0: android.content.SyncContext;
+
+        $z0 := @parameter1: boolean;
+
+        return;
+    }
+
+    public void onSyncStarting(android.content.SyncContext, java.lang.String, boolean, android.content.SyncResult)
+    {
+        com.google.android.providers.AbstractGDataSyncAdapter $r0;
+        android.content.SyncContext $r1;
+        java.lang.String $r2, $r7;
+        boolean $z0;
+        android.content.SyncResult $r3;
+        android.content.Context $r4;
+        java.lang.String[] $r5;
+        com.google.wireless.gdata.client.GDataServiceClient $r6;
+        com.google.android.googlelogin.GoogleLoginServiceBlockingHelper$AuthenticationException $r8;
+        android.content.SyncStats $r9;
+        long $l0;
+        com.google.android.googlelogin.GoogleLoginServiceNotFoundException $r10;
+
+        $r0 := @this: com.google.android.providers.AbstractGDataSyncAdapter;
+
+        $r1 := @parameter0: android.content.SyncContext;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $z0 := @parameter2: boolean;
+
+        $r3 := @parameter3: android.content.SyncResult;
+
+        $r0.<com.google.android.providers.AbstractGDataSyncAdapter: boolean mSyncCanceled> = 0;
+
+        $r0.<com.google.android.providers.AbstractGDataSyncAdapter: int mServerQueries> = 0;
+
+        $r0.<com.google.android.providers.AbstractGDataSyncAdapter: int mServerEntries> = 0;
+
+     label1:
+        $r4 = virtualinvoke $r0.<android.content.TempProviderSyncAdapter: android.content.Context getContext()>();
+
+        $r5 = staticinvoke <com.google.android.googlelogin.GoogleLoginServiceBlockingHelper: java.lang.String[] getAccounts(android.content.Context)>($r4);
+
+        virtualinvoke $r0.<android.content.TempProviderSyncAdapter: void onAccountsChanged(java.lang.String[])>($r5);
+
+        virtualinvoke $r1.<android.content.SyncContext: void setStatusText(java.lang.String)>("Authenticating\u2026");
+
+        $r0.<com.google.android.providers.AbstractGDataSyncAdapter: java.lang.String mAccount> = $r2;
+
+        $r4 = virtualinvoke $r0.<android.content.TempProviderSyncAdapter: android.content.Context getContext()>();
+
+        $r2 = $r0.<com.google.android.providers.AbstractGDataSyncAdapter: java.lang.String mAccount>;
+
+        $r6 = virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: com.google.wireless.gdata.client.GDataServiceClient getGDataServiceClient()>();
+
+        $r7 = virtualinvoke $r6.<com.google.wireless.gdata.client.GDataServiceClient: java.lang.String getServiceName()>();
+
+        $r2 = staticinvoke <com.google.android.googlelogin.GoogleLoginServiceBlockingHelper: java.lang.String getAuthToken(android.content.Context,java.lang.String,java.lang.String)>($r4, $r2, $r7);
+
+     label2:
+        $r0.<com.google.android.providers.AbstractGDataSyncAdapter: java.lang.String mAuthToken> = $r2;
+
+        return;
+
+     label3:
+        $r8 := @caughtexception;
+
+        $r9 = $r3.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l0 = $r9.<android.content.SyncStats: long numAuthExceptions>;
+
+        $l0 = $l0 + 1L;
+
+        $r9.<android.content.SyncStats: long numAuthExceptions> = $l0;
+
+        virtualinvoke $r1.<android.content.SyncContext: void setStatusText(java.lang.String)>("Could not authenticate user.");
+
+        return;
+
+     label4:
+        $r10 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("Sync", "Google login service not found", $r10);
+
+        return;
+
+        catch com.google.android.googlelogin.GoogleLoginServiceBlockingHelper$AuthenticationException from label1 to label2 with label3;
+        catch com.google.android.googlelogin.GoogleLoginServiceNotFoundException from label1 to label2 with label4;
+    }
+
+    public volatile android.content.TempProviderSyncAdapter$SyncData readSyncData(android.content.SyncableContentProvider)
+    {
+        com.google.android.providers.AbstractGDataSyncAdapter $r0;
+        android.content.SyncableContentProvider $r1;
+        com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData $r2;
+
+        $r0 := @this: com.google.android.providers.AbstractGDataSyncAdapter;
+
+        $r1 := @parameter0: android.content.SyncableContentProvider;
+
+        $r2 = virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData readSyncData(android.content.SyncableContentProvider)>($r1);
+
+        return $r2;
+    }
+
+    public com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData readSyncData(android.content.SyncableContentProvider)
+    {
+        com.google.android.providers.AbstractGDataSyncAdapter $r0;
+        android.content.SyncableContentProvider $r1;
+        android.net.Uri $r2;
+        java.lang.String[] $r3;
+        java.lang.String $r4;
+        android.database.Cursor $r5;
+        boolean $z0;
+        int $i0;
+        byte[] $r6;
+        com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData $r7;
+        java.lang.Throwable $r8;
+        android.content.ContentProvider r9;
+
+        $r0 := @this: com.google.android.providers.AbstractGDataSyncAdapter;
+
+        $r1 := @parameter0: android.content.SyncableContentProvider;
+
+        $r2 = <com.google.android.providers.AbstractGDataSyncAdapter: android.net.Uri SYNC_STATE_CONTENT_URI>;
+
+        $r3 = newarray (java.lang.String)[1];
+
+        $r4 = $r0.<com.google.android.providers.AbstractGDataSyncAdapter: java.lang.String mAccount>;
+
+        $r3[0] = $r4;
+
+        r9 = (android.content.ContentProvider) $r1;
+
+        $r5 = virtualinvoke r9.<android.content.ContentProvider: android.database.Cursor query(android.net.Uri,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String)>($r2, null, "_sync_account = ?", $r3, null);
+
+     label1:
+        $z0 = interfaceinvoke $r5.<android.database.Cursor: boolean moveToFirst()>();
+
+        if $z0 == 0 goto label3;
+
+        $i0 = interfaceinvoke $r5.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("data");
+
+        $r6 = interfaceinvoke $r5.<android.database.Cursor: byte[] getBlob(int)>($i0);
+
+        $r7 = staticinvoke <com.google.android.providers.AbstractGDataSyncAdapter: com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData newGDataSyncDataFromBytes(byte[])>($r6);
+
+     label2:
+        interfaceinvoke $r5.<android.database.Cursor: void close()>();
+
+        return $r7;
+
+     label3:
+        interfaceinvoke $r5.<android.database.Cursor: void close()>();
+
+        $r7 = virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData newSyncData()>();
+
+        return $r7;
+
+     label4:
+        $r8 := @caughtexception;
+
+        interfaceinvoke $r5.<android.database.Cursor: void close()>();
+
+        throw $r8;
+
+        catch java.lang.Throwable from label1 to label2 with label4;
+    }
+
+    public void sendClientDiffs(android.content.SyncContext, android.content.SyncableContentProvider, android.content.SyncableContentProvider, android.content.SyncResult, boolean)
+    {
+        com.google.android.providers.AbstractGDataSyncAdapter $r0;
+        android.content.SyncContext $r1;
+        android.content.SyncableContentProvider $r2, $r3;
+        android.content.SyncResult $r4;
+        boolean $z0;
+        java.lang.Object $r5;
+        com.google.wireless.gdata.data.Entry $r6;
+
+        $r0 := @this: com.google.android.providers.AbstractGDataSyncAdapter;
+
+        $r1 := @parameter0: android.content.SyncContext;
+
+        $r2 := @parameter1: android.content.SyncableContentProvider;
+
+        $r3 := @parameter2: android.content.SyncableContentProvider;
+
+        $r4 := @parameter3: android.content.SyncResult;
+
+        $z0 := @parameter4: boolean;
+
+        virtualinvoke $r0.<android.content.TempProviderSyncAdapter: void initTempProvider(android.content.SyncableContentProvider)>($r2);
+
+        $r5 = virtualinvoke $r0.<android.content.TempProviderSyncAdapter: java.lang.Object createSyncInfo()>();
+
+        $r6 = virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: com.google.wireless.gdata.data.Entry newEntry()>();
+
+        virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: void sendClientDiffsImpl(android.content.SyncContext,android.content.SyncableContentProvider,com.google.wireless.gdata.data.Entry,java.lang.Object,android.content.SyncableContentProvider,android.content.SyncResult,boolean)>($r1, $r2, $r6, $r5, $r3, $r4, $z0);
+
+        return;
+    }
+
+    protected void sendClientDiffsImpl(android.content.SyncContext, android.content.SyncableContentProvider, com.google.wireless.gdata.data.Entry, java.lang.Object, android.content.SyncableContentProvider, android.content.SyncResult, boolean)
+    {
+        com.google.android.providers.AbstractGDataSyncAdapter $r0;
+        android.content.SyncContext $r1;
+        android.content.SyncableContentProvider $r2, $r5;
+        com.google.wireless.gdata.data.Entry $r3, $r12;
+        java.lang.Object $r4;
+        android.content.SyncResult $r6;
+        boolean $z0, $z1;
+        java.lang.String $r7, $r17;
+        java.lang.Class $r8;
+        android.database.Cursor $r9;
+        int $i0, $i1, $i2;
+        java.lang.StringBuilder $r10, r20;
+        com.google.android.providers.AbstractGDataSyncAdapter$ClientDiffType $r11;
+        long $l3;
+        java.lang.Long $r13;
+        com.google.wireless.gdata.parser.ParseException $r14, $r19;
+        android.content.SyncStats $r15;
+        java.lang.Throwable $r16, $r18, r22;
+        android.content.ContentProvider r21;
+
+        $r0 := @this: com.google.android.providers.AbstractGDataSyncAdapter;
+
+        $r1 := @parameter0: android.content.SyncContext;
+
+        $r2 := @parameter1: android.content.SyncableContentProvider;
+
+        $r3 := @parameter2: com.google.wireless.gdata.data.Entry;
+
+        $r4 := @parameter3: java.lang.Object;
+
+        $r5 := @parameter4: android.content.SyncableContentProvider;
+
+        $r6 := @parameter5: android.content.SyncResult;
+
+        $z0 := @parameter6: boolean;
+
+        $r7 = $r0.<com.google.android.providers.AbstractGDataSyncAdapter: java.lang.String mAccount>;
+
+        $z1 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r7);
+
+        if $z1 == 0 goto label01;
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("Sync", "no username, so skipping the merge");
+
+        return;
+
+     label01:
+        $r8 = virtualinvoke $r3.<java.lang.Object: java.lang.Class getClass()>();
+
+        r21 = (android.content.ContentProvider) $r2;
+
+        $r9 = virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: android.database.Cursor getCursorForDeletedTable(android.content.ContentProvider,java.lang.Class)>(r21, $r8);
+
+     label02:
+        $i0 = interfaceinvoke $r9.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("_sync_local_id");
+
+        $i1 = interfaceinvoke $r9.<android.database.Cursor: int getCount()>();
+
+     label03:
+        $z1 = interfaceinvoke $r9.<android.database.Cursor: boolean moveToNext()>();
+
+        if $z1 == 0 goto label04;
+
+        $z1 = virtualinvoke $r6.<android.content.SyncResult: boolean madeSomeProgress()>();
+
+        if $z1 != 0 goto label04;
+
+        $z1 = $r0.<com.google.android.providers.AbstractGDataSyncAdapter: boolean mSyncCanceled>;
+
+        if $z1 == 0 goto label08;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Sync", "stopping since the sync was cancelled");
+
+     label04:
+        interfaceinvoke $r9.<android.database.Cursor: void deactivate()>();
+
+        $r8 = virtualinvoke $r3.<java.lang.Object: java.lang.Class getClass()>();
+
+        r21 = (android.content.ContentProvider) $r2;
+
+        $r9 = virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: android.database.Cursor getCursorForTable(android.content.ContentProvider,java.lang.Class)>(r21, $r8);
+
+     label05:
+        $i0 = interfaceinvoke $r9.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("_sync_local_id");
+
+        $i1 = interfaceinvoke $r9.<android.database.Cursor: int getCount()>();
+
+     label06:
+        $z0 = virtualinvoke $r6.<android.content.SyncResult: boolean madeSomeProgress()>();
+
+        if $z0 != 0 goto label07;
+
+        $z0 = interfaceinvoke $r9.<android.database.Cursor: boolean moveToNext()>();
+
+        if $z0 == 0 goto label07;
+
+        $z0 = $r0.<com.google.android.providers.AbstractGDataSyncAdapter: boolean mSyncCanceled>;
+
+        if $z0 == 0 goto label20;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Sync", "stopping since the sync was cancelled");
+
+     label07:
+        interfaceinvoke $r9.<android.database.Cursor: void deactivate()>();
+
+        return;
+
+     label08:
+        virtualinvoke $r3.<com.google.wireless.gdata.data.Entry: void clear()>();
+
+     label09:
+        virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: void deletedCursorToEntry(android.content.SyncContext,android.database.Cursor,com.google.wireless.gdata.data.Entry)>($r1, $r9, $r3);
+
+     label10:
+        r20 = new java.lang.StringBuilder;
+
+        specialinvoke r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Deleting, ");
+
+        $i2 = $i1 - 1;
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" to go");
+
+        $r7 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<android.content.SyncContext: void setStatusText(java.lang.String)>($r7);
+
+        virtualinvoke $r3.<com.google.wireless.gdata.data.Entry: void setDeleted(boolean)>(1);
+
+        if $z0 != 0 goto label19;
+
+        $r11 = <com.google.android.providers.AbstractGDataSyncAdapter$ClientDiffType: com.google.android.providers.AbstractGDataSyncAdapter$ClientDiffType DELETE>;
+
+        $r7 = virtualinvoke $r3.<com.google.wireless.gdata.data.Entry: java.lang.String getEditUri()>();
+
+        $r12 = virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: com.google.wireless.gdata.data.Entry sendSingleClientDiff(com.google.android.providers.AbstractGDataSyncAdapter$ClientDiffType,java.lang.String,com.google.wireless.gdata.data.Entry,android.content.SyncResult,boolean)>($r11, $r7, $r3, $r6, 1);
+
+     label11:
+        if $r12 == null goto label36;
+
+     label12:
+        $l3 = interfaceinvoke $r9.<android.database.Cursor: long getLong(int)>($i0);
+
+        $r13 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l3);
+
+        virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: void updateProviderInTransaction(android.content.SyncableContentProvider,com.google.wireless.gdata.data.Entry,java.lang.Long,java.lang.Object,android.content.SyncResult)>($r5, $r12, $r13, $r4, $r6);
+
+     label13:
+        goto label03;
+
+     label14:
+        $r14 := @caughtexception;
+
+     label15:
+        r20 = new java.lang.StringBuilder;
+
+        specialinvoke r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unable to convert row to an Entry, skipping. ");
+
+        $i2 = interfaceinvoke $r9.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("_id");
+
+        $l3 = interfaceinvoke $r9.<android.database.Cursor: long getLong(int)>($i2);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l3);
+
+        $r7 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r22 = (java.lang.Throwable) $r14;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String,java.lang.Throwable)>("Sync", $r7, r22);
+
+        $r15 = $r6.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l3 = $r15.<android.content.SyncStats: long numParseExceptions>;
+
+        $l3 = $l3 + 1L;
+
+        $r15.<android.content.SyncStats: long numParseExceptions> = $l3;
+
+     label16:
+        goto label03;
+
+     label17:
+        $r16 := @caughtexception;
+
+     label18:
+        interfaceinvoke $r9.<android.database.Cursor: void deactivate()>();
+
+        throw $r16;
+
+     label19:
+        $r12 = $r3;
+
+        goto label11;
+
+     label20:
+        virtualinvoke $r3.<com.google.wireless.gdata.data.Entry: void clear()>();
+
+        r20 = new java.lang.StringBuilder;
+
+        specialinvoke r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Updating, ");
+
+        $i2 = $i1 - 1;
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" to go");
+
+        $r7 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<android.content.SyncContext: void setStatusText(java.lang.String)>($r7);
+
+     label21:
+        $r7 = virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: java.lang.String cursorToEntry(android.content.SyncContext,android.database.Cursor,com.google.wireless.gdata.data.Entry,java.lang.Object)>($r1, $r9, $r3, $r4);
+
+     label22:
+        $r17 = $r7;
+
+     label23:
+        if $r7 != null goto label29;
+
+        $r7 = virtualinvoke $r3.<com.google.wireless.gdata.data.Entry: java.lang.String getEditUri()>();
+
+     label24:
+        $r17 = $r7;
+
+        $r11 = <com.google.android.providers.AbstractGDataSyncAdapter$ClientDiffType: com.google.android.providers.AbstractGDataSyncAdapter$ClientDiffType UPDATE>;
+
+     label25:
+        $r12 = virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: com.google.wireless.gdata.data.Entry sendSingleClientDiff(com.google.android.providers.AbstractGDataSyncAdapter$ClientDiffType,java.lang.String,com.google.wireless.gdata.data.Entry,android.content.SyncResult,boolean)>($r11, $r17, $r3, $r6, 1);
+
+        if $r12 == null goto label06;
+
+        $l3 = interfaceinvoke $r9.<android.database.Cursor: long getLong(int)>($i0);
+
+        $r13 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l3);
+
+        virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: void updateProviderInTransaction(android.content.SyncableContentProvider,com.google.wireless.gdata.data.Entry,java.lang.Long,java.lang.Object,android.content.SyncResult)>($r5, $r12, $r13, $r4, $r6);
+
+     label26:
+        goto label06;
+
+     label27:
+        $r18 := @caughtexception;
+
+     label28:
+        interfaceinvoke $r9.<android.database.Cursor: void deactivate()>();
+
+        throw $r18;
+
+     label29:
+        $r11 = <com.google.android.providers.AbstractGDataSyncAdapter$ClientDiffType: com.google.android.providers.AbstractGDataSyncAdapter$ClientDiffType INSERT>;
+
+     label30:
+        goto label25;
+
+     label31:
+        $r19 := @caughtexception;
+
+     label32:
+        r20 = new java.lang.StringBuilder;
+
+        specialinvoke r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unable to convert row to an Entry, skipping. ");
+
+        $i2 = interfaceinvoke $r9.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("_id");
+
+        $l3 = interfaceinvoke $r9.<android.database.Cursor: long getLong(int)>($i2);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l3);
+
+        $r7 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r22 = (java.lang.Throwable) $r19;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("Sync", $r7, r22);
+
+        $r15 = $r6.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l3 = $r15.<android.content.SyncStats: long numParseExceptions>;
+
+        $l3 = $l3 + 1L;
+
+        $r15.<android.content.SyncStats: long numParseExceptions> = $l3;
+
+     label33:
+        goto label06;
+
+     label34:
+        $r18 := @caughtexception;
+
+        goto label28;
+
+     label35:
+        $r16 := @caughtexception;
+
+        goto label18;
+
+     label36:
+        goto label03;
+
+        catch java.lang.Throwable from label02 to label03 with label35;
+        catch java.lang.Throwable from label03 to label04 with label17;
+        catch java.lang.Throwable from label05 to label06 with label34;
+        catch java.lang.Throwable from label06 to label07 with label27;
+        catch java.lang.Throwable from label08 to label09 with label17;
+        catch com.google.wireless.gdata.parser.ParseException from label09 to label10 with label14;
+        catch java.lang.Throwable from label09 to label10 with label17;
+        catch java.lang.Throwable from label10 to label11 with label17;
+        catch java.lang.Throwable from label12 to label13 with label35;
+        catch java.lang.Throwable from label15 to label16 with label17;
+        catch java.lang.Throwable from label20 to label21 with label27;
+        catch com.google.wireless.gdata.parser.ParseException from label21 to label22 with label31;
+        catch com.google.wireless.gdata.parser.ParseException from label23 to label24 with label31;
+        catch java.lang.Throwable from label21 to label22 with label27;
+        catch java.lang.Throwable from label23 to label25 with label27;
+        catch java.lang.Throwable from label25 to label26 with label27;
+        catch java.lang.Throwable from label29 to label30 with label27;
+        catch java.lang.Throwable from label32 to label33 with label27;
+    }
+
+    public com.google.wireless.gdata.data.Entry sendSingleClientDiff(com.google.android.providers.AbstractGDataSyncAdapter$ClientDiffType, java.lang.String, com.google.wireless.gdata.data.Entry, android.content.SyncResult, boolean)
+    {
+        com.google.android.providers.AbstractGDataSyncAdapter $r0;
+        com.google.android.providers.AbstractGDataSyncAdapter$ClientDiffType $r1, $r16;
+        java.lang.String $r2, $r7;
+        android.content.SyncResult $r3;
+        boolean $z0, $z1;
+        com.google.wireless.gdata.data.Entry $r4, $r17;
+        int[] $r5;
+        int $i0;
+        java.lang.StringBuilder $r6, r20;
+        java.lang.IllegalArgumentException $r8, r21;
+        com.google.wireless.gdata.parser.ParseException $r9;
+        android.content.SyncStats $r10;
+        long $l1;
+        com.google.wireless.gdata.client.GDataServiceClient $r11;
+        java.io.IOException $r12;
+        java.lang.RuntimeException $r13;
+        java.lang.Class $r14;
+        com.google.wireless.gdata.client.HttpException $r15;
+        com.google.android.googlelogin.GoogleLoginServiceNotFoundException $r18;
+        com.google.android.googlelogin.GoogleLoginServiceBlockingHelper$AuthenticationException $r19;
+        java.lang.Throwable r22;
+
+        $r0 := @this: com.google.android.providers.AbstractGDataSyncAdapter;
+
+        $r1 := @parameter0: com.google.android.providers.AbstractGDataSyncAdapter$ClientDiffType;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r4 := @parameter2: com.google.wireless.gdata.data.Entry;
+
+        $r3 := @parameter3: android.content.SyncResult;
+
+        $z0 := @parameter4: boolean;
+
+        $r5 = <com.google.android.providers.AbstractGDataSyncAdapter$1: int[] $SwitchMap$com$google$android$providers$AbstractGDataSyncAdapter$ClientDiffType>;
+
+     label01:
+        $i0 = virtualinvoke $r1.<java.lang.Enum: int ordinal()>();
+
+     label02:
+        $i0 = $r5[$i0];
+
+     label03:
+        lookupswitch($i0)
+        {
+            case 1: goto label05;
+            case 2: goto label17;
+            case 3: goto label30;
+            default: goto label04;
+        };
+
+     label04:
+        return $r4;
+
+     label05:
+        $z1 = staticinvoke <android.util.Log: boolean isLoggable(java.lang.String,int)>("Sync", 2);
+
+        if $z1 == 0 goto label08;
+
+     label06:
+        r20 = new java.lang.StringBuilder;
+
+     label07:
+        specialinvoke r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Updating entry ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("Sync", $r7);
+
+     label08:
+        $z1 = virtualinvoke $r4.<com.google.wireless.gdata.data.Entry: boolean isDeleted()>();
+
+        if $z1 == 0 goto label13;
+
+     label09:
+        r21 = new java.lang.IllegalArgumentException;
+
+     label10:
+        $r8 = r21;
+
+        specialinvoke r21.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("entry is marked as deleted but op is UPDATE");
+
+     label11:
+        throw $r8;
+
+     label12:
+        $r9 := @caughtexception;
+
+        r20 = new java.lang.StringBuilder;
+
+        specialinvoke r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("parse error during ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" of ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", skipping");
+
+        $r2 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r22 = (java.lang.Throwable) $r9;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("Sync", $r2, r22);
+
+        $r10 = $r3.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l1 = $r10.<android.content.SyncStats: long numParseExceptions>;
+
+        $l1 = $l1 + 1L;
+
+        $r10.<android.content.SyncStats: long numParseExceptions> = $l1;
+
+        return null;
+
+     label13:
+        $r11 = virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: com.google.wireless.gdata.client.GDataServiceClient getGDataServiceClient()>();
+
+        $r7 = $r0.<com.google.android.providers.AbstractGDataSyncAdapter: java.lang.String mAuthToken>;
+
+        $r4 = virtualinvoke $r11.<com.google.wireless.gdata.client.GDataServiceClient: com.google.wireless.gdata.data.Entry updateEntry(com.google.wireless.gdata.data.Entry,java.lang.String)>($r4, $r7);
+
+     label14:
+        $r10 = $r3.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l1 = $r10.<android.content.SyncStats: long numUpdates>;
+
+        $l1 = $l1 + 1L;
+
+        $r10.<android.content.SyncStats: long numUpdates> = $l1;
+
+     label15:
+        goto label04;
+
+     label16:
+        $r12 := @caughtexception;
+
+        r20 = new java.lang.StringBuilder;
+
+        specialinvoke r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("io error during ");
+
+        $r7 = virtualinvoke $r1.<java.lang.Enum: java.lang.String toString()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" of ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", due to ");
+
+        $r2 = virtualinvoke $r12.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", skipping");
+
+        $r2 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Sync", $r2);
+
+        $r10 = $r3.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l1 = $r10.<android.content.SyncStats: long numIoExceptions>;
+
+        $l1 = $l1 + 1L;
+
+        $r10.<android.content.SyncStats: long numIoExceptions> = $l1;
+
+        return null;
+
+     label17:
+        $z1 = staticinvoke <android.util.Log: boolean isLoggable(java.lang.String,int)>("Sync", 2);
+
+        if $z1 == 0 goto label20;
+
+     label18:
+        r20 = new java.lang.StringBuilder;
+
+     label19:
+        specialinvoke r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Inserting entry ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("Sync", $r7);
+
+     label20:
+        $z1 = virtualinvoke $r4.<com.google.wireless.gdata.data.Entry: boolean isDeleted()>();
+
+        if $z1 == 0 goto label25;
+
+     label21:
+        r21 = new java.lang.IllegalArgumentException;
+
+     label22:
+        $r8 = r21;
+
+        specialinvoke r21.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("entry is marked as deleted but op is INSERT");
+
+     label23:
+        throw $r8;
+
+     label24:
+        $r13 := @caughtexception;
+
+        r20 = new java.lang.StringBuilder;
+
+        specialinvoke r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("object ");
+
+        $r14 = virtualinvoke $r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r7 = virtualinvoke $r14.<java.lang.Class: java.lang.String getName()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" caught an exception during ");
+
+        $r7 = virtualinvoke $r1.<java.lang.Enum: java.lang.String toString()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" of ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("Sync", $r2, $r13);
+
+        $r10 = $r3.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l1 = $r10.<android.content.SyncStats: long numSkippedEntries>;
+
+        $l1 = $l1 + 1L;
+
+        $r10.<android.content.SyncStats: long numSkippedEntries> = $l1;
+
+        return null;
+
+     label25:
+        $r11 = virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: com.google.wireless.gdata.client.GDataServiceClient getGDataServiceClient()>();
+
+        $r7 = $r0.<com.google.android.providers.AbstractGDataSyncAdapter: java.lang.String mAuthToken>;
+
+        $r4 = virtualinvoke $r11.<com.google.wireless.gdata.client.GDataServiceClient: com.google.wireless.gdata.data.Entry createEntry(java.lang.String,java.lang.String,com.google.wireless.gdata.data.Entry)>($r2, $r7, $r4);
+
+     label26:
+        $r10 = $r3.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l1 = $r10.<android.content.SyncStats: long numInserts>;
+
+        $l1 = $l1 + 1L;
+
+        $r10.<android.content.SyncStats: long numInserts> = $l1;
+
+     label27:
+        goto label04;
+
+     label28:
+        $r15 := @caughtexception;
+
+        $i0 = virtualinvoke $r15.<com.google.wireless.gdata.client.HttpException: int getStatusCode()>();
+
+        lookupswitch($i0)
+        {
+            case 400: goto label37;
+            case 401: goto label44;
+            case 402: goto label29;
+            case 403: goto label37;
+            case 404: goto label42;
+            case 405: goto label29;
+            case 406: goto label29;
+            case 407: goto label29;
+            case 408: goto label29;
+            case 409: goto label49;
+            default: goto label29;
+        };
+
+     label29:
+        r20 = new java.lang.StringBuilder;
+
+        specialinvoke r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("other error during ");
+
+        $r7 = virtualinvoke $r1.<java.lang.Enum: java.lang.String toString()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" of ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", due to ");
+
+        r22 = (java.lang.Throwable) $r15;
+
+        $r2 = virtualinvoke r22.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", skipping");
+
+        $r2 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Sync", $r2);
+
+        $r10 = $r3.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l1 = $r10.<android.content.SyncStats: long numIoExceptions>;
+
+        $l1 = $l1 + 1L;
+
+        $r10.<android.content.SyncStats: long numIoExceptions> = $l1;
+
+        return null;
+
+     label30:
+        $z1 = virtualinvoke $r4.<com.google.wireless.gdata.data.Entry: boolean isDeleted()>();
+
+        if $z1 != 0 goto label34;
+
+     label31:
+        r21 = new java.lang.IllegalArgumentException;
+
+     label32:
+        $r8 = r21;
+
+        specialinvoke r21.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("entry is not marked as deleted but op is DELETE");
+
+     label33:
+        throw $r8;
+
+     label34:
+        $r11 = virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: com.google.wireless.gdata.client.GDataServiceClient getGDataServiceClient()>();
+
+        $r7 = $r0.<com.google.android.providers.AbstractGDataSyncAdapter: java.lang.String mAuthToken>;
+
+        virtualinvoke $r11.<com.google.wireless.gdata.client.GDataServiceClient: void deleteEntry(java.lang.String,java.lang.String)>($r2, $r7);
+
+     label35:
+        $r10 = $r3.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l1 = $r10.<android.content.SyncStats: long numDeletes>;
+
+        $l1 = $l1 + 1L;
+
+        $r10.<android.content.SyncStats: long numDeletes> = $l1;
+
+     label36:
+        goto label04;
+
+     label37:
+        $r16 = <com.google.android.providers.AbstractGDataSyncAdapter$ClientDiffType: com.google.android.providers.AbstractGDataSyncAdapter$ClientDiffType UPDATE>;
+
+        if $r1 != $r16 goto label40;
+
+        $r14 = virtualinvoke $r4.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r2 = virtualinvoke $r4.<com.google.wireless.gdata.data.Entry: java.lang.String getId()>();
+
+        $r17 = specialinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: com.google.wireless.gdata.data.Entry getSingleEntry(java.lang.Class,java.lang.String)>($r14, $r2);
+
+        $r4 = $r17;
+
+        if $r17 != null goto label38;
+
+        $r10 = $r3.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l1 = $r10.<android.content.SyncStats: long numIoExceptions>;
+
+        $l1 = $l1 + 1L;
+
+        $r10.<android.content.SyncStats: long numIoExceptions> = $l1;
+
+        return null;
+
+     label38:
+        $r10 = $r3.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l1 = $r10.<android.content.SyncStats: long numUpdates>;
+
+        $l1 = $l1 + 1L;
+
+        $r10.<android.content.SyncStats: long numUpdates> = $l1;
+
+     label39:
+        return $r4;
+
+     label40:
+        $r16 = <com.google.android.providers.AbstractGDataSyncAdapter$ClientDiffType: com.google.android.providers.AbstractGDataSyncAdapter$ClientDiffType INSERT>;
+
+        if $r1 != $r16 goto label41;
+
+        virtualinvoke $r4.<com.google.wireless.gdata.data.Entry: void setDeleted(boolean)>(1);
+
+        $r10 = $r3.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l1 = $r10.<android.content.SyncStats: long numDeletes>;
+
+        $l1 = $l1 + 1L;
+
+        $r10.<android.content.SyncStats: long numDeletes> = $l1;
+
+        goto label39;
+
+     label41:
+        $r16 = <com.google.android.providers.AbstractGDataSyncAdapter$ClientDiffType: com.google.android.providers.AbstractGDataSyncAdapter$ClientDiffType DELETE>;
+
+        if $r1 != $r16 goto label39;
+
+        $r10 = $r3.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l1 = $r10.<android.content.SyncStats: long numDeletes>;
+
+        $l1 = $l1 + 1L;
+
+        $r10.<android.content.SyncStats: long numDeletes> = $l1;
+
+        goto label39;
+
+     label42:
+        $r16 = <com.google.android.providers.AbstractGDataSyncAdapter$ClientDiffType: com.google.android.providers.AbstractGDataSyncAdapter$ClientDiffType UPDATE>;
+
+        if $r1 != $r16 goto label43;
+
+        virtualinvoke $r4.<com.google.wireless.gdata.data.Entry: void setDeleted(boolean)>(1);
+
+     label43:
+        $r10 = $r3.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l1 = $r10.<android.content.SyncStats: long numDeletes>;
+
+        $l1 = $l1 + 1L;
+
+        $r10.<android.content.SyncStats: long numDeletes> = $l1;
+
+        return $r4;
+
+     label44:
+        if $z0 == 0 goto label48;
+
+     label45:
+        virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: void invalidateAndUpdateAuthToken()>();
+
+        $r4 = virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: com.google.wireless.gdata.data.Entry sendSingleClientDiff(com.google.android.providers.AbstractGDataSyncAdapter$ClientDiffType,java.lang.String,com.google.wireless.gdata.data.Entry,android.content.SyncResult,boolean)>($r1, $r2, $r4, $r3, 0);
+
+     label46:
+        return $r4;
+
+     label47:
+        $r18 := @caughtexception;
+
+     label48:
+        $r10 = $r3.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l1 = $r10.<android.content.SyncStats: long numAuthExceptions>;
+
+        $l1 = $l1 + 1L;
+
+        $r10.<android.content.SyncStats: long numAuthExceptions> = $l1;
+
+        return null;
+
+     label49:
+        $r16 = <com.google.android.providers.AbstractGDataSyncAdapter$ClientDiffType: com.google.android.providers.AbstractGDataSyncAdapter$ClientDiffType INSERT>;
+
+        if $r1 != $r16 goto label50;
+
+        $r10 = $r3.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l1 = $r10.<android.content.SyncStats: long numConflictDetectedExceptions>;
+
+        $l1 = $l1 + 1L;
+
+        $r10.<android.content.SyncStats: long numConflictDetectedExceptions> = $l1;
+
+        return null;
+
+     label50:
+        $r14 = virtualinvoke $r4.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r4 = specialinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: com.google.wireless.gdata.data.Entry getSingleEntry(java.lang.Class,java.lang.String)>($r14, $r2);
+
+        if $r4 != null goto label51;
+
+        r20 = new java.lang.StringBuilder;
+
+        specialinvoke r20.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke r20.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("conflict detected during ");
+
+        $r7 = virtualinvoke $r1.<java.lang.Enum: java.lang.String toString()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" of ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", skipping");
+
+        $r2 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r22 = (java.lang.Throwable) $r15;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String,java.lang.Throwable)>("Sync", $r2, r22);
+
+        $r10 = $r3.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l1 = $r10.<android.content.SyncStats: long numConflictDetectedExceptions>;
+
+        $l1 = $l1 + 1L;
+
+        $r10.<android.content.SyncStats: long numConflictDetectedExceptions> = $l1;
+
+        return null;
+
+     label51:
+        $r10 = $r3.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l1 = $r10.<android.content.SyncStats: long numUpdates>;
+
+        $l1 = $l1 + 1L;
+
+        $r10.<android.content.SyncStats: long numUpdates> = $l1;
+
+        return $r4;
+
+     label52:
+        $r19 := @caughtexception;
+
+        goto label48;
+
+        catch com.google.wireless.gdata.parser.ParseException from label01 to label02 with label12;
+        catch com.google.wireless.gdata.parser.ParseException from label03 to label04 with label12;
+        catch com.google.wireless.gdata.parser.ParseException from label05 to label06 with label12;
+        catch com.google.wireless.gdata.parser.ParseException from label07 to label09 with label12;
+        catch com.google.wireless.gdata.parser.ParseException from label10 to label11 with label12;
+        catch java.io.IOException from label01 to label02 with label16;
+        catch java.io.IOException from label03 to label04 with label16;
+        catch java.io.IOException from label05 to label06 with label16;
+        catch java.io.IOException from label07 to label09 with label16;
+        catch java.io.IOException from label10 to label11 with label16;
+        catch java.lang.RuntimeException from label01 to label04 with label24;
+        catch java.lang.RuntimeException from label05 to label06 with label24;
+        catch java.lang.RuntimeException from label07 to label09 with label24;
+        catch java.lang.RuntimeException from label10 to label12 with label24;
+        catch com.google.wireless.gdata.client.HttpException from label01 to label02 with label28;
+        catch com.google.wireless.gdata.client.HttpException from label03 to label04 with label28;
+        catch com.google.wireless.gdata.client.HttpException from label05 to label06 with label28;
+        catch com.google.wireless.gdata.client.HttpException from label07 to label09 with label28;
+        catch com.google.wireless.gdata.client.HttpException from label10 to label11 with label28;
+        catch com.google.wireless.gdata.parser.ParseException from label13 to label14 with label12;
+        catch java.io.IOException from label13 to label14 with label16;
+        catch java.lang.RuntimeException from label13 to label15 with label24;
+        catch com.google.wireless.gdata.client.HttpException from label13 to label14 with label28;
+        catch com.google.wireless.gdata.parser.ParseException from label17 to label18 with label12;
+        catch com.google.wireless.gdata.parser.ParseException from label19 to label21 with label12;
+        catch com.google.wireless.gdata.parser.ParseException from label22 to label23 with label12;
+        catch java.io.IOException from label17 to label18 with label16;
+        catch java.io.IOException from label19 to label21 with label16;
+        catch java.io.IOException from label22 to label23 with label16;
+        catch java.lang.RuntimeException from label17 to label18 with label24;
+        catch java.lang.RuntimeException from label19 to label21 with label24;
+        catch java.lang.RuntimeException from label22 to label24 with label24;
+        catch com.google.wireless.gdata.client.HttpException from label17 to label18 with label28;
+        catch com.google.wireless.gdata.client.HttpException from label19 to label21 with label28;
+        catch com.google.wireless.gdata.client.HttpException from label22 to label23 with label28;
+        catch com.google.wireless.gdata.parser.ParseException from label25 to label26 with label12;
+        catch java.io.IOException from label25 to label26 with label16;
+        catch java.lang.RuntimeException from label25 to label27 with label24;
+        catch com.google.wireless.gdata.client.HttpException from label25 to label26 with label28;
+        catch com.google.wireless.gdata.parser.ParseException from label30 to label31 with label12;
+        catch com.google.wireless.gdata.parser.ParseException from label32 to label33 with label12;
+        catch com.google.wireless.gdata.parser.ParseException from label34 to label35 with label12;
+        catch java.io.IOException from label30 to label31 with label16;
+        catch java.io.IOException from label32 to label33 with label16;
+        catch java.io.IOException from label34 to label35 with label16;
+        catch java.lang.RuntimeException from label30 to label31 with label24;
+        catch java.lang.RuntimeException from label32 to label36 with label24;
+        catch com.google.wireless.gdata.client.HttpException from label30 to label31 with label28;
+        catch com.google.wireless.gdata.client.HttpException from label32 to label33 with label28;
+        catch com.google.wireless.gdata.client.HttpException from label34 to label35 with label28;
+        catch com.google.android.googlelogin.GoogleLoginServiceBlockingHelper$AuthenticationException from label45 to label46 with label52;
+        catch com.google.android.googlelogin.GoogleLoginServiceNotFoundException from label45 to label46 with label47;
+    }
+
+    protected void setAuthToken(java.lang.String)
+    {
+        com.google.android.providers.AbstractGDataSyncAdapter $r0;
+        java.lang.String $r1;
+
+        $r0 := @this: com.google.android.providers.AbstractGDataSyncAdapter;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r0.<com.google.android.providers.AbstractGDataSyncAdapter: java.lang.String mAuthToken> = $r1;
+
+        return;
+    }
+
+    protected abstract void updateProvider(com.google.wireless.gdata.data.Feed, java.lang.Long, com.google.wireless.gdata.data.Entry, android.content.ContentProvider, java.lang.Object) throws com.google.wireless.gdata.parser.ParseException;
+
+    void updateProviderInTransaction(android.content.SyncableContentProvider, com.google.wireless.gdata.data.Entry, java.lang.Long, java.lang.Object, android.content.SyncResult)
+    {
+        com.google.android.providers.AbstractGDataSyncAdapter $r0;
+        android.content.SyncableContentProvider $r1;
+        com.google.wireless.gdata.data.Entry $r2;
+        java.lang.Long $r3;
+        java.lang.Object $r4;
+        android.content.SyncResult $r5;
+        android.database.sqlite.SQLiteDatabase $r6;
+        boolean $z0;
+        java.lang.StringBuilder $r7, r12;
+        java.lang.String $r8;
+        java.lang.Exception $r9;
+        android.content.SyncStats $r10;
+        long $l0;
+        java.lang.Throwable $r11;
+        android.content.ContentProvider r13;
+
+        $r0 := @this: com.google.android.providers.AbstractGDataSyncAdapter;
+
+        $r1 := @parameter0: android.content.SyncableContentProvider;
+
+        $r2 := @parameter1: com.google.wireless.gdata.data.Entry;
+
+        $r3 := @parameter2: java.lang.Long;
+
+        $r4 := @parameter3: java.lang.Object;
+
+        $r5 := @parameter4: android.content.SyncResult;
+
+        $r6 = virtualinvoke $r1.<android.content.SyncableContentProvider: android.database.sqlite.SQLiteDatabase getDatabase()>();
+
+        virtualinvoke $r6.<android.database.sqlite.SQLiteDatabase: void beginTransaction()>();
+
+     label1:
+        $z0 = staticinvoke <android.util.Log: boolean isLoggable(java.lang.String,int)>("Sync", 2);
+
+        if $z0 == 0 goto label4;
+
+     label2:
+        r12 = new java.lang.StringBuilder;
+
+     label3:
+        specialinvoke r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("sendClientDiffs: updating provider with entry ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("Sync", $r8);
+
+     label4:
+        r13 = (android.content.ContentProvider) $r1;
+
+        virtualinvoke $r0.<com.google.android.providers.AbstractGDataSyncAdapter: void updateProvider(com.google.wireless.gdata.data.Feed,java.lang.Long,com.google.wireless.gdata.data.Entry,android.content.ContentProvider,java.lang.Object)>(null, $r3, $r2, r13, $r4);
+
+        virtualinvoke $r6.<android.database.sqlite.SQLiteDatabase: void setTransactionSuccessful()>();
+
+     label5:
+        virtualinvoke $r6.<android.database.sqlite.SQLiteDatabase: void endTransaction()>();
+
+        return;
+
+     label6:
+        $r9 := @caughtexception;
+
+     label7:
+        r12 = new java.lang.StringBuilder;
+
+        specialinvoke r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("updateProvider failed, entry ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String,java.lang.Throwable)>("Sync", $r8, $r9);
+
+        $r10 = $r5.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l0 = $r10.<android.content.SyncStats: long numSkippedEntries>;
+
+        $l0 = $l0 + 1L;
+
+        $r10.<android.content.SyncStats: long numSkippedEntries> = $l0;
+
+     label8:
+        virtualinvoke $r6.<android.database.sqlite.SQLiteDatabase: void endTransaction()>();
+
+        return;
+
+     label9:
+        $r11 := @caughtexception;
+
+        virtualinvoke $r6.<android.database.sqlite.SQLiteDatabase: void endTransaction()>();
+
+        throw $r11;
+
+        catch java.lang.Exception from label1 to label2 with label6;
+        catch java.lang.Exception from label3 to label5 with label6;
+        catch java.lang.Throwable from label1 to label5 with label9;
+        catch java.lang.Throwable from label7 to label8 with label9;
+    }
+
+    protected void updateQueryParameters(com.google.wireless.gdata.client.QueryParams)
+    {
+        com.google.android.providers.AbstractGDataSyncAdapter $r0;
+        com.google.wireless.gdata.client.QueryParams $r1;
+
+        $r0 := @this: com.google.android.providers.AbstractGDataSyncAdapter;
+
+        $r1 := @parameter0: com.google.wireless.gdata.client.QueryParams;
+
+        return;
+    }
+
+    public void writeSyncData(android.content.TempProviderSyncAdapter$SyncData, android.content.SyncableContentProvider)
+    {
+        com.google.android.providers.AbstractGDataSyncAdapter $r0;
+        android.content.SyncableContentProvider $r1;
+        java.lang.String $r2;
+        byte[] $r3;
+        android.content.TempProviderSyncAdapter$SyncData $r4;
+        android.net.Uri $r5;
+        java.lang.String[] $r6;
+        android.content.ContentValues $r7, r9;
+        com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData $r8;
+        android.content.ContentProvider r10;
+
+        $r0 := @this: com.google.android.providers.AbstractGDataSyncAdapter;
+
+        $r4 := @parameter0: android.content.TempProviderSyncAdapter$SyncData;
+
+        $r1 := @parameter1: android.content.SyncableContentProvider;
+
+        $r5 = <com.google.android.providers.AbstractGDataSyncAdapter: android.net.Uri SYNC_STATE_CONTENT_URI>;
+
+        $r6 = newarray (java.lang.String)[1];
+
+        $r2 = $r0.<com.google.android.providers.AbstractGDataSyncAdapter: java.lang.String mAccount>;
+
+        $r6[0] = $r2;
+
+        r10 = (android.content.ContentProvider) $r1;
+
+        virtualinvoke r10.<android.content.ContentProvider: int delete(android.net.Uri,java.lang.String,java.lang.String[])>($r5, "_sync_account = ?", $r6);
+
+        if $r4 != null goto label1;
+
+        r9 = new android.content.ContentValues;
+
+        $r7 = r9;
+
+        specialinvoke r9.<android.content.ContentValues: void <init>()>();
+
+        virtualinvoke $r7.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("data", null);
+
+        $r2 = $r0.<com.google.android.providers.AbstractGDataSyncAdapter: java.lang.String mAccount>;
+
+        virtualinvoke $r7.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("_sync_account", $r2);
+
+        $r5 = <com.google.android.providers.AbstractGDataSyncAdapter: android.net.Uri SYNC_STATE_CONTENT_URI>;
+
+        r10 = (android.content.ContentProvider) $r1;
+
+        virtualinvoke r10.<android.content.ContentProvider: android.net.Uri insert(android.net.Uri,android.content.ContentValues)>($r5, $r7);
+
+        return;
+
+     label1:
+        r9 = new android.content.ContentValues;
+
+        $r7 = r9;
+
+        specialinvoke r9.<android.content.ContentValues: void <init>()>();
+
+        $r8 = (com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData) $r4;
+
+        $r3 = staticinvoke <com.google.android.providers.AbstractGDataSyncAdapter: byte[] newBytesFromGDataSyncData(com.google.android.providers.AbstractGDataSyncAdapter$GDataSyncData)>($r8);
+
+        virtualinvoke $r7.<android.content.ContentValues: void put(java.lang.String,byte[])>("data", $r3);
+
+        $r2 = $r0.<com.google.android.providers.AbstractGDataSyncAdapter: java.lang.String mAccount>;
+
+        virtualinvoke $r7.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("_sync_account", $r2);
+
+        $r5 = <com.google.android.providers.AbstractGDataSyncAdapter: android.net.Uri SYNC_STATE_CONTENT_URI>;
+
+        r10 = (android.content.ContentProvider) $r1;
+
+        virtualinvoke r10.<android.content.ContentProvider: android.net.Uri insert(android.net.Uri,android.content.ContentValues)>($r5, $r7);
+
+        return;
+    }
+}

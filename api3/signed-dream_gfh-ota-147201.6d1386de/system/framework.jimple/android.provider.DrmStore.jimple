@@ -1,0 +1,372 @@
+public final class android.provider.DrmStore extends java.lang.Object
+{
+    private static final java.lang.String ACCESS_DRM_PERMISSION;
+    public static final java.lang.String AUTHORITY;
+    private static final java.lang.String TAG;
+
+    public void <init>()
+    {
+        android.provider.DrmStore $r0;
+
+        $r0 := @this: android.provider.DrmStore;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static final android.content.Intent addDrmFile(android.content.ContentResolver, java.io.File, java.lang.String)
+    {
+        android.content.ContentResolver $r0;
+        java.io.File $r1;
+        java.lang.String $r2, $r5, $r11;
+        java.io.FileInputStream $r3;
+        android.drm.mobile1.DrmRawContent $r4;
+        long $l0;
+        int $i1;
+        android.drm.mobile1.DrmRightsManager $r6;
+        android.drm.mobile1.DrmRights $r7;
+        java.io.InputStream $r8;
+        android.net.Uri $r9;
+        boolean $z0;
+        android.content.ContentValues $r10;
+        java.lang.Long $r12;
+        java.io.OutputStream $r13, $r14;
+        byte[] $r15;
+        java.lang.Exception $r16, $r27;
+        android.content.Intent $r17;
+        java.lang.StringBuilder $r18;
+        java.io.IOException $r19, $r20, $r22;
+        java.lang.Throwable $r21, $r23, $r24, $r25, $r26;
+
+        $r0 := @parameter0: android.content.ContentResolver;
+
+        $r1 := @parameter1: java.io.File;
+
+        $r2 := @parameter2: java.lang.String;
+
+     label01:
+        $r3 = new java.io.FileInputStream;
+
+     label02:
+        specialinvoke $r3.<java.io.FileInputStream: void <init>(java.io.File)>($r1);
+
+     label03:
+        $r4 = new android.drm.mobile1.DrmRawContent;
+
+     label04:
+        $l0 = virtualinvoke $r1.<java.io.File: long length()>();
+
+        $i1 = (int) $l0;
+
+        specialinvoke $r4.<android.drm.mobile1.DrmRawContent: void <init>(java.io.InputStream,int,java.lang.String)>($r3, $i1, "application/vnd.oma.drm.message");
+
+        $r5 = virtualinvoke $r4.<android.drm.mobile1.DrmRawContent: java.lang.String getContentType()>();
+
+        $r6 = staticinvoke <android.drm.mobile1.DrmRightsManager: android.drm.mobile1.DrmRightsManager getInstance()>();
+
+        $r7 = virtualinvoke $r6.<android.drm.mobile1.DrmRightsManager: android.drm.mobile1.DrmRights queryRights(android.drm.mobile1.DrmRawContent)>($r4);
+
+        $r8 = virtualinvoke $r4.<android.drm.mobile1.DrmRawContent: java.io.InputStream getContentInputStream(android.drm.mobile1.DrmRights)>($r7);
+
+        $i1 = virtualinvoke $r8.<java.io.InputStream: int available()>();
+
+     label05:
+        $l0 = (long) $i1;
+
+     label06:
+        $r9 = null;
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean startsWith(java.lang.String)>("audio/");
+
+        if $z0 == 0 goto label21;
+
+     label07:
+        $r9 = <android.provider.DrmStore$Audio: android.net.Uri CONTENT_URI>;
+
+     label08:
+        if $r9 == null goto label48;
+
+     label09:
+        $r10 = new android.content.ContentValues;
+
+        specialinvoke $r10.<android.content.ContentValues: void <init>(int)>(3);
+
+        if $r2 != null goto label10;
+
+        $r11 = virtualinvoke $r1.<java.io.File: java.lang.String getName()>();
+
+        $r2 = $r11;
+
+        $i1 = virtualinvoke $r11.<java.lang.String: int lastIndexOf(int)>(46);
+
+        if $i1 <= 0 goto label10;
+
+        $r2 = virtualinvoke $r11.<java.lang.String: java.lang.String substring(int,int)>(0, $i1);
+
+     label10:
+        virtualinvoke $r10.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("title", $r2);
+
+        $r12 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l0);
+
+        virtualinvoke $r10.<android.content.ContentValues: void put(java.lang.String,java.lang.Long)>("_size", $r12);
+
+        virtualinvoke $r10.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("mime_type", $r5);
+
+        $r9 = virtualinvoke $r0.<android.content.ContentResolver: android.net.Uri insert(android.net.Uri,android.content.ContentValues)>($r9, $r10);
+
+        if $r9 == null goto label48;
+
+        $r13 = virtualinvoke $r0.<android.content.ContentResolver: java.io.OutputStream openOutputStream(android.net.Uri)>($r9);
+
+     label11:
+        $r14 = $r13;
+
+     label12:
+        $r15 = newarray (byte)[1000];
+
+     label13:
+        $i1 = virtualinvoke $r8.<java.io.InputStream: int read(byte[])>($r15);
+
+        if $i1 == -1 goto label27;
+
+        virtualinvoke $r13.<java.io.OutputStream: void write(byte[],int,int)>($r15, 0, $i1);
+
+     label14:
+        goto label13;
+
+     label15:
+        $r16 := @caughtexception;
+
+        $r17 = null;
+
+     label16:
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("DrmStore", "pushing file failed", $r16);
+
+     label17:
+        if $r3 == null goto label19;
+
+     label18:
+        virtualinvoke $r3.<java.io.FileInputStream: void close()>();
+
+     label19:
+        if $r14 == null goto label20;
+
+        virtualinvoke $r14.<java.io.OutputStream: void close()>();
+
+     label20:
+        return $r17;
+
+     label21:
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean startsWith(java.lang.String)>("image/");
+
+     label22:
+        if $z0 == 0 goto label24;
+
+        $r9 = <android.provider.DrmStore$Images: android.net.Uri CONTENT_URI>;
+
+     label23:
+        goto label08;
+
+     label24:
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unsupported mime type ");
+
+        $r18 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r11 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("DrmStore", $r11);
+
+     label25:
+        goto label08;
+
+     label26:
+        $r16 := @caughtexception;
+
+        $r14 = null;
+
+        $r17 = null;
+
+        goto label16;
+
+     label27:
+        $r17 = new android.content.Intent;
+
+     label28:
+        specialinvoke $r17.<android.content.Intent: void <init>()>();
+
+     label29:
+        virtualinvoke $r17.<android.content.Intent: android.content.Intent setDataAndType(android.net.Uri,java.lang.String)>($r9, $r5);
+
+     label30:
+        if $r3 == null goto label32;
+
+     label31:
+        virtualinvoke $r3.<java.io.FileInputStream: void close()>();
+
+     label32:
+        if $r13 == null goto label33;
+
+        virtualinvoke $r13.<java.io.OutputStream: void close()>();
+
+     label33:
+        return $r17;
+
+     label34:
+        $r19 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("DrmStore", "IOException in DrmTest.onCreate()", $r19);
+
+        return $r17;
+
+     label35:
+        $r20 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("DrmStore", "IOException in DrmTest.onCreate()", $r20);
+
+        return $r17;
+
+     label36:
+        $r21 := @caughtexception;
+
+        $r13 = null;
+
+        $r3 = null;
+
+     label37:
+        if $r3 == null goto label39;
+
+     label38:
+        virtualinvoke $r3.<java.io.FileInputStream: void close()>();
+
+     label39:
+        if $r13 == null goto label40;
+
+        virtualinvoke $r13.<java.io.OutputStream: void close()>();
+
+     label40:
+        throw $r21;
+
+     label41:
+        $r22 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("DrmStore", "IOException in DrmTest.onCreate()", $r22);
+
+        goto label40;
+
+     label42:
+        $r23 := @caughtexception;
+
+        $r13 = null;
+
+        $r21 = $r23;
+
+        goto label37;
+
+     label43:
+        $r24 := @caughtexception;
+
+        $r21 = $r24;
+
+        goto label37;
+
+     label44:
+        $r25 := @caughtexception;
+
+        $r21 = $r25;
+
+        goto label37;
+
+     label45:
+        $r26 := @caughtexception;
+
+        $r13 = $r14;
+
+        $r21 = $r26;
+
+        goto label37;
+
+     label46:
+        $r16 := @caughtexception;
+
+        $r17 = null;
+
+        $r3 = null;
+
+        $r14 = null;
+
+        goto label16;
+
+     label47:
+        $r27 := @caughtexception;
+
+        $r16 = $r27;
+
+        goto label16;
+
+     label48:
+        $r17 = null;
+
+        $r13 = null;
+
+        goto label30;
+
+        catch java.lang.Exception from label02 to label03 with label46;
+        catch java.lang.Throwable from label01 to label03 with label36;
+        catch java.lang.Exception from label04 to label05 with label26;
+        catch java.lang.Exception from label06 to label07 with label26;
+        catch java.lang.Exception from label09 to label11 with label26;
+        catch java.lang.Throwable from label03 to label11 with label42;
+        catch java.lang.Exception from label12 to label14 with label15;
+        catch java.lang.Throwable from label12 to label14 with label43;
+        catch java.lang.Throwable from label16 to label17 with label45;
+        catch java.io.IOException from label18 to label20 with label35;
+        catch java.lang.Exception from label21 to label22 with label26;
+        catch java.lang.Exception from label24 to label25 with label26;
+        catch java.lang.Throwable from label21 to label23 with label42;
+        catch java.lang.Throwable from label24 to label25 with label42;
+        catch java.lang.Exception from label28 to label29 with label15;
+        catch java.lang.Throwable from label27 to label29 with label43;
+        catch java.lang.Exception from label29 to label30 with label47;
+        catch java.lang.Throwable from label29 to label30 with label44;
+        catch java.io.IOException from label31 to label33 with label34;
+        catch java.io.IOException from label38 to label40 with label41;
+    }
+
+    public static void enforceAccessDrmPermission(android.content.Context)
+    {
+        android.content.Context $r0;
+        int $i0;
+        java.lang.SecurityException $r1;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $i0 = virtualinvoke $r0.<android.content.Context: int checkCallingOrSelfPermission(java.lang.String)>("android.permission.ACCESS_DRM");
+
+        if $i0 == 0 goto label1;
+
+        $r1 = new java.lang.SecurityException;
+
+        specialinvoke $r1.<java.lang.SecurityException: void <init>(java.lang.String)>("Requires DRM permission");
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <android.provider.DrmStore: java.lang.String TAG> = "DrmStore";
+
+        <android.provider.DrmStore: java.lang.String AUTHORITY> = "drm";
+
+        <android.provider.DrmStore: java.lang.String ACCESS_DRM_PERMISSION> = "android.permission.ACCESS_DRM";
+
+        return;
+    }
+}

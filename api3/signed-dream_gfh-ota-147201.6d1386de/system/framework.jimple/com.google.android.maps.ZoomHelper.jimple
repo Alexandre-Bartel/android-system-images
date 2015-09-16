@@ -1,0 +1,751 @@
+class com.google.android.maps.ZoomHelper extends java.lang.Object
+{
+    public static final long DELAY_MILLIS;
+    private static final long FADE_DURATION;
+    private static final java.lang.String LOG_TAG;
+    private static final long SCALE_DURATION;
+    private final android.view.animation.AnimationSet mAnimations;
+    private final android.graphics.Paint mBitmapPaint;
+    private long mCommitTime;
+    private final com.google.android.maps.MapController mController;
+    private boolean mFading;
+    private final android.view.animation.Transformation mLastDrawnScale;
+    private final com.google.android.maps.MapView mMapView;
+    private com.google.android.maps.ZoomHelper$Snapshot mSnapshot;
+    protected final android.graphics.Point mTempPoint;
+
+    void <init>(com.google.android.maps.MapView, com.google.android.maps.MapController)
+    {
+        com.google.android.maps.ZoomHelper $r0;
+        com.google.android.maps.MapView $r1;
+        com.google.android.maps.MapController $r2;
+        android.view.animation.Transformation $r3;
+        android.view.animation.AnimationSet $r4;
+        android.graphics.Paint $r5;
+        android.graphics.Point $r6;
+
+        $r0 := @this: com.google.android.maps.ZoomHelper;
+
+        $r1 := @parameter0: com.google.android.maps.MapView;
+
+        $r2 := @parameter1: com.google.android.maps.MapController;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r3 = new android.view.animation.Transformation;
+
+        specialinvoke $r3.<android.view.animation.Transformation: void <init>()>();
+
+        $r0.<com.google.android.maps.ZoomHelper: android.view.animation.Transformation mLastDrawnScale> = $r3;
+
+        $r4 = new android.view.animation.AnimationSet;
+
+        specialinvoke $r4.<android.view.animation.AnimationSet: void <init>(boolean)>(0);
+
+        $r0.<com.google.android.maps.ZoomHelper: android.view.animation.AnimationSet mAnimations> = $r4;
+
+        $r5 = new android.graphics.Paint;
+
+        specialinvoke $r5.<android.graphics.Paint: void <init>()>();
+
+        $r0.<com.google.android.maps.ZoomHelper: android.graphics.Paint mBitmapPaint> = $r5;
+
+        $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.ZoomHelper$Snapshot mSnapshot> = null;
+
+        $r0.<com.google.android.maps.ZoomHelper: boolean mFading> = 0;
+
+        $r0.<com.google.android.maps.ZoomHelper: long mCommitTime> = 9223372036854775807L;
+
+        $r6 = new android.graphics.Point;
+
+        specialinvoke $r6.<android.graphics.Point: void <init>()>();
+
+        $r0.<com.google.android.maps.ZoomHelper: android.graphics.Point mTempPoint> = $r6;
+
+        $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.MapView mMapView> = $r1;
+
+        $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.MapController mController> = $r2;
+
+        $r5 = $r0.<com.google.android.maps.ZoomHelper: android.graphics.Paint mBitmapPaint>;
+
+        virtualinvoke $r5.<android.graphics.Paint: void setFilterBitmap(boolean)>(1);
+
+        return;
+    }
+
+    private void addFade()
+    {
+        com.google.android.maps.ZoomHelper $r0;
+        android.view.animation.AlphaAnimation $r1;
+        android.view.animation.AnimationSet $r2;
+
+        $r0 := @this: com.google.android.maps.ZoomHelper;
+
+        $r1 = new android.view.animation.AlphaAnimation;
+
+        specialinvoke $r1.<android.view.animation.AlphaAnimation: void <init>(float,float)>(1.0F, 0.0F);
+
+        virtualinvoke $r1.<android.view.animation.Animation: void setFillAfter(boolean)>(1);
+
+        virtualinvoke $r1.<android.view.animation.Animation: void setDuration(long)>(300L);
+
+        virtualinvoke $r1.<android.view.animation.Animation: void initialize(int,int,int,int)>(0, 0, 0, 0);
+
+        virtualinvoke $r1.<android.view.animation.Animation: void startNow()>();
+
+        $r2 = $r0.<com.google.android.maps.ZoomHelper: android.view.animation.AnimationSet mAnimations>;
+
+        virtualinvoke $r2.<android.view.animation.AnimationSet: void addAnimation(android.view.animation.Animation)>($r1);
+
+        return;
+    }
+
+    private void addScale()
+    {
+        com.google.android.maps.ZoomHelper $r0;
+        android.view.animation.ScaleAnimation $r1;
+        float $f0, $f1, $f2, $f3;
+        android.view.animation.Transformation $r2;
+        android.graphics.Matrix $r3;
+        com.google.android.maps.ZoomHelper$Snapshot $r4;
+        com.google.map.Zoom $r5, $r7;
+        com.google.android.maps.MapView $r6;
+        float[] $r8;
+        android.view.animation.LinearInterpolator $r9;
+        android.view.animation.AnimationSet $r10;
+        java.util.List $r11;
+
+        $r0 := @this: com.google.android.maps.ZoomHelper;
+
+        $r2 = $r0.<com.google.android.maps.ZoomHelper: android.view.animation.Transformation mLastDrawnScale>;
+
+        $r3 = virtualinvoke $r2.<android.view.animation.Transformation: android.graphics.Matrix getMatrix()>();
+
+        $f2 = virtualinvoke $r3.<android.graphics.Matrix: float mapRadius(float)>(1.0F);
+
+        $r4 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.ZoomHelper$Snapshot mSnapshot>;
+
+        $r5 = $r4.<com.google.android.maps.ZoomHelper$Snapshot: com.google.map.Zoom zoom>;
+
+        $r6 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.MapView mMapView>;
+
+        $r7 = virtualinvoke $r6.<com.google.android.maps.MapView: com.google.map.Zoom getZoom()>();
+
+        $f3 = specialinvoke $r0.<com.google.android.maps.ZoomHelper: float getScale(com.google.map.Zoom,com.google.map.Zoom)>($r5, $r7);
+
+        $r1 = new android.view.animation.ScaleAnimation;
+
+        $r4 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.ZoomHelper$Snapshot mSnapshot>;
+
+        $r8 = $r4.<com.google.android.maps.ZoomHelper$Snapshot: float[] fixedPointCoords>;
+
+        $f0 = $r8[0];
+
+        $r4 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.ZoomHelper$Snapshot mSnapshot>;
+
+        $r8 = $r4.<com.google.android.maps.ZoomHelper$Snapshot: float[] fixedPointCoords>;
+
+        $f1 = $r8[1];
+
+        specialinvoke $r1.<android.view.animation.ScaleAnimation: void <init>(float,float,float,float,float,float)>($f2, $f3, $f2, $f3, $f0, $f1);
+
+        virtualinvoke $r1.<android.view.animation.Animation: void setFillAfter(boolean)>(1);
+
+        virtualinvoke $r1.<android.view.animation.Animation: void setDuration(long)>(500L);
+
+        virtualinvoke $r1.<android.view.animation.ScaleAnimation: void initialize(int,int,int,int)>(0, 0, 0, 0);
+
+        virtualinvoke $r1.<android.view.animation.Animation: void startNow()>();
+
+        $r9 = new android.view.animation.LinearInterpolator;
+
+        specialinvoke $r9.<android.view.animation.LinearInterpolator: void <init>()>();
+
+        virtualinvoke $r1.<android.view.animation.Animation: void setInterpolator(android.view.animation.Interpolator)>($r9);
+
+        $r0.<com.google.android.maps.ZoomHelper: boolean mFading> = 0;
+
+        $r10 = $r0.<com.google.android.maps.ZoomHelper: android.view.animation.AnimationSet mAnimations>;
+
+        $r11 = virtualinvoke $r10.<android.view.animation.AnimationSet: java.util.List getAnimations()>();
+
+        interfaceinvoke $r11.<java.util.List: void clear()>();
+
+        $r10 = $r0.<com.google.android.maps.ZoomHelper: android.view.animation.AnimationSet mAnimations>;
+
+        virtualinvoke $r10.<android.view.animation.AnimationSet: void addAnimation(android.view.animation.Animation)>($r1);
+
+        return;
+    }
+
+    private void createSnapshot()
+    {
+        com.google.android.maps.ZoomHelper $r0;
+        android.graphics.Canvas $r1;
+        android.graphics.Rect $r2;
+        com.google.android.maps.ZoomHelper$Snapshot $r3;
+        android.graphics.Bitmap$Config $r4;
+        com.google.android.maps.MapView $r5;
+        int $i0, $i1;
+        android.graphics.Bitmap $r6;
+        long $l2;
+        com.google.map.Zoom $r7;
+        android.view.animation.Transformation $r8;
+
+        $r0 := @this: com.google.android.maps.ZoomHelper;
+
+        $r3 = new com.google.android.maps.ZoomHelper$Snapshot;
+
+        specialinvoke $r3.<com.google.android.maps.ZoomHelper$Snapshot: void <init>(com.google.android.maps.ZoomHelper$1)>(null);
+
+        $r2 = new android.graphics.Rect;
+
+        specialinvoke $r2.<android.graphics.Rect: void <init>()>();
+
+        $r5 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.MapView mMapView>;
+
+        $i0 = virtualinvoke $r5.<android.view.View: int getWidth()>();
+
+        $r5 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.MapView mMapView>;
+
+        $i1 = virtualinvoke $r5.<android.view.View: int getHeight()>();
+
+        $r4 = <android.graphics.Bitmap$Config: android.graphics.Bitmap$Config RGB_565>;
+
+        $r6 = staticinvoke <android.graphics.Bitmap: android.graphics.Bitmap createBitmap(int,int,android.graphics.Bitmap$Config)>($i0, $i1, $r4);
+
+        $r3.<com.google.android.maps.ZoomHelper$Snapshot: android.graphics.Bitmap bitmap> = $r6;
+
+        $r1 = new android.graphics.Canvas;
+
+        $r6 = $r3.<com.google.android.maps.ZoomHelper$Snapshot: android.graphics.Bitmap bitmap>;
+
+        specialinvoke $r1.<android.graphics.Canvas: void <init>(android.graphics.Bitmap)>($r6);
+
+        $l2 = staticinvoke <android.view.animation.AnimationUtils: long currentAnimationTimeMillis()>();
+
+        $i0 = (int) $l2;
+
+        virtualinvoke $r1.<android.graphics.Canvas: void drawColor(int)>($i0);
+
+        $r5 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.MapView mMapView>;
+
+        virtualinvoke $r5.<com.google.android.maps.MapView: boolean drawMap(android.graphics.Canvas,boolean)>($r1, 0);
+
+        $r5 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.MapView mMapView>;
+
+        $r7 = virtualinvoke $r5.<com.google.android.maps.MapView: com.google.map.Zoom getZoom()>();
+
+        $r3.<com.google.android.maps.ZoomHelper$Snapshot: com.google.map.Zoom zoom> = $r7;
+
+        $r8 = $r0.<com.google.android.maps.ZoomHelper: android.view.animation.Transformation mLastDrawnScale>;
+
+        virtualinvoke $r8.<android.view.animation.Transformation: void clear()>();
+
+        $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.ZoomHelper$Snapshot mSnapshot> = $r3;
+
+        return;
+    }
+
+    private float getScale(com.google.map.Zoom, com.google.map.Zoom)
+    {
+        com.google.android.maps.ZoomHelper $r0;
+        com.google.map.Zoom $r1, $r2;
+        boolean $z0;
+        int $i0;
+        float $f0;
+
+        $r0 := @this: com.google.android.maps.ZoomHelper;
+
+        $r1 := @parameter0: com.google.map.Zoom;
+
+        $r2 := @parameter1: com.google.map.Zoom;
+
+        $z0 = virtualinvoke $r2.<com.google.map.Zoom: boolean isMoreZoomedIn(com.google.map.Zoom)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        $i0 = virtualinvoke $r1.<com.google.map.Zoom: int getZoomRatio(com.google.map.Zoom)>($r2);
+
+        $f0 = (float) $i0;
+
+        return $f0;
+
+     label1:
+        $i0 = virtualinvoke $r2.<com.google.map.Zoom: int getZoomRatio(com.google.map.Zoom)>($r1);
+
+        $f0 = (float) $i0;
+
+        $f0 = 1.0F / $f0;
+
+        return $f0;
+    }
+
+    private void stepAnimation(long, com.google.android.maps.PixelConverter)
+    {
+        com.google.android.maps.ZoomHelper $r0;
+        long $l0;
+        com.google.android.maps.PixelConverter $r1;
+        com.google.android.maps.GeoPoint $r2;
+        android.view.animation.AnimationSet $r3;
+        android.view.animation.Transformation $r4;
+        android.graphics.Matrix $r5;
+        com.google.android.maps.MapView $r6;
+        com.google.map.Zoom $r7, $r9;
+        com.google.android.maps.ZoomHelper$Snapshot $r8;
+        float $f0, $f1, $f2;
+        float[] $r10;
+
+        $r0 := @this: com.google.android.maps.ZoomHelper;
+
+        $l0 := @parameter0: long;
+
+        $r1 := @parameter1: com.google.android.maps.PixelConverter;
+
+        $r3 = $r0.<com.google.android.maps.ZoomHelper: android.view.animation.AnimationSet mAnimations>;
+
+        $r4 = $r0.<com.google.android.maps.ZoomHelper: android.view.animation.Transformation mLastDrawnScale>;
+
+        virtualinvoke $r3.<android.view.animation.AnimationSet: boolean getTransformation(long,android.view.animation.Transformation)>($l0, $r4);
+
+        $r4 = $r0.<com.google.android.maps.ZoomHelper: android.view.animation.Transformation mLastDrawnScale>;
+
+        $r5 = virtualinvoke $r4.<android.view.animation.Transformation: android.graphics.Matrix getMatrix()>();
+
+        $r6 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.MapView mMapView>;
+
+        $r7 = virtualinvoke $r6.<com.google.android.maps.MapView: com.google.map.Zoom getZoom()>();
+
+        $r8 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.ZoomHelper$Snapshot mSnapshot>;
+
+        $r9 = $r8.<com.google.android.maps.ZoomHelper$Snapshot: com.google.map.Zoom zoom>;
+
+        $f0 = specialinvoke $r0.<com.google.android.maps.ZoomHelper: float getScale(com.google.map.Zoom,com.google.map.Zoom)>($r7, $r9);
+
+        $r8 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.ZoomHelper$Snapshot mSnapshot>;
+
+        $r2 = $r8.<com.google.android.maps.ZoomHelper$Snapshot: com.google.android.maps.GeoPoint fixedPoint>;
+
+        $r8 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.ZoomHelper$Snapshot mSnapshot>;
+
+        $r10 = $r8.<com.google.android.maps.ZoomHelper$Snapshot: float[] fixedPointCoords>;
+
+        $f1 = $r10[0];
+
+        $r8 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.ZoomHelper$Snapshot mSnapshot>;
+
+        $r10 = $r8.<com.google.android.maps.ZoomHelper$Snapshot: float[] fixedPointCoords>;
+
+        $f2 = $r10[1];
+
+        virtualinvoke $r1.<com.google.android.maps.PixelConverter: void setMatrix(android.graphics.Matrix,float,com.google.android.maps.GeoPoint,float,float)>($r5, $f0, $r2, $f1, $f2);
+
+        return;
+    }
+
+    boolean doZoom(com.google.map.Zoom, boolean, int, int)
+    {
+        com.google.android.maps.ZoomHelper $r0;
+        com.google.map.Zoom $r1;
+        boolean $z0, $z1;
+        int $i0, $i1, $i2;
+        android.graphics.Matrix $r2, $r10;
+        com.google.android.maps.ZoomHelper$Snapshot $r3;
+        com.google.android.maps.MapView $r4;
+        com.google.android.maps.Projection $r5;
+        com.google.android.maps.PixelConverter $r6;
+        com.google.android.maps.GeoPoint $r7;
+        float[] $r8;
+        float $f0;
+        android.view.animation.Transformation $r9;
+        java.lang.StringBuilder $r11;
+        java.lang.String $r12;
+        com.google.android.maps.MapController $r13;
+        android.graphics.Point $r14;
+        long $l3;
+
+        $r0 := @this: com.google.android.maps.ZoomHelper;
+
+        $r1 := @parameter0: com.google.map.Zoom;
+
+        $z0 := @parameter1: boolean;
+
+        $i0 := @parameter2: int;
+
+        $i1 := @parameter3: int;
+
+        $r3 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.ZoomHelper$Snapshot mSnapshot>;
+
+        if $r3 != null goto label1;
+
+        specialinvoke $r0.<com.google.android.maps.ZoomHelper: void createSnapshot()>();
+
+     label1:
+        $r4 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.MapView mMapView>;
+
+        $r5 = virtualinvoke $r4.<com.google.android.maps.MapView: com.google.android.maps.Projection getProjection()>();
+
+        $r6 = (com.google.android.maps.PixelConverter) $r5;
+
+        $r3 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.ZoomHelper$Snapshot mSnapshot>;
+
+        $r7 = virtualinvoke $r6.<com.google.android.maps.PixelConverter: com.google.android.maps.GeoPoint fromPixels(int,int)>($i0, $i1);
+
+        $r3.<com.google.android.maps.ZoomHelper$Snapshot: com.google.android.maps.GeoPoint fixedPoint> = $r7;
+
+        $r3 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.ZoomHelper$Snapshot mSnapshot>;
+
+        $r8 = $r3.<com.google.android.maps.ZoomHelper$Snapshot: float[] fixedPointCoords>;
+
+        $f0 = (float) $i0;
+
+        $r8[0] = $f0;
+
+        $r3 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.ZoomHelper$Snapshot mSnapshot>;
+
+        $r8 = $r3.<com.google.android.maps.ZoomHelper$Snapshot: float[] fixedPointCoords>;
+
+        $f0 = (float) $i1;
+
+        $r8[1] = $f0;
+
+        $r2 = new android.graphics.Matrix;
+
+        specialinvoke $r2.<android.graphics.Matrix: void <init>()>();
+
+        $r9 = $r0.<com.google.android.maps.ZoomHelper: android.view.animation.Transformation mLastDrawnScale>;
+
+        $r10 = virtualinvoke $r9.<android.view.animation.Transformation: android.graphics.Matrix getMatrix()>();
+
+        $z1 = virtualinvoke $r10.<android.graphics.Matrix: boolean invert(android.graphics.Matrix)>($r2);
+
+        if $z1 != 0 goto label2;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Singular matrix ");
+
+        $r9 = $r0.<com.google.android.maps.ZoomHelper: android.view.animation.Transformation mLastDrawnScale>;
+
+        $r10 = virtualinvoke $r9.<android.view.animation.Transformation: android.graphics.Matrix getMatrix()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r10);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("ZoomHelper", $r12);
+
+     label2:
+        $r3 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.ZoomHelper$Snapshot mSnapshot>;
+
+        $r8 = $r3.<com.google.android.maps.ZoomHelper$Snapshot: float[] fixedPointCoords>;
+
+        virtualinvoke $r2.<android.graphics.Matrix: void mapPoints(float[])>($r8);
+
+        $r13 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.MapController mController>;
+
+        virtualinvoke $r13.<com.google.android.maps.MapController: void zoomTo(com.google.map.Zoom)>($r1);
+
+        $r4 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.MapView mMapView>;
+
+        $i2 = virtualinvoke $r4.<android.view.View: int getWidth()>();
+
+        $i2 = $i2 / 2;
+
+        if $i0 != $i2 goto label3;
+
+        $r4 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.MapView mMapView>;
+
+        $i2 = virtualinvoke $r4.<android.view.View: int getHeight()>();
+
+        $i2 = $i2 / 2;
+
+        if $i1 == $i2 goto label4;
+
+     label3:
+        $r3 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.ZoomHelper$Snapshot mSnapshot>;
+
+        $r7 = $r3.<com.google.android.maps.ZoomHelper$Snapshot: com.google.android.maps.GeoPoint fixedPoint>;
+
+        $r14 = virtualinvoke $r6.<com.google.android.maps.PixelConverter: android.graphics.Point toPixels(com.google.android.maps.GeoPoint,android.graphics.Point,boolean)>($r7, null, 0);
+
+        $r13 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.MapController mController>;
+
+        $i2 = $r14.<android.graphics.Point: int x>;
+
+        $i0 = $i2 - $i0;
+
+        $i2 = $r14.<android.graphics.Point: int y>;
+
+        $i1 = $i2 - $i1;
+
+        virtualinvoke $r13.<com.google.android.maps.MapController: void scrollBy(int,int)>($i0, $i1);
+
+     label4:
+        specialinvoke $r0.<com.google.android.maps.ZoomHelper: void addScale()>();
+
+        $l3 = staticinvoke <android.view.animation.AnimationUtils: long currentAnimationTimeMillis()>();
+
+        specialinvoke $r0.<com.google.android.maps.ZoomHelper: void stepAnimation(long,com.google.android.maps.PixelConverter)>($l3, $r6);
+
+        if $z0 == 0 goto label5;
+
+        $l3 = staticinvoke <android.view.animation.AnimationUtils: long currentAnimationTimeMillis()>();
+
+        $l3 = $l3 + 600L;
+
+        $r0.<com.google.android.maps.ZoomHelper: long mCommitTime> = $l3;
+
+        return 1;
+
+     label5:
+        $r4 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.MapView mMapView>;
+
+        virtualinvoke $r4.<com.google.android.maps.MapView: void preLoad()>();
+
+        return 1;
+    }
+
+    boolean doZoom(boolean, boolean, int, int)
+    {
+        com.google.android.maps.ZoomHelper $r0;
+        boolean $z0, $z1;
+        int $i0, $i1, $i2, $i3;
+        com.google.android.maps.MapView $r1;
+        com.google.map.Zoom $r2;
+
+        $r0 := @this: com.google.android.maps.ZoomHelper;
+
+        $z0 := @parameter0: boolean;
+
+        $z1 := @parameter1: boolean;
+
+        $i0 := @parameter2: int;
+
+        $i1 := @parameter3: int;
+
+        $r1 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.MapView mMapView>;
+
+        $r2 = virtualinvoke $r1.<com.google.android.maps.MapView: com.google.map.Zoom getZoom()>();
+
+        if $z0 == 0 goto label3;
+
+        $r2 = virtualinvoke $r2.<com.google.map.Zoom: com.google.map.Zoom getNextHigherZoom()>();
+
+     label1:
+        if $r2 == null goto label2;
+
+        $i2 = virtualinvoke $r2.<com.google.map.Zoom: int getZoomLevel()>();
+
+        $r1 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.MapView mMapView>;
+
+        $i3 = virtualinvoke $r1.<com.google.android.maps.MapView: int getMaxZoomLevel()>();
+
+        if $i2 <= $i3 goto label4;
+
+     label2:
+        return 0;
+
+     label3:
+        $r2 = virtualinvoke $r2.<com.google.map.Zoom: com.google.map.Zoom getNextLowerZoom()>();
+
+        goto label1;
+
+     label4:
+        $z0 = virtualinvoke $r0.<com.google.android.maps.ZoomHelper: boolean doZoom(com.google.map.Zoom,boolean,int,int)>($r2, $z1, $i0, $i1);
+
+        return $z0;
+    }
+
+    boolean onDraw(android.graphics.Canvas, com.google.android.maps.MapView, long)
+    {
+        com.google.android.maps.ZoomHelper $r0;
+        android.graphics.Canvas $r1;
+        com.google.android.maps.MapView $r2;
+        long $l0, $l1;
+        com.google.android.maps.ZoomHelper$Snapshot $r3;
+        com.google.android.maps.Projection $r4;
+        com.google.android.maps.PixelConverter $r5;
+        boolean $z0;
+        byte $b2;
+        android.graphics.Paint $r6;
+        android.view.animation.Transformation $r7;
+        float $f0;
+        int $i3;
+        android.graphics.Matrix $r8;
+        android.graphics.Bitmap $r9;
+        android.view.animation.AnimationSet $r10;
+        java.util.List $r11;
+        com.google.android.maps.MapView$Repainter $r12;
+
+        $r0 := @this: com.google.android.maps.ZoomHelper;
+
+        $r1 := @parameter0: android.graphics.Canvas;
+
+        $r2 := @parameter1: com.google.android.maps.MapView;
+
+        $l0 := @parameter2: long;
+
+        $r3 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.ZoomHelper$Snapshot mSnapshot>;
+
+        if $r3 != null goto label1;
+
+        return 0;
+
+     label1:
+        $r2 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.MapView mMapView>;
+
+        $r4 = virtualinvoke $r2.<com.google.android.maps.MapView: com.google.android.maps.Projection getProjection()>();
+
+        $r5 = (com.google.android.maps.PixelConverter) $r4;
+
+        $z0 = virtualinvoke $r0.<com.google.android.maps.ZoomHelper: boolean shouldDrawMap(long)>($l0);
+
+        if $z0 != 0 goto label2;
+
+        virtualinvoke $r1.<android.graphics.Canvas: void drawARGB(int,int,int,int)>(255, 255, 255, 255);
+
+     label2:
+        $l1 = $r0.<com.google.android.maps.ZoomHelper: long mCommitTime>;
+
+        $b2 = $l0 cmp $l1;
+
+        if $b2 <= 0 goto label3;
+
+        $r2 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.MapView mMapView>;
+
+        virtualinvoke $r2.<com.google.android.maps.MapView: void preLoad()>();
+
+        $r0.<com.google.android.maps.ZoomHelper: long mCommitTime> = 9223372036854775807L;
+
+     label3:
+        specialinvoke $r0.<com.google.android.maps.ZoomHelper: void stepAnimation(long,com.google.android.maps.PixelConverter)>($l0, $r5);
+
+        $r6 = $r0.<com.google.android.maps.ZoomHelper: android.graphics.Paint mBitmapPaint>;
+
+        $r7 = $r0.<com.google.android.maps.ZoomHelper: android.view.animation.Transformation mLastDrawnScale>;
+
+        $f0 = virtualinvoke $r7.<android.view.animation.Transformation: float getAlpha()>();
+
+        $f0 = 255.0F * $f0;
+
+        $i3 = (int) $f0;
+
+        virtualinvoke $r6.<android.graphics.Paint: void setAlpha(int)>($i3);
+
+        virtualinvoke $r1.<android.graphics.Canvas: int save()>();
+
+        $r7 = $r0.<com.google.android.maps.ZoomHelper: android.view.animation.Transformation mLastDrawnScale>;
+
+        $r8 = virtualinvoke $r7.<android.view.animation.Transformation: android.graphics.Matrix getMatrix()>();
+
+        virtualinvoke $r1.<android.graphics.Canvas: void concat(android.graphics.Matrix)>($r8);
+
+        $r3 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.ZoomHelper$Snapshot mSnapshot>;
+
+        $r9 = $r3.<com.google.android.maps.ZoomHelper$Snapshot: android.graphics.Bitmap bitmap>;
+
+        $r6 = $r0.<com.google.android.maps.ZoomHelper: android.graphics.Paint mBitmapPaint>;
+
+        virtualinvoke $r1.<android.graphics.Canvas: void drawBitmap(android.graphics.Bitmap,float,float,android.graphics.Paint)>($r9, 0.0F, 0.0F, $r6);
+
+        virtualinvoke $r1.<android.graphics.Canvas: void restore()>();
+
+        $r10 = $r0.<com.google.android.maps.ZoomHelper: android.view.animation.AnimationSet mAnimations>;
+
+        $z0 = virtualinvoke $r10.<android.view.animation.Animation: boolean hasEnded()>();
+
+        if $z0 == 0 goto label6;
+
+        $z0 = $r0.<com.google.android.maps.ZoomHelper: boolean mFading>;
+
+        if $z0 == 0 goto label4;
+
+        $r10 = $r0.<com.google.android.maps.ZoomHelper: android.view.animation.AnimationSet mAnimations>;
+
+        $r11 = virtualinvoke $r10.<android.view.animation.AnimationSet: java.util.List getAnimations()>();
+
+        interfaceinvoke $r11.<java.util.List: void clear()>();
+
+        $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.ZoomHelper$Snapshot mSnapshot> = null;
+
+        $r0.<com.google.android.maps.ZoomHelper: boolean mFading> = 0;
+
+        virtualinvoke $r5.<com.google.android.maps.PixelConverter: void resetMatrix()>();
+
+        return 0;
+
+     label4:
+        $r2 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.MapView mMapView>;
+
+        $z0 = virtualinvoke $r2.<com.google.android.maps.MapView: boolean canCoverCenter()>();
+
+        if $z0 == 0 goto label5;
+
+        $r0.<com.google.android.maps.ZoomHelper: boolean mFading> = 1;
+
+        specialinvoke $r0.<com.google.android.maps.ZoomHelper: void addFade()>();
+
+        return 1;
+
+     label5:
+        $r2 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.MapView mMapView>;
+
+        $r12 = $r2.<com.google.android.maps.MapView: com.google.android.maps.MapView$Repainter mRepainter>;
+
+        virtualinvoke $r12.<com.google.android.maps.MapView$Repainter: void repaint()>();
+
+        return 0;
+
+     label6:
+        return 1;
+    }
+
+    boolean shouldDrawMap(long)
+    {
+        com.google.android.maps.ZoomHelper $r0;
+        long $l0;
+        boolean $z0;
+        com.google.android.maps.ZoomHelper$Snapshot $r1;
+        android.view.animation.AnimationSet $r2;
+
+        $r0 := @this: com.google.android.maps.ZoomHelper;
+
+        $l0 := @parameter0: long;
+
+        $r1 = $r0.<com.google.android.maps.ZoomHelper: com.google.android.maps.ZoomHelper$Snapshot mSnapshot>;
+
+        if $r1 == null goto label1;
+
+        $z0 = $r0.<com.google.android.maps.ZoomHelper: boolean mFading>;
+
+        if $z0 != 0 goto label1;
+
+        $r2 = $r0.<com.google.android.maps.ZoomHelper: android.view.animation.AnimationSet mAnimations>;
+
+        $z0 = virtualinvoke $r2.<android.view.animation.Animation: boolean hasEnded()>();
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    public static void <clinit>()
+    {
+        <com.google.android.maps.ZoomHelper: long SCALE_DURATION> = 500L;
+
+        <com.google.android.maps.ZoomHelper: java.lang.String LOG_TAG> = "ZoomHelper";
+
+        <com.google.android.maps.ZoomHelper: long FADE_DURATION> = 300L;
+
+        <com.google.android.maps.ZoomHelper: long DELAY_MILLIS> = 600L;
+
+        return;
+    }
+}

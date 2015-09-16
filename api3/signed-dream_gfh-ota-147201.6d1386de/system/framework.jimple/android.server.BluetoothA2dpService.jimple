@@ -1,0 +1,1918 @@
+public class android.server.BluetoothA2dpService extends android.bluetooth.IBluetoothA2dp$Stub
+{
+    private static final java.lang.String A2DP_SINK_ADDRESS;
+    public static final java.lang.String BLUETOOTH_A2DP_SERVICE;
+    private static final java.lang.String BLUETOOTH_ADMIN_PERM;
+    private static final java.lang.String BLUETOOTH_ENABLED;
+    private static final java.lang.String BLUETOOTH_PERM;
+    private static final boolean DBG;
+    private static final int MESSAGE_CONNECT_TO;
+    private static final int MESSAGE_DISCONNECT;
+    private static final java.lang.String TAG;
+    private java.util.HashMap mAudioDevices;
+    private final android.media.AudioManager mAudioManager;
+    private final android.bluetooth.BluetoothDevice mBluetooth;
+    private final android.content.Context mContext;
+    private final android.os.Handler mHandler;
+    private final android.content.IntentFilter mIntentFilter;
+    private final java.util.ArrayList mPendingDisconnects;
+    private final android.content.BroadcastReceiver mReceiver;
+    private int mSinkCount;
+
+    public void <init>(android.content.Context)
+    {
+        android.server.BluetoothA2dpService $r0;
+        android.content.Context $r1;
+        android.content.IntentFilter $r2;
+        java.util.ArrayList $r3;
+        android.server.BluetoothA2dpService$1 $r4;
+        android.server.BluetoothA2dpService$2 $r5;
+        java.lang.Object $r6;
+        android.media.AudioManager $r7;
+        android.bluetooth.BluetoothDevice $r8;
+        java.lang.RuntimeException $r9;
+        boolean $z0;
+        android.content.BroadcastReceiver $r10;
+
+        $r0 := @this: android.server.BluetoothA2dpService;
+
+        $r1 := @parameter0: android.content.Context;
+
+        specialinvoke $r0.<android.bluetooth.IBluetoothA2dp$Stub: void <init>()>();
+
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>()>();
+
+        $r0.<android.server.BluetoothA2dpService: java.util.ArrayList mPendingDisconnects> = $r3;
+
+        $r0.<android.server.BluetoothA2dpService: int mSinkCount> = 0;
+
+        $r4 = new android.server.BluetoothA2dpService$1;
+
+        specialinvoke $r4.<android.server.BluetoothA2dpService$1: void <init>(android.server.BluetoothA2dpService)>($r0);
+
+        $r0.<android.server.BluetoothA2dpService: android.content.BroadcastReceiver mReceiver> = $r4;
+
+        $r5 = new android.server.BluetoothA2dpService$2;
+
+        specialinvoke $r5.<android.server.BluetoothA2dpService$2: void <init>(android.server.BluetoothA2dpService)>($r0);
+
+        $r0.<android.server.BluetoothA2dpService: android.os.Handler mHandler> = $r5;
+
+        $r0.<android.server.BluetoothA2dpService: android.content.Context mContext> = $r1;
+
+        $r6 = virtualinvoke $r1.<android.content.Context: java.lang.Object getSystemService(java.lang.String)>("audio");
+
+        $r7 = (android.media.AudioManager) $r6;
+
+        $r0.<android.server.BluetoothA2dpService: android.media.AudioManager mAudioManager> = $r7;
+
+        $r1 = $r0.<android.server.BluetoothA2dpService: android.content.Context mContext>;
+
+        $r6 = virtualinvoke $r1.<android.content.Context: java.lang.Object getSystemService(java.lang.String)>("bluetooth");
+
+        $r8 = (android.bluetooth.BluetoothDevice) $r6;
+
+        $r0.<android.server.BluetoothA2dpService: android.bluetooth.BluetoothDevice mBluetooth> = $r8;
+
+        $r8 = $r0.<android.server.BluetoothA2dpService: android.bluetooth.BluetoothDevice mBluetooth>;
+
+        if $r8 != null goto label1;
+
+        $r9 = new java.lang.RuntimeException;
+
+        specialinvoke $r9.<java.lang.RuntimeException: void <init>(java.lang.String)>("Platform does not support Bluetooth");
+
+        throw $r9;
+
+     label1:
+        $z0 = specialinvoke $r0.<android.server.BluetoothA2dpService: boolean initNative()>();
+
+        if $z0 != 0 goto label2;
+
+        $r9 = new java.lang.RuntimeException;
+
+        specialinvoke $r9.<java.lang.RuntimeException: void <init>(java.lang.String)>("Could not init BluetoothA2dpService");
+
+        throw $r9;
+
+     label2:
+        $r2 = new android.content.IntentFilter;
+
+        specialinvoke $r2.<android.content.IntentFilter: void <init>(java.lang.String)>("android.bluetooth.intent.action.BLUETOOTH_STATE_CHANGED");
+
+        $r0.<android.server.BluetoothA2dpService: android.content.IntentFilter mIntentFilter> = $r2;
+
+        $r2 = $r0.<android.server.BluetoothA2dpService: android.content.IntentFilter mIntentFilter>;
+
+        virtualinvoke $r2.<android.content.IntentFilter: void addAction(java.lang.String)>("android.bluetooth.intent.action.BOND_STATE_CHANGED_ACTION");
+
+        $r2 = $r0.<android.server.BluetoothA2dpService: android.content.IntentFilter mIntentFilter>;
+
+        virtualinvoke $r2.<android.content.IntentFilter: void addAction(java.lang.String)>("android.bluetooth.intent.action.REMOTE_DEVICE_CONNECTED");
+
+        $r1 = $r0.<android.server.BluetoothA2dpService: android.content.Context mContext>;
+
+        $r10 = $r0.<android.server.BluetoothA2dpService: android.content.BroadcastReceiver mReceiver>;
+
+        $r2 = $r0.<android.server.BluetoothA2dpService: android.content.IntentFilter mIntentFilter>;
+
+        virtualinvoke $r1.<android.content.Context: android.content.Intent registerReceiver(android.content.BroadcastReceiver,android.content.IntentFilter)>($r10, $r2);
+
+        $r8 = $r0.<android.server.BluetoothA2dpService: android.bluetooth.BluetoothDevice mBluetooth>;
+
+        $z0 = virtualinvoke $r8.<android.bluetooth.BluetoothDevice: boolean isEnabled()>();
+
+        if $z0 == 0 goto label3;
+
+        specialinvoke $r0.<android.server.BluetoothA2dpService: void onBluetoothEnable()>();
+
+        return;
+
+     label3:
+        return;
+    }
+
+    static void access$000(android.server.BluetoothA2dpService)
+    {
+        android.server.BluetoothA2dpService $r0;
+
+        $r0 := @parameter0: android.server.BluetoothA2dpService;
+
+        specialinvoke $r0.<android.server.BluetoothA2dpService: void onBluetoothEnable()>();
+
+        return;
+    }
+
+    static void access$100(android.server.BluetoothA2dpService)
+    {
+        android.server.BluetoothA2dpService $r0;
+
+        $r0 := @parameter0: android.server.BluetoothA2dpService;
+
+        specialinvoke $r0.<android.server.BluetoothA2dpService: void onBluetoothDisable()>();
+
+        return;
+    }
+
+    static android.os.Handler access$200(android.server.BluetoothA2dpService)
+    {
+        android.server.BluetoothA2dpService $r0;
+        android.os.Handler r1;
+
+        $r0 := @parameter0: android.server.BluetoothA2dpService;
+
+        r1 = $r0.<android.server.BluetoothA2dpService: android.os.Handler mHandler>;
+
+        return r1;
+    }
+
+    static android.bluetooth.BluetoothDevice access$300(android.server.BluetoothA2dpService)
+    {
+        android.server.BluetoothA2dpService $r0;
+        android.bluetooth.BluetoothDevice r1;
+
+        $r0 := @parameter0: android.server.BluetoothA2dpService;
+
+        r1 = $r0.<android.server.BluetoothA2dpService: android.bluetooth.BluetoothDevice mBluetooth>;
+
+        return r1;
+    }
+
+    static java.util.List access$400(android.server.BluetoothA2dpService, int[])
+    {
+        android.server.BluetoothA2dpService $r0;
+        int[] $r1;
+        java.util.List $r2;
+
+        $r0 := @parameter0: android.server.BluetoothA2dpService;
+
+        $r1 := @parameter1: int[];
+
+        $r2 = specialinvoke $r0.<android.server.BluetoothA2dpService: java.util.List lookupSinksMatchingStates(int[])>($r1);
+
+        return $r2;
+    }
+
+    static void access$500(java.lang.String)
+    {
+        java.lang.String $r0;
+
+        $r0 := @parameter0: java.lang.String;
+
+        staticinvoke <android.server.BluetoothA2dpService: void log(java.lang.String)>($r0);
+
+        return;
+    }
+
+    static void access$600(android.server.BluetoothA2dpService, java.lang.String)
+    {
+        android.server.BluetoothA2dpService $r0;
+        java.lang.String $r1;
+
+        $r0 := @parameter0: android.server.BluetoothA2dpService;
+
+        $r1 := @parameter1: java.lang.String;
+
+        specialinvoke $r0.<android.server.BluetoothA2dpService: void handleDeferredDisconnect(java.lang.String)>($r1);
+
+        return;
+    }
+
+    private native void cleanupNative();
+
+    private synchronized native boolean connectSinkNative(java.lang.String);
+
+    private synchronized native java.lang.String createHeadsetNative(java.lang.String);
+
+    private synchronized native boolean disconnectSinkNative(java.lang.String);
+
+    private synchronized native java.lang.String getAddressNative(java.lang.String);
+
+    private void handleDeferredDisconnect(java.lang.String)
+    {
+        android.server.BluetoothA2dpService $r0;
+        java.lang.String $r1;
+        boolean $z0;
+        java.util.ArrayList $r2;
+        int $i0;
+        android.media.AudioManager $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: android.server.BluetoothA2dpService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothA2dpService: java.util.ArrayList mPendingDisconnects>;
+
+        $z0 = virtualinvoke $r2.<java.util.ArrayList: boolean contains(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label3;
+
+        $r2 = $r0.<android.server.BluetoothA2dpService: java.util.ArrayList mPendingDisconnects>;
+
+        virtualinvoke $r2.<java.util.ArrayList: boolean remove(java.lang.Object)>($r1);
+
+        $i0 = $r0.<android.server.BluetoothA2dpService: int mSinkCount>;
+
+        if $i0 != 1 goto label2;
+
+        $r3 = $r0.<android.server.BluetoothA2dpService: android.media.AudioManager mAudioManager>;
+
+        virtualinvoke $r3.<android.media.AudioManager: void setBluetoothA2dpOn(boolean)>(0);
+
+     label2:
+        specialinvoke $r0.<android.server.BluetoothA2dpService: void updateState(java.lang.String,int)>($r1, 0);
+
+     label3:
+        exitmonitor $r0;
+
+        return;
+
+     label4:
+        $r4 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+    }
+
+    private native boolean initNative();
+
+    private synchronized native boolean isSinkConnectedNative(java.lang.String);
+
+    private synchronized native java.lang.String[] listHeadsetsNative();
+
+    private static void log(java.lang.String)
+    {
+        java.lang.String $r0;
+
+        $r0 := @parameter0: java.lang.String;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("BluetoothA2dpService", $r0);
+
+        return;
+    }
+
+    private final java.lang.String lookupAddress(java.lang.String)
+    {
+        android.server.BluetoothA2dpService $r0;
+        java.lang.String $r1, $r2;
+        java.util.HashMap $r3;
+        java.lang.Object $r4;
+        android.server.BluetoothA2dpService$SinkState $r5;
+        java.lang.StringBuilder $r6;
+        java.lang.Throwable $r7;
+
+        $r0 := @this: android.server.BluetoothA2dpService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        $r3 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+     label2:
+        if $r3 != null goto label4;
+
+        $r1 = null;
+
+     label3:
+        exitmonitor $r0;
+
+        return $r1;
+
+     label4:
+        $r3 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+        $r4 = virtualinvoke $r3.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r5 = (android.server.BluetoothA2dpService$SinkState) $r4;
+
+        if $r5 != null goto label5;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("lookupAddress() called for unknown device ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r2 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("BluetoothA2dpService", $r2);
+
+        specialinvoke $r0.<android.server.BluetoothA2dpService: void updateState(java.lang.String,int)>($r1, 0);
+
+     label5:
+        $r3 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+        $r4 = virtualinvoke $r3.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r5 = (android.server.BluetoothA2dpService$SinkState) $r4;
+
+        $r2 = $r5.<android.server.BluetoothA2dpService$SinkState: java.lang.String address>;
+
+        if $r2 != null goto label6;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Can\'t find address for ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("BluetoothA2dpService", $r1);
+
+     label6:
+        $r1 = $r2;
+
+        goto label3;
+
+     label7:
+        $r7 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r7;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label4 to label6 with label7;
+    }
+
+    private final java.lang.String lookupPath(java.lang.String)
+    {
+        android.server.BluetoothA2dpService $r0;
+        java.lang.String $r1, $r6, $r8;
+        java.util.HashMap $r2;
+        java.util.Set $r3;
+        java.util.Iterator $r4;
+        boolean $z0;
+        java.lang.Object $r5;
+        android.server.BluetoothA2dpService$SinkState $r7;
+        java.lang.Throwable $r9;
+
+        $r0 := @this: android.server.BluetoothA2dpService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+     label2:
+        if $r2 != null goto label4;
+
+        $r1 = null;
+
+     label3:
+        exitmonitor $r0;
+
+        return $r1;
+
+     label4:
+        $r2 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+        $r3 = virtualinvoke $r2.<java.util.HashMap: java.util.Set keySet()>();
+
+        $r4 = interfaceinvoke $r3.<java.util.Set: java.util.Iterator iterator()>();
+
+     label5:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label7;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        $r6 = (java.lang.String) $r5;
+
+        $r2 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+        $r5 = virtualinvoke $r2.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r6);
+
+        $r7 = (android.server.BluetoothA2dpService$SinkState) $r5;
+
+        $r8 = $r7.<android.server.BluetoothA2dpService$SinkState: java.lang.String address>;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>($r8);
+
+     label6:
+        if $z0 == 0 goto label5;
+
+        $r1 = $r6;
+
+        goto label3;
+
+     label7:
+        $r1 = null;
+
+        goto label3;
+
+     label8:
+        $r9 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r9;
+
+        catch java.lang.Throwable from label1 to label2 with label8;
+        catch java.lang.Throwable from label4 to label6 with label8;
+    }
+
+    private java.util.List lookupSinksMatchingStates(int[])
+    {
+        android.server.BluetoothA2dpService $r0;
+        int[] $r1;
+        int $i0, $i1, $i2, $i3;
+        java.util.ArrayList $r2;
+        java.util.HashMap $r3;
+        java.util.Collection $r4;
+        java.util.Iterator $r5;
+        boolean $z0;
+        java.lang.Object $r6;
+        android.server.BluetoothA2dpService$SinkState $r7;
+        java.lang.String $r8;
+        java.lang.Throwable $r9;
+
+        $r0 := @this: android.server.BluetoothA2dpService;
+
+        $r1 := @parameter0: int[];
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        $r3 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+     label2:
+        if $r3 != null goto label4;
+
+     label3:
+        exitmonitor $r0;
+
+        return $r2;
+
+     label4:
+        $r3 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+        $r4 = virtualinvoke $r3.<java.util.HashMap: java.util.Collection values()>();
+
+        $r5 = interfaceinvoke $r4.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label5:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        $r7 = (android.server.BluetoothA2dpService$SinkState) $r6;
+
+        $i0 = lengthof $r1;
+
+        $i2 = 0;
+
+     label6:
+        if $i2 >= $i0 goto label5;
+
+        $i1 = $r1[$i2];
+
+        $i3 = $r7.<android.server.BluetoothA2dpService$SinkState: int state>;
+
+        if $i3 != $i1 goto label9;
+
+        $r8 = $r7.<android.server.BluetoothA2dpService$SinkState: java.lang.String address>;
+
+        interfaceinvoke $r2.<java.util.List: boolean add(java.lang.Object)>($r8);
+
+     label7:
+        goto label5;
+
+     label8:
+        $r9 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r9;
+
+     label9:
+        $i2 = $i2 + 1;
+
+        goto label6;
+
+        catch java.lang.Throwable from label1 to label2 with label8;
+        catch java.lang.Throwable from label4 to label7 with label8;
+    }
+
+    private void onBluetoothDisable()
+    {
+        android.server.BluetoothA2dpService $r0;
+        int $i0, $i1, $i2;
+        java.lang.String $r1;
+        java.util.HashMap $r2;
+        java.lang.String[] $r3;
+        java.util.Set $r4;
+        java.lang.Object[] $r5;
+        java.lang.Object $r6;
+        android.server.BluetoothA2dpService$SinkState $r7;
+        java.lang.Throwable $r8;
+        android.media.AudioManager $r9;
+
+        $r0 := @this: android.server.BluetoothA2dpService;
+
+        entermonitor $r0;
+
+     label01:
+        $r2 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+        if $r2 == null goto label09;
+
+        $r2 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+        $i0 = virtualinvoke $r2.<java.util.HashMap: int size()>();
+
+        $r3 = newarray (java.lang.String)[$i0];
+
+        $r2 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+        $r4 = virtualinvoke $r2.<java.util.HashMap: java.util.Set keySet()>();
+
+        $r5 = interfaceinvoke $r4.<java.util.Set: java.lang.Object[] toArray(java.lang.Object[])>($r3);
+
+        $r3 = (java.lang.String[]) $r5;
+
+        $i0 = lengthof $r3;
+
+        $i1 = 0;
+
+     label02:
+        if $i1 >= $i0 goto label08;
+
+        $r1 = $r3[$i1];
+
+        $r2 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+        $r6 = virtualinvoke $r2.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r7 = (android.server.BluetoothA2dpService$SinkState) $r6;
+
+        $i2 = $r7.<android.server.BluetoothA2dpService$SinkState: int state>;
+
+        lookupswitch($i2)
+        {
+            case 1: goto label04;
+            case 2: goto label04;
+            case 3: goto label07;
+            case 4: goto label04;
+            default: goto label03;
+        };
+
+     label03:
+        $i1 = $i1 + 1;
+
+        goto label02;
+
+     label04:
+        specialinvoke $r0.<android.server.BluetoothA2dpService: boolean disconnectSinkNative(java.lang.String)>($r1);
+
+        specialinvoke $r0.<android.server.BluetoothA2dpService: void updateState(java.lang.String,int)>($r1, 0);
+
+     label05:
+        goto label03;
+
+     label06:
+        $r8 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r8;
+
+     label07:
+        specialinvoke $r0.<android.server.BluetoothA2dpService: void updateState(java.lang.String,int)>($r1, 0);
+
+        goto label03;
+
+     label08:
+        $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices> = null;
+
+     label09:
+        $r9 = $r0.<android.server.BluetoothA2dpService: android.media.AudioManager mAudioManager>;
+
+        virtualinvoke $r9.<android.media.AudioManager: void setBluetoothA2dpOn(boolean)>(0);
+
+        $r9 = $r0.<android.server.BluetoothA2dpService: android.media.AudioManager mAudioManager>;
+
+        virtualinvoke $r9.<android.media.AudioManager: void setParameter(java.lang.String,java.lang.String)>("bluetooth_enabled", "false");
+
+     label10:
+        exitmonitor $r0;
+
+        return;
+
+        catch java.lang.Throwable from label01 to label05 with label06;
+        catch java.lang.Throwable from label07 to label10 with label06;
+    }
+
+    private void onBluetoothEnable()
+    {
+        android.server.BluetoothA2dpService $r0;
+        int $i0, $i1;
+        java.lang.String $r1, $r5;
+        java.util.HashMap $r2;
+        java.lang.String[] $r3;
+        android.server.BluetoothA2dpService$SinkState $r4;
+        boolean $z0;
+        byte $b2;
+        android.media.AudioManager $r6;
+        java.lang.Throwable $r7;
+
+        $r0 := @this: android.server.BluetoothA2dpService;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>()>();
+
+        $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices> = $r2;
+
+        $r3 = specialinvoke $r0.<android.server.BluetoothA2dpService: java.lang.String[] listHeadsetsNative()>();
+
+        $r3 = (java.lang.String[]) $r3;
+
+        if $r3 == null goto label5;
+
+        $i0 = lengthof $r3;
+
+        $i1 = 0;
+
+     label2:
+        if $i1 >= $i0 goto label5;
+
+        $r1 = $r3[$i1];
+
+        $r2 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+        $r4 = new android.server.BluetoothA2dpService$SinkState;
+
+        $r5 = specialinvoke $r0.<android.server.BluetoothA2dpService: java.lang.String getAddressNative(java.lang.String)>($r1);
+
+        $z0 = specialinvoke $r0.<android.server.BluetoothA2dpService: boolean isSinkConnectedNative(java.lang.String)>($r1);
+
+        if $z0 == 0 goto label4;
+
+        $b2 = 2;
+
+     label3:
+        specialinvoke $r4.<android.server.BluetoothA2dpService$SinkState: void <init>(android.server.BluetoothA2dpService,java.lang.String,int)>($r0, $r5, $b2);
+
+        virtualinvoke $r2.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, $r4);
+
+        $i1 = $i1 + 1;
+
+        goto label2;
+
+     label4:
+        $b2 = 0;
+
+        goto label3;
+
+     label5:
+        $r6 = $r0.<android.server.BluetoothA2dpService: android.media.AudioManager mAudioManager>;
+
+        virtualinvoke $r6.<android.media.AudioManager: void setParameter(java.lang.String,java.lang.String)>("bluetooth_enabled", "true");
+
+     label6:
+        exitmonitor $r0;
+
+        return;
+
+     label7:
+        $r7 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r7;
+
+        catch java.lang.Throwable from label1 to label6 with label7;
+    }
+
+    private void onHeadsetCreated(java.lang.String)
+    {
+        android.server.BluetoothA2dpService $r0;
+        java.lang.String $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: android.server.BluetoothA2dpService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        specialinvoke $r0.<android.server.BluetoothA2dpService: void updateState(java.lang.String,int)>($r1, 0);
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    private void onHeadsetRemoved(java.lang.String)
+    {
+        android.server.BluetoothA2dpService $r0;
+        java.lang.String $r1;
+        java.util.HashMap $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.server.BluetoothA2dpService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+     label2:
+        if $r2 != null goto label4;
+
+     label3:
+        exitmonitor $r0;
+
+        return;
+
+     label4:
+        $r2 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+        virtualinvoke $r2.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>($r1);
+
+     label5:
+        goto label3;
+
+     label6:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+    }
+
+    private void onSinkConnected(java.lang.String)
+    {
+        android.server.BluetoothA2dpService $r0;
+        java.lang.String $r1, $r2;
+        int $i0, $i1, $i2;
+        java.util.ArrayList $r3;
+        java.util.HashMap $r4;
+        java.lang.String[] $r5;
+        java.util.Set $r6;
+        java.lang.Object[] $r7;
+        boolean $z0;
+        java.lang.Object $r8;
+        android.server.BluetoothA2dpService$SinkState $r9;
+        java.lang.Throwable $r10;
+        android.media.AudioManager $r11;
+
+        $r0 := @this: android.server.BluetoothA2dpService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label01:
+        $r3 = $r0.<android.server.BluetoothA2dpService: java.util.ArrayList mPendingDisconnects>;
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean remove(java.lang.Object)>($r1);
+
+        $r4 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+     label02:
+        if $r4 != null goto label04;
+
+     label03:
+        exitmonitor $r0;
+
+        return;
+
+     label04:
+        $r4 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+        $i0 = virtualinvoke $r4.<java.util.HashMap: int size()>();
+
+        $r5 = newarray (java.lang.String)[$i0];
+
+        $r4 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+        $r6 = virtualinvoke $r4.<java.util.HashMap: java.util.Set keySet()>();
+
+        $r7 = interfaceinvoke $r6.<java.util.Set: java.lang.Object[] toArray(java.lang.Object[])>($r5);
+
+        $r5 = (java.lang.String[]) $r7;
+
+        $i0 = lengthof $r5;
+
+        $i2 = 0;
+
+     label05:
+        if $i2 >= $i0 goto label11;
+
+        $r2 = $r5[$i2];
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 == 0 goto label07;
+
+     label06:
+        $i2 = $i2 + 1;
+
+        goto label05;
+
+     label07:
+        $r4 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+        $r8 = virtualinvoke $r4.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r2);
+
+        $r9 = (android.server.BluetoothA2dpService$SinkState) $r8;
+
+        $i1 = $r9.<android.server.BluetoothA2dpService$SinkState: int state>;
+
+        if $i1 == 2 goto label08;
+
+        if $i1 != 4 goto label06;
+
+     label08:
+        specialinvoke $r0.<android.server.BluetoothA2dpService: void updateState(java.lang.String,int)>($r1, 0);
+
+     label09:
+        goto label06;
+
+     label10:
+        $r10 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r10;
+
+     label11:
+        specialinvoke $r0.<android.server.BluetoothA2dpService: void updateState(java.lang.String,int)>($r1, 1);
+
+        $r11 = $r0.<android.server.BluetoothA2dpService: android.media.AudioManager mAudioManager>;
+
+        $r2 = specialinvoke $r0.<android.server.BluetoothA2dpService: java.lang.String lookupAddress(java.lang.String)>($r1);
+
+        virtualinvoke $r11.<android.media.AudioManager: void setParameter(java.lang.String,java.lang.String)>("a2dp_sink_address", $r2);
+
+        $r11 = $r0.<android.server.BluetoothA2dpService: android.media.AudioManager mAudioManager>;
+
+        virtualinvoke $r11.<android.media.AudioManager: void setBluetoothA2dpOn(boolean)>(1);
+
+        specialinvoke $r0.<android.server.BluetoothA2dpService: void updateState(java.lang.String,int)>($r1, 2);
+
+     label12:
+        goto label03;
+
+        catch java.lang.Throwable from label01 to label02 with label10;
+        catch java.lang.Throwable from label04 to label09 with label10;
+        catch java.lang.Throwable from label11 to label12 with label10;
+    }
+
+    private void onSinkDisconnected(java.lang.String)
+    {
+        android.server.BluetoothA2dpService $r0;
+        java.lang.String $r1;
+        android.os.Message $r2;
+        java.util.ArrayList $r3;
+        android.os.Handler $r4;
+        java.lang.Throwable $r5;
+
+        $r0 := @this: android.server.BluetoothA2dpService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        $r3 = $r0.<android.server.BluetoothA2dpService: java.util.ArrayList mPendingDisconnects>;
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>($r1);
+
+        $r4 = $r0.<android.server.BluetoothA2dpService: android.os.Handler mHandler>;
+
+        $r2 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int,java.lang.Object)>($r4, 2, $r1);
+
+        $r4 = $r0.<android.server.BluetoothA2dpService: android.os.Handler mHandler>;
+
+        virtualinvoke $r4.<android.os.Handler: boolean sendMessageDelayed(android.os.Message,long)>($r2, 2000L);
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r5 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    private void onSinkPlaying(java.lang.String)
+    {
+        android.server.BluetoothA2dpService $r0;
+        java.lang.String $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: android.server.BluetoothA2dpService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        specialinvoke $r0.<android.server.BluetoothA2dpService: void updateState(java.lang.String,int)>($r1, 4);
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    private void onSinkStopped(java.lang.String)
+    {
+        android.server.BluetoothA2dpService $r0;
+        java.lang.String $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: android.server.BluetoothA2dpService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        specialinvoke $r0.<android.server.BluetoothA2dpService: void updateState(java.lang.String,int)>($r1, 2);
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    private synchronized native boolean removeHeadsetNative(java.lang.String);
+
+    private void updateState(java.lang.String, int)
+    {
+        android.server.BluetoothA2dpService $r0;
+        java.lang.String $r1, $r5, $r6;
+        int $i0, $i1, $i2;
+        java.util.HashMap $r2;
+        java.lang.Object $r3;
+        android.server.BluetoothA2dpService$SinkState $r4;
+        java.lang.StringBuilder $r7;
+        android.content.Intent $r8;
+        android.content.Context $r9;
+        java.lang.Throwable $r10;
+
+        $r0 := @this: android.server.BluetoothA2dpService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        entermonitor $r0;
+
+     label01:
+        $r2 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+     label02:
+        if $r2 != null goto label04;
+
+     label03:
+        exitmonitor $r0;
+
+        return;
+
+     label04:
+        $r2 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+        $r3 = virtualinvoke $r2.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r4 = (android.server.BluetoothA2dpService$SinkState) $r3;
+
+        if $r4 != null goto label10;
+
+        $r5 = specialinvoke $r0.<android.server.BluetoothA2dpService: java.lang.String getAddressNative(java.lang.String)>($r1);
+
+        $r6 = $r5;
+
+        $r2 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+        $r4 = new android.server.BluetoothA2dpService$SinkState;
+
+        specialinvoke $r4.<android.server.BluetoothA2dpService$SinkState: void <init>(android.server.BluetoothA2dpService,java.lang.String,int)>($r0, $r5, $i0);
+
+        virtualinvoke $r2.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, $r4);
+
+        $i1 = 0;
+
+     label05:
+        if $i0 == $i1 goto label03;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("state ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" (");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("->");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r1 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.server.BluetoothA2dpService: void log(java.lang.String)>($r1);
+
+        if $i1 != 0 goto label11;
+
+        $i2 = $r0.<android.server.BluetoothA2dpService: int mSinkCount>;
+
+        $i2 = $i2 + 1;
+
+        $r0.<android.server.BluetoothA2dpService: int mSinkCount> = $i2;
+
+     label06:
+        $r8 = new android.content.Intent;
+
+        specialinvoke $r8.<android.content.Intent: void <init>(java.lang.String)>("android.bluetooth.a2dp.intent.action.SINK_STATE_CHANGED");
+
+        virtualinvoke $r8.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("android.bluetooth.intent.ADDRESS", $r6);
+
+        virtualinvoke $r8.<android.content.Intent: android.content.Intent putExtra(java.lang.String,int)>("android.bluetooth.a2dp.intent.SINK_PREVIOUS_STATE", $i1);
+
+        virtualinvoke $r8.<android.content.Intent: android.content.Intent putExtra(java.lang.String,int)>("android.bluetooth.a2dp.intent.SINK_STATE", $i0);
+
+        $r9 = $r0.<android.server.BluetoothA2dpService: android.content.Context mContext>;
+
+        virtualinvoke $r9.<android.content.Context: void sendBroadcast(android.content.Intent,java.lang.String)>($r8, "android.permission.BLUETOOTH");
+
+        if $i1 == 2 goto label07;
+
+        if $i1 != 4 goto label03;
+
+     label07:
+        if $i0 == 1 goto label03;
+
+        if $i0 == 2 goto label03;
+
+        if $i0 == 4 goto label03;
+
+        $r8 = new android.content.Intent;
+
+        specialinvoke $r8.<android.content.Intent: void <init>(java.lang.String)>("android.media.AUDIO_BECOMING_NOISY");
+
+        $r9 = $r0.<android.server.BluetoothA2dpService: android.content.Context mContext>;
+
+        virtualinvoke $r9.<android.content.Context: void sendBroadcast(android.content.Intent)>($r8);
+
+     label08:
+        goto label03;
+
+     label09:
+        $r10 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r10;
+
+     label10:
+        $r6 = specialinvoke $r0.<android.server.BluetoothA2dpService: java.lang.String lookupAddress(java.lang.String)>($r1);
+
+        $i1 = $r4.<android.server.BluetoothA2dpService$SinkState: int state>;
+
+        $r4.<android.server.BluetoothA2dpService$SinkState: int state> = $i0;
+
+        goto label05;
+
+     label11:
+        if $i0 != 0 goto label06;
+
+        $i2 = $r0.<android.server.BluetoothA2dpService: int mSinkCount>;
+
+        $i2 = $i2 - 1;
+
+        $r0.<android.server.BluetoothA2dpService: int mSinkCount> = $i2;
+
+     label12:
+        goto label06;
+
+        catch java.lang.Throwable from label01 to label02 with label09;
+        catch java.lang.Throwable from label04 to label08 with label09;
+        catch java.lang.Throwable from label10 to label12 with label09;
+    }
+
+    public int connectSink(java.lang.String)
+    {
+        android.server.BluetoothA2dpService $r0;
+        java.lang.String $r1, $r4, $r8;
+        android.content.Context $r2;
+        java.lang.StringBuilder $r3;
+        boolean $z0;
+        short $s0;
+        java.util.HashMap $r5;
+        int[] $r6;
+        java.util.List $r7;
+        int $i1;
+        java.lang.Object $r9;
+        android.server.BluetoothA2dpService$SinkState $r10;
+        java.lang.Throwable $r11;
+
+        $r0 := @this: android.server.BluetoothA2dpService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label01:
+        $r2 = $r0.<android.server.BluetoothA2dpService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH_ADMIN", "Need BLUETOOTH_ADMIN permission");
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("connectSink(");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.server.BluetoothA2dpService: void log(java.lang.String)>($r4);
+
+        $z0 = staticinvoke <android.bluetooth.BluetoothDevice: boolean checkBluetoothAddress(java.lang.String)>($r1);
+
+     label02:
+        if $z0 != 0 goto label04;
+
+        $s0 = -1000;
+
+     label03:
+        exitmonitor $r0;
+
+        return $s0;
+
+     label04:
+        $r5 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+        if $r5 != null goto label05;
+
+        $s0 = -1000;
+
+        goto label03;
+
+     label05:
+        $r6 = newarray (int)[4];
+
+        $r6[0] = 1;
+
+        $r6[1] = 2;
+
+        $r6[2] = 4;
+
+        $r6[3] = 3;
+
+        $r7 = specialinvoke $r0.<android.server.BluetoothA2dpService: java.util.List lookupSinksMatchingStates(int[])>($r6);
+
+        $i1 = interfaceinvoke $r7.<java.util.List: int size()>();
+
+        if $i1 == 0 goto label06;
+
+        $s0 = -1000;
+
+        goto label03;
+
+     label06:
+        $r8 = specialinvoke $r0.<android.server.BluetoothA2dpService: java.lang.String lookupPath(java.lang.String)>($r1);
+
+        $r4 = $r8;
+
+        if $r8 != null goto label07;
+
+        $r8 = specialinvoke $r0.<android.server.BluetoothA2dpService: java.lang.String createHeadsetNative(java.lang.String)>($r1);
+
+        $r4 = $r8;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("new bluez sink: ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" (");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.server.BluetoothA2dpService: void log(java.lang.String)>($r1);
+
+     label07:
+        if $r4 != null goto label08;
+
+        $s0 = -1000;
+
+        goto label03;
+
+     label08:
+        $r5 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+        $r9 = virtualinvoke $r5.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r4);
+
+        $r10 = (android.server.BluetoothA2dpService$SinkState) $r9;
+
+        $i1 = 0;
+
+        if $r10 == null goto label09;
+
+        $i1 = $r10.<android.server.BluetoothA2dpService$SinkState: int state>;
+
+     label09:
+        lookupswitch($i1)
+        {
+            case 1: goto label12;
+            case 2: goto label11;
+            case 3: goto label11;
+            case 4: goto label11;
+            default: goto label10;
+        };
+
+     label10:
+        $z0 = specialinvoke $r0.<android.server.BluetoothA2dpService: boolean connectSinkNative(java.lang.String)>($r4);
+
+        if $z0 != 0 goto label13;
+
+        $s0 = -1000;
+
+        goto label03;
+
+     label11:
+        $s0 = -1000;
+
+        goto label03;
+
+     label12:
+        $s0 = 0;
+
+        goto label03;
+
+     label13:
+        specialinvoke $r0.<android.server.BluetoothA2dpService: void updateState(java.lang.String,int)>($r4, 1);
+
+     label14:
+        $s0 = 0;
+
+        goto label03;
+
+     label15:
+        $r11 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r11;
+
+        catch java.lang.Throwable from label01 to label02 with label15;
+        catch java.lang.Throwable from label04 to label14 with label15;
+    }
+
+    public int disconnectSink(java.lang.String)
+    {
+        android.server.BluetoothA2dpService $r0;
+        java.lang.String $r1, $r4;
+        android.content.Context $r2;
+        java.lang.StringBuilder $r3;
+        boolean $z0;
+        short $s0;
+        java.util.HashMap $r5;
+        java.lang.Object $r6;
+        android.server.BluetoothA2dpService$SinkState $r7;
+        int $i1;
+        java.lang.Throwable $r8;
+
+        $r0 := @this: android.server.BluetoothA2dpService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label01:
+        $r2 = $r0.<android.server.BluetoothA2dpService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH_ADMIN", "Need BLUETOOTH_ADMIN permission");
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("disconnectSink(");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.server.BluetoothA2dpService: void log(java.lang.String)>($r4);
+
+        $z0 = staticinvoke <android.bluetooth.BluetoothDevice: boolean checkBluetoothAddress(java.lang.String)>($r1);
+
+     label02:
+        if $z0 != 0 goto label04;
+
+        $s0 = -1000;
+
+     label03:
+        exitmonitor $r0;
+
+        return $s0;
+
+     label04:
+        $r5 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+        if $r5 != null goto label05;
+
+        $s0 = -1000;
+
+        goto label03;
+
+     label05:
+        $r1 = specialinvoke $r0.<android.server.BluetoothA2dpService: java.lang.String lookupPath(java.lang.String)>($r1);
+
+        if $r1 != null goto label06;
+
+        $s0 = -1000;
+
+        goto label03;
+
+     label06:
+        $r5 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+        $r6 = virtualinvoke $r5.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r7 = (android.server.BluetoothA2dpService$SinkState) $r6;
+
+        $i1 = $r7.<android.server.BluetoothA2dpService$SinkState: int state>;
+
+        lookupswitch($i1)
+        {
+            case 0: goto label08;
+            case 1: goto label07;
+            case 2: goto label07;
+            case 3: goto label09;
+            default: goto label07;
+        };
+
+     label07:
+        $z0 = specialinvoke $r0.<android.server.BluetoothA2dpService: boolean disconnectSinkNative(java.lang.String)>($r1);
+
+        if $z0 != 0 goto label10;
+
+        $s0 = -1000;
+
+        goto label03;
+
+     label08:
+        $s0 = -1000;
+
+        goto label03;
+
+     label09:
+        $s0 = 0;
+
+        goto label03;
+
+     label10:
+        specialinvoke $r0.<android.server.BluetoothA2dpService: void updateState(java.lang.String,int)>($r1, 3);
+
+     label11:
+        $s0 = 0;
+
+        goto label03;
+
+     label12:
+        $r8 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r8;
+
+        catch java.lang.Throwable from label01 to label02 with label12;
+        catch java.lang.Throwable from label04 to label11 with label12;
+    }
+
+    protected void dump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[])
+    {
+        android.server.BluetoothA2dpService $r0;
+        java.io.FileDescriptor $r1;
+        java.io.PrintWriter $r2;
+        java.lang.String[] $r3;
+        java.util.HashMap $r4;
+        java.util.Set $r5;
+        java.util.Iterator $r6;
+        boolean $z0;
+        java.lang.Object $r7;
+        java.lang.String $r8;
+        android.server.BluetoothA2dpService$SinkState $r9;
+        java.lang.StringBuilder $r10;
+        int $i0;
+        java.lang.Throwable $r11;
+
+        $r0 := @this: android.server.BluetoothA2dpService;
+
+        $r1 := @parameter0: java.io.FileDescriptor;
+
+        $r2 := @parameter1: java.io.PrintWriter;
+
+        $r3 := @parameter2: java.lang.String[];
+
+        entermonitor $r0;
+
+     label1:
+        $r4 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+     label2:
+        if $r4 != null goto label4;
+
+     label3:
+        exitmonitor $r0;
+
+        return;
+
+     label4:
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("Cached audio devices:");
+
+        $r4 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+        $r5 = virtualinvoke $r4.<java.util.HashMap: java.util.Set keySet()>();
+
+        $r6 = interfaceinvoke $r5.<java.util.Set: java.util.Iterator iterator()>();
+
+     label5:
+        $z0 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r7 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        $r8 = (java.lang.String) $r7;
+
+        $r4 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+        $r7 = virtualinvoke $r4.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r8);
+
+        $r9 = (android.server.BluetoothA2dpService$SinkState) $r7;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r8 = $r9.<android.server.BluetoothA2dpService$SinkState: java.lang.String address>;
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $i0 = $r9.<android.server.BluetoothA2dpService$SinkState: int state>;
+
+        $r8 = staticinvoke <android.bluetooth.BluetoothA2dp: java.lang.String stateToString(int)>($i0);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r8 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r8);
+
+     label6:
+        goto label5;
+
+     label7:
+        $r11 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r11;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label4 to label6 with label7;
+    }
+
+    protected void finalize() throws java.lang.Throwable
+    {
+        android.server.BluetoothA2dpService $r0;
+        java.lang.Throwable $r1;
+
+        $r0 := @this: android.server.BluetoothA2dpService;
+
+     label1:
+        specialinvoke $r0.<android.server.BluetoothA2dpService: void cleanupNative()>();
+
+     label2:
+        specialinvoke $r0.<android.os.Binder: void finalize()>();
+
+        return;
+
+     label3:
+        $r1 := @caughtexception;
+
+        specialinvoke $r0.<android.os.Binder: void finalize()>();
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public int getSinkPriority(java.lang.String)
+    {
+        android.server.BluetoothA2dpService $r0;
+        java.lang.String $r1;
+        android.content.Context $r2;
+        boolean $z0;
+        int $i0;
+        android.content.ContentResolver $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: android.server.BluetoothA2dpService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothA2dpService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        $z0 = staticinvoke <android.bluetooth.BluetoothDevice: boolean checkBluetoothAddress(java.lang.String)>($r1);
+
+     label2:
+        if $z0 != 0 goto label4;
+
+        $i0 = -1000;
+
+     label3:
+        exitmonitor $r0;
+
+        return $i0;
+
+     label4:
+        $r2 = $r0.<android.server.BluetoothA2dpService: android.content.Context mContext>;
+
+        $r3 = virtualinvoke $r2.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r1 = staticinvoke <android.provider.Settings$Secure: java.lang.String getBluetoothA2dpSinkPriorityKey(java.lang.String)>($r1);
+
+        $i0 = staticinvoke <android.provider.Settings$Secure: int getInt(android.content.ContentResolver,java.lang.String,int)>($r3, $r1, 0);
+
+     label5:
+        goto label3;
+
+     label6:
+        $r4 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+    }
+
+    public int getSinkState(java.lang.String)
+    {
+        android.server.BluetoothA2dpService $r0;
+        java.lang.String $r1, $r8;
+        android.content.Context $r2;
+        boolean $z0;
+        int $i0;
+        java.util.HashMap $r3;
+        java.util.Collection $r4;
+        java.util.Iterator $r5;
+        java.lang.Object $r6;
+        android.server.BluetoothA2dpService$SinkState $r7;
+        java.lang.Throwable $r9;
+
+        $r0 := @this: android.server.BluetoothA2dpService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothA2dpService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        $z0 = staticinvoke <android.bluetooth.BluetoothDevice: boolean checkBluetoothAddress(java.lang.String)>($r1);
+
+     label2:
+        if $z0 != 0 goto label4;
+
+        $i0 = -1000;
+
+     label3:
+        exitmonitor $r0;
+
+        return $i0;
+
+     label4:
+        $r3 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+        if $r3 != null goto label5;
+
+        $i0 = 0;
+
+        goto label3;
+
+     label5:
+        $r3 = $r0.<android.server.BluetoothA2dpService: java.util.HashMap mAudioDevices>;
+
+        $r4 = virtualinvoke $r3.<java.util.HashMap: java.util.Collection values()>();
+
+        $r5 = interfaceinvoke $r4.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label6:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label8;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        $r7 = (android.server.BluetoothA2dpService$SinkState) $r6;
+
+        $r8 = $r7.<android.server.BluetoothA2dpService$SinkState: java.lang.String address>;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>($r8);
+
+        if $z0 == 0 goto label6;
+
+        $i0 = $r7.<android.server.BluetoothA2dpService$SinkState: int state>;
+
+     label7:
+        goto label3;
+
+     label8:
+        $i0 = 0;
+
+        goto label3;
+
+     label9:
+        $r9 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r9;
+
+        catch java.lang.Throwable from label1 to label2 with label9;
+        catch java.lang.Throwable from label4 to label7 with label9;
+    }
+
+    public java.util.List listConnectedSinks()
+    {
+        android.server.BluetoothA2dpService $r0;
+        java.util.List $r1;
+        android.content.Context $r2;
+        int[] $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: android.server.BluetoothA2dpService;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothA2dpService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        $r3 = newarray (int)[2];
+
+        $r3[0] = 2;
+
+        $r3[1] = 4;
+
+        $r1 = specialinvoke $r0.<android.server.BluetoothA2dpService: java.util.List lookupSinksMatchingStates(int[])>($r3);
+
+     label2:
+        exitmonitor $r0;
+
+        return $r1;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public int setSinkPriority(java.lang.String, int)
+    {
+        android.server.BluetoothA2dpService $r0;
+        java.lang.String $r1;
+        int $i0;
+        android.content.Context $r2;
+        boolean $z0;
+        short $s1;
+        android.content.ContentResolver $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: android.server.BluetoothA2dpService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothA2dpService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH_ADMIN", "Need BLUETOOTH_ADMIN permission");
+
+        $z0 = staticinvoke <android.bluetooth.BluetoothDevice: boolean checkBluetoothAddress(java.lang.String)>($r1);
+
+     label2:
+        if $z0 != 0 goto label4;
+
+        $s1 = -1000;
+
+     label3:
+        exitmonitor $r0;
+
+        return $s1;
+
+     label4:
+        $r2 = $r0.<android.server.BluetoothA2dpService: android.content.Context mContext>;
+
+        $r3 = virtualinvoke $r2.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r1 = staticinvoke <android.provider.Settings$Secure: java.lang.String getBluetoothA2dpSinkPriorityKey(java.lang.String)>($r1);
+
+        $z0 = staticinvoke <android.provider.Settings$Secure: boolean putInt(android.content.ContentResolver,java.lang.String,int)>($r3, $r1, $i0);
+
+     label5:
+        if $z0 == 0 goto label6;
+
+        $s1 = 0;
+
+        goto label3;
+
+     label6:
+        $s1 = -1000;
+
+        goto label3;
+
+     label7:
+        $r4 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label4 to label5 with label7;
+    }
+
+    public static void <clinit>()
+    {
+        <android.server.BluetoothA2dpService: java.lang.String TAG> = "BluetoothA2dpService";
+
+        <android.server.BluetoothA2dpService: int MESSAGE_DISCONNECT> = 2;
+
+        <android.server.BluetoothA2dpService: int MESSAGE_CONNECT_TO> = 1;
+
+        <android.server.BluetoothA2dpService: boolean DBG> = 1;
+
+        <android.server.BluetoothA2dpService: java.lang.String BLUETOOTH_PERM> = "android.permission.BLUETOOTH";
+
+        <android.server.BluetoothA2dpService: java.lang.String BLUETOOTH_ENABLED> = "bluetooth_enabled";
+
+        <android.server.BluetoothA2dpService: java.lang.String BLUETOOTH_ADMIN_PERM> = "android.permission.BLUETOOTH_ADMIN";
+
+        <android.server.BluetoothA2dpService: java.lang.String BLUETOOTH_A2DP_SERVICE> = "bluetooth_a2dp";
+
+        <android.server.BluetoothA2dpService: java.lang.String A2DP_SINK_ADDRESS> = "a2dp_sink_address";
+
+        return;
+    }
+}

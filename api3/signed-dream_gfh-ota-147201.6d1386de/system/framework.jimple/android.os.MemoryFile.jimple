@@ -1,0 +1,344 @@
+public class android.os.MemoryFile extends java.lang.Object
+{
+    private static java.lang.String TAG;
+    private int mAddress;
+    private boolean mAllowPurging;
+    private int mFD;
+    private int mLength;
+
+    static void <clinit>()
+    {
+        <android.os.MemoryFile: java.lang.String TAG> = "MemoryFile";
+
+        return;
+    }
+
+    public void <init>(java.lang.String, int)
+    {
+        android.os.MemoryFile $r0;
+        java.lang.String $r1;
+        int $i0, $i1;
+
+        $r0 := @this: android.os.MemoryFile;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r0.<android.os.MemoryFile: boolean mAllowPurging> = 0;
+
+        $r0.<android.os.MemoryFile: int mLength> = $i0;
+
+        $i1 = specialinvoke $r0.<android.os.MemoryFile: int native_open(java.lang.String,int)>($r1, $i0);
+
+        $r0.<android.os.MemoryFile: int mFD> = $i1;
+
+        $i1 = $r0.<android.os.MemoryFile: int mFD>;
+
+        $i0 = specialinvoke $r0.<android.os.MemoryFile: int native_mmap(int,int)>($i1, $i0);
+
+        $r0.<android.os.MemoryFile: int mAddress> = $i0;
+
+        return;
+    }
+
+    static int access$200(android.os.MemoryFile)
+    {
+        android.os.MemoryFile $r0;
+        int i0;
+
+        $r0 := @parameter0: android.os.MemoryFile;
+
+        i0 = $r0.<android.os.MemoryFile: int mLength>;
+
+        return i0;
+    }
+
+    private native void native_close(int);
+
+    private native int native_mmap(int, int);
+
+    private native int native_open(java.lang.String, int);
+
+    private native void native_pin(int, boolean);
+
+    private native int native_read(int, int, byte[], int, int, int, boolean);
+
+    private native void native_write(int, int, byte[], int, int, int, boolean);
+
+    public boolean allowPurging(boolean) throws java.io.IOException
+    {
+        android.os.MemoryFile $r0;
+        boolean $z0, $z1, $z2;
+        int $i0;
+        java.lang.Throwable $r1;
+
+        $r0 := @this: android.os.MemoryFile;
+
+        $z0 := @parameter0: boolean;
+
+        entermonitor $r0;
+
+     label1:
+        $z1 = $r0.<android.os.MemoryFile: boolean mAllowPurging>;
+
+        if $z1 == $z0 goto label3;
+
+        $i0 = $r0.<android.os.MemoryFile: int mFD>;
+
+        if $z0 != 0 goto label4;
+
+        $z2 = 1;
+
+     label2:
+        specialinvoke $r0.<android.os.MemoryFile: void native_pin(int,boolean)>($i0, $z2);
+
+        $r0.<android.os.MemoryFile: boolean mAllowPurging> = $z0;
+
+     label3:
+        exitmonitor $r0;
+
+        return $z1;
+
+     label4:
+        $z2 = 0;
+
+        goto label2;
+
+     label5:
+        $r1 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label3 with label5;
+    }
+
+    public void close()
+    {
+        android.os.MemoryFile $r0;
+        int $i0;
+
+        $r0 := @this: android.os.MemoryFile;
+
+        $i0 = $r0.<android.os.MemoryFile: int mFD>;
+
+        if $i0 <= 0 goto label1;
+
+        $i0 = $r0.<android.os.MemoryFile: int mFD>;
+
+        specialinvoke $r0.<android.os.MemoryFile: void native_close(int)>($i0);
+
+        $r0.<android.os.MemoryFile: int mFD> = 0;
+
+        return;
+
+     label1:
+        return;
+    }
+
+    protected void finalize()
+    {
+        android.os.MemoryFile $r0;
+        int $i0;
+        java.lang.String $r1;
+
+        $r0 := @this: android.os.MemoryFile;
+
+        $i0 = $r0.<android.os.MemoryFile: int mFD>;
+
+        if $i0 <= 0 goto label1;
+
+        $r1 = <android.os.MemoryFile: java.lang.String TAG>;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>($r1, "MemoryFile.finalize() called while ashmem still open");
+
+        virtualinvoke $r0.<android.os.MemoryFile: void close()>();
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public java.io.InputStream getInputStream()
+    {
+        android.os.MemoryFile $r0;
+        android.os.MemoryFile$MemoryInputStream $r1;
+
+        $r0 := @this: android.os.MemoryFile;
+
+        $r1 = new android.os.MemoryFile$MemoryInputStream;
+
+        specialinvoke $r1.<android.os.MemoryFile$MemoryInputStream: void <init>(android.os.MemoryFile,android.os.MemoryFile$1)>($r0, null);
+
+        return $r1;
+    }
+
+    public java.io.OutputStream getOutputStream()
+    {
+        android.os.MemoryFile $r0;
+        android.os.MemoryFile$MemoryOutputStream $r1;
+
+        $r0 := @this: android.os.MemoryFile;
+
+        $r1 = new android.os.MemoryFile$MemoryOutputStream;
+
+        specialinvoke $r1.<android.os.MemoryFile$MemoryOutputStream: void <init>(android.os.MemoryFile,android.os.MemoryFile$1)>($r0, null);
+
+        return $r1;
+    }
+
+    public boolean isPurgingAllowed()
+    {
+        android.os.MemoryFile $r0;
+        boolean z0;
+
+        $r0 := @this: android.os.MemoryFile;
+
+        z0 = $r0.<android.os.MemoryFile: boolean mAllowPurging>;
+
+        return z0;
+    }
+
+    public int length()
+    {
+        android.os.MemoryFile $r0;
+        int i0;
+
+        $r0 := @this: android.os.MemoryFile;
+
+        i0 = $r0.<android.os.MemoryFile: int mLength>;
+
+        return i0;
+    }
+
+    public int readBytes(byte[], int, int, int) throws java.io.IOException
+    {
+        android.os.MemoryFile $r0;
+        byte[] $r1;
+        int $i0, $i1, $i2, $i3, $i4;
+        boolean $z0;
+        java.lang.IndexOutOfBoundsException $r2;
+
+        $r0 := @this: android.os.MemoryFile;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        if $i1 < 0 goto label1;
+
+        $i3 = lengthof $r1;
+
+        if $i1 > $i3 goto label1;
+
+        if $i2 < 0 goto label1;
+
+        $i3 = lengthof $r1;
+
+        $i3 = $i3 - $i1;
+
+        if $i2 > $i3 goto label1;
+
+        if $i0 < 0 goto label1;
+
+        $i3 = $r0.<android.os.MemoryFile: int mLength>;
+
+        if $i0 > $i3 goto label1;
+
+        $i3 = $r0.<android.os.MemoryFile: int mLength>;
+
+        $i3 = $i3 - $i0;
+
+        if $i2 <= $i3 goto label2;
+
+     label1:
+        $r2 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r2.<java.lang.IndexOutOfBoundsException: void <init>()>();
+
+        throw $r2;
+
+     label2:
+        $i3 = $r0.<android.os.MemoryFile: int mFD>;
+
+        $i4 = $r0.<android.os.MemoryFile: int mAddress>;
+
+        $z0 = $r0.<android.os.MemoryFile: boolean mAllowPurging>;
+
+        $i0 = specialinvoke $r0.<android.os.MemoryFile: int native_read(int,int,byte[],int,int,int,boolean)>($i3, $i4, $r1, $i0, $i1, $i2, $z0);
+
+        return $i0;
+    }
+
+    public void writeBytes(byte[], int, int, int) throws java.io.IOException
+    {
+        android.os.MemoryFile $r0;
+        byte[] $r1;
+        int $i0, $i1, $i2, $i3, $i4;
+        boolean $z0;
+        java.lang.IndexOutOfBoundsException $r2;
+
+        $r0 := @this: android.os.MemoryFile;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        if $i0 < 0 goto label1;
+
+        $i3 = lengthof $r1;
+
+        if $i0 > $i3 goto label1;
+
+        if $i2 < 0 goto label1;
+
+        $i3 = lengthof $r1;
+
+        $i3 = $i3 - $i0;
+
+        if $i2 > $i3 goto label1;
+
+        if $i1 < 0 goto label1;
+
+        $i3 = $r0.<android.os.MemoryFile: int mLength>;
+
+        if $i1 > $i3 goto label1;
+
+        $i3 = $r0.<android.os.MemoryFile: int mLength>;
+
+        $i3 = $i3 - $i1;
+
+        if $i2 <= $i3 goto label2;
+
+     label1:
+        $r2 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r2.<java.lang.IndexOutOfBoundsException: void <init>()>();
+
+        throw $r2;
+
+     label2:
+        $i3 = $r0.<android.os.MemoryFile: int mFD>;
+
+        $i4 = $r0.<android.os.MemoryFile: int mAddress>;
+
+        $z0 = $r0.<android.os.MemoryFile: boolean mAllowPurging>;
+
+        specialinvoke $r0.<android.os.MemoryFile: void native_write(int,int,byte[],int,int,int,boolean)>($i3, $i4, $r1, $i0, $i1, $i2, $z0);
+
+        return;
+    }
+}

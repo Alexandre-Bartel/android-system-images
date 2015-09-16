@@ -1,0 +1,868 @@
+public final class android.net.http.AndroidHttpClient extends java.lang.Object implements org.apache.http.client.HttpClient
+{
+    public static long DEFAULT_SYNC_MIN_GZIP_BYTES;
+    private static final java.lang.String TAG;
+    private static final java.lang.ThreadLocal sThreadBlocked;
+    private static final org.apache.http.HttpRequestInterceptor sThreadCheckInterceptor;
+    private volatile android.net.http.AndroidHttpClient$LoggingConfiguration curlConfiguration;
+    private final org.apache.http.client.HttpClient delegate;
+    private java.lang.RuntimeException mLeakedException;
+
+    static void <clinit>()
+    {
+        java.lang.ThreadLocal $r0;
+        android.net.http.AndroidHttpClient$1 $r1;
+
+        <android.net.http.AndroidHttpClient: java.lang.String TAG> = "AndroidHttpClient";
+
+        <android.net.http.AndroidHttpClient: long DEFAULT_SYNC_MIN_GZIP_BYTES> = 256L;
+
+        $r0 = new java.lang.ThreadLocal;
+
+        specialinvoke $r0.<java.lang.ThreadLocal: void <init>()>();
+
+        <android.net.http.AndroidHttpClient: java.lang.ThreadLocal sThreadBlocked> = $r0;
+
+        $r1 = new android.net.http.AndroidHttpClient$1;
+
+        specialinvoke $r1.<android.net.http.AndroidHttpClient$1: void <init>()>();
+
+        <android.net.http.AndroidHttpClient: org.apache.http.HttpRequestInterceptor sThreadCheckInterceptor> = $r1;
+
+        return;
+    }
+
+    private void <init>(org.apache.http.conn.ClientConnectionManager, org.apache.http.params.HttpParams)
+    {
+        android.net.http.AndroidHttpClient $r0;
+        org.apache.http.conn.ClientConnectionManager $r1;
+        org.apache.http.params.HttpParams $r2;
+        java.lang.IllegalStateException $r3;
+        android.net.http.AndroidHttpClient$2 $r4;
+
+        $r0 := @this: android.net.http.AndroidHttpClient;
+
+        $r1 := @parameter0: org.apache.http.conn.ClientConnectionManager;
+
+        $r2 := @parameter1: org.apache.http.params.HttpParams;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("AndroidHttpClient created and never closed");
+
+        $r0.<android.net.http.AndroidHttpClient: java.lang.RuntimeException mLeakedException> = $r3;
+
+        $r4 = new android.net.http.AndroidHttpClient$2;
+
+        specialinvoke $r4.<android.net.http.AndroidHttpClient$2: void <init>(android.net.http.AndroidHttpClient,org.apache.http.conn.ClientConnectionManager,org.apache.http.params.HttpParams)>($r0, $r1, $r2);
+
+        $r0.<android.net.http.AndroidHttpClient: org.apache.http.client.HttpClient delegate> = $r4;
+
+        return;
+    }
+
+    static java.lang.ThreadLocal access$000()
+    {
+        java.lang.ThreadLocal r0;
+
+        r0 = <android.net.http.AndroidHttpClient: java.lang.ThreadLocal sThreadBlocked>;
+
+        return r0;
+    }
+
+    static org.apache.http.HttpRequestInterceptor access$100()
+    {
+        org.apache.http.HttpRequestInterceptor r0;
+
+        r0 = <android.net.http.AndroidHttpClient: org.apache.http.HttpRequestInterceptor sThreadCheckInterceptor>;
+
+        return r0;
+    }
+
+    static android.net.http.AndroidHttpClient$LoggingConfiguration access$400(android.net.http.AndroidHttpClient)
+    {
+        android.net.http.AndroidHttpClient $r0;
+        android.net.http.AndroidHttpClient$LoggingConfiguration r1;
+
+        $r0 := @parameter0: android.net.http.AndroidHttpClient;
+
+        r1 = $r0.<android.net.http.AndroidHttpClient: android.net.http.AndroidHttpClient$LoggingConfiguration curlConfiguration>;
+
+        return r1;
+    }
+
+    static java.lang.String access$700(org.apache.http.client.methods.HttpUriRequest, boolean) throws java.io.IOException
+    {
+        org.apache.http.client.methods.HttpUriRequest $r0;
+        boolean $z0;
+        java.lang.String $r1;
+
+        $r0 := @parameter0: org.apache.http.client.methods.HttpUriRequest;
+
+        $z0 := @parameter1: boolean;
+
+        $r1 = staticinvoke <android.net.http.AndroidHttpClient: java.lang.String toCurl(org.apache.http.client.methods.HttpUriRequest,boolean)>($r0, $z0);
+
+        return $r1;
+    }
+
+    public static org.apache.http.entity.AbstractHttpEntity getCompressedEntity(byte[], android.content.ContentResolver) throws java.io.IOException
+    {
+        byte[] $r0;
+        android.content.ContentResolver $r1;
+        java.io.ByteArrayOutputStream $r2;
+        java.util.zip.GZIPOutputStream $r3;
+        int $i0;
+        long $l1, $l2;
+        byte $b3;
+        org.apache.http.entity.ByteArrayEntity $r4;
+
+        $r0 := @parameter0: byte[];
+
+        $r1 := @parameter1: android.content.ContentResolver;
+
+        $i0 = lengthof $r0;
+
+        $l1 = (long) $i0;
+
+        $l2 = staticinvoke <android.net.http.AndroidHttpClient: long getMinGzipSize(android.content.ContentResolver)>($r1);
+
+        $b3 = $l1 cmp $l2;
+
+        if $b3 >= 0 goto label1;
+
+        $r4 = new org.apache.http.entity.ByteArrayEntity;
+
+        specialinvoke $r4.<org.apache.http.entity.ByteArrayEntity: void <init>(byte[])>($r0);
+
+        return $r4;
+
+     label1:
+        $r2 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r2.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        $r3 = new java.util.zip.GZIPOutputStream;
+
+        specialinvoke $r3.<java.util.zip.GZIPOutputStream: void <init>(java.io.OutputStream)>($r2);
+
+        virtualinvoke $r3.<java.io.FilterOutputStream: void write(byte[])>($r0);
+
+        virtualinvoke $r3.<java.util.zip.DeflaterOutputStream: void close()>();
+
+        $r4 = new org.apache.http.entity.ByteArrayEntity;
+
+        $r0 = virtualinvoke $r2.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        specialinvoke $r4.<org.apache.http.entity.ByteArrayEntity: void <init>(byte[])>($r0);
+
+        virtualinvoke $r4.<org.apache.http.entity.AbstractHttpEntity: void setContentEncoding(java.lang.String)>("gzip");
+
+        return $r4;
+    }
+
+    public static long getMinGzipSize(android.content.ContentResolver)
+    {
+        android.content.ContentResolver $r0;
+        java.lang.NumberFormatException $r1;
+        java.lang.String $r2;
+        boolean $z0;
+        long $l0;
+        java.lang.StringBuilder $r3;
+
+        $r0 := @parameter0: android.content.ContentResolver;
+
+        $r2 = staticinvoke <android.provider.Settings$Gservices: java.lang.String getString(android.content.ContentResolver,java.lang.String)>($r0, "sync_min_gzip_bytes");
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r2);
+
+        if $z0 != 0 goto label4;
+
+     label1:
+        $l0 = staticinvoke <java.lang.Long: long parseLong(java.lang.String)>($r2);
+
+     label2:
+        return $l0;
+
+     label3:
+        $r1 := @caughtexception;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to parse sync_min_gzip_bytes ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String,java.lang.Throwable)>("AndroidHttpClient", $r2, $r1);
+
+     label4:
+        $l0 = <android.net.http.AndroidHttpClient: long DEFAULT_SYNC_MIN_GZIP_BYTES>;
+
+        return $l0;
+
+        catch java.lang.NumberFormatException from label1 to label2 with label3;
+    }
+
+    public static java.io.InputStream getUngzippedContent(org.apache.http.HttpEntity) throws java.io.IOException
+    {
+        org.apache.http.HttpEntity $r0;
+        java.io.InputStream $r1, $r2;
+        org.apache.http.Header $r3;
+        java.lang.String $r4;
+        boolean $z0;
+        java.util.zip.GZIPInputStream $r5;
+
+        $r0 := @parameter0: org.apache.http.HttpEntity;
+
+        $r1 = interfaceinvoke $r0.<org.apache.http.HttpEntity: java.io.InputStream getContent()>();
+
+        $r2 = $r1;
+
+        if $r1 != null goto label1;
+
+        return $r1;
+
+     label1:
+        $r3 = interfaceinvoke $r0.<org.apache.http.HttpEntity: org.apache.http.Header getContentEncoding()>();
+
+        if $r3 != null goto label2;
+
+        return $r1;
+
+     label2:
+        $r4 = interfaceinvoke $r3.<org.apache.http.Header: java.lang.String getValue()>();
+
+        if $r4 != null goto label3;
+
+        return $r1;
+
+     label3:
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean contains(java.lang.CharSequence)>("gzip");
+
+        if $z0 == 0 goto label4;
+
+        $r5 = new java.util.zip.GZIPInputStream;
+
+        specialinvoke $r5.<java.util.zip.GZIPInputStream: void <init>(java.io.InputStream)>($r1);
+
+        $r2 = $r5;
+
+     label4:
+        return $r2;
+    }
+
+    public static void modifyRequestToAcceptGzipResponse(org.apache.http.HttpRequest)
+    {
+        org.apache.http.HttpRequest $r0;
+
+        $r0 := @parameter0: org.apache.http.HttpRequest;
+
+        interfaceinvoke $r0.<org.apache.http.HttpRequest: void addHeader(java.lang.String,java.lang.String)>("Accept-Encoding", "gzip");
+
+        return;
+    }
+
+    public static android.net.http.AndroidHttpClient newInstance(java.lang.String)
+    {
+        java.lang.String $r0;
+        android.net.http.AndroidHttpClient $r1;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <android.net.http.AndroidHttpClient: android.net.http.AndroidHttpClient newInstance(java.lang.String,org.apache.harmony.xnet.provider.jsse.SSLClientSessionCache)>($r0, null);
+
+        return $r1;
+    }
+
+    public static android.net.http.AndroidHttpClient newInstance(java.lang.String, org.apache.harmony.xnet.provider.jsse.SSLClientSessionCache)
+    {
+        java.lang.String $r0;
+        org.apache.harmony.xnet.provider.jsse.SSLClientSessionCache $r1;
+        org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager $r2;
+        org.apache.http.params.BasicHttpParams $r3;
+        org.apache.http.conn.scheme.SchemeRegistry $r4;
+        org.apache.http.conn.scheme.Scheme $r5;
+        org.apache.http.conn.scheme.PlainSocketFactory $r6;
+        org.apache.http.conn.ssl.SSLSocketFactory $r7;
+        android.net.http.AndroidHttpClient $r8;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $r1 := @parameter1: org.apache.harmony.xnet.provider.jsse.SSLClientSessionCache;
+
+        $r3 = new org.apache.http.params.BasicHttpParams;
+
+        specialinvoke $r3.<org.apache.http.params.BasicHttpParams: void <init>()>();
+
+        staticinvoke <org.apache.http.params.HttpConnectionParams: void setStaleCheckingEnabled(org.apache.http.params.HttpParams,boolean)>($r3, 0);
+
+        staticinvoke <org.apache.http.params.HttpConnectionParams: void setConnectionTimeout(org.apache.http.params.HttpParams,int)>($r3, 20000);
+
+        staticinvoke <org.apache.http.params.HttpConnectionParams: void setSoTimeout(org.apache.http.params.HttpParams,int)>($r3, 20000);
+
+        staticinvoke <org.apache.http.params.HttpConnectionParams: void setSocketBufferSize(org.apache.http.params.HttpParams,int)>($r3, 8192);
+
+        staticinvoke <org.apache.http.client.params.HttpClientParams: void setRedirecting(org.apache.http.params.HttpParams,boolean)>($r3, 0);
+
+        staticinvoke <org.apache.http.params.HttpProtocolParams: void setUserAgent(org.apache.http.params.HttpParams,java.lang.String)>($r3, $r0);
+
+        $r4 = new org.apache.http.conn.scheme.SchemeRegistry;
+
+        specialinvoke $r4.<org.apache.http.conn.scheme.SchemeRegistry: void <init>()>();
+
+        $r5 = new org.apache.http.conn.scheme.Scheme;
+
+        $r6 = staticinvoke <org.apache.http.conn.scheme.PlainSocketFactory: org.apache.http.conn.scheme.PlainSocketFactory getSocketFactory()>();
+
+        specialinvoke $r5.<org.apache.http.conn.scheme.Scheme: void <init>(java.lang.String,org.apache.http.conn.scheme.SocketFactory,int)>("http", $r6, 80);
+
+        virtualinvoke $r4.<org.apache.http.conn.scheme.SchemeRegistry: org.apache.http.conn.scheme.Scheme register(org.apache.http.conn.scheme.Scheme)>($r5);
+
+        $r5 = new org.apache.http.conn.scheme.Scheme;
+
+        $r7 = staticinvoke <android.net.http.AndroidHttpClient: org.apache.http.conn.ssl.SSLSocketFactory socketFactoryWithCache(org.apache.harmony.xnet.provider.jsse.SSLClientSessionCache)>($r1);
+
+        specialinvoke $r5.<org.apache.http.conn.scheme.Scheme: void <init>(java.lang.String,org.apache.http.conn.scheme.SocketFactory,int)>("https", $r7, 443);
+
+        virtualinvoke $r4.<org.apache.http.conn.scheme.SchemeRegistry: org.apache.http.conn.scheme.Scheme register(org.apache.http.conn.scheme.Scheme)>($r5);
+
+        $r2 = new org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+
+        specialinvoke $r2.<org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager: void <init>(org.apache.http.params.HttpParams,org.apache.http.conn.scheme.SchemeRegistry)>($r3, $r4);
+
+        $r8 = new android.net.http.AndroidHttpClient;
+
+        specialinvoke $r8.<android.net.http.AndroidHttpClient: void <init>(org.apache.http.conn.ClientConnectionManager,org.apache.http.params.HttpParams)>($r2, $r3);
+
+        return $r8;
+    }
+
+    public static void setThreadBlocked(boolean)
+    {
+        boolean $z0;
+        java.lang.ThreadLocal $r0;
+        java.lang.Boolean $r1;
+
+        $z0 := @parameter0: boolean;
+
+        $r0 = <android.net.http.AndroidHttpClient: java.lang.ThreadLocal sThreadBlocked>;
+
+        $r1 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z0);
+
+        virtualinvoke $r0.<java.lang.ThreadLocal: void set(java.lang.Object)>($r1);
+
+        return;
+    }
+
+    private static org.apache.http.conn.ssl.SSLSocketFactory socketFactoryWithCache(org.apache.harmony.xnet.provider.jsse.SSLClientSessionCache)
+    {
+        org.apache.harmony.xnet.provider.jsse.SSLClientSessionCache $r0;
+        org.apache.harmony.xnet.provider.jsse.SSLContextImpl $r1;
+        java.security.KeyManagementException $r2;
+        org.apache.http.conn.ssl.SSLSocketFactory $r3;
+        javax.net.ssl.SSLSocketFactory $r4;
+        java.lang.AssertionError $r5;
+
+        $r0 := @parameter0: org.apache.harmony.xnet.provider.jsse.SSLClientSessionCache;
+
+        if $r0 != null goto label1;
+
+        $r3 = staticinvoke <org.apache.http.conn.ssl.SSLSocketFactory: org.apache.http.conn.ssl.SSLSocketFactory getSocketFactory()>();
+
+        return $r3;
+
+     label1:
+        $r1 = new org.apache.harmony.xnet.provider.jsse.SSLContextImpl;
+
+        specialinvoke $r1.<org.apache.harmony.xnet.provider.jsse.SSLContextImpl: void <init>()>();
+
+     label2:
+        virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.SSLContextImpl: void engineInit(javax.net.ssl.KeyManager[],javax.net.ssl.TrustManager[],java.security.SecureRandom,org.apache.harmony.xnet.provider.jsse.SSLClientSessionCache,org.apache.harmony.xnet.provider.jsse.SSLServerSessionCache)>(null, null, null, $r0, null);
+
+     label3:
+        $r3 = new org.apache.http.conn.ssl.SSLSocketFactory;
+
+        $r4 = virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.SSLContextImpl: javax.net.ssl.SSLSocketFactory engineGetSocketFactory()>();
+
+        specialinvoke $r3.<org.apache.http.conn.ssl.SSLSocketFactory: void <init>(javax.net.ssl.SSLSocketFactory)>($r4);
+
+        return $r3;
+
+     label4:
+        $r2 := @caughtexception;
+
+        $r5 = new java.lang.AssertionError;
+
+        specialinvoke $r5.<java.lang.AssertionError: void <init>(java.lang.Object)>($r2);
+
+        throw $r5;
+
+        catch java.security.KeyManagementException from label2 to label3 with label4;
+    }
+
+    private static java.lang.String toCurl(org.apache.http.client.methods.HttpUriRequest, boolean) throws java.io.IOException
+    {
+        java.lang.StringBuilder $r0, $r12;
+        org.apache.http.client.methods.HttpUriRequest $r1, $r8;
+        boolean $z0, $z1;
+        org.apache.http.Header[] $r2;
+        int $i0, $i1;
+        org.apache.http.Header $r3;
+        java.lang.String $r4;
+        java.net.URI $r5;
+        org.apache.http.impl.client.RequestWrapper $r6;
+        org.apache.http.HttpRequest $r7;
+        org.apache.http.HttpEntityEnclosingRequest $r9;
+        org.apache.http.HttpEntity $r10;
+        long $l2;
+        byte $b3;
+        java.io.ByteArrayOutputStream $r11;
+
+        $r1 := @parameter0: org.apache.http.client.methods.HttpUriRequest;
+
+        $z0 := @parameter1: boolean;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("curl ");
+
+        $r2 = interfaceinvoke $r1.<org.apache.http.client.methods.HttpUriRequest: org.apache.http.Header[] getAllHeaders()>();
+
+        $i0 = lengthof $r2;
+
+        $i1 = 0;
+
+     label1:
+        if $i1 >= $i0 goto label4;
+
+        $r3 = $r2[$i1];
+
+        if $z0 != 0 goto label3;
+
+        $r4 = interfaceinvoke $r3.<org.apache.http.Header: java.lang.String getName()>();
+
+        $z1 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>("Authorization");
+
+        if $z1 != 0 goto label2;
+
+        $r4 = interfaceinvoke $r3.<org.apache.http.Header: java.lang.String getName()>();
+
+        $z1 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>("Cookie");
+
+        if $z1 == 0 goto label3;
+
+     label2:
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label3:
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("--header \"");
+
+        $r4 = virtualinvoke $r3.<java.lang.Object: java.lang.String toString()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.String: java.lang.String trim()>();
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\" ");
+
+        goto label2;
+
+     label4:
+        $r5 = interfaceinvoke $r1.<org.apache.http.client.methods.HttpUriRequest: java.net.URI getURI()>();
+
+        $z0 = $r1 instanceof org.apache.http.impl.client.RequestWrapper;
+
+        if $z0 == 0 goto label8;
+
+        $r6 = (org.apache.http.impl.client.RequestWrapper) $r1;
+
+        $r7 = virtualinvoke $r6.<org.apache.http.impl.client.RequestWrapper: org.apache.http.HttpRequest getOriginal()>();
+
+        $z0 = $r7 instanceof org.apache.http.client.methods.HttpUriRequest;
+
+        if $z0 == 0 goto label8;
+
+        $r8 = (org.apache.http.client.methods.HttpUriRequest) $r7;
+
+        $r5 = interfaceinvoke $r8.<org.apache.http.client.methods.HttpUriRequest: java.net.URI getURI()>();
+
+     label5:
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r5);
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $z0 = $r1 instanceof org.apache.http.HttpEntityEnclosingRequest;
+
+        if $z0 == 0 goto label6;
+
+        $r9 = (org.apache.http.HttpEntityEnclosingRequest) $r1;
+
+        $r10 = interfaceinvoke $r9.<org.apache.http.HttpEntityEnclosingRequest: org.apache.http.HttpEntity getEntity()>();
+
+        if $r10 == null goto label6;
+
+        $z0 = interfaceinvoke $r10.<org.apache.http.HttpEntity: boolean isRepeatable()>();
+
+        if $z0 == 0 goto label6;
+
+        $l2 = interfaceinvoke $r10.<org.apache.http.HttpEntity: long getContentLength()>();
+
+        $b3 = $l2 cmp 1024L;
+
+        if $b3 >= 0 goto label7;
+
+        $r11 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r11.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        interfaceinvoke $r10.<org.apache.http.HttpEntity: void writeTo(java.io.OutputStream)>($r11);
+
+        $r4 = virtualinvoke $r11.<java.io.ByteArrayOutputStream: java.lang.String toString()>();
+
+        $r12 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" --data-ascii \"");
+
+        $r12 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+     label6:
+        $r4 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r4;
+
+     label7:
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" [TOO MUCH DATA TO INCLUDE]");
+
+        goto label6;
+
+     label8:
+        goto label5;
+    }
+
+    public void close()
+    {
+        android.net.http.AndroidHttpClient $r0;
+        org.apache.http.conn.ClientConnectionManager $r1;
+        java.lang.RuntimeException $r2;
+
+        $r0 := @this: android.net.http.AndroidHttpClient;
+
+        $r2 = $r0.<android.net.http.AndroidHttpClient: java.lang.RuntimeException mLeakedException>;
+
+        if $r2 == null goto label1;
+
+        $r1 = virtualinvoke $r0.<android.net.http.AndroidHttpClient: org.apache.http.conn.ClientConnectionManager getConnectionManager()>();
+
+        interfaceinvoke $r1.<org.apache.http.conn.ClientConnectionManager: void shutdown()>();
+
+        $r0.<android.net.http.AndroidHttpClient: java.lang.RuntimeException mLeakedException> = null;
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public void disableCurlLogging()
+    {
+        android.net.http.AndroidHttpClient $r0;
+
+        $r0 := @this: android.net.http.AndroidHttpClient;
+
+        $r0.<android.net.http.AndroidHttpClient: android.net.http.AndroidHttpClient$LoggingConfiguration curlConfiguration> = null;
+
+        return;
+    }
+
+    public void enableCurlLogging(java.lang.String, int)
+    {
+        android.net.http.AndroidHttpClient $r0;
+        java.lang.String $r1;
+        int $i0;
+        java.lang.NullPointerException $r2;
+        java.lang.IllegalArgumentException $r3;
+        android.net.http.AndroidHttpClient$LoggingConfiguration $r4;
+
+        $r0 := @this: android.net.http.AndroidHttpClient;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.NullPointerException;
+
+        specialinvoke $r2.<java.lang.NullPointerException: void <init>(java.lang.String)>("name");
+
+        throw $r2;
+
+     label1:
+        if $i0 < 2 goto label2;
+
+        if $i0 <= 7 goto label3;
+
+     label2:
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Level is out of range [2..7]");
+
+        throw $r3;
+
+     label3:
+        $r4 = new android.net.http.AndroidHttpClient$LoggingConfiguration;
+
+        specialinvoke $r4.<android.net.http.AndroidHttpClient$LoggingConfiguration: void <init>(java.lang.String,int,android.net.http.AndroidHttpClient$1)>($r1, $i0, null);
+
+        $r0.<android.net.http.AndroidHttpClient: android.net.http.AndroidHttpClient$LoggingConfiguration curlConfiguration> = $r4;
+
+        return;
+    }
+
+    public java.lang.Object execute(org.apache.http.HttpHost, org.apache.http.HttpRequest, org.apache.http.client.ResponseHandler) throws java.io.IOException, org.apache.http.client.ClientProtocolException
+    {
+        android.net.http.AndroidHttpClient $r0;
+        org.apache.http.HttpHost $r1;
+        org.apache.http.HttpRequest $r2;
+        org.apache.http.client.ResponseHandler $r3;
+        java.lang.Object $r4;
+        org.apache.http.client.HttpClient $r5;
+
+        $r0 := @this: android.net.http.AndroidHttpClient;
+
+        $r1 := @parameter0: org.apache.http.HttpHost;
+
+        $r2 := @parameter1: org.apache.http.HttpRequest;
+
+        $r3 := @parameter2: org.apache.http.client.ResponseHandler;
+
+        $r5 = $r0.<android.net.http.AndroidHttpClient: org.apache.http.client.HttpClient delegate>;
+
+        $r4 = interfaceinvoke $r5.<org.apache.http.client.HttpClient: java.lang.Object execute(org.apache.http.HttpHost,org.apache.http.HttpRequest,org.apache.http.client.ResponseHandler)>($r1, $r2, $r3);
+
+        return $r4;
+    }
+
+    public java.lang.Object execute(org.apache.http.HttpHost, org.apache.http.HttpRequest, org.apache.http.client.ResponseHandler, org.apache.http.protocol.HttpContext) throws java.io.IOException, org.apache.http.client.ClientProtocolException
+    {
+        android.net.http.AndroidHttpClient $r0;
+        org.apache.http.HttpHost $r1;
+        org.apache.http.HttpRequest $r2;
+        org.apache.http.client.ResponseHandler $r3;
+        org.apache.http.protocol.HttpContext $r4;
+        java.lang.Object $r5;
+        org.apache.http.client.HttpClient $r6;
+
+        $r0 := @this: android.net.http.AndroidHttpClient;
+
+        $r1 := @parameter0: org.apache.http.HttpHost;
+
+        $r2 := @parameter1: org.apache.http.HttpRequest;
+
+        $r3 := @parameter2: org.apache.http.client.ResponseHandler;
+
+        $r4 := @parameter3: org.apache.http.protocol.HttpContext;
+
+        $r6 = $r0.<android.net.http.AndroidHttpClient: org.apache.http.client.HttpClient delegate>;
+
+        $r5 = interfaceinvoke $r6.<org.apache.http.client.HttpClient: java.lang.Object execute(org.apache.http.HttpHost,org.apache.http.HttpRequest,org.apache.http.client.ResponseHandler,org.apache.http.protocol.HttpContext)>($r1, $r2, $r3, $r4);
+
+        return $r5;
+    }
+
+    public java.lang.Object execute(org.apache.http.client.methods.HttpUriRequest, org.apache.http.client.ResponseHandler) throws java.io.IOException, org.apache.http.client.ClientProtocolException
+    {
+        android.net.http.AndroidHttpClient $r0;
+        org.apache.http.client.methods.HttpUriRequest $r1;
+        org.apache.http.client.ResponseHandler $r2;
+        java.lang.Object $r3;
+        org.apache.http.client.HttpClient $r4;
+
+        $r0 := @this: android.net.http.AndroidHttpClient;
+
+        $r1 := @parameter0: org.apache.http.client.methods.HttpUriRequest;
+
+        $r2 := @parameter1: org.apache.http.client.ResponseHandler;
+
+        $r4 = $r0.<android.net.http.AndroidHttpClient: org.apache.http.client.HttpClient delegate>;
+
+        $r3 = interfaceinvoke $r4.<org.apache.http.client.HttpClient: java.lang.Object execute(org.apache.http.client.methods.HttpUriRequest,org.apache.http.client.ResponseHandler)>($r1, $r2);
+
+        return $r3;
+    }
+
+    public java.lang.Object execute(org.apache.http.client.methods.HttpUriRequest, org.apache.http.client.ResponseHandler, org.apache.http.protocol.HttpContext) throws java.io.IOException, org.apache.http.client.ClientProtocolException
+    {
+        android.net.http.AndroidHttpClient $r0;
+        org.apache.http.client.methods.HttpUriRequest $r1;
+        org.apache.http.client.ResponseHandler $r2;
+        org.apache.http.protocol.HttpContext $r3;
+        java.lang.Object $r4;
+        org.apache.http.client.HttpClient $r5;
+
+        $r0 := @this: android.net.http.AndroidHttpClient;
+
+        $r1 := @parameter0: org.apache.http.client.methods.HttpUriRequest;
+
+        $r2 := @parameter1: org.apache.http.client.ResponseHandler;
+
+        $r3 := @parameter2: org.apache.http.protocol.HttpContext;
+
+        $r5 = $r0.<android.net.http.AndroidHttpClient: org.apache.http.client.HttpClient delegate>;
+
+        $r4 = interfaceinvoke $r5.<org.apache.http.client.HttpClient: java.lang.Object execute(org.apache.http.client.methods.HttpUriRequest,org.apache.http.client.ResponseHandler,org.apache.http.protocol.HttpContext)>($r1, $r2, $r3);
+
+        return $r4;
+    }
+
+    public org.apache.http.HttpResponse execute(org.apache.http.HttpHost, org.apache.http.HttpRequest) throws java.io.IOException
+    {
+        android.net.http.AndroidHttpClient $r0;
+        org.apache.http.HttpHost $r1;
+        org.apache.http.HttpRequest $r2;
+        org.apache.http.HttpResponse $r3;
+        org.apache.http.client.HttpClient $r4;
+
+        $r0 := @this: android.net.http.AndroidHttpClient;
+
+        $r1 := @parameter0: org.apache.http.HttpHost;
+
+        $r2 := @parameter1: org.apache.http.HttpRequest;
+
+        $r4 = $r0.<android.net.http.AndroidHttpClient: org.apache.http.client.HttpClient delegate>;
+
+        $r3 = interfaceinvoke $r4.<org.apache.http.client.HttpClient: org.apache.http.HttpResponse execute(org.apache.http.HttpHost,org.apache.http.HttpRequest)>($r1, $r2);
+
+        return $r3;
+    }
+
+    public org.apache.http.HttpResponse execute(org.apache.http.HttpHost, org.apache.http.HttpRequest, org.apache.http.protocol.HttpContext) throws java.io.IOException
+    {
+        android.net.http.AndroidHttpClient $r0;
+        org.apache.http.HttpHost $r1;
+        org.apache.http.HttpRequest $r2;
+        org.apache.http.protocol.HttpContext $r3;
+        org.apache.http.HttpResponse $r4;
+        org.apache.http.client.HttpClient $r5;
+
+        $r0 := @this: android.net.http.AndroidHttpClient;
+
+        $r1 := @parameter0: org.apache.http.HttpHost;
+
+        $r2 := @parameter1: org.apache.http.HttpRequest;
+
+        $r3 := @parameter2: org.apache.http.protocol.HttpContext;
+
+        $r5 = $r0.<android.net.http.AndroidHttpClient: org.apache.http.client.HttpClient delegate>;
+
+        $r4 = interfaceinvoke $r5.<org.apache.http.client.HttpClient: org.apache.http.HttpResponse execute(org.apache.http.HttpHost,org.apache.http.HttpRequest,org.apache.http.protocol.HttpContext)>($r1, $r2, $r3);
+
+        return $r4;
+    }
+
+    public org.apache.http.HttpResponse execute(org.apache.http.client.methods.HttpUriRequest) throws java.io.IOException
+    {
+        android.net.http.AndroidHttpClient $r0;
+        org.apache.http.client.methods.HttpUriRequest $r1;
+        org.apache.http.HttpResponse $r2;
+        org.apache.http.client.HttpClient $r3;
+
+        $r0 := @this: android.net.http.AndroidHttpClient;
+
+        $r1 := @parameter0: org.apache.http.client.methods.HttpUriRequest;
+
+        $r3 = $r0.<android.net.http.AndroidHttpClient: org.apache.http.client.HttpClient delegate>;
+
+        $r2 = interfaceinvoke $r3.<org.apache.http.client.HttpClient: org.apache.http.HttpResponse execute(org.apache.http.client.methods.HttpUriRequest)>($r1);
+
+        return $r2;
+    }
+
+    public org.apache.http.HttpResponse execute(org.apache.http.client.methods.HttpUriRequest, org.apache.http.protocol.HttpContext) throws java.io.IOException
+    {
+        android.net.http.AndroidHttpClient $r0;
+        org.apache.http.client.methods.HttpUriRequest $r1;
+        org.apache.http.protocol.HttpContext $r2;
+        org.apache.http.HttpResponse $r3;
+        org.apache.http.client.HttpClient $r4;
+
+        $r0 := @this: android.net.http.AndroidHttpClient;
+
+        $r1 := @parameter0: org.apache.http.client.methods.HttpUriRequest;
+
+        $r2 := @parameter1: org.apache.http.protocol.HttpContext;
+
+        $r4 = $r0.<android.net.http.AndroidHttpClient: org.apache.http.client.HttpClient delegate>;
+
+        $r3 = interfaceinvoke $r4.<org.apache.http.client.HttpClient: org.apache.http.HttpResponse execute(org.apache.http.client.methods.HttpUriRequest,org.apache.http.protocol.HttpContext)>($r1, $r2);
+
+        return $r3;
+    }
+
+    protected void finalize() throws java.lang.Throwable
+    {
+        android.net.http.AndroidHttpClient $r0;
+        java.lang.RuntimeException $r1;
+
+        $r0 := @this: android.net.http.AndroidHttpClient;
+
+        specialinvoke $r0.<java.lang.Object: void finalize()>();
+
+        $r1 = $r0.<android.net.http.AndroidHttpClient: java.lang.RuntimeException mLeakedException>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<android.net.http.AndroidHttpClient: java.lang.RuntimeException mLeakedException>;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("AndroidHttpClient", "Leak found", $r1);
+
+        $r0.<android.net.http.AndroidHttpClient: java.lang.RuntimeException mLeakedException> = null;
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public org.apache.http.conn.ClientConnectionManager getConnectionManager()
+    {
+        android.net.http.AndroidHttpClient $r0;
+        org.apache.http.conn.ClientConnectionManager $r1;
+        org.apache.http.client.HttpClient $r2;
+
+        $r0 := @this: android.net.http.AndroidHttpClient;
+
+        $r2 = $r0.<android.net.http.AndroidHttpClient: org.apache.http.client.HttpClient delegate>;
+
+        $r1 = interfaceinvoke $r2.<org.apache.http.client.HttpClient: org.apache.http.conn.ClientConnectionManager getConnectionManager()>();
+
+        return $r1;
+    }
+
+    public org.apache.http.params.HttpParams getParams()
+    {
+        android.net.http.AndroidHttpClient $r0;
+        org.apache.http.params.HttpParams $r1;
+        org.apache.http.client.HttpClient $r2;
+
+        $r0 := @this: android.net.http.AndroidHttpClient;
+
+        $r2 = $r0.<android.net.http.AndroidHttpClient: org.apache.http.client.HttpClient delegate>;
+
+        $r1 = interfaceinvoke $r2.<org.apache.http.client.HttpClient: org.apache.http.params.HttpParams getParams()>();
+
+        return $r1;
+    }
+}

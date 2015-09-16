@@ -1,0 +1,791 @@
+public class org.apache.harmony.awt.im.InputMethodContext extends java.awt.im.InputContext implements java.awt.im.spi.InputMethodContext
+{
+    private java.awt.Component client;
+    private final java.util.Map imInstances;
+    private java.awt.im.spi.InputMethod inputMethod;
+    private final java.util.Map localeIM;
+    private final org.apache.harmony.awt.wtk.NativeIM nativeIM;
+    private java.awt.Component nextComp;
+    private final java.util.Set notifyIM;
+    private boolean pendingClientNotify;
+
+    public void <init>()
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        java.util.HashSet $r1;
+        java.util.HashMap $r2;
+        java.util.Locale $r3;
+        java.awt.im.spi.InputMethod $r4;
+        org.apache.harmony.awt.wtk.NativeIM $r5;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        specialinvoke $r0.<java.awt.im.InputContext: void <init>()>();
+
+        $r1 = new java.util.HashSet;
+
+        specialinvoke $r1.<java.util.HashSet: void <init>()>();
+
+        $r0.<org.apache.harmony.awt.im.InputMethodContext: java.util.Set notifyIM> = $r1;
+
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>()>();
+
+        $r0.<org.apache.harmony.awt.im.InputMethodContext: java.util.Map imInstances> = $r2;
+
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>()>();
+
+        $r0.<org.apache.harmony.awt.im.InputMethodContext: java.util.Map localeIM> = $r2;
+
+        $r3 = <java.util.Locale: java.util.Locale US>;
+
+        virtualinvoke $r0.<org.apache.harmony.awt.im.InputMethodContext: boolean selectInputMethod(java.util.Locale)>($r3);
+
+        $r4 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        $r5 = (org.apache.harmony.awt.wtk.NativeIM) $r4;
+
+        $r0.<org.apache.harmony.awt.im.InputMethodContext: org.apache.harmony.awt.wtk.NativeIM nativeIM> = $r5;
+
+        return;
+    }
+
+    private void closeIM(java.awt.im.spi.InputMethod)
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        java.awt.im.spi.InputMethod $r1;
+        boolean $z0;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        $r1 := @parameter0: java.awt.im.spi.InputMethod;
+
+        if $r1 != null goto label1;
+
+        return;
+
+     label1:
+        $z0 = interfaceinvoke $r1.<java.awt.im.spi.InputMethod: boolean isCompositionEnabled()>();
+
+        if $z0 == 0 goto label2;
+
+        interfaceinvoke $r1.<java.awt.im.spi.InputMethod: void endComposition()>();
+
+     label2:
+        interfaceinvoke $r1.<java.awt.im.spi.InputMethod: void deactivate(boolean)>(1);
+
+        interfaceinvoke $r1.<java.awt.im.spi.InputMethod: void hideWindows()>();
+
+        return;
+    }
+
+    private java.awt.im.spi.InputMethod getIMInstance(java.awt.im.spi.InputMethodDescriptor) throws java.lang.Exception
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        java.awt.im.spi.InputMethodDescriptor $r1;
+        java.util.Map $r2;
+        java.lang.Object $r3;
+        java.awt.im.spi.InputMethod $r4;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        $r1 := @parameter0: java.awt.im.spi.InputMethodDescriptor;
+
+        $r2 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.util.Map imInstances>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r4 = (java.awt.im.spi.InputMethod) $r3;
+
+        if $r4 != null goto label1;
+
+        $r4 = interfaceinvoke $r1.<java.awt.im.spi.InputMethodDescriptor: java.awt.im.spi.InputMethod createInputMethod()>();
+
+        interfaceinvoke $r4.<java.awt.im.spi.InputMethod: void setInputMethodContext(java.awt.im.spi.InputMethodContext)>($r0);
+
+        $r2 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.util.Map imInstances>;
+
+        interfaceinvoke $r2.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, $r4);
+
+        return $r4;
+
+     label1:
+        return $r4;
+    }
+
+    private java.awt.im.spi.InputMethod getIMInstance(java.util.Iterator, java.util.Locale) throws java.lang.Exception
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        java.util.Iterator $r1;
+        java.util.Locale $r2, $r3;
+        int $i0, $i1;
+        boolean $z0;
+        java.lang.Object $r4;
+        java.awt.im.spi.InputMethodDescriptor $r5;
+        java.util.Locale[] $r6;
+        java.awt.im.spi.InputMethod $r7;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        $r1 := @parameter0: java.util.Iterator;
+
+        $r2 := @parameter1: java.util.Locale;
+
+     label1:
+        $z0 = interfaceinvoke $r1.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r4 = interfaceinvoke $r1.<java.util.Iterator: java.lang.Object next()>();
+
+        $r5 = (java.awt.im.spi.InputMethodDescriptor) $r4;
+
+        $r6 = interfaceinvoke $r5.<java.awt.im.spi.InputMethodDescriptor: java.util.Locale[] getAvailableLocales()>();
+
+        $i0 = lengthof $r6;
+
+        $i1 = 0;
+
+     label2:
+        if $i1 >= $i0 goto label1;
+
+        $r3 = $r6[$i1];
+
+        $z0 = virtualinvoke $r2.<java.util.Locale: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label3;
+
+        $r7 = specialinvoke $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.spi.InputMethod getIMInstance(java.awt.im.spi.InputMethodDescriptor)>($r5);
+
+        return $r7;
+
+     label3:
+        $i1 = $i1 + 1;
+
+        goto label2;
+
+     label4:
+        return null;
+    }
+
+    private java.awt.im.InputMethodRequests getIMRequests()
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        java.awt.im.InputMethodRequests $r1;
+        java.awt.Component $r2;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        $r2 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.Component client>;
+
+        if $r2 == null goto label1;
+
+        $r2 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.Component client>;
+
+        $r1 = virtualinvoke $r2.<java.awt.Component: java.awt.im.InputMethodRequests getInputMethodRequests()>();
+
+        return $r1;
+
+     label1:
+        return null;
+    }
+
+    private java.awt.im.InputMethodRequests getStyleIMRequests()
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        java.awt.im.InputMethodRequests $r1;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        $r1 = specialinvoke $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.InputMethodRequests getIMRequests()>();
+
+        return $r1;
+    }
+
+    private void initIM(java.awt.im.spi.InputMethod, java.util.Locale)
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        java.awt.im.spi.InputMethod $r1, $r3;
+        java.util.Locale $r2;
+        boolean $z0;
+        java.lang.UnsupportedOperationException $r4;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        $r1 := @parameter0: java.awt.im.spi.InputMethod;
+
+        $r2 := @parameter1: java.util.Locale;
+
+        if $r1 != null goto label1;
+
+        return;
+
+     label1:
+        interfaceinvoke $r1.<java.awt.im.spi.InputMethod: boolean setLocale(java.util.Locale)>($r2);
+
+        interfaceinvoke $r1.<java.awt.im.spi.InputMethod: void setCharacterSubsets(java.lang.Character$Subset[])>(null);
+
+        $r3 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        if $r3 == null goto label6;
+
+        $r3 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.spi.InputMethod inputMethod>;
+
+     label2:
+        $z0 = interfaceinvoke $r3.<java.awt.im.spi.InputMethod: boolean isCompositionEnabled()>();
+
+     label3:
+        interfaceinvoke $r1.<java.awt.im.spi.InputMethod: void setCompositionEnabled(boolean)>($z0);
+
+     label4:
+        return;
+
+     label5:
+        $r4 := @caughtexception;
+
+        return;
+
+     label6:
+        $z0 = 1;
+
+        goto label3;
+
+        catch java.lang.UnsupportedOperationException from label2 to label4 with label5;
+    }
+
+    private boolean switchToIM(java.util.Locale, java.awt.im.spi.InputMethod)
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        java.util.Locale $r1;
+        java.awt.im.spi.InputMethod $r2;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        $r1 := @parameter0: java.util.Locale;
+
+        $r2 := @parameter1: java.awt.im.spi.InputMethod;
+
+        return 0;
+    }
+
+    public java.text.AttributedCharacterIterator cancelLatestCommittedText(java.text.AttributedCharacterIterator$Attribute[])
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        java.text.AttributedCharacterIterator$Attribute[] $r1;
+        java.awt.im.InputMethodRequests $r2;
+        java.text.AttributedCharacterIterator $r3;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        $r1 := @parameter0: java.text.AttributedCharacterIterator$Attribute[];
+
+        $r2 = specialinvoke $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.InputMethodRequests getIMRequests()>();
+
+        $r3 = interfaceinvoke $r2.<java.awt.im.InputMethodRequests: java.text.AttributedCharacterIterator cancelLatestCommittedText(java.text.AttributedCharacterIterator$Attribute[])>($r1);
+
+        return $r3;
+    }
+
+    public void dispatchInputMethodEvent(int, java.text.AttributedCharacterIterator, int, java.awt.font.TextHitInfo, java.awt.font.TextHitInfo)
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        int $i0, $i1;
+        java.text.AttributedCharacterIterator $r1;
+        java.awt.font.TextHitInfo $r2, $r3;
+        java.awt.Component $r4;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.text.AttributedCharacterIterator;
+
+        $i1 := @parameter2: int;
+
+        $r2 := @parameter3: java.awt.font.TextHitInfo;
+
+        $r3 := @parameter4: java.awt.font.TextHitInfo;
+
+        $r4 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.Component client>;
+
+        if $r4 != null goto label1;
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public void dispose()
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        java.awt.im.spi.InputMethod $r1;
+        java.util.Set $r2;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        $r1 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        specialinvoke $r0.<org.apache.harmony.awt.im.InputMethodContext: void closeIM(java.awt.im.spi.InputMethod)>($r1);
+
+        $r1 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        interfaceinvoke $r1.<java.awt.im.spi.InputMethod: void dispose()>();
+
+     label1:
+        $r2 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.util.Set notifyIM>;
+
+        interfaceinvoke $r2.<java.util.Set: void clear()>();
+
+        specialinvoke $r0.<java.awt.im.InputContext: void dispose()>();
+
+        return;
+    }
+
+    public void enableClientWindowNotification(java.awt.im.spi.InputMethod, boolean)
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        java.awt.im.spi.InputMethod $r1;
+        boolean $z0;
+        java.util.Set $r2;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        $r1 := @parameter0: java.awt.im.spi.InputMethod;
+
+        $z0 := @parameter1: boolean;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.util.Set notifyIM>;
+
+        interfaceinvoke $r2.<java.util.Set: boolean add(java.lang.Object)>($r1);
+
+        return;
+
+     label1:
+        $r2 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.util.Set notifyIM>;
+
+        interfaceinvoke $r2.<java.util.Set: boolean remove(java.lang.Object)>($r1);
+
+        return;
+    }
+
+    public void endComposition()
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        java.awt.im.spi.InputMethod $r1;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        $r1 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        interfaceinvoke $r1.<java.awt.im.spi.InputMethod: void endComposition()>();
+
+     label1:
+        specialinvoke $r0.<java.awt.im.InputContext: void endComposition()>();
+
+        return;
+    }
+
+    public final java.awt.Component getClient()
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        java.awt.Component r1;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        r1 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.Component client>;
+
+        return r1;
+    }
+
+    public java.text.AttributedCharacterIterator getCommittedText(int, int, java.text.AttributedCharacterIterator$Attribute[])
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        int $i0, $i1;
+        java.text.AttributedCharacterIterator$Attribute[] $r1;
+        java.awt.im.InputMethodRequests $r2;
+        java.text.AttributedCharacterIterator $r3;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 := @parameter2: java.text.AttributedCharacterIterator$Attribute[];
+
+        $r2 = specialinvoke $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.InputMethodRequests getIMRequests()>();
+
+        $r3 = interfaceinvoke $r2.<java.awt.im.InputMethodRequests: java.text.AttributedCharacterIterator getCommittedText(int,int,java.text.AttributedCharacterIterator$Attribute[])>($i0, $i1, $r1);
+
+        return $r3;
+    }
+
+    public int getCommittedTextLength()
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        java.awt.im.InputMethodRequests $r1;
+        int $i0;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        $r1 = specialinvoke $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.InputMethodRequests getIMRequests()>();
+
+        $i0 = interfaceinvoke $r1.<java.awt.im.InputMethodRequests: int getCommittedTextLength()>();
+
+        return $i0;
+    }
+
+    public final java.awt.im.spi.InputMethod getInputMethod()
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        java.awt.im.spi.InputMethod r1;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        r1 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        return r1;
+    }
+
+    public java.lang.Object getInputMethodControlObject()
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        java.awt.im.spi.InputMethod $r1;
+        java.lang.Object $r2;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        $r1 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        $r2 = interfaceinvoke $r1.<java.awt.im.spi.InputMethod: java.lang.Object getControlObject()>();
+
+        return $r2;
+
+     label1:
+        $r2 = specialinvoke $r0.<java.awt.im.InputContext: java.lang.Object getInputMethodControlObject()>();
+
+        return $r2;
+    }
+
+    public int getInsertPositionOffset()
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        java.awt.im.InputMethodRequests $r1;
+        int $i0;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        $r1 = specialinvoke $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.InputMethodRequests getIMRequests()>();
+
+        $i0 = interfaceinvoke $r1.<java.awt.im.InputMethodRequests: int getInsertPositionOffset()>();
+
+        return $i0;
+    }
+
+    public java.util.Locale getLocale()
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        java.awt.im.spi.InputMethod $r1;
+        java.util.Locale $r2;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        $r1 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        $r2 = interfaceinvoke $r1.<java.awt.im.spi.InputMethod: java.util.Locale getLocale()>();
+
+        return $r2;
+
+     label1:
+        $r2 = specialinvoke $r0.<java.awt.im.InputContext: java.util.Locale getLocale()>();
+
+        return $r2;
+    }
+
+    public java.awt.font.TextHitInfo getLocationOffset(int, int)
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        int $i0, $i1;
+        java.awt.im.InputMethodRequests $r1;
+        java.awt.font.TextHitInfo $r2;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 = specialinvoke $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.InputMethodRequests getStyleIMRequests()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = interfaceinvoke $r1.<java.awt.im.InputMethodRequests: java.awt.font.TextHitInfo getLocationOffset(int,int)>($i0, $i1);
+
+        return $r2;
+
+     label1:
+        return null;
+    }
+
+    public final org.apache.harmony.awt.wtk.NativeIM getNativeIM()
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        org.apache.harmony.awt.wtk.NativeIM r1;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        r1 = $r0.<org.apache.harmony.awt.im.InputMethodContext: org.apache.harmony.awt.wtk.NativeIM nativeIM>;
+
+        return r1;
+    }
+
+    public java.text.AttributedCharacterIterator getSelectedText(java.text.AttributedCharacterIterator$Attribute[])
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        java.text.AttributedCharacterIterator$Attribute[] $r1;
+        java.awt.im.InputMethodRequests $r2;
+        java.text.AttributedCharacterIterator $r3;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        $r1 := @parameter0: java.text.AttributedCharacterIterator$Attribute[];
+
+        $r2 = specialinvoke $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.InputMethodRequests getIMRequests()>();
+
+        $r3 = interfaceinvoke $r2.<java.awt.im.InputMethodRequests: java.text.AttributedCharacterIterator getSelectedText(java.text.AttributedCharacterIterator$Attribute[])>($r1);
+
+        return $r3;
+    }
+
+    public java.awt.Rectangle getTextLocation(java.awt.font.TextHitInfo)
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        java.awt.font.TextHitInfo $r1;
+        java.awt.im.InputMethodRequests $r2;
+        java.awt.Rectangle $r3;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        $r1 := @parameter0: java.awt.font.TextHitInfo;
+
+        $r2 = specialinvoke $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.InputMethodRequests getStyleIMRequests()>();
+
+        $r3 = interfaceinvoke $r2.<java.awt.im.InputMethodRequests: java.awt.Rectangle getTextLocation(java.awt.font.TextHitInfo)>($r1);
+
+        return $r3;
+    }
+
+    public boolean isCompositionEnabled()
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        java.awt.im.spi.InputMethod $r1;
+        boolean $z0;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        $r1 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        $z0 = interfaceinvoke $r1.<java.awt.im.spi.InputMethod: boolean isCompositionEnabled()>();
+
+        return $z0;
+
+     label1:
+        $z0 = specialinvoke $r0.<java.awt.im.InputContext: boolean isCompositionEnabled()>();
+
+        return $z0;
+    }
+
+    public void notifyClientWindowChange(java.awt.Rectangle)
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        java.awt.Rectangle $r1;
+        java.awt.im.spi.InputMethod $r2;
+        boolean $z0;
+        java.util.Set $r3;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        $r1 := @parameter0: java.awt.Rectangle;
+
+        $r3 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.util.Set notifyIM>;
+
+        $r2 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        $z0 = interfaceinvoke $r3.<java.util.Set: boolean contains(java.lang.Object)>($r2);
+
+        if $z0 == 0 goto label1;
+
+        $r2 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        interfaceinvoke $r2.<java.awt.im.spi.InputMethod: void notifyClientWindowChange(java.awt.Rectangle)>($r1);
+
+     label1:
+        $r0.<org.apache.harmony.awt.im.InputMethodContext: boolean pendingClientNotify> = 0;
+
+        return;
+    }
+
+    public void reconvert()
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        java.awt.im.spi.InputMethod $r1;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        $r1 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        interfaceinvoke $r1.<java.awt.im.spi.InputMethod: void reconvert()>();
+
+     label1:
+        specialinvoke $r0.<java.awt.im.InputContext: void reconvert()>();
+
+        return;
+    }
+
+    void selectIM(java.awt.im.spi.InputMethodDescriptor, java.util.Locale)
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        java.awt.im.spi.InputMethodDescriptor $r1;
+        java.util.Locale $r2;
+        java.awt.im.spi.InputMethod $r3;
+        java.lang.Exception $r4;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        $r1 := @parameter0: java.awt.im.spi.InputMethodDescriptor;
+
+        $r2 := @parameter1: java.util.Locale;
+
+     label1:
+        $r3 = specialinvoke $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.spi.InputMethod getIMInstance(java.awt.im.spi.InputMethodDescriptor)>($r1);
+
+        specialinvoke $r0.<org.apache.harmony.awt.im.InputMethodContext: boolean switchToIM(java.util.Locale,java.awt.im.spi.InputMethod)>($r2, $r3);
+
+     label2:
+        return;
+
+     label3:
+        $r4 := @caughtexception;
+
+        virtualinvoke $r4.<java.lang.Throwable: void printStackTrace()>();
+
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public boolean selectInputMethod(java.util.Locale)
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        java.util.Locale $r1;
+        java.awt.im.spi.InputMethod $r2;
+        boolean $z0;
+        java.util.Map $r3;
+        java.lang.Object $r4;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        $r1 := @parameter0: java.util.Locale;
+
+        $r2 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        if $r2 == null goto label1;
+
+        $r2 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        $z0 = interfaceinvoke $r2.<java.awt.im.spi.InputMethod: boolean setLocale(java.util.Locale)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        $r3 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.util.Map localeIM>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r2 = (java.awt.im.spi.InputMethod) $r4;
+
+        $z0 = specialinvoke $r0.<org.apache.harmony.awt.im.InputMethodContext: boolean switchToIM(java.util.Locale,java.awt.im.spi.InputMethod)>($r1, $r2);
+
+        return $z0;
+    }
+
+    public void setCharacterSubsets(java.lang.Character$Subset[])
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        java.lang.Character$Subset[] $r1;
+        java.awt.im.spi.InputMethod $r2;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        $r1 := @parameter0: java.lang.Character$Subset[];
+
+        $r2 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        if $r2 == null goto label1;
+
+        $r2 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        interfaceinvoke $r2.<java.awt.im.spi.InputMethod: void setCharacterSubsets(java.lang.Character$Subset[])>($r1);
+
+     label1:
+        specialinvoke $r0.<java.awt.im.InputContext: void setCharacterSubsets(java.lang.Character$Subset[])>($r1);
+
+        return;
+    }
+
+    public void setCompositionEnabled(boolean)
+    {
+        org.apache.harmony.awt.im.InputMethodContext $r0;
+        boolean $z0;
+        java.awt.im.spi.InputMethod $r1;
+
+        $r0 := @this: org.apache.harmony.awt.im.InputMethodContext;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<org.apache.harmony.awt.im.InputMethodContext: java.awt.im.spi.InputMethod inputMethod>;
+
+        interfaceinvoke $r1.<java.awt.im.spi.InputMethod: void setCompositionEnabled(boolean)>($z0);
+
+     label1:
+        specialinvoke $r0.<java.awt.im.InputContext: void setCompositionEnabled(boolean)>($z0);
+
+        return;
+    }
+}

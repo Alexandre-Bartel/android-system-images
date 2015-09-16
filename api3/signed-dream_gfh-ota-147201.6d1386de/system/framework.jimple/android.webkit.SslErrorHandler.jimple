@@ -1,0 +1,448 @@
+public class android.webkit.SslErrorHandler extends android.os.Handler
+{
+    private static final java.lang.String LOGTAG;
+    private final int HANDLE_RESPONSE;
+    private java.util.LinkedList mLoaderQueue;
+    private android.webkit.Network mNetwork;
+    private android.os.Bundle mSslPrefTable;
+
+    void <init>(android.webkit.Network)
+    {
+        android.webkit.SslErrorHandler $r0;
+        android.webkit.Network $r1;
+        java.util.LinkedList $r2;
+        android.os.Bundle $r3;
+
+        $r0 := @this: android.webkit.SslErrorHandler;
+
+        $r1 := @parameter0: android.webkit.Network;
+
+        specialinvoke $r0.<android.os.Handler: void <init>()>();
+
+        $r0.<android.webkit.SslErrorHandler: int HANDLE_RESPONSE> = 100;
+
+        $r0.<android.webkit.SslErrorHandler: android.webkit.Network mNetwork> = $r1;
+
+        $r2 = new java.util.LinkedList;
+
+        specialinvoke $r2.<java.util.LinkedList: void <init>()>();
+
+        $r0.<android.webkit.SslErrorHandler: java.util.LinkedList mLoaderQueue> = $r2;
+
+        $r3 = new android.os.Bundle;
+
+        specialinvoke $r3.<android.os.Bundle: void <init>()>();
+
+        $r0.<android.webkit.SslErrorHandler: android.os.Bundle mSslPrefTable> = $r3;
+
+        return;
+    }
+
+    private boolean processNextLoader()
+    {
+        android.webkit.SslErrorHandler $r0;
+        java.util.LinkedList $r1;
+        java.lang.Object $r2;
+        android.webkit.LoadListener $r3;
+        boolean $z0;
+        android.net.http.SslError $r4;
+        int $i0, $i1;
+        java.lang.String $r5;
+        android.os.Bundle $r6;
+        android.webkit.BrowserFrame $r7;
+        android.webkit.CallbackProxy $r8;
+        java.lang.Throwable $r9;
+
+        $r0 := @this: android.webkit.SslErrorHandler;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = $r0.<android.webkit.SslErrorHandler: java.util.LinkedList mLoaderQueue>;
+
+        $r2 = virtualinvoke $r1.<java.util.LinkedList: java.lang.Object peek()>();
+
+        $r3 = (android.webkit.LoadListener) $r2;
+
+        if $r3 == null goto label6;
+
+        $z0 = virtualinvoke $r3.<android.webkit.LoadListener: boolean cancelled()>();
+
+     label2:
+        if $z0 == 0 goto label4;
+
+        $z0 = 1;
+
+     label3:
+        exitmonitor $r0;
+
+        return $z0;
+
+     label4:
+        $r4 = virtualinvoke $r3.<android.webkit.LoadListener: android.net.http.SslError sslError()>();
+
+        $i0 = virtualinvoke $r4.<android.net.http.SslError: int getPrimaryError()>();
+
+        $r5 = virtualinvoke $r3.<android.webkit.LoadListener: java.lang.String host()>();
+
+        $r6 = $r0.<android.webkit.SslErrorHandler: android.os.Bundle mSslPrefTable>;
+
+        $z0 = virtualinvoke $r6.<android.os.Bundle: boolean containsKey(java.lang.String)>($r5);
+
+        if $z0 == 0 goto label5;
+
+        $r6 = $r0.<android.webkit.SslErrorHandler: android.os.Bundle mSslPrefTable>;
+
+        $i1 = virtualinvoke $r6.<android.os.Bundle: int getInt(java.lang.String)>($r5);
+
+        if $i0 > $i1 goto label5;
+
+        virtualinvoke $r0.<android.webkit.SslErrorHandler: void handleSslErrorResponse(boolean)>(1);
+
+        $z0 = 1;
+
+        goto label3;
+
+     label5:
+        $r7 = virtualinvoke $r3.<android.webkit.LoadListener: android.webkit.BrowserFrame getFrame()>();
+
+        $r8 = virtualinvoke $r7.<android.webkit.BrowserFrame: android.webkit.CallbackProxy getCallbackProxy()>();
+
+        virtualinvoke $r8.<android.webkit.CallbackProxy: void onReceivedSslError(android.webkit.SslErrorHandler,android.net.http.SslError)>($r0, $r4);
+
+     label6:
+        $z0 = 0;
+
+        goto label3;
+
+     label7:
+        $r9 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r9;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label4 to label6 with label7;
+    }
+
+    public void cancel()
+    {
+        android.webkit.SslErrorHandler $r0;
+        android.os.Message $r1;
+
+        $r0 := @this: android.webkit.SslErrorHandler;
+
+        $r1 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,int,int)>(100, 0, 0);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r1);
+
+        return;
+    }
+
+    void clear()
+    {
+        android.webkit.SslErrorHandler $r0;
+        android.os.Bundle $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: android.webkit.SslErrorHandler;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = $r0.<android.webkit.SslErrorHandler: android.os.Bundle mSslPrefTable>;
+
+        virtualinvoke $r1.<android.os.Bundle: void clear()>();
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    void fastProcessQueuedSslErrors()
+    {
+        android.webkit.SslErrorHandler $r0;
+        boolean $z0;
+
+        $r0 := @this: android.webkit.SslErrorHandler;
+
+     label1:
+        $z0 = specialinvoke $r0.<android.webkit.SslErrorHandler: boolean processNextLoader()>();
+
+        if $z0 != 0 goto label1;
+
+        return;
+    }
+
+    public void handleMessage(android.os.Message)
+    {
+        android.webkit.SslErrorHandler $r0;
+        android.os.Message $r1;
+        int $i0;
+        boolean $z0;
+
+        $r0 := @this: android.webkit.SslErrorHandler;
+
+        $r1 := @parameter0: android.os.Message;
+
+        $i0 = $r1.<android.os.Message: int what>;
+
+        lookupswitch($i0)
+        {
+            case 100: goto label2;
+            default: goto label1;
+        };
+
+     label1:
+        return;
+
+     label2:
+        $i0 = $r1.<android.os.Message: int arg1>;
+
+        if $i0 != 1 goto label4;
+
+        $z0 = 1;
+
+     label3:
+        virtualinvoke $r0.<android.webkit.SslErrorHandler: void handleSslErrorResponse(boolean)>($z0);
+
+        virtualinvoke $r0.<android.webkit.SslErrorHandler: void fastProcessQueuedSslErrors()>();
+
+        return;
+
+     label4:
+        $z0 = 0;
+
+        goto label3;
+    }
+
+    void handleSslErrorRequest(android.webkit.LoadListener)
+    {
+        android.webkit.SslErrorHandler $r0;
+        android.webkit.LoadListener $r1;
+        boolean $z0;
+        java.util.LinkedList $r2;
+        java.lang.Object $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: android.webkit.SslErrorHandler;
+
+        $r1 := @parameter0: android.webkit.LoadListener;
+
+        entermonitor $r0;
+
+     label1:
+        $z0 = virtualinvoke $r1.<android.webkit.LoadListener: boolean cancelled()>();
+
+        if $z0 != 0 goto label2;
+
+        $r2 = $r0.<android.webkit.SslErrorHandler: java.util.LinkedList mLoaderQueue>;
+
+        virtualinvoke $r2.<java.util.LinkedList: boolean offer(java.lang.Object)>($r1);
+
+        $r2 = $r0.<android.webkit.SslErrorHandler: java.util.LinkedList mLoaderQueue>;
+
+        $r3 = virtualinvoke $r2.<java.util.LinkedList: java.lang.Object peek()>();
+
+        if $r1 != $r3 goto label2;
+
+        virtualinvoke $r0.<android.webkit.SslErrorHandler: void fastProcessQueuedSslErrors()>();
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    void handleSslErrorResponse(boolean)
+    {
+        android.webkit.SslErrorHandler $r0;
+        boolean $z0, $z1;
+        java.util.LinkedList $r1;
+        java.lang.Object $r2;
+        android.webkit.LoadListener $r3;
+        android.net.http.SslError $r4;
+        int $i0, $i1;
+        java.lang.String $r5;
+        android.os.Bundle $r6;
+        java.lang.Integer $r7;
+        java.lang.Throwable $r8;
+
+        $r0 := @this: android.webkit.SslErrorHandler;
+
+        $z0 := @parameter0: boolean;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = $r0.<android.webkit.SslErrorHandler: java.util.LinkedList mLoaderQueue>;
+
+        $r2 = virtualinvoke $r1.<java.util.LinkedList: java.lang.Object poll()>();
+
+        $r3 = (android.webkit.LoadListener) $r2;
+
+        $z1 = virtualinvoke $r3.<android.webkit.LoadListener: boolean cancelled()>();
+
+        if $z1 != 0 goto label4;
+
+        if $z0 == 0 goto label3;
+
+        $r4 = virtualinvoke $r3.<android.webkit.LoadListener: android.net.http.SslError sslError()>();
+
+        $i0 = virtualinvoke $r4.<android.net.http.SslError: int getPrimaryError()>();
+
+        $r5 = virtualinvoke $r3.<android.webkit.LoadListener: java.lang.String host()>();
+
+        $r6 = $r0.<android.webkit.SslErrorHandler: android.os.Bundle mSslPrefTable>;
+
+        $z1 = virtualinvoke $r6.<android.os.Bundle: boolean containsKey(java.lang.String)>($r5);
+
+        if $z1 == 0 goto label2;
+
+        $r6 = $r0.<android.webkit.SslErrorHandler: android.os.Bundle mSslPrefTable>;
+
+        $i1 = virtualinvoke $r6.<android.os.Bundle: int getInt(java.lang.String)>($r5);
+
+        if $i0 <= $i1 goto label3;
+
+     label2:
+        $r6 = $r0.<android.webkit.SslErrorHandler: android.os.Bundle mSslPrefTable>;
+
+        $r7 = new java.lang.Integer;
+
+        specialinvoke $r7.<java.lang.Integer: void <init>(int)>($i0);
+
+        $i0 = virtualinvoke $r7.<java.lang.Integer: int intValue()>();
+
+        virtualinvoke $r6.<android.os.Bundle: void putInt(java.lang.String,int)>($r5, $i0);
+
+     label3:
+        virtualinvoke $r3.<android.webkit.LoadListener: void handleSslErrorResponse(boolean)>($z0);
+
+     label4:
+        exitmonitor $r0;
+
+        return;
+
+     label5:
+        $r8 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r8;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+    }
+
+    public void proceed()
+    {
+        android.webkit.SslErrorHandler $r0;
+        android.os.Message $r1;
+
+        $r0 := @this: android.webkit.SslErrorHandler;
+
+        $r1 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,int,int)>(100, 1, 0);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r1);
+
+        return;
+    }
+
+    boolean restoreState(android.os.Bundle)
+    {
+        android.webkit.SslErrorHandler $r0;
+        android.os.Bundle $r1;
+        boolean $z0;
+
+        $r0 := @this: android.webkit.SslErrorHandler;
+
+        $r1 := @parameter0: android.os.Bundle;
+
+        if $r1 == null goto label2;
+
+        $z0 = 1;
+
+     label1:
+        if $z0 == 0 goto label3;
+
+        $z0 = virtualinvoke $r1.<android.os.Bundle: boolean containsKey(java.lang.String)>("ssl-error-handler");
+
+        if $z0 == 0 goto label4;
+
+        $r1 = virtualinvoke $r1.<android.os.Bundle: android.os.Bundle getBundle(java.lang.String)>("ssl-error-handler");
+
+        $r0.<android.webkit.SslErrorHandler: android.os.Bundle mSslPrefTable> = $r1;
+
+        return $z0;
+
+     label2:
+        $z0 = 0;
+
+        goto label1;
+
+     label3:
+        return $z0;
+
+     label4:
+        return $z0;
+    }
+
+    boolean saveState(android.os.Bundle)
+    {
+        android.webkit.SslErrorHandler $r0;
+        android.os.Bundle $r1, $r2;
+        boolean $z0;
+
+        $r0 := @this: android.webkit.SslErrorHandler;
+
+        $r1 := @parameter0: android.os.Bundle;
+
+        if $r1 == null goto label2;
+
+        $z0 = 1;
+
+     label1:
+        if $z0 == 0 goto label3;
+
+        $r2 = $r0.<android.webkit.SslErrorHandler: android.os.Bundle mSslPrefTable>;
+
+        virtualinvoke $r1.<android.os.Bundle: void putBundle(java.lang.String,android.os.Bundle)>("ssl-error-handler", $r2);
+
+        return $z0;
+
+     label2:
+        $z0 = 0;
+
+        goto label1;
+
+     label3:
+        return $z0;
+    }
+
+    public static void <clinit>()
+    {
+        <android.webkit.SslErrorHandler: java.lang.String LOGTAG> = "network";
+
+        return;
+    }
+}

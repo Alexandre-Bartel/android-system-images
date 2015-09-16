@@ -1,0 +1,628 @@
+public class android.bluetooth.ScoSocket extends java.lang.Object
+{
+    private static final boolean DBG;
+    public static final int STATE_ACCEPT;
+    public static final int STATE_CLOSED;
+    public static final int STATE_CONNECTED;
+    public static final int STATE_CONNECTING;
+    public static final int STATE_READY;
+    private static final java.lang.String TAG;
+    private static final boolean VDBG;
+    private int mAcceptedCode;
+    private int mClosedCode;
+    private int mConnectedCode;
+    private android.os.Handler mHandler;
+    private int mNativeData;
+    private int mState;
+    private android.os.PowerManager$WakeLock mWakeLock;
+
+    static void <clinit>()
+    {
+        <android.bluetooth.ScoSocket: java.lang.String TAG> = "ScoSocket";
+
+        <android.bluetooth.ScoSocket: int STATE_READY> = 1;
+
+        <android.bluetooth.ScoSocket: int STATE_CONNECTING> = 3;
+
+        <android.bluetooth.ScoSocket: int STATE_CONNECTED> = 4;
+
+        <android.bluetooth.ScoSocket: int STATE_CLOSED> = 5;
+
+        <android.bluetooth.ScoSocket: int STATE_ACCEPT> = 2;
+
+        <android.bluetooth.ScoSocket: boolean DBG> = 1;
+
+        staticinvoke <android.bluetooth.ScoSocket: void classInitNative()>();
+
+        return;
+    }
+
+    public void <init>(android.os.PowerManager, android.os.Handler, int, int, int)
+    {
+        android.bluetooth.ScoSocket $r0;
+        android.os.PowerManager $r1;
+        android.os.Handler $r2;
+        int $i0, $i1, $i2;
+        android.os.PowerManager$WakeLock $r3;
+
+        $r0 := @this: android.bluetooth.ScoSocket;
+
+        $r1 := @parameter0: android.os.PowerManager;
+
+        $r2 := @parameter1: android.os.Handler;
+
+        $i0 := @parameter2: int;
+
+        $i1 := @parameter3: int;
+
+        $i2 := @parameter4: int;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        specialinvoke $r0.<android.bluetooth.ScoSocket: void initNative()>();
+
+        $r0.<android.bluetooth.ScoSocket: int mState> = 1;
+
+        $r0.<android.bluetooth.ScoSocket: android.os.Handler mHandler> = $r2;
+
+        $r0.<android.bluetooth.ScoSocket: int mAcceptedCode> = $i0;
+
+        $r0.<android.bluetooth.ScoSocket: int mConnectedCode> = $i1;
+
+        $r0.<android.bluetooth.ScoSocket: int mClosedCode> = $i2;
+
+        $r3 = virtualinvoke $r1.<android.os.PowerManager: android.os.PowerManager$WakeLock newWakeLock(int,java.lang.String)>(1, "ScoSocket");
+
+        $r0.<android.bluetooth.ScoSocket: android.os.PowerManager$WakeLock mWakeLock> = $r3;
+
+        $r3 = $r0.<android.bluetooth.ScoSocket: android.os.PowerManager$WakeLock mWakeLock>;
+
+        virtualinvoke $r3.<android.os.PowerManager$WakeLock: void setReferenceCounted(boolean)>(0);
+
+        return;
+    }
+
+    private native boolean acceptNative();
+
+    private void acquireWakeLock()
+    {
+        android.bluetooth.ScoSocket $r0;
+        boolean $z0;
+        android.os.PowerManager$WakeLock $r1;
+
+        $r0 := @this: android.bluetooth.ScoSocket;
+
+        $r1 = $r0.<android.bluetooth.ScoSocket: android.os.PowerManager$WakeLock mWakeLock>;
+
+        $z0 = virtualinvoke $r1.<android.os.PowerManager$WakeLock: boolean isHeld()>();
+
+        if $z0 != 0 goto label1;
+
+        $r1 = $r0.<android.bluetooth.ScoSocket: android.os.PowerManager$WakeLock mWakeLock>;
+
+        virtualinvoke $r1.<android.os.PowerManager$WakeLock: void acquire()>();
+
+        return;
+
+     label1:
+        return;
+    }
+
+    private static native void classInitNative();
+
+    private native void closeNative();
+
+    private native boolean connectNative(java.lang.String);
+
+    private native void destroyNative();
+
+    private native void initNative();
+
+    private void log(java.lang.String)
+    {
+        android.bluetooth.ScoSocket $r0;
+        java.lang.String $r1;
+
+        $r0 := @this: android.bluetooth.ScoSocket;
+
+        $r1 := @parameter0: java.lang.String;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("ScoSocket", $r1);
+
+        return;
+    }
+
+    private void onAccepted(int)
+    {
+        android.bluetooth.ScoSocket $r0;
+        int $i0, $i1;
+        java.lang.StringBuilder $r1;
+        java.lang.String $r2;
+        android.os.Handler $r3;
+        android.os.Message $r4;
+        java.lang.Throwable $r5;
+
+        $r0 := @this: android.bluetooth.ScoSocket;
+
+        $i0 := @parameter0: int;
+
+        entermonitor $r0;
+
+     label1:
+        $i1 = $r0.<android.bluetooth.ScoSocket: int mState>;
+
+        if $i1 == 2 goto label3;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Strange state ");
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r0);
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<android.bluetooth.ScoSocket: void log(java.lang.String)>($r2);
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        if $i0 < 0 goto label8;
+
+     label4:
+        $r0.<android.bluetooth.ScoSocket: int mState> = 4;
+
+     label5:
+        $r3 = $r0.<android.bluetooth.ScoSocket: android.os.Handler mHandler>;
+
+        $i1 = $r0.<android.bluetooth.ScoSocket: int mAcceptedCode>;
+
+        $i0 = $r0.<android.bluetooth.ScoSocket: int mState>;
+
+        $r4 = virtualinvoke $r3.<android.os.Handler: android.os.Message obtainMessage(int,int,int,java.lang.Object)>($i1, $i0, -1, $r0);
+
+        virtualinvoke $r4.<android.os.Message: void sendToTarget()>();
+
+     label6:
+        goto label2;
+
+     label7:
+        $r5 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r5;
+
+     label8:
+        $r0.<android.bluetooth.ScoSocket: int mState> = 5;
+
+     label9:
+        goto label5;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label4 to label6 with label7;
+        catch java.lang.Throwable from label8 to label9 with label7;
+    }
+
+    private void onClosed()
+    {
+        android.bluetooth.ScoSocket $r0;
+        java.lang.StringBuilder $r1;
+        java.lang.String $r2;
+        int $i0, $i1;
+        android.os.Handler $r3;
+        android.os.Message $r4;
+        java.lang.Throwable $r5;
+
+        $r0 := @this: android.bluetooth.ScoSocket;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("onClosed() ");
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r0);
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<android.bluetooth.ScoSocket: void log(java.lang.String)>($r2);
+
+        $i0 = $r0.<android.bluetooth.ScoSocket: int mState>;
+
+        if $i0 == 5 goto label2;
+
+        $r0.<android.bluetooth.ScoSocket: int mState> = 5;
+
+        $r3 = $r0.<android.bluetooth.ScoSocket: android.os.Handler mHandler>;
+
+        $i0 = $r0.<android.bluetooth.ScoSocket: int mClosedCode>;
+
+        $i1 = $r0.<android.bluetooth.ScoSocket: int mState>;
+
+        $r4 = virtualinvoke $r3.<android.os.Handler: android.os.Message obtainMessage(int,int,int,java.lang.Object)>($i0, $i1, -1, $r0);
+
+        virtualinvoke $r4.<android.os.Message: void sendToTarget()>();
+
+        specialinvoke $r0.<android.bluetooth.ScoSocket: void releaseWakeLock()>();
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r5 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    private void onConnected(int)
+    {
+        android.bluetooth.ScoSocket $r0;
+        int $i0, $i1;
+        java.lang.StringBuilder $r1;
+        java.lang.String $r2;
+        android.os.Handler $r3;
+        android.os.Message $r4;
+        java.lang.Throwable $r5;
+
+        $r0 := @this: android.bluetooth.ScoSocket;
+
+        $i0 := @parameter0: int;
+
+        entermonitor $r0;
+
+     label1:
+        $i1 = $r0.<android.bluetooth.ScoSocket: int mState>;
+
+        if $i1 == 3 goto label3;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Strange state, closing ");
+
+        $i0 = $r0.<android.bluetooth.ScoSocket: int mState>;
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r0);
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<android.bluetooth.ScoSocket: void log(java.lang.String)>($r2);
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        if $i0 < 0 goto label8;
+
+     label4:
+        $r0.<android.bluetooth.ScoSocket: int mState> = 4;
+
+     label5:
+        $r3 = $r0.<android.bluetooth.ScoSocket: android.os.Handler mHandler>;
+
+        $i1 = $r0.<android.bluetooth.ScoSocket: int mConnectedCode>;
+
+        $i0 = $r0.<android.bluetooth.ScoSocket: int mState>;
+
+        $r4 = virtualinvoke $r3.<android.os.Handler: android.os.Message obtainMessage(int,int,int,java.lang.Object)>($i1, $i0, -1, $r0);
+
+        virtualinvoke $r4.<android.os.Message: void sendToTarget()>();
+
+        specialinvoke $r0.<android.bluetooth.ScoSocket: void releaseWakeLockNow()>();
+
+     label6:
+        goto label2;
+
+     label7:
+        $r5 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r5;
+
+     label8:
+        $r0.<android.bluetooth.ScoSocket: int mState> = 5;
+
+     label9:
+        goto label5;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label4 to label6 with label7;
+        catch java.lang.Throwable from label8 to label9 with label7;
+    }
+
+    private void releaseWakeLock()
+    {
+        android.bluetooth.ScoSocket $r0;
+        boolean $z0;
+        android.os.PowerManager$WakeLock $r1;
+
+        $r0 := @this: android.bluetooth.ScoSocket;
+
+        $r1 = $r0.<android.bluetooth.ScoSocket: android.os.PowerManager$WakeLock mWakeLock>;
+
+        $z0 = virtualinvoke $r1.<android.os.PowerManager$WakeLock: boolean isHeld()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = $r0.<android.bluetooth.ScoSocket: android.os.PowerManager$WakeLock mWakeLock>;
+
+        virtualinvoke $r1.<android.os.PowerManager$WakeLock: void acquire(long)>(2000L);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    private void releaseWakeLockNow()
+    {
+        android.bluetooth.ScoSocket $r0;
+        boolean $z0;
+        android.os.PowerManager$WakeLock $r1;
+
+        $r0 := @this: android.bluetooth.ScoSocket;
+
+        $r1 = $r0.<android.bluetooth.ScoSocket: android.os.PowerManager$WakeLock mWakeLock>;
+
+        $z0 = virtualinvoke $r1.<android.os.PowerManager$WakeLock: boolean isHeld()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = $r0.<android.bluetooth.ScoSocket: android.os.PowerManager$WakeLock mWakeLock>;
+
+        virtualinvoke $r1.<android.os.PowerManager$WakeLock: void release()>();
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public boolean accept()
+    {
+        android.bluetooth.ScoSocket $r0;
+        boolean $z0;
+        int $i0;
+        java.lang.Throwable $r1;
+
+        $r0 := @this: android.bluetooth.ScoSocket;
+
+        entermonitor $r0;
+
+     label1:
+        $i0 = $r0.<android.bluetooth.ScoSocket: int mState>;
+
+        if $i0 == 1 goto label4;
+
+        specialinvoke $r0.<android.bluetooth.ScoSocket: void log(java.lang.String)>("Bad state");
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        exitmonitor $r0;
+
+        return $z0;
+
+     label4:
+        $z0 = specialinvoke $r0.<android.bluetooth.ScoSocket: boolean acceptNative()>();
+
+        if $z0 == 0 goto label5;
+
+        $r0.<android.bluetooth.ScoSocket: int mState> = 2;
+
+        $z0 = 1;
+
+        goto label3;
+
+     label5:
+        $r0.<android.bluetooth.ScoSocket: int mState> = 5;
+
+     label6:
+        $z0 = 0;
+
+        goto label3;
+
+     label7:
+        $r1 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label4 to label6 with label7;
+    }
+
+    public void close()
+    {
+        android.bluetooth.ScoSocket $r0;
+        java.lang.StringBuilder $r1;
+        int $i0;
+        java.lang.String $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.bluetooth.ScoSocket;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r0);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" SCO OBJECT close() mState = ");
+
+        $i0 = $r0.<android.bluetooth.ScoSocket: int mState>;
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<android.bluetooth.ScoSocket: void log(java.lang.String)>($r2);
+
+        specialinvoke $r0.<android.bluetooth.ScoSocket: void acquireWakeLock()>();
+
+        $r0.<android.bluetooth.ScoSocket: int mState> = 5;
+
+        specialinvoke $r0.<android.bluetooth.ScoSocket: void closeNative()>();
+
+        specialinvoke $r0.<android.bluetooth.ScoSocket: void releaseWakeLock()>();
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public boolean connect(java.lang.String)
+    {
+        android.bluetooth.ScoSocket $r0;
+        java.lang.String $r1;
+        boolean $z0;
+        int $i0;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: android.bluetooth.ScoSocket;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        $i0 = $r0.<android.bluetooth.ScoSocket: int mState>;
+
+        if $i0 == 1 goto label4;
+
+        specialinvoke $r0.<android.bluetooth.ScoSocket: void log(java.lang.String)>("connect(): Bad state");
+
+     label2:
+        $z0 = 0;
+
+     label3:
+        exitmonitor $r0;
+
+        return $z0;
+
+     label4:
+        specialinvoke $r0.<android.bluetooth.ScoSocket: void acquireWakeLock()>();
+
+        $z0 = specialinvoke $r0.<android.bluetooth.ScoSocket: boolean connectNative(java.lang.String)>($r1);
+
+        if $z0 == 0 goto label5;
+
+        $r0.<android.bluetooth.ScoSocket: int mState> = 3;
+
+        $z0 = 1;
+
+        goto label3;
+
+     label5:
+        $r0.<android.bluetooth.ScoSocket: int mState> = 5;
+
+        specialinvoke $r0.<android.bluetooth.ScoSocket: void releaseWakeLockNow()>();
+
+     label6:
+        $z0 = 0;
+
+        goto label3;
+
+     label7:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label4 to label6 with label7;
+    }
+
+    protected void finalize() throws java.lang.Throwable
+    {
+        android.bluetooth.ScoSocket $r0;
+        java.lang.Throwable $r1;
+
+        $r0 := @this: android.bluetooth.ScoSocket;
+
+     label1:
+        specialinvoke $r0.<android.bluetooth.ScoSocket: void destroyNative()>();
+
+        specialinvoke $r0.<android.bluetooth.ScoSocket: void releaseWakeLockNow()>();
+
+     label2:
+        specialinvoke $r0.<java.lang.Object: void finalize()>();
+
+        return;
+
+     label3:
+        $r1 := @caughtexception;
+
+        specialinvoke $r0.<java.lang.Object: void finalize()>();
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public int getState()
+    {
+        android.bluetooth.ScoSocket $r0;
+        java.lang.Throwable $r1;
+        int i0;
+
+        $r0 := @this: android.bluetooth.ScoSocket;
+
+        entermonitor $r0;
+
+     label1:
+        i0 = $r0.<android.bluetooth.ScoSocket: int mState>;
+
+     label2:
+        exitmonitor $r0;
+
+        return i0;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+}

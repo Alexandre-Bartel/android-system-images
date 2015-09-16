@@ -1,0 +1,867 @@
+public class android.os.MessageQueue extends java.lang.Object
+{
+    private final java.util.ArrayList mIdleHandlers;
+    android.os.Message mMessages;
+    boolean mQuitAllowed;
+    private boolean mQuiting;
+
+    void <init>()
+    {
+        android.os.MessageQueue $r0;
+        java.util.ArrayList $r1;
+
+        $r0 := @this: android.os.MessageQueue;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        $r0.<android.os.MessageQueue: java.util.ArrayList mIdleHandlers> = $r1;
+
+        $r0.<android.os.MessageQueue: boolean mQuiting> = 0;
+
+        $r0.<android.os.MessageQueue: boolean mQuitAllowed> = 1;
+
+        return;
+    }
+
+    public final void addIdleHandler(android.os.MessageQueue$IdleHandler)
+    {
+        android.os.MessageQueue $r0;
+        android.os.MessageQueue$IdleHandler $r1;
+        java.lang.NullPointerException $r2;
+        java.util.ArrayList $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: android.os.MessageQueue;
+
+        $r1 := @parameter0: android.os.MessageQueue$IdleHandler;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.NullPointerException;
+
+        specialinvoke $r2.<java.lang.NullPointerException: void <init>(java.lang.String)>("Can\'t add a null IdleHandler");
+
+        throw $r2;
+
+     label1:
+        entermonitor $r0;
+
+     label2:
+        $r3 = $r0.<android.os.MessageQueue: java.util.ArrayList mIdleHandlers>;
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>($r1);
+
+        exitmonitor $r0;
+
+     label3:
+        return;
+
+     label4:
+        $r4 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label5:
+        throw $r4;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    final boolean enqueueMessage(android.os.Message, long)
+    {
+        android.os.MessageQueue $r0;
+        android.os.Message $r1, $r7, $r8;
+        long $l0, $l1;
+        java.lang.RuntimeException $r2;
+        byte $b2;
+        android.util.AndroidRuntimeException $r3;
+        java.lang.StringBuilder $r4;
+        java.lang.String $r5;
+        android.os.Handler $r6;
+        boolean $z0;
+        java.lang.Throwable $r9;
+
+        $r0 := @this: android.os.MessageQueue;
+
+        $r1 := @parameter0: android.os.Message;
+
+        $l0 := @parameter1: long;
+
+        $l1 = $r1.<android.os.Message: long when>;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 == 0 goto label01;
+
+        $r3 = new android.util.AndroidRuntimeException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" This message is already in use.");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<android.util.AndroidRuntimeException: void <init>(java.lang.String)>($r5);
+
+        throw $r3;
+
+     label01:
+        $r6 = $r1.<android.os.Message: android.os.Handler target>;
+
+        if $r6 != null goto label02;
+
+        $z0 = $r0.<android.os.MessageQueue: boolean mQuitAllowed>;
+
+        if $z0 != 0 goto label02;
+
+        $r2 = new java.lang.RuntimeException;
+
+        specialinvoke $r2.<java.lang.RuntimeException: void <init>(java.lang.String)>("Main thread not allowed to quit");
+
+        throw $r2;
+
+     label02:
+        entermonitor $r0;
+
+     label03:
+        $z0 = $r0.<android.os.MessageQueue: boolean mQuiting>;
+
+        if $z0 == 0 goto label05;
+
+        $r2 = new java.lang.RuntimeException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = $r1.<android.os.Message: android.os.Handler target>;
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r6);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" sending message to a Handler on a dead thread");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.RuntimeException: void <init>(java.lang.String)>($r5);
+
+        $r5 = virtualinvoke $r2.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String,java.lang.Throwable)>("MessageQueue", $r5, $r2);
+
+        exitmonitor $r0;
+
+     label04:
+        return 0;
+
+     label05:
+        $r6 = $r1.<android.os.Message: android.os.Handler target>;
+
+        if $r6 != null goto label06;
+
+        $r0.<android.os.MessageQueue: boolean mQuiting> = 1;
+
+     label06:
+        $r1.<android.os.Message: long when> = $l0;
+
+        $r7 = $r0.<android.os.MessageQueue: android.os.Message mMessages>;
+
+        if $r7 == null goto label07;
+
+        $b2 = $l0 cmp 0L;
+
+        if $b2 == 0 goto label07;
+
+        $l1 = $r7.<android.os.Message: long when>;
+
+        $b2 = $l0 cmp $l1;
+
+        if $b2 >= 0 goto label10;
+
+     label07:
+        $r1.<android.os.Message: android.os.Message next> = $r7;
+
+        $r0.<android.os.MessageQueue: android.os.Message mMessages> = $r1;
+
+        virtualinvoke $r0.<java.lang.Object: void notify()>();
+
+     label08:
+        exitmonitor $r0;
+
+     label09:
+        return 1;
+
+     label10:
+        $r8 = null;
+
+     label11:
+        if $r7 == null goto label12;
+
+        $l1 = $r7.<android.os.Message: long when>;
+
+        $b2 = $l1 cmp $l0;
+
+        if $b2 > 0 goto label12;
+
+        $r8 = $r7;
+
+        $r7 = $r7.<android.os.Message: android.os.Message next>;
+
+        goto label11;
+
+     label12:
+        $r7 = $r8.<android.os.Message: android.os.Message next>;
+
+        $r1.<android.os.Message: android.os.Message next> = $r7;
+
+        $r8.<android.os.Message: android.os.Message next> = $r1;
+
+        virtualinvoke $r0.<java.lang.Object: void notify()>();
+
+        goto label08;
+
+     label13:
+        $r9 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label14:
+        throw $r9;
+
+        catch java.lang.Throwable from label03 to label04 with label13;
+        catch java.lang.Throwable from label05 to label09 with label13;
+        catch java.lang.Throwable from label10 to label14 with label13;
+    }
+
+    final android.os.Message next()
+    {
+        android.os.MessageQueue $r0;
+        java.lang.Object[] $r1, $r3;
+        java.lang.Object $r2;
+        int $i0, $i2;
+        boolean $z0, $z1, $z2;
+        long $l1, $l3;
+        android.os.Message $r4;
+        java.util.ArrayList $r5;
+        android.os.MessageQueue$IdleHandler $r6;
+        java.lang.Throwable $r7, $r8, $r9, $r10;
+        byte $b4;
+        java.lang.InterruptedException $r11;
+
+        $r0 := @this: android.os.MessageQueue;
+
+        $z0 = 1;
+
+     label01:
+        $r3 = null;
+
+        entermonitor $r0;
+
+     label02:
+        $l1 = staticinvoke <android.os.SystemClock: long uptimeMillis()>();
+
+        $r4 = virtualinvoke $r0.<android.os.MessageQueue: android.os.Message pullNextLocked(long)>($l1);
+
+        if $r4 == null goto label04;
+
+        exitmonitor $r0;
+
+     label03:
+        return $r4;
+
+     label04:
+        if $z0 == 0 goto label05;
+
+        $r5 = $r0.<android.os.MessageQueue: java.util.ArrayList mIdleHandlers>;
+
+        $i0 = virtualinvoke $r5.<java.util.ArrayList: int size()>();
+
+        if $i0 <= 0 goto label05;
+
+        $r5 = $r0.<android.os.MessageQueue: java.util.ArrayList mIdleHandlers>;
+
+        $r3 = virtualinvoke $r5.<java.util.ArrayList: java.lang.Object[] toArray()>();
+
+     label05:
+        exitmonitor $r0;
+
+     label06:
+        $z1 = 0;
+
+        if $r3 == null goto label19;
+
+        $r1 = $r3;
+
+        $i0 = lengthof $r3;
+
+        $i2 = 0;
+
+     label07:
+        if $i2 >= $i0 goto label19;
+
+        $r2 = $r1[$i2];
+
+        $z2 = 0;
+
+        $z1 = 1;
+
+     label08:
+        $r6 = (android.os.MessageQueue$IdleHandler) $r2;
+
+        $z2 = interfaceinvoke $r6.<android.os.MessageQueue$IdleHandler: boolean queueIdle()>();
+
+     label09:
+        if $z2 != 0 goto label11;
+
+        entermonitor $r0;
+
+     label10:
+        $r5 = $r0.<android.os.MessageQueue: java.util.ArrayList mIdleHandlers>;
+
+        virtualinvoke $r5.<java.util.ArrayList: boolean remove(java.lang.Object)>($r2);
+
+        exitmonitor $r0;
+
+     label11:
+        $i2 = $i2 + 1;
+
+        goto label07;
+
+     label12:
+        $r7 := @caughtexception;
+
+     label13:
+        exitmonitor $r0;
+
+     label14:
+        throw $r7;
+
+     label15:
+        $r8 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("MessageQueue", "IdleHandler threw exception", $r8);
+
+        staticinvoke <com.android.internal.os.RuntimeInit: void crash(java.lang.String,java.lang.Throwable)>("MessageQueue", $r8);
+
+        goto label09;
+
+     label16:
+        $r9 := @caughtexception;
+
+     label17:
+        exitmonitor $r0;
+
+     label18:
+        throw $r9;
+
+     label19:
+        if $z1 == 0 goto label20;
+
+        $z0 = 0;
+
+        goto label01;
+
+     label20:
+        entermonitor $r0;
+
+     label21:
+        $r4 = $r0.<android.os.MessageQueue: android.os.Message mMessages>;
+
+        if $r4 == null goto label29;
+
+        $r4 = $r0.<android.os.MessageQueue: android.os.Message mMessages>;
+
+        $l3 = $r4.<android.os.Message: long when>;
+
+        $l3 = $l3 - $l1;
+
+        $b4 = $l3 cmp 0L;
+
+        if $b4 <= 0 goto label25;
+
+     label22:
+        staticinvoke <android.os.Binder: void flushPendingCommands()>();
+
+     label23:
+        $r4 = $r0.<android.os.MessageQueue: android.os.Message mMessages>;
+
+        $l3 = $r4.<android.os.Message: long when>;
+
+     label24:
+        $l1 = $l3 - $l1;
+
+        virtualinvoke $r0.<java.lang.Object: void wait(long)>($l1);
+
+     label25:
+        exitmonitor $r0;
+
+     label26:
+        goto label01;
+
+     label27:
+        $r10 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label28:
+        throw $r10;
+
+     label29:
+        staticinvoke <android.os.Binder: void flushPendingCommands()>();
+
+        virtualinvoke $r0.<java.lang.Object: void wait()>();
+
+     label30:
+        goto label25;
+
+     label31:
+        $r11 := @caughtexception;
+
+        goto label25;
+
+        catch java.lang.Throwable from label02 to label03 with label12;
+        catch java.lang.Throwable from label04 to label06 with label12;
+        catch java.lang.Throwable from label08 to label09 with label15;
+        catch java.lang.Throwable from label10 to label11 with label16;
+        catch java.lang.Throwable from label13 to label14 with label12;
+        catch java.lang.Throwable from label17 to label18 with label16;
+        catch java.lang.InterruptedException from label22 to label23 with label31;
+        catch java.lang.InterruptedException from label24 to label25 with label31;
+        catch java.lang.Throwable from label21 to label25 with label27;
+        catch java.lang.Throwable from label25 to label26 with label27;
+        catch java.lang.Throwable from label27 to label28 with label27;
+        catch java.lang.InterruptedException from label29 to label30 with label31;
+        catch java.lang.Throwable from label29 to label30 with label27;
+    }
+
+    void poke()
+    {
+        android.os.MessageQueue $r0;
+        java.lang.Throwable $r1;
+
+        $r0 := @this: android.os.MessageQueue;
+
+        entermonitor $r0;
+
+     label1:
+        virtualinvoke $r0.<java.lang.Object: void notify()>();
+
+        exitmonitor $r0;
+
+     label2:
+        return;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label4:
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    final android.os.Message pullNextLocked(long)
+    {
+        android.os.MessageQueue $r0;
+        long $l0, $l1;
+        android.os.Message $r1, $r2;
+        byte $b2;
+
+        $r0 := @this: android.os.MessageQueue;
+
+        $l0 := @parameter0: long;
+
+        $r1 = $r0.<android.os.MessageQueue: android.os.Message mMessages>;
+
+        if $r1 == null goto label1;
+
+        $l1 = $r1.<android.os.Message: long when>;
+
+        $b2 = $l0 cmp $l1;
+
+        if $b2 < 0 goto label1;
+
+        $r2 = $r1.<android.os.Message: android.os.Message next>;
+
+        $r0.<android.os.MessageQueue: android.os.Message mMessages> = $r2;
+
+        return $r1;
+
+     label1:
+        return null;
+    }
+
+    final void removeCallbacksAndMessages(android.os.Handler, java.lang.Object)
+    {
+        android.os.MessageQueue $r0;
+        android.os.Handler $r1, $r5;
+        java.lang.Object $r2, $r6;
+        android.os.Message $r3, $r4, $r7;
+        java.lang.Throwable $r8;
+
+        $r0 := @this: android.os.MessageQueue;
+
+        $r1 := @parameter0: android.os.Handler;
+
+        $r2 := @parameter1: java.lang.Object;
+
+        entermonitor $r0;
+
+     label01:
+        $r4 = $r0.<android.os.MessageQueue: android.os.Message mMessages>;
+
+     label02:
+        if $r4 == null goto label04;
+
+        $r5 = $r4.<android.os.Message: android.os.Handler target>;
+
+        if $r5 != $r1 goto label04;
+
+        if $r2 == null goto label03;
+
+        $r6 = $r4.<android.os.Message: java.lang.Object obj>;
+
+        if $r6 != $r2 goto label04;
+
+     label03:
+        $r3 = $r4.<android.os.Message: android.os.Message next>;
+
+        $r0.<android.os.MessageQueue: android.os.Message mMessages> = $r3;
+
+        virtualinvoke $r4.<android.os.Message: void recycle()>();
+
+        $r4 = $r3;
+
+        goto label02;
+
+     label04:
+        if $r4 == null goto label09;
+
+        $r7 = $r4.<android.os.Message: android.os.Message next>;
+
+        if $r7 == null goto label08;
+
+        $r5 = $r7.<android.os.Message: android.os.Handler target>;
+
+        if $r5 != $r1 goto label08;
+
+        if $r2 == null goto label05;
+
+        $r6 = $r7.<android.os.Message: java.lang.Object obj>;
+
+        if $r6 != $r2 goto label08;
+
+     label05:
+        $r3 = $r7.<android.os.Message: android.os.Message next>;
+
+        virtualinvoke $r7.<android.os.Message: void recycle()>();
+
+        $r4.<android.os.Message: android.os.Message next> = $r3;
+
+        goto label04;
+
+     label06:
+        $r8 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label07:
+        throw $r8;
+
+     label08:
+        $r4 = $r7;
+
+        goto label04;
+
+     label09:
+        exitmonitor $r0;
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label01 to label07 with label06;
+        catch java.lang.Throwable from label09 to label10 with label06;
+    }
+
+    public final void removeIdleHandler(android.os.MessageQueue$IdleHandler)
+    {
+        android.os.MessageQueue $r0;
+        android.os.MessageQueue$IdleHandler $r1;
+        java.util.ArrayList $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.os.MessageQueue;
+
+        $r1 := @parameter0: android.os.MessageQueue$IdleHandler;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.os.MessageQueue: java.util.ArrayList mIdleHandlers>;
+
+        virtualinvoke $r2.<java.util.ArrayList: boolean remove(java.lang.Object)>($r1);
+
+        exitmonitor $r0;
+
+     label2:
+        return;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label4:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    final void removeMessages(android.os.Handler, java.lang.Runnable, java.lang.Object)
+    {
+        android.os.MessageQueue $r0;
+        android.os.Handler $r1, $r6;
+        java.lang.Runnable $r2, $r7;
+        java.lang.Object $r3, $r8;
+        android.os.Message $r4, $r5, $r9;
+        java.lang.Throwable $r10;
+
+        $r0 := @this: android.os.MessageQueue;
+
+        $r1 := @parameter0: android.os.Handler;
+
+        $r2 := @parameter1: java.lang.Runnable;
+
+        $r3 := @parameter2: java.lang.Object;
+
+        if $r2 != null goto label01;
+
+        return;
+
+     label01:
+        entermonitor $r0;
+
+     label02:
+        $r5 = $r0.<android.os.MessageQueue: android.os.Message mMessages>;
+
+     label03:
+        if $r5 == null goto label05;
+
+        $r6 = $r5.<android.os.Message: android.os.Handler target>;
+
+        if $r6 != $r1 goto label05;
+
+        $r7 = $r5.<android.os.Message: java.lang.Runnable callback>;
+
+        if $r7 != $r2 goto label05;
+
+        if $r3 == null goto label04;
+
+        $r8 = $r5.<android.os.Message: java.lang.Object obj>;
+
+        if $r8 != $r3 goto label05;
+
+     label04:
+        $r4 = $r5.<android.os.Message: android.os.Message next>;
+
+        $r0.<android.os.MessageQueue: android.os.Message mMessages> = $r4;
+
+        virtualinvoke $r5.<android.os.Message: void recycle()>();
+
+        $r5 = $r4;
+
+        goto label03;
+
+     label05:
+        if $r5 == null goto label10;
+
+        $r9 = $r5.<android.os.Message: android.os.Message next>;
+
+        if $r9 == null goto label09;
+
+        $r6 = $r9.<android.os.Message: android.os.Handler target>;
+
+        if $r6 != $r1 goto label09;
+
+        $r7 = $r9.<android.os.Message: java.lang.Runnable callback>;
+
+        if $r7 != $r2 goto label09;
+
+        if $r3 == null goto label06;
+
+        $r8 = $r9.<android.os.Message: java.lang.Object obj>;
+
+        if $r8 != $r3 goto label09;
+
+     label06:
+        $r4 = $r9.<android.os.Message: android.os.Message next>;
+
+        virtualinvoke $r9.<android.os.Message: void recycle()>();
+
+        $r5.<android.os.Message: android.os.Message next> = $r4;
+
+        goto label05;
+
+     label07:
+        $r10 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label08:
+        throw $r10;
+
+     label09:
+        $r5 = $r9;
+
+        goto label05;
+
+     label10:
+        exitmonitor $r0;
+
+     label11:
+        return;
+
+        catch java.lang.Throwable from label02 to label08 with label07;
+        catch java.lang.Throwable from label10 to label11 with label07;
+    }
+
+    final boolean removeMessages(android.os.Handler, int, java.lang.Object, boolean)
+    {
+        android.os.MessageQueue $r0;
+        android.os.Handler $r1, $r5;
+        int $i0, $i1;
+        java.lang.Object $r2, $r6;
+        boolean $z0, $z1;
+        android.os.Message $r3, $r4, $r7;
+        java.lang.Throwable $r8;
+
+        $r0 := @this: android.os.MessageQueue;
+
+        $r1 := @parameter0: android.os.Handler;
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: java.lang.Object;
+
+        $z0 := @parameter3: boolean;
+
+        entermonitor $r0;
+
+     label01:
+        $r4 = $r0.<android.os.MessageQueue: android.os.Message mMessages>;
+
+        $z1 = 0;
+
+     label02:
+        if $r4 == null goto label07;
+
+        $r5 = $r4.<android.os.Message: android.os.Handler target>;
+
+        if $r5 != $r1 goto label07;
+
+        $i1 = $r4.<android.os.Message: int what>;
+
+        if $i1 != $i0 goto label07;
+
+        if $r2 == null goto label03;
+
+        $r6 = $r4.<android.os.Message: java.lang.Object obj>;
+
+        if $r6 != $r2 goto label07;
+
+     label03:
+        if $z0 != 0 goto label05;
+
+        exitmonitor $r0;
+
+     label04:
+        return 1;
+
+     label05:
+        $z1 = 1;
+
+        $r3 = $r4.<android.os.Message: android.os.Message next>;
+
+        $r0.<android.os.MessageQueue: android.os.Message mMessages> = $r3;
+
+        virtualinvoke $r4.<android.os.Message: void recycle()>();
+
+        $r4 = $r3;
+
+        goto label02;
+
+     label06:
+        $z1 = 1;
+
+        $r3 = $r7.<android.os.Message: android.os.Message next>;
+
+        virtualinvoke $r7.<android.os.Message: void recycle()>();
+
+        $r4.<android.os.Message: android.os.Message next> = $r3;
+
+     label07:
+        if $r4 == null goto label11;
+
+        $r7 = $r4.<android.os.Message: android.os.Message next>;
+
+        if $r7 == null goto label10;
+
+        $r5 = $r7.<android.os.Message: android.os.Handler target>;
+
+        if $r5 != $r1 goto label10;
+
+        $i1 = $r7.<android.os.Message: int what>;
+
+        if $i1 != $i0 goto label10;
+
+        if $r2 == null goto label08;
+
+        $r6 = $r7.<android.os.Message: java.lang.Object obj>;
+
+        if $r6 != $r2 goto label10;
+
+     label08:
+        if $z0 != 0 goto label06;
+
+        exitmonitor $r0;
+
+     label09:
+        return 1;
+
+     label10:
+        $r4 = $r7;
+
+        goto label07;
+
+     label11:
+        exitmonitor $r0;
+
+     label12:
+        return $z1;
+
+     label13:
+        $r8 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label14:
+        throw $r8;
+
+        catch java.lang.Throwable from label01 to label04 with label13;
+        catch java.lang.Throwable from label05 to label09 with label13;
+        catch java.lang.Throwable from label10 to label12 with label13;
+        catch java.lang.Throwable from label13 to label14 with label13;
+    }
+}

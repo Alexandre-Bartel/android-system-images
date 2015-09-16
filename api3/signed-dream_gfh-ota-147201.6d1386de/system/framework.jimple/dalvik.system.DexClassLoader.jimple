@@ -1,0 +1,647 @@
+public class dalvik.system.DexClassLoader extends java.lang.ClassLoader
+{
+    private static final boolean VERBOSE_DEBUG;
+    private final java.lang.String mDexOutputPath;
+    private dalvik.system.DexFile[] mDexs;
+    private java.io.File[] mFiles;
+    private boolean mInitialized;
+    private java.lang.String[] mLibPaths;
+    private final java.lang.String mRawDexPath;
+    private final java.lang.String mRawLibPath;
+    private java.util.zip.ZipFile[] mZips;
+
+    public void <init>(java.lang.String, java.lang.String, java.lang.String, java.lang.ClassLoader)
+    {
+        dalvik.system.DexClassLoader $r0;
+        java.lang.String $r1, $r2, $r3;
+        java.lang.ClassLoader $r4;
+        java.lang.NullPointerException $r5;
+
+        $r0 := @this: dalvik.system.DexClassLoader;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r4 := @parameter3: java.lang.ClassLoader;
+
+        specialinvoke $r0.<java.lang.ClassLoader: void <init>(java.lang.ClassLoader)>($r4);
+
+        if $r1 == null goto label1;
+
+        if $r2 != null goto label2;
+
+     label1:
+        $r5 = new java.lang.NullPointerException;
+
+        specialinvoke $r5.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r5;
+
+     label2:
+        $r0.<dalvik.system.DexClassLoader: java.lang.String mRawDexPath> = $r1;
+
+        $r0.<dalvik.system.DexClassLoader: java.lang.String mDexOutputPath> = $r2;
+
+        $r0.<dalvik.system.DexClassLoader: java.lang.String mRawLibPath> = $r3;
+
+        return;
+    }
+
+    private void ensureInit()
+    {
+        dalvik.system.DexClassLoader $r0;
+        java.io.File $r1;
+        boolean $z0;
+        java.lang.String $r2, $r10, $r15, $r16, $r17;
+        java.lang.String[] $r3;
+        int $i0, $i1;
+        java.io.File[] $r4;
+        java.util.zip.ZipFile[] $r5;
+        dalvik.system.DexFile[] $r6;
+        java.io.PrintStream $r7;
+        java.lang.StringBuilder $r8;
+        java.util.zip.ZipFile $r9;
+        dalvik.system.DexFile $r11;
+        java.io.IOException $r12, $r14;
+        java.lang.Throwable $r13;
+
+        $r0 := @this: dalvik.system.DexClassLoader;
+
+        entermonitor $r0;
+
+     label01:
+        $z0 = $r0.<dalvik.system.DexClassLoader: boolean mInitialized>;
+
+     label02:
+        if $z0 == 0 goto label04;
+
+     label03:
+        exitmonitor $r0;
+
+        return;
+
+     label04:
+        $r0.<dalvik.system.DexClassLoader: boolean mInitialized> = 1;
+
+        $r2 = $r0.<dalvik.system.DexClassLoader: java.lang.String mRawDexPath>;
+
+        $r3 = virtualinvoke $r2.<java.lang.String: java.lang.String[] split(java.lang.String)>(":");
+
+        $i0 = lengthof $r3;
+
+        $r4 = newarray (java.io.File)[$i0];
+
+        $r0.<dalvik.system.DexClassLoader: java.io.File[] mFiles> = $r4;
+
+        $r5 = newarray (java.util.zip.ZipFile)[$i0];
+
+        $r0.<dalvik.system.DexClassLoader: java.util.zip.ZipFile[] mZips> = $r5;
+
+        $r6 = newarray (dalvik.system.DexFile)[$i0];
+
+        $r0.<dalvik.system.DexClassLoader: dalvik.system.DexFile[] mDexs> = $r6;
+
+        $i1 = 0;
+
+     label05:
+        if $i1 >= $i0 goto label22;
+
+        $r7 = <java.lang.System: java.io.PrintStream out>;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("My path is: ");
+
+        $r2 = $r3[$i1];
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r7.<java.io.PrintStream: void println(java.lang.String)>($r2);
+
+        $r1 = new java.io.File;
+
+        $r2 = $r3[$i1];
+
+        specialinvoke $r1.<java.io.File: void <init>(java.lang.String)>($r2);
+
+        $r4 = $r0.<dalvik.system.DexClassLoader: java.io.File[] mFiles>;
+
+        $r4[$i1] = $r1;
+
+        $z0 = virtualinvoke $r1.<java.io.File: boolean isFile()>();
+
+     label06:
+        if $z0 == 0 goto label15;
+
+     label07:
+        $r5 = $r0.<dalvik.system.DexClassLoader: java.util.zip.ZipFile[] mZips>;
+
+        $r9 = new java.util.zip.ZipFile;
+
+     label08:
+        specialinvoke $r9.<java.util.zip.ZipFile: void <init>(java.io.File)>($r1);
+
+     label09:
+        $r5[$i1] = $r9;
+
+     label10:
+        $r2 = $r3[$i1];
+
+        $r10 = $r0.<dalvik.system.DexClassLoader: java.lang.String mDexOutputPath>;
+
+     label11:
+        $r2 = staticinvoke <dalvik.system.DexClassLoader: java.lang.String generateOutputName(java.lang.String,java.lang.String)>($r2, $r10);
+
+     label12:
+        $r6 = $r0.<dalvik.system.DexClassLoader: dalvik.system.DexFile[] mDexs>;
+
+     label13:
+        $r10 = $r3[$i1];
+
+        $r11 = staticinvoke <dalvik.system.DexFile: dalvik.system.DexFile loadDex(java.lang.String,java.lang.String,int)>($r10, $r2, 0);
+
+     label14:
+        $r6[$i1] = $r11;
+
+     label15:
+        $i1 = $i1 + 1;
+
+        goto label05;
+
+     label16:
+        $r12 := @caughtexception;
+
+     label17:
+        $r7 = <java.lang.System: java.io.PrintStream out>;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed opening \'");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\': ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r12);
+
+        $r2 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r7.<java.io.PrintStream: void println(java.lang.String)>($r2);
+
+     label18:
+        goto label10;
+
+     label19:
+        $r13 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r13;
+
+     label20:
+        $r14 := @caughtexception;
+
+     label21:
+        $r7 = <java.lang.System: java.io.PrintStream out>;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed loadDex \'");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\': ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r14);
+
+        $r2 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r7.<java.io.PrintStream: void println(java.lang.String)>($r2);
+
+        goto label15;
+
+     label22:
+        $r15 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String,java.lang.String)>("java.library.path", ".");
+
+        $r16 = $r15;
+
+        $r10 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String,java.lang.String)>("path.separator", ":");
+
+        $r2 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String,java.lang.String)>("file.separator", "/");
+
+        $r17 = $r0.<dalvik.system.DexClassLoader: java.lang.String mRawLibPath>;
+
+        if $r17 == null goto label23;
+
+        $i0 = virtualinvoke $r15.<java.lang.String: int length()>();
+
+        if $i0 <= 0 goto label26;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r15 = $r0.<dalvik.system.DexClassLoader: java.lang.String mRawLibPath>;
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r16 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label23:
+        $r3 = virtualinvoke $r16.<java.lang.String: java.lang.String[] split(java.lang.String)>($r10);
+
+        $r0.<dalvik.system.DexClassLoader: java.lang.String[] mLibPaths> = $r3;
+
+        $r3 = $r0.<dalvik.system.DexClassLoader: java.lang.String[] mLibPaths>;
+
+        $i0 = lengthof $r3;
+
+        $i1 = 0;
+
+     label24:
+        if $i1 >= $i0 goto label03;
+
+        $r3 = $r0.<dalvik.system.DexClassLoader: java.lang.String[] mLibPaths>;
+
+        $r10 = $r3[$i1];
+
+        $z0 = virtualinvoke $r10.<java.lang.String: boolean endsWith(java.lang.String)>($r2);
+
+        if $z0 != 0 goto label25;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = $r0.<dalvik.system.DexClassLoader: java.lang.String[] mLibPaths>;
+
+        $r10 = $r3[$i1];
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r3[$i1] = $r10;
+
+     label25:
+        $i1 = $i1 + 1;
+
+        goto label24;
+
+     label26:
+        $r16 = $r0.<dalvik.system.DexClassLoader: java.lang.String mRawLibPath>;
+
+     label27:
+        goto label23;
+
+        catch java.lang.Throwable from label01 to label02 with label19;
+        catch java.lang.Throwable from label04 to label06 with label19;
+        catch java.io.IOException from label08 to label09 with label16;
+        catch java.lang.Throwable from label07 to label10 with label19;
+        catch java.io.IOException from label11 to label12 with label20;
+        catch java.io.IOException from label13 to label14 with label20;
+        catch java.lang.Throwable from label10 to label15 with label19;
+        catch java.lang.Throwable from label17 to label18 with label19;
+        catch java.lang.Throwable from label21 to label27 with label19;
+    }
+
+    private static java.lang.String generateOutputName(java.lang.String, java.lang.String)
+    {
+        java.lang.String $r0, $r1;
+        java.lang.StringBuilder $r2;
+        boolean $z0;
+        int $i0;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>(int)>(80);
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean endsWith(java.lang.String)>("/");
+
+        if $z0 != 0 goto label1;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+     label1:
+        $i0 = virtualinvoke $r0.<java.lang.String: int lastIndexOf(java.lang.String)>("/");
+
+        if $i0 >= 0 goto label4;
+
+     label2:
+        $i0 = virtualinvoke $r0.<java.lang.String: int lastIndexOf(java.lang.String)>(".");
+
+        if $i0 >= 0 goto label5;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r0);
+
+     label3:
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".dex");
+
+        $r0 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r0;
+
+     label4:
+        $i0 = $i0 + 1;
+
+        $r0 = virtualinvoke $r0.<java.lang.String: java.lang.String substring(int)>($i0);
+
+        goto label2;
+
+     label5:
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.CharSequence,int,int)>($r0, 0, $i0);
+
+        goto label3;
+    }
+
+    protected java.lang.Class findClass(java.lang.String) throws java.lang.ClassNotFoundException
+    {
+        dalvik.system.DexClassLoader $r0;
+        java.lang.String $r1, $r5;
+        int $i0, $i1;
+        java.io.File[] $r2;
+        dalvik.system.DexFile[] $r3;
+        dalvik.system.DexFile $r4;
+        java.lang.Class $r6;
+        java.lang.ClassNotFoundException $r7;
+        java.lang.StringBuilder $r8;
+
+        $r0 := @this: dalvik.system.DexClassLoader;
+
+        $r1 := @parameter0: java.lang.String;
+
+        specialinvoke $r0.<dalvik.system.DexClassLoader: void ensureInit()>();
+
+        $r2 = $r0.<dalvik.system.DexClassLoader: java.io.File[] mFiles>;
+
+        $i0 = lengthof $r2;
+
+        $i1 = 0;
+
+     label1:
+        if $i1 >= $i0 goto label3;
+
+        $r3 = $r0.<dalvik.system.DexClassLoader: dalvik.system.DexFile[] mDexs>;
+
+        $r4 = $r3[$i1];
+
+        if $r4 == null goto label2;
+
+        $r5 = virtualinvoke $r1.<java.lang.String: java.lang.String replace(char,char)>(46, 47);
+
+        $r3 = $r0.<dalvik.system.DexClassLoader: dalvik.system.DexFile[] mDexs>;
+
+        $r4 = $r3[$i1];
+
+        $r6 = virtualinvoke $r4.<dalvik.system.DexFile: java.lang.Class loadClass(java.lang.String,java.lang.ClassLoader)>($r5, $r0);
+
+        if $r6 == null goto label2;
+
+        return $r6;
+
+     label2:
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label3:
+        $r7 = new java.lang.ClassNotFoundException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" in loader ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r0);
+
+        $r1 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.lang.ClassNotFoundException: void <init>(java.lang.String)>($r1);
+
+        throw $r7;
+    }
+
+    protected java.lang.String findLibrary(java.lang.String)
+    {
+        dalvik.system.DexClassLoader $r0;
+        java.lang.String $r1, $r5;
+        java.io.File $r2;
+        int $i0, $i1;
+        java.lang.String[] $r3;
+        java.lang.StringBuilder $r4;
+        boolean $z0;
+
+        $r0 := @this: dalvik.system.DexClassLoader;
+
+        $r1 := @parameter0: java.lang.String;
+
+        specialinvoke $r0.<dalvik.system.DexClassLoader: void ensureInit()>();
+
+        $r1 = staticinvoke <java.lang.System: java.lang.String mapLibraryName(java.lang.String)>($r1);
+
+        $i0 = 0;
+
+     label1:
+        $r3 = $r0.<dalvik.system.DexClassLoader: java.lang.String[] mLibPaths>;
+
+        $i1 = lengthof $r3;
+
+        if $i0 >= $i1 goto label3;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = $r0.<dalvik.system.DexClassLoader: java.lang.String[] mLibPaths>;
+
+        $r5 = $r3[$i0];
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r2 = new java.io.File;
+
+        specialinvoke $r2.<java.io.File: void <init>(java.lang.String)>($r5);
+
+        $z0 = virtualinvoke $r2.<java.io.File: boolean exists()>();
+
+        if $z0 == 0 goto label2;
+
+        return $r5;
+
+     label2:
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label3:
+        return null;
+    }
+
+    protected java.net.URL findResource(java.lang.String)
+    {
+        dalvik.system.DexClassLoader $r0;
+        java.lang.String $r1;
+        int $i0, $i1;
+        java.io.File $r2;
+        java.util.zip.ZipFile $r3;
+        java.io.File[] $r4;
+        java.util.zip.ZipFile[] $r5;
+        java.util.zip.ZipEntry $r6;
+        java.net.URL $r7, $r9;
+        java.lang.StringBuilder $r8;
+        java.net.MalformedURLException $r10;
+        java.lang.RuntimeException $r11;
+
+        $r0 := @this: dalvik.system.DexClassLoader;
+
+        $r1 := @parameter0: java.lang.String;
+
+        specialinvoke $r0.<dalvik.system.DexClassLoader: void ensureInit()>();
+
+        $r4 = $r0.<dalvik.system.DexClassLoader: java.io.File[] mFiles>;
+
+        $i0 = lengthof $r4;
+
+        $i1 = 0;
+
+     label1:
+        if $i1 >= $i0 goto label6;
+
+        $r4 = $r0.<dalvik.system.DexClassLoader: java.io.File[] mFiles>;
+
+        $r2 = $r4[$i1];
+
+        $r5 = $r0.<dalvik.system.DexClassLoader: java.util.zip.ZipFile[] mZips>;
+
+        $r3 = $r5[$i1];
+
+        $r6 = virtualinvoke $r3.<java.util.zip.ZipFile: java.util.zip.ZipEntry getEntry(java.lang.String)>($r1);
+
+        if $r6 == null goto label5;
+
+        $r7 = new java.net.URL;
+
+        $r8 = new java.lang.StringBuilder;
+
+     label2:
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("jar:");
+
+        $r9 = virtualinvoke $r2.<java.io.File: java.net.URL toURL()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("!/");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.net.URL: void <init>(java.lang.String)>($r1);
+
+     label3:
+        return $r7;
+
+     label4:
+        $r10 := @caughtexception;
+
+        $r11 = new java.lang.RuntimeException;
+
+        specialinvoke $r11.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r10);
+
+        throw $r11;
+
+     label5:
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label6:
+        return null;
+
+        catch java.net.MalformedURLException from label2 to label3 with label4;
+    }
+
+    protected java.lang.Package getPackage(java.lang.String)
+    {
+        dalvik.system.DexClassLoader $r0;
+        java.lang.String $r1, $r2;
+        boolean $z0;
+        java.lang.Package $r3, $r4;
+        java.lang.Throwable $r5;
+
+        $r0 := @this: dalvik.system.DexClassLoader;
+
+        $r1 := @parameter0: java.lang.String;
+
+        if $r1 == null goto label6;
+
+        $r2 = "";
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 != 0 goto label6;
+
+        entermonitor $r0;
+
+     label1:
+        $r3 = specialinvoke $r0.<java.lang.ClassLoader: java.lang.Package getPackage(java.lang.String)>($r1);
+
+        $r4 = $r3;
+
+        if $r3 != null goto label2;
+
+        $r4 = virtualinvoke $r0.<java.lang.ClassLoader: java.lang.Package definePackage(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.net.URL)>($r1, "Unknown", "0.0", "Unknown", "Unknown", "0.0", "Unknown", null);
+
+     label2:
+        exitmonitor $r0;
+
+     label3:
+        return $r4;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label5:
+        throw $r5;
+
+     label6:
+        return null;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+}

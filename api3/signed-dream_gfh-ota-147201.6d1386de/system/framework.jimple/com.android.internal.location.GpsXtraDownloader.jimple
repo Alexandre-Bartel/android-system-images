@@ -1,0 +1,447 @@
+public class com.android.internal.location.GpsXtraDownloader extends java.lang.Object
+{
+    private static final java.lang.String TAG;
+    private android.content.Context mContext;
+    private int mNextServerIndex;
+    private java.lang.String[] mXtraServers;
+
+    void <init>(android.content.Context, java.util.Properties)
+    {
+        com.android.internal.location.GpsXtraDownloader $r0;
+        android.content.Context $r1;
+        java.util.Properties $r2;
+        java.util.Random $r3;
+        int $i0, $i1;
+        java.lang.String $r4, $r5, $r6;
+        java.lang.String[] $r7;
+
+        $r0 := @this: com.android.internal.location.GpsXtraDownloader;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: java.util.Properties;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r0.<com.android.internal.location.GpsXtraDownloader: android.content.Context mContext> = $r1;
+
+        $i0 = 0;
+
+        $r4 = virtualinvoke $r2.<java.util.Properties: java.lang.String getProperty(java.lang.String)>("XTRA_SERVER_1");
+
+        $r5 = virtualinvoke $r2.<java.util.Properties: java.lang.String getProperty(java.lang.String)>("XTRA_SERVER_2");
+
+        $r6 = virtualinvoke $r2.<java.util.Properties: java.lang.String getProperty(java.lang.String)>("XTRA_SERVER_3");
+
+        if $r4 == null goto label1;
+
+        $i0 = 0 + 1;
+
+     label1:
+        if $r5 == null goto label2;
+
+        $i0 = $i0 + 1;
+
+     label2:
+        if $r6 == null goto label3;
+
+        $i0 = $i0 + 1;
+
+     label3:
+        if $i0 != 0 goto label5;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("GpsXtraDownloader", "No XTRA servers were specified in the GPS configuration");
+
+     label4:
+        $r3 = new java.util.Random;
+
+        specialinvoke $r3.<java.util.Random: void <init>()>();
+
+        $i1 = virtualinvoke $r3.<java.util.Random: int nextInt(int)>($i0);
+
+        $r0.<com.android.internal.location.GpsXtraDownloader: int mNextServerIndex> = $i1;
+
+        return;
+
+     label5:
+        $r7 = newarray (java.lang.String)[$i0];
+
+        $r0.<com.android.internal.location.GpsXtraDownloader: java.lang.String[] mXtraServers> = $r7;
+
+        if $r4 == null goto label9;
+
+        $r7 = $r0.<com.android.internal.location.GpsXtraDownloader: java.lang.String[] mXtraServers>;
+
+        $i1 = 0 + 1;
+
+        $r7[0] = $r4;
+
+     label6:
+        if $r5 == null goto label7;
+
+        $r7 = $r0.<com.android.internal.location.GpsXtraDownloader: java.lang.String[] mXtraServers>;
+
+        $r7[$i1] = $r5;
+
+        $i1 = $i1 + 1;
+
+     label7:
+        if $r6 == null goto label8;
+
+        $r7 = $r0.<com.android.internal.location.GpsXtraDownloader: java.lang.String[] mXtraServers>;
+
+        $i0 = $i1 + 1;
+
+        $r7[$i1] = $r6;
+
+        goto label4;
+
+     label8:
+        $i0 = $i1;
+
+        goto label4;
+
+     label9:
+        $i1 = 0;
+
+        goto label6;
+    }
+
+    protected static byte[] doDownload(java.lang.String, boolean, java.lang.String, int)
+    {
+        java.lang.String $r0, $r1, $r3;
+        boolean $z0;
+        int $i0;
+        java.lang.StringBuilder $r2;
+        android.net.http.AndroidHttpClient $r4, $r5;
+        org.apache.http.client.methods.HttpGet $r6;
+        org.apache.http.HttpHost $r7;
+        org.apache.http.params.HttpParams $r8;
+        org.apache.http.HttpResponse $r9;
+        org.apache.http.StatusLine $r10;
+        org.apache.http.HttpEntity $r11;
+        byte[] $r12;
+        long $l1;
+        byte $b2;
+        java.io.DataInputStream $r13;
+        java.io.InputStream $r14;
+        java.io.IOException $r15, $r19;
+        java.lang.Throwable $r16, $r18, $r20, $r21;
+        java.lang.Exception $r17;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $z0 := @parameter1: boolean;
+
+        $r1 := @parameter2: java.lang.String;
+
+        $i0 := @parameter3: int;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Downloading XTRA data from ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r0);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GpsXtraDownloader", $r3);
+
+        $r4 = null;
+
+     label01:
+        $r5 = staticinvoke <android.net.http.AndroidHttpClient: android.net.http.AndroidHttpClient newInstance(java.lang.String)>("Android");
+
+     label02:
+        $r4 = $r5;
+
+     label03:
+        $r6 = new org.apache.http.client.methods.HttpGet;
+
+        specialinvoke $r6.<org.apache.http.client.methods.HttpGet: void <init>(java.lang.String)>($r0);
+
+        if $z0 == 0 goto label04;
+
+        $r7 = new org.apache.http.HttpHost;
+
+        specialinvoke $r7.<org.apache.http.HttpHost: void <init>(java.lang.String,int)>($r1, $i0);
+
+        $r8 = interfaceinvoke $r6.<org.apache.http.client.methods.HttpUriRequest: org.apache.http.params.HttpParams getParams()>();
+
+        staticinvoke <org.apache.http.conn.params.ConnRouteParams: void setDefaultProxy(org.apache.http.params.HttpParams,org.apache.http.HttpHost)>($r8, $r7);
+
+     label04:
+        interfaceinvoke $r6.<org.apache.http.client.methods.HttpUriRequest: void addHeader(java.lang.String,java.lang.String)>("Accept", "*/*, application/vnd.wap.mms-message, application/vnd.wap.sic");
+
+        interfaceinvoke $r6.<org.apache.http.client.methods.HttpUriRequest: void addHeader(java.lang.String,java.lang.String)>("x-wap-profile", "http://www.openmobilealliance.org/tech/profiles/UAPROF/ccppschema-20021212#");
+
+        $r9 = virtualinvoke $r5.<android.net.http.AndroidHttpClient: org.apache.http.HttpResponse execute(org.apache.http.client.methods.HttpUriRequest)>($r6);
+
+        $r10 = interfaceinvoke $r9.<org.apache.http.HttpResponse: org.apache.http.StatusLine getStatusLine()>();
+
+        $i0 = interfaceinvoke $r10.<org.apache.http.StatusLine: int getStatusCode()>();
+
+        if $i0 == 200 goto label07;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("HTTP error: ");
+
+        $r0 = interfaceinvoke $r10.<org.apache.http.StatusLine: java.lang.String getReasonPhrase()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r0);
+
+        $r0 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GpsXtraDownloader", $r0);
+
+     label05:
+        if $r5 == null goto label06;
+
+        virtualinvoke $r5.<android.net.http.AndroidHttpClient: void close()>();
+
+     label06:
+        return null;
+
+     label07:
+        $r11 = interfaceinvoke $r9.<org.apache.http.HttpResponse: org.apache.http.HttpEntity getEntity()>();
+
+     label08:
+        $r12 = null;
+
+        if $r11 == null goto label16;
+
+     label09:
+        $l1 = interfaceinvoke $r11.<org.apache.http.HttpEntity: long getContentLength()>();
+
+     label10:
+        $b2 = $l1 cmp 0L;
+
+     label11:
+        if $b2 <= 0 goto label14;
+
+        $l1 = interfaceinvoke $r11.<org.apache.http.HttpEntity: long getContentLength()>();
+
+        $i0 = (int) $l1;
+
+        $r12 = newarray (byte)[$i0];
+
+        $r13 = new java.io.DataInputStream;
+
+        $r14 = interfaceinvoke $r11.<org.apache.http.HttpEntity: java.io.InputStream getContent()>();
+
+        specialinvoke $r13.<java.io.DataInputStream: void <init>(java.io.InputStream)>($r14);
+
+     label12:
+        virtualinvoke $r13.<java.io.DataInputStream: void readFully(byte[])>($r12);
+
+     label13:
+        virtualinvoke $r13.<java.io.FilterInputStream: void close()>();
+
+     label14:
+        if $r11 == null goto label16;
+
+     label15:
+        interfaceinvoke $r11.<org.apache.http.HttpEntity: void consumeContent()>();
+
+     label16:
+        if $r5 == null goto label17;
+
+        virtualinvoke $r5.<android.net.http.AndroidHttpClient: void close()>();
+
+     label17:
+        return $r12;
+
+     label18:
+        $r15 := @caughtexception;
+
+     label19:
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("GpsXtraDownloader", "Unexpected IOException.", $r15);
+
+     label20:
+        goto label14;
+
+     label21:
+        $r16 := @caughtexception;
+
+        if $r11 == null goto label23;
+
+     label22:
+        interfaceinvoke $r11.<org.apache.http.HttpEntity: void consumeContent()>();
+
+     label23:
+        throw $r16;
+
+     label24:
+        $r17 := @caughtexception;
+
+        $r5 = $r4;
+
+     label25:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("error ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r17);
+
+        $r0 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GpsXtraDownloader", $r0);
+
+     label26:
+        if $r4 == null goto label27;
+
+        virtualinvoke $r4.<android.net.http.AndroidHttpClient: void close()>();
+
+     label27:
+        return null;
+
+     label28:
+        $r18 := @caughtexception;
+
+     label29:
+        virtualinvoke $r13.<java.io.FilterInputStream: void close()>();
+
+     label30:
+        throw $r18;
+
+     label31:
+        $r19 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("GpsXtraDownloader", "Unexpected IOException.", $r19);
+
+     label32:
+        goto label30;
+
+     label33:
+        $r20 := @caughtexception;
+
+        $r21 = $r20;
+
+        $r5 = $r4;
+
+     label34:
+        if $r5 == null goto label35;
+
+        virtualinvoke $r5.<android.net.http.AndroidHttpClient: void close()>();
+
+     label35:
+        throw $r21;
+
+     label36:
+        $r21 := @caughtexception;
+
+        goto label34;
+
+        catch java.lang.Exception from label01 to label02 with label24;
+        catch java.lang.Exception from label03 to label05 with label24;
+        catch java.lang.Throwable from label01 to label05 with label33;
+        catch java.lang.Exception from label07 to label08 with label24;
+        catch java.lang.Throwable from label07 to label08 with label33;
+        catch java.lang.Throwable from label09 to label10 with label21;
+        catch java.lang.Throwable from label11 to label12 with label21;
+        catch java.lang.Throwable from label12 to label13 with label28;
+        catch java.io.IOException from label13 to label14 with label18;
+        catch java.lang.Throwable from label13 to label14 with label21;
+        catch java.lang.Exception from label15 to label16 with label24;
+        catch java.lang.Throwable from label15 to label16 with label33;
+        catch java.lang.Throwable from label19 to label20 with label21;
+        catch java.lang.Exception from label22 to label24 with label24;
+        catch java.lang.Throwable from label22 to label24 with label33;
+        catch java.lang.Throwable from label25 to label26 with label36;
+        catch java.io.IOException from label29 to label30 with label31;
+        catch java.lang.Throwable from label29 to label30 with label21;
+        catch java.lang.Throwable from label30 to label32 with label21;
+    }
+
+    byte[] downloadXtraData()
+    {
+        com.android.internal.location.GpsXtraDownloader $r0;
+        int $i0, $i1, $i2, $i3;
+        android.content.Context $r1;
+        java.lang.String $r2, $r5;
+        boolean $z0;
+        byte[] $r3;
+        java.lang.String[] $r4;
+
+        $r0 := @this: com.android.internal.location.GpsXtraDownloader;
+
+        $r1 = $r0.<com.android.internal.location.GpsXtraDownloader: android.content.Context mContext>;
+
+        $r2 = staticinvoke <android.net.Proxy: java.lang.String getHost(android.content.Context)>($r1);
+
+        $r1 = $r0.<com.android.internal.location.GpsXtraDownloader: android.content.Context mContext>;
+
+        $i1 = staticinvoke <android.net.Proxy: int getPort(android.content.Context)>($r1);
+
+        if $r2 == null goto label2;
+
+        if $i1 == -1 goto label2;
+
+        $z0 = 1;
+
+     label1:
+        $r3 = null;
+
+        $i0 = $r0.<com.android.internal.location.GpsXtraDownloader: int mNextServerIndex>;
+
+        $r4 = $r0.<com.android.internal.location.GpsXtraDownloader: java.lang.String[] mXtraServers>;
+
+        if $r4 != null goto label3;
+
+        return null;
+
+     label2:
+        $z0 = 0;
+
+        goto label1;
+
+     label3:
+        if $r3 != null goto label5;
+
+        $r4 = $r0.<com.android.internal.location.GpsXtraDownloader: java.lang.String[] mXtraServers>;
+
+        $i2 = $r0.<com.android.internal.location.GpsXtraDownloader: int mNextServerIndex>;
+
+        $r5 = $r4[$i2];
+
+        $r3 = staticinvoke <com.android.internal.location.GpsXtraDownloader: byte[] doDownload(java.lang.String,boolean,java.lang.String,int)>($r5, $z0, $r2, $i1);
+
+        $i2 = $r0.<com.android.internal.location.GpsXtraDownloader: int mNextServerIndex>;
+
+        $i2 = $i2 + 1;
+
+        $r0.<com.android.internal.location.GpsXtraDownloader: int mNextServerIndex> = $i2;
+
+        $i2 = $r0.<com.android.internal.location.GpsXtraDownloader: int mNextServerIndex>;
+
+        $r4 = $r0.<com.android.internal.location.GpsXtraDownloader: java.lang.String[] mXtraServers>;
+
+        $i3 = lengthof $r4;
+
+        if $i2 != $i3 goto label4;
+
+        $r0.<com.android.internal.location.GpsXtraDownloader: int mNextServerIndex> = 0;
+
+     label4:
+        $i2 = $r0.<com.android.internal.location.GpsXtraDownloader: int mNextServerIndex>;
+
+        if $i2 != $i0 goto label3;
+
+     label5:
+        return $r3;
+    }
+
+    public static void <clinit>()
+    {
+        <com.android.internal.location.GpsXtraDownloader: java.lang.String TAG> = "GpsXtraDownloader";
+
+        return;
+    }
+}

@@ -1,0 +1,1194 @@
+public class SQLite.JDBC2y.JDBCConnection extends java.lang.Object implements SQLite.BusyHandler, java.sql.Connection
+{
+    protected boolean autocommit;
+    protected SQLite.JDBC2y.DatabaseX db;
+    private java.lang.String dbfile;
+    protected java.lang.String enc;
+    protected boolean intrans;
+    private SQLite.JDBC2y.JDBCDatabaseMetaData meta;
+    private boolean readonly;
+    private long t0;
+    protected int timeout;
+    protected java.lang.String url;
+
+    public void <init>(java.lang.String, java.lang.String) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        java.lang.String $r1, $r2, $r3;
+        boolean $z0;
+        SQLite.JDBC2y.DatabaseX $r4;
+        java.sql.SQLException $r5;
+        SQLite.Exception $r6;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r0.<SQLite.JDBC2y.JDBCConnection: boolean autocommit> = 1;
+
+        $r0.<SQLite.JDBC2y.JDBCConnection: boolean intrans> = 0;
+
+        $r0.<SQLite.JDBC2y.JDBCConnection: int timeout> = 1000000;
+
+        $r0.<SQLite.JDBC2y.JDBCConnection: java.lang.String dbfile> = null;
+
+        $r0.<SQLite.JDBC2y.JDBCConnection: SQLite.JDBC2y.JDBCDatabaseMetaData meta> = null;
+
+        $r0.<SQLite.JDBC2y.JDBCConnection: boolean readonly> = 0;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>("sqlite:/");
+
+        if $z0 == 0 goto label06;
+
+        $r3 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int)>(8);
+
+        $r0.<SQLite.JDBC2y.JDBCConnection: java.lang.String dbfile> = $r3;
+
+     label01:
+        $r0.<SQLite.JDBC2y.JDBCConnection: java.lang.String url> = $r1;
+
+        $r0.<SQLite.JDBC2y.JDBCConnection: java.lang.String enc> = $r2;
+
+        $z0 = $r0.<SQLite.JDBC2y.JDBCConnection: boolean readonly>;
+
+     label02:
+        $r4 = specialinvoke $r0.<SQLite.JDBC2y.JDBCConnection: SQLite.JDBC2y.DatabaseX open(boolean)>($z0);
+
+     label03:
+        $r0.<SQLite.JDBC2y.JDBCConnection: SQLite.JDBC2y.DatabaseX db> = $r4;
+
+     label04:
+        $r4 = $r0.<SQLite.JDBC2y.JDBCConnection: SQLite.JDBC2y.DatabaseX db>;
+
+        virtualinvoke $r4.<SQLite.Database: void busy_handler(SQLite.BusyHandler)>($r0);
+
+     label05:
+        return;
+
+     label06:
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>("jdbc:sqlite:/");
+
+        if $z0 == 0 goto label07;
+
+        $r3 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int)>(13);
+
+        $r0.<SQLite.JDBC2y.JDBCConnection: java.lang.String dbfile> = $r3;
+
+        goto label01;
+
+     label07:
+        $r5 = new java.sql.SQLException;
+
+        specialinvoke $r5.<java.sql.SQLException: void <init>(java.lang.String)>("unsupported url");
+
+        throw $r5;
+
+     label08:
+        $r5 := @caughtexception;
+
+        $r4 = $r0.<SQLite.JDBC2y.JDBCConnection: SQLite.JDBC2y.DatabaseX db>;
+
+        if $r4 == null goto label10;
+
+        $r4 = $r0.<SQLite.JDBC2y.JDBCConnection: SQLite.JDBC2y.DatabaseX db>;
+
+     label09:
+        virtualinvoke $r4.<SQLite.Database: void close()>();
+
+     label10:
+        throw $r5;
+
+     label11:
+        $r6 := @caughtexception;
+
+        goto label10;
+
+        catch java.sql.SQLException from label02 to label03 with label08;
+        catch java.sql.SQLException from label04 to label05 with label08;
+        catch SQLite.Exception from label09 to label10 with label11;
+    }
+
+    private boolean busy0(SQLite.JDBC2y.DatabaseX, int)
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        SQLite.JDBC2y.DatabaseX $r1;
+        int $i0;
+        long $l1, $l2;
+        byte $b3;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $r1 := @parameter0: SQLite.JDBC2y.DatabaseX;
+
+        $i0 := @parameter1: int;
+
+        if $i0 > 1 goto label1;
+
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r0.<SQLite.JDBC2y.JDBCConnection: long t0> = $l1;
+
+     label1:
+        if $r1 == null goto label3;
+
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l2 = $r0.<SQLite.JDBC2y.JDBCConnection: long t0>;
+
+        $l1 = $l1 - $l2;
+
+        $i0 = $r0.<SQLite.JDBC2y.JDBCConnection: int timeout>;
+
+        $l2 = (long) $i0;
+
+        $b3 = $l1 cmp $l2;
+
+        if $b3 <= 0 goto label2;
+
+        return 0;
+
+     label2:
+        virtualinvoke $r1.<SQLite.JDBC2y.DatabaseX: void wait(int)>(100);
+
+        return 1;
+
+     label3:
+        return 0;
+    }
+
+    private SQLite.JDBC2y.DatabaseX open(boolean) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        boolean $z0;
+        SQLite.JDBC2y.DatabaseX $r1;
+        java.lang.String $r2;
+        short $s0;
+        int $i1, $i2;
+        SQLite.Exception $r3, $r5, $r6, $r7;
+        java.sql.SQLException $r4;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 = new SQLite.JDBC2y.DatabaseX;
+
+     label01:
+        specialinvoke $r1.<SQLite.JDBC2y.DatabaseX: void <init>()>();
+
+     label02:
+        $r2 = $r0.<SQLite.JDBC2y.JDBCConnection: java.lang.String dbfile>;
+
+        if $z0 == 0 goto label07;
+
+        $s0 = 292;
+
+     label03:
+        virtualinvoke $r1.<SQLite.Database: void open(java.lang.String,int)>($r2, $s0);
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCConnection: java.lang.String enc>;
+
+        virtualinvoke $r1.<SQLite.Database: void set_encoding(java.lang.String)>($r2);
+
+     label04:
+        $i1 = 0;
+
+     label05:
+        virtualinvoke $r1.<SQLite.JDBC2y.DatabaseX: void exec(java.lang.String,SQLite.Callback)>("PRAGMA short_column_names = off;", null);
+
+        virtualinvoke $r1.<SQLite.JDBC2y.DatabaseX: void exec(java.lang.String,SQLite.Callback)>("PRAGMA full_column_names = on;", null);
+
+        virtualinvoke $r1.<SQLite.JDBC2y.DatabaseX: void exec(java.lang.String,SQLite.Callback)>("PRAGMA empty_result_callbacks = on;", null);
+
+        $r2 = staticinvoke <SQLite.Database: java.lang.String version()>();
+
+        $i2 = virtualinvoke $r2.<java.lang.String: int compareTo(java.lang.String)>("2.6.0");
+
+        if $i2 < 0 goto label15;
+
+        virtualinvoke $r1.<SQLite.JDBC2y.DatabaseX: void exec(java.lang.String,SQLite.Callback)>("PRAGMA show_datatypes = on;", null);
+
+     label06:
+        return $r1;
+
+     label07:
+        $s0 = 420;
+
+        goto label03;
+
+     label08:
+        $r3 := @caughtexception;
+
+     label09:
+        $r4 = new java.sql.SQLException;
+
+        $r2 = virtualinvoke $r3.<java.lang.Throwable: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.sql.SQLException: void <init>(java.lang.String)>($r2);
+
+        throw $r4;
+
+     label10:
+        $r5 := @caughtexception;
+
+        $i2 = virtualinvoke $r1.<SQLite.Database: int last_error()>();
+
+        if $i2 != 5 goto label11;
+
+        $i1 = $i1 + 1;
+
+        $z0 = specialinvoke $r0.<SQLite.JDBC2y.JDBCConnection: boolean busy0(SQLite.JDBC2y.DatabaseX,int)>($r1, $i1);
+
+        if $z0 != 0 goto label05;
+
+     label11:
+        virtualinvoke $r1.<SQLite.Database: void close()>();
+
+     label12:
+        $r4 = new java.sql.SQLException;
+
+        $r2 = virtualinvoke $r5.<java.lang.Throwable: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.sql.SQLException: void <init>(java.lang.String)>($r2);
+
+        throw $r4;
+
+     label13:
+        $r6 := @caughtexception;
+
+        goto label12;
+
+     label14:
+        $r7 := @caughtexception;
+
+        $r3 = $r7;
+
+        goto label09;
+
+     label15:
+        return $r1;
+
+        catch SQLite.Exception from label01 to label02 with label08;
+        catch SQLite.Exception from label03 to label04 with label14;
+        catch SQLite.Exception from label05 to label06 with label10;
+        catch SQLite.Exception from label11 to label12 with label13;
+    }
+
+    public boolean busy(java.lang.String, int)
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        java.lang.String $r1;
+        int $i0;
+        boolean $z0;
+        SQLite.JDBC2y.DatabaseX $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCConnection: SQLite.JDBC2y.DatabaseX db>;
+
+        $z0 = specialinvoke $r0.<SQLite.JDBC2y.JDBCConnection: boolean busy0(SQLite.JDBC2y.DatabaseX,int)>($r2, $i0);
+
+        return $z0;
+    }
+
+    protected boolean busy3(SQLite.JDBC2y.DatabaseX, int)
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        SQLite.JDBC2y.DatabaseX $r1;
+        int $i0;
+        long $l1, $l2;
+        byte $b3;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $r1 := @parameter0: SQLite.JDBC2y.DatabaseX;
+
+        $i0 := @parameter1: int;
+
+        if $i0 > 1 goto label1;
+
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r0.<SQLite.JDBC2y.JDBCConnection: long t0> = $l1;
+
+     label1:
+        if $r1 == null goto label3;
+
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l2 = $r0.<SQLite.JDBC2y.JDBCConnection: long t0>;
+
+        $l1 = $l1 - $l2;
+
+        $i0 = $r0.<SQLite.JDBC2y.JDBCConnection: int timeout>;
+
+        $l2 = (long) $i0;
+
+        $b3 = $l1 cmp $l2;
+
+        if $b3 <= 0 goto label2;
+
+        return 0;
+
+     label2:
+        return 1;
+
+     label3:
+        return 0;
+    }
+
+    public void clearWarnings() throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        return;
+    }
+
+    public void close() throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        java.lang.String $r1;
+        SQLite.JDBC2y.DatabaseX $r2;
+        SQLite.Exception $r3;
+        java.sql.SQLException $r4;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+     label1:
+        virtualinvoke $r0.<SQLite.JDBC2y.JDBCConnection: void rollback()>();
+
+     label2:
+        $r0.<SQLite.JDBC2y.JDBCConnection: boolean intrans> = 0;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCConnection: SQLite.JDBC2y.DatabaseX db>;
+
+        if $r2 == null goto label7;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCConnection: SQLite.JDBC2y.DatabaseX db>;
+
+     label3:
+        virtualinvoke $r2.<SQLite.Database: void close()>();
+
+     label4:
+        $r0.<SQLite.JDBC2y.JDBCConnection: SQLite.JDBC2y.DatabaseX db> = null;
+
+        return;
+
+     label5:
+        $r3 := @caughtexception;
+
+        $r4 = new java.sql.SQLException;
+
+        $r1 = virtualinvoke $r3.<java.lang.Throwable: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.sql.SQLException: void <init>(java.lang.String)>($r1);
+
+        throw $r4;
+
+     label6:
+        $r4 := @caughtexception;
+
+        goto label2;
+
+     label7:
+        return;
+
+        catch java.sql.SQLException from label1 to label2 with label6;
+        catch SQLite.Exception from label3 to label4 with label5;
+    }
+
+    public void commit() throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        java.lang.String $r1;
+        SQLite.JDBC2y.DatabaseX $r2;
+        java.sql.SQLException $r3;
+        boolean $z0;
+        SQLite.Exception $r4;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCConnection: SQLite.JDBC2y.DatabaseX db>;
+
+        if $r2 != null goto label1;
+
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("stale connection");
+
+        throw $r3;
+
+     label1:
+        $z0 = $r0.<SQLite.JDBC2y.JDBCConnection: boolean intrans>;
+
+        if $z0 != 0 goto label2;
+
+        return;
+
+     label2:
+        $r2 = $r0.<SQLite.JDBC2y.JDBCConnection: SQLite.JDBC2y.DatabaseX db>;
+
+     label3:
+        virtualinvoke $r2.<SQLite.JDBC2y.DatabaseX: void exec(java.lang.String,SQLite.Callback)>("COMMIT", null);
+
+     label4:
+        $r0.<SQLite.JDBC2y.JDBCConnection: boolean intrans> = 0;
+
+        return;
+
+     label5:
+        $r4 := @caughtexception;
+
+        $r3 = new java.sql.SQLException;
+
+        $r1 = virtualinvoke $r4.<java.lang.Throwable: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>($r1);
+
+        throw $r3;
+
+        catch SQLite.Exception from label3 to label4 with label5;
+    }
+
+    public java.sql.Statement createStatement()
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        SQLite.JDBC2y.JDBCStatement $r1;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $r1 = new SQLite.JDBC2y.JDBCStatement;
+
+        specialinvoke $r1.<SQLite.JDBC2y.JDBCStatement: void <init>(SQLite.JDBC2y.JDBCConnection)>($r0);
+
+        return $r1;
+    }
+
+    public java.sql.Statement createStatement(int, int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        int $i0, $i1;
+        SQLite.JDBC2y.JDBCStatement $r1;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 = new SQLite.JDBC2y.JDBCStatement;
+
+        specialinvoke $r1.<SQLite.JDBC2y.JDBCStatement: void <init>(SQLite.JDBC2y.JDBCConnection)>($r0);
+
+        return $r1;
+    }
+
+    public java.sql.Statement createStatement(int, int, int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        int $i0, $i1, $i2;
+        java.sql.Statement $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i2 := @parameter2: int;
+
+        if $i2 == 1 goto label1;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+
+     label1:
+        $r1 = virtualinvoke $r0.<SQLite.JDBC2y.JDBCConnection: java.sql.Statement createStatement(int,int)>($i0, $i1);
+
+        return $r1;
+    }
+
+    public boolean getAutoCommit() throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        boolean z0;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        z0 = $r0.<SQLite.JDBC2y.JDBCConnection: boolean autocommit>;
+
+        return z0;
+    }
+
+    public java.lang.String getCatalog() throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        return null;
+    }
+
+    public int getHoldability() throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        return 1;
+    }
+
+    public java.sql.DatabaseMetaData getMetaData() throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        SQLite.JDBC2y.JDBCDatabaseMetaData $r1;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $r1 = $r0.<SQLite.JDBC2y.JDBCConnection: SQLite.JDBC2y.JDBCDatabaseMetaData meta>;
+
+        if $r1 != null goto label1;
+
+        $r1 = new SQLite.JDBC2y.JDBCDatabaseMetaData;
+
+        specialinvoke $r1.<SQLite.JDBC2y.JDBCDatabaseMetaData: void <init>(SQLite.JDBC2y.JDBCConnection)>($r0);
+
+        $r0.<SQLite.JDBC2y.JDBCConnection: SQLite.JDBC2y.JDBCDatabaseMetaData meta> = $r1;
+
+     label1:
+        $r1 = $r0.<SQLite.JDBC2y.JDBCConnection: SQLite.JDBC2y.JDBCDatabaseMetaData meta>;
+
+        return $r1;
+    }
+
+    public SQLite.Database getSQLiteDatabase()
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        SQLite.JDBC2y.DatabaseX r1;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        r1 = $r0.<SQLite.JDBC2y.JDBCConnection: SQLite.JDBC2y.DatabaseX db>;
+
+        return r1;
+    }
+
+    public int getTransactionIsolation() throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        return 8;
+    }
+
+    public java.util.Map getTypeMap() throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        java.sql.SQLException $r1;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $r1 = new java.sql.SQLException;
+
+        specialinvoke $r1.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r1;
+    }
+
+    public java.sql.SQLWarning getWarnings() throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        return null;
+    }
+
+    public boolean isClosed() throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        SQLite.JDBC2y.DatabaseX $r1;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $r1 = $r0.<SQLite.JDBC2y.JDBCConnection: SQLite.JDBC2y.DatabaseX db>;
+
+        if $r1 != null goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    public boolean isReadOnly() throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        boolean z0;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        z0 = $r0.<SQLite.JDBC2y.JDBCConnection: boolean readonly>;
+
+        return z0;
+    }
+
+    public java.lang.String nativeSQL(java.lang.String) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        java.lang.String $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public java.sql.CallableStatement prepareCall(java.lang.String) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        java.lang.String $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public java.sql.CallableStatement prepareCall(java.lang.String, int, int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        java.lang.String $r1;
+        int $i0, $i1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public java.sql.CallableStatement prepareCall(java.lang.String, int, int, int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        java.lang.String $r1;
+        int $i0, $i1, $i2;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public java.sql.PreparedStatement prepareStatement(java.lang.String) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        java.lang.String $r1;
+        SQLite.JDBC2y.JDBCPreparedStatement $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new SQLite.JDBC2y.JDBCPreparedStatement;
+
+        specialinvoke $r2.<SQLite.JDBC2y.JDBCPreparedStatement: void <init>(SQLite.JDBC2y.JDBCConnection,java.lang.String)>($r0, $r1);
+
+        return $r2;
+    }
+
+    public java.sql.PreparedStatement prepareStatement(java.lang.String, int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        java.lang.String $r1;
+        int $i0;
+        java.sql.PreparedStatement $r2;
+        java.sql.SQLException $r3;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        if $i0 == 2 goto label1;
+
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r3;
+
+     label1:
+        $r2 = virtualinvoke $r0.<SQLite.JDBC2y.JDBCConnection: java.sql.PreparedStatement prepareStatement(java.lang.String)>($r1);
+
+        return $r2;
+    }
+
+    public java.sql.PreparedStatement prepareStatement(java.lang.String, int, int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        java.lang.String $r1;
+        int $i0, $i1;
+        SQLite.JDBC2y.JDBCPreparedStatement $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $r2 = new SQLite.JDBC2y.JDBCPreparedStatement;
+
+        specialinvoke $r2.<SQLite.JDBC2y.JDBCPreparedStatement: void <init>(SQLite.JDBC2y.JDBCConnection,java.lang.String)>($r0, $r1);
+
+        return $r2;
+    }
+
+    public java.sql.PreparedStatement prepareStatement(java.lang.String, int, int, int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        java.lang.String $r1;
+        int $i0, $i1, $i2;
+        java.sql.PreparedStatement $r2;
+        java.sql.SQLException $r3;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        if $i2 == 1 goto label1;
+
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r3;
+
+     label1:
+        $r2 = virtualinvoke $r0.<SQLite.JDBC2y.JDBCConnection: java.sql.PreparedStatement prepareStatement(java.lang.String,int,int)>($r1, $i0, $i1);
+
+        return $r2;
+    }
+
+    public java.sql.PreparedStatement prepareStatement(java.lang.String, int[]) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        java.lang.String $r1;
+        int[] $r2;
+        java.sql.SQLException $r3;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: int[];
+
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r3;
+    }
+
+    public java.sql.PreparedStatement prepareStatement(java.lang.String, java.lang.String[]) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        java.lang.String $r1;
+        java.lang.String[] $r2;
+        java.sql.SQLException $r3;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String[];
+
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r3;
+    }
+
+    public void releaseSavepoint(java.sql.Savepoint) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        java.sql.Savepoint $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $r1 := @parameter0: java.sql.Savepoint;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public void rollback() throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        java.lang.String $r1;
+        SQLite.JDBC2y.DatabaseX $r2;
+        java.sql.SQLException $r3;
+        boolean $z0;
+        SQLite.Exception $r4;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCConnection: SQLite.JDBC2y.DatabaseX db>;
+
+        if $r2 != null goto label1;
+
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("stale connection");
+
+        throw $r3;
+
+     label1:
+        $z0 = $r0.<SQLite.JDBC2y.JDBCConnection: boolean intrans>;
+
+        if $z0 != 0 goto label2;
+
+        return;
+
+     label2:
+        $r2 = $r0.<SQLite.JDBC2y.JDBCConnection: SQLite.JDBC2y.DatabaseX db>;
+
+     label3:
+        virtualinvoke $r2.<SQLite.JDBC2y.DatabaseX: void exec(java.lang.String,SQLite.Callback)>("ROLLBACK", null);
+
+     label4:
+        $r0.<SQLite.JDBC2y.JDBCConnection: boolean intrans> = 0;
+
+        return;
+
+     label5:
+        $r4 := @caughtexception;
+
+        $r3 = new java.sql.SQLException;
+
+        $r1 = virtualinvoke $r4.<java.lang.Throwable: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>($r1);
+
+        throw $r3;
+
+        catch SQLite.Exception from label3 to label4 with label5;
+    }
+
+    public void rollback(java.sql.Savepoint) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        java.sql.Savepoint $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $r1 := @parameter0: java.sql.Savepoint;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public void setAutoCommit(boolean) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        boolean $z0, $z1;
+        java.lang.String $r1;
+        SQLite.JDBC2y.DatabaseX $r2;
+        SQLite.Exception $r3;
+        java.sql.SQLException $r4;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $z0 := @parameter0: boolean;
+
+        if $z0 == 0 goto label2;
+
+        $z1 = $r0.<SQLite.JDBC2y.JDBCConnection: boolean intrans>;
+
+        if $z1 == 0 goto label2;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCConnection: SQLite.JDBC2y.DatabaseX db>;
+
+        if $r2 == null goto label2;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCConnection: SQLite.JDBC2y.DatabaseX db>;
+
+     label1:
+        virtualinvoke $r2.<SQLite.JDBC2y.DatabaseX: void exec(java.lang.String,SQLite.Callback)>("ROLLBACK", null);
+
+     label2:
+        $r0.<SQLite.JDBC2y.JDBCConnection: boolean intrans> = 0;
+
+        $r0.<SQLite.JDBC2y.JDBCConnection: boolean autocommit> = $z0;
+
+        return;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.sql.SQLException;
+
+        $r1 = virtualinvoke $r3.<java.lang.Throwable: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.sql.SQLException: void <init>(java.lang.String)>($r1);
+
+        throw $r4;
+
+        catch SQLite.Exception from label1 to label2 with label3;
+    }
+
+    public void setCatalog(java.lang.String) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        java.lang.String $r1;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $r1 := @parameter0: java.lang.String;
+
+        return;
+    }
+
+    public void setHoldability(int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        int $i0;
+        java.sql.SQLException $r1;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $i0 := @parameter0: int;
+
+        if $i0 != 1 goto label1;
+
+        return;
+
+     label1:
+        $r1 = new java.sql.SQLException;
+
+        specialinvoke $r1.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r1;
+    }
+
+    public void setReadOnly(boolean) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        boolean $z0, $z1;
+        java.sql.SQLException $r1;
+        SQLite.JDBC2y.DatabaseX $r2, $r3, $r4;
+        SQLite.Exception $r5, $r7;
+        java.lang.String $r6;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $z0 := @parameter0: boolean;
+
+        $z1 = $r0.<SQLite.JDBC2y.JDBCConnection: boolean intrans>;
+
+        if $z1 == 0 goto label01;
+
+        $r1 = new java.sql.SQLException;
+
+        specialinvoke $r1.<java.sql.SQLException: void <init>(java.lang.String)>("incomplete transaction");
+
+        throw $r1;
+
+     label01:
+        $z1 = $r0.<SQLite.JDBC2y.JDBCConnection: boolean readonly>;
+
+        if $z0 == $z1 goto label11;
+
+        $r2 = null;
+
+     label02:
+        $r3 = specialinvoke $r0.<SQLite.JDBC2y.JDBCConnection: SQLite.JDBC2y.DatabaseX open(boolean)>($z0);
+
+     label03:
+        $r2 = $r3;
+
+     label04:
+        $r4 = $r0.<SQLite.JDBC2y.JDBCConnection: SQLite.JDBC2y.DatabaseX db>;
+
+        virtualinvoke $r4.<SQLite.Database: void close()>();
+
+     label05:
+        $r0.<SQLite.JDBC2y.JDBCConnection: SQLite.JDBC2y.DatabaseX db> = $r3;
+
+        $r0.<SQLite.JDBC2y.JDBCConnection: boolean readonly> = $z0;
+
+        return;
+
+     label06:
+        $r1 := @caughtexception;
+
+        throw $r1;
+
+     label07:
+        $r5 := @caughtexception;
+
+        if $r2 == null goto label09;
+
+     label08:
+        virtualinvoke $r2.<SQLite.Database: void close()>();
+
+     label09:
+        $r1 = new java.sql.SQLException;
+
+        $r6 = virtualinvoke $r5.<java.lang.Throwable: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.sql.SQLException: void <init>(java.lang.String)>($r6);
+
+        throw $r1;
+
+     label10:
+        $r7 := @caughtexception;
+
+        goto label09;
+
+     label11:
+        return;
+
+        catch java.sql.SQLException from label02 to label03 with label06;
+        catch java.sql.SQLException from label04 to label05 with label06;
+        catch SQLite.Exception from label02 to label03 with label07;
+        catch SQLite.Exception from label04 to label05 with label07;
+        catch SQLite.Exception from label08 to label09 with label10;
+    }
+
+    public java.sql.Savepoint setSavepoint() throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        java.sql.SQLException $r1;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $r1 = new java.sql.SQLException;
+
+        specialinvoke $r1.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r1;
+    }
+
+    public java.sql.Savepoint setSavepoint(java.lang.String) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        java.lang.String $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public void setTransactionIsolation(int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        int $i0;
+        java.sql.SQLException $r1;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $i0 := @parameter0: int;
+
+        if $i0 == 8 goto label1;
+
+        $r1 = new java.sql.SQLException;
+
+        specialinvoke $r1.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+
+    public void setTypeMap(java.util.Map) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCConnection $r0;
+        java.util.Map $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCConnection;
+
+        $r1 := @parameter0: java.util.Map;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+}

@@ -1,0 +1,1919 @@
+final class com.android.internal.telephony.gsm.SMSDispatcher extends android.os.Handler
+{
+    private static final int DEFAULT_SMS_CHECK_PERIOD;
+    private static final int DEFAULT_SMS_MAX_COUNT;
+    private static final int DEFAULT_SMS_TIMOUEOUT;
+    static final int EVENT_ALERT_TIMEOUT;
+    static final int EVENT_NEW_SMS;
+    static final int EVENT_NEW_SMS_STATUS_REPORT;
+    static final int EVENT_POST_ALERT;
+    static final int EVENT_SEND_CONFIRMED_SMS;
+    static final int EVENT_SEND_RETRY;
+    static final int EVENT_SEND_SMS_COMPLETE;
+    static final int EVENT_SIM_FULL;
+    static final int MAIL_SEND_SMS;
+    private static final int MAX_SEND_RETRIES;
+    private static final java.lang.String[] RAW_PROJECTION;
+    private static final int SEND_RETRY_DELAY;
+    private static final int SINGLE_PART_SMS;
+    private static final java.lang.String TAG;
+    private static int sConcatenatedRef;
+    private final int WAKE_LOCK_TIMEOUT;
+    private final java.util.ArrayList deliveryPendingList;
+    private final com.android.internal.telephony.gsm.CommandsInterface mCm;
+    private final android.content.Context mContext;
+    private com.android.internal.telephony.gsm.SMSDispatcher$SmsCounter mCounter;
+    private android.content.DialogInterface$OnClickListener mListener;
+    private final com.android.internal.telephony.gsm.GSMPhone mPhone;
+    private final android.net.Uri mRawUri;
+    private final android.content.ContentResolver mResolver;
+    private com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker mSTracker;
+    private android.os.PowerManager$WakeLock mWakeLock;
+    private final com.android.internal.telephony.WapPushOverSms mWapPush;
+
+    static void <clinit>()
+    {
+        java.lang.String[] $r0;
+
+        <com.android.internal.telephony.gsm.SMSDispatcher: java.lang.String TAG> = "GSM";
+
+        <com.android.internal.telephony.gsm.SMSDispatcher: int SINGLE_PART_SMS> = 1;
+
+        <com.android.internal.telephony.gsm.SMSDispatcher: int SEND_RETRY_DELAY> = 2000;
+
+        <com.android.internal.telephony.gsm.SMSDispatcher: int MAX_SEND_RETRIES> = 3;
+
+        <com.android.internal.telephony.gsm.SMSDispatcher: int MAIL_SEND_SMS> = 1;
+
+        <com.android.internal.telephony.gsm.SMSDispatcher: int EVENT_SIM_FULL> = 6;
+
+        <com.android.internal.telephony.gsm.SMSDispatcher: int EVENT_SEND_SMS_COMPLETE> = 2;
+
+        <com.android.internal.telephony.gsm.SMSDispatcher: int EVENT_SEND_RETRY> = 3;
+
+        <com.android.internal.telephony.gsm.SMSDispatcher: int EVENT_SEND_CONFIRMED_SMS> = 8;
+
+        <com.android.internal.telephony.gsm.SMSDispatcher: int EVENT_POST_ALERT> = 7;
+
+        <com.android.internal.telephony.gsm.SMSDispatcher: int EVENT_NEW_SMS_STATUS_REPORT> = 5;
+
+        <com.android.internal.telephony.gsm.SMSDispatcher: int EVENT_NEW_SMS> = 1;
+
+        <com.android.internal.telephony.gsm.SMSDispatcher: int EVENT_ALERT_TIMEOUT> = 9;
+
+        <com.android.internal.telephony.gsm.SMSDispatcher: int DEFAULT_SMS_TIMOUEOUT> = 6000;
+
+        <com.android.internal.telephony.gsm.SMSDispatcher: int DEFAULT_SMS_MAX_COUNT> = 100;
+
+        <com.android.internal.telephony.gsm.SMSDispatcher: int DEFAULT_SMS_CHECK_PERIOD> = 3600000;
+
+        $r0 = newarray (java.lang.String)[2];
+
+        $r0[0] = "pdu";
+
+        $r0[1] = "sequence";
+
+        <com.android.internal.telephony.gsm.SMSDispatcher: java.lang.String[] RAW_PROJECTION> = $r0;
+
+        return;
+    }
+
+    void <init>(com.android.internal.telephony.gsm.GSMPhone)
+    {
+        com.android.internal.telephony.gsm.SMSDispatcher $r0;
+        com.android.internal.telephony.gsm.GSMPhone $r1;
+        android.net.Uri $r2;
+        java.util.ArrayList $r3;
+        com.android.internal.telephony.gsm.SMSDispatcher$1 $r4;
+        com.android.internal.telephony.WapPushOverSms $r5;
+        android.content.Context $r6;
+        android.content.ContentResolver $r7;
+        com.android.internal.telephony.gsm.CommandsInterface $r8;
+        int $i0, $i1;
+        com.android.internal.telephony.gsm.SMSDispatcher$SmsCounter $r9;
+        java.util.Random $r10;
+
+        $r0 := @this: com.android.internal.telephony.gsm.SMSDispatcher;
+
+        $r1 := @parameter0: com.android.internal.telephony.gsm.GSMPhone;
+
+        specialinvoke $r0.<android.os.Handler: void <init>()>();
+
+        $r2 = <android.provider.Telephony$Sms: android.net.Uri CONTENT_URI>;
+
+        $r2 = staticinvoke <android.net.Uri: android.net.Uri withAppendedPath(android.net.Uri,java.lang.String)>($r2, "raw");
+
+        $r0.<com.android.internal.telephony.gsm.SMSDispatcher: android.net.Uri mRawUri> = $r2;
+
+        $r0.<com.android.internal.telephony.gsm.SMSDispatcher: int WAKE_LOCK_TIMEOUT> = 5000;
+
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>()>();
+
+        $r0.<com.android.internal.telephony.gsm.SMSDispatcher: java.util.ArrayList deliveryPendingList> = $r3;
+
+        $r4 = new com.android.internal.telephony.gsm.SMSDispatcher$1;
+
+        specialinvoke $r4.<com.android.internal.telephony.gsm.SMSDispatcher$1: void <init>(com.android.internal.telephony.gsm.SMSDispatcher)>($r0);
+
+        $r0.<com.android.internal.telephony.gsm.SMSDispatcher: android.content.DialogInterface$OnClickListener mListener> = $r4;
+
+        $r0.<com.android.internal.telephony.gsm.SMSDispatcher: com.android.internal.telephony.gsm.GSMPhone mPhone> = $r1;
+
+        $r5 = new com.android.internal.telephony.WapPushOverSms;
+
+        specialinvoke $r5.<com.android.internal.telephony.WapPushOverSms: void <init>(com.android.internal.telephony.Phone)>($r1);
+
+        $r0.<com.android.internal.telephony.gsm.SMSDispatcher: com.android.internal.telephony.WapPushOverSms mWapPush> = $r5;
+
+        $r6 = virtualinvoke $r1.<com.android.internal.telephony.PhoneBase: android.content.Context getContext()>();
+
+        $r0.<com.android.internal.telephony.gsm.SMSDispatcher: android.content.Context mContext> = $r6;
+
+        $r6 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: android.content.Context mContext>;
+
+        $r7 = virtualinvoke $r6.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r0.<com.android.internal.telephony.gsm.SMSDispatcher: android.content.ContentResolver mResolver> = $r7;
+
+        $r8 = $r1.<com.android.internal.telephony.gsm.GSMPhone: com.android.internal.telephony.gsm.CommandsInterface mCM>;
+
+        $r0.<com.android.internal.telephony.gsm.SMSDispatcher: com.android.internal.telephony.gsm.CommandsInterface mCm> = $r8;
+
+        $r0.<com.android.internal.telephony.gsm.SMSDispatcher: com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker mSTracker> = null;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.SMSDispatcher: void createWakelock()>();
+
+        $r7 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: android.content.ContentResolver mResolver>;
+
+        $i0 = staticinvoke <android.provider.Settings$Gservices: int getInt(android.content.ContentResolver,java.lang.String,int)>($r7, "sms_outgoing_check_interval_ms", 3600000);
+
+        $r7 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: android.content.ContentResolver mResolver>;
+
+        $i1 = staticinvoke <android.provider.Settings$Gservices: int getInt(android.content.ContentResolver,java.lang.String,int)>($r7, "sms_outgoing_check_max_count", 100);
+
+        $r9 = new com.android.internal.telephony.gsm.SMSDispatcher$SmsCounter;
+
+        specialinvoke $r9.<com.android.internal.telephony.gsm.SMSDispatcher$SmsCounter: void <init>(com.android.internal.telephony.gsm.SMSDispatcher,int,int)>($r0, $i1, $i0);
+
+        $r0.<com.android.internal.telephony.gsm.SMSDispatcher: com.android.internal.telephony.gsm.SMSDispatcher$SmsCounter mCounter> = $r9;
+
+        $r8 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: com.android.internal.telephony.gsm.CommandsInterface mCm>;
+
+        interfaceinvoke $r8.<com.android.internal.telephony.gsm.CommandsInterface: void setOnNewSMS(android.os.Handler,int,java.lang.Object)>($r0, 1, null);
+
+        $r8 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: com.android.internal.telephony.gsm.CommandsInterface mCm>;
+
+        interfaceinvoke $r8.<com.android.internal.telephony.gsm.CommandsInterface: void setOnSmsStatus(android.os.Handler,int,java.lang.Object)>($r0, 5, null);
+
+        $r8 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: com.android.internal.telephony.gsm.CommandsInterface mCm>;
+
+        interfaceinvoke $r8.<com.android.internal.telephony.gsm.CommandsInterface: void setOnSimSmsFull(android.os.Handler,int,java.lang.Object)>($r0, 6, null);
+
+        $r10 = new java.util.Random;
+
+        specialinvoke $r10.<java.util.Random: void <init>()>();
+
+        $i0 = virtualinvoke $r10.<java.util.Random: int nextInt(int)>(256);
+
+        <com.android.internal.telephony.gsm.SMSDispatcher: int sConcatenatedRef> = $i0;
+
+        return;
+    }
+
+    private void createWakelock()
+    {
+        com.android.internal.telephony.gsm.SMSDispatcher $r0;
+        android.content.Context $r1;
+        java.lang.Object $r2;
+        android.os.PowerManager $r3;
+        android.os.PowerManager$WakeLock $r4;
+
+        $r0 := @this: com.android.internal.telephony.gsm.SMSDispatcher;
+
+        $r1 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: android.content.Context mContext>;
+
+        $r2 = virtualinvoke $r1.<android.content.Context: java.lang.Object getSystemService(java.lang.String)>("power");
+
+        $r3 = (android.os.PowerManager) $r2;
+
+        $r4 = virtualinvoke $r3.<android.os.PowerManager: android.os.PowerManager$WakeLock newWakeLock(int,java.lang.String)>(1, "SMSDispatcher");
+
+        $r0.<com.android.internal.telephony.gsm.SMSDispatcher: android.os.PowerManager$WakeLock mWakeLock> = $r4;
+
+        $r4 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: android.os.PowerManager$WakeLock mWakeLock>;
+
+        virtualinvoke $r4.<android.os.PowerManager$WakeLock: void setReferenceCounted(boolean)>(1);
+
+        return;
+    }
+
+    private void dispatchPdus(byte[][])
+    {
+        com.android.internal.telephony.gsm.SMSDispatcher $r0;
+        byte[][] $r1;
+        android.content.Intent $r2;
+
+        $r0 := @this: com.android.internal.telephony.gsm.SMSDispatcher;
+
+        $r1 := @parameter0: byte[][];
+
+        $r2 = new android.content.Intent;
+
+        specialinvoke $r2.<android.content.Intent: void <init>(java.lang.String)>("android.provider.Telephony.SMS_RECEIVED");
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.io.Serializable)>("pdus", $r1);
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.SMSDispatcher: void sendBroadcast(android.content.Intent,java.lang.String)>($r2, "android.permission.RECEIVE_SMS");
+
+        return;
+    }
+
+    private void dispatchPortAddressedPdus(byte[][], int)
+    {
+        com.android.internal.telephony.gsm.SMSDispatcher $r0;
+        byte[][] $r1;
+        int $i0;
+        android.content.Intent $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+        android.net.Uri $r5;
+
+        $r0 := @this: com.android.internal.telephony.gsm.SMSDispatcher;
+
+        $r1 := @parameter0: byte[][];
+
+        $i0 := @parameter1: int;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("sms://localhost:");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r5 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>($r4);
+
+        $r2 = new android.content.Intent;
+
+        specialinvoke $r2.<android.content.Intent: void <init>(java.lang.String,android.net.Uri)>("android.intent.action.DATA_SMS_RECEIVED", $r5);
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.io.Serializable)>("pdus", $r1);
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.SMSDispatcher: void sendBroadcast(android.content.Intent,java.lang.String)>($r2, "android.permission.RECEIVE_SMS");
+
+        return;
+    }
+
+    private java.lang.String getAppNameByIntent(android.app.PendingIntent)
+    {
+        com.android.internal.telephony.gsm.SMSDispatcher $r0;
+        android.app.PendingIntent $r1;
+        android.content.res.Resources $r2;
+        java.lang.String $r3;
+
+        $r0 := @this: com.android.internal.telephony.gsm.SMSDispatcher;
+
+        $r1 := @parameter0: android.app.PendingIntent;
+
+        $r2 = staticinvoke <android.content.res.Resources: android.content.res.Resources getSystem()>();
+
+        if $r1 == null goto label1;
+
+        $r3 = virtualinvoke $r1.<android.app.PendingIntent: java.lang.String getTargetPackage()>();
+
+        return $r3;
+
+     label1:
+        $r3 = virtualinvoke $r2.<android.content.res.Resources: java.lang.String getString(int)>(17039974);
+
+        return $r3;
+    }
+
+    private void handleNotInService(int, com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker)
+    {
+        com.android.internal.telephony.gsm.SMSDispatcher $r0;
+        int $i0;
+        com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker $r1;
+        android.app.PendingIntent $r2;
+        android.app.PendingIntent$CanceledException $r3;
+
+        $r0 := @this: com.android.internal.telephony.gsm.SMSDispatcher;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker;
+
+        $r2 = $r1.<com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker: android.app.PendingIntent mSentIntent>;
+
+        if $r2 == null goto label6;
+
+        if $i0 != 3 goto label3;
+
+        $r2 = $r1.<com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker: android.app.PendingIntent mSentIntent>;
+
+     label1:
+        virtualinvoke $r2.<android.app.PendingIntent: void send(int)>(2);
+
+     label2:
+        return;
+
+     label3:
+        $r2 = $r1.<com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker: android.app.PendingIntent mSentIntent>;
+
+        virtualinvoke $r2.<android.app.PendingIntent: void send(int)>(4);
+
+     label4:
+        return;
+
+     label5:
+        $r3 := @caughtexception;
+
+        return;
+
+     label6:
+        return;
+
+        catch android.app.PendingIntent$CanceledException from label1 to label2 with label5;
+        catch android.app.PendingIntent$CanceledException from label3 to label4 with label5;
+    }
+
+    private void handleReachSentLimit(com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker)
+    {
+        com.android.internal.telephony.gsm.SMSDispatcher $r0;
+        com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker $r1;
+        android.content.res.Resources $r2;
+        android.app.PendingIntent $r3;
+        java.lang.String $r4, $r7;
+        android.app.AlertDialog$Builder $r5;
+        android.content.Context $r6;
+        java.lang.StringBuilder $r8;
+        android.content.DialogInterface$OnClickListener $r9;
+        android.app.AlertDialog $r10;
+        android.view.Window $r11;
+        android.os.Message $r12;
+
+        $r0 := @this: com.android.internal.telephony.gsm.SMSDispatcher;
+
+        $r1 := @parameter0: com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker;
+
+        $r2 = staticinvoke <android.content.res.Resources: android.content.res.Resources getSystem()>();
+
+        $r3 = $r1.<com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker: android.app.PendingIntent mSentIntent>;
+
+        $r4 = specialinvoke $r0.<com.android.internal.telephony.gsm.SMSDispatcher: java.lang.String getAppNameByIntent(android.app.PendingIntent)>($r3);
+
+        $r5 = new android.app.AlertDialog$Builder;
+
+        $r6 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: android.content.Context mContext>;
+
+        specialinvoke $r5.<android.app.AlertDialog$Builder: void <init>(android.content.Context)>($r6);
+
+        $r7 = virtualinvoke $r2.<android.content.res.Resources: java.lang.String getString(int)>(17039975);
+
+        $r5 = virtualinvoke $r5.<android.app.AlertDialog$Builder: android.app.AlertDialog$Builder setTitle(java.lang.CharSequence)>($r7);
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r4 = virtualinvoke $r2.<android.content.res.Resources: java.lang.String getString(int)>(17039976);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r5 = virtualinvoke $r5.<android.app.AlertDialog$Builder: android.app.AlertDialog$Builder setMessage(java.lang.CharSequence)>($r4);
+
+        $r4 = virtualinvoke $r2.<android.content.res.Resources: java.lang.String getString(int)>(17039977);
+
+        $r9 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: android.content.DialogInterface$OnClickListener mListener>;
+
+        $r5 = virtualinvoke $r5.<android.app.AlertDialog$Builder: android.app.AlertDialog$Builder setPositiveButton(java.lang.CharSequence,android.content.DialogInterface$OnClickListener)>($r4, $r9);
+
+        $r4 = virtualinvoke $r2.<android.content.res.Resources: java.lang.String getString(int)>(17039978);
+
+        $r5 = virtualinvoke $r5.<android.app.AlertDialog$Builder: android.app.AlertDialog$Builder setNegativeButton(java.lang.CharSequence,android.content.DialogInterface$OnClickListener)>($r4, null);
+
+        $r10 = virtualinvoke $r5.<android.app.AlertDialog$Builder: android.app.AlertDialog create()>();
+
+        $r11 = virtualinvoke $r10.<android.app.Dialog: android.view.Window getWindow()>();
+
+        virtualinvoke $r11.<android.view.Window: void setType(int)>(2003);
+
+        virtualinvoke $r10.<android.app.Dialog: void show()>();
+
+        $r0.<com.android.internal.telephony.gsm.SMSDispatcher: com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker mSTracker> = $r1;
+
+        $r12 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,java.lang.Object)>(9, $r10);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessageDelayed(android.os.Message,long)>($r12, 6000L);
+
+        return;
+    }
+
+    private void handleSendComplete(android.os.AsyncResult)
+    {
+        com.android.internal.telephony.gsm.SMSDispatcher $r0;
+        android.os.AsyncResult $r1;
+        int $i0;
+        android.app.PendingIntent $r2, $r8;
+        java.lang.Object $r3;
+        com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker $r4;
+        java.lang.Throwable $r5;
+        java.lang.StringBuilder $r6;
+        java.lang.String $r7;
+        com.android.internal.telephony.gsm.SmsResponse $r9;
+        java.util.ArrayList $r10;
+        com.android.internal.telephony.gsm.GSMPhone $r11;
+        android.telephony.ServiceState $r12;
+        com.android.internal.telephony.gsm.CommandException $r13;
+        com.android.internal.telephony.gsm.CommandException$Error $r14, $r15;
+        android.os.Message $r16;
+        android.app.PendingIntent$CanceledException $r17, $r18;
+
+        $r0 := @this: com.android.internal.telephony.gsm.SMSDispatcher;
+
+        $r1 := @parameter0: android.os.AsyncResult;
+
+        $r3 = $r1.<android.os.AsyncResult: java.lang.Object userObj>;
+
+        $r4 = (com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker) $r3;
+
+        $r2 = $r4.<com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker: android.app.PendingIntent mSentIntent>;
+
+        $r5 = $r1.<android.os.AsyncResult: java.lang.Throwable exception>;
+
+        if $r5 != null goto label04;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SMS send complete. Broadcasting intent: ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GSM", $r7);
+
+        $r8 = $r4.<com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker: android.app.PendingIntent mDeliveryIntent>;
+
+        if $r8 == null goto label01;
+
+        $r3 = $r1.<android.os.AsyncResult: java.lang.Object result>;
+
+        $r9 = (com.android.internal.telephony.gsm.SmsResponse) $r3;
+
+        $i0 = $r9.<com.android.internal.telephony.gsm.SmsResponse: int messageRef>;
+
+        $r4.<com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker: int mMessageRef> = $i0;
+
+        $r10 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: java.util.ArrayList deliveryPendingList>;
+
+        virtualinvoke $r10.<java.util.ArrayList: boolean add(java.lang.Object)>($r4);
+
+     label01:
+        if $r2 == null goto label11;
+
+     label02:
+        virtualinvoke $r2.<android.app.PendingIntent: void send(int)>(-1);
+
+     label03:
+        return;
+
+     label04:
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GSM", "SMS send failed");
+
+        $r11 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: com.android.internal.telephony.gsm.GSMPhone mPhone>;
+
+        $r12 = virtualinvoke $r11.<com.android.internal.telephony.gsm.GSMPhone: android.telephony.ServiceState getServiceState()>();
+
+        $i0 = virtualinvoke $r12.<android.telephony.ServiceState: int getState()>();
+
+        if $i0 == 0 goto label05;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.SMSDispatcher: void handleNotInService(int,com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker)>($i0, $r4);
+
+        return;
+
+     label05:
+        $r5 = $r1.<android.os.AsyncResult: java.lang.Throwable exception>;
+
+        $r13 = (com.android.internal.telephony.gsm.CommandException) $r5;
+
+        $r13 = (com.android.internal.telephony.gsm.CommandException) $r13;
+
+        $r14 = virtualinvoke $r13.<com.android.internal.telephony.gsm.CommandException: com.android.internal.telephony.gsm.CommandException$Error getCommandError()>();
+
+        $r15 = <com.android.internal.telephony.gsm.CommandException$Error: com.android.internal.telephony.gsm.CommandException$Error SMS_FAIL_RETRY>;
+
+        if $r14 != $r15 goto label06;
+
+        $i0 = $r4.<com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker: int mRetryCount>;
+
+        if $i0 >= 3 goto label06;
+
+        $i0 = $r4.<com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker: int mRetryCount>;
+
+        $i0 = $i0 + 1;
+
+        $r4.<com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker: int mRetryCount> = $i0;
+
+        $r16 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,java.lang.Object)>(3, $r4);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessageDelayed(android.os.Message,long)>($r16, 2000L);
+
+        return;
+
+     label06:
+        $r2 = $r4.<com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker: android.app.PendingIntent mSentIntent>;
+
+        if $r2 == null goto label12;
+
+        $r2 = $r4.<com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker: android.app.PendingIntent mSentIntent>;
+
+     label07:
+        virtualinvoke $r2.<android.app.PendingIntent: void send(int)>(1);
+
+     label08:
+        return;
+
+     label09:
+        $r17 := @caughtexception;
+
+        return;
+
+     label10:
+        $r18 := @caughtexception;
+
+        return;
+
+     label11:
+        return;
+
+     label12:
+        return;
+
+        catch android.app.PendingIntent$CanceledException from label02 to label03 with label10;
+        catch android.app.PendingIntent$CanceledException from label07 to label08 with label09;
+    }
+
+    private void handleSimFull()
+    {
+        com.android.internal.telephony.gsm.SMSDispatcher $r0;
+        android.content.Intent $r1;
+
+        $r0 := @this: com.android.internal.telephony.gsm.SMSDispatcher;
+
+        $r1 = new android.content.Intent;
+
+        specialinvoke $r1.<android.content.Intent: void <init>(java.lang.String)>("android.provider.Telephony.SIM_FULL");
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.SMSDispatcher: void sendBroadcast(android.content.Intent,java.lang.String)>($r1, "android.permission.RECEIVE_SMS");
+
+        return;
+    }
+
+    private void handleStatusReport(android.os.AsyncResult)
+    {
+        com.android.internal.telephony.gsm.SMSDispatcher $r0;
+        android.os.AsyncResult $r1;
+        android.content.Intent $r2;
+        android.app.PendingIntent $r3;
+        int $i0, $i1, $i2, $i3;
+        java.lang.Object $r4;
+        java.lang.String $r5;
+        android.telephony.gsm.SmsMessage $r6;
+        java.util.ArrayList $r7;
+        com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker $r8;
+        byte[] $r9;
+        android.content.Context $r10;
+        com.android.internal.telephony.gsm.CommandsInterface $r11;
+        android.app.PendingIntent$CanceledException $r12;
+
+        $r0 := @this: com.android.internal.telephony.gsm.SMSDispatcher;
+
+        $r1 := @parameter0: android.os.AsyncResult;
+
+        $r4 = $r1.<android.os.AsyncResult: java.lang.Object result>;
+
+        $r5 = (java.lang.String) $r4;
+
+        $r6 = staticinvoke <android.telephony.gsm.SmsMessage: android.telephony.gsm.SmsMessage newFromCDS(java.lang.String)>($r5);
+
+        if $r6 == null goto label3;
+
+        $i0 = $r6.<android.telephony.gsm.SmsMessage: int messageRef>;
+
+        $i1 = 0;
+
+        $r7 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: java.util.ArrayList deliveryPendingList>;
+
+        $i2 = virtualinvoke $r7.<java.util.ArrayList: int size()>();
+
+     label1:
+        if $i1 >= $i2 goto label3;
+
+        $r7 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: java.util.ArrayList deliveryPendingList>;
+
+        $r4 = virtualinvoke $r7.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r8 = (com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker) $r4;
+
+        $i3 = $r8.<com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker: int mMessageRef>;
+
+        if $i3 != $i0 goto label4;
+
+        $r7 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: java.util.ArrayList deliveryPendingList>;
+
+        virtualinvoke $r7.<java.util.ArrayList: java.lang.Object remove(int)>($i1);
+
+        $r3 = $r8.<com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker: android.app.PendingIntent mDeliveryIntent>;
+
+        $r2 = new android.content.Intent;
+
+        specialinvoke $r2.<android.content.Intent: void <init>()>();
+
+        $r9 = staticinvoke <com.android.internal.telephony.gsm.SimUtils: byte[] hexStringToBytes(java.lang.String)>($r5);
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,byte[])>("pdu", $r9);
+
+        $r10 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: android.content.Context mContext>;
+
+     label2:
+        virtualinvoke $r3.<android.app.PendingIntent: void send(android.content.Context,int,android.content.Intent)>($r10, -1, $r2);
+
+     label3:
+        $r11 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: com.android.internal.telephony.gsm.CommandsInterface mCm>;
+
+        if $r11 == null goto label6;
+
+        $r11 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: com.android.internal.telephony.gsm.CommandsInterface mCm>;
+
+        interfaceinvoke $r11.<com.android.internal.telephony.gsm.CommandsInterface: void acknowledgeLastIncomingSMS(boolean,android.os.Message)>(1, null);
+
+        return;
+
+     label4:
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label5:
+        $r12 := @caughtexception;
+
+        goto label3;
+
+     label6:
+        return;
+
+        catch android.app.PendingIntent$CanceledException from label2 to label3 with label5;
+    }
+
+    private boolean isMultipartTracker(com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker)
+    {
+        com.android.internal.telephony.gsm.SMSDispatcher $r0;
+        com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker $r1;
+        java.util.HashMap $r2;
+        java.lang.Object $r3;
+
+        $r0 := @this: com.android.internal.telephony.gsm.SMSDispatcher;
+
+        $r1 := @parameter0: com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker;
+
+        $r2 = $r1.<com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker: java.util.HashMap mData>;
+
+        $r3 = virtualinvoke $r2.<java.util.HashMap: java.lang.Object get(java.lang.Object)>("parts");
+
+        if $r3 == null goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    private void processMessagePart(android.telephony.gsm.SmsMessage, int, int, int, int)
+    {
+        com.android.internal.telephony.gsm.SMSDispatcher $r0;
+        android.telephony.gsm.SmsMessage $r1;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i8;
+        java.lang.String[] $r2, $r10;
+        java.io.ByteArrayOutputStream $r3;
+        android.content.ContentValues $r4;
+        java.lang.StringBuilder $r5;
+        java.lang.String $r6;
+        android.database.Cursor $r7, $r11;
+        android.content.ContentResolver $r8;
+        android.net.Uri $r9;
+        java.lang.Long $r12;
+        long $l7;
+        byte[] $r13;
+        java.lang.Integer $r14;
+        byte[][] $r15;
+        android.database.SQLException $r16;
+        java.lang.Throwable $r17;
+        com.android.internal.telephony.WapPushOverSms $r18;
+
+        $r0 := @this: com.android.internal.telephony.gsm.SMSDispatcher;
+
+        $r1 := @parameter0: android.telephony.gsm.SmsMessage;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        $i3 := @parameter4: int;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>(java.lang.String)>("reference_number =");
+
+        virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" AND address = ?");
+
+        $r2 = newarray (java.lang.String)[1];
+
+        $r6 = virtualinvoke $r1.<android.telephony.gsm.SmsMessage: java.lang.String getOriginatingAddress()>();
+
+        $r2[0] = $r6;
+
+        $r7 = null;
+
+     label01:
+        $r8 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: android.content.ContentResolver mResolver>;
+
+        $r9 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: android.net.Uri mRawUri>;
+
+        $r10 = <com.android.internal.telephony.gsm.SMSDispatcher: java.lang.String[] RAW_PROJECTION>;
+
+     label02:
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r11 = virtualinvoke $r8.<android.content.ContentResolver: android.database.Cursor query(android.net.Uri,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String)>($r9, $r10, $r6, $r2, null);
+
+        $r7 = $r11;
+
+        $i5 = interfaceinvoke $r11.<android.database.Cursor: int getCount()>();
+
+     label03:
+        $i6 = $i2 - 1;
+
+     label04:
+        if $i5 == $i6 goto label08;
+
+        $r4 = new android.content.ContentValues;
+
+        specialinvoke $r4.<android.content.ContentValues: void <init>()>();
+
+        $r12 = new java.lang.Long;
+
+        $l7 = virtualinvoke $r1.<android.telephony.gsm.SmsMessage: long getTimestampMillis()>();
+
+        specialinvoke $r12.<java.lang.Long: void <init>(long)>($l7);
+
+        virtualinvoke $r4.<android.content.ContentValues: void put(java.lang.String,java.lang.Long)>("date", $r12);
+
+        $r13 = virtualinvoke $r1.<android.telephony.gsm.SmsMessage: byte[] getPdu()>();
+
+        $r6 = staticinvoke <com.android.internal.util.HexDump: java.lang.String toHexString(byte[])>($r13);
+
+        virtualinvoke $r4.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("pdu", $r6);
+
+        $r6 = virtualinvoke $r1.<android.telephony.gsm.SmsMessage: java.lang.String getOriginatingAddress()>();
+
+        virtualinvoke $r4.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("address", $r6);
+
+        $r14 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        virtualinvoke $r4.<android.content.ContentValues: void put(java.lang.String,java.lang.Integer)>("reference_number", $r14);
+
+        $r14 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        virtualinvoke $r4.<android.content.ContentValues: void put(java.lang.String,java.lang.Integer)>("count", $r14);
+
+        $r14 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        virtualinvoke $r4.<android.content.ContentValues: void put(java.lang.String,java.lang.Integer)>("sequence", $r14);
+
+        if $i3 == -1 goto label05;
+
+        $r14 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i3);
+
+        virtualinvoke $r4.<android.content.ContentValues: void put(java.lang.String,java.lang.Integer)>("destination_port", $r14);
+
+     label05:
+        $r8 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: android.content.ContentResolver mResolver>;
+
+     label06:
+        $r9 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: android.net.Uri mRawUri>;
+
+        virtualinvoke $r8.<android.content.ContentResolver: android.net.Uri insert(android.net.Uri,android.content.ContentValues)>($r9, $r4);
+
+     label07:
+        if $r11 == null goto label31;
+
+        interfaceinvoke $r11.<android.database.Cursor: void close()>();
+
+        return;
+
+     label08:
+        $i0 = interfaceinvoke $r11.<android.database.Cursor: int getColumnIndex(java.lang.String)>("pdu");
+
+        $i6 = interfaceinvoke $r11.<android.database.Cursor: int getColumnIndex(java.lang.String)>("sequence");
+
+     label09:
+        $r15 = newarray (byte[])[$i2];
+
+     label10:
+        $i8 = 0;
+
+     label11:
+        if $i8 >= $i5 goto label16;
+
+        interfaceinvoke $r11.<android.database.Cursor: boolean moveToNext()>();
+
+        $l7 = interfaceinvoke $r11.<android.database.Cursor: long getLong(int)>($i6);
+
+     label12:
+        $i4 = (int) $l7;
+
+     label13:
+        $i4 = $i4 - 1;
+
+        $r6 = interfaceinvoke $r11.<android.database.Cursor: java.lang.String getString(int)>($i0);
+
+        $r13 = staticinvoke <com.android.internal.util.HexDump: byte[] hexStringToByteArray(java.lang.String)>($r6);
+
+     label14:
+        $r15[$i4] = $r13;
+
+     label15:
+        $i8 = $i8 + 1;
+
+        goto label11;
+
+     label16:
+        $i0 = $i1 - 1;
+
+        $r13 = virtualinvoke $r1.<android.telephony.gsm.SmsMessage: byte[] getPdu()>();
+
+     label17:
+        $r15[$i0] = $r13;
+
+        $r8 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: android.content.ContentResolver mResolver>;
+
+     label18:
+        $r9 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: android.net.Uri mRawUri>;
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r8.<android.content.ContentResolver: int delete(android.net.Uri,java.lang.String,java.lang.String[])>($r9, $r6, $r2);
+
+     label19:
+        if $r11 == null goto label20;
+
+        interfaceinvoke $r11.<android.database.Cursor: void close()>();
+
+     label20:
+        lookupswitch($i3)
+        {
+            case -1: goto label30;
+            case 2948: goto label27;
+            default: goto label21;
+        };
+
+     label21:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.SMSDispatcher: void dispatchPortAddressedPdus(byte[][],int)>($r15, $i3);
+
+        return;
+
+     label22:
+        $r16 := @caughtexception;
+
+     label23:
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("GSM", "Can\'t access multipart SMS database", $r16);
+
+     label24:
+        if $r7 == null goto label32;
+
+        interfaceinvoke $r7.<android.database.Cursor: void close()>();
+
+        return;
+
+     label25:
+        $r17 := @caughtexception;
+
+        if $r7 == null goto label26;
+
+        interfaceinvoke $r7.<android.database.Cursor: void close()>();
+
+     label26:
+        throw $r17;
+
+     label27:
+        $r3 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r3.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        $i0 = 0;
+
+     label28:
+        if $i0 >= $i2 goto label29;
+
+        $r13 = $r15[$i0];
+
+        $r1 = staticinvoke <android.telephony.gsm.SmsMessage: android.telephony.gsm.SmsMessage createFromPdu(byte[])>($r13);
+
+        $r13 = virtualinvoke $r1.<android.telephony.gsm.SmsMessage: byte[] getUserData()>();
+
+        $i1 = lengthof $r13;
+
+        virtualinvoke $r3.<java.io.ByteArrayOutputStream: void write(byte[],int,int)>($r13, 0, $i1);
+
+        $i0 = $i0 + 1;
+
+        goto label28;
+
+     label29:
+        $r18 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: com.android.internal.telephony.WapPushOverSms mWapPush>;
+
+        $r13 = virtualinvoke $r3.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        virtualinvoke $r18.<com.android.internal.telephony.WapPushOverSms: void dispatchWapPdu(byte[])>($r13);
+
+        return;
+
+     label30:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.SMSDispatcher: void dispatchPdus(byte[][])>($r15);
+
+        return;
+
+     label31:
+        return;
+
+     label32:
+        return;
+
+        catch android.database.SQLException from label02 to label03 with label22;
+        catch android.database.SQLException from label04 to label05 with label22;
+        catch android.database.SQLException from label06 to label07 with label22;
+        catch java.lang.Throwable from label01 to label03 with label25;
+        catch java.lang.Throwable from label04 to label07 with label25;
+        catch android.database.SQLException from label08 to label09 with label22;
+        catch android.database.SQLException from label11 to label12 with label22;
+        catch android.database.SQLException from label13 to label14 with label22;
+        catch android.database.SQLException from label16 to label17 with label22;
+        catch android.database.SQLException from label18 to label19 with label22;
+        catch java.lang.Throwable from label08 to label10 with label25;
+        catch java.lang.Throwable from label11 to label15 with label25;
+        catch java.lang.Throwable from label16 to label19 with label25;
+        catch java.lang.Throwable from label23 to label24 with label25;
+    }
+
+    private void sendBroadcast(android.content.Intent, java.lang.String)
+    {
+        com.android.internal.telephony.gsm.SMSDispatcher $r0;
+        android.content.Intent $r1;
+        java.lang.String $r2;
+        android.os.PowerManager$WakeLock $r3;
+        android.content.Context $r4;
+
+        $r0 := @this: com.android.internal.telephony.gsm.SMSDispatcher;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: android.os.PowerManager$WakeLock mWakeLock>;
+
+        virtualinvoke $r3.<android.os.PowerManager$WakeLock: void acquire(long)>(5000L);
+
+        $r4 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: android.content.Context mContext>;
+
+        virtualinvoke $r4.<android.content.Context: void sendBroadcast(android.content.Intent,java.lang.String)>($r1, $r2);
+
+        return;
+    }
+
+    private void sendMultipartSms(com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker)
+    {
+        com.android.internal.telephony.gsm.SMSDispatcher $r0;
+        com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker $r1;
+        java.util.HashMap $r2;
+        java.lang.Object $r3;
+        java.lang.String $r4, $r5;
+        java.util.ArrayList $r6, $r7, $r8;
+
+        $r0 := @this: com.android.internal.telephony.gsm.SMSDispatcher;
+
+        $r1 := @parameter0: com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker;
+
+        $r2 = $r1.<com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker: java.util.HashMap mData>;
+
+        $r3 = virtualinvoke $r2.<java.util.HashMap: java.lang.Object get(java.lang.Object)>("destination");
+
+        $r4 = (java.lang.String) $r3;
+
+        $r3 = virtualinvoke $r2.<java.util.HashMap: java.lang.Object get(java.lang.Object)>("scaddress");
+
+        $r5 = (java.lang.String) $r3;
+
+        $r3 = virtualinvoke $r2.<java.util.HashMap: java.lang.Object get(java.lang.Object)>("parts");
+
+        $r6 = (java.util.ArrayList) $r3;
+
+        $r3 = virtualinvoke $r2.<java.util.HashMap: java.lang.Object get(java.lang.Object)>("sentIntents");
+
+        $r7 = (java.util.ArrayList) $r3;
+
+        $r3 = virtualinvoke $r2.<java.util.HashMap: java.lang.Object get(java.lang.Object)>("deliveryIntents");
+
+        $r8 = (java.util.ArrayList) $r3;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.SMSDispatcher: void sendMultipartTextWithPermit(java.lang.String,java.lang.String,java.util.ArrayList,java.util.ArrayList,java.util.ArrayList)>($r4, $r5, $r6, $r7, $r8);
+
+        return;
+    }
+
+    private void sendMultipartTextWithPermit(java.lang.String, java.lang.String, java.util.ArrayList, java.util.ArrayList, java.util.ArrayList)
+    {
+        com.android.internal.telephony.gsm.SMSDispatcher $r0;
+        java.lang.String $r1, $r2, $r16;
+        java.util.ArrayList $r3, $r4, $r5;
+        com.android.internal.telephony.gsm.SmsHeader $r6;
+        java.util.HashMap $r7;
+        android.app.PendingIntent $r8, $r9;
+        com.android.internal.telephony.gsm.GSMPhone $r10;
+        android.telephony.ServiceState $r11;
+        int $i0, $i1, $i2, $i3;
+        java.lang.Object $r12;
+        com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker $r13;
+        byte[] $r14;
+        byte $b4;
+        com.android.internal.telephony.gsm.SmsHeader$Element $r15;
+        boolean $z0;
+        android.telephony.gsm.SmsMessage$SubmitPdu $r17;
+
+        $r0 := @this: com.android.internal.telephony.gsm.SMSDispatcher;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.util.ArrayList;
+
+        $r4 := @parameter3: java.util.ArrayList;
+
+        $r5 := @parameter4: java.util.ArrayList;
+
+        $r8 = null;
+
+        $r9 = null;
+
+        $r10 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: com.android.internal.telephony.gsm.GSMPhone mPhone>;
+
+        $r11 = virtualinvoke $r10.<com.android.internal.telephony.gsm.GSMPhone: android.telephony.ServiceState getServiceState()>();
+
+        $i0 = virtualinvoke $r11.<android.telephony.ServiceState: int getState()>();
+
+        if $i0 == 0 goto label03;
+
+        $i1 = 0;
+
+        $i2 = virtualinvoke $r3.<java.util.ArrayList: int size()>();
+
+     label01:
+        if $i1 >= $i2 goto label09;
+
+        if $r4 == null goto label02;
+
+        $i3 = virtualinvoke $r4.<java.util.ArrayList: int size()>();
+
+        if $i3 <= $i1 goto label02;
+
+        $r12 = virtualinvoke $r4.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r8 = (android.app.PendingIntent) $r12;
+
+     label02:
+        $r13 = new com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker;
+
+        specialinvoke $r13.<com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker: void <init>(java.util.HashMap,android.app.PendingIntent,android.app.PendingIntent)>(null, $r8, null);
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.SMSDispatcher: void handleNotInService(int,com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker)>($i0, $r13);
+
+        $i1 = $i1 + 1;
+
+        goto label01;
+
+     label03:
+        $i0 = <com.android.internal.telephony.gsm.SMSDispatcher: int sConcatenatedRef>;
+
+        $i0 = $i0 + 1;
+
+        <com.android.internal.telephony.gsm.SMSDispatcher: int sConcatenatedRef> = $i0;
+
+        $i0 = $i0 & 255;
+
+        $i1 = 0;
+
+        $i2 = virtualinvoke $r3.<java.util.ArrayList: int size()>();
+
+     label04:
+        if $i1 >= $i2 goto label10;
+
+        $r14 = newarray (byte)[3];
+
+        $b4 = (byte) $i0;
+
+        $r14[0] = $b4;
+
+        $b4 = (byte) $i2;
+
+        $r14[1] = $b4;
+
+        $i3 = $i1 + 1;
+
+        $b4 = (byte) $i3;
+
+        $r14[2] = $b4;
+
+        $r6 = new com.android.internal.telephony.gsm.SmsHeader;
+
+        specialinvoke $r6.<com.android.internal.telephony.gsm.SmsHeader: void <init>()>();
+
+        $r15 = new com.android.internal.telephony.gsm.SmsHeader$Element;
+
+        specialinvoke $r15.<com.android.internal.telephony.gsm.SmsHeader$Element: void <init>(int,byte[])>(0, $r14);
+
+        virtualinvoke $r6.<com.android.internal.telephony.gsm.SmsHeader: void add(com.android.internal.telephony.gsm.SmsHeader$Element)>($r15);
+
+        if $r4 == null goto label05;
+
+        $i3 = virtualinvoke $r4.<java.util.ArrayList: int size()>();
+
+        if $i3 <= $i1 goto label05;
+
+        $r12 = virtualinvoke $r4.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r8 = (android.app.PendingIntent) $r12;
+
+     label05:
+        if $r5 == null goto label06;
+
+        $i3 = virtualinvoke $r5.<java.util.ArrayList: int size()>();
+
+        if $i3 <= $i1 goto label06;
+
+        $r12 = virtualinvoke $r5.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r9 = (android.app.PendingIntent) $r12;
+
+     label06:
+        $r12 = virtualinvoke $r3.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r16 = (java.lang.String) $r12;
+
+        if $r9 == null goto label08;
+
+        $z0 = 1;
+
+     label07:
+        $r14 = virtualinvoke $r6.<com.android.internal.telephony.gsm.SmsHeader: byte[] toByteArray()>();
+
+        $r17 = staticinvoke <android.telephony.gsm.SmsMessage: android.telephony.gsm.SmsMessage$SubmitPdu getSubmitPdu(java.lang.String,java.lang.String,java.lang.String,boolean,byte[])>($r2, $r1, $r16, $z0, $r14);
+
+        $r7 = new java.util.HashMap;
+
+        specialinvoke $r7.<java.util.HashMap: void <init>()>();
+
+        $r14 = $r17.<android.telephony.gsm.SmsMessage$SubmitPdu: byte[] encodedScAddress>;
+
+        virtualinvoke $r7.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("smsc", $r14);
+
+        $r14 = $r17.<android.telephony.gsm.SmsMessage$SubmitPdu: byte[] encodedMessage>;
+
+        virtualinvoke $r7.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("pdu", $r14);
+
+        $r13 = new com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker;
+
+        specialinvoke $r13.<com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker: void <init>(java.util.HashMap,android.app.PendingIntent,android.app.PendingIntent)>($r7, $r8, $r9);
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.SMSDispatcher: void sendSms(com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker)>($r13);
+
+        $i1 = $i1 + 1;
+
+        goto label04;
+
+     label08:
+        $z0 = 0;
+
+        goto label07;
+
+     label09:
+        return;
+
+     label10:
+        return;
+    }
+
+    private void sendSms(com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker)
+    {
+        com.android.internal.telephony.gsm.SMSDispatcher $r0;
+        com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker $r1;
+        java.util.HashMap $r2;
+        java.lang.Object $r3;
+        byte[] $r4, $r5;
+        android.os.Message $r6;
+        com.android.internal.telephony.gsm.CommandsInterface $r7;
+        java.lang.String $r8, $r9;
+
+        $r0 := @this: com.android.internal.telephony.gsm.SMSDispatcher;
+
+        $r1 := @parameter0: com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker;
+
+        $r2 = $r1.<com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker: java.util.HashMap mData>;
+
+        $r3 = virtualinvoke $r2.<java.util.HashMap: java.lang.Object get(java.lang.Object)>("smsc");
+
+        $r4 = (byte[]) $r3;
+
+        $r4 = (byte[]) $r4;
+
+        $r3 = virtualinvoke $r2.<java.util.HashMap: java.lang.Object get(java.lang.Object)>("pdu");
+
+        $r5 = (byte[]) $r3;
+
+        $r5 = (byte[]) $r5;
+
+        $r6 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,java.lang.Object)>(2, $r1);
+
+        $r7 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: com.android.internal.telephony.gsm.CommandsInterface mCm>;
+
+        $r8 = staticinvoke <com.android.internal.telephony.gsm.SimUtils: java.lang.String bytesToHexString(byte[])>($r4);
+
+        $r9 = staticinvoke <com.android.internal.telephony.gsm.SimUtils: java.lang.String bytesToHexString(byte[])>($r5);
+
+        interfaceinvoke $r7.<com.android.internal.telephony.gsm.CommandsInterface: void sendSMS(java.lang.String,java.lang.String,android.os.Message)>($r8, $r9, $r6);
+
+        return;
+    }
+
+    void dispatchMessage(android.telephony.gsm.SmsMessage)
+    {
+        com.android.internal.telephony.gsm.SMSDispatcher $r0;
+        android.telephony.gsm.SmsMessage $r1;
+        byte[][] $r2;
+        boolean $z0, $z1;
+        com.android.internal.telephony.gsm.GSMPhone $r3;
+        java.lang.StringBuilder $r4;
+        java.lang.String $r5;
+        int $i0, $i3, $i4;
+        short $s1, $s2, $s6;
+        com.android.internal.telephony.gsm.SmsHeader $r6;
+        java.util.ArrayList $r7;
+        java.util.Iterator $r8;
+        java.lang.Object $r9;
+        com.android.internal.telephony.gsm.SmsHeader$Element $r10;
+        byte[] $r11;
+        byte $b5;
+        java.lang.ArrayIndexOutOfBoundsException $r12;
+        com.android.internal.telephony.WapPushOverSms $r13;
+
+        $r0 := @this: com.android.internal.telephony.gsm.SMSDispatcher;
+
+        $r1 := @parameter0: android.telephony.gsm.SmsMessage;
+
+        if $r1 != null goto label01;
+
+        return;
+
+     label01:
+        $z0 = 0;
+
+        $z1 = virtualinvoke $r1.<android.telephony.gsm.SmsMessage: boolean isMWISetMessage()>();
+
+        if $z1 == 0 goto label12;
+
+        $r3 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: com.android.internal.telephony.gsm.GSMPhone mPhone>;
+
+        virtualinvoke $r3.<com.android.internal.telephony.gsm.GSMPhone: void updateMessageWaitingIndicator(boolean)>(1);
+
+        $z1 = virtualinvoke $r1.<android.telephony.gsm.SmsMessage: boolean isMwiDontStore()>();
+
+        if $z1 == 0 goto label02;
+
+        $z0 = 1;
+
+     label02:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Received voice mail indicator set SMS shouldStore=");
+
+        if $z0 != 0 goto label11;
+
+        $z1 = 1;
+
+     label03:
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GSM", $r5);
+
+     label04:
+        if $z0 != 0 goto label32;
+
+        $i0 = -1;
+
+        $s1 = 0;
+
+        $s2 = 0;
+
+        $i3 = -1;
+
+        $r6 = virtualinvoke $r1.<android.telephony.gsm.SmsMessage: com.android.internal.telephony.gsm.SmsHeader getUserDataHeader()>();
+
+        if $r6 == null goto label28;
+
+        $r7 = virtualinvoke $r6.<com.android.internal.telephony.gsm.SmsHeader: java.util.ArrayList getElements()>();
+
+        $r8 = virtualinvoke $r7.<java.util.AbstractList: java.util.Iterator iterator()>();
+
+     label05:
+        $z0 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label28;
+
+        $r9 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        $r10 = (com.android.internal.telephony.gsm.SmsHeader$Element) $r9;
+
+     label06:
+        $i4 = virtualinvoke $r10.<com.android.internal.telephony.gsm.SmsHeader$Element: int getID()>();
+
+        lookupswitch($i4)
+        {
+            case 0: goto label08;
+            case 5: goto label23;
+            case 8: goto label16;
+            default: goto label07;
+        };
+
+     label07:
+        goto label05;
+
+     label08:
+        $r11 = virtualinvoke $r10.<com.android.internal.telephony.gsm.SmsHeader$Element: byte[] getData()>();
+
+        $b5 = $r11[0];
+
+        $i0 = $b5 & 255;
+
+        $b5 = $r11[1];
+
+        $s1 = $b5 & 255;
+
+        $b5 = $r11[2];
+
+     label09:
+        $s2 = $b5 & 255;
+
+        if $s1 == 0 goto label10;
+
+        if $s2 == 0 goto label10;
+
+        if $s2 <= $s1 goto label05;
+
+     label10:
+        $i0 = -1;
+
+        goto label05;
+
+     label11:
+        $z1 = 0;
+
+        goto label03;
+
+     label12:
+        $z1 = virtualinvoke $r1.<android.telephony.gsm.SmsMessage: boolean isMWIClearMessage()>();
+
+        if $z1 == 0 goto label04;
+
+        $r3 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: com.android.internal.telephony.gsm.GSMPhone mPhone>;
+
+        virtualinvoke $r3.<com.android.internal.telephony.gsm.GSMPhone: void updateMessageWaitingIndicator(boolean)>(0);
+
+        $z1 = virtualinvoke $r1.<android.telephony.gsm.SmsMessage: boolean isMwiDontStore()>();
+
+        if $z1 == 0 goto label13;
+
+        $z0 = 1;
+
+     label13:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Received voice mail indicator clear SMS shouldStore=");
+
+        if $z0 != 0 goto label15;
+
+        $z1 = 1;
+
+     label14:
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GSM", $r5);
+
+        goto label04;
+
+     label15:
+        $z1 = 0;
+
+        goto label14;
+
+     label16:
+        $r11 = virtualinvoke $r10.<com.android.internal.telephony.gsm.SmsHeader$Element: byte[] getData()>();
+
+        $b5 = $r11[0];
+
+     label17:
+        $s1 = $b5 & 255;
+
+     label18:
+        $i0 = $s1 * 256;
+
+        $b5 = $r11[1];
+
+     label19:
+        $s1 = $b5 & 255;
+
+     label20:
+        $i0 = $i0 + $s1;
+
+        $b5 = $r11[2];
+
+        $s1 = $b5 & 255;
+
+        $b5 = $r11[3];
+
+     label21:
+        $s2 = $b5 & 255;
+
+        if $s1 == 0 goto label22;
+
+        if $s2 == 0 goto label22;
+
+        if $s2 <= $s1 goto label05;
+
+     label22:
+        $i0 = -1;
+
+        goto label05;
+
+     label23:
+        $r11 = virtualinvoke $r10.<com.android.internal.telephony.gsm.SmsHeader$Element: byte[] getData()>();
+
+        $b5 = $r11[0];
+
+     label24:
+        $s6 = $b5 & 255;
+
+     label25:
+        $i3 = $s6 << 8;
+
+        $b5 = $r11[1];
+
+     label26:
+        $s6 = $b5 & 255;
+
+        $i3 = $i3 | $s6;
+
+        goto label05;
+
+     label27:
+        $r12 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("GSM", "Bad element in header", $r12);
+
+        return;
+
+     label28:
+        if $i0 != -1 goto label31;
+
+        $r2 = newarray (byte[])[1];
+
+        $r11 = virtualinvoke $r1.<android.telephony.gsm.SmsMessage: byte[] getPdu()>();
+
+        $r2[0] = $r11;
+
+        if $i3 == -1 goto label30;
+
+        if $i3 != 2948 goto label29;
+
+        $r13 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: com.android.internal.telephony.WapPushOverSms mWapPush>;
+
+        $r11 = virtualinvoke $r1.<android.telephony.gsm.SmsMessage: byte[] getUserData()>();
+
+        virtualinvoke $r13.<com.android.internal.telephony.WapPushOverSms: void dispatchWapPdu(byte[])>($r11);
+
+     label29:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.SMSDispatcher: void dispatchPortAddressedPdus(byte[][],int)>($r2, $i3);
+
+        return;
+
+     label30:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.SMSDispatcher: void dispatchPdus(byte[][])>($r2);
+
+        return;
+
+     label31:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.SMSDispatcher: void processMessagePart(android.telephony.gsm.SmsMessage,int,int,int,int)>($r1, $i0, $s2, $s1, $i3);
+
+        return;
+
+     label32:
+        return;
+
+        catch java.lang.ArrayIndexOutOfBoundsException from label06 to label07 with label27;
+        catch java.lang.ArrayIndexOutOfBoundsException from label08 to label09 with label27;
+        catch java.lang.ArrayIndexOutOfBoundsException from label16 to label17 with label27;
+        catch java.lang.ArrayIndexOutOfBoundsException from label18 to label19 with label27;
+        catch java.lang.ArrayIndexOutOfBoundsException from label20 to label21 with label27;
+        catch java.lang.ArrayIndexOutOfBoundsException from label23 to label24 with label27;
+        catch java.lang.ArrayIndexOutOfBoundsException from label25 to label26 with label27;
+    }
+
+    public void handleMessage(android.os.Message)
+    {
+        com.android.internal.telephony.gsm.SMSDispatcher $r0;
+        android.os.Message $r1;
+        int $i0;
+        java.lang.Object $r2;
+        android.os.AsyncResult $r3;
+        com.android.internal.telephony.gsm.CommandsInterface $r4;
+        java.lang.Throwable $r5;
+        java.lang.StringBuilder $r6;
+        java.lang.String $r7;
+        android.telephony.gsm.SmsMessage $r8;
+        com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker $r9;
+        android.app.AlertDialog $r10;
+        boolean $z0;
+
+        $r0 := @this: com.android.internal.telephony.gsm.SMSDispatcher;
+
+        $r1 := @parameter0: android.os.Message;
+
+        $i0 = $r1.<android.os.Message: int what>;
+
+        lookupswitch($i0)
+        {
+            case 1: goto label02;
+            case 2: goto label05;
+            case 3: goto label06;
+            case 4: goto label01;
+            case 5: goto label07;
+            case 6: goto label08;
+            case 7: goto label09;
+            case 8: goto label11;
+            case 9: goto label10;
+            default: goto label01;
+        };
+
+     label01:
+        return;
+
+     label02:
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GSM", "New SMS Message Received");
+
+        $r2 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r3 = (android.os.AsyncResult) $r2;
+
+        $r4 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: com.android.internal.telephony.gsm.CommandsInterface mCm>;
+
+        if $r4 == null goto label03;
+
+        $r4 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: com.android.internal.telephony.gsm.CommandsInterface mCm>;
+
+        interfaceinvoke $r4.<com.android.internal.telephony.gsm.CommandsInterface: void acknowledgeLastIncomingSMS(boolean,android.os.Message)>(1, null);
+
+     label03:
+        $r5 = $r3.<android.os.AsyncResult: java.lang.Throwable exception>;
+
+        if $r5 == null goto label04;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exception processing incoming SMS. Exception:");
+
+        $r5 = $r3.<android.os.AsyncResult: java.lang.Throwable exception>;
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("GSM", $r7);
+
+        return;
+
+     label04:
+        $r2 = $r3.<android.os.AsyncResult: java.lang.Object result>;
+
+        $r8 = (android.telephony.gsm.SmsMessage) $r2;
+
+        virtualinvoke $r0.<com.android.internal.telephony.gsm.SMSDispatcher: void dispatchMessage(android.telephony.gsm.SmsMessage)>($r8);
+
+        return;
+
+     label05:
+        $r2 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r3 = (android.os.AsyncResult) $r2;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.SMSDispatcher: void handleSendComplete(android.os.AsyncResult)>($r3);
+
+        return;
+
+     label06:
+        $r2 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r9 = (com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker) $r2;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.SMSDispatcher: void sendSms(com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker)>($r9);
+
+        return;
+
+     label07:
+        $r2 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r3 = (android.os.AsyncResult) $r2;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.SMSDispatcher: void handleStatusReport(android.os.AsyncResult)>($r3);
+
+        return;
+
+     label08:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.SMSDispatcher: void handleSimFull()>();
+
+        return;
+
+     label09:
+        $r2 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r9 = (com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker) $r2;
+
+        $r9 = (com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker) $r9;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.SMSDispatcher: void handleReachSentLimit(com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker)>($r9);
+
+        return;
+
+     label10:
+        $r2 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r10 = (android.app.AlertDialog) $r2;
+
+        $r10 = (android.app.AlertDialog) $r10;
+
+        virtualinvoke $r10.<android.app.Dialog: void dismiss()>();
+
+        $r1.<android.os.Message: java.lang.Object obj> = null;
+
+        $r0.<com.android.internal.telephony.gsm.SMSDispatcher: com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker mSTracker> = null;
+
+        return;
+
+     label11:
+        $r9 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker mSTracker>;
+
+        if $r9 == null goto label14;
+
+        $r9 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker mSTracker>;
+
+        $z0 = specialinvoke $r0.<com.android.internal.telephony.gsm.SMSDispatcher: boolean isMultipartTracker(com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker)>($r9);
+
+        if $z0 == 0 goto label13;
+
+        $r9 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker mSTracker>;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.SMSDispatcher: void sendMultipartSms(com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker)>($r9);
+
+     label12:
+        $r0.<com.android.internal.telephony.gsm.SMSDispatcher: com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker mSTracker> = null;
+
+        return;
+
+     label13:
+        $r9 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker mSTracker>;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.SMSDispatcher: void sendSms(com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker)>($r9);
+
+        goto label12;
+
+     label14:
+        return;
+    }
+
+    void sendMultipartText(java.lang.String, java.lang.String, java.util.ArrayList, java.util.ArrayList, java.util.ArrayList)
+    {
+        com.android.internal.telephony.gsm.SMSDispatcher $r0;
+        java.lang.String $r1, $r2, $r12;
+        java.util.ArrayList $r3, $r4, $r5;
+        java.util.HashMap $r6;
+        com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker $r7;
+        android.app.PendingIntent $r8;
+        com.android.internal.telephony.gsm.GSMPhone $r9;
+        android.telephony.ServiceState $r10;
+        int $i0;
+        java.lang.Object $r11;
+        com.android.internal.telephony.gsm.SMSDispatcher$SmsCounter $r13;
+        boolean $z0;
+        android.os.Message $r14;
+
+        $r0 := @this: com.android.internal.telephony.gsm.SMSDispatcher;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.util.ArrayList;
+
+        $r4 := @parameter3: java.util.ArrayList;
+
+        $r5 := @parameter4: java.util.ArrayList;
+
+        $r8 = null;
+
+        $r9 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: com.android.internal.telephony.gsm.GSMPhone mPhone>;
+
+        $r10 = virtualinvoke $r9.<com.android.internal.telephony.gsm.GSMPhone: android.telephony.ServiceState getServiceState()>();
+
+        $i0 = virtualinvoke $r10.<android.telephony.ServiceState: int getState()>();
+
+        if $i0 != 0 goto label2;
+
+        if $r4 == null goto label1;
+
+        $i0 = virtualinvoke $r4.<java.util.ArrayList: int size()>();
+
+        if $i0 <= 0 goto label1;
+
+        $r11 = virtualinvoke $r4.<java.util.ArrayList: java.lang.Object get(int)>(0);
+
+        $r8 = (android.app.PendingIntent) $r11;
+
+     label1:
+        $r12 = specialinvoke $r0.<com.android.internal.telephony.gsm.SMSDispatcher: java.lang.String getAppNameByIntent(android.app.PendingIntent)>($r8);
+
+        $r13 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: com.android.internal.telephony.gsm.SMSDispatcher$SmsCounter mCounter>;
+
+        $i0 = virtualinvoke $r3.<java.util.ArrayList: int size()>();
+
+        $z0 = virtualinvoke $r13.<com.android.internal.telephony.gsm.SMSDispatcher$SmsCounter: boolean check(java.lang.String,int)>($r12, $i0);
+
+        if $z0 != 0 goto label2;
+
+        $r6 = new java.util.HashMap;
+
+        specialinvoke $r6.<java.util.HashMap: void <init>()>();
+
+        virtualinvoke $r6.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("destination", $r1);
+
+        virtualinvoke $r6.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("scaddress", $r2);
+
+        virtualinvoke $r6.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("parts", $r3);
+
+        virtualinvoke $r6.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("sentIntents", $r4);
+
+        virtualinvoke $r6.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("deliveryIntents", $r5);
+
+        $r7 = new com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker;
+
+        specialinvoke $r7.<com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker: void <init>(java.util.HashMap,android.app.PendingIntent,android.app.PendingIntent)>($r6, null, null);
+
+        $r14 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,java.lang.Object)>(7, $r7);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r14);
+
+        return;
+
+     label2:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.SMSDispatcher: void sendMultipartTextWithPermit(java.lang.String,java.lang.String,java.util.ArrayList,java.util.ArrayList,java.util.ArrayList)>($r1, $r2, $r3, $r4, $r5);
+
+        return;
+    }
+
+    void sendRawPdu(byte[], byte[], android.app.PendingIntent, android.app.PendingIntent)
+    {
+        com.android.internal.telephony.gsm.SMSDispatcher $r0;
+        byte[] $r1, $r2;
+        android.app.PendingIntent $r3, $r4;
+        java.util.HashMap $r5;
+        com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker $r6;
+        com.android.internal.telephony.gsm.GSMPhone $r7;
+        android.telephony.ServiceState $r8;
+        int $i0;
+        java.lang.String $r9;
+        com.android.internal.telephony.gsm.SMSDispatcher$SmsCounter $r10;
+        boolean $z0;
+        android.os.Message $r11;
+        android.app.PendingIntent$CanceledException $r12;
+
+        $r0 := @this: com.android.internal.telephony.gsm.SMSDispatcher;
+
+        $r1 := @parameter0: byte[];
+
+        $r2 := @parameter1: byte[];
+
+        $r3 := @parameter2: android.app.PendingIntent;
+
+        $r4 := @parameter3: android.app.PendingIntent;
+
+        if $r2 != null goto label3;
+
+        if $r3 == null goto label7;
+
+     label1:
+        virtualinvoke $r3.<android.app.PendingIntent: void send(int)>(3);
+
+     label2:
+        return;
+
+     label3:
+        $r5 = new java.util.HashMap;
+
+        specialinvoke $r5.<java.util.HashMap: void <init>()>();
+
+        virtualinvoke $r5.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("smsc", $r1);
+
+        virtualinvoke $r5.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("pdu", $r2);
+
+        $r6 = new com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker;
+
+        specialinvoke $r6.<com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker: void <init>(java.util.HashMap,android.app.PendingIntent,android.app.PendingIntent)>($r5, $r3, $r4);
+
+        $r7 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: com.android.internal.telephony.gsm.GSMPhone mPhone>;
+
+        $r8 = virtualinvoke $r7.<com.android.internal.telephony.gsm.GSMPhone: android.telephony.ServiceState getServiceState()>();
+
+        $i0 = virtualinvoke $r8.<android.telephony.ServiceState: int getState()>();
+
+        if $i0 == 0 goto label4;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.SMSDispatcher: void handleNotInService(int,com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker)>($i0, $r6);
+
+        return;
+
+     label4:
+        $r9 = specialinvoke $r0.<com.android.internal.telephony.gsm.SMSDispatcher: java.lang.String getAppNameByIntent(android.app.PendingIntent)>($r3);
+
+        $r10 = $r0.<com.android.internal.telephony.gsm.SMSDispatcher: com.android.internal.telephony.gsm.SMSDispatcher$SmsCounter mCounter>;
+
+        $z0 = virtualinvoke $r10.<com.android.internal.telephony.gsm.SMSDispatcher$SmsCounter: boolean check(java.lang.String,int)>($r9, 1);
+
+        if $z0 == 0 goto label5;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.SMSDispatcher: void sendSms(com.android.internal.telephony.gsm.SMSDispatcher$SmsTracker)>($r6);
+
+        return;
+
+     label5:
+        $r11 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int,java.lang.Object)>(7, $r6);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r11);
+
+        return;
+
+     label6:
+        $r12 := @caughtexception;
+
+        return;
+
+     label7:
+        return;
+
+        catch android.app.PendingIntent$CanceledException from label1 to label2 with label6;
+    }
+}

@@ -1,0 +1,1935 @@
+class org.apache.harmony.nio.internal.SocketChannelImpl extends java.nio.channels.SocketChannel implements org.apache.harmony.luni.platform.FileDescriptorHandler
+{
+    private static final int CONNECT_SUCCESS;
+    private static final int EOF;
+    private static final int ERRCODE_SOCKET_NONBLOCKING_WOULD_BLOCK;
+    private static final int HY_PORT_SOCKET_STEP_CHECK;
+    private static final int HY_SOCK_STEP_START;
+    static final int SOCKET_STATUS_CLOSED;
+    static final int SOCKET_STATUS_CONNECTED;
+    static final int SOCKET_STATUS_PENDING;
+    static final int SOCKET_STATUS_UNCONNECTED;
+    static final int SOCKET_STATUS_UNINIT;
+    private static final int TIMEOUT_BLOCK;
+    private static final int TIMEOUT_NONBLOCK;
+    static final org.apache.harmony.luni.platform.INetworkSystem networkSystem;
+    java.net.InetSocketAddress connectAddress;
+    private byte[] connectContext;
+    java.io.FileDescriptor fd;
+    volatile boolean isBound;
+    java.net.InetAddress localAddress;
+    int localPort;
+    private final java.lang.Object readLock;
+    private java.net.Socket socket;
+    int status;
+    private int trafficClass;
+    private final java.lang.Object writeLock;
+
+    static void <clinit>()
+    {
+        org.apache.harmony.luni.platform.INetworkSystem $r0;
+
+        <org.apache.harmony.nio.internal.SocketChannelImpl: int TIMEOUT_BLOCK> = -1;
+
+        <org.apache.harmony.nio.internal.SocketChannelImpl: int SOCKET_STATUS_UNINIT> = -1;
+
+        <org.apache.harmony.nio.internal.SocketChannelImpl: int SOCKET_STATUS_UNCONNECTED> = 0;
+
+        <org.apache.harmony.nio.internal.SocketChannelImpl: int SOCKET_STATUS_PENDING> = 1;
+
+        <org.apache.harmony.nio.internal.SocketChannelImpl: int SOCKET_STATUS_CONNECTED> = 2;
+
+        <org.apache.harmony.nio.internal.SocketChannelImpl: int SOCKET_STATUS_CLOSED> = 3;
+
+        <org.apache.harmony.nio.internal.SocketChannelImpl: int HY_SOCK_STEP_START> = 0;
+
+        <org.apache.harmony.nio.internal.SocketChannelImpl: int HY_PORT_SOCKET_STEP_CHECK> = 1;
+
+        <org.apache.harmony.nio.internal.SocketChannelImpl: int ERRCODE_SOCKET_NONBLOCKING_WOULD_BLOCK> = -211;
+
+        <org.apache.harmony.nio.internal.SocketChannelImpl: int EOF> = -1;
+
+        <org.apache.harmony.nio.internal.SocketChannelImpl: int CONNECT_SUCCESS> = 0;
+
+        $r0 = staticinvoke <org.apache.harmony.luni.platform.Platform: org.apache.harmony.luni.platform.INetworkSystem getNetworkSystem()>();
+
+        <org.apache.harmony.nio.internal.SocketChannelImpl: org.apache.harmony.luni.platform.INetworkSystem networkSystem> = $r0;
+
+        return;
+    }
+
+    private void <init>()
+    {
+        org.apache.harmony.nio.internal.SocketChannelImpl $r0;
+        java.nio.channels.spi.SelectorProvider $r1;
+        java.lang.Object $r2;
+        byte[] $r3;
+        java.io.FileDescriptor $r4;
+        java.net.InetSocketAddress $r5;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SocketChannelImpl;
+
+        $r1 = staticinvoke <java.nio.channels.spi.SelectorProvider: java.nio.channels.spi.SelectorProvider provider()>();
+
+        specialinvoke $r0.<java.nio.channels.SocketChannel: void <init>(java.nio.channels.spi.SelectorProvider)>($r1);
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.net.Socket socket> = null;
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.net.InetSocketAddress connectAddress> = null;
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.net.InetAddress localAddress> = null;
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int status> = -1;
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: boolean isBound> = 0;
+
+        $r2 = new java.lang.Object;
+
+        specialinvoke $r2.<java.lang.Object: void <init>()>();
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.lang.Object readLock> = $r2;
+
+        $r2 = new java.lang.Object;
+
+        specialinvoke $r2.<java.lang.Object: void <init>()>();
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.lang.Object writeLock> = $r2;
+
+        $r3 = newarray (byte)[392];
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: byte[] connectContext> = $r3;
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int trafficClass> = 0;
+
+        $r4 = new java.io.FileDescriptor;
+
+        specialinvoke $r4.<java.io.FileDescriptor: void <init>()>();
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.io.FileDescriptor fd> = $r4;
+
+        $r5 = new java.net.InetSocketAddress;
+
+        specialinvoke $r5.<java.net.InetSocketAddress: void <init>(int)>(0);
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.net.InetSocketAddress connectAddress> = $r5;
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int status> = 2;
+
+        return;
+    }
+
+    void <init>(java.net.Socket, java.io.FileDescriptor)
+    {
+        org.apache.harmony.nio.internal.SocketChannelImpl $r0;
+        java.net.Socket $r1;
+        java.io.FileDescriptor $r2;
+        java.nio.channels.spi.SelectorProvider $r3;
+        java.lang.Object $r4;
+        byte[] $r5;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SocketChannelImpl;
+
+        $r1 := @parameter0: java.net.Socket;
+
+        $r2 := @parameter1: java.io.FileDescriptor;
+
+        $r3 = staticinvoke <java.nio.channels.spi.SelectorProvider: java.nio.channels.spi.SelectorProvider provider()>();
+
+        specialinvoke $r0.<java.nio.channels.SocketChannel: void <init>(java.nio.channels.spi.SelectorProvider)>($r3);
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.net.Socket socket> = null;
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.net.InetSocketAddress connectAddress> = null;
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.net.InetAddress localAddress> = null;
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int status> = -1;
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: boolean isBound> = 0;
+
+        $r4 = new java.lang.Object;
+
+        specialinvoke $r4.<java.lang.Object: void <init>()>();
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.lang.Object readLock> = $r4;
+
+        $r4 = new java.lang.Object;
+
+        specialinvoke $r4.<java.lang.Object: void <init>()>();
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.lang.Object writeLock> = $r4;
+
+        $r5 = newarray (byte)[392];
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: byte[] connectContext> = $r5;
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int trafficClass> = 0;
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.net.Socket socket> = $r1;
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.io.FileDescriptor fd> = $r2;
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int status> = 0;
+
+        return;
+    }
+
+    public void <init>(java.nio.channels.spi.SelectorProvider) throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.SocketChannelImpl $r0;
+        java.nio.channels.spi.SelectorProvider $r1;
+        java.lang.Object $r2;
+        byte[] $r3;
+        java.io.FileDescriptor $r4;
+        org.apache.harmony.luni.platform.INetworkSystem $r5;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SocketChannelImpl;
+
+        $r1 := @parameter0: java.nio.channels.spi.SelectorProvider;
+
+        specialinvoke $r0.<java.nio.channels.SocketChannel: void <init>(java.nio.channels.spi.SelectorProvider)>($r1);
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.net.Socket socket> = null;
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.net.InetSocketAddress connectAddress> = null;
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.net.InetAddress localAddress> = null;
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int status> = -1;
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: boolean isBound> = 0;
+
+        $r2 = new java.lang.Object;
+
+        specialinvoke $r2.<java.lang.Object: void <init>()>();
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.lang.Object readLock> = $r2;
+
+        $r2 = new java.lang.Object;
+
+        specialinvoke $r2.<java.lang.Object: void <init>()>();
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.lang.Object writeLock> = $r2;
+
+        $r3 = newarray (byte)[392];
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: byte[] connectContext> = $r3;
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int trafficClass> = 0;
+
+        $r4 = new java.io.FileDescriptor;
+
+        specialinvoke $r4.<java.io.FileDescriptor: void <init>()>();
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.io.FileDescriptor fd> = $r4;
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int status> = 0;
+
+        $r5 = <org.apache.harmony.nio.internal.SocketChannelImpl: org.apache.harmony.luni.platform.INetworkSystem networkSystem>;
+
+        $r4 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.io.FileDescriptor fd>;
+
+        interfaceinvoke $r5.<org.apache.harmony.luni.platform.INetworkSystem: void createSocket(java.io.FileDescriptor,boolean)>($r4, 1);
+
+        return;
+    }
+
+    private int calculateByteBufferArray(java.nio.ByteBuffer[], int, int)
+    {
+        org.apache.harmony.nio.internal.SocketChannelImpl $r0;
+        java.nio.ByteBuffer[] $r1;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.nio.ByteBuffer $r2;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SocketChannelImpl;
+
+        $r1 := @parameter0: java.nio.ByteBuffer[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i3 = 0;
+
+        $i4 = $i0;
+
+     label1:
+        $i2 = $i0 + $i1;
+
+        if $i4 >= $i2 goto label2;
+
+        $r2 = $r1[$i4];
+
+        $i2 = virtualinvoke $r2.<java.nio.Buffer: int remaining()>();
+
+        $i3 = $i3 + $i2;
+
+        $i4 = $i4 + 1;
+
+        goto label1;
+
+     label2:
+        return $i3;
+    }
+
+    private void checkOpenConnected() throws java.nio.channels.ClosedChannelException
+    {
+        org.apache.harmony.nio.internal.SocketChannelImpl $r0;
+        boolean $z0;
+        java.nio.channels.ClosedChannelException $r1;
+        java.lang.Throwable $r2;
+        java.nio.channels.NotYetConnectedException $r3;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SocketChannelImpl;
+
+        entermonitor $r0;
+
+     label1:
+        $z0 = virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: boolean isOpen()>();
+
+        if $z0 != 0 goto label3;
+
+        $r1 = new java.nio.channels.ClosedChannelException;
+
+        specialinvoke $r1.<java.nio.channels.ClosedChannelException: void <init>()>();
+
+        throw $r1;
+
+     label2:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r2;
+
+     label3:
+        $z0 = virtualinvoke $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: boolean isConnected()>();
+
+        if $z0 != 0 goto label4;
+
+        $r3 = new java.nio.channels.NotYetConnectedException;
+
+        specialinvoke $r3.<java.nio.channels.NotYetConnectedException: void <init>()>();
+
+        throw $r3;
+
+     label4:
+        exitmonitor $r0;
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label2;
+        catch java.lang.Throwable from label3 to label4 with label2;
+    }
+
+    private void checkUnconnected() throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.SocketChannelImpl $r0;
+        boolean $z0;
+        java.nio.channels.ClosedChannelException $r1;
+        java.lang.Throwable $r2;
+        int $i0;
+        java.nio.channels.AlreadyConnectedException $r3;
+        java.nio.channels.ConnectionPendingException $r4;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SocketChannelImpl;
+
+        entermonitor $r0;
+
+     label1:
+        $z0 = virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: boolean isOpen()>();
+
+        if $z0 != 0 goto label3;
+
+        $r1 = new java.nio.channels.ClosedChannelException;
+
+        specialinvoke $r1.<java.nio.channels.ClosedChannelException: void <init>()>();
+
+        throw $r1;
+
+     label2:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r2;
+
+     label3:
+        $i0 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int status>;
+
+        if $i0 != 2 goto label4;
+
+        $r3 = new java.nio.channels.AlreadyConnectedException;
+
+        specialinvoke $r3.<java.nio.channels.AlreadyConnectedException: void <init>()>();
+
+        throw $r3;
+
+     label4:
+        $i0 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int status>;
+
+        if $i0 != 1 goto label5;
+
+        $r4 = new java.nio.channels.ConnectionPendingException;
+
+        specialinvoke $r4.<java.nio.channels.ConnectionPendingException: void <init>()>();
+
+        throw $r4;
+
+     label5:
+        exitmonitor $r0;
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label2;
+        catch java.lang.Throwable from label3 to label5 with label2;
+    }
+
+    private boolean isIndexValid(java.nio.ByteBuffer[], int, int)
+    {
+        org.apache.harmony.nio.internal.SocketChannelImpl $r0;
+        java.nio.ByteBuffer[] $r1;
+        int $i0, $i1;
+        long $l2, $l3;
+        byte $b4;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SocketChannelImpl;
+
+        $r1 := @parameter0: java.nio.ByteBuffer[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        if $i1 < 0 goto label1;
+
+        if $i0 < 0 goto label1;
+
+        $l2 = (long) $i1;
+
+        $l3 = (long) $i0;
+
+        $l2 = $l2 + $l3;
+
+        $i0 = lengthof $r1;
+
+        $l3 = (long) $i0;
+
+        $b4 = $l2 cmp $l3;
+
+        if $b4 > 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    private int readImpl(java.nio.ByteBuffer) throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.SocketChannelImpl $r0;
+        java.nio.ByteBuffer $r1;
+        java.io.FileDescriptor $r2;
+        java.lang.Object $r3;
+        boolean $z0;
+        int $i0, $i1, $i2;
+        org.apache.harmony.luni.platform.INetworkSystem $r4;
+        byte $b3;
+        byte[] $r5;
+        java.lang.Throwable $r6, $r7;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SocketChannelImpl;
+
+        $r1 := @parameter0: java.nio.ByteBuffer;
+
+        $r3 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.lang.Object readLock>;
+
+        entermonitor $r3;
+
+     label01:
+        $z0 = virtualinvoke $r0.<java.nio.channels.spi.AbstractSelectableChannel: boolean isBlocking()>();
+
+        if $z0 == 0 goto label02;
+
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void begin()>();
+
+     label02:
+        $i0 = virtualinvoke $r1.<java.nio.Buffer: int position()>();
+
+        $i1 = virtualinvoke $r1.<java.nio.Buffer: int remaining()>();
+
+        $z0 = virtualinvoke $r1.<java.nio.ByteBuffer: boolean isDirect()>();
+
+        if $z0 == 0 goto label09;
+
+        $i2 = staticinvoke <org.apache.harmony.nio.AddressUtil: int getDirectBufferAddress(java.nio.Buffer)>($r1);
+
+        $r4 = <org.apache.harmony.nio.internal.SocketChannelImpl: org.apache.harmony.luni.platform.INetworkSystem networkSystem>;
+
+        $r2 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.io.FileDescriptor fd>;
+
+        $z0 = virtualinvoke $r0.<java.nio.channels.spi.AbstractSelectableChannel: boolean isBlocking()>();
+
+        if $z0 == 0 goto label08;
+
+        $b3 = -1;
+
+     label03:
+        $i1 = interfaceinvoke $r4.<org.apache.harmony.luni.platform.INetworkSystem: int readDirect(java.io.FileDescriptor,int,int,int,int)>($r2, $i2, $i0, $i1, $b3);
+
+     label04:
+        $z0 = virtualinvoke $r0.<java.nio.channels.spi.AbstractSelectableChannel: boolean isBlocking()>();
+
+        if $z0 == 0 goto label06;
+
+        if $i1 <= 0 goto label13;
+
+        $z0 = 1;
+
+     label05:
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void end(boolean)>($z0);
+
+     label06:
+        exitmonitor $r3;
+
+     label07:
+        return $i1;
+
+     label08:
+        $b3 = 0;
+
+        goto label03;
+
+     label09:
+        $r5 = virtualinvoke $r1.<java.nio.ByteBuffer: byte[] array()>();
+
+        $i2 = virtualinvoke $r1.<java.nio.ByteBuffer: int arrayOffset()>();
+
+        $i0 = $i0 + $i2;
+
+        $r4 = <org.apache.harmony.nio.internal.SocketChannelImpl: org.apache.harmony.luni.platform.INetworkSystem networkSystem>;
+
+        $r2 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.io.FileDescriptor fd>;
+
+        $z0 = virtualinvoke $r0.<java.nio.channels.spi.AbstractSelectableChannel: boolean isBlocking()>();
+
+        if $z0 == 0 goto label12;
+
+        $b3 = -1;
+
+     label10:
+        $i1 = interfaceinvoke $r4.<org.apache.harmony.luni.platform.INetworkSystem: int read(java.io.FileDescriptor,byte[],int,int,int)>($r2, $r5, $i0, $i1, $b3);
+
+     label11:
+        goto label04;
+
+     label12:
+        $b3 = 0;
+
+        goto label10;
+
+     label13:
+        $z0 = 0;
+
+        goto label05;
+
+     label14:
+        $r6 := @caughtexception;
+
+     label15:
+        $z0 = virtualinvoke $r0.<java.nio.channels.spi.AbstractSelectableChannel: boolean isBlocking()>();
+
+        if $z0 == 0 goto label17;
+
+        goto label20;
+
+     label16:
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void end(boolean)>($z0);
+
+     label17:
+        throw $r6;
+
+     label18:
+        $r7 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label19:
+        throw $r7;
+
+     label20:
+        $z0 = 0;
+
+        goto label16;
+
+        catch java.lang.Throwable from label01 to label04 with label14;
+        catch java.lang.Throwable from label04 to label07 with label18;
+        catch java.lang.Throwable from label09 to label11 with label14;
+        catch java.lang.Throwable from label15 to label19 with label18;
+    }
+
+    static java.net.InetSocketAddress validateAddress(java.net.SocketAddress)
+    {
+        java.net.SocketAddress $r0;
+        boolean $z0;
+        java.lang.IllegalArgumentException $r1;
+        java.nio.channels.UnsupportedAddressTypeException $r2;
+        java.net.InetSocketAddress $r3;
+        java.nio.channels.UnresolvedAddressException $r4;
+
+        $r0 := @parameter0: java.net.SocketAddress;
+
+        if $r0 != null goto label1;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r1;
+
+     label1:
+        $z0 = $r0 instanceof java.net.InetSocketAddress;
+
+        if $z0 != 0 goto label2;
+
+        $r2 = new java.nio.channels.UnsupportedAddressTypeException;
+
+        specialinvoke $r2.<java.nio.channels.UnsupportedAddressTypeException: void <init>()>();
+
+        throw $r2;
+
+     label2:
+        $r3 = (java.net.InetSocketAddress) $r0;
+
+        $z0 = virtualinvoke $r3.<java.net.InetSocketAddress: boolean isUnresolved()>();
+
+        if $z0 == 0 goto label3;
+
+        $r4 = new java.nio.channels.UnresolvedAddressException;
+
+        specialinvoke $r4.<java.nio.channels.UnresolvedAddressException: void <init>()>();
+
+        throw $r4;
+
+     label3:
+        return $r3;
+    }
+
+    private int writeImpl(java.nio.ByteBuffer) throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.SocketChannelImpl $r0;
+        java.nio.ByteBuffer $r1;
+        byte[] $r2;
+        java.lang.Object $r3;
+        boolean $z0;
+        int $i0, $i1, $i2, $i3, $i4;
+        org.apache.harmony.luni.platform.INetworkSystem $r4;
+        java.io.FileDescriptor $r5;
+        java.net.SocketException $r6;
+        java.lang.Throwable $r7, $r9;
+        org.apache.harmony.luni.util.ErrorCodeException $r8;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SocketChannelImpl;
+
+        $r1 := @parameter0: java.nio.ByteBuffer;
+
+        $r3 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.lang.Object writeLock>;
+
+        entermonitor $r3;
+
+     label01:
+        $z0 = virtualinvoke $r1.<java.nio.Buffer: boolean hasRemaining()>();
+
+        if $z0 != 0 goto label03;
+
+        exitmonitor $r3;
+
+     label02:
+        return 0;
+
+     label03:
+        $i0 = 0;
+
+     label04:
+        $i1 = virtualinvoke $r1.<java.nio.Buffer: int position()>();
+
+        $i2 = $i1;
+
+        $i3 = virtualinvoke $r1.<java.nio.Buffer: int remaining()>();
+
+        $z0 = virtualinvoke $r0.<java.nio.channels.spi.AbstractSelectableChannel: boolean isBlocking()>();
+
+        if $z0 == 0 goto label05;
+
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void begin()>();
+
+     label05:
+        $z0 = virtualinvoke $r1.<java.nio.ByteBuffer: boolean isDirect()>();
+
+        if $z0 == 0 goto label13;
+
+        $i4 = staticinvoke <org.apache.harmony.nio.AddressUtil: int getDirectBufferAddress(java.nio.Buffer)>($r1);
+
+     label06:
+        $r4 = <org.apache.harmony.nio.internal.SocketChannelImpl: org.apache.harmony.luni.platform.INetworkSystem networkSystem>;
+
+     label07:
+        $r5 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.io.FileDescriptor fd>;
+
+        $i0 = interfaceinvoke $r4.<org.apache.harmony.luni.platform.INetworkSystem: int writeDirect(java.io.FileDescriptor,int,int,int)>($r5, $i4, $i1, $i3);
+
+     label08:
+        $i2 = $i2 + $i0;
+
+        virtualinvoke $r1.<java.nio.Buffer: java.nio.Buffer position(int)>($i2);
+
+     label09:
+        $z0 = virtualinvoke $r0.<java.nio.channels.spi.AbstractSelectableChannel: boolean isBlocking()>();
+
+        if $z0 == 0 goto label11;
+
+        if $i0 < 0 goto label21;
+
+        $z0 = 1;
+
+     label10:
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void end(boolean)>($z0);
+
+     label11:
+        exitmonitor $r3;
+
+     label12:
+        return $i0;
+
+     label13:
+        $z0 = virtualinvoke $r1.<java.nio.ByteBuffer: boolean hasArray()>();
+
+        if $z0 == 0 goto label17;
+
+        $i2 = virtualinvoke $r1.<java.nio.ByteBuffer: int arrayOffset()>();
+
+     label14:
+        $i2 = $i1 + $i2;
+
+        $r4 = <org.apache.harmony.nio.internal.SocketChannelImpl: org.apache.harmony.luni.platform.INetworkSystem networkSystem>;
+
+     label15:
+        $r5 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.io.FileDescriptor fd>;
+
+        $r2 = virtualinvoke $r1.<java.nio.ByteBuffer: byte[] array()>();
+
+        $i0 = interfaceinvoke $r4.<org.apache.harmony.luni.platform.INetworkSystem: int write(java.io.FileDescriptor,byte[],int,int)>($r5, $r2, $i2, $i3);
+
+     label16:
+        goto label08;
+
+     label17:
+        $r2 = newarray (byte)[$i3];
+
+        virtualinvoke $r1.<java.nio.ByteBuffer: java.nio.ByteBuffer get(byte[])>($r2);
+
+     label18:
+        $r4 = <org.apache.harmony.nio.internal.SocketChannelImpl: org.apache.harmony.luni.platform.INetworkSystem networkSystem>;
+
+     label19:
+        $r5 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.io.FileDescriptor fd>;
+
+        $i0 = interfaceinvoke $r4.<org.apache.harmony.luni.platform.INetworkSystem: int write(java.io.FileDescriptor,byte[],int,int)>($r5, $r2, 0, $i3);
+
+     label20:
+        goto label08;
+
+     label21:
+        $z0 = 0;
+
+        goto label10;
+
+     label22:
+        $r6 := @caughtexception;
+
+     label23:
+        $r7 = virtualinvoke $r6.<java.lang.Throwable: java.lang.Throwable getCause()>();
+
+        $z0 = $r7 instanceof org.apache.harmony.luni.util.ErrorCodeException;
+
+        if $z0 == 0 goto label30;
+
+        $r7 = virtualinvoke $r6.<java.lang.Throwable: java.lang.Throwable getCause()>();
+
+        $r8 = (org.apache.harmony.luni.util.ErrorCodeException) $r7;
+
+        $i2 = virtualinvoke $r8.<org.apache.harmony.luni.util.ErrorCodeException: int getErrorCode()>();
+
+     label24:
+        if -211 != $i2 goto label30;
+
+     label25:
+        $z0 = virtualinvoke $r0.<java.nio.channels.spi.AbstractSelectableChannel: boolean isBlocking()>();
+
+        if $z0 == 0 goto label27;
+
+        if $i0 < 0 goto label29;
+
+        $z0 = 1;
+
+     label26:
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void end(boolean)>($z0);
+
+     label27:
+        exitmonitor $r3;
+
+     label28:
+        return $i0;
+
+     label29:
+        $z0 = 0;
+
+        goto label26;
+
+     label30:
+        throw $r6;
+
+     label31:
+        $r7 := @caughtexception;
+
+     label32:
+        $z0 = virtualinvoke $r0.<java.nio.channels.spi.AbstractSelectableChannel: boolean isBlocking()>();
+
+        if $z0 == 0 goto label34;
+
+        if $i0 < 0 goto label37;
+
+        $z0 = 1;
+
+     label33:
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void end(boolean)>($z0);
+
+     label34:
+        throw $r7;
+
+     label35:
+        $r9 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label36:
+        throw $r9;
+
+     label37:
+        $z0 = 0;
+
+        goto label33;
+
+        catch java.lang.Throwable from label01 to label02 with label35;
+        catch java.net.SocketException from label04 to label06 with label22;
+        catch java.net.SocketException from label07 to label08 with label22;
+        catch java.net.SocketException from label08 to label09 with label22;
+        catch java.lang.Throwable from label04 to label09 with label31;
+        catch java.lang.Throwable from label09 to label12 with label35;
+        catch java.net.SocketException from label13 to label14 with label22;
+        catch java.net.SocketException from label15 to label16 with label22;
+        catch java.net.SocketException from label17 to label18 with label22;
+        catch java.net.SocketException from label19 to label20 with label22;
+        catch java.lang.Throwable from label13 to label20 with label31;
+        catch java.lang.Throwable from label23 to label24 with label31;
+        catch java.lang.Throwable from label25 to label28 with label35;
+        catch java.lang.Throwable from label30 to label31 with label31;
+        catch java.lang.Throwable from label32 to label36 with label35;
+    }
+
+    public boolean connect(java.net.SocketAddress) throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.SocketChannelImpl $r0;
+        java.net.SocketAddress $r1;
+        byte[] $r2;
+        java.net.InetSocketAddress $r3;
+        int $i0, $i1;
+        java.net.InetAddress $r4;
+        java.lang.String $r5;
+        java.lang.SecurityManager $r6;
+        boolean $z0, $z1;
+        org.apache.harmony.luni.platform.INetworkSystem $r7;
+        java.io.FileDescriptor $r8;
+        byte $b2;
+        java.io.IOException $r9;
+        java.lang.Throwable $r10, $r11;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SocketChannelImpl;
+
+        $r1 := @parameter0: java.net.SocketAddress;
+
+        specialinvoke $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: void checkUnconnected()>();
+
+        $r3 = staticinvoke <org.apache.harmony.nio.internal.SocketChannelImpl: java.net.InetSocketAddress validateAddress(java.net.SocketAddress)>($r1);
+
+        $i0 = virtualinvoke $r3.<java.net.InetSocketAddress: int getPort()>();
+
+        $r4 = virtualinvoke $r3.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        $r5 = virtualinvoke $r4.<java.net.InetAddress: java.lang.String getHostName()>();
+
+        $r6 = staticinvoke <java.lang.System: java.lang.SecurityManager getSecurityManager()>();
+
+        if $r6 == null goto label01;
+
+        virtualinvoke $r6.<java.lang.SecurityManager: void checkConnect(java.lang.String,int)>($r5, $i0);
+
+     label01:
+        $z0 = 0;
+
+     label02:
+        $z1 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: boolean isBound>;
+
+        if $z1 != 0 goto label04;
+
+        $r7 = <org.apache.harmony.nio.internal.SocketChannelImpl: org.apache.harmony.luni.platform.INetworkSystem networkSystem>;
+
+        $r8 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.io.FileDescriptor fd>;
+
+        $r2 = newarray (byte)[4];
+
+        $r2[0] = 0;
+
+        $r2[1] = 0;
+
+        $r2[2] = 0;
+
+        $r2[3] = 0;
+
+     label03:
+        $r4 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByAddress(byte[])>($r2);
+
+        interfaceinvoke $r7.<org.apache.harmony.luni.platform.INetworkSystem: boolean bind2(java.io.FileDescriptor,int,boolean,java.net.InetAddress)>($r8, 0, 1, $r4);
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: boolean isBound> = 1;
+
+     label04:
+        $z1 = virtualinvoke $r0.<java.nio.channels.spi.AbstractSelectableChannel: boolean isBlocking()>();
+
+        if $z1 == 0 goto label16;
+
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void begin()>();
+
+     label05:
+        $r7 = <org.apache.harmony.nio.internal.SocketChannelImpl: org.apache.harmony.luni.platform.INetworkSystem networkSystem>;
+
+        $r8 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.io.FileDescriptor fd>;
+
+     label06:
+        $i0 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int trafficClass>;
+
+        $r4 = virtualinvoke $r3.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        $i1 = virtualinvoke $r3.<java.net.InetSocketAddress: int getPort()>();
+
+        $i0 = interfaceinvoke $r7.<org.apache.harmony.luni.platform.INetworkSystem: int connect(java.io.FileDescriptor,int,java.net.InetAddress,int)>($r8, $i0, $r4, $i1);
+
+     label07:
+        if $i0 != 0 goto label24;
+
+     label08:
+        $z0 = 1;
+
+     label09:
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: boolean isBound> = $z0;
+
+     label10:
+        $z1 = virtualinvoke $r0.<java.nio.channels.spi.AbstractSelectableChannel: boolean isBlocking()>();
+
+        if $z1 == 0 goto label11;
+
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void end(boolean)>($z0);
+
+     label11:
+        $r7 = <org.apache.harmony.nio.internal.SocketChannelImpl: org.apache.harmony.luni.platform.INetworkSystem networkSystem>;
+
+        $r8 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.io.FileDescriptor fd>;
+
+        $i0 = interfaceinvoke $r7.<org.apache.harmony.luni.platform.INetworkSystem: int getSocketLocalPort(java.io.FileDescriptor,boolean)>($r8, 0);
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int localPort> = $i0;
+
+        $r7 = <org.apache.harmony.nio.internal.SocketChannelImpl: org.apache.harmony.luni.platform.INetworkSystem networkSystem>;
+
+        $r8 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.io.FileDescriptor fd>;
+
+        $r4 = interfaceinvoke $r7.<org.apache.harmony.luni.platform.INetworkSystem: java.net.InetAddress getSocketLocalAddress(java.io.FileDescriptor,boolean)>($r8, 0);
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.net.InetAddress localAddress> = $r4;
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.net.InetSocketAddress connectAddress> = $r3;
+
+        entermonitor $r0;
+
+     label12:
+        $z1 = virtualinvoke $r0.<java.nio.channels.spi.AbstractSelectableChannel: boolean isBlocking()>();
+
+        if $z1 == 0 goto label30;
+
+        if $z0 == 0 goto label29;
+
+        $b2 = 2;
+
+     label13:
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int status> = $b2;
+
+     label14:
+        exitmonitor $r0;
+
+     label15:
+        return $z0;
+
+     label16:
+        $r7 = <org.apache.harmony.nio.internal.SocketChannelImpl: org.apache.harmony.luni.platform.INetworkSystem networkSystem>;
+
+        $r8 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.io.FileDescriptor fd>;
+
+        $i0 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int trafficClass>;
+
+     label17:
+        $r4 = virtualinvoke $r3.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        $i1 = virtualinvoke $r3.<java.net.InetSocketAddress: int getPort()>();
+
+        $r2 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: byte[] connectContext>;
+
+        $i0 = interfaceinvoke $r7.<org.apache.harmony.luni.platform.INetworkSystem: int connectWithTimeout(java.io.FileDescriptor,int,int,java.net.InetAddress,int,int,byte[])>($r8, 0, $i0, $r4, $i1, 0, $r2);
+
+        $z1 = virtualinvoke $r0.<java.nio.channels.spi.AbstractSelectableChannel: boolean isBlocking()>();
+
+     label18:
+        if $z1 != 0 goto label07;
+
+        $r7 = <org.apache.harmony.nio.internal.SocketChannelImpl: org.apache.harmony.luni.platform.INetworkSystem networkSystem>;
+
+     label19:
+        $r8 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.io.FileDescriptor fd>;
+
+        interfaceinvoke $r7.<org.apache.harmony.luni.platform.INetworkSystem: void setNonBlocking(java.io.FileDescriptor,boolean)>($r8, 1);
+
+     label20:
+        goto label07;
+
+     label21:
+        $r9 := @caughtexception;
+
+     label22:
+        $z1 = $r9 instanceof java.net.ConnectException;
+
+        if $z1 == 0 goto label25;
+
+        $z1 = virtualinvoke $r0.<java.nio.channels.spi.AbstractSelectableChannel: boolean isBlocking()>();
+
+        if $z1 != 0 goto label25;
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int status> = 1;
+
+     label23:
+        $z1 = virtualinvoke $r0.<java.nio.channels.spi.AbstractSelectableChannel: boolean isBlocking()>();
+
+        if $z1 == 0 goto label11;
+
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void end(boolean)>(0);
+
+        goto label11;
+
+     label24:
+        $z0 = 0;
+
+        goto label09;
+
+     label25:
+        $z1 = virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: boolean isOpen()>();
+
+        if $z1 == 0 goto label26;
+
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void close()>();
+
+        $z0 = 1;
+
+     label26:
+        throw $r9;
+
+     label27:
+        $r10 := @caughtexception;
+
+        $z1 = virtualinvoke $r0.<java.nio.channels.spi.AbstractSelectableChannel: boolean isBlocking()>();
+
+        if $z1 == 0 goto label28;
+
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void end(boolean)>($z0);
+
+     label28:
+        throw $r10;
+
+     label29:
+        $b2 = 0;
+
+        goto label13;
+
+     label30:
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int status> = 1;
+
+        goto label14;
+
+     label31:
+        $r11 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label32:
+        throw $r11;
+
+        catch java.io.IOException from label03 to label05 with label21;
+        catch java.io.IOException from label06 to label07 with label21;
+        catch java.lang.Throwable from label02 to label07 with label27;
+        catch java.lang.Throwable from label08 to label10 with label27;
+        catch java.lang.Throwable from label12 to label15 with label31;
+        catch java.io.IOException from label17 to label18 with label21;
+        catch java.io.IOException from label19 to label20 with label21;
+        catch java.lang.Throwable from label16 to label20 with label27;
+        catch java.lang.Throwable from label22 to label23 with label27;
+        catch java.lang.Throwable from label25 to label27 with label27;
+        catch java.lang.Throwable from label30 to label32 with label31;
+    }
+
+    public boolean finishConnect() throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.SocketChannelImpl $r0;
+        int $i0, $i2;
+        byte[] $r1;
+        boolean $z0, $z1;
+        java.nio.channels.ClosedChannelException $r2;
+        java.lang.Throwable $r3, $r10, $r11;
+        java.nio.channels.NoConnectionPendingException $r4;
+        org.apache.harmony.luni.platform.INetworkSystem $r5;
+        java.io.FileDescriptor $r6;
+        byte $b1;
+        java.net.InetSocketAddress $r7;
+        java.net.InetAddress $r8;
+        java.net.ConnectException $r9;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SocketChannelImpl;
+
+        entermonitor $r0;
+
+     label01:
+        $z0 = virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: boolean isOpen()>();
+
+        if $z0 != 0 goto label04;
+
+        $r2 = new java.nio.channels.ClosedChannelException;
+
+        specialinvoke $r2.<java.nio.channels.ClosedChannelException: void <init>()>();
+
+        throw $r2;
+
+     label02:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label03:
+        throw $r3;
+
+     label04:
+        $i0 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int status>;
+
+        if $i0 != 2 goto label06;
+
+        exitmonitor $r0;
+
+     label05:
+        return 1;
+
+     label06:
+        $i0 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int status>;
+
+        if $i0 == 1 goto label07;
+
+        $r4 = new java.nio.channels.NoConnectionPendingException;
+
+        specialinvoke $r4.<java.nio.channels.NoConnectionPendingException: void <init>()>();
+
+        throw $r4;
+
+     label07:
+        exitmonitor $r0;
+
+     label08:
+        $z0 = 0;
+
+     label09:
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void begin()>();
+
+     label10:
+        $r5 = <org.apache.harmony.nio.internal.SocketChannelImpl: org.apache.harmony.luni.platform.INetworkSystem networkSystem>;
+
+     label11:
+        $r6 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.io.FileDescriptor fd>;
+
+        $z1 = virtualinvoke $r0.<java.nio.channels.spi.AbstractSelectableChannel: boolean isBlocking()>();
+
+     label12:
+        if $z1 == 0 goto label24;
+
+     label13:
+        $b1 = -1;
+
+     label14:
+        $i0 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int trafficClass>;
+
+     label15:
+        $r7 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.net.InetSocketAddress connectAddress>;
+
+        $r8 = virtualinvoke $r7.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        $r7 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.net.InetSocketAddress connectAddress>;
+
+        $i2 = virtualinvoke $r7.<java.net.InetSocketAddress: int getPort()>();
+
+        $r1 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: byte[] connectContext>;
+
+        $i0 = interfaceinvoke $r5.<org.apache.harmony.luni.platform.INetworkSystem: int connectWithTimeout(java.io.FileDescriptor,int,int,java.net.InetAddress,int,int,byte[])>($r6, $b1, $i0, $r8, $i2, 1, $r1);
+
+     label16:
+        if $i0 != 0 goto label25;
+
+     label17:
+        $z0 = 1;
+
+     label18:
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: boolean isBound> = $z0;
+
+        $r5 = <org.apache.harmony.nio.internal.SocketChannelImpl: org.apache.harmony.luni.platform.INetworkSystem networkSystem>;
+
+     label19:
+        $r6 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.io.FileDescriptor fd>;
+
+        $r8 = interfaceinvoke $r5.<org.apache.harmony.luni.platform.INetworkSystem: java.net.InetAddress getSocketLocalAddress(java.io.FileDescriptor,boolean)>($r6, 0);
+
+     label20:
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.net.InetAddress localAddress> = $r8;
+
+     label21:
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void end(boolean)>($z0);
+
+        entermonitor $r0;
+
+        if $z0 == 0 goto label30;
+
+        $i0 = 2;
+
+     label22:
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int status> = $i0;
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: boolean isBound> = $z0;
+
+        exitmonitor $r0;
+
+     label23:
+        return $z0;
+
+     label24:
+        $b1 = 0;
+
+        goto label14;
+
+     label25:
+        $z0 = 0;
+
+        goto label18;
+
+     label26:
+        $r9 := @caughtexception;
+
+     label27:
+        $z1 = virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: boolean isOpen()>();
+
+        if $z1 == 0 goto label28;
+
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void close()>();
+
+        $z0 = 1;
+
+     label28:
+        throw $r9;
+
+     label29:
+        $r10 := @caughtexception;
+
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void end(boolean)>($z0);
+
+        throw $r10;
+
+     label30:
+        $i0 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int status>;
+
+        goto label22;
+
+     label31:
+        $r11 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label32:
+        throw $r11;
+
+        catch java.lang.Throwable from label01 to label03 with label02;
+        catch java.lang.Throwable from label04 to label05 with label02;
+        catch java.lang.Throwable from label06 to label08 with label02;
+        catch java.net.ConnectException from label09 to label10 with label26;
+        catch java.net.ConnectException from label11 to label12 with label26;
+        catch java.net.ConnectException from label15 to label16 with label26;
+        catch java.net.ConnectException from label19 to label20 with label26;
+        catch java.lang.Throwable from label09 to label12 with label29;
+        catch java.lang.Throwable from label13 to label16 with label29;
+        catch java.lang.Throwable from label17 to label21 with label29;
+        catch java.lang.Throwable from label22 to label23 with label31;
+        catch java.lang.Throwable from label27 to label29 with label29;
+        catch java.lang.Throwable from label30 to label32 with label31;
+    }
+
+    public java.io.FileDescriptor getFD()
+    {
+        org.apache.harmony.nio.internal.SocketChannelImpl $r0;
+        java.io.FileDescriptor r1;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SocketChannelImpl;
+
+        r1 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.io.FileDescriptor fd>;
+
+        return r1;
+    }
+
+    public java.net.InetAddress getLocalAddress() throws java.net.UnknownHostException
+    {
+        org.apache.harmony.nio.internal.SocketChannelImpl $r0;
+        byte[] $r1;
+        java.net.InetAddress $r2;
+        boolean $z0;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SocketChannelImpl;
+
+        $r1 = newarray (byte)[4];
+
+        $r1[0] = 0;
+
+        $r1[1] = 0;
+
+        $r1[2] = 0;
+
+        $r1[3] = 0;
+
+        $z0 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: boolean isBound>;
+
+        if $z0 != 0 goto label1;
+
+        $r2 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByAddress(byte[])>($r1);
+
+        return $r2;
+
+     label1:
+        $r2 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.net.InetAddress localAddress>;
+
+        return $r2;
+    }
+
+    protected void implCloseSelectableChannel() throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.SocketChannelImpl $r0;
+        boolean $z0;
+        int $i0;
+        java.net.Socket $r1;
+        org.apache.harmony.luni.platform.INetworkSystem $r2;
+        java.io.FileDescriptor $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SocketChannelImpl;
+
+        entermonitor $r0;
+
+     label1:
+        $i0 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int status>;
+
+        if 3 == $i0 goto label2;
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int status> = 3;
+
+        $r1 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.net.Socket socket>;
+
+        if $r1 == null goto label3;
+
+        $r1 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.net.Socket socket>;
+
+        $z0 = virtualinvoke $r1.<java.net.Socket: boolean isClosed()>();
+
+        if $z0 != 0 goto label3;
+
+        $r1 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.net.Socket socket>;
+
+        virtualinvoke $r1.<java.net.Socket: void close()>();
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r2 = <org.apache.harmony.nio.internal.SocketChannelImpl: org.apache.harmony.luni.platform.INetworkSystem networkSystem>;
+
+        $r3 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.io.FileDescriptor fd>;
+
+        interfaceinvoke $r2.<org.apache.harmony.luni.platform.INetworkSystem: void socketClose(java.io.FileDescriptor)>($r3);
+
+     label4:
+        goto label2;
+
+     label5:
+        $r4 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+    }
+
+    protected void implConfigureBlocking(boolean) throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.SocketChannelImpl $r0;
+        boolean $z0;
+        java.io.FileDescriptor $r1;
+        java.lang.Object $r2;
+        org.apache.harmony.luni.platform.INetworkSystem $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SocketChannelImpl;
+
+        $z0 := @parameter0: boolean;
+
+        $r2 = virtualinvoke $r0.<java.nio.channels.spi.AbstractSelectableChannel: java.lang.Object blockingLock()>();
+
+        entermonitor $r2;
+
+     label1:
+        $r3 = <org.apache.harmony.nio.internal.SocketChannelImpl: org.apache.harmony.luni.platform.INetworkSystem networkSystem>;
+
+        $r1 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.io.FileDescriptor fd>;
+
+        if $z0 != 0 goto label4;
+
+        $z0 = 1;
+
+     label2:
+        interfaceinvoke $r3.<org.apache.harmony.luni.platform.INetworkSystem: void setNonBlocking(java.io.FileDescriptor,boolean)>($r1, $z0);
+
+        exitmonitor $r2;
+
+     label3:
+        return;
+
+     label4:
+        $z0 = 0;
+
+        goto label2;
+
+     label5:
+        $r4 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label6:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label3 with label5;
+        catch java.lang.Throwable from label4 to label6 with label5;
+    }
+
+    public boolean isConnected()
+    {
+        org.apache.harmony.nio.internal.SocketChannelImpl $r0;
+        int $i0;
+        boolean $z0;
+        java.lang.Throwable $r1;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SocketChannelImpl;
+
+        entermonitor $r0;
+
+     label1:
+        $i0 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int status>;
+
+     label2:
+        if $i0 != 2 goto label4;
+
+        $z0 = 1;
+
+     label3:
+        exitmonitor $r0;
+
+        return $z0;
+
+     label4:
+        $z0 = 0;
+
+        goto label3;
+
+     label5:
+        $r1 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+    }
+
+    public boolean isConnectionPending()
+    {
+        org.apache.harmony.nio.internal.SocketChannelImpl $r0;
+        int $i0;
+        boolean $z0;
+        java.lang.Throwable $r1;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SocketChannelImpl;
+
+        entermonitor $r0;
+
+     label1:
+        $i0 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int status>;
+
+     label2:
+        if $i0 != 1 goto label4;
+
+        $z0 = 1;
+
+     label3:
+        exitmonitor $r0;
+
+        return $z0;
+
+     label4:
+        $z0 = 0;
+
+        goto label3;
+
+     label5:
+        $r1 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+    }
+
+    public int read(java.nio.ByteBuffer) throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.SocketChannelImpl $r0;
+        java.nio.ByteBuffer $r1, $r4;
+        java.lang.NullPointerException $r2;
+        boolean $z0;
+        int $i0, $i1, $i2;
+        byte[] $r3;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SocketChannelImpl;
+
+        $r1 := @parameter0: java.nio.ByteBuffer;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.NullPointerException;
+
+        specialinvoke $r2.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        specialinvoke $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: void checkOpenConnected()>();
+
+        $z0 = virtualinvoke $r1.<java.nio.Buffer: boolean hasRemaining()>();
+
+        if $z0 != 0 goto label2;
+
+        return 0;
+
+     label2:
+        $z0 = virtualinvoke $r1.<java.nio.ByteBuffer: boolean isDirect()>();
+
+        if $z0 != 0 goto label3;
+
+        $z0 = virtualinvoke $r1.<java.nio.ByteBuffer: boolean hasArray()>();
+
+        if $z0 == 0 goto label5;
+
+     label3:
+        $i0 = specialinvoke $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int readImpl(java.nio.ByteBuffer)>($r1);
+
+        $i1 = $i0;
+
+        if $i0 <= 0 goto label4;
+
+        $i2 = virtualinvoke $r1.<java.nio.Buffer: int position()>();
+
+        $i0 = $i2 + $i0;
+
+        virtualinvoke $r1.<java.nio.Buffer: java.nio.Buffer position(int)>($i0);
+
+     label4:
+        return $i1;
+
+     label5:
+        $i1 = virtualinvoke $r1.<java.nio.Buffer: int remaining()>();
+
+        $r3 = newarray (byte)[$i1];
+
+        $r4 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[])>($r3);
+
+        $i0 = specialinvoke $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int readImpl(java.nio.ByteBuffer)>($r4);
+
+        $i1 = $i0;
+
+        if $i0 <= 0 goto label4;
+
+        virtualinvoke $r1.<java.nio.ByteBuffer: java.nio.ByteBuffer put(byte[],int,int)>($r3, 0, $i0);
+
+        goto label4;
+    }
+
+    public long read(java.nio.ByteBuffer[], int, int) throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.SocketChannelImpl $r0;
+        java.nio.ByteBuffer[] $r1;
+        int $i0, $i1, $i2, $i4, $i5;
+        byte[] $r2;
+        boolean $z0;
+        java.lang.IndexOutOfBoundsException $r3;
+        long $l3;
+        java.nio.ByteBuffer $r4;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SocketChannelImpl;
+
+        $r1 := @parameter0: java.nio.ByteBuffer[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $z0 = specialinvoke $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: boolean isIndexValid(java.nio.ByteBuffer[],int,int)>($r1, $i0, $i1);
+
+        if $z0 != 0 goto label1;
+
+        $r3 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r3.<java.lang.IndexOutOfBoundsException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        specialinvoke $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: void checkOpenConnected()>();
+
+        $i1 = specialinvoke $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int calculateByteBufferArray(java.nio.ByteBuffer[],int,int)>($r1, $i0, $i1);
+
+        if $i1 != 0 goto label2;
+
+        return 0L;
+
+     label2:
+        $r2 = newarray (byte)[$i1];
+
+        $r4 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer wrap(byte[])>($r2);
+
+        $i1 = specialinvoke $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int readImpl(java.nio.ByteBuffer)>($r4);
+
+        if $i1 <= 0 goto label4;
+
+        $i4 = $i1;
+
+     label3:
+        if $i4 <= 0 goto label4;
+
+        $r4 = $r1[$i0];
+
+        $i2 = virtualinvoke $r4.<java.nio.Buffer: int remaining()>();
+
+        $i5 = staticinvoke <java.lang.Math: int min(int,int)>($i2, $i4);
+
+        $r4 = $r1[$i0];
+
+        $i2 = $i1 - $i4;
+
+        virtualinvoke $r4.<java.nio.ByteBuffer: java.nio.ByteBuffer put(byte[],int,int)>($r2, $i2, $i5);
+
+        $i0 = $i0 + 1;
+
+        $i4 = $i4 - $i5;
+
+        goto label3;
+
+     label4:
+        $l3 = (long) $i1;
+
+        return $l3;
+    }
+
+    void setBound(boolean)
+    {
+        org.apache.harmony.nio.internal.SocketChannelImpl $r0;
+        boolean $z0;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SocketChannelImpl;
+
+        $z0 := @parameter0: boolean;
+
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: boolean isBound> = $z0;
+
+        return;
+    }
+
+    void setConnected()
+    {
+        org.apache.harmony.nio.internal.SocketChannelImpl $r0;
+        java.lang.Throwable $r1;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SocketChannelImpl;
+
+        entermonitor $r0;
+
+     label1:
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int status> = 2;
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public java.net.Socket socket()
+    {
+        org.apache.harmony.nio.internal.SocketChannelImpl $r0;
+        int $i0, $i1;
+        java.net.Socket $r1;
+        java.net.InetAddress $r2;
+        java.net.InetSocketAddress $r3;
+        org.apache.harmony.nio.internal.SocketChannelImpl$SocketAdapter $r4;
+        java.io.FileDescriptor $r5;
+        java.net.SocketImpl $r6;
+        java.net.SocketException $r7;
+        java.lang.Throwable $r8;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SocketChannelImpl;
+
+        entermonitor $r0;
+
+     label01:
+        $r1 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.net.Socket socket>;
+
+     label02:
+        if $r1 != null goto label10;
+
+        $r2 = null;
+
+        $i1 = 0;
+
+     label03:
+        $r3 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.net.InetSocketAddress connectAddress>;
+
+        if $r3 == null goto label07;
+
+        $r3 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.net.InetSocketAddress connectAddress>;
+
+     label04:
+        $r2 = virtualinvoke $r3.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+     label05:
+        $r3 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.net.InetSocketAddress connectAddress>;
+
+        $i0 = virtualinvoke $r3.<java.net.InetSocketAddress: int getPort()>();
+
+     label06:
+        $i1 = $i0;
+
+     label07:
+        $r4 = new org.apache.harmony.nio.internal.SocketChannelImpl$SocketAdapter;
+
+        $r5 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.io.FileDescriptor fd>;
+
+     label08:
+        $i0 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int localPort>;
+
+        $r6 = staticinvoke <org.apache.harmony.luni.net.SocketImplProvider: java.net.SocketImpl getSocketImpl(java.io.FileDescriptor,int,java.net.InetAddress,int)>($r5, $i0, $r2, $i1);
+
+        specialinvoke $r4.<org.apache.harmony.nio.internal.SocketChannelImpl$SocketAdapter: void <init>(java.net.SocketImpl,org.apache.harmony.nio.internal.SocketChannelImpl)>($r6, $r0);
+
+     label09:
+        $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.net.Socket socket> = $r4;
+
+     label10:
+        $r1 = $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: java.net.Socket socket>;
+
+     label11:
+        exitmonitor $r0;
+
+        return $r1;
+
+     label12:
+        $r7 := @caughtexception;
+
+        $r1 = null;
+
+        goto label11;
+
+     label13:
+        $r8 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r8;
+
+        catch java.lang.Throwable from label01 to label02 with label13;
+        catch java.net.SocketException from label04 to label05 with label12;
+        catch java.net.SocketException from label05 to label06 with label12;
+        catch java.net.SocketException from label08 to label09 with label12;
+        catch java.lang.Throwable from label03 to label10 with label13;
+        catch java.lang.Throwable from label10 to label11 with label13;
+    }
+
+    public int write(java.nio.ByteBuffer) throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.SocketChannelImpl $r0;
+        java.nio.ByteBuffer $r1;
+        java.lang.NullPointerException $r2;
+        boolean $z0;
+        int $i0;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SocketChannelImpl;
+
+        $r1 := @parameter0: java.nio.ByteBuffer;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.NullPointerException;
+
+        specialinvoke $r2.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        specialinvoke $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: void checkOpenConnected()>();
+
+        $z0 = virtualinvoke $r1.<java.nio.Buffer: boolean hasRemaining()>();
+
+        if $z0 != 0 goto label2;
+
+        return 0;
+
+     label2:
+        $i0 = specialinvoke $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int writeImpl(java.nio.ByteBuffer)>($r1);
+
+        return $i0;
+    }
+
+    public long write(java.nio.ByteBuffer[], int, int) throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.SocketChannelImpl $r0;
+        java.nio.ByteBuffer[] $r1;
+        int $i0, $i1, $i2, $i4, $i5;
+        boolean $z0;
+        java.lang.IndexOutOfBoundsException $r2;
+        long $l3;
+        java.nio.ByteBuffer $r3, $r4;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SocketChannelImpl;
+
+        $r1 := @parameter0: java.nio.ByteBuffer[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $z0 = specialinvoke $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: boolean isIndexValid(java.nio.ByteBuffer[],int,int)>($r1, $i0, $i1);
+
+        if $z0 != 0 goto label1;
+
+        $r2 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r2.<java.lang.IndexOutOfBoundsException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        specialinvoke $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: void checkOpenConnected()>();
+
+        $i2 = specialinvoke $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int calculateByteBufferArray(java.nio.ByteBuffer[],int,int)>($r1, $i0, $i1);
+
+        if $i2 != 0 goto label2;
+
+        return 0L;
+
+     label2:
+        $r3 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer allocate(int)>($i2);
+
+        $i2 = $i0;
+
+     label3:
+        $i4 = $i1 + $i0;
+
+        if $i2 >= $i4 goto label4;
+
+        $r4 = $r1[$i2];
+
+        $i4 = virtualinvoke $r4.<java.nio.Buffer: int position()>();
+
+        virtualinvoke $r3.<java.nio.ByteBuffer: java.nio.ByteBuffer put(java.nio.ByteBuffer)>($r4);
+
+        virtualinvoke $r4.<java.nio.Buffer: java.nio.Buffer position(int)>($i4);
+
+        $i2 = $i2 + 1;
+
+        goto label3;
+
+     label4:
+        virtualinvoke $r3.<java.nio.Buffer: java.nio.Buffer flip()>();
+
+        $i1 = specialinvoke $r0.<org.apache.harmony.nio.internal.SocketChannelImpl: int writeImpl(java.nio.ByteBuffer)>($r3);
+
+        $i2 = $i1;
+
+     label5:
+        if $i2 <= 0 goto label6;
+
+        $r3 = $r1[$i0];
+
+        $i4 = virtualinvoke $r3.<java.nio.Buffer: int remaining()>();
+
+        $i4 = staticinvoke <java.lang.Math: int min(int,int)>($i2, $i4);
+
+        $i5 = virtualinvoke $r3.<java.nio.Buffer: int position()>();
+
+        $i5 = $i5 + $i4;
+
+        virtualinvoke $r3.<java.nio.Buffer: java.nio.Buffer position(int)>($i5);
+
+        $i0 = $i0 + 1;
+
+        $i2 = $i2 - $i4;
+
+        goto label5;
+
+     label6:
+        $l3 = (long) $i1;
+
+        return $l3;
+    }
+}

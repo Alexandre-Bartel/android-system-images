@@ -1,0 +1,281 @@
+class com.android.server.WifiWatchdogService$DnsPinger extends java.lang.Object
+{
+    private static final int DNS_PORT;
+    private static final int DNS_QUERY_BASE_SIZE;
+    private static java.util.Random sRandom;
+
+    static void <clinit>()
+    {
+        java.util.Random $r0;
+
+        <com.android.server.WifiWatchdogService$DnsPinger: int DNS_QUERY_BASE_SIZE> = 33;
+
+        <com.android.server.WifiWatchdogService$DnsPinger: int DNS_PORT> = 53;
+
+        $r0 = new java.util.Random;
+
+        specialinvoke $r0.<java.util.Random: void <init>()>();
+
+        <com.android.server.WifiWatchdogService$DnsPinger: java.util.Random sRandom> = $r0;
+
+        return;
+    }
+
+    private void <init>()
+    {
+        com.android.server.WifiWatchdogService$DnsPinger $r0;
+
+        $r0 := @this: com.android.server.WifiWatchdogService$DnsPinger;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private static void fillQuery(byte[])
+    {
+        byte[] $r0;
+        int $i0, $i1;
+        java.util.Random $r1;
+        byte $b2;
+
+        $r0 := @parameter0: byte[];
+
+        $i0 = 0;
+
+     label1:
+        $i1 = lengthof $r0;
+
+        if $i0 >= $i1 goto label2;
+
+        $r0[$i0] = 0;
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label2:
+        $r1 = <com.android.server.WifiWatchdogService$DnsPinger: java.util.Random sRandom>;
+
+        $i0 = virtualinvoke $r1.<java.util.Random: int nextInt(int)>(256);
+
+        $b2 = (byte) $i0;
+
+        $r0[0] = $b2;
+
+        $r1 = <com.android.server.WifiWatchdogService$DnsPinger: java.util.Random sRandom>;
+
+        $i0 = virtualinvoke $r1.<java.util.Random: int nextInt(int)>(256);
+
+        $b2 = (byte) $i0;
+
+        $r0[1] = $b2;
+
+        $r0[2] = 1;
+
+        $r0[5] = 1;
+
+        staticinvoke <com.android.server.WifiWatchdogService$DnsPinger: void writeString(byte[],int,java.lang.String)>($r0, 12, "www");
+
+        staticinvoke <com.android.server.WifiWatchdogService$DnsPinger: void writeString(byte[],int,java.lang.String)>($r0, 16, "android");
+
+        staticinvoke <com.android.server.WifiWatchdogService$DnsPinger: void writeString(byte[],int,java.lang.String)>($r0, 24, "com");
+
+        $r0[30] = 1;
+
+        $r0[32] = 1;
+
+        return;
+    }
+
+    static boolean isDnsReachable(int, int)
+    {
+        int $i0, $i1;
+        byte[] $r0, $r2;
+        java.net.DatagramPacket $r1;
+        java.net.DatagramSocket $r3;
+        java.net.InetAddress $r4;
+        byte $b2;
+        java.net.SocketException $r5;
+        java.net.UnknownHostException $r6;
+        java.net.SocketTimeoutException $r7;
+        java.io.IOException $r8;
+        java.lang.Exception $r9;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r3 = new java.net.DatagramSocket;
+
+     label01:
+        specialinvoke $r3.<java.net.DatagramSocket: void <init>()>();
+
+        virtualinvoke $r3.<java.net.DatagramSocket: void setSoTimeout(int)>($i1);
+
+        $r0 = newarray (byte)[33];
+
+        staticinvoke <com.android.server.WifiWatchdogService$DnsPinger: void fillQuery(byte[])>($r0);
+
+     label02:
+        $r2 = newarray (byte)[4];
+
+     label03:
+        $i1 = $i0 & 255;
+
+     label04:
+        $b2 = (byte) $i1;
+
+        $r2[0] = $b2;
+
+     label05:
+        $i1 = $i0 >> 8;
+
+        $i1 = $i1 & 255;
+
+     label06:
+        $b2 = (byte) $i1;
+
+        $r2[1] = $b2;
+
+     label07:
+        $i1 = $i0 >> 16;
+
+        $i1 = $i1 & 255;
+
+     label08:
+        $b2 = (byte) $i1;
+
+        $r2[2] = $b2;
+
+     label09:
+        $i0 = $i0 >> 24;
+
+        $i0 = $i0 & 255;
+
+     label10:
+        $b2 = (byte) $i0;
+
+     label11:
+        $r2[3] = $b2;
+
+        $r4 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByAddress(byte[])>($r2);
+
+     label12:
+        $r1 = new java.net.DatagramPacket;
+
+     label13:
+        $i0 = lengthof $r0;
+
+        specialinvoke $r1.<java.net.DatagramPacket: void <init>(byte[],int,java.net.InetAddress,int)>($r0, $i0, $r4, 53);
+
+        virtualinvoke $r3.<java.net.DatagramSocket: void send(java.net.DatagramPacket)>($r1);
+
+     label14:
+        $r1 = new java.net.DatagramPacket;
+
+     label15:
+        $i0 = lengthof $r0;
+
+        specialinvoke $r1.<java.net.DatagramPacket: void <init>(byte[],int)>($r0, $i0);
+
+        virtualinvoke $r3.<java.net.DatagramSocket: void receive(java.net.DatagramPacket)>($r1);
+
+     label16:
+        return 1;
+
+     label17:
+        $r5 := @caughtexception;
+
+        return 0;
+
+     label18:
+        $r6 := @caughtexception;
+
+        return 0;
+
+     label19:
+        $r7 := @caughtexception;
+
+        return 0;
+
+     label20:
+        $r8 := @caughtexception;
+
+        return 0;
+
+     label21:
+        $r9 := @caughtexception;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String,java.lang.Throwable)>("WifiWatchdogService", "DnsPinger.isReachable got an unknown exception", $r9);
+
+        return 0;
+
+        catch java.net.SocketException from label01 to label02 with label17;
+        catch java.net.SocketException from label11 to label12 with label17;
+        catch java.net.SocketException from label13 to label14 with label17;
+        catch java.net.SocketException from label15 to label16 with label17;
+        catch java.net.UnknownHostException from label01 to label02 with label18;
+        catch java.net.UnknownHostException from label11 to label12 with label18;
+        catch java.net.UnknownHostException from label13 to label14 with label18;
+        catch java.net.UnknownHostException from label15 to label16 with label18;
+        catch java.net.SocketTimeoutException from label01 to label02 with label19;
+        catch java.net.SocketTimeoutException from label11 to label12 with label19;
+        catch java.net.SocketTimeoutException from label13 to label14 with label19;
+        catch java.net.SocketTimeoutException from label15 to label16 with label19;
+        catch java.io.IOException from label01 to label02 with label20;
+        catch java.io.IOException from label11 to label12 with label20;
+        catch java.io.IOException from label13 to label14 with label20;
+        catch java.io.IOException from label15 to label16 with label20;
+        catch java.lang.Exception from label01 to label03 with label21;
+        catch java.lang.Exception from label04 to label05 with label21;
+        catch java.lang.Exception from label06 to label07 with label21;
+        catch java.lang.Exception from label08 to label09 with label21;
+        catch java.lang.Exception from label10 to label16 with label21;
+    }
+
+    private static void writeString(byte[], int, java.lang.String)
+    {
+        byte[] $r0;
+        int $i0, $i1, $i2;
+        java.lang.String $r1;
+        byte $b3;
+        char $c4;
+
+        $r0 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $r1 := @parameter2: java.lang.String;
+
+        $i1 = $i0 + 1;
+
+        $i2 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        $b3 = (byte) $i2;
+
+        $r0[$i0] = $b3;
+
+        $i0 = 0;
+
+     label1:
+        $i2 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 >= $i2 goto label2;
+
+        $c4 = virtualinvoke $r1.<java.lang.String: char charAt(int)>($i0);
+
+        $b3 = (byte) $c4;
+
+        $r0[$i1] = $b3;
+
+        $i0 = $i0 + 1;
+
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+}

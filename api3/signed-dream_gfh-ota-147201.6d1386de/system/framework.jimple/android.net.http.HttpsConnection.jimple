@@ -1,0 +1,792 @@
+public class android.net.http.HttpsConnection extends android.net.http.Connection
+{
+    private static javax.net.ssl.SSLSocketFactory mSslSocketFactory;
+    private boolean mAborted;
+    private java.lang.Object mSuspendLock;
+    private boolean mSuspended;
+
+    static void <clinit>()
+    {
+        <android.net.http.HttpsConnection: javax.net.ssl.SSLSocketFactory mSslSocketFactory> = null;
+
+        staticinvoke <android.net.http.HttpsConnection: void initializeEngine(java.io.File)>(null);
+
+        return;
+    }
+
+    void <init>(android.content.Context, org.apache.http.HttpHost, android.net.http.RequestQueue$ConnectionManager, android.net.http.RequestFeeder)
+    {
+        android.net.http.HttpsConnection $r0;
+        android.content.Context $r1;
+        org.apache.http.HttpHost $r2;
+        android.net.http.RequestQueue$ConnectionManager $r3;
+        android.net.http.RequestFeeder $r4;
+        java.lang.Object $r5;
+
+        $r0 := @this: android.net.http.HttpsConnection;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: org.apache.http.HttpHost;
+
+        $r3 := @parameter2: android.net.http.RequestQueue$ConnectionManager;
+
+        $r4 := @parameter3: android.net.http.RequestFeeder;
+
+        specialinvoke $r0.<android.net.http.Connection: void <init>(android.content.Context,org.apache.http.HttpHost,android.net.http.RequestQueue$ConnectionManager,android.net.http.RequestFeeder)>($r1, $r2, $r3, $r4);
+
+        $r5 = new java.lang.Object;
+
+        specialinvoke $r5.<java.lang.Object: void <init>()>();
+
+        $r0.<android.net.http.HttpsConnection: java.lang.Object mSuspendLock> = $r5;
+
+        $r0.<android.net.http.HttpsConnection: boolean mSuspended> = 0;
+
+        $r0.<android.net.http.HttpsConnection: boolean mAborted> = 0;
+
+        return;
+    }
+
+    private static javax.net.ssl.SSLSocketFactory getSocketFactory()
+    {
+        java.lang.Throwable $r0;
+        javax.net.ssl.SSLSocketFactory r1;
+
+        entermonitor class "android/net/http/HttpsConnection";
+
+     label1:
+        r1 = <android.net.http.HttpsConnection: javax.net.ssl.SSLSocketFactory mSslSocketFactory>;
+
+     label2:
+        exitmonitor class "android/net/http/HttpsConnection";
+
+        return r1;
+
+     label3:
+        $r0 := @caughtexception;
+
+        exitmonitor class "android/net/http/HttpsConnection";
+
+        throw $r0;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public static void initializeEngine(java.io.File)
+    {
+        java.io.File $r0;
+        org.apache.harmony.xnet.provider.jsse.SSLContextImpl $r1;
+        javax.net.ssl.TrustManager[] $r2;
+        org.apache.harmony.xnet.provider.jsse.SSLClientSessionCache $r3;
+        java.lang.StringBuilder $r4;
+        java.lang.String $r5;
+        android.net.http.HttpsConnection$1 $r6;
+        javax.net.ssl.SSLSocketFactory $r7;
+        java.lang.Throwable $r8;
+        java.security.KeyManagementException $r9;
+        java.lang.RuntimeException $r10;
+        java.io.IOException $r11;
+
+        $r0 := @parameter0: java.io.File;
+
+        $r3 = null;
+
+        if $r0 == null goto label02;
+
+        $r4 = new java.lang.StringBuilder;
+
+     label01:
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Caching SSL sessions in ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r0);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("HttpsConnection", $r5);
+
+        $r3 = staticinvoke <org.apache.harmony.xnet.provider.jsse.FileClientSessionCache: org.apache.harmony.xnet.provider.jsse.SSLClientSessionCache usingDirectory(java.io.File)>($r0);
+
+     label02:
+        $r1 = new org.apache.harmony.xnet.provider.jsse.SSLContextImpl;
+
+        specialinvoke $r1.<org.apache.harmony.xnet.provider.jsse.SSLContextImpl: void <init>()>();
+
+     label03:
+        $r2 = newarray (javax.net.ssl.TrustManager)[1];
+
+     label04:
+        $r6 = new android.net.http.HttpsConnection$1;
+
+        specialinvoke $r6.<android.net.http.HttpsConnection$1: void <init>()>();
+
+        $r2[0] = $r6;
+
+        virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.SSLContextImpl: void engineInit(javax.net.ssl.KeyManager[],javax.net.ssl.TrustManager[],java.security.SecureRandom,org.apache.harmony.xnet.provider.jsse.SSLClientSessionCache,org.apache.harmony.xnet.provider.jsse.SSLServerSessionCache)>(null, $r2, null, $r3, null);
+
+     label05:
+        entermonitor class "android/net/http/HttpsConnection";
+
+     label06:
+        $r7 = virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.SSLContextImpl: javax.net.ssl.SSLSocketFactory engineGetSocketFactory()>();
+
+        <android.net.http.HttpsConnection: javax.net.ssl.SSLSocketFactory mSslSocketFactory> = $r7;
+
+        exitmonitor class "android/net/http/HttpsConnection";
+
+     label07:
+        return;
+
+     label08:
+        $r8 := @caughtexception;
+
+        exitmonitor class "android/net/http/HttpsConnection";
+
+     label09:
+        throw $r8;
+
+     label10:
+        $r9 := @caughtexception;
+
+        $r10 = new java.lang.RuntimeException;
+
+        specialinvoke $r10.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r9);
+
+        throw $r10;
+
+     label11:
+        $r11 := @caughtexception;
+
+        $r10 = new java.lang.RuntimeException;
+
+        specialinvoke $r10.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r11);
+
+        throw $r10;
+
+        catch java.security.KeyManagementException from label01 to label02 with label10;
+        catch java.security.KeyManagementException from label02 to label03 with label10;
+        catch java.security.KeyManagementException from label04 to label05 with label10;
+        catch java.io.IOException from label01 to label02 with label11;
+        catch java.io.IOException from label02 to label03 with label11;
+        catch java.io.IOException from label04 to label05 with label11;
+        catch java.lang.Throwable from label06 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+        catch java.security.KeyManagementException from label09 to label10 with label10;
+        catch java.io.IOException from label09 to label10 with label11;
+    }
+
+    void closeConnection()
+    {
+        android.net.http.HttpsConnection $r0;
+        boolean $z0;
+        android.net.http.AndroidHttpClientConnection $r1;
+        java.io.IOException $r2;
+
+        $r0 := @this: android.net.http.HttpsConnection;
+
+        $z0 = $r0.<android.net.http.HttpsConnection: boolean mSuspended>;
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke $r0.<android.net.http.HttpsConnection: void restartConnection(boolean)>(0);
+
+     label1:
+        $r1 = $r0.<android.net.http.Connection: android.net.http.AndroidHttpClientConnection mHttpClientConnection>;
+
+        if $r1 == null goto label7;
+
+        $r1 = $r0.<android.net.http.Connection: android.net.http.AndroidHttpClientConnection mHttpClientConnection>;
+
+     label2:
+        $z0 = virtualinvoke $r1.<android.net.http.AndroidHttpClientConnection: boolean isOpen()>();
+
+     label3:
+        if $z0 == 0 goto label8;
+
+     label4:
+        $r1 = $r0.<android.net.http.Connection: android.net.http.AndroidHttpClientConnection mHttpClientConnection>;
+
+        virtualinvoke $r1.<android.net.http.AndroidHttpClientConnection: void close()>();
+
+     label5:
+        return;
+
+     label6:
+        $r2 := @caughtexception;
+
+        virtualinvoke $r2.<java.lang.Throwable: void printStackTrace()>();
+
+        return;
+
+     label7:
+        return;
+
+     label8:
+        return;
+
+        catch java.io.IOException from label2 to label3 with label6;
+        catch java.io.IOException from label4 to label5 with label6;
+    }
+
+    java.lang.String getScheme()
+    {
+        android.net.http.HttpsConnection $r0;
+
+        $r0 := @this: android.net.http.HttpsConnection;
+
+        return "https";
+    }
+
+    android.net.http.AndroidHttpClientConnection openConnection(android.net.http.Request) throws java.io.IOException
+    {
+        android.net.http.HttpsConnection $r0;
+        android.net.http.Request $r1;
+        android.net.http.AndroidHttpClientConnection $r2, $r10;
+        org.apache.http.Header $r3;
+        android.net.http.Headers $r4;
+        int $i0, $i1, $i2;
+        org.apache.http.message.BasicHttpRequest $r5, $r13;
+        java.net.Socket $r6;
+        javax.net.ssl.SSLSocket $r7, $r32;
+        android.net.http.RequestQueue$ConnectionManager $r8;
+        org.apache.http.HttpHost $r9;
+        java.lang.String $r11, $r16;
+        org.apache.http.params.BasicHttpParams $r12;
+        org.apache.http.Header[] $r14;
+        boolean $z0;
+        java.io.IOException $r15, $r29, $r30, $r34, $r37, $r38;
+        org.apache.http.StatusLine $r17;
+        javax.net.ssl.SSLSocketFactory $r18;
+        android.net.http.CertificateChainValidator $r19;
+        android.net.http.SslError $r20;
+        android.net.http.EventHandler $r21;
+        android.net.http.SslCertificate $r22;
+        java.lang.Object $r23, $r24;
+        android.net.http.SSLConnectionClosedByUserException $r25;
+        java.lang.Throwable $r26, $r35;
+        org.apache.http.ParseException $r27;
+        org.apache.http.HttpException $r28;
+        org.apache.http.ProtocolVersion $r31;
+        java.net.InetSocketAddress $r33;
+        java.lang.InterruptedException $r36;
+
+        $r0 := @this: android.net.http.HttpsConnection;
+
+        $r1 := @parameter0: android.net.http.Request;
+
+        $r7 = null;
+
+        $r8 = $r0.<android.net.http.Connection: android.net.http.RequestQueue$ConnectionManager mConnectionManager>;
+
+        $r9 = interfaceinvoke $r8.<android.net.http.RequestQueue$ConnectionManager: org.apache.http.HttpHost getProxyHost()>();
+
+        if $r9 == null goto label41;
+
+        $r10 = null;
+
+        $r6 = new java.net.Socket;
+
+     label01:
+        $r11 = virtualinvoke $r9.<org.apache.http.HttpHost: java.lang.String getHostName()>();
+
+        $i0 = virtualinvoke $r9.<org.apache.http.HttpHost: int getPort()>();
+
+        specialinvoke $r6.<java.net.Socket: void <init>(java.lang.String,int)>($r11, $i0);
+
+     label02:
+        virtualinvoke $r6.<java.net.Socket: void setSoTimeout(int)>(60000);
+
+        $r2 = new android.net.http.AndroidHttpClientConnection;
+
+        specialinvoke $r2.<android.net.http.AndroidHttpClientConnection: void <init>()>();
+
+     label03:
+        $r12 = new org.apache.http.params.BasicHttpParams;
+
+     label04:
+        specialinvoke $r12.<org.apache.http.params.BasicHttpParams: void <init>()>();
+
+        staticinvoke <org.apache.http.params.HttpConnectionParams: void setSocketBufferSize(org.apache.http.params.HttpParams,int)>($r12, 8192);
+
+        virtualinvoke $r2.<android.net.http.AndroidHttpClientConnection: void bind(java.net.Socket,org.apache.http.params.HttpParams)>($r6, $r12);
+
+     label05:
+        $r4 = new android.net.http.Headers;
+
+        specialinvoke $r4.<android.net.http.Headers: void <init>()>();
+
+        $r5 = new org.apache.http.message.BasicHttpRequest;
+
+        $r9 = $r0.<android.net.http.Connection: org.apache.http.HttpHost mHost>;
+
+     label06:
+        $r11 = virtualinvoke $r9.<org.apache.http.HttpHost: java.lang.String toHostString()>();
+
+        specialinvoke $r5.<org.apache.http.message.BasicHttpRequest: void <init>(java.lang.String,java.lang.String)>("CONNECT", $r11);
+
+        $r13 = $r1.<android.net.http.Request: org.apache.http.message.BasicHttpRequest mHttpRequest>;
+
+        $r14 = virtualinvoke $r13.<org.apache.http.message.AbstractHttpMessage: org.apache.http.Header[] getAllHeaders()>();
+
+     label07:
+        $i0 = lengthof $r14;
+
+        $i1 = 0;
+
+     label08:
+        if $i1 >= $i0 goto label15;
+
+        $r3 = $r14[$i1];
+
+        $r11 = interfaceinvoke $r3.<org.apache.http.Header: java.lang.String getName()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $z0 = virtualinvoke $r11.<java.lang.String: boolean startsWith(java.lang.String)>("proxy");
+
+        if $z0 != 0 goto label09;
+
+        $z0 = virtualinvoke $r11.<java.lang.String: boolean equals(java.lang.Object)>("keep-alive");
+
+        if $z0 == 0 goto label10;
+
+     label09:
+        virtualinvoke $r5.<org.apache.http.message.AbstractHttpMessage: void addHeader(org.apache.http.Header)>($r3);
+
+     label10:
+        $i1 = $i1 + 1;
+
+        goto label08;
+
+     label11:
+        $r15 := @caughtexception;
+
+     label12:
+        if $r10 == null goto label13;
+
+        virtualinvoke $r10.<android.net.http.AndroidHttpClientConnection: void close()>();
+
+     label13:
+        $r11 = virtualinvoke $r15.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        $r16 = $r11;
+
+        if $r11 != null goto label14;
+
+        $r16 = "failed to establish a connection to the proxy";
+
+     label14:
+        $r15 = new java.io.IOException;
+
+        specialinvoke $r15.<java.io.IOException: void <init>(java.lang.String)>($r16);
+
+        throw $r15;
+
+     label15:
+        virtualinvoke $r2.<android.net.http.AndroidHttpClientConnection: void sendRequestHeader(org.apache.http.HttpRequest)>($r5);
+
+        virtualinvoke $r2.<android.net.http.AndroidHttpClientConnection: void flush()>();
+
+     label16:
+        $r17 = virtualinvoke $r2.<android.net.http.AndroidHttpClientConnection: org.apache.http.StatusLine parseResponseHeader(android.net.http.Headers)>($r4);
+
+        $i0 = interfaceinvoke $r17.<org.apache.http.StatusLine: int getStatusCode()>();
+
+     label17:
+        if $i0 < 200 goto label16;
+
+        if $i0 != 200 goto label40;
+
+     label18:
+        $r18 = staticinvoke <android.net.http.HttpsConnection: javax.net.ssl.SSLSocketFactory getSocketFactory()>();
+
+        $r9 = $r0.<android.net.http.Connection: org.apache.http.HttpHost mHost>;
+
+        $r11 = virtualinvoke $r9.<org.apache.http.HttpHost: java.lang.String getHostName()>();
+
+        $r9 = $r0.<android.net.http.Connection: org.apache.http.HttpHost mHost>;
+
+        $i0 = virtualinvoke $r9.<org.apache.http.HttpHost: int getPort()>();
+
+        $r6 = virtualinvoke $r18.<javax.net.ssl.SSLSocketFactory: java.net.Socket createSocket(java.net.Socket,java.lang.String,int,boolean)>($r6, $r11, $i0, 1);
+
+     label19:
+        $r7 = (javax.net.ssl.SSLSocket) $r6;
+
+     label20:
+        $r19 = staticinvoke <android.net.http.CertificateChainValidator: android.net.http.CertificateChainValidator getInstance()>();
+
+        $r9 = $r0.<android.net.http.Connection: org.apache.http.HttpHost mHost>;
+
+        $r11 = virtualinvoke $r9.<org.apache.http.HttpHost: java.lang.String getHostName()>();
+
+        $r20 = virtualinvoke $r19.<android.net.http.CertificateChainValidator: android.net.http.SslError doHandshakeAndValidateServerCertificates(android.net.http.HttpsConnection,javax.net.ssl.SSLSocket,java.lang.String)>($r0, $r7, $r11);
+
+        $r21 = virtualinvoke $r1.<android.net.http.Request: android.net.http.EventHandler getEventHandler()>();
+
+        $r22 = $r0.<android.net.http.Connection: android.net.http.SslCertificate mCertificate>;
+
+        interfaceinvoke $r21.<android.net.http.EventHandler: void certificate(android.net.http.SslCertificate)>($r22);
+
+        if $r20 == null goto label54;
+
+        $r23 = $r0.<android.net.http.HttpsConnection: java.lang.Object mSuspendLock>;
+
+        entermonitor $r23;
+
+     label21:
+        $r0.<android.net.http.HttpsConnection: boolean mSuspended> = 1;
+
+        exitmonitor $r23;
+
+     label22:
+        interfaceinvoke $r21.<android.net.http.EventHandler: void handleSslErrorRequest(android.net.http.SslError)>($r20);
+
+        $r23 = $r0.<android.net.http.HttpsConnection: java.lang.Object mSuspendLock>;
+
+        entermonitor $r23;
+
+     label23:
+        $z0 = $r0.<android.net.http.HttpsConnection: boolean mSuspended>;
+
+     label24:
+        if $z0 == 0 goto label28;
+
+     label25:
+        $r24 = $r0.<android.net.http.HttpsConnection: java.lang.Object mSuspendLock>;
+
+     label26:
+        virtualinvoke $r24.<java.lang.Object: void wait(long)>(600000L);
+
+     label27:
+        $z0 = $r0.<android.net.http.HttpsConnection: boolean mSuspended>;
+
+        if $z0 == 0 goto label28;
+
+        $r0.<android.net.http.HttpsConnection: boolean mSuspended> = 0;
+
+        $r0.<android.net.http.HttpsConnection: boolean mAborted> = 1;
+
+     label28:
+        $z0 = $r0.<android.net.http.HttpsConnection: boolean mAborted>;
+
+        if $z0 == 0 goto label53;
+
+        virtualinvoke $r7.<java.net.Socket: void close()>();
+
+        $r25 = new android.net.http.SSLConnectionClosedByUserException;
+
+        specialinvoke $r25.<android.net.http.SSLConnectionClosedByUserException: void <init>(java.lang.String)>("connection closed by the user");
+
+        throw $r25;
+
+     label29:
+        $r26 := @caughtexception;
+
+        exitmonitor $r23;
+
+     label30:
+        throw $r26;
+
+     label31:
+        $r27 := @caughtexception;
+
+        $r11 = virtualinvoke $r27.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        $r16 = $r11;
+
+        if $r11 != null goto label32;
+
+        $r16 = "failed to send a CONNECT request";
+
+     label32:
+        $r15 = new java.io.IOException;
+
+        specialinvoke $r15.<java.io.IOException: void <init>(java.lang.String)>($r16);
+
+        throw $r15;
+
+     label33:
+        $r28 := @caughtexception;
+
+        $r11 = virtualinvoke $r28.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        $r16 = $r11;
+
+        if $r11 != null goto label34;
+
+        $r16 = "failed to send a CONNECT request";
+
+     label34:
+        $r15 = new java.io.IOException;
+
+        specialinvoke $r15.<java.io.IOException: void <init>(java.lang.String)>($r16);
+
+        throw $r15;
+
+     label35:
+        $r29 := @caughtexception;
+
+        $r11 = virtualinvoke $r29.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        $r16 = $r11;
+
+        if $r11 != null goto label36;
+
+        $r16 = "failed to send a CONNECT request";
+
+     label36:
+        $r15 = new java.io.IOException;
+
+        specialinvoke $r15.<java.io.IOException: void <init>(java.lang.String)>($r16);
+
+        throw $r15;
+
+     label37:
+        $r30 := @caughtexception;
+
+        goto label38;
+
+     label38:
+        $r11 = virtualinvoke $r30.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        $r16 = $r11;
+
+        if $r11 != null goto label39;
+
+        $r16 = "failed to create an SSL socket";
+
+     label39:
+        $r15 = new java.io.IOException;
+
+        specialinvoke $r15.<java.io.IOException: void <init>(java.lang.String)>($r16);
+
+        throw $r15;
+
+     label40:
+        $r31 = interfaceinvoke $r17.<org.apache.http.StatusLine: org.apache.http.ProtocolVersion getProtocolVersion()>();
+
+        $r21 = $r1.<android.net.http.Request: android.net.http.EventHandler mEventHandler>;
+
+        $i1 = virtualinvoke $r31.<org.apache.http.ProtocolVersion: int getMajor()>();
+
+        $i2 = virtualinvoke $r31.<org.apache.http.ProtocolVersion: int getMinor()>();
+
+        $r11 = interfaceinvoke $r17.<org.apache.http.StatusLine: java.lang.String getReasonPhrase()>();
+
+        interfaceinvoke $r21.<android.net.http.EventHandler: void status(int,int,int,java.lang.String)>($i1, $i2, $i0, $r11);
+
+        $r21 = $r1.<android.net.http.Request: android.net.http.EventHandler mEventHandler>;
+
+        interfaceinvoke $r21.<android.net.http.EventHandler: void headers(android.net.http.Headers)>($r4);
+
+        $r21 = $r1.<android.net.http.Request: android.net.http.EventHandler mEventHandler>;
+
+        interfaceinvoke $r21.<android.net.http.EventHandler: void endData()>();
+
+        virtualinvoke $r2.<android.net.http.AndroidHttpClientConnection: void close()>();
+
+        return null;
+
+     label41:
+        $r18 = staticinvoke <android.net.http.HttpsConnection: javax.net.ssl.SSLSocketFactory getSocketFactory()>();
+
+        $r6 = virtualinvoke $r18.<javax.net.SocketFactory: java.net.Socket createSocket()>();
+
+     label42:
+        $r32 = (javax.net.ssl.SSLSocket) $r6;
+
+     label43:
+        $r7 = $r32;
+
+        virtualinvoke $r32.<java.net.Socket: void setSoTimeout(int)>(60000);
+
+     label44:
+        $r33 = new java.net.InetSocketAddress;
+
+     label45:
+        $r9 = $r0.<android.net.http.Connection: org.apache.http.HttpHost mHost>;
+
+        $r11 = virtualinvoke $r9.<org.apache.http.HttpHost: java.lang.String getHostName()>();
+
+        $r9 = $r0.<android.net.http.Connection: org.apache.http.HttpHost mHost>;
+
+        $i0 = virtualinvoke $r9.<org.apache.http.HttpHost: int getPort()>();
+
+        specialinvoke $r33.<java.net.InetSocketAddress: void <init>(java.lang.String,int)>($r11, $i0);
+
+        virtualinvoke $r32.<java.net.Socket: void connect(java.net.SocketAddress)>($r33);
+
+     label46:
+        goto label20;
+
+     label47:
+        $r34 := @caughtexception;
+
+        if $r7 == null goto label48;
+
+        virtualinvoke $r7.<java.net.Socket: void close()>();
+
+     label48:
+        $r11 = virtualinvoke $r34.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        $r16 = $r11;
+
+        if $r11 != null goto label49;
+
+        $r16 = "failed to create an SSL socket";
+
+     label49:
+        $r15 = new java.io.IOException;
+
+        specialinvoke $r15.<java.io.IOException: void <init>(java.lang.String)>($r16);
+
+        throw $r15;
+
+     label50:
+        $r35 := @caughtexception;
+
+     label51:
+        exitmonitor $r23;
+
+     label52:
+        throw $r35;
+
+     label53:
+        exitmonitor $r23;
+
+     label54:
+        $r2 = new android.net.http.AndroidHttpClientConnection;
+
+        specialinvoke $r2.<android.net.http.AndroidHttpClientConnection: void <init>()>();
+
+        $r12 = new org.apache.http.params.BasicHttpParams;
+
+        specialinvoke $r12.<org.apache.http.params.BasicHttpParams: void <init>()>();
+
+        virtualinvoke $r12.<org.apache.http.params.AbstractHttpParams: org.apache.http.params.HttpParams setIntParameter(java.lang.String,int)>("http.socket.buffer-size", 8192);
+
+        virtualinvoke $r2.<android.net.http.AndroidHttpClientConnection: void bind(java.net.Socket,org.apache.http.params.HttpParams)>($r7, $r12);
+
+        return $r2;
+
+     label55:
+        $r36 := @caughtexception;
+
+        goto label28;
+
+     label56:
+        $r37 := @caughtexception;
+
+        $r15 = $r37;
+
+        goto label12;
+
+     label57:
+        $r38 := @caughtexception;
+
+        $r15 = $r38;
+
+        $r10 = $r2;
+
+        goto label12;
+
+        catch java.io.IOException from label01 to label02 with label11;
+        catch java.io.IOException from label02 to label03 with label56;
+        catch java.io.IOException from label04 to label05 with label57;
+        catch org.apache.http.ParseException from label06 to label07 with label31;
+        catch org.apache.http.ParseException from label08 to label10 with label31;
+        catch org.apache.http.HttpException from label06 to label07 with label33;
+        catch org.apache.http.HttpException from label08 to label10 with label33;
+        catch java.io.IOException from label06 to label07 with label35;
+        catch java.io.IOException from label08 to label10 with label35;
+        catch org.apache.http.ParseException from label15 to label17 with label31;
+        catch org.apache.http.HttpException from label15 to label17 with label33;
+        catch java.io.IOException from label15 to label17 with label35;
+        catch java.io.IOException from label18 to label19 with label37;
+        catch java.lang.Throwable from label21 to label22 with label50;
+        catch java.lang.Throwable from label23 to label24 with label29;
+        catch java.lang.InterruptedException from label26 to label27 with label55;
+        catch java.lang.Throwable from label25 to label28 with label29;
+        catch java.lang.Throwable from label28 to label30 with label29;
+        catch java.io.IOException from label41 to label42 with label47;
+        catch java.io.IOException from label43 to label44 with label47;
+        catch java.io.IOException from label45 to label46 with label47;
+        catch java.lang.Throwable from label51 to label52 with label50;
+        catch java.lang.Throwable from label53 to label54 with label29;
+    }
+
+    void restartConnection(boolean)
+    {
+        android.net.http.HttpsConnection $r0;
+        boolean $z0, $z1;
+        java.lang.Object $r1, $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.net.http.HttpsConnection;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 = $r0.<android.net.http.HttpsConnection: java.lang.Object mSuspendLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $z1 = $r0.<android.net.http.HttpsConnection: boolean mSuspended>;
+
+        if $z1 == 0 goto label3;
+
+        $r0.<android.net.http.HttpsConnection: boolean mSuspended> = 0;
+
+        if $z0 != 0 goto label5;
+
+        $z0 = 1;
+
+     label2:
+        $r0.<android.net.http.HttpsConnection: boolean mAborted> = $z0;
+
+        $r2 = $r0.<android.net.http.HttpsConnection: java.lang.Object mSuspendLock>;
+
+        virtualinvoke $r2.<java.lang.Object: void notify()>();
+
+     label3:
+        exitmonitor $r1;
+
+     label4:
+        return;
+
+     label5:
+        $z0 = 0;
+
+        goto label2;
+
+     label6:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label7:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label4 with label6;
+        catch java.lang.Throwable from label5 to label7 with label6;
+    }
+
+    void setCertificate(android.net.http.SslCertificate)
+    {
+        android.net.http.HttpsConnection $r0;
+        android.net.http.SslCertificate $r1;
+
+        $r0 := @this: android.net.http.HttpsConnection;
+
+        $r1 := @parameter0: android.net.http.SslCertificate;
+
+        $r0.<android.net.http.Connection: android.net.http.SslCertificate mCertificate> = $r1;
+
+        return;
+    }
+}

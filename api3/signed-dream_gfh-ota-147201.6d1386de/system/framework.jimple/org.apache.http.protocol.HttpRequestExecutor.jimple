@@ -1,0 +1,479 @@
+public class org.apache.http.protocol.HttpRequestExecutor extends java.lang.Object
+{
+
+    public void <init>()
+    {
+        org.apache.http.protocol.HttpRequestExecutor $r0;
+
+        $r0 := @this: org.apache.http.protocol.HttpRequestExecutor;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    protected boolean canResponseHaveBody(org.apache.http.HttpRequest, org.apache.http.HttpResponse)
+    {
+        org.apache.http.protocol.HttpRequestExecutor $r0;
+        org.apache.http.HttpRequest $r1;
+        org.apache.http.HttpResponse $r2;
+        java.lang.String $r3, $r5;
+        org.apache.http.RequestLine $r4;
+        boolean $z0;
+        org.apache.http.StatusLine $r6;
+        int $i0;
+
+        $r0 := @this: org.apache.http.protocol.HttpRequestExecutor;
+
+        $r1 := @parameter0: org.apache.http.HttpRequest;
+
+        $r2 := @parameter1: org.apache.http.HttpResponse;
+
+        $r3 = "HEAD";
+
+        $r4 = interfaceinvoke $r1.<org.apache.http.HttpRequest: org.apache.http.RequestLine getRequestLine()>();
+
+        $r5 = interfaceinvoke $r4.<org.apache.http.RequestLine: java.lang.String getMethod()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r5);
+
+        if $z0 == 0 goto label1;
+
+        return 0;
+
+     label1:
+        $r6 = interfaceinvoke $r2.<org.apache.http.HttpResponse: org.apache.http.StatusLine getStatusLine()>();
+
+        $i0 = interfaceinvoke $r6.<org.apache.http.StatusLine: int getStatusCode()>();
+
+        if $i0 < 200 goto label2;
+
+        if $i0 == 204 goto label2;
+
+        if $i0 == 304 goto label2;
+
+        if $i0 == 205 goto label2;
+
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    protected org.apache.http.HttpResponse doReceiveResponse(org.apache.http.HttpRequest, org.apache.http.HttpClientConnection, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException, java.io.IOException
+    {
+        org.apache.http.protocol.HttpRequestExecutor $r0;
+        org.apache.http.HttpRequest $r1;
+        org.apache.http.HttpClientConnection $r2;
+        org.apache.http.protocol.HttpContext $r3;
+        java.lang.IllegalArgumentException $r4;
+        org.apache.http.HttpResponse $r5, $r6;
+        int $i0;
+        boolean $z0;
+        org.apache.http.StatusLine $r7;
+
+        $r0 := @this: org.apache.http.protocol.HttpRequestExecutor;
+
+        $r1 := @parameter0: org.apache.http.HttpRequest;
+
+        $r2 := @parameter1: org.apache.http.HttpClientConnection;
+
+        $r3 := @parameter2: org.apache.http.protocol.HttpContext;
+
+        if $r1 != null goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("HTTP request may not be null");
+
+        throw $r4;
+
+     label1:
+        if $r2 != null goto label2;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("HTTP connection may not be null");
+
+        throw $r4;
+
+     label2:
+        if $r3 != null goto label3;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("HTTP context may not be null");
+
+        throw $r4;
+
+     label3:
+        $r5 = null;
+
+        $i0 = 0;
+
+     label4:
+        if $r5 == null goto label5;
+
+        if $i0 >= 200 goto label7;
+
+     label5:
+        $r6 = interfaceinvoke $r2.<org.apache.http.HttpClientConnection: org.apache.http.HttpResponse receiveResponseHeader()>();
+
+        $r5 = $r6;
+
+        $z0 = virtualinvoke $r0.<org.apache.http.protocol.HttpRequestExecutor: boolean canResponseHaveBody(org.apache.http.HttpRequest,org.apache.http.HttpResponse)>($r1, $r6);
+
+        if $z0 == 0 goto label6;
+
+        interfaceinvoke $r2.<org.apache.http.HttpClientConnection: void receiveResponseEntity(org.apache.http.HttpResponse)>($r6);
+
+     label6:
+        $r7 = interfaceinvoke $r6.<org.apache.http.HttpResponse: org.apache.http.StatusLine getStatusLine()>();
+
+        $i0 = interfaceinvoke $r7.<org.apache.http.StatusLine: int getStatusCode()>();
+
+        goto label4;
+
+     label7:
+        return $r5;
+    }
+
+    protected org.apache.http.HttpResponse doSendRequest(org.apache.http.HttpRequest, org.apache.http.HttpClientConnection, org.apache.http.protocol.HttpContext) throws java.io.IOException, org.apache.http.HttpException
+    {
+        org.apache.http.protocol.HttpRequestExecutor $r0;
+        org.apache.http.HttpClientConnection $r1;
+        org.apache.http.protocol.HttpContext $r2;
+        org.apache.http.HttpRequest $r3;
+        java.lang.IllegalArgumentException $r4;
+        org.apache.http.HttpResponse $r5, $r12;
+        java.lang.Boolean $r6;
+        boolean $z0, $z1;
+        org.apache.http.RequestLine $r7;
+        org.apache.http.ProtocolVersion $r8;
+        org.apache.http.HttpEntityEnclosingRequest $r9;
+        org.apache.http.HttpVersion $r10;
+        org.apache.http.params.HttpParams $r11;
+        int $i0;
+        org.apache.http.StatusLine $r13;
+        java.net.ProtocolException $r14;
+        java.lang.StringBuilder $r15;
+        java.lang.String $r16;
+
+        $r0 := @this: org.apache.http.protocol.HttpRequestExecutor;
+
+        $r3 := @parameter0: org.apache.http.HttpRequest;
+
+        $r1 := @parameter1: org.apache.http.HttpClientConnection;
+
+        $r2 := @parameter2: org.apache.http.protocol.HttpContext;
+
+        if $r3 != null goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("HTTP request may not be null");
+
+        throw $r4;
+
+     label1:
+        if $r1 != null goto label2;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("HTTP connection may not be null");
+
+        throw $r4;
+
+     label2:
+        if $r2 != null goto label3;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("HTTP context may not be null");
+
+        throw $r4;
+
+     label3:
+        $r5 = null;
+
+        $r6 = <java.lang.Boolean: java.lang.Boolean FALSE>;
+
+        interfaceinvoke $r2.<org.apache.http.protocol.HttpContext: void setAttribute(java.lang.String,java.lang.Object)>("http.request_sent", $r6);
+
+        interfaceinvoke $r1.<org.apache.http.HttpClientConnection: void sendRequestHeader(org.apache.http.HttpRequest)>($r3);
+
+        $z0 = $r3 instanceof org.apache.http.HttpEntityEnclosingRequest;
+
+        if $z0 == 0 goto label7;
+
+        $z0 = 1;
+
+        $r7 = interfaceinvoke $r3.<org.apache.http.HttpRequest: org.apache.http.RequestLine getRequestLine()>();
+
+        $r8 = interfaceinvoke $r7.<org.apache.http.RequestLine: org.apache.http.ProtocolVersion getProtocolVersion()>();
+
+        $r9 = (org.apache.http.HttpEntityEnclosingRequest) $r3;
+
+        $z1 = interfaceinvoke $r9.<org.apache.http.HttpEntityEnclosingRequest: boolean expectContinue()>();
+
+        if $z1 == 0 goto label6;
+
+        $r10 = <org.apache.http.HttpVersion: org.apache.http.HttpVersion HTTP_1_0>;
+
+        $z1 = virtualinvoke $r8.<org.apache.http.ProtocolVersion: boolean lessEquals(org.apache.http.ProtocolVersion)>($r10);
+
+        if $z1 != 0 goto label6;
+
+        interfaceinvoke $r1.<org.apache.http.HttpClientConnection: void flush()>();
+
+        $r11 = interfaceinvoke $r3.<org.apache.http.HttpRequest: org.apache.http.params.HttpParams getParams()>();
+
+        $i0 = interfaceinvoke $r11.<org.apache.http.params.HttpParams: int getIntParameter(java.lang.String,int)>("http.protocol.wait-for-continue", 2000);
+
+        $z1 = interfaceinvoke $r1.<org.apache.http.HttpClientConnection: boolean isResponseAvailable(int)>($i0);
+
+        if $z1 == 0 goto label6;
+
+        $r12 = interfaceinvoke $r1.<org.apache.http.HttpClientConnection: org.apache.http.HttpResponse receiveResponseHeader()>();
+
+        $r5 = $r12;
+
+        $z1 = virtualinvoke $r0.<org.apache.http.protocol.HttpRequestExecutor: boolean canResponseHaveBody(org.apache.http.HttpRequest,org.apache.http.HttpResponse)>($r3, $r12);
+
+        if $z1 == 0 goto label4;
+
+        interfaceinvoke $r1.<org.apache.http.HttpClientConnection: void receiveResponseEntity(org.apache.http.HttpResponse)>($r12);
+
+     label4:
+        $r13 = interfaceinvoke $r12.<org.apache.http.HttpResponse: org.apache.http.StatusLine getStatusLine()>();
+
+        $i0 = interfaceinvoke $r13.<org.apache.http.StatusLine: int getStatusCode()>();
+
+        if $i0 >= 200 goto label8;
+
+        if $i0 == 100 goto label5;
+
+        $r14 = new java.net.ProtocolException;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unexpected response: ");
+
+        $r13 = interfaceinvoke $r12.<org.apache.http.HttpResponse: org.apache.http.StatusLine getStatusLine()>();
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r13);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r14.<java.net.ProtocolException: void <init>(java.lang.String)>($r16);
+
+        throw $r14;
+
+     label5:
+        $r5 = null;
+
+     label6:
+        if $z0 == 0 goto label7;
+
+        $r9 = (org.apache.http.HttpEntityEnclosingRequest) $r3;
+
+        interfaceinvoke $r1.<org.apache.http.HttpClientConnection: void sendRequestEntity(org.apache.http.HttpEntityEnclosingRequest)>($r9);
+
+     label7:
+        interfaceinvoke $r1.<org.apache.http.HttpClientConnection: void flush()>();
+
+        $r6 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+        interfaceinvoke $r2.<org.apache.http.protocol.HttpContext: void setAttribute(java.lang.String,java.lang.Object)>("http.request_sent", $r6);
+
+        return $r5;
+
+     label8:
+        $z0 = 0;
+
+        goto label6;
+    }
+
+    public org.apache.http.HttpResponse execute(org.apache.http.HttpRequest, org.apache.http.HttpClientConnection, org.apache.http.protocol.HttpContext) throws java.io.IOException, org.apache.http.HttpException
+    {
+        org.apache.http.protocol.HttpRequestExecutor $r0;
+        org.apache.http.HttpRequest $r1;
+        org.apache.http.HttpClientConnection $r2;
+        org.apache.http.protocol.HttpContext $r3;
+        java.lang.IllegalArgumentException $r4;
+        org.apache.http.HttpResponse $r5;
+        java.io.IOException $r6;
+        org.apache.http.HttpException $r7;
+        java.lang.RuntimeException $r8;
+
+        $r0 := @this: org.apache.http.protocol.HttpRequestExecutor;
+
+        $r1 := @parameter0: org.apache.http.HttpRequest;
+
+        $r2 := @parameter1: org.apache.http.HttpClientConnection;
+
+        $r3 := @parameter2: org.apache.http.protocol.HttpContext;
+
+        if $r1 != null goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("HTTP request may not be null");
+
+        throw $r4;
+
+     label1:
+        if $r2 != null goto label2;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Client connection may not be null");
+
+        throw $r4;
+
+     label2:
+        if $r3 != null goto label3;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("HTTP context may not be null");
+
+        throw $r4;
+
+     label3:
+        $r5 = virtualinvoke $r0.<org.apache.http.protocol.HttpRequestExecutor: org.apache.http.HttpResponse doSendRequest(org.apache.http.HttpRequest,org.apache.http.HttpClientConnection,org.apache.http.protocol.HttpContext)>($r1, $r2, $r3);
+
+        if $r5 != null goto label8;
+
+        $r5 = virtualinvoke $r0.<org.apache.http.protocol.HttpRequestExecutor: org.apache.http.HttpResponse doReceiveResponse(org.apache.http.HttpRequest,org.apache.http.HttpClientConnection,org.apache.http.protocol.HttpContext)>($r1, $r2, $r3);
+
+     label4:
+        return $r5;
+
+     label5:
+        $r6 := @caughtexception;
+
+        interfaceinvoke $r2.<org.apache.http.HttpClientConnection: void close()>();
+
+        throw $r6;
+
+     label6:
+        $r7 := @caughtexception;
+
+        interfaceinvoke $r2.<org.apache.http.HttpClientConnection: void close()>();
+
+        throw $r7;
+
+     label7:
+        $r8 := @caughtexception;
+
+        interfaceinvoke $r2.<org.apache.http.HttpClientConnection: void close()>();
+
+        throw $r8;
+
+     label8:
+        return $r5;
+
+        catch java.io.IOException from label3 to label4 with label5;
+        catch org.apache.http.HttpException from label3 to label4 with label6;
+        catch java.lang.RuntimeException from label3 to label4 with label7;
+    }
+
+    public void postProcess(org.apache.http.HttpResponse, org.apache.http.protocol.HttpProcessor, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException, java.io.IOException
+    {
+        org.apache.http.protocol.HttpRequestExecutor $r0;
+        org.apache.http.HttpResponse $r1;
+        org.apache.http.protocol.HttpProcessor $r2;
+        org.apache.http.protocol.HttpContext $r3;
+        java.lang.IllegalArgumentException $r4;
+
+        $r0 := @this: org.apache.http.protocol.HttpRequestExecutor;
+
+        $r1 := @parameter0: org.apache.http.HttpResponse;
+
+        $r2 := @parameter1: org.apache.http.protocol.HttpProcessor;
+
+        $r3 := @parameter2: org.apache.http.protocol.HttpContext;
+
+        if $r1 != null goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("HTTP response may not be null");
+
+        throw $r4;
+
+     label1:
+        if $r2 != null goto label2;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("HTTP processor may not be null");
+
+        throw $r4;
+
+     label2:
+        if $r3 != null goto label3;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("HTTP context may not be null");
+
+        throw $r4;
+
+     label3:
+        interfaceinvoke $r2.<org.apache.http.protocol.HttpProcessor: void process(org.apache.http.HttpResponse,org.apache.http.protocol.HttpContext)>($r1, $r3);
+
+        return;
+    }
+
+    public void preProcess(org.apache.http.HttpRequest, org.apache.http.protocol.HttpProcessor, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException, java.io.IOException
+    {
+        org.apache.http.protocol.HttpRequestExecutor $r0;
+        org.apache.http.HttpRequest $r1;
+        org.apache.http.protocol.HttpProcessor $r2;
+        org.apache.http.protocol.HttpContext $r3;
+        java.lang.IllegalArgumentException $r4;
+
+        $r0 := @this: org.apache.http.protocol.HttpRequestExecutor;
+
+        $r1 := @parameter0: org.apache.http.HttpRequest;
+
+        $r2 := @parameter1: org.apache.http.protocol.HttpProcessor;
+
+        $r3 := @parameter2: org.apache.http.protocol.HttpContext;
+
+        if $r1 != null goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("HTTP request may not be null");
+
+        throw $r4;
+
+     label1:
+        if $r2 != null goto label2;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("HTTP processor may not be null");
+
+        throw $r4;
+
+     label2:
+        if $r3 != null goto label3;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("HTTP context may not be null");
+
+        throw $r4;
+
+     label3:
+        interfaceinvoke $r2.<org.apache.http.protocol.HttpProcessor: void process(org.apache.http.HttpRequest,org.apache.http.protocol.HttpContext)>($r1, $r3);
+
+        return;
+    }
+}

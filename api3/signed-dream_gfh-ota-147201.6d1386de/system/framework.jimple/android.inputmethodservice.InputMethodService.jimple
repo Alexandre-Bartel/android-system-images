@@ -1,0 +1,3594 @@
+public class android.inputmethodservice.InputMethodService extends android.inputmethodservice.AbstractInputMethodService
+{
+    static final boolean DEBUG;
+    static final int MOVEMENT_DOWN;
+    static final int MOVEMENT_UP;
+    static final java.lang.String TAG;
+    final android.view.View$OnClickListener mActionClickListener;
+    android.widget.FrameLayout mCandidatesFrame;
+    boolean mCandidatesViewStarted;
+    int mCandidatesVisibility;
+    android.view.inputmethod.CompletionInfo[] mCurCompletions;
+    android.view.ViewGroup mExtractAccessories;
+    android.widget.Button mExtractAction;
+    android.inputmethodservice.ExtractEditText mExtractEditText;
+    android.widget.FrameLayout mExtractFrame;
+    android.view.View mExtractView;
+    boolean mExtractViewHidden;
+    android.view.inputmethod.ExtractedText mExtractedText;
+    int mExtractedToken;
+    boolean mFullscreenApplied;
+    android.view.ViewGroup mFullscreenArea;
+    android.view.inputmethod.InputMethodManager mImm;
+    boolean mInShowWindow;
+    android.view.LayoutInflater mInflater;
+    boolean mInitialized;
+    android.view.inputmethod.InputBinding mInputBinding;
+    android.view.inputmethod.InputConnection mInputConnection;
+    android.view.inputmethod.EditorInfo mInputEditorInfo;
+    android.widget.FrameLayout mInputFrame;
+    boolean mInputStarted;
+    android.view.View mInputView;
+    boolean mInputViewStarted;
+    final android.view.ViewTreeObserver$OnComputeInternalInsetsListener mInsetsComputer;
+    boolean mIsFullscreen;
+    boolean mIsInputViewShown;
+    boolean mLastShowInputRequested;
+    android.view.View mRootView;
+    int mShowInputFlags;
+    boolean mShowInputForced;
+    boolean mShowInputRequested;
+    android.view.inputmethod.InputConnection mStartedInputConnection;
+    int mStatusIcon;
+    int mTheme;
+    android.content.res.TypedArray mThemeAttrs;
+    final android.inputmethodservice.InputMethodService$Insets mTmpInsets;
+    final int[] mTmpLocation;
+    android.os.IBinder mToken;
+    android.inputmethodservice.SoftInputWindow mWindow;
+    boolean mWindowAdded;
+    boolean mWindowCreated;
+    boolean mWindowVisible;
+    boolean mWindowWasVisible;
+
+    public void <init>()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        android.inputmethodservice.InputMethodService$Insets $r1;
+        int[] $r2;
+        android.inputmethodservice.InputMethodService$1 $r3;
+        android.inputmethodservice.InputMethodService$2 $r4;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        specialinvoke $r0.<android.inputmethodservice.AbstractInputMethodService: void <init>()>();
+
+        $r0.<android.inputmethodservice.InputMethodService: int mTheme> = 16973908;
+
+        $r1 = new android.inputmethodservice.InputMethodService$Insets;
+
+        specialinvoke $r1.<android.inputmethodservice.InputMethodService$Insets: void <init>()>();
+
+        $r0.<android.inputmethodservice.InputMethodService: android.inputmethodservice.InputMethodService$Insets mTmpInsets> = $r1;
+
+        $r2 = newarray (int)[2];
+
+        $r0.<android.inputmethodservice.InputMethodService: int[] mTmpLocation> = $r2;
+
+        $r3 = new android.inputmethodservice.InputMethodService$1;
+
+        specialinvoke $r3.<android.inputmethodservice.InputMethodService$1: void <init>(android.inputmethodservice.InputMethodService)>($r0);
+
+        $r0.<android.inputmethodservice.InputMethodService: android.view.ViewTreeObserver$OnComputeInternalInsetsListener mInsetsComputer> = $r3;
+
+        $r4 = new android.inputmethodservice.InputMethodService$2;
+
+        specialinvoke $r4.<android.inputmethodservice.InputMethodService$2: void <init>(android.inputmethodservice.InputMethodService)>($r0);
+
+        $r0.<android.inputmethodservice.InputMethodService: android.view.View$OnClickListener mActionClickListener> = $r4;
+
+        return;
+    }
+
+    static void access$000(android.inputmethodservice.InputMethodService, int, int)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        int $i0, $i1;
+
+        $r0 := @parameter0: android.inputmethodservice.InputMethodService;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        specialinvoke $r0.<android.inputmethodservice.InputMethodService: void onToggleSoftInput(int,int)>($i0, $i1);
+
+        return;
+    }
+
+    private void onToggleSoftInput(int, int)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        int $i0, $i1;
+        boolean $z0;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $z0 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: boolean isInputViewShown()>();
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void requestHideSelf(int)>($i1);
+
+        return;
+
+     label1:
+        specialinvoke $r0.<android.inputmethodservice.InputMethodService: void requestShowSelf(int)>($i0);
+
+        return;
+    }
+
+    private void requestShowSelf(int)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        int $i0;
+        android.view.inputmethod.InputMethodManager $r1;
+        android.os.IBinder $r2;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.InputMethodManager mImm>;
+
+        $r2 = $r0.<android.inputmethodservice.InputMethodService: android.os.IBinder mToken>;
+
+        virtualinvoke $r1.<android.view.inputmethod.InputMethodManager: void showSoftInputFromInputMethod(android.os.IBinder,int)>($r2, $i0);
+
+        return;
+    }
+
+    void doFinishInput()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        boolean $z0;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mInputViewStarted>;
+
+        if $z0 == 0 goto label3;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void onFinishInputView(boolean)>(1);
+
+     label1:
+        $r0.<android.inputmethodservice.InputMethodService: boolean mInputViewStarted> = 0;
+
+        $r0.<android.inputmethodservice.InputMethodService: boolean mCandidatesViewStarted> = 0;
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mInputStarted>;
+
+        if $z0 == 0 goto label2;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void onFinishInput()>();
+
+     label2:
+        $r0.<android.inputmethodservice.InputMethodService: boolean mInputStarted> = 0;
+
+        $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.InputConnection mStartedInputConnection> = null;
+
+        $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.CompletionInfo[] mCurCompletions> = null;
+
+        return;
+
+     label3:
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mCandidatesViewStarted>;
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void onFinishCandidatesView(boolean)>(1);
+
+        goto label1;
+    }
+
+    boolean doMovementKey(int, android.view.KeyEvent, int)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        int $i0, $i1;
+        android.view.KeyEvent $r1, $r6;
+        android.inputmethodservice.ExtractEditText $r2;
+        boolean $z0;
+        android.text.method.MovementMethod $r3;
+        android.text.Layout $r4;
+        android.text.Editable $r5;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: android.view.KeyEvent;
+
+        $i1 := @parameter2: int;
+
+        $r2 = $r0.<android.inputmethodservice.InputMethodService: android.inputmethodservice.ExtractEditText mExtractEditText>;
+
+        $z0 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: boolean isExtractViewShown()>();
+
+        if $z0 == 0 goto label4;
+
+        $z0 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: boolean isInputViewShown()>();
+
+        if $z0 == 0 goto label4;
+
+        if $r2 == null goto label4;
+
+        $r3 = virtualinvoke $r2.<android.widget.TextView: android.text.method.MovementMethod getMovementMethod()>();
+
+        $r4 = virtualinvoke $r2.<android.widget.TextView: android.text.Layout getLayout()>();
+
+        if $r3 == null goto label3;
+
+        if $r4 == null goto label3;
+
+        if $i1 != -1 goto label1;
+
+        $r5 = virtualinvoke $r2.<android.widget.EditText: android.text.Editable getText()>();
+
+        $z0 = interfaceinvoke $r3.<android.text.method.MovementMethod: boolean onKeyDown(android.widget.TextView,android.text.Spannable,int,android.view.KeyEvent)>($r2, $r5, $i0, $r1);
+
+        if $z0 == 0 goto label3;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void reportExtractedMovement(int,int)>($i0, 1);
+
+        return 1;
+
+     label1:
+        if $i1 != -2 goto label2;
+
+        $r5 = virtualinvoke $r2.<android.widget.EditText: android.text.Editable getText()>();
+
+        $z0 = interfaceinvoke $r3.<android.text.method.MovementMethod: boolean onKeyUp(android.widget.TextView,android.text.Spannable,int,android.view.KeyEvent)>($r2, $r5, $i0, $r1);
+
+        if $z0 == 0 goto label3;
+
+        return 1;
+
+     label2:
+        $r5 = virtualinvoke $r2.<android.widget.EditText: android.text.Editable getText()>();
+
+        $z0 = interfaceinvoke $r3.<android.text.method.MovementMethod: boolean onKeyOther(android.widget.TextView,android.text.Spannable,android.view.KeyEvent)>($r2, $r5, $r1);
+
+        if $z0 == 0 goto label5;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void reportExtractedMovement(int,int)>($i0, $i1);
+
+     label3:
+        lookupswitch($i0)
+        {
+            case 19: goto label8;
+            case 20: goto label8;
+            case 21: goto label8;
+            case 22: goto label8;
+            default: goto label4;
+        };
+
+     label4:
+        return 0;
+
+     label5:
+        $r6 = staticinvoke <android.view.KeyEvent: android.view.KeyEvent changeAction(android.view.KeyEvent,int)>($r1, 0);
+
+        $r5 = virtualinvoke $r2.<android.widget.EditText: android.text.Editable getText()>();
+
+        $z0 = interfaceinvoke $r3.<android.text.method.MovementMethod: boolean onKeyDown(android.widget.TextView,android.text.Spannable,int,android.view.KeyEvent)>($r2, $r5, $i0, $r6);
+
+        if $z0 == 0 goto label3;
+
+        $r1 = staticinvoke <android.view.KeyEvent: android.view.KeyEvent changeAction(android.view.KeyEvent,int)>($r1, 1);
+
+        $r5 = virtualinvoke $r2.<android.widget.EditText: android.text.Editable getText()>();
+
+        interfaceinvoke $r3.<android.text.method.MovementMethod: boolean onKeyUp(android.widget.TextView,android.text.Spannable,int,android.view.KeyEvent)>($r2, $r5, $i0, $r1);
+
+     label6:
+        $i1 = $i1 + -1;
+
+        if $i1 <= 0 goto label7;
+
+        $r5 = virtualinvoke $r2.<android.widget.EditText: android.text.Editable getText()>();
+
+        interfaceinvoke $r3.<android.text.method.MovementMethod: boolean onKeyDown(android.widget.TextView,android.text.Spannable,int,android.view.KeyEvent)>($r2, $r5, $i0, $r6);
+
+        $r5 = virtualinvoke $r2.<android.widget.EditText: android.text.Editable getText()>();
+
+        interfaceinvoke $r3.<android.text.method.MovementMethod: boolean onKeyUp(android.widget.TextView,android.text.Spannable,int,android.view.KeyEvent)>($r2, $r5, $i0, $r1);
+
+        goto label6;
+
+     label7:
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void reportExtractedMovement(int,int)>($i0, $i1);
+
+        goto label3;
+
+     label8:
+        return 1;
+    }
+
+    void doStartInput(android.view.inputmethod.InputConnection, android.view.inputmethod.EditorInfo, boolean)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        android.view.inputmethod.InputConnection $r1;
+        android.view.inputmethod.EditorInfo $r2;
+        boolean $z0, $z1;
+        int $i0;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $r1 := @parameter0: android.view.inputmethod.InputConnection;
+
+        $r2 := @parameter1: android.view.inputmethod.EditorInfo;
+
+        $z0 := @parameter2: boolean;
+
+        if $z0 != 0 goto label1;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void doFinishInput()>();
+
+     label1:
+        $r0.<android.inputmethodservice.InputMethodService: boolean mInputStarted> = 1;
+
+        $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.InputConnection mStartedInputConnection> = $r1;
+
+        $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.EditorInfo mInputEditorInfo> = $r2;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void initialize()>();
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void onStartInput(android.view.inputmethod.EditorInfo,boolean)>($r2, $z0);
+
+        $z1 = $r0.<android.inputmethodservice.InputMethodService: boolean mWindowVisible>;
+
+        if $z1 == 0 goto label3;
+
+        $z1 = $r0.<android.inputmethodservice.InputMethodService: boolean mShowInputRequested>;
+
+        if $z1 == 0 goto label2;
+
+        $r0.<android.inputmethodservice.InputMethodService: boolean mInputViewStarted> = 1;
+
+        $r2 = $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.EditorInfo mInputEditorInfo>;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void onStartInputView(android.view.inputmethod.EditorInfo,boolean)>($r2, $z0);
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void startExtractingText(boolean)>(1);
+
+        return;
+
+     label2:
+        $i0 = $r0.<android.inputmethodservice.InputMethodService: int mCandidatesVisibility>;
+
+        if $i0 != 0 goto label4;
+
+        $r0.<android.inputmethodservice.InputMethodService: boolean mCandidatesViewStarted> = 1;
+
+        $r2 = $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.EditorInfo mInputEditorInfo>;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void onStartCandidatesView(android.view.inputmethod.EditorInfo,boolean)>($r2, $z0);
+
+        return;
+
+     label3:
+        return;
+
+     label4:
+        return;
+    }
+
+    protected void dump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[])
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        java.io.FileDescriptor $r1;
+        java.io.PrintWriter $r2;
+        java.lang.String[] $r3;
+        android.util.PrintWriterPrinter $r4;
+        java.lang.StringBuilder $r5;
+        java.lang.String $r6;
+        boolean $z0;
+        android.content.res.Resources $r7;
+        android.content.res.Configuration $r8;
+        android.os.IBinder $r9;
+        android.view.inputmethod.InputBinding $r10;
+        android.view.inputmethod.InputConnection $r11;
+        android.view.inputmethod.EditorInfo $r12;
+        int $i0;
+        android.view.inputmethod.ExtractedText $r13;
+        java.lang.CharSequence $r14;
+        android.inputmethodservice.InputMethodService$Insets $r15;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $r1 := @parameter0: java.io.FileDescriptor;
+
+        $r2 := @parameter1: java.io.PrintWriter;
+
+        $r3 := @parameter2: java.lang.String[];
+
+        $r4 = new android.util.PrintWriterPrinter;
+
+        specialinvoke $r4.<android.util.PrintWriterPrinter: void <init>(java.io.PrintWriter)>($r2);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Input method service state for ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r4.<android.util.Printer: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mWindowCreated=");
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mWindowCreated>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" mWindowAdded=");
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mWindowAdded>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r4.<android.util.Printer: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mWindowVisible=");
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mWindowVisible>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" mWindowWasVisible=");
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mWindowWasVisible>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" mInShowWindow=");
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mInShowWindow>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r4.<android.util.Printer: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  Configuration=");
+
+        $r7 = virtualinvoke $r0.<android.content.ContextWrapper: android.content.res.Resources getResources()>();
+
+        $r8 = virtualinvoke $r7.<android.content.res.Resources: android.content.res.Configuration getConfiguration()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r4.<android.util.Printer: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mToken=");
+
+        $r9 = $r0.<android.inputmethodservice.InputMethodService: android.os.IBinder mToken>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r4.<android.util.Printer: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mInputBinding=");
+
+        $r10 = $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.InputBinding mInputBinding>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r10);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r4.<android.util.Printer: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mInputConnection=");
+
+        $r11 = $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.InputConnection mInputConnection>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r11);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r4.<android.util.Printer: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mStartedInputConnection=");
+
+        $r11 = $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.InputConnection mStartedInputConnection>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r11);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r4.<android.util.Printer: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mInputStarted=");
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mInputStarted>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" mInputViewStarted=");
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mInputViewStarted>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" mCandidatesViewStarted=");
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mCandidatesViewStarted>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r4.<android.util.Printer: void println(java.lang.String)>($r6);
+
+        $r12 = $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.EditorInfo mInputEditorInfo>;
+
+        if $r12 == null goto label3;
+
+        interfaceinvoke $r4.<android.util.Printer: void println(java.lang.String)>("  mInputEditorInfo:");
+
+        $r12 = $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.EditorInfo mInputEditorInfo>;
+
+        virtualinvoke $r12.<android.view.inputmethod.EditorInfo: void dump(android.util.Printer,java.lang.String)>($r4, "    ");
+
+     label1:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mShowInputRequested=");
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mShowInputRequested>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" mLastShowInputRequested=");
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mLastShowInputRequested>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" mShowInputForced=");
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mShowInputForced>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" mShowInputFlags=0x");
+
+        $i0 = $r0.<android.inputmethodservice.InputMethodService: int mShowInputFlags>;
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r4.<android.util.Printer: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mCandidatesVisibility=");
+
+        $i0 = $r0.<android.inputmethodservice.InputMethodService: int mCandidatesVisibility>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" mFullscreenApplied=");
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mFullscreenApplied>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" mIsFullscreen=");
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mIsFullscreen>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" mExtractViewHidden=");
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mExtractViewHidden>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r4.<android.util.Printer: void println(java.lang.String)>($r6);
+
+        $r13 = $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.ExtractedText mExtractedText>;
+
+        if $r13 == null goto label4;
+
+        interfaceinvoke $r4.<android.util.Printer: void println(java.lang.String)>("  mExtractedText:");
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("    text=");
+
+        $r13 = $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.ExtractedText mExtractedText>;
+
+        $r14 = $r13.<android.view.inputmethod.ExtractedText: java.lang.CharSequence text>;
+
+        $i0 = interfaceinvoke $r14.<java.lang.CharSequence: int length()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" chars");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" startOffset=");
+
+        $r13 = $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.ExtractedText mExtractedText>;
+
+        $i0 = $r13.<android.view.inputmethod.ExtractedText: int startOffset>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r4.<android.util.Printer: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("    selectionStart=");
+
+        $r13 = $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.ExtractedText mExtractedText>;
+
+        $i0 = $r13.<android.view.inputmethod.ExtractedText: int selectionStart>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" selectionEnd=");
+
+        $r13 = $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.ExtractedText mExtractedText>;
+
+        $i0 = $r13.<android.view.inputmethod.ExtractedText: int selectionEnd>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" flags=0x");
+
+        $r13 = $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.ExtractedText mExtractedText>;
+
+        $i0 = $r13.<android.view.inputmethod.ExtractedText: int flags>;
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r4.<android.util.Printer: void println(java.lang.String)>($r6);
+
+     label2:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mExtractedToken=");
+
+        $i0 = $r0.<android.inputmethodservice.InputMethodService: int mExtractedToken>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r4.<android.util.Printer: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mIsInputViewShown=");
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mIsInputViewShown>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" mStatusIcon=");
+
+        $i0 = $r0.<android.inputmethodservice.InputMethodService: int mStatusIcon>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r4.<android.util.Printer: void println(java.lang.String)>($r6);
+
+        interfaceinvoke $r4.<android.util.Printer: void println(java.lang.String)>("Last computed insets:");
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  contentTopInsets=");
+
+        $r15 = $r0.<android.inputmethodservice.InputMethodService: android.inputmethodservice.InputMethodService$Insets mTmpInsets>;
+
+        $i0 = $r15.<android.inputmethodservice.InputMethodService$Insets: int contentTopInsets>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" visibleTopInsets=");
+
+        $r15 = $r0.<android.inputmethodservice.InputMethodService: android.inputmethodservice.InputMethodService$Insets mTmpInsets>;
+
+        $i0 = $r15.<android.inputmethodservice.InputMethodService$Insets: int visibleTopInsets>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" touchableInsets=");
+
+        $r15 = $r0.<android.inputmethodservice.InputMethodService: android.inputmethodservice.InputMethodService$Insets mTmpInsets>;
+
+        $i0 = $r15.<android.inputmethodservice.InputMethodService$Insets: int touchableInsets>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r4.<android.util.Printer: void println(java.lang.String)>($r6);
+
+        return;
+
+     label3:
+        interfaceinvoke $r4.<android.util.Printer: void println(java.lang.String)>("  mInputEditorInfo: null");
+
+        goto label1;
+
+     label4:
+        interfaceinvoke $r4.<android.util.Printer: void println(java.lang.String)>("  mExtractedText: null");
+
+        goto label2;
+    }
+
+    public int getCandidatesHiddenVisibility()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        boolean $z0;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $z0 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: boolean isExtractViewShown()>();
+
+        if $z0 == 0 goto label1;
+
+        return 8;
+
+     label1:
+        return 4;
+    }
+
+    public android.view.inputmethod.InputBinding getCurrentInputBinding()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        android.view.inputmethod.InputBinding r1;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        r1 = $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.InputBinding mInputBinding>;
+
+        return r1;
+    }
+
+    public android.view.inputmethod.InputConnection getCurrentInputConnection()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        android.view.inputmethod.InputConnection $r1;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $r1 = $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.InputConnection mStartedInputConnection>;
+
+        if $r1 == null goto label1;
+
+        return $r1;
+
+     label1:
+        $r1 = $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.InputConnection mInputConnection>;
+
+        return $r1;
+    }
+
+    public android.view.inputmethod.EditorInfo getCurrentInputEditorInfo()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        android.view.inputmethod.EditorInfo r1;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        r1 = $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.EditorInfo mInputEditorInfo>;
+
+        return r1;
+    }
+
+    public boolean getCurrentInputStarted()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        boolean z0;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mInputStarted>;
+
+        return z0;
+    }
+
+    public android.view.LayoutInflater getLayoutInflater()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        android.view.LayoutInflater r1;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        r1 = $r0.<android.inputmethodservice.InputMethodService: android.view.LayoutInflater mInflater>;
+
+        return r1;
+    }
+
+    public int getMaxWidth()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        java.lang.Object $r1;
+        android.view.WindowManager $r2;
+        android.view.Display $r3;
+        int $i0;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $r1 = virtualinvoke $r0.<android.content.ContextWrapper: java.lang.Object getSystemService(java.lang.String)>("window");
+
+        $r2 = (android.view.WindowManager) $r1;
+
+        $r3 = interfaceinvoke $r2.<android.view.WindowManager: android.view.Display getDefaultDisplay()>();
+
+        $i0 = virtualinvoke $r3.<android.view.Display: int getWidth()>();
+
+        return $i0;
+    }
+
+    public java.lang.CharSequence getTextForImeAction(int)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        int $i0;
+        java.lang.CharSequence $r1;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $i0 := @parameter0: int;
+
+        $i0 = $i0 & 255;
+
+        lookupswitch($i0)
+        {
+            case 1: goto label2;
+            case 2: goto label3;
+            case 3: goto label4;
+            case 4: goto label5;
+            case 5: goto label6;
+            case 6: goto label7;
+            default: goto label1;
+        };
+
+     label1:
+        $r1 = virtualinvoke $r0.<android.content.Context: java.lang.CharSequence getText(int)>(17040030);
+
+        return $r1;
+
+     label2:
+        return null;
+
+     label3:
+        $r1 = virtualinvoke $r0.<android.content.Context: java.lang.CharSequence getText(int)>(17040025);
+
+        return $r1;
+
+     label4:
+        $r1 = virtualinvoke $r0.<android.content.Context: java.lang.CharSequence getText(int)>(17040026);
+
+        return $r1;
+
+     label5:
+        $r1 = virtualinvoke $r0.<android.content.Context: java.lang.CharSequence getText(int)>(17040027);
+
+        return $r1;
+
+     label6:
+        $r1 = virtualinvoke $r0.<android.content.Context: java.lang.CharSequence getText(int)>(17040028);
+
+        return $r1;
+
+     label7:
+        $r1 = virtualinvoke $r0.<android.content.Context: java.lang.CharSequence getText(int)>(17040029);
+
+        return $r1;
+    }
+
+    public android.app.Dialog getWindow()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        android.inputmethodservice.SoftInputWindow r1;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        r1 = $r0.<android.inputmethodservice.InputMethodService: android.inputmethodservice.SoftInputWindow mWindow>;
+
+        return r1;
+    }
+
+    public void hideStatusIcon()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        android.os.IBinder $r1;
+        android.view.inputmethod.InputMethodManager $r2;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $r0.<android.inputmethodservice.InputMethodService: int mStatusIcon> = 0;
+
+        $r2 = $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.InputMethodManager mImm>;
+
+        $r1 = $r0.<android.inputmethodservice.InputMethodService: android.os.IBinder mToken>;
+
+        virtualinvoke $r2.<android.view.inputmethod.InputMethodManager: void hideStatusIcon(android.os.IBinder)>($r1);
+
+        return;
+    }
+
+    public void hideWindow()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        boolean $z0;
+        android.inputmethodservice.SoftInputWindow $r1;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mInputViewStarted>;
+
+        if $z0 == 0 goto label2;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void onFinishInputView(boolean)>(0);
+
+     label1:
+        $r0.<android.inputmethodservice.InputMethodService: boolean mInputViewStarted> = 0;
+
+        $r0.<android.inputmethodservice.InputMethodService: boolean mCandidatesViewStarted> = 0;
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mWindowVisible>;
+
+        if $z0 == 0 goto label3;
+
+        $r1 = $r0.<android.inputmethodservice.InputMethodService: android.inputmethodservice.SoftInputWindow mWindow>;
+
+        virtualinvoke $r1.<android.app.Dialog: void hide()>();
+
+        $r0.<android.inputmethodservice.InputMethodService: boolean mWindowVisible> = 0;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void onWindowHidden()>();
+
+        $r0.<android.inputmethodservice.InputMethodService: boolean mWindowWasVisible> = 0;
+
+        return;
+
+     label2:
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mCandidatesViewStarted>;
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void onFinishCandidatesView(boolean)>(0);
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    void initViews()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        int[] $r1;
+        android.content.res.TypedArray $r2;
+        android.view.LayoutInflater $r3;
+        android.view.View $r4;
+        android.inputmethodservice.SoftInputWindow $r5;
+        android.view.ViewTreeObserver $r6;
+        android.view.ViewTreeObserver$OnComputeInternalInsetsListener $r7;
+        android.content.ContentResolver $r8;
+        int $i0;
+        android.view.Window $r9;
+        android.view.ViewGroup $r10;
+        android.widget.FrameLayout $r11;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $r0.<android.inputmethodservice.InputMethodService: boolean mInitialized> = 0;
+
+        $r0.<android.inputmethodservice.InputMethodService: boolean mWindowCreated> = 0;
+
+        $r0.<android.inputmethodservice.InputMethodService: boolean mShowInputRequested> = 0;
+
+        $r0.<android.inputmethodservice.InputMethodService: boolean mShowInputForced> = 0;
+
+        $r1 = <android.R$styleable: int[] InputMethodService>;
+
+        $r2 = virtualinvoke $r0.<android.content.Context: android.content.res.TypedArray obtainStyledAttributes(int[])>($r1);
+
+        $r0.<android.inputmethodservice.InputMethodService: android.content.res.TypedArray mThemeAttrs> = $r2;
+
+        $r3 = $r0.<android.inputmethodservice.InputMethodService: android.view.LayoutInflater mInflater>;
+
+        $r4 = virtualinvoke $r3.<android.view.LayoutInflater: android.view.View inflate(int,android.view.ViewGroup)>(17367082, null);
+
+        $r0.<android.inputmethodservice.InputMethodService: android.view.View mRootView> = $r4;
+
+        $r5 = $r0.<android.inputmethodservice.InputMethodService: android.inputmethodservice.SoftInputWindow mWindow>;
+
+        $r4 = $r0.<android.inputmethodservice.InputMethodService: android.view.View mRootView>;
+
+        virtualinvoke $r5.<android.app.Dialog: void setContentView(android.view.View)>($r4);
+
+        $r4 = $r0.<android.inputmethodservice.InputMethodService: android.view.View mRootView>;
+
+        $r6 = virtualinvoke $r4.<android.view.View: android.view.ViewTreeObserver getViewTreeObserver()>();
+
+        $r7 = $r0.<android.inputmethodservice.InputMethodService: android.view.ViewTreeObserver$OnComputeInternalInsetsListener mInsetsComputer>;
+
+        virtualinvoke $r6.<android.view.ViewTreeObserver: void addOnComputeInternalInsetsListener(android.view.ViewTreeObserver$OnComputeInternalInsetsListener)>($r7);
+
+        $r8 = virtualinvoke $r0.<android.content.ContextWrapper: android.content.ContentResolver getContentResolver()>();
+
+        $i0 = staticinvoke <android.provider.Settings$System: int getInt(android.content.ContentResolver,java.lang.String,int)>($r8, "fancy_ime_animations", 0);
+
+        if $i0 == 0 goto label1;
+
+        $r5 = $r0.<android.inputmethodservice.InputMethodService: android.inputmethodservice.SoftInputWindow mWindow>;
+
+        $r9 = virtualinvoke $r5.<android.app.Dialog: android.view.Window getWindow()>();
+
+        virtualinvoke $r9.<android.view.Window: void setWindowAnimations(int)>(16973927);
+
+     label1:
+        $r4 = $r0.<android.inputmethodservice.InputMethodService: android.view.View mRootView>;
+
+        $r4 = virtualinvoke $r4.<android.view.View: android.view.View findViewById(int)>(16908663);
+
+        $r10 = (android.view.ViewGroup) $r4;
+
+        $r0.<android.inputmethodservice.InputMethodService: android.view.ViewGroup mFullscreenArea> = $r10;
+
+        $r0.<android.inputmethodservice.InputMethodService: boolean mExtractViewHidden> = 0;
+
+        $r4 = $r0.<android.inputmethodservice.InputMethodService: android.view.View mRootView>;
+
+        $r4 = virtualinvoke $r4.<android.view.View: android.view.View findViewById(int)>(16908316);
+
+        $r11 = (android.widget.FrameLayout) $r4;
+
+        $r0.<android.inputmethodservice.InputMethodService: android.widget.FrameLayout mExtractFrame> = $r11;
+
+        $r0.<android.inputmethodservice.InputMethodService: android.view.View mExtractView> = null;
+
+        $r0.<android.inputmethodservice.InputMethodService: android.inputmethodservice.ExtractEditText mExtractEditText> = null;
+
+        $r0.<android.inputmethodservice.InputMethodService: android.view.ViewGroup mExtractAccessories> = null;
+
+        $r0.<android.inputmethodservice.InputMethodService: android.widget.Button mExtractAction> = null;
+
+        $r0.<android.inputmethodservice.InputMethodService: boolean mFullscreenApplied> = 0;
+
+        $r4 = $r0.<android.inputmethodservice.InputMethodService: android.view.View mRootView>;
+
+        $r4 = virtualinvoke $r4.<android.view.View: android.view.View findViewById(int)>(16908317);
+
+        $r11 = (android.widget.FrameLayout) $r4;
+
+        $r0.<android.inputmethodservice.InputMethodService: android.widget.FrameLayout mCandidatesFrame> = $r11;
+
+        $r4 = $r0.<android.inputmethodservice.InputMethodService: android.view.View mRootView>;
+
+        $r4 = virtualinvoke $r4.<android.view.View: android.view.View findViewById(int)>(16908318);
+
+        $r11 = (android.widget.FrameLayout) $r4;
+
+        $r0.<android.inputmethodservice.InputMethodService: android.widget.FrameLayout mInputFrame> = $r11;
+
+        $r0.<android.inputmethodservice.InputMethodService: android.view.View mInputView> = null;
+
+        $r0.<android.inputmethodservice.InputMethodService: boolean mIsInputViewShown> = 0;
+
+        $r11 = $r0.<android.inputmethodservice.InputMethodService: android.widget.FrameLayout mExtractFrame>;
+
+        virtualinvoke $r11.<android.view.View: void setVisibility(int)>(8);
+
+        $i0 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: int getCandidatesHiddenVisibility()>();
+
+        $r0.<android.inputmethodservice.InputMethodService: int mCandidatesVisibility> = $i0;
+
+        $r11 = $r0.<android.inputmethodservice.InputMethodService: android.widget.FrameLayout mCandidatesFrame>;
+
+        $i0 = $r0.<android.inputmethodservice.InputMethodService: int mCandidatesVisibility>;
+
+        virtualinvoke $r11.<android.view.View: void setVisibility(int)>($i0);
+
+        $r11 = $r0.<android.inputmethodservice.InputMethodService: android.widget.FrameLayout mInputFrame>;
+
+        virtualinvoke $r11.<android.view.View: void setVisibility(int)>(8);
+
+        return;
+    }
+
+    void initialize()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        boolean $z0;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mInitialized>;
+
+        if $z0 != 0 goto label1;
+
+        $r0.<android.inputmethodservice.InputMethodService: boolean mInitialized> = 1;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void onInitializeInterface()>();
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public boolean isExtractViewShown()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        boolean $z0;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mIsFullscreen>;
+
+        if $z0 == 0 goto label1;
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mExtractViewHidden>;
+
+        if $z0 != 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    public boolean isFullscreenMode()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        boolean z0;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mIsFullscreen>;
+
+        return z0;
+    }
+
+    public boolean isInputViewShown()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        boolean $z0;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mIsInputViewShown>;
+
+        if $z0 == 0 goto label1;
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mWindowVisible>;
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    public boolean isShowInputRequested()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        boolean z0;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mShowInputRequested>;
+
+        return z0;
+    }
+
+    public void onAppPrivateCommand(java.lang.String, android.os.Bundle)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        java.lang.String $r1;
+        android.os.Bundle $r2;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: android.os.Bundle;
+
+        return;
+    }
+
+    public void onBindInput()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        return;
+    }
+
+    public void onComputeInsets(android.inputmethodservice.InputMethodService$Insets)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        android.inputmethodservice.InputMethodService$Insets $r1;
+        int[] $r2;
+        android.widget.FrameLayout $r3;
+        int $i0;
+        boolean $z0;
+        android.app.Dialog $r4;
+        android.view.Window $r5;
+        android.view.View $r6;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $r1 := @parameter0: android.inputmethodservice.InputMethodService$Insets;
+
+        $r2 = $r0.<android.inputmethodservice.InputMethodService: int[] mTmpLocation>;
+
+        $r3 = $r0.<android.inputmethodservice.InputMethodService: android.widget.FrameLayout mInputFrame>;
+
+        $i0 = virtualinvoke $r3.<android.view.View: int getVisibility()>();
+
+        if $i0 != 0 goto label4;
+
+        $r3 = $r0.<android.inputmethodservice.InputMethodService: android.widget.FrameLayout mInputFrame>;
+
+        virtualinvoke $r3.<android.view.View: void getLocationInWindow(int[])>($r2);
+
+     label1:
+        $z0 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: boolean isFullscreenMode()>();
+
+        if $z0 == 0 goto label5;
+
+        $r4 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: android.app.Dialog getWindow()>();
+
+        $r5 = virtualinvoke $r4.<android.app.Dialog: android.view.Window getWindow()>();
+
+        $r6 = virtualinvoke $r5.<android.view.Window: android.view.View getDecorView()>();
+
+        $i0 = virtualinvoke $r6.<android.view.View: int getHeight()>();
+
+        $r1.<android.inputmethodservice.InputMethodService$Insets: int contentTopInsets> = $i0;
+
+     label2:
+        $r3 = $r0.<android.inputmethodservice.InputMethodService: android.widget.FrameLayout mCandidatesFrame>;
+
+        $i0 = virtualinvoke $r3.<android.view.View: int getVisibility()>();
+
+        if $i0 != 0 goto label3;
+
+        $r3 = $r0.<android.inputmethodservice.InputMethodService: android.widget.FrameLayout mCandidatesFrame>;
+
+        virtualinvoke $r3.<android.view.View: void getLocationInWindow(int[])>($r2);
+
+     label3:
+        $i0 = $r2[1];
+
+        $r1.<android.inputmethodservice.InputMethodService$Insets: int visibleTopInsets> = $i0;
+
+        $r1.<android.inputmethodservice.InputMethodService$Insets: int touchableInsets> = 2;
+
+        return;
+
+     label4:
+        $r4 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: android.app.Dialog getWindow()>();
+
+        $r5 = virtualinvoke $r4.<android.app.Dialog: android.view.Window getWindow()>();
+
+        $r6 = virtualinvoke $r5.<android.view.Window: android.view.View getDecorView()>();
+
+        $i0 = virtualinvoke $r6.<android.view.View: int getHeight()>();
+
+        $r2[1] = $i0;
+
+        goto label1;
+
+     label5:
+        $i0 = $r2[1];
+
+        $r1.<android.inputmethodservice.InputMethodService$Insets: int contentTopInsets> = $i0;
+
+        goto label2;
+    }
+
+    public void onConfigurationChanged(android.content.res.Configuration)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        android.content.res.Configuration $r1;
+        android.view.inputmethod.CompletionInfo[] $r2;
+        int $i0;
+        boolean $z0, $z1, $z2;
+        android.view.inputmethod.InputConnection $r3;
+        android.view.inputmethod.EditorInfo $r4;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $r1 := @parameter0: android.content.res.Configuration;
+
+        specialinvoke $r0.<android.app.Service: void onConfigurationChanged(android.content.res.Configuration)>($r1);
+
+        $z1 = $r0.<android.inputmethodservice.InputMethodService: boolean mWindowVisible>;
+
+        $i0 = $r0.<android.inputmethodservice.InputMethodService: int mShowInputFlags>;
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mShowInputRequested>;
+
+        $r2 = $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.CompletionInfo[] mCurCompletions>;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void initViews()>();
+
+        $r0.<android.inputmethodservice.InputMethodService: boolean mInputViewStarted> = 0;
+
+        $r0.<android.inputmethodservice.InputMethodService: boolean mCandidatesViewStarted> = 0;
+
+        $z2 = $r0.<android.inputmethodservice.InputMethodService: boolean mInputStarted>;
+
+        if $z2 == 0 goto label1;
+
+        $r3 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.InputConnection getCurrentInputConnection()>();
+
+        $r4 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.EditorInfo getCurrentInputEditorInfo()>();
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void doStartInput(android.view.inputmethod.InputConnection,android.view.inputmethod.EditorInfo,boolean)>($r3, $r4, 1);
+
+     label1:
+        if $z1 == 0 goto label5;
+
+        if $z0 == 0 goto label3;
+
+        $z0 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: boolean onShowInputRequested(int,boolean)>($i0, 1);
+
+        if $z0 == 0 goto label2;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void showWindow(boolean)>(1);
+
+        if $r2 == null goto label6;
+
+        $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.CompletionInfo[] mCurCompletions> = $r2;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void onDisplayCompletions(android.view.inputmethod.CompletionInfo[])>($r2);
+
+        return;
+
+     label2:
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void hideWindow()>();
+
+        return;
+
+     label3:
+        $i0 = $r0.<android.inputmethodservice.InputMethodService: int mCandidatesVisibility>;
+
+        if $i0 != 0 goto label4;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void showWindow(boolean)>(0);
+
+        return;
+
+     label4:
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void hideWindow()>();
+
+        return;
+
+     label5:
+        return;
+
+     label6:
+        return;
+    }
+
+    public void onConfigureWindow(android.view.Window, boolean, boolean)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        android.view.Window $r1;
+        boolean $z0, $z1;
+        android.inputmethodservice.SoftInputWindow $r2;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $r1 := @parameter0: android.view.Window;
+
+        $z0 := @parameter1: boolean;
+
+        $z1 := @parameter2: boolean;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = $r0.<android.inputmethodservice.InputMethodService: android.inputmethodservice.SoftInputWindow mWindow>;
+
+        $r1 = virtualinvoke $r2.<android.app.Dialog: android.view.Window getWindow()>();
+
+        virtualinvoke $r1.<android.view.Window: void setLayout(int,int)>(-1, -1);
+
+        return;
+
+     label1:
+        $r2 = $r0.<android.inputmethodservice.InputMethodService: android.inputmethodservice.SoftInputWindow mWindow>;
+
+        $r1 = virtualinvoke $r2.<android.app.Dialog: android.view.Window getWindow()>();
+
+        virtualinvoke $r1.<android.view.Window: void setLayout(int,int)>(-1, -2);
+
+        return;
+    }
+
+    public void onCreate()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        int $i0;
+        java.lang.Object $r1;
+        android.view.inputmethod.InputMethodManager $r2;
+        android.view.LayoutInflater $r3;
+        android.inputmethodservice.SoftInputWindow $r4;
+        android.view.Window $r5;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $i0 = $r0.<android.inputmethodservice.InputMethodService: int mTheme>;
+
+        specialinvoke $r0.<android.content.ContextWrapper: void setTheme(int)>($i0);
+
+        specialinvoke $r0.<android.app.Service: void onCreate()>();
+
+        $r1 = virtualinvoke $r0.<android.content.ContextWrapper: java.lang.Object getSystemService(java.lang.String)>("input_method");
+
+        $r2 = (android.view.inputmethod.InputMethodManager) $r1;
+
+        $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.InputMethodManager mImm> = $r2;
+
+        $r1 = virtualinvoke $r0.<android.content.ContextWrapper: java.lang.Object getSystemService(java.lang.String)>("layout_inflater");
+
+        $r3 = (android.view.LayoutInflater) $r1;
+
+        $r0.<android.inputmethodservice.InputMethodService: android.view.LayoutInflater mInflater> = $r3;
+
+        $r4 = new android.inputmethodservice.SoftInputWindow;
+
+        $i0 = $r0.<android.inputmethodservice.InputMethodService: int mTheme>;
+
+        specialinvoke $r4.<android.inputmethodservice.SoftInputWindow: void <init>(android.content.Context,int)>($r0, $i0);
+
+        $r0.<android.inputmethodservice.InputMethodService: android.inputmethodservice.SoftInputWindow mWindow> = $r4;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void initViews()>();
+
+        $r4 = $r0.<android.inputmethodservice.InputMethodService: android.inputmethodservice.SoftInputWindow mWindow>;
+
+        $r5 = virtualinvoke $r4.<android.app.Dialog: android.view.Window getWindow()>();
+
+        virtualinvoke $r5.<android.view.Window: void setLayout(int,int)>(-1, -2);
+
+        return;
+    }
+
+    public android.view.View onCreateCandidatesView()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        return null;
+    }
+
+    public android.view.View onCreateExtractTextView()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        android.view.View $r1;
+        android.view.LayoutInflater $r2;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $r2 = $r0.<android.inputmethodservice.InputMethodService: android.view.LayoutInflater mInflater>;
+
+        $r1 = virtualinvoke $r2.<android.view.LayoutInflater: android.view.View inflate(int,android.view.ViewGroup)>(17367083, null);
+
+        return $r1;
+    }
+
+    public android.inputmethodservice.AbstractInputMethodService$AbstractInputMethodImpl onCreateInputMethodInterface()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        android.inputmethodservice.InputMethodService$InputMethodImpl $r1;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $r1 = new android.inputmethodservice.InputMethodService$InputMethodImpl;
+
+        specialinvoke $r1.<android.inputmethodservice.InputMethodService$InputMethodImpl: void <init>(android.inputmethodservice.InputMethodService)>($r0);
+
+        return $r1;
+    }
+
+    public android.inputmethodservice.AbstractInputMethodService$AbstractInputMethodSessionImpl onCreateInputMethodSessionInterface()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        android.inputmethodservice.InputMethodService$InputMethodSessionImpl $r1;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $r1 = new android.inputmethodservice.InputMethodService$InputMethodSessionImpl;
+
+        specialinvoke $r1.<android.inputmethodservice.InputMethodService$InputMethodSessionImpl: void <init>(android.inputmethodservice.InputMethodService)>($r0);
+
+        return $r1;
+    }
+
+    public android.view.View onCreateInputView()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        return null;
+    }
+
+    public void onDestroy()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        android.view.ViewTreeObserver$OnComputeInternalInsetsListener $r1;
+        android.view.ViewTreeObserver $r2;
+        android.view.View $r3;
+        boolean $z0;
+        android.inputmethodservice.SoftInputWindow $r4;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        specialinvoke $r0.<android.app.Service: void onDestroy()>();
+
+        $r3 = $r0.<android.inputmethodservice.InputMethodService: android.view.View mRootView>;
+
+        $r2 = virtualinvoke $r3.<android.view.View: android.view.ViewTreeObserver getViewTreeObserver()>();
+
+        $r1 = $r0.<android.inputmethodservice.InputMethodService: android.view.ViewTreeObserver$OnComputeInternalInsetsListener mInsetsComputer>;
+
+        virtualinvoke $r2.<android.view.ViewTreeObserver: void removeOnComputeInternalInsetsListener(android.view.ViewTreeObserver$OnComputeInternalInsetsListener)>($r1);
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mWindowAdded>;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = $r0.<android.inputmethodservice.InputMethodService: android.inputmethodservice.SoftInputWindow mWindow>;
+
+        virtualinvoke $r4.<android.app.Dialog: void dismiss()>();
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public void onDisplayCompletions(android.view.inputmethod.CompletionInfo[])
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        android.view.inputmethod.CompletionInfo[] $r1;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $r1 := @parameter0: android.view.inputmethod.CompletionInfo[];
+
+        return;
+    }
+
+    public boolean onEvaluateFullscreenMode()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        android.content.res.Resources $r1;
+        android.content.res.Configuration $r2;
+        int $i0;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $r1 = virtualinvoke $r0.<android.content.ContextWrapper: android.content.res.Resources getResources()>();
+
+        $r2 = virtualinvoke $r1.<android.content.res.Resources: android.content.res.Configuration getConfiguration()>();
+
+        $i0 = $r2.<android.content.res.Configuration: int orientation>;
+
+        if $i0 != 2 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    public boolean onEvaluateInputViewShown()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        android.content.res.Resources $r1;
+        android.content.res.Configuration $r2;
+        int $i0;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $r1 = virtualinvoke $r0.<android.content.ContextWrapper: android.content.res.Resources getResources()>();
+
+        $r2 = virtualinvoke $r1.<android.content.res.Resources: android.content.res.Configuration getConfiguration()>();
+
+        $i0 = $r2.<android.content.res.Configuration: int keyboard>;
+
+        if $i0 == 1 goto label1;
+
+        $i0 = $r2.<android.content.res.Configuration: int hardKeyboardHidden>;
+
+        if $i0 != 2 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    public boolean onExtractTextContextMenuItem(int)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        int $i0;
+        android.view.inputmethod.InputConnection $r1;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $i0 := @parameter0: int;
+
+        $r1 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.InputConnection getCurrentInputConnection()>();
+
+        if $r1 == null goto label1;
+
+        interfaceinvoke $r1.<android.view.inputmethod.InputConnection: boolean performContextMenuAction(int)>($i0);
+
+     label1:
+        return 1;
+    }
+
+    public void onExtractedCursorMovement(int, int)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        int $i0, $i1;
+        boolean $z0;
+        android.inputmethodservice.ExtractEditText $r1;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 = $r0.<android.inputmethodservice.InputMethodService: android.inputmethodservice.ExtractEditText mExtractEditText>;
+
+        if $r1 == null goto label2;
+
+        if $i1 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = $r0.<android.inputmethodservice.InputMethodService: android.inputmethodservice.ExtractEditText mExtractEditText>;
+
+        $z0 = virtualinvoke $r1.<android.inputmethodservice.ExtractEditText: boolean hasVerticalScrollBar()>();
+
+        if $z0 == 0 goto label3;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void setCandidatesViewShown(boolean)>(0);
+
+        return;
+
+     label2:
+        return;
+
+     label3:
+        return;
+    }
+
+    public void onExtractedSelectionChanged(int, int)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        int $i0, $i1;
+        android.view.inputmethod.InputConnection $r1;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.InputConnection getCurrentInputConnection()>();
+
+        if $r1 == null goto label1;
+
+        interfaceinvoke $r1.<android.view.inputmethod.InputConnection: boolean setSelection(int,int)>($i0, $i1);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public void onExtractedTextClicked()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        boolean $z0;
+        android.inputmethodservice.ExtractEditText $r1;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $r1 = $r0.<android.inputmethodservice.InputMethodService: android.inputmethodservice.ExtractEditText mExtractEditText>;
+
+        if $r1 != null goto label1;
+
+        return;
+
+     label1:
+        $r1 = $r0.<android.inputmethodservice.InputMethodService: android.inputmethodservice.ExtractEditText mExtractEditText>;
+
+        $z0 = virtualinvoke $r1.<android.inputmethodservice.ExtractEditText: boolean hasVerticalScrollBar()>();
+
+        if $z0 == 0 goto label2;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void setCandidatesViewShown(boolean)>(0);
+
+        return;
+
+     label2:
+        return;
+    }
+
+    public void onExtractingInputChanged(android.view.inputmethod.EditorInfo)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        android.view.inputmethod.EditorInfo $r1;
+        int $i0;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $r1 := @parameter0: android.view.inputmethod.EditorInfo;
+
+        $i0 = $r1.<android.view.inputmethod.EditorInfo: int inputType>;
+
+        if $i0 != 0 goto label1;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void requestHideSelf(int)>(2);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public void onFinishCandidatesView(boolean)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        boolean $z0;
+        android.view.inputmethod.InputConnection $r1;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $z0 := @parameter0: boolean;
+
+        if $z0 != 0 goto label1;
+
+        $r1 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.InputConnection getCurrentInputConnection()>();
+
+        if $r1 == null goto label2;
+
+        interfaceinvoke $r1.<android.view.inputmethod.InputConnection: boolean finishComposingText()>();
+
+        return;
+
+     label1:
+        return;
+
+     label2:
+        return;
+    }
+
+    public void onFinishInput()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        android.view.inputmethod.InputConnection $r1;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $r1 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.InputConnection getCurrentInputConnection()>();
+
+        if $r1 == null goto label1;
+
+        interfaceinvoke $r1.<android.view.inputmethod.InputConnection: boolean finishComposingText()>();
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public void onFinishInputView(boolean)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        boolean $z0;
+        android.view.inputmethod.InputConnection $r1;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $z0 := @parameter0: boolean;
+
+        if $z0 != 0 goto label1;
+
+        $r1 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.InputConnection getCurrentInputConnection()>();
+
+        if $r1 == null goto label2;
+
+        interfaceinvoke $r1.<android.view.inputmethod.InputConnection: boolean finishComposingText()>();
+
+        return;
+
+     label1:
+        return;
+
+     label2:
+        return;
+    }
+
+    public void onInitializeInterface()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        return;
+    }
+
+    public boolean onKeyDown(int, android.view.KeyEvent)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        int $i0, $i1;
+        android.view.KeyEvent $r1;
+        boolean $z0;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: android.view.KeyEvent;
+
+        $i1 = virtualinvoke $r1.<android.view.KeyEvent: int getKeyCode()>();
+
+        if $i1 != 4 goto label3;
+
+        $i1 = virtualinvoke $r1.<android.view.KeyEvent: int getRepeatCount()>();
+
+        if $i1 != 0 goto label3;
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mShowInputRequested>;
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void requestHideSelf(int)>(0);
+
+        return 1;
+
+     label1:
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mWindowVisible>;
+
+        if $z0 == 0 goto label3;
+
+        $i0 = $r0.<android.inputmethodservice.InputMethodService: int mCandidatesVisibility>;
+
+        if $i0 != 0 goto label2;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void setCandidatesViewShown(boolean)>(0);
+
+        return 1;
+
+     label2:
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void hideWindow()>();
+
+        return 1;
+
+     label3:
+        $z0 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: boolean doMovementKey(int,android.view.KeyEvent,int)>($i0, $r1, -1);
+
+        return $z0;
+    }
+
+    public boolean onKeyMultiple(int, int, android.view.KeyEvent)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        int $i0, $i1;
+        android.view.KeyEvent $r1;
+        boolean $z0;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 := @parameter2: android.view.KeyEvent;
+
+        $z0 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: boolean doMovementKey(int,android.view.KeyEvent,int)>($i0, $r1, $i1);
+
+        return $z0;
+    }
+
+    public boolean onKeyUp(int, android.view.KeyEvent)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        int $i0;
+        android.view.KeyEvent $r1;
+        boolean $z0;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: android.view.KeyEvent;
+
+        $z0 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: boolean doMovementKey(int,android.view.KeyEvent,int)>($i0, $r1, -2);
+
+        return $z0;
+    }
+
+    public boolean onShowInputRequested(int, boolean)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        int $i0, $i1;
+        boolean $z0, $z1;
+        android.content.res.Resources $r1;
+        android.content.res.Configuration $r2;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $i0 := @parameter0: int;
+
+        $z0 := @parameter1: boolean;
+
+        $z1 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: boolean onEvaluateInputViewShown()>();
+
+        if $z1 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $i1 = $i0 & 1;
+
+        if $i1 != 0 goto label3;
+
+        if $z0 != 0 goto label2;
+
+        $z0 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: boolean onEvaluateFullscreenMode()>();
+
+        if $z0 == 0 goto label2;
+
+        return 0;
+
+     label2:
+        $r1 = virtualinvoke $r0.<android.content.ContextWrapper: android.content.res.Resources getResources()>();
+
+        $r2 = virtualinvoke $r1.<android.content.res.Resources: android.content.res.Configuration getConfiguration()>();
+
+        $i1 = $r2.<android.content.res.Configuration: int keyboard>;
+
+        if $i1 == 1 goto label3;
+
+        return 0;
+
+     label3:
+        $i0 = $i0 & 2;
+
+        if $i0 == 0 goto label4;
+
+        $r0.<android.inputmethodservice.InputMethodService: boolean mShowInputForced> = 1;
+
+     label4:
+        return 1;
+    }
+
+    public void onStartCandidatesView(android.view.inputmethod.EditorInfo, boolean)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        android.view.inputmethod.EditorInfo $r1;
+        boolean $z0;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $r1 := @parameter0: android.view.inputmethod.EditorInfo;
+
+        $z0 := @parameter1: boolean;
+
+        return;
+    }
+
+    public void onStartInput(android.view.inputmethod.EditorInfo, boolean)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        android.view.inputmethod.EditorInfo $r1;
+        boolean $z0;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $r1 := @parameter0: android.view.inputmethod.EditorInfo;
+
+        $z0 := @parameter1: boolean;
+
+        return;
+    }
+
+    public void onStartInputView(android.view.inputmethod.EditorInfo, boolean)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        android.view.inputmethod.EditorInfo $r1;
+        boolean $z0;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $r1 := @parameter0: android.view.inputmethod.EditorInfo;
+
+        $z0 := @parameter1: boolean;
+
+        return;
+    }
+
+    public boolean onTrackballEvent(android.view.MotionEvent)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        android.view.MotionEvent $r1;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $r1 := @parameter0: android.view.MotionEvent;
+
+        return 0;
+    }
+
+    public void onUnbindInput()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        return;
+    }
+
+    public void onUpdateCursor(android.graphics.Rect)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        android.graphics.Rect $r1;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $r1 := @parameter0: android.graphics.Rect;
+
+        return;
+    }
+
+    public void onUpdateExtractedText(int, android.view.inputmethod.ExtractedText)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        int $i0, $i1;
+        android.view.inputmethod.ExtractedText $r1;
+        android.inputmethodservice.ExtractEditText $r2;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: android.view.inputmethod.ExtractedText;
+
+        $i1 = $r0.<android.inputmethodservice.InputMethodService: int mExtractedToken>;
+
+        if $i1 == $i0 goto label1;
+
+        return;
+
+     label1:
+        if $r1 == null goto label2;
+
+        $r2 = $r0.<android.inputmethodservice.InputMethodService: android.inputmethodservice.ExtractEditText mExtractEditText>;
+
+        if $r2 == null goto label3;
+
+        $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.ExtractedText mExtractedText> = $r1;
+
+        $r2 = $r0.<android.inputmethodservice.InputMethodService: android.inputmethodservice.ExtractEditText mExtractEditText>;
+
+        virtualinvoke $r2.<android.inputmethodservice.ExtractEditText: void setExtractedText(android.view.inputmethod.ExtractedText)>($r1);
+
+        return;
+
+     label2:
+        return;
+
+     label3:
+        return;
+    }
+
+    public void onUpdateExtractingViews(android.view.inputmethod.EditorInfo)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        android.view.inputmethod.EditorInfo $r1;
+        boolean $z0;
+        android.view.ViewGroup $r2;
+        java.lang.CharSequence $r3;
+        int $i0;
+        android.widget.Button $r4;
+        android.view.View$OnClickListener $r5;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $r1 := @parameter0: android.view.inputmethod.EditorInfo;
+
+        $z0 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: boolean isExtractViewShown()>();
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r2 = $r0.<android.inputmethodservice.InputMethodService: android.view.ViewGroup mExtractAccessories>;
+
+        if $r2 == null goto label8;
+
+        $r3 = $r1.<android.view.inputmethod.EditorInfo: java.lang.CharSequence actionLabel>;
+
+        if $r3 != null goto label2;
+
+        $i0 = $r1.<android.view.inputmethod.EditorInfo: int imeOptions>;
+
+        $i0 = $i0 & 255;
+
+        if $i0 == 1 goto label5;
+
+        $i0 = $r1.<android.view.inputmethod.EditorInfo: int imeOptions>;
+
+        $i0 = $i0 & 536870912;
+
+        if $i0 != 0 goto label5;
+
+        $i0 = $r1.<android.view.inputmethod.EditorInfo: int inputType>;
+
+        if $i0 == 0 goto label5;
+
+     label2:
+        $z0 = 1;
+
+     label3:
+        if $z0 == 0 goto label7;
+
+        $r2 = $r0.<android.inputmethodservice.InputMethodService: android.view.ViewGroup mExtractAccessories>;
+
+        virtualinvoke $r2.<android.view.View: void setVisibility(int)>(0);
+
+        $r3 = $r1.<android.view.inputmethod.EditorInfo: java.lang.CharSequence actionLabel>;
+
+        if $r3 == null goto label6;
+
+        $r4 = $r0.<android.inputmethodservice.InputMethodService: android.widget.Button mExtractAction>;
+
+        $r3 = $r1.<android.view.inputmethod.EditorInfo: java.lang.CharSequence actionLabel>;
+
+        virtualinvoke $r4.<android.widget.TextView: void setText(java.lang.CharSequence)>($r3);
+
+     label4:
+        $r4 = $r0.<android.inputmethodservice.InputMethodService: android.widget.Button mExtractAction>;
+
+        $r5 = $r0.<android.inputmethodservice.InputMethodService: android.view.View$OnClickListener mActionClickListener>;
+
+        virtualinvoke $r4.<android.view.View: void setOnClickListener(android.view.View$OnClickListener)>($r5);
+
+        return;
+
+     label5:
+        $z0 = 0;
+
+        goto label3;
+
+     label6:
+        $r4 = $r0.<android.inputmethodservice.InputMethodService: android.widget.Button mExtractAction>;
+
+        $i0 = $r1.<android.view.inputmethod.EditorInfo: int imeOptions>;
+
+        $r3 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: java.lang.CharSequence getTextForImeAction(int)>($i0);
+
+        virtualinvoke $r4.<android.widget.TextView: void setText(java.lang.CharSequence)>($r3);
+
+        goto label4;
+
+     label7:
+        $r2 = $r0.<android.inputmethodservice.InputMethodService: android.view.ViewGroup mExtractAccessories>;
+
+        virtualinvoke $r2.<android.view.View: void setVisibility(int)>(8);
+
+        $r4 = $r0.<android.inputmethodservice.InputMethodService: android.widget.Button mExtractAction>;
+
+        virtualinvoke $r4.<android.view.View: void setOnClickListener(android.view.View$OnClickListener)>(null);
+
+        return;
+
+     label8:
+        return;
+    }
+
+    public void onUpdateExtractingVisibility(android.view.inputmethod.EditorInfo)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        android.view.inputmethod.EditorInfo $r1;
+        int $i0;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $r1 := @parameter0: android.view.inputmethod.EditorInfo;
+
+        $i0 = $r1.<android.view.inputmethod.EditorInfo: int inputType>;
+
+        if $i0 == 0 goto label1;
+
+        $i0 = $r1.<android.view.inputmethod.EditorInfo: int imeOptions>;
+
+        $i0 = $i0 & 268435456;
+
+        if $i0 == 0 goto label2;
+
+     label1:
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void setExtractViewShown(boolean)>(0);
+
+        return;
+
+     label2:
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void setExtractViewShown(boolean)>(1);
+
+        return;
+    }
+
+    public void onUpdateSelection(int, int, int, int, int, int)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        android.inputmethodservice.ExtractEditText $r1;
+        boolean $z0;
+        android.view.inputmethod.ExtractedText $r2;
+        android.text.Editable $r3;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i4 := @parameter2: int;
+
+        $i5 := @parameter3: int;
+
+        $i2 := @parameter4: int;
+
+        $i3 := @parameter5: int;
+
+        $r1 = $r0.<android.inputmethodservice.InputMethodService: android.inputmethodservice.ExtractEditText mExtractEditText>;
+
+        if $r1 == null goto label5;
+
+        $z0 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: boolean isFullscreenMode()>();
+
+        if $z0 == 0 goto label6;
+
+        $r2 = $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.ExtractedText mExtractedText>;
+
+        if $r2 == null goto label7;
+
+        $r2 = $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.ExtractedText mExtractedText>;
+
+        $i1 = $r2.<android.view.inputmethod.ExtractedText: int startOffset>;
+
+        virtualinvoke $r1.<android.inputmethodservice.ExtractEditText: void startInternalChanges()>();
+
+        $i0 = $i4 - $i1;
+
+        $i1 = $i5 - $i1;
+
+        $r3 = virtualinvoke $r1.<android.widget.EditText: android.text.Editable getText()>();
+
+        $i4 = interfaceinvoke $r3.<android.text.Editable: int length()>();
+
+        if $i0 >= 0 goto label3;
+
+        $i0 = 0;
+
+     label1:
+        if $i1 >= 0 goto label4;
+
+        $i1 = 0;
+
+     label2:
+        virtualinvoke $r1.<android.widget.EditText: void setSelection(int,int)>($i0, $i1);
+
+        virtualinvoke $r1.<android.inputmethodservice.ExtractEditText: void finishInternalChanges()>();
+
+        return;
+
+     label3:
+        if $i0 <= $i4 goto label1;
+
+        $i0 = $i4;
+
+        goto label1;
+
+     label4:
+        if $i1 <= $i4 goto label2;
+
+        $i1 = $i4;
+
+        goto label2;
+
+     label5:
+        return;
+
+     label6:
+        return;
+
+     label7:
+        return;
+    }
+
+    public void onWindowHidden()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        return;
+    }
+
+    public void onWindowShown()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        return;
+    }
+
+    void reportExtractedMovement(int, int)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        int $i0, $i1, $i2, $i3;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i2 = 0;
+
+        $i3 = 0;
+
+        lookupswitch($i0)
+        {
+            case 19: goto label4;
+            case 20: goto label5;
+            case 21: goto label2;
+            case 22: goto label3;
+            default: goto label1;
+        };
+
+     label1:
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void onExtractedCursorMovement(int,int)>($i2, $i3);
+
+        return;
+
+     label2:
+        $i2 = neg $i1;
+
+        goto label1;
+
+     label3:
+        $i2 = $i1;
+
+        goto label1;
+
+     label4:
+        $i3 = neg $i1;
+
+        goto label1;
+
+     label5:
+        $i3 = $i1;
+
+        goto label1;
+    }
+
+    public void requestHideSelf(int)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        int $i0;
+        android.view.inputmethod.InputMethodManager $r1;
+        android.os.IBinder $r2;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.InputMethodManager mImm>;
+
+        $r2 = $r0.<android.inputmethodservice.InputMethodService: android.os.IBinder mToken>;
+
+        virtualinvoke $r1.<android.view.inputmethod.InputMethodManager: void hideSoftInputFromInputMethod(android.os.IBinder,int)>($r2, $i0);
+
+        return;
+    }
+
+    public boolean sendDefaultEditorAction(boolean)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        boolean $z0;
+        android.view.inputmethod.EditorInfo $r1;
+        int $i0;
+        android.view.inputmethod.InputConnection $r2;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.EditorInfo getCurrentInputEditorInfo()>();
+
+        if $r1 == null goto label3;
+
+        if $z0 == 0 goto label1;
+
+        $i0 = $r1.<android.view.inputmethod.EditorInfo: int imeOptions>;
+
+        $i0 = $i0 & 1073741824;
+
+        if $i0 != 0 goto label3;
+
+     label1:
+        $i0 = $r1.<android.view.inputmethod.EditorInfo: int imeOptions>;
+
+        $i0 = $i0 & 255;
+
+        if $i0 == 1 goto label3;
+
+        $r2 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.InputConnection getCurrentInputConnection()>();
+
+        if $r2 == null goto label2;
+
+        $i0 = $r1.<android.view.inputmethod.EditorInfo: int imeOptions>;
+
+        $i0 = $i0 & 255;
+
+        interfaceinvoke $r2.<android.view.inputmethod.InputConnection: boolean performEditorAction(int)>($i0);
+
+     label2:
+        return 1;
+
+     label3:
+        return 0;
+    }
+
+    public void sendDownUpKeyEvents(int)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        int $i0;
+        android.view.KeyEvent $r1;
+        android.view.inputmethod.InputConnection $r2;
+        long $l1, $l2;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $i0 := @parameter0: int;
+
+        $r2 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.InputConnection getCurrentInputConnection()>();
+
+        if $r2 != null goto label1;
+
+        return;
+
+     label1:
+        $l1 = staticinvoke <android.os.SystemClock: long uptimeMillis()>();
+
+        $r1 = new android.view.KeyEvent;
+
+        specialinvoke $r1.<android.view.KeyEvent: void <init>(long,long,int,int,int,int,int,int,int)>($l1, $l1, 0, $i0, 0, 0, 0, 0, 6);
+
+        interfaceinvoke $r2.<android.view.inputmethod.InputConnection: boolean sendKeyEvent(android.view.KeyEvent)>($r1);
+
+        $r1 = new android.view.KeyEvent;
+
+        $l2 = staticinvoke <android.os.SystemClock: long uptimeMillis()>();
+
+        specialinvoke $r1.<android.view.KeyEvent: void <init>(long,long,int,int,int,int,int,int,int)>($l2, $l1, 1, $i0, 0, 0, 0, 0, 6);
+
+        interfaceinvoke $r2.<android.view.inputmethod.InputConnection: boolean sendKeyEvent(android.view.KeyEvent)>($r1);
+
+        return;
+    }
+
+    public void sendKeyChar(char)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        char $c0;
+        int $i1;
+        boolean $z0;
+        android.view.inputmethod.InputConnection $r1;
+        java.lang.String $r2;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $c0 := @parameter0: char;
+
+        lookupswitch($c0)
+        {
+            case 10: goto label2;
+            default: goto label1;
+        };
+
+     label1:
+        if $c0 < 48 goto label3;
+
+        if $c0 > 57 goto label3;
+
+        $i1 = $c0 - 48;
+
+        $i1 = $i1 + 7;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void sendDownUpKeyEvents(int)>($i1);
+
+        return;
+
+     label2:
+        $z0 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: boolean sendDefaultEditorAction(boolean)>(1);
+
+        if $z0 != 0 goto label4;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void sendDownUpKeyEvents(int)>(66);
+
+        return;
+
+     label3:
+        $r1 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.InputConnection getCurrentInputConnection()>();
+
+        if $r1 == null goto label5;
+
+        $r2 = staticinvoke <java.lang.String: java.lang.String valueOf(char)>($c0);
+
+        interfaceinvoke $r1.<android.view.inputmethod.InputConnection: boolean commitText(java.lang.CharSequence,int)>($r2, 1);
+
+        return;
+
+     label4:
+        return;
+
+     label5:
+        return;
+    }
+
+    public void setCandidatesView(android.view.View)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        android.view.View $r1;
+        android.widget.FrameLayout$LayoutParams $r2;
+        android.widget.FrameLayout $r3;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $r1 := @parameter0: android.view.View;
+
+        $r3 = $r0.<android.inputmethodservice.InputMethodService: android.widget.FrameLayout mCandidatesFrame>;
+
+        virtualinvoke $r3.<android.view.ViewGroup: void removeAllViews()>();
+
+        $r3 = $r0.<android.inputmethodservice.InputMethodService: android.widget.FrameLayout mCandidatesFrame>;
+
+        $r2 = new android.widget.FrameLayout$LayoutParams;
+
+        specialinvoke $r2.<android.widget.FrameLayout$LayoutParams: void <init>(int,int)>(-1, -2);
+
+        virtualinvoke $r3.<android.view.ViewGroup: void addView(android.view.View,android.view.ViewGroup$LayoutParams)>($r1, $r2);
+
+        return;
+    }
+
+    public void setCandidatesViewShown(boolean)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        boolean $z0, $z1;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $z0 := @parameter0: boolean;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void updateCandidatesVisibility(boolean)>($z0);
+
+        $z1 = $r0.<android.inputmethodservice.InputMethodService: boolean mShowInputRequested>;
+
+        if $z1 != 0 goto label2;
+
+        $z1 = $r0.<android.inputmethodservice.InputMethodService: boolean mWindowVisible>;
+
+        if $z1 == $z0 goto label3;
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void showWindow(boolean)>(0);
+
+        return;
+
+     label1:
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void hideWindow()>();
+
+        return;
+
+     label2:
+        return;
+
+     label3:
+        return;
+    }
+
+    public void setExtractView(android.view.View)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        android.view.View $r1, $r4;
+        android.widget.FrameLayout$LayoutParams $r2;
+        android.widget.FrameLayout $r3;
+        android.inputmethodservice.ExtractEditText $r5;
+        android.widget.Button $r6;
+        android.view.ViewGroup $r7;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $r1 := @parameter0: android.view.View;
+
+        $r3 = $r0.<android.inputmethodservice.InputMethodService: android.widget.FrameLayout mExtractFrame>;
+
+        virtualinvoke $r3.<android.view.ViewGroup: void removeAllViews()>();
+
+        $r3 = $r0.<android.inputmethodservice.InputMethodService: android.widget.FrameLayout mExtractFrame>;
+
+        $r2 = new android.widget.FrameLayout$LayoutParams;
+
+        specialinvoke $r2.<android.widget.FrameLayout$LayoutParams: void <init>(int,int)>(-1, -1);
+
+        virtualinvoke $r3.<android.view.ViewGroup: void addView(android.view.View,android.view.ViewGroup$LayoutParams)>($r1, $r2);
+
+        $r0.<android.inputmethodservice.InputMethodService: android.view.View mExtractView> = $r1;
+
+        if $r1 == null goto label2;
+
+        $r4 = virtualinvoke $r1.<android.view.View: android.view.View findViewById(int)>(16908325);
+
+        $r5 = (android.inputmethodservice.ExtractEditText) $r4;
+
+        $r0.<android.inputmethodservice.InputMethodService: android.inputmethodservice.ExtractEditText mExtractEditText> = $r5;
+
+        $r5 = $r0.<android.inputmethodservice.InputMethodService: android.inputmethodservice.ExtractEditText mExtractEditText>;
+
+        virtualinvoke $r5.<android.inputmethodservice.ExtractEditText: void setIME(android.inputmethodservice.InputMethodService)>($r0);
+
+        $r4 = virtualinvoke $r1.<android.view.View: android.view.View findViewById(int)>(16908665);
+
+        $r6 = (android.widget.Button) $r4;
+
+        $r0.<android.inputmethodservice.InputMethodService: android.widget.Button mExtractAction> = $r6;
+
+        $r6 = $r0.<android.inputmethodservice.InputMethodService: android.widget.Button mExtractAction>;
+
+        if $r6 == null goto label1;
+
+        $r1 = virtualinvoke $r1.<android.view.View: android.view.View findViewById(int)>(16908664);
+
+        $r7 = (android.view.ViewGroup) $r1;
+
+        $r0.<android.inputmethodservice.InputMethodService: android.view.ViewGroup mExtractAccessories> = $r7;
+
+     label1:
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void startExtractingText(boolean)>(0);
+
+        return;
+
+     label2:
+        $r0.<android.inputmethodservice.InputMethodService: android.inputmethodservice.ExtractEditText mExtractEditText> = null;
+
+        $r0.<android.inputmethodservice.InputMethodService: android.view.ViewGroup mExtractAccessories> = null;
+
+        $r0.<android.inputmethodservice.InputMethodService: android.widget.Button mExtractAction> = null;
+
+        return;
+    }
+
+    public void setExtractViewShown(boolean)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        boolean $z0, $z1;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $z0 := @parameter0: boolean;
+
+        $z1 = $r0.<android.inputmethodservice.InputMethodService: boolean mExtractViewHidden>;
+
+        if $z1 != $z0 goto label3;
+
+        if $z0 != 0 goto label2;
+
+        $z0 = 1;
+
+     label1:
+        $r0.<android.inputmethodservice.InputMethodService: boolean mExtractViewHidden> = $z0;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void updateExtractFrameVisibility()>();
+
+        return;
+
+     label2:
+        $z0 = 0;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    public void setInputView(android.view.View)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        android.view.View $r1;
+        android.widget.FrameLayout$LayoutParams $r2;
+        android.widget.FrameLayout $r3;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $r1 := @parameter0: android.view.View;
+
+        $r3 = $r0.<android.inputmethodservice.InputMethodService: android.widget.FrameLayout mInputFrame>;
+
+        virtualinvoke $r3.<android.view.ViewGroup: void removeAllViews()>();
+
+        $r3 = $r0.<android.inputmethodservice.InputMethodService: android.widget.FrameLayout mInputFrame>;
+
+        $r2 = new android.widget.FrameLayout$LayoutParams;
+
+        specialinvoke $r2.<android.widget.FrameLayout$LayoutParams: void <init>(int,int)>(-1, -2);
+
+        virtualinvoke $r3.<android.view.ViewGroup: void addView(android.view.View,android.view.ViewGroup$LayoutParams)>($r1, $r2);
+
+        $r0.<android.inputmethodservice.InputMethodService: android.view.View mInputView> = $r1;
+
+        return;
+    }
+
+    public void setTheme(int)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        int $i0;
+        android.inputmethodservice.SoftInputWindow $r1;
+        java.lang.IllegalStateException $r2;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<android.inputmethodservice.InputMethodService: android.inputmethodservice.SoftInputWindow mWindow>;
+
+        if $r1 == null goto label1;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Must be called before onCreate()");
+
+        throw $r2;
+
+     label1:
+        $r0.<android.inputmethodservice.InputMethodService: int mTheme> = $i0;
+
+        return;
+    }
+
+    public void showStatusIcon(int)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        int $i0;
+        android.view.inputmethod.InputMethodManager $r1;
+        android.os.IBinder $r2;
+        java.lang.String $r3;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $i0 := @parameter0: int;
+
+        $r0.<android.inputmethodservice.InputMethodService: int mStatusIcon> = $i0;
+
+        $r1 = $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.InputMethodManager mImm>;
+
+        $r2 = $r0.<android.inputmethodservice.InputMethodService: android.os.IBinder mToken>;
+
+        $r3 = virtualinvoke $r0.<android.content.ContextWrapper: java.lang.String getPackageName()>();
+
+        virtualinvoke $r1.<android.view.inputmethod.InputMethodManager: void showStatusIcon(android.os.IBinder,java.lang.String,int)>($r2, $r3, $i0);
+
+        return;
+    }
+
+    public void showWindow(boolean)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        boolean $z0, $z1;
+        java.lang.Throwable $r1;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $z0 := @parameter0: boolean;
+
+        $z1 = $r0.<android.inputmethodservice.InputMethodService: boolean mInShowWindow>;
+
+        if $z1 == 0 goto label1;
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("InputMethodService", "Re-entrance in to showWindow");
+
+        return;
+
+     label1:
+        $z1 = $r0.<android.inputmethodservice.InputMethodService: boolean mWindowVisible>;
+
+        $r0.<android.inputmethodservice.InputMethodService: boolean mWindowWasVisible> = $z1;
+
+        $r0.<android.inputmethodservice.InputMethodService: boolean mInShowWindow> = 1;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void showWindowInner(boolean)>($z0);
+
+     label2:
+        $r0.<android.inputmethodservice.InputMethodService: boolean mWindowWasVisible> = 1;
+
+        $r0.<android.inputmethodservice.InputMethodService: boolean mInShowWindow> = 0;
+
+        return;
+
+     label3:
+        $r1 := @caughtexception;
+
+        $r0.<android.inputmethodservice.InputMethodService: boolean mWindowWasVisible> = 1;
+
+        $r0.<android.inputmethodservice.InputMethodService: boolean mInShowWindow> = 0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    void showWindowInner(boolean)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        boolean $z0, $z1, $z2, $z3;
+        android.view.View $r1;
+        android.view.inputmethod.EditorInfo $r2;
+        android.inputmethodservice.SoftInputWindow $r3;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $z1 := @parameter0: boolean;
+
+        $z2 = 0;
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mWindowVisible>;
+
+        $r0.<android.inputmethodservice.InputMethodService: boolean mWindowVisible> = 1;
+
+        $z3 = $r0.<android.inputmethodservice.InputMethodService: boolean mShowInputRequested>;
+
+        if $z3 != 0 goto label6;
+
+        $z3 = $r0.<android.inputmethodservice.InputMethodService: boolean mInputStarted>;
+
+        if $z3 == 0 goto label1;
+
+        if $z1 == 0 goto label1;
+
+        $z2 = 1;
+
+        $r0.<android.inputmethodservice.InputMethodService: boolean mShowInputRequested> = 1;
+
+     label1:
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void initialize()>();
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void updateFullscreenMode()>();
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void updateInputViewShown()>();
+
+        $z1 = $r0.<android.inputmethodservice.InputMethodService: boolean mWindowAdded>;
+
+        if $z1 == 0 goto label2;
+
+        $z1 = $r0.<android.inputmethodservice.InputMethodService: boolean mWindowCreated>;
+
+        if $z1 != 0 goto label3;
+
+     label2:
+        $r0.<android.inputmethodservice.InputMethodService: boolean mWindowAdded> = 1;
+
+        $r0.<android.inputmethodservice.InputMethodService: boolean mWindowCreated> = 1;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void initialize()>();
+
+        $r1 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: android.view.View onCreateCandidatesView()>();
+
+        if $r1 == null goto label3;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void setCandidatesView(android.view.View)>($r1);
+
+     label3:
+        $z1 = $r0.<android.inputmethodservice.InputMethodService: boolean mShowInputRequested>;
+
+        if $z1 == 0 goto label7;
+
+        $z1 = $r0.<android.inputmethodservice.InputMethodService: boolean mInputViewStarted>;
+
+        if $z1 != 0 goto label4;
+
+        $r0.<android.inputmethodservice.InputMethodService: boolean mInputViewStarted> = 1;
+
+        $r2 = $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.EditorInfo mInputEditorInfo>;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void onStartInputView(android.view.inputmethod.EditorInfo,boolean)>($r2, 0);
+
+     label4:
+        if $z2 == 0 goto label5;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void startExtractingText(boolean)>(0);
+
+     label5:
+        if $z0 != 0 goto label8;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void onWindowShown()>();
+
+        $r3 = $r0.<android.inputmethodservice.InputMethodService: android.inputmethodservice.SoftInputWindow mWindow>;
+
+        virtualinvoke $r3.<android.app.Dialog: void show()>();
+
+        return;
+
+     label6:
+        goto label1;
+
+     label7:
+        $z1 = $r0.<android.inputmethodservice.InputMethodService: boolean mCandidatesViewStarted>;
+
+        if $z1 != 0 goto label4;
+
+        $r0.<android.inputmethodservice.InputMethodService: boolean mCandidatesViewStarted> = 1;
+
+        $r2 = $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.EditorInfo mInputEditorInfo>;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void onStartCandidatesView(android.view.inputmethod.EditorInfo,boolean)>($r2, 0);
+
+        goto label4;
+
+     label8:
+        return;
+    }
+
+    void startExtractingText(boolean)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        boolean $z0, $z1;
+        android.inputmethodservice.ExtractEditText $r1;
+        android.view.inputmethod.ExtractedTextRequest $r2;
+        int $i0, $i1;
+        android.view.inputmethod.InputConnection $r3;
+        android.view.inputmethod.ExtractedText $r4;
+        android.view.inputmethod.EditorInfo $r5;
+        java.lang.CharSequence $r6;
+        java.lang.Throwable $r7;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 = $r0.<android.inputmethodservice.InputMethodService: android.inputmethodservice.ExtractEditText mExtractEditText>;
+
+        if $r1 == null goto label11;
+
+        $z1 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: boolean getCurrentInputStarted()>();
+
+        if $z1 == 0 goto label12;
+
+        $z1 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: boolean isFullscreenMode()>();
+
+        if $z1 == 0 goto label13;
+
+        $i0 = $r0.<android.inputmethodservice.InputMethodService: int mExtractedToken>;
+
+        $i0 = $i0 + 1;
+
+        $r0.<android.inputmethodservice.InputMethodService: int mExtractedToken> = $i0;
+
+        $r2 = new android.view.inputmethod.ExtractedTextRequest;
+
+        specialinvoke $r2.<android.view.inputmethod.ExtractedTextRequest: void <init>()>();
+
+        $i0 = $r0.<android.inputmethodservice.InputMethodService: int mExtractedToken>;
+
+        $r2.<android.view.inputmethod.ExtractedTextRequest: int token> = $i0;
+
+        $r2.<android.view.inputmethod.ExtractedTextRequest: int flags> = 1;
+
+        $r2.<android.view.inputmethod.ExtractedTextRequest: int hintMaxLines> = 10;
+
+        $r2.<android.view.inputmethod.ExtractedTextRequest: int hintMaxChars> = 10000;
+
+        $r3 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.InputConnection getCurrentInputConnection()>();
+
+        $r4 = interfaceinvoke $r3.<android.view.inputmethod.InputConnection: android.view.inputmethod.ExtractedText getExtractedText(android.view.inputmethod.ExtractedTextRequest,int)>($r2, 1);
+
+        $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.ExtractedText mExtractedText> = $r4;
+
+        $r5 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.EditorInfo getCurrentInputEditorInfo()>();
+
+     label01:
+        virtualinvoke $r1.<android.inputmethodservice.ExtractEditText: void startInternalChanges()>();
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void onUpdateExtractingVisibility(android.view.inputmethod.EditorInfo)>($r5);
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void onUpdateExtractingViews(android.view.inputmethod.EditorInfo)>($r5);
+
+        $i0 = $r5.<android.view.inputmethod.EditorInfo: int inputType>;
+
+     label02:
+        $i1 = $i0 & 15;
+
+     label03:
+        if $i1 != 1 goto label06;
+
+     label04:
+        $i1 = 262144 & $i0;
+
+     label05:
+        if $i1 == 0 goto label06;
+
+        $i0 = $i0 | 131072;
+
+     label06:
+        virtualinvoke $r1.<android.widget.TextView: void setInputType(int)>($i0);
+
+        $r6 = $r5.<android.view.inputmethod.EditorInfo: java.lang.CharSequence hintText>;
+
+        virtualinvoke $r1.<android.widget.TextView: void setHint(java.lang.CharSequence)>($r6);
+
+        $r4 = $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.ExtractedText mExtractedText>;
+
+        if $r4 == null goto label08;
+
+        virtualinvoke $r1.<android.view.View: void setEnabled(boolean)>(1);
+
+        $r4 = $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.ExtractedText mExtractedText>;
+
+        virtualinvoke $r1.<android.inputmethodservice.ExtractEditText: void setExtractedText(android.view.inputmethod.ExtractedText)>($r4);
+
+     label07:
+        virtualinvoke $r1.<android.inputmethodservice.ExtractEditText: void finishInternalChanges()>();
+
+        if $z0 == 0 goto label14;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void onExtractingInputChanged(android.view.inputmethod.EditorInfo)>($r5);
+
+        return;
+
+     label08:
+        virtualinvoke $r1.<android.view.View: void setEnabled(boolean)>(0);
+
+        virtualinvoke $r1.<android.widget.TextView: void setText(java.lang.CharSequence)>("");
+
+     label09:
+        goto label07;
+
+     label10:
+        $r7 := @caughtexception;
+
+        virtualinvoke $r1.<android.inputmethodservice.ExtractEditText: void finishInternalChanges()>();
+
+        throw $r7;
+
+     label11:
+        return;
+
+     label12:
+        return;
+
+     label13:
+        return;
+
+     label14:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label10;
+        catch java.lang.Throwable from label03 to label04 with label10;
+        catch java.lang.Throwable from label05 to label07 with label10;
+        catch java.lang.Throwable from label08 to label09 with label10;
+    }
+
+    public void switchInputMethod(java.lang.String)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        java.lang.String $r1;
+        android.view.inputmethod.InputMethodManager $r2;
+        android.os.IBinder $r3;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.InputMethodManager mImm>;
+
+        $r3 = $r0.<android.inputmethodservice.InputMethodService: android.os.IBinder mToken>;
+
+        virtualinvoke $r2.<android.view.inputmethod.InputMethodManager: void setInputMethod(android.os.IBinder,java.lang.String)>($r3, $r1);
+
+        return;
+    }
+
+    void updateCandidatesVisibility(boolean)
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        boolean $z0;
+        int $i0, $i1;
+        android.widget.FrameLayout $r1;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $z0 := @parameter0: boolean;
+
+        if $z0 == 0 goto label2;
+
+        $i0 = 0;
+
+     label1:
+        $i1 = $r0.<android.inputmethodservice.InputMethodService: int mCandidatesVisibility>;
+
+        if $i1 == $i0 goto label3;
+
+        $r1 = $r0.<android.inputmethodservice.InputMethodService: android.widget.FrameLayout mCandidatesFrame>;
+
+        virtualinvoke $r1.<android.view.View: void setVisibility(int)>($i0);
+
+        $r0.<android.inputmethodservice.InputMethodService: int mCandidatesVisibility> = $i0;
+
+        return;
+
+     label2:
+        $i0 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: int getCandidatesHiddenVisibility()>();
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    void updateExtractFrameVisibility()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        boolean $z0;
+        byte $b0, $b2;
+        android.widget.FrameLayout $r1;
+        int $i1;
+        android.view.ViewGroup $r2;
+        android.content.res.TypedArray $r3;
+        android.view.animation.Animation $r4;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $z0 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: boolean isFullscreenMode()>();
+
+        if $z0 == 0 goto label7;
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mExtractViewHidden>;
+
+        if $z0 == 0 goto label6;
+
+        $b0 = 4;
+
+     label1:
+        $r1 = $r0.<android.inputmethodservice.InputMethodService: android.widget.FrameLayout mExtractFrame>;
+
+        virtualinvoke $r1.<android.view.View: void setVisibility(int)>(0);
+
+     label2:
+        $i1 = $r0.<android.inputmethodservice.InputMethodService: int mCandidatesVisibility>;
+
+        if $i1 != 0 goto label8;
+
+        $z0 = 1;
+
+     label3:
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void updateCandidatesVisibility(boolean)>($z0);
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mWindowWasVisible>;
+
+        if $z0 == 0 goto label5;
+
+        $r2 = $r0.<android.inputmethodservice.InputMethodService: android.view.ViewGroup mFullscreenArea>;
+
+        $i1 = virtualinvoke $r2.<android.view.View: int getVisibility()>();
+
+        if $i1 == $b0 goto label5;
+
+        $r3 = $r0.<android.inputmethodservice.InputMethodService: android.content.res.TypedArray mThemeAttrs>;
+
+        if $b0 != 0 goto label9;
+
+        $b2 = 1;
+
+     label4:
+        $i1 = virtualinvoke $r3.<android.content.res.TypedArray: int getResourceId(int,int)>($b2, 0);
+
+        if $i1 == 0 goto label5;
+
+        $r2 = $r0.<android.inputmethodservice.InputMethodService: android.view.ViewGroup mFullscreenArea>;
+
+        $r4 = staticinvoke <android.view.animation.AnimationUtils: android.view.animation.Animation loadAnimation(android.content.Context,int)>($r0, $i1);
+
+        virtualinvoke $r2.<android.view.View: void startAnimation(android.view.animation.Animation)>($r4);
+
+     label5:
+        $r2 = $r0.<android.inputmethodservice.InputMethodService: android.view.ViewGroup mFullscreenArea>;
+
+        virtualinvoke $r2.<android.view.View: void setVisibility(int)>($b0);
+
+        return;
+
+     label6:
+        $b0 = 0;
+
+        goto label1;
+
+     label7:
+        $b0 = 0;
+
+        $r1 = $r0.<android.inputmethodservice.InputMethodService: android.widget.FrameLayout mExtractFrame>;
+
+        virtualinvoke $r1.<android.view.View: void setVisibility(int)>(8);
+
+        goto label2;
+
+     label8:
+        $z0 = 0;
+
+        goto label3;
+
+     label9:
+        $b2 = 2;
+
+        goto label4;
+    }
+
+    public void updateFullscreenMode()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        boolean $z0, $z1, $z2;
+        android.view.inputmethod.InputConnection $r1;
+        android.view.ViewGroup $r2, $r8;
+        android.view.ViewGroup$LayoutParams $r3;
+        android.widget.LinearLayout$LayoutParams $r4;
+        android.content.res.TypedArray $r5;
+        android.graphics.drawable.Drawable $r6;
+        android.view.ViewParent $r7;
+        android.view.View $r9;
+        android.inputmethodservice.SoftInputWindow $r10;
+        android.view.Window $r11;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mShowInputRequested>;
+
+        if $z0 == 0 goto label10;
+
+        $z0 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: boolean onEvaluateFullscreenMode()>();
+
+        if $z0 == 0 goto label10;
+
+        $z0 = 1;
+
+     label01:
+        $z1 = $r0.<android.inputmethodservice.InputMethodService: boolean mLastShowInputRequested>;
+
+        $z2 = $r0.<android.inputmethodservice.InputMethodService: boolean mShowInputRequested>;
+
+        if $z1 == $z2 goto label11;
+
+        $z1 = 1;
+
+     label02:
+        $z2 = $r0.<android.inputmethodservice.InputMethodService: boolean mIsFullscreen>;
+
+        if $z2 != $z0 goto label03;
+
+        $z2 = $r0.<android.inputmethodservice.InputMethodService: boolean mFullscreenApplied>;
+
+        if $z2 != 0 goto label08;
+
+     label03:
+        $z1 = 1;
+
+        $r0.<android.inputmethodservice.InputMethodService: boolean mIsFullscreen> = $z0;
+
+        $r1 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: android.view.inputmethod.InputConnection getCurrentInputConnection()>();
+
+        if $r1 == null goto label04;
+
+        interfaceinvoke $r1.<android.view.inputmethod.InputConnection: boolean reportFullscreenMode(boolean)>($z0);
+
+     label04:
+        $r0.<android.inputmethodservice.InputMethodService: boolean mFullscreenApplied> = 1;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void initialize()>();
+
+        $r2 = $r0.<android.inputmethodservice.InputMethodService: android.view.ViewGroup mFullscreenArea>;
+
+        $r3 = virtualinvoke $r2.<android.view.View: android.view.ViewGroup$LayoutParams getLayoutParams()>();
+
+        $r4 = (android.widget.LinearLayout$LayoutParams) $r3;
+
+        if $z0 == 0 goto label12;
+
+        $r2 = $r0.<android.inputmethodservice.InputMethodService: android.view.ViewGroup mFullscreenArea>;
+
+        $r5 = $r0.<android.inputmethodservice.InputMethodService: android.content.res.TypedArray mThemeAttrs>;
+
+        $r6 = virtualinvoke $r5.<android.content.res.TypedArray: android.graphics.drawable.Drawable getDrawable(int)>(0);
+
+        virtualinvoke $r2.<android.view.View: void setBackgroundDrawable(android.graphics.drawable.Drawable)>($r6);
+
+        $r4.<android.view.ViewGroup$LayoutParams: int height> = 0;
+
+        $r4.<android.widget.LinearLayout$LayoutParams: float weight> = 1.0F;
+
+     label05:
+        $r2 = $r0.<android.inputmethodservice.InputMethodService: android.view.ViewGroup mFullscreenArea>;
+
+        $r7 = virtualinvoke $r2.<android.view.View: android.view.ViewParent getParent()>();
+
+        $r2 = (android.view.ViewGroup) $r7;
+
+        $r8 = $r0.<android.inputmethodservice.InputMethodService: android.view.ViewGroup mFullscreenArea>;
+
+        virtualinvoke $r2.<android.view.ViewGroup: void updateViewLayout(android.view.View,android.view.ViewGroup$LayoutParams)>($r8, $r4);
+
+        if $z0 == 0 goto label07;
+
+        $r9 = $r0.<android.inputmethodservice.InputMethodService: android.view.View mExtractView>;
+
+        if $r9 != null goto label06;
+
+        $r9 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: android.view.View onCreateExtractTextView()>();
+
+        if $r9 == null goto label06;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void setExtractView(android.view.View)>($r9);
+
+     label06:
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void startExtractingText(boolean)>(0);
+
+     label07:
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void updateExtractFrameVisibility()>();
+
+     label08:
+        if $z1 == 0 goto label14;
+
+        $r10 = $r0.<android.inputmethodservice.InputMethodService: android.inputmethodservice.SoftInputWindow mWindow>;
+
+        $r11 = virtualinvoke $r10.<android.app.Dialog: android.view.Window getWindow()>();
+
+        $z1 = $r0.<android.inputmethodservice.InputMethodService: boolean mShowInputRequested>;
+
+        if $z1 != 0 goto label13;
+
+        $z1 = 1;
+
+     label09:
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void onConfigureWindow(android.view.Window,boolean,boolean)>($r11, $z0, $z1);
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mShowInputRequested>;
+
+        $r0.<android.inputmethodservice.InputMethodService: boolean mLastShowInputRequested> = $z0;
+
+        return;
+
+     label10:
+        $z0 = 0;
+
+        goto label01;
+
+     label11:
+        $z1 = 0;
+
+        goto label02;
+
+     label12:
+        $r2 = $r0.<android.inputmethodservice.InputMethodService: android.view.ViewGroup mFullscreenArea>;
+
+        virtualinvoke $r2.<android.view.View: void setBackgroundDrawable(android.graphics.drawable.Drawable)>(null);
+
+        $r4.<android.view.ViewGroup$LayoutParams: int height> = -2;
+
+        $r4.<android.widget.LinearLayout$LayoutParams: float weight> = 0.0F;
+
+        goto label05;
+
+     label13:
+        $z1 = 0;
+
+        goto label09;
+
+     label14:
+        return;
+    }
+
+    public void updateInputViewShown()
+    {
+        android.inputmethodservice.InputMethodService $r0;
+        byte $b0;
+        boolean $z0, $z1;
+        android.widget.FrameLayout $r1;
+        android.view.View $r2;
+
+        $r0 := @this: android.inputmethodservice.InputMethodService;
+
+        $b0 = 0;
+
+        $z0 = $r0.<android.inputmethodservice.InputMethodService: boolean mShowInputRequested>;
+
+        if $z0 == 0 goto label3;
+
+        $z0 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: boolean onEvaluateInputViewShown()>();
+
+        if $z0 == 0 goto label3;
+
+        $z0 = 1;
+
+     label1:
+        $z1 = $r0.<android.inputmethodservice.InputMethodService: boolean mIsInputViewShown>;
+
+        if $z1 == $z0 goto label5;
+
+        $z1 = $r0.<android.inputmethodservice.InputMethodService: boolean mWindowVisible>;
+
+        if $z1 == 0 goto label6;
+
+        $r0.<android.inputmethodservice.InputMethodService: boolean mIsInputViewShown> = $z0;
+
+        $r1 = $r0.<android.inputmethodservice.InputMethodService: android.widget.FrameLayout mInputFrame>;
+
+        if $z0 == 0 goto label4;
+
+     label2:
+        virtualinvoke $r1.<android.view.View: void setVisibility(int)>($b0);
+
+        $r2 = $r0.<android.inputmethodservice.InputMethodService: android.view.View mInputView>;
+
+        if $r2 != null goto label7;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void initialize()>();
+
+        $r2 = virtualinvoke $r0.<android.inputmethodservice.InputMethodService: android.view.View onCreateInputView()>();
+
+        if $r2 == null goto label8;
+
+        virtualinvoke $r0.<android.inputmethodservice.InputMethodService: void setInputView(android.view.View)>($r2);
+
+        return;
+
+     label3:
+        $z0 = 0;
+
+        goto label1;
+
+     label4:
+        $b0 = 8;
+
+        goto label2;
+
+     label5:
+        return;
+
+     label6:
+        return;
+
+     label7:
+        return;
+
+     label8:
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <android.inputmethodservice.InputMethodService: java.lang.String TAG> = "InputMethodService";
+
+        <android.inputmethodservice.InputMethodService: int MOVEMENT_UP> = -2;
+
+        <android.inputmethodservice.InputMethodService: int MOVEMENT_DOWN> = -1;
+
+        <android.inputmethodservice.InputMethodService: boolean DEBUG> = 0;
+
+        return;
+    }
+}

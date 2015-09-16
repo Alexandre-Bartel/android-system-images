@@ -1,0 +1,606 @@
+class com.android.internal.location.GpsLocationProvider$GpsNetworkThread extends java.lang.Thread
+{
+    private boolean mDone;
+    private long mNextNtpTime;
+    private long mNextXtraTime;
+    private boolean mXtraDownloadRequested;
+    final com.android.internal.location.GpsLocationProvider this$0;
+
+    public void <init>(com.android.internal.location.GpsLocationProvider)
+    {
+        com.android.internal.location.GpsLocationProvider$GpsNetworkThread $r0;
+        com.android.internal.location.GpsLocationProvider $r1;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider$GpsNetworkThread;
+
+        $r1 := @parameter0: com.android.internal.location.GpsLocationProvider;
+
+        $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: com.android.internal.location.GpsLocationProvider this$0> = $r1;
+
+        specialinvoke $r0.<java.lang.Thread: void <init>(java.lang.String)>("GpsNetworkThread");
+
+        $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: long mNextNtpTime> = 0L;
+
+        $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: long mNextXtraTime> = 0L;
+
+        $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: boolean mXtraDownloadRequested> = 0;
+
+        $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: boolean mDone> = 0;
+
+        return;
+    }
+
+    private long getWaitTime()
+    {
+        com.android.internal.location.GpsLocationProvider$GpsNetworkThread $r0;
+        long $l0, $l1, $l2;
+        com.android.internal.location.GpsLocationProvider $r1;
+        java.lang.String $r2;
+        byte $b3;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider$GpsNetworkThread;
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l1 = 9223372036854775807L;
+
+        $r1 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: com.android.internal.location.GpsLocationProvider this$0>;
+
+        $r2 = staticinvoke <com.android.internal.location.GpsLocationProvider: java.lang.String access$1200(com.android.internal.location.GpsLocationProvider)>($r1);
+
+        if $r2 == null goto label1;
+
+        $l1 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: long mNextNtpTime>;
+
+        $l1 = $l1 - $l0;
+
+     label1:
+        $l2 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: long mNextXtraTime>;
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 == 0 goto label2;
+
+        $l2 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: long mNextXtraTime>;
+
+        $l0 = $l2 - $l0;
+
+        $b3 = $l0 cmp $l1;
+
+        if $b3 >= 0 goto label2;
+
+        $l1 = $l0;
+
+     label2:
+        $b3 = $l1 cmp 0L;
+
+        if $b3 >= 0 goto label3;
+
+        return 0L;
+
+     label3:
+        return $l1;
+    }
+
+    public void run()
+    {
+        com.android.internal.location.GpsLocationProvider$GpsNetworkThread $r0;
+        java.lang.Object $r1;
+        com.android.internal.location.GpsLocationProvider $r2;
+        boolean $z0;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider$GpsNetworkThread;
+
+        $r2 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: com.android.internal.location.GpsLocationProvider this$0>;
+
+        $r1 = staticinvoke <com.android.internal.location.GpsLocationProvider: java.lang.Object access$600(com.android.internal.location.GpsLocationProvider)>($r2);
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: boolean mDone>;
+
+        if $z0 != 0 goto label2;
+
+        virtualinvoke $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: void runLocked()>();
+
+     label2:
+        exitmonitor $r1;
+
+     label3:
+        return;
+
+     label4:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public void runLocked()
+    {
+        com.android.internal.location.GpsLocationProvider$GpsNetworkThread $r0;
+        android.net.SntpClient $r1;
+        com.android.internal.location.GpsXtraDownloader $r2;
+        com.android.internal.location.GpsLocationProvider $r3, $r12;
+        boolean $z0;
+        android.content.Context $r4;
+        java.util.Properties $r5;
+        long $l0, $l1, $l3;
+        byte $b2;
+        java.lang.String $r6;
+        java.lang.StringBuilder $r7;
+        int $i4, $i5;
+        java.net.InetAddress $r8;
+        byte[] $r9;
+        java.lang.InterruptedException $r10;
+        java.lang.Throwable $r11;
+        java.net.UnknownHostException $r13;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider$GpsNetworkThread;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GpsLocationProvider", "NetworkThread starting");
+
+        $r1 = new android.net.SntpClient;
+
+        specialinvoke $r1.<android.net.SntpClient: void <init>()>();
+
+        $r2 = null;
+
+        $r3 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: com.android.internal.location.GpsLocationProvider this$0>;
+
+        $z0 = staticinvoke <com.android.internal.location.GpsLocationProvider: boolean access$700(com.android.internal.location.GpsLocationProvider)>($r3);
+
+        if $z0 == 0 goto label01;
+
+        $r2 = new com.android.internal.location.GpsXtraDownloader;
+
+        $r3 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: com.android.internal.location.GpsLocationProvider this$0>;
+
+        $r4 = staticinvoke <com.android.internal.location.GpsLocationProvider: android.content.Context access$800(com.android.internal.location.GpsLocationProvider)>($r3);
+
+        $r3 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: com.android.internal.location.GpsLocationProvider this$0>;
+
+        $r5 = staticinvoke <com.android.internal.location.GpsLocationProvider: java.util.Properties access$900(com.android.internal.location.GpsLocationProvider)>($r3);
+
+        specialinvoke $r2.<com.android.internal.location.GpsXtraDownloader: void <init>(android.content.Context,java.util.Properties)>($r4, $r5);
+
+     label01:
+        $z0 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: boolean mDone>;
+
+        if $z0 != 0 goto label31;
+
+        $l0 = specialinvoke $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: long getWaitTime()>();
+
+     label02:
+        entermonitor $r0;
+
+     label03:
+        $r3 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: com.android.internal.location.GpsLocationProvider this$0>;
+
+     label04:
+        $z0 = staticinvoke <com.android.internal.location.GpsLocationProvider: boolean access$1000(com.android.internal.location.GpsLocationProvider)>($r3);
+
+        if $z0 != 0 goto label14;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GpsLocationProvider", "NetworkThread wait for network");
+
+        virtualinvoke $r0.<java.lang.Object: void wait()>();
+
+     label05:
+        exitmonitor $r0;
+
+     label06:
+        $l1 = specialinvoke $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: long getWaitTime()>();
+
+        $l0 = $l1;
+
+        $z0 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: boolean mDone>;
+
+        if $z0 != 0 goto label08;
+
+        $z0 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: boolean mXtraDownloadRequested>;
+
+        if $z0 != 0 goto label07;
+
+        $r3 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: com.android.internal.location.GpsLocationProvider this$0>;
+
+        $z0 = staticinvoke <com.android.internal.location.GpsLocationProvider: boolean access$1100(com.android.internal.location.GpsLocationProvider)>($r3);
+
+        if $z0 != 0 goto label07;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 > 0 goto label02;
+
+     label07:
+        $r3 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: com.android.internal.location.GpsLocationProvider this$0>;
+
+        $z0 = staticinvoke <com.android.internal.location.GpsLocationProvider: boolean access$1000(com.android.internal.location.GpsLocationProvider)>($r3);
+
+        if $z0 == 0 goto label02;
+
+     label08:
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GpsLocationProvider", "NetworkThread out of wake loop");
+
+        $z0 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: boolean mDone>;
+
+        if $z0 != 0 goto label01;
+
+        $r3 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: com.android.internal.location.GpsLocationProvider this$0>;
+
+        $r6 = staticinvoke <com.android.internal.location.GpsLocationProvider: java.lang.String access$1200(com.android.internal.location.GpsLocationProvider)>($r3);
+
+        if $r6 == null goto label09;
+
+        $l0 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: long mNextNtpTime>;
+
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $b2 = $l0 cmp $l1;
+
+        if $b2 > 0 goto label09;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Requesting time from NTP server ");
+
+        $r3 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: com.android.internal.location.GpsLocationProvider this$0>;
+
+        $r6 = staticinvoke <com.android.internal.location.GpsLocationProvider: java.lang.String access$1200(com.android.internal.location.GpsLocationProvider)>($r3);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GpsLocationProvider", $r6);
+
+        $r3 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: com.android.internal.location.GpsLocationProvider this$0>;
+
+        $r6 = staticinvoke <com.android.internal.location.GpsLocationProvider: java.lang.String access$1200(com.android.internal.location.GpsLocationProvider)>($r3);
+
+        $z0 = virtualinvoke $r1.<android.net.SntpClient: boolean requestTime(java.lang.String,int)>($r6, 10000);
+
+        if $z0 == 0 goto label22;
+
+        $l0 = virtualinvoke $r1.<android.net.SntpClient: long getNtpTime()>();
+
+        $l1 = virtualinvoke $r1.<android.net.SntpClient: long getNtpTimeReference()>();
+
+        $l3 = virtualinvoke $r1.<android.net.SntpClient: long getRoundTripTime()>();
+
+        $l3 = $l3 / 2L;
+
+        $i4 = (int) $l3;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("calling native_inject_time: ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" reference: ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l1);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" certainty: ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r6 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GpsLocationProvider", $r6);
+
+        $r3 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: com.android.internal.location.GpsLocationProvider this$0>;
+
+        staticinvoke <com.android.internal.location.GpsLocationProvider: void access$1300(com.android.internal.location.GpsLocationProvider,long,long,int)>($r3, $l0, $l1, $i4);
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l0 = $l0 + 14400000L;
+
+        $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: long mNextNtpTime> = $l0;
+
+     label09:
+        $r3 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: com.android.internal.location.GpsLocationProvider this$0>;
+
+        $z0 = staticinvoke <com.android.internal.location.GpsLocationProvider: boolean access$1100(com.android.internal.location.GpsLocationProvider)>($r3);
+
+        if $z0 == 0 goto label27;
+
+        $r3 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: com.android.internal.location.GpsLocationProvider this$0>;
+
+     label10:
+        $r6 = staticinvoke <com.android.internal.location.GpsLocationProvider: java.lang.String access$1400(com.android.internal.location.GpsLocationProvider)>($r3);
+
+        $r8 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByName(java.lang.String)>($r6);
+
+        if $r8 == null goto label27;
+
+        $r9 = virtualinvoke $r8.<java.net.InetAddress: byte[] getAddress()>();
+
+     label11:
+        $l0 = 0L;
+
+        $i4 = 0;
+
+     label12:
+        $i5 = lengthof $r9;
+
+        if $i4 >= $i5 goto label23;
+
+        $i5 = $r9[$i4];
+
+        if $i5 >= 0 goto label13;
+
+        $i5 = $i5 + 256;
+
+     label13:
+        $l0 = 256L * $l0;
+
+        $l1 = (long) $i5;
+
+        $l0 = $l0 + $l1;
+
+        $i4 = $i4 + 1;
+
+        goto label12;
+
+     label14:
+        $b2 = $l0 cmp 0L;
+
+        if $b2 <= 0 goto label05;
+
+     label15:
+        $r7 = new java.lang.StringBuilder;
+
+     label16:
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("NetworkThread wait for ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ms");
+
+        $r6 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GpsLocationProvider", $r6);
+
+        virtualinvoke $r0.<java.lang.Object: void wait(long)>($l0);
+
+     label17:
+        goto label05;
+
+     label18:
+        $r10 := @caughtexception;
+
+     label19:
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GpsLocationProvider", "InterruptedException in GpsNetworkThread");
+
+        goto label05;
+
+     label20:
+        $r11 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label21:
+        throw $r11;
+
+     label22:
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GpsLocationProvider", "requestTime failed");
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l0 = $l0 + 300000L;
+
+        $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: long mNextNtpTime> = $l0;
+
+        goto label09;
+
+     label23:
+        $r3 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: com.android.internal.location.GpsLocationProvider this$0>;
+
+     label24:
+        staticinvoke <com.android.internal.location.GpsLocationProvider: int access$1502(com.android.internal.location.GpsLocationProvider,int)>($r3, 1);
+
+     label25:
+        $r3 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: com.android.internal.location.GpsLocationProvider this$0>;
+
+        $i4 = (int) $l0;
+
+     label26:
+        $r12 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: com.android.internal.location.GpsLocationProvider this$0>;
+
+        $i5 = staticinvoke <com.android.internal.location.GpsLocationProvider: int access$1600(com.android.internal.location.GpsLocationProvider)>($r12);
+
+        staticinvoke <com.android.internal.location.GpsLocationProvider: void access$1700(com.android.internal.location.GpsLocationProvider,int,int)>($r3, $i4, $i5);
+
+        $r3 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: com.android.internal.location.GpsLocationProvider this$0>;
+
+        staticinvoke <com.android.internal.location.GpsLocationProvider: boolean access$1102(com.android.internal.location.GpsLocationProvider,boolean)>($r3, 0);
+
+     label27:
+        $z0 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: boolean mXtraDownloadRequested>;
+
+        if $z0 != 0 goto label28;
+
+        $l0 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: long mNextXtraTime>;
+
+        $b2 = $l0 cmp 0L;
+
+        if $b2 <= 0 goto label01;
+
+        $l0 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: long mNextXtraTime>;
+
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $b2 = $l0 cmp $l1;
+
+        if $b2 > 0 goto label01;
+
+     label28:
+        if $r2 == null goto label01;
+
+        $r9 = virtualinvoke $r2.<com.android.internal.location.GpsXtraDownloader: byte[] downloadXtraData()>();
+
+        if $r9 == null goto label30;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GpsLocationProvider", "calling native_inject_xtra_data");
+
+        $r3 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: com.android.internal.location.GpsLocationProvider this$0>;
+
+        $i4 = lengthof $r9;
+
+        staticinvoke <com.android.internal.location.GpsLocationProvider: void access$1800(com.android.internal.location.GpsLocationProvider,byte[],int)>($r3, $r9, $i4);
+
+        $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: long mNextXtraTime> = 0L;
+
+        $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: boolean mXtraDownloadRequested> = 0;
+
+        goto label01;
+
+     label29:
+        $r13 := @caughtexception;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unknown host for SUPL server ");
+
+        $r3 = $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: com.android.internal.location.GpsLocationProvider this$0>;
+
+        $r6 = staticinvoke <com.android.internal.location.GpsLocationProvider: java.lang.String access$1400(com.android.internal.location.GpsLocationProvider)>($r3);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("GpsLocationProvider", $r6);
+
+        goto label27;
+
+     label30:
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l0 = $l0 + 300000L;
+
+        $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: long mNextXtraTime> = $l0;
+
+        goto label01;
+
+     label31:
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GpsLocationProvider", "NetworkThread exiting");
+
+        return;
+
+        catch java.lang.InterruptedException from label04 to label05 with label18;
+        catch java.lang.Throwable from label03 to label05 with label20;
+        catch java.lang.Throwable from label05 to label06 with label20;
+        catch java.net.UnknownHostException from label10 to label11 with label29;
+        catch java.lang.InterruptedException from label16 to label17 with label18;
+        catch java.lang.Throwable from label15 to label17 with label20;
+        catch java.lang.Throwable from label19 to label21 with label20;
+        catch java.net.UnknownHostException from label24 to label25 with label29;
+        catch java.net.UnknownHostException from label26 to label27 with label29;
+    }
+
+    void setDone()
+    {
+        com.android.internal.location.GpsLocationProvider$GpsNetworkThread $r0;
+        java.lang.Throwable $r1;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider$GpsNetworkThread;
+
+        entermonitor $r0;
+
+     label1:
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GpsLocationProvider", "stopping NetworkThread");
+
+        $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: boolean mDone> = 1;
+
+        virtualinvoke $r0.<java.lang.Object: void notify()>();
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    void signal()
+    {
+        com.android.internal.location.GpsLocationProvider$GpsNetworkThread $r0;
+        java.lang.Throwable $r1;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider$GpsNetworkThread;
+
+        entermonitor $r0;
+
+     label1:
+        virtualinvoke $r0.<java.lang.Object: void notify()>();
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    void xtraDownloadRequest()
+    {
+        com.android.internal.location.GpsLocationProvider$GpsNetworkThread $r0;
+        java.lang.Throwable $r1;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider$GpsNetworkThread;
+
+        entermonitor $r0;
+
+     label1:
+        $r0.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: boolean mXtraDownloadRequested> = 1;
+
+        virtualinvoke $r0.<java.lang.Object: void notify()>();
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+}

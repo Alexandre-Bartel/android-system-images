@@ -1,0 +1,841 @@
+public class org.bouncycastle.jce.provider.PKIXCertPath extends java.security.cert.CertPath
+{
+    static final java.util.List certPathEncodings;
+    private java.util.List certificates;
+
+    static void <clinit>()
+    {
+        java.util.ArrayList $r0;
+        java.util.List $r1;
+
+        $r0 = new java.util.ArrayList;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>()>();
+
+        interfaceinvoke $r0.<java.util.List: boolean add(java.lang.Object)>("PkiPath");
+
+        interfaceinvoke $r0.<java.util.List: boolean add(java.lang.Object)>("PEM");
+
+        interfaceinvoke $r0.<java.util.List: boolean add(java.lang.Object)>("PKCS7");
+
+        $r1 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r0);
+
+        <org.bouncycastle.jce.provider.PKIXCertPath: java.util.List certPathEncodings> = $r1;
+
+        return;
+    }
+
+    void <init>(java.io.InputStream, java.lang.String) throws java.security.cert.CertificateException
+    {
+        org.bouncycastle.jce.provider.PKIXCertPath $r0;
+        java.lang.String $r1;
+        java.io.ByteArrayInputStream $r2;
+        org.bouncycastle.asn1.ASN1InputStream $r3;
+        org.bouncycastle.asn1.DEROutputStream $r4;
+        java.io.BufferedInputStream $r5;
+        java.io.ByteArrayOutputStream $r6;
+        java.io.InputStream $r7;
+        boolean $z0;
+        org.bouncycastle.asn1.DERObject $r8;
+        java.security.cert.CertificateException $r9;
+        java.io.IOException $r10, $r21;
+        java.lang.StringBuilder $r11;
+        org.bouncycastle.asn1.ASN1Sequence $r12;
+        java.util.Enumeration $r13;
+        java.util.ArrayList $r14;
+        java.security.cert.CertificateFactory $r15;
+        java.lang.Object $r16;
+        byte[] $r17;
+        java.util.List $r18;
+        java.security.cert.Certificate $r19;
+        java.security.NoSuchProviderException $r20, $r22;
+
+        $r0 := @this: org.bouncycastle.jce.provider.PKIXCertPath;
+
+        $r7 := @parameter0: java.io.InputStream;
+
+        $r1 := @parameter1: java.lang.String;
+
+        specialinvoke $r0.<java.security.cert.CertPath: void <init>(java.lang.String)>("X.509");
+
+     label01:
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("PkiPath");
+
+        if $z0 == 0 goto label15;
+
+        $r3 = new org.bouncycastle.asn1.ASN1InputStream;
+
+        specialinvoke $r3.<org.bouncycastle.asn1.ASN1InputStream: void <init>(java.io.InputStream)>($r7);
+
+        $r8 = virtualinvoke $r3.<org.bouncycastle.asn1.ASN1InputStream: org.bouncycastle.asn1.DERObject readObject()>();
+
+     label02:
+        $z0 = $r8 instanceof org.bouncycastle.asn1.ASN1Sequence;
+
+        if $z0 != 0 goto label07;
+
+     label03:
+        $r9 = new java.security.cert.CertificateException;
+
+        specialinvoke $r9.<java.security.cert.CertificateException: void <init>(java.lang.String)>("input stream does not contain a ASN1 SEQUENCE while reading PkiPath encoded data to load CertPath");
+
+     label04:
+        throw $r9;
+
+     label05:
+        $r10 := @caughtexception;
+
+     label06:
+        $r9 = new java.security.cert.CertificateException;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("IOException throw while decoding CertPath:\n");
+
+        $r1 = virtualinvoke $r10.<java.lang.Throwable: java.lang.String toString()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r9.<java.security.cert.CertificateException: void <init>(java.lang.String)>($r1);
+
+        throw $r9;
+
+     label07:
+        $r12 = (org.bouncycastle.asn1.ASN1Sequence) $r8;
+
+     label08:
+        $r13 = virtualinvoke $r12.<org.bouncycastle.asn1.ASN1Collection: java.util.Enumeration getObjects()>();
+
+        $r14 = new java.util.ArrayList;
+
+        specialinvoke $r14.<java.util.ArrayList: void <init>()>();
+
+        $r0.<org.bouncycastle.jce.provider.PKIXCertPath: java.util.List certificates> = $r14;
+
+        $r15 = staticinvoke <java.security.cert.CertificateFactory: java.security.cert.CertificateFactory getInstance(java.lang.String,java.lang.String)>("X.509", "BC");
+
+     label09:
+        $z0 = interfaceinvoke $r13.<java.util.Enumeration: boolean hasMoreElements()>();
+
+     label10:
+        if $z0 == 0 goto label25;
+
+     label11:
+        $r6 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r6.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        $r4 = new org.bouncycastle.asn1.DEROutputStream;
+
+        specialinvoke $r4.<org.bouncycastle.asn1.DEROutputStream: void <init>(java.io.OutputStream)>($r6);
+
+        $r16 = interfaceinvoke $r13.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        virtualinvoke $r4.<org.bouncycastle.asn1.DEROutputStream: void writeObject(java.lang.Object)>($r16);
+
+        virtualinvoke $r4.<java.io.FilterOutputStream: void close()>();
+
+        $r2 = new java.io.ByteArrayInputStream;
+
+        $r17 = virtualinvoke $r6.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        specialinvoke $r2.<java.io.ByteArrayInputStream: void <init>(byte[])>($r17);
+
+        $r18 = $r0.<org.bouncycastle.jce.provider.PKIXCertPath: java.util.List certificates>;
+
+        $r19 = virtualinvoke $r15.<java.security.cert.CertificateFactory: java.security.cert.Certificate generateCertificate(java.io.InputStream)>($r2);
+
+        interfaceinvoke $r18.<java.util.List: void add(int,java.lang.Object)>(0, $r19);
+
+     label12:
+        goto label09;
+
+     label13:
+        $r20 := @caughtexception;
+
+     label14:
+        $r9 = new java.security.cert.CertificateException;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("BouncyCastle provider not found while trying to get a CertificateFactory:\n");
+
+        $r1 = virtualinvoke $r20.<java.lang.Throwable: java.lang.String toString()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r9.<java.security.cert.CertificateException: void <init>(java.lang.String)>($r1);
+
+        throw $r9;
+
+     label15:
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("PKCS7");
+
+        if $z0 != 0 goto label17;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("PEM");
+
+     label16:
+        if $z0 == 0 goto label26;
+
+     label17:
+        $r5 = new java.io.BufferedInputStream;
+
+        specialinvoke $r5.<java.io.BufferedInputStream: void <init>(java.io.InputStream,int)>($r7, 8192);
+
+     label18:
+        $r14 = new java.util.ArrayList;
+
+     label19:
+        specialinvoke $r14.<java.util.ArrayList: void <init>()>();
+
+        $r0.<org.bouncycastle.jce.provider.PKIXCertPath: java.util.List certificates> = $r14;
+
+        $r15 = staticinvoke <java.security.cert.CertificateFactory: java.security.cert.CertificateFactory getInstance(java.lang.String,java.lang.String)>("X.509", "BC");
+
+     label20:
+        $r19 = virtualinvoke $r15.<java.security.cert.CertificateFactory: java.security.cert.Certificate generateCertificate(java.io.InputStream)>($r5);
+
+     label21:
+        if $r19 == null goto label25;
+
+     label22:
+        $r18 = $r0.<org.bouncycastle.jce.provider.PKIXCertPath: java.util.List certificates>;
+
+        interfaceinvoke $r18.<java.util.List: boolean add(java.lang.Object)>($r19);
+
+     label23:
+        goto label20;
+
+     label24:
+        $r21 := @caughtexception;
+
+        $r10 = $r21;
+
+        goto label06;
+
+     label25:
+        $r18 = $r0.<org.bouncycastle.jce.provider.PKIXCertPath: java.util.List certificates>;
+
+        $r18 = specialinvoke $r0.<org.bouncycastle.jce.provider.PKIXCertPath: java.util.List sortCerts(java.util.List)>($r18);
+
+        $r0.<org.bouncycastle.jce.provider.PKIXCertPath: java.util.List certificates> = $r18;
+
+        return;
+
+     label26:
+        $r9 = new java.security.cert.CertificateException;
+
+        $r11 = new java.lang.StringBuilder;
+
+     label27:
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unsupported encoding: ");
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r9.<java.security.cert.CertificateException: void <init>(java.lang.String)>($r1);
+
+     label28:
+        throw $r9;
+
+     label29:
+        $r22 := @caughtexception;
+
+        $r20 = $r22;
+
+        goto label14;
+
+        catch java.io.IOException from label01 to label02 with label05;
+        catch java.io.IOException from label03 to label04 with label05;
+        catch java.security.NoSuchProviderException from label01 to label02 with label13;
+        catch java.security.NoSuchProviderException from label03 to label04 with label13;
+        catch java.io.IOException from label08 to label10 with label05;
+        catch java.io.IOException from label11 to label12 with label05;
+        catch java.security.NoSuchProviderException from label08 to label10 with label13;
+        catch java.security.NoSuchProviderException from label11 to label12 with label13;
+        catch java.io.IOException from label15 to label16 with label05;
+        catch java.io.IOException from label17 to label18 with label05;
+        catch java.security.NoSuchProviderException from label15 to label16 with label13;
+        catch java.security.NoSuchProviderException from label17 to label18 with label13;
+        catch java.io.IOException from label19 to label21 with label24;
+        catch java.io.IOException from label22 to label23 with label24;
+        catch java.security.NoSuchProviderException from label19 to label21 with label29;
+        catch java.security.NoSuchProviderException from label22 to label23 with label29;
+        catch java.io.IOException from label27 to label28 with label05;
+        catch java.security.NoSuchProviderException from label27 to label28 with label13;
+    }
+
+    void <init>(java.util.List)
+    {
+        org.bouncycastle.jce.provider.PKIXCertPath $r0;
+        java.util.List $r1;
+        java.util.ArrayList $r2;
+
+        $r0 := @this: org.bouncycastle.jce.provider.PKIXCertPath;
+
+        $r1 := @parameter0: java.util.List;
+
+        specialinvoke $r0.<java.security.cert.CertPath: void <init>(java.lang.String)>("X.509");
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>(java.util.Collection)>($r1);
+
+        $r1 = specialinvoke $r0.<org.bouncycastle.jce.provider.PKIXCertPath: java.util.List sortCerts(java.util.List)>($r2);
+
+        $r0.<org.bouncycastle.jce.provider.PKIXCertPath: java.util.List certificates> = $r1;
+
+        return;
+    }
+
+    private java.util.List sortCerts(java.util.List)
+    {
+        java.util.List $r0;
+        java.util.ArrayList $r1;
+        org.bouncycastle.jce.provider.PKIXCertPath $r2;
+        int $i0, $i1, $i2;
+        java.lang.Object $r3;
+        java.security.cert.X509Certificate $r4, $r7;
+        javax.security.auth.x500.X500Principal $r5, $r6;
+        boolean $z0, $z1;
+
+        $r2 := @this: org.bouncycastle.jce.provider.PKIXCertPath;
+
+        $r0 := @parameter0: java.util.List;
+
+        $i0 = interfaceinvoke $r0.<java.util.List: int size()>();
+
+        if $i0 >= 2 goto label01;
+
+        return $r0;
+
+     label01:
+        $r3 = interfaceinvoke $r0.<java.util.List: java.lang.Object get(int)>(0);
+
+        $r4 = (java.security.cert.X509Certificate) $r3;
+
+        $r5 = virtualinvoke $r4.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getIssuerX500Principal()>();
+
+        $z0 = 1;
+
+        $i0 = 1;
+
+     label02:
+        $i1 = interfaceinvoke $r0.<java.util.List: int size()>();
+
+        if $i0 == $i1 goto label04;
+
+        $r3 = interfaceinvoke $r0.<java.util.List: java.lang.Object get(int)>($i0);
+
+        $r4 = (java.security.cert.X509Certificate) $r3;
+
+        $r6 = virtualinvoke $r4.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+        $z1 = virtualinvoke $r5.<javax.security.auth.x500.X500Principal: boolean equals(java.lang.Object)>($r6);
+
+        if $z1 == 0 goto label03;
+
+        $r3 = interfaceinvoke $r0.<java.util.List: java.lang.Object get(int)>($i0);
+
+        $r4 = (java.security.cert.X509Certificate) $r3;
+
+        $r5 = virtualinvoke $r4.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getIssuerX500Principal()>();
+
+        $i0 = $i0 + 1;
+
+        goto label02;
+
+     label03:
+        $z0 = 0;
+
+     label04:
+        if $z0 == 0 goto label05;
+
+        return $r0;
+
+     label05:
+        $r1 = new java.util.ArrayList;
+
+        $i0 = interfaceinvoke $r0.<java.util.List: int size()>();
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>(int)>($i0);
+
+        $i0 = 0;
+
+     label06:
+        $i1 = interfaceinvoke $r0.<java.util.List: int size()>();
+
+        if $i0 >= $i1 goto label11;
+
+        $r3 = interfaceinvoke $r0.<java.util.List: java.lang.Object get(int)>($i0);
+
+        $r4 = (java.security.cert.X509Certificate) $r3;
+
+        $z0 = 0;
+
+        $r5 = virtualinvoke $r4.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+        $i1 = 0;
+
+     label07:
+        $i2 = interfaceinvoke $r0.<java.util.List: int size()>();
+
+        if $i1 == $i2 goto label08;
+
+        $r3 = interfaceinvoke $r0.<java.util.List: java.lang.Object get(int)>($i1);
+
+        $r7 = (java.security.cert.X509Certificate) $r3;
+
+        $r6 = virtualinvoke $r7.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getIssuerX500Principal()>();
+
+        $z1 = virtualinvoke $r6.<javax.security.auth.x500.X500Principal: boolean equals(java.lang.Object)>($r5);
+
+        if $z1 == 0 goto label10;
+
+        $z0 = 1;
+
+     label08:
+        if $z0 != 0 goto label09;
+
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>($r4);
+
+        interfaceinvoke $r0.<java.util.List: java.lang.Object remove(int)>($i0);
+
+     label09:
+        $i0 = $i0 + 1;
+
+        goto label06;
+
+     label10:
+        $i1 = $i1 + 1;
+
+        goto label07;
+
+     label11:
+        $i0 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        if $i0 <= 1 goto label14;
+
+        $i0 = 0;
+
+     label12:
+        $i1 = interfaceinvoke $r0.<java.util.List: int size()>();
+
+        if $i0 == $i1 goto label13;
+
+        $r3 = interfaceinvoke $r0.<java.util.List: java.lang.Object get(int)>($i0);
+
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>($r3);
+
+        $i0 = $i0 + 1;
+
+        goto label12;
+
+     label13:
+        return $r1;
+
+     label14:
+        $i0 = 0;
+
+     label15:
+        $i1 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        if $i0 == $i1 goto label19;
+
+        $r3 = interfaceinvoke $r1.<java.util.List: java.lang.Object get(int)>($i0);
+
+        $r4 = (java.security.cert.X509Certificate) $r3;
+
+        $r5 = virtualinvoke $r4.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getIssuerX500Principal()>();
+
+        $i1 = 0;
+
+     label16:
+        $i2 = interfaceinvoke $r0.<java.util.List: int size()>();
+
+        if $i1 >= $i2 goto label17;
+
+        $r3 = interfaceinvoke $r0.<java.util.List: java.lang.Object get(int)>($i1);
+
+        $r4 = (java.security.cert.X509Certificate) $r3;
+
+        $r6 = virtualinvoke $r4.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+        $z0 = virtualinvoke $r5.<javax.security.auth.x500.X500Principal: boolean equals(java.lang.Object)>($r6);
+
+        if $z0 == 0 goto label18;
+
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>($r4);
+
+        interfaceinvoke $r0.<java.util.List: java.lang.Object remove(int)>($i1);
+
+     label17:
+        $i0 = $i0 + 1;
+
+        goto label15;
+
+     label18:
+        $i1 = $i1 + 1;
+
+        goto label16;
+
+     label19:
+        $i0 = 0;
+
+     label20:
+        $i1 = interfaceinvoke $r0.<java.util.List: int size()>();
+
+        if $i0 == $i1 goto label21;
+
+        $r3 = interfaceinvoke $r0.<java.util.List: java.lang.Object get(int)>($i0);
+
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>($r3);
+
+        $i0 = $i0 + 1;
+
+        goto label20;
+
+     label21:
+        return $r1;
+    }
+
+    private org.bouncycastle.asn1.DERObject toASN1Object(java.security.cert.X509Certificate) throws java.security.cert.CertificateEncodingException
+    {
+        org.bouncycastle.jce.provider.PKIXCertPath $r0;
+        java.security.cert.X509Certificate $r1;
+        org.bouncycastle.asn1.ASN1InputStream $r2;
+        byte[] $r3;
+        org.bouncycastle.asn1.DERObject $r4;
+        java.lang.Exception $r5;
+        java.security.cert.CertificateEncodingException $r6;
+        java.lang.StringBuilder $r7;
+        java.lang.String $r8;
+
+        $r0 := @this: org.bouncycastle.jce.provider.PKIXCertPath;
+
+        $r1 := @parameter0: java.security.cert.X509Certificate;
+
+        $r2 = new org.bouncycastle.asn1.ASN1InputStream;
+
+     label1:
+        $r3 = virtualinvoke $r1.<java.security.cert.Certificate: byte[] getEncoded()>();
+
+        specialinvoke $r2.<org.bouncycastle.asn1.ASN1InputStream: void <init>(byte[])>($r3);
+
+        $r4 = virtualinvoke $r2.<org.bouncycastle.asn1.ASN1InputStream: org.bouncycastle.asn1.DERObject readObject()>();
+
+     label2:
+        return $r4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = new java.security.cert.CertificateEncodingException;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exception while encoding certificate: ");
+
+        $r8 = virtualinvoke $r5.<java.lang.Throwable: java.lang.String toString()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<java.security.cert.CertificateEncodingException: void <init>(java.lang.String)>($r8);
+
+        throw $r6;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    private byte[] toDEREncoded(org.bouncycastle.asn1.ASN1Encodable) throws java.security.cert.CertificateEncodingException
+    {
+        org.bouncycastle.jce.provider.PKIXCertPath $r0;
+        org.bouncycastle.asn1.ASN1Encodable $r1;
+        java.io.ByteArrayOutputStream $r2;
+        org.bouncycastle.asn1.DEROutputStream $r3;
+        byte[] $r4;
+        java.io.IOException $r5;
+        java.security.cert.CertificateEncodingException $r6;
+        java.lang.StringBuilder $r7;
+        java.lang.String $r8;
+
+        $r0 := @this: org.bouncycastle.jce.provider.PKIXCertPath;
+
+        $r1 := @parameter0: org.bouncycastle.asn1.ASN1Encodable;
+
+        $r2 = new java.io.ByteArrayOutputStream;
+
+     label1:
+        specialinvoke $r2.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        $r3 = new org.bouncycastle.asn1.DEROutputStream;
+
+        specialinvoke $r3.<org.bouncycastle.asn1.DEROutputStream: void <init>(java.io.OutputStream)>($r2);
+
+        virtualinvoke $r3.<org.bouncycastle.asn1.DEROutputStream: void writeObject(java.lang.Object)>($r1);
+
+        virtualinvoke $r3.<java.io.FilterOutputStream: void close()>();
+
+        $r4 = virtualinvoke $r2.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+     label2:
+        return $r4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = new java.security.cert.CertificateEncodingException;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exeption thrown: ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r5);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<java.security.cert.CertificateEncodingException: void <init>(java.lang.String)>($r8);
+
+        throw $r6;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public java.util.List getCertificates()
+    {
+        org.bouncycastle.jce.provider.PKIXCertPath $r0;
+        java.util.List $r1;
+        java.util.ArrayList $r2;
+
+        $r0 := @this: org.bouncycastle.jce.provider.PKIXCertPath;
+
+        $r2 = new java.util.ArrayList;
+
+        $r1 = $r0.<org.bouncycastle.jce.provider.PKIXCertPath: java.util.List certificates>;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>(java.util.Collection)>($r1);
+
+        $r1 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r2);
+
+        return $r1;
+    }
+
+    public byte[] getEncoded() throws java.security.cert.CertificateEncodingException
+    {
+        org.bouncycastle.jce.provider.PKIXCertPath $r0;
+        java.util.Iterator $r1;
+        boolean $z0;
+        java.lang.Object $r2;
+        java.lang.String $r3;
+        byte[] $r4;
+
+        $r0 := @this: org.bouncycastle.jce.provider.PKIXCertPath;
+
+        $r1 = virtualinvoke $r0.<org.bouncycastle.jce.provider.PKIXCertPath: java.util.Iterator getEncodings()>();
+
+        $z0 = interfaceinvoke $r1.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label1;
+
+        $r2 = interfaceinvoke $r1.<java.util.Iterator: java.lang.Object next()>();
+
+        $z0 = $r2 instanceof java.lang.String;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = (java.lang.String) $r2;
+
+        $r4 = virtualinvoke $r0.<org.bouncycastle.jce.provider.PKIXCertPath: byte[] getEncoded(java.lang.String)>($r3);
+
+        return $r4;
+
+     label1:
+        return null;
+    }
+
+    public byte[] getEncoded(java.lang.String) throws java.security.cert.CertificateEncodingException
+    {
+        org.bouncycastle.jce.provider.PKIXCertPath $r0;
+        java.lang.String $r1;
+        org.bouncycastle.asn1.pkcs.SignedData $r2;
+        org.bouncycastle.asn1.pkcs.ContentInfo $r3;
+        org.bouncycastle.asn1.DERSet $r4, $r16, $r17;
+        boolean $z0;
+        org.bouncycastle.asn1.ASN1EncodableVector $r5;
+        java.util.List $r6, $r7;
+        int $i0, $i1;
+        java.util.ListIterator $r8;
+        java.lang.Object $r9;
+        java.security.cert.X509Certificate $r10;
+        org.bouncycastle.asn1.DERObject $r11;
+        org.bouncycastle.asn1.DERSequence $r12;
+        byte[] $r13;
+        org.bouncycastle.asn1.DERObjectIdentifier $r14;
+        org.bouncycastle.asn1.DERInteger $r15;
+        java.security.cert.CertificateEncodingException $r18;
+        java.lang.StringBuilder $r19;
+
+        $r0 := @this: org.bouncycastle.jce.provider.PKIXCertPath;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("PkiPath");
+
+        if $z0 == 0 goto label3;
+
+        $r5 = new org.bouncycastle.asn1.ASN1EncodableVector;
+
+        specialinvoke $r5.<org.bouncycastle.asn1.ASN1EncodableVector: void <init>()>();
+
+        $r6 = $r0.<org.bouncycastle.jce.provider.PKIXCertPath: java.util.List certificates>;
+
+        $r7 = $r0.<org.bouncycastle.jce.provider.PKIXCertPath: java.util.List certificates>;
+
+        $i0 = interfaceinvoke $r7.<java.util.List: int size()>();
+
+        $r8 = interfaceinvoke $r6.<java.util.List: java.util.ListIterator listIterator(int)>($i0);
+
+     label1:
+        $z0 = interfaceinvoke $r8.<java.util.ListIterator: boolean hasPrevious()>();
+
+        if $z0 == 0 goto label2;
+
+        $r9 = interfaceinvoke $r8.<java.util.ListIterator: java.lang.Object previous()>();
+
+        $r10 = (java.security.cert.X509Certificate) $r9;
+
+        $r11 = specialinvoke $r0.<org.bouncycastle.jce.provider.PKIXCertPath: org.bouncycastle.asn1.DERObject toASN1Object(java.security.cert.X509Certificate)>($r10);
+
+        virtualinvoke $r5.<org.bouncycastle.asn1.DEREncodableVector: void add(org.bouncycastle.asn1.DEREncodable)>($r11);
+
+        goto label1;
+
+     label2:
+        $r12 = new org.bouncycastle.asn1.DERSequence;
+
+        specialinvoke $r12.<org.bouncycastle.asn1.DERSequence: void <init>(org.bouncycastle.asn1.DEREncodableVector)>($r5);
+
+        $r13 = specialinvoke $r0.<org.bouncycastle.jce.provider.PKIXCertPath: byte[] toDEREncoded(org.bouncycastle.asn1.ASN1Encodable)>($r12);
+
+        return $r13;
+
+     label3:
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("PKCS7");
+
+        if $z0 == 0 goto label6;
+
+        $r3 = new org.bouncycastle.asn1.pkcs.ContentInfo;
+
+        $r14 = <org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers: org.bouncycastle.asn1.DERObjectIdentifier data>;
+
+        specialinvoke $r3.<org.bouncycastle.asn1.pkcs.ContentInfo: void <init>(org.bouncycastle.asn1.DERObjectIdentifier,org.bouncycastle.asn1.DEREncodable)>($r14, null);
+
+        $r5 = new org.bouncycastle.asn1.ASN1EncodableVector;
+
+        specialinvoke $r5.<org.bouncycastle.asn1.ASN1EncodableVector: void <init>()>();
+
+        $i0 = 0;
+
+     label4:
+        $r6 = $r0.<org.bouncycastle.jce.provider.PKIXCertPath: java.util.List certificates>;
+
+        $i1 = interfaceinvoke $r6.<java.util.List: int size()>();
+
+        if $i0 == $i1 goto label5;
+
+        $r6 = $r0.<org.bouncycastle.jce.provider.PKIXCertPath: java.util.List certificates>;
+
+        $r9 = interfaceinvoke $r6.<java.util.List: java.lang.Object get(int)>($i0);
+
+        $r10 = (java.security.cert.X509Certificate) $r9;
+
+        $r11 = specialinvoke $r0.<org.bouncycastle.jce.provider.PKIXCertPath: org.bouncycastle.asn1.DERObject toASN1Object(java.security.cert.X509Certificate)>($r10);
+
+        virtualinvoke $r5.<org.bouncycastle.asn1.DEREncodableVector: void add(org.bouncycastle.asn1.DEREncodable)>($r11);
+
+        $i0 = $i0 + 1;
+
+        goto label4;
+
+     label5:
+        $r2 = new org.bouncycastle.asn1.pkcs.SignedData;
+
+        $r15 = new org.bouncycastle.asn1.DERInteger;
+
+        specialinvoke $r15.<org.bouncycastle.asn1.DERInteger: void <init>(int)>(1);
+
+        $r16 = new org.bouncycastle.asn1.DERSet;
+
+        specialinvoke $r16.<org.bouncycastle.asn1.DERSet: void <init>()>();
+
+        $r17 = new org.bouncycastle.asn1.DERSet;
+
+        specialinvoke $r17.<org.bouncycastle.asn1.DERSet: void <init>(org.bouncycastle.asn1.DEREncodableVector)>($r5);
+
+        $r4 = new org.bouncycastle.asn1.DERSet;
+
+        specialinvoke $r4.<org.bouncycastle.asn1.DERSet: void <init>()>();
+
+        specialinvoke $r2.<org.bouncycastle.asn1.pkcs.SignedData: void <init>(org.bouncycastle.asn1.DERInteger,org.bouncycastle.asn1.ASN1Set,org.bouncycastle.asn1.pkcs.ContentInfo,org.bouncycastle.asn1.ASN1Set,org.bouncycastle.asn1.ASN1Set,org.bouncycastle.asn1.ASN1Set)>($r15, $r16, $r3, $r17, null, $r4);
+
+        $r3 = new org.bouncycastle.asn1.pkcs.ContentInfo;
+
+        $r14 = <org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers: org.bouncycastle.asn1.DERObjectIdentifier signedData>;
+
+        specialinvoke $r3.<org.bouncycastle.asn1.pkcs.ContentInfo: void <init>(org.bouncycastle.asn1.DERObjectIdentifier,org.bouncycastle.asn1.DEREncodable)>($r14, $r2);
+
+        $r13 = specialinvoke $r0.<org.bouncycastle.jce.provider.PKIXCertPath: byte[] toDEREncoded(org.bouncycastle.asn1.ASN1Encodable)>($r3);
+
+        return $r13;
+
+     label6:
+        $r18 = new java.security.cert.CertificateEncodingException;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unsupported encoding: ");
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r18.<java.security.cert.CertificateEncodingException: void <init>(java.lang.String)>($r1);
+
+        throw $r18;
+    }
+
+    public java.util.Iterator getEncodings()
+    {
+        org.bouncycastle.jce.provider.PKIXCertPath $r0;
+        java.util.Iterator $r1;
+        java.util.List $r2;
+
+        $r0 := @this: org.bouncycastle.jce.provider.PKIXCertPath;
+
+        $r2 = <org.bouncycastle.jce.provider.PKIXCertPath: java.util.List certPathEncodings>;
+
+        $r1 = interfaceinvoke $r2.<java.util.List: java.util.Iterator iterator()>();
+
+        return $r1;
+    }
+}

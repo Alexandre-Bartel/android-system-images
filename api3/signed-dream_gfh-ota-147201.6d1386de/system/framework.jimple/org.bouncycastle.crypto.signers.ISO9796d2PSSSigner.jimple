@@ -1,0 +1,1368 @@
+public class org.bouncycastle.crypto.signers.ISO9796d2PSSSigner extends java.lang.Object implements org.bouncycastle.crypto.SignerWithRecovery
+{
+    public static final int TRAILER_IMPLICIT;
+    public static final int TRAILER_RIPEMD128;
+    public static final int TRAILER_RIPEMD160;
+    public static final int TRAILER_SHA1;
+    private byte[] block;
+    private org.bouncycastle.crypto.AsymmetricBlockCipher cipher;
+    private org.bouncycastle.crypto.Digest digest;
+    private boolean fullMessage;
+    private int hLen;
+    private int keyBits;
+    private byte[] mBuf;
+    private int messageLength;
+    private java.security.SecureRandom random;
+    private byte[] recoveredMessage;
+    private int saltLength;
+    private byte[] standardSalt;
+    private int trailer;
+
+    public void <init>(org.bouncycastle.crypto.AsymmetricBlockCipher, org.bouncycastle.crypto.Digest, int)
+    {
+        org.bouncycastle.crypto.signers.ISO9796d2PSSSigner $r0;
+        org.bouncycastle.crypto.AsymmetricBlockCipher $r1;
+        org.bouncycastle.crypto.Digest $r2;
+        int $i0;
+
+        $r0 := @this: org.bouncycastle.crypto.signers.ISO9796d2PSSSigner;
+
+        $r1 := @parameter0: org.bouncycastle.crypto.AsymmetricBlockCipher;
+
+        $r2 := @parameter1: org.bouncycastle.crypto.Digest;
+
+        $i0 := @parameter2: int;
+
+        specialinvoke $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: void <init>(org.bouncycastle.crypto.AsymmetricBlockCipher,org.bouncycastle.crypto.Digest,int,boolean)>($r1, $r2, $i0, 0);
+
+        return;
+    }
+
+    public void <init>(org.bouncycastle.crypto.AsymmetricBlockCipher, org.bouncycastle.crypto.Digest, int, boolean)
+    {
+        org.bouncycastle.crypto.signers.ISO9796d2PSSSigner $r0;
+        org.bouncycastle.crypto.AsymmetricBlockCipher $r1;
+        org.bouncycastle.crypto.Digest $r2;
+        int $i0, $i1;
+        boolean $z0;
+        java.lang.IllegalArgumentException $r3;
+
+        $r0 := @this: org.bouncycastle.crypto.signers.ISO9796d2PSSSigner;
+
+        $r1 := @parameter0: org.bouncycastle.crypto.AsymmetricBlockCipher;
+
+        $r2 := @parameter1: org.bouncycastle.crypto.Digest;
+
+        $i0 := @parameter2: int;
+
+        $z0 := @parameter3: boolean;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.AsymmetricBlockCipher cipher> = $r1;
+
+        $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.Digest digest> = $r2;
+
+        $i1 = interfaceinvoke $r2.<org.bouncycastle.crypto.Digest: int getDigestSize()>();
+
+        $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int hLen> = $i1;
+
+        $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int saltLength> = $i0;
+
+        if $z0 == 0 goto label1;
+
+        $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int trailer> = 188;
+
+        return;
+
+     label1:
+        $z0 = $r2 instanceof org.bouncycastle.crypto.digests.SHA1Digest;
+
+        if $z0 == 0 goto label2;
+
+        $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int trailer> = 13260;
+
+        return;
+
+     label2:
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("no valid trailer for digest");
+
+        throw $r3;
+    }
+
+    private void ItoOSP(int, byte[])
+    {
+        org.bouncycastle.crypto.signers.ISO9796d2PSSSigner $r0;
+        int $i0, $i1;
+        byte[] $r1;
+        byte $b2;
+
+        $r0 := @this: org.bouncycastle.crypto.signers.ISO9796d2PSSSigner;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: byte[];
+
+        $i1 = $i0 >>> 24;
+
+        $b2 = (byte) $i1;
+
+        $r1[0] = $b2;
+
+        $i1 = $i0 >>> 16;
+
+        $b2 = (byte) $i1;
+
+        $r1[1] = $b2;
+
+        $i1 = $i0 >>> 8;
+
+        $b2 = (byte) $i1;
+
+        $r1[2] = $b2;
+
+        $i0 = $i0 >>> 0;
+
+        $b2 = (byte) $i0;
+
+        $r1[3] = $b2;
+
+        return;
+    }
+
+    private void LtoOSP(long, byte[])
+    {
+        org.bouncycastle.crypto.signers.ISO9796d2PSSSigner $r0;
+        long $l0, $l1;
+        byte[] $r1;
+        int $i2;
+        byte $b3;
+
+        $r0 := @this: org.bouncycastle.crypto.signers.ISO9796d2PSSSigner;
+
+        $l0 := @parameter0: long;
+
+        $r1 := @parameter1: byte[];
+
+        $l1 = $l0 >>> 56;
+
+        $i2 = (int) $l1;
+
+        $b3 = (byte) $i2;
+
+        $r1[0] = $b3;
+
+        $l1 = $l0 >>> 48;
+
+        $i2 = (int) $l1;
+
+        $b3 = (byte) $i2;
+
+        $r1[1] = $b3;
+
+        $l1 = $l0 >>> 40;
+
+        $i2 = (int) $l1;
+
+        $b3 = (byte) $i2;
+
+        $r1[2] = $b3;
+
+        $l1 = $l0 >>> 32;
+
+        $i2 = (int) $l1;
+
+        $b3 = (byte) $i2;
+
+        $r1[3] = $b3;
+
+        $l1 = $l0 >>> 24;
+
+        $i2 = (int) $l1;
+
+        $b3 = (byte) $i2;
+
+        $r1[4] = $b3;
+
+        $l1 = $l0 >>> 16;
+
+        $i2 = (int) $l1;
+
+        $b3 = (byte) $i2;
+
+        $r1[5] = $b3;
+
+        $l1 = $l0 >>> 8;
+
+        $i2 = (int) $l1;
+
+        $b3 = (byte) $i2;
+
+        $r1[6] = $b3;
+
+        $l0 = $l0 >>> 0;
+
+        $i2 = (int) $l0;
+
+        $b3 = (byte) $i2;
+
+        $r1[7] = $b3;
+
+        return;
+    }
+
+    private void clearBlock(byte[])
+    {
+        org.bouncycastle.crypto.signers.ISO9796d2PSSSigner $r0;
+        byte[] $r1;
+        int $i0, $i1;
+
+        $r0 := @this: org.bouncycastle.crypto.signers.ISO9796d2PSSSigner;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 = 0;
+
+     label1:
+        $i1 = lengthof $r1;
+
+        if $i0 == $i1 goto label2;
+
+        $r1[$i0] = 0;
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    private boolean isSameAs(byte[], byte[])
+    {
+        org.bouncycastle.crypto.signers.ISO9796d2PSSSigner $r0;
+        byte[] $r1, $r2;
+        int $i0, $i1;
+        byte $b2, $b3;
+
+        $r0 := @this: org.bouncycastle.crypto.signers.ISO9796d2PSSSigner;
+
+        $r1 := @parameter0: byte[];
+
+        $r2 := @parameter1: byte[];
+
+        $i0 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int messageLength>;
+
+        $i1 = lengthof $r2;
+
+        if $i0 == $i1 goto label1;
+
+        return 0;
+
+     label1:
+        $i0 = 0;
+
+     label2:
+        $i1 = lengthof $r2;
+
+        if $i0 == $i1 goto label4;
+
+        $b2 = $r1[$i0];
+
+        $b3 = $r2[$i0];
+
+        if $b2 == $b3 goto label3;
+
+        return 0;
+
+     label3:
+        $i0 = $i0 + 1;
+
+        goto label2;
+
+     label4:
+        return 1;
+    }
+
+    private byte[] maskGeneratorFunction1(byte[], int, int, int)
+    {
+        org.bouncycastle.crypto.signers.ISO9796d2PSSSigner $r0;
+        byte[] $r1, $r2, $r3, $r4;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        org.bouncycastle.crypto.Digest $r5;
+
+        $r0 := @this: org.bouncycastle.crypto.signers.ISO9796d2PSSSigner;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        $r4 = newarray (byte)[$i2];
+
+        $i3 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int hLen>;
+
+        $r3 = newarray (byte)[$i3];
+
+        $r2 = newarray (byte)[4];
+
+        $i3 = 0;
+
+        $r5 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.Digest digest>;
+
+        interfaceinvoke $r5.<org.bouncycastle.crypto.Digest: void reset()>();
+
+     label1:
+        $i4 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int hLen>;
+
+        $i4 = $i2 / $i4;
+
+        if $i3 >= $i4 goto label2;
+
+        specialinvoke $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: void ItoOSP(int,byte[])>($i3, $r2);
+
+        $r5 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.Digest digest>;
+
+        interfaceinvoke $r5.<org.bouncycastle.crypto.Digest: void update(byte[],int,int)>($r1, $i0, $i1);
+
+        $r5 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.Digest digest>;
+
+        $i4 = lengthof $r2;
+
+        interfaceinvoke $r5.<org.bouncycastle.crypto.Digest: void update(byte[],int,int)>($r2, 0, $i4);
+
+        $r5 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.Digest digest>;
+
+        interfaceinvoke $r5.<org.bouncycastle.crypto.Digest: int doFinal(byte[],int)>($r3, 0);
+
+        $i4 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int hLen>;
+
+        $i4 = $i4 * $i3;
+
+        $i5 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int hLen>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, 0, $r4, $i4, $i5);
+
+        $i3 = $i3 + 1;
+
+        goto label1;
+
+     label2:
+        $i4 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int hLen>;
+
+        $i4 = $i4 * $i3;
+
+        if $i4 >= $i2 goto label3;
+
+        specialinvoke $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: void ItoOSP(int,byte[])>($i3, $r2);
+
+        $r5 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.Digest digest>;
+
+        interfaceinvoke $r5.<org.bouncycastle.crypto.Digest: void update(byte[],int,int)>($r1, $i0, $i1);
+
+        $r5 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.Digest digest>;
+
+        $i0 = lengthof $r2;
+
+        interfaceinvoke $r5.<org.bouncycastle.crypto.Digest: void update(byte[],int,int)>($r2, 0, $i0);
+
+        $r5 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.Digest digest>;
+
+        interfaceinvoke $r5.<org.bouncycastle.crypto.Digest: int doFinal(byte[],int)>($r3, 0);
+
+        $i0 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int hLen>;
+
+        $i0 = $i0 * $i3;
+
+        $i1 = lengthof $r4;
+
+        $i2 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int hLen>;
+
+        $i2 = $i2 * $i3;
+
+        $i1 = $i1 - $i2;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, 0, $r4, $i0, $i1);
+
+        return $r4;
+
+     label3:
+        return $r4;
+    }
+
+    public byte[] generateSignature() throws org.bouncycastle.crypto.CryptoException
+    {
+        org.bouncycastle.crypto.signers.ISO9796d2PSSSigner $r0;
+        byte[] $r1, $r2, $r4, $r5;
+        int $i0, $i1, $i4;
+        org.bouncycastle.crypto.Digest $r3;
+        long $l2;
+        byte $b3, $b5, $b6;
+        java.security.SecureRandom $r6;
+        org.bouncycastle.crypto.AsymmetricBlockCipher $r7;
+
+        $r0 := @this: org.bouncycastle.crypto.signers.ISO9796d2PSSSigner;
+
+        $r3 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.Digest digest>;
+
+        $i0 = interfaceinvoke $r3.<org.bouncycastle.crypto.Digest: int getDigestSize()>();
+
+        $r2 = newarray (byte)[$i0];
+
+        $r3 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.Digest digest>;
+
+        interfaceinvoke $r3.<org.bouncycastle.crypto.Digest: int doFinal(byte[],int)>($r2, 0);
+
+        $r1 = newarray (byte)[8];
+
+        $i0 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int messageLength>;
+
+        $i0 = $i0 * 8;
+
+        $l2 = (long) $i0;
+
+        specialinvoke $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: void LtoOSP(long,byte[])>($l2, $r1);
+
+        $r3 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.Digest digest>;
+
+        $i0 = lengthof $r1;
+
+        interfaceinvoke $r3.<org.bouncycastle.crypto.Digest: void update(byte[],int,int)>($r1, 0, $i0);
+
+        $r3 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.Digest digest>;
+
+        $r1 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] mBuf>;
+
+        $i0 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int messageLength>;
+
+        interfaceinvoke $r3.<org.bouncycastle.crypto.Digest: void update(byte[],int,int)>($r1, 0, $i0);
+
+        $r3 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.Digest digest>;
+
+        $i0 = lengthof $r2;
+
+        interfaceinvoke $r3.<org.bouncycastle.crypto.Digest: void update(byte[],int,int)>($r2, 0, $i0);
+
+        $r2 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] standardSalt>;
+
+        if $r2 == null goto label4;
+
+        $r1 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] standardSalt>;
+
+     label1:
+        $r3 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.Digest digest>;
+
+        $i0 = lengthof $r1;
+
+        interfaceinvoke $r3.<org.bouncycastle.crypto.Digest: void update(byte[],int,int)>($r1, 0, $i0);
+
+        $r3 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.Digest digest>;
+
+        $i0 = interfaceinvoke $r3.<org.bouncycastle.crypto.Digest: int getDigestSize()>();
+
+        $r2 = newarray (byte)[$i0];
+
+        $r3 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.Digest digest>;
+
+        interfaceinvoke $r3.<org.bouncycastle.crypto.Digest: int doFinal(byte[],int)>($r2, 0);
+
+        $b3 = 2;
+
+        $i0 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int trailer>;
+
+        if $i0 != 188 goto label2;
+
+        $b3 = 1;
+
+     label2:
+        $r4 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] block>;
+
+        $i0 = lengthof $r4;
+
+        $i1 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int messageLength>;
+
+        $i0 = $i0 - $i1;
+
+        $i1 = lengthof $r1;
+
+        $i0 = $i0 - $i1;
+
+        $i1 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int hLen>;
+
+        $i0 = $i0 - $i1;
+
+        $i0 = $i0 - $b3;
+
+        $i0 = $i0 - 1;
+
+        $r4 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] block>;
+
+        $r4[$i0] = 1;
+
+        $r4 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] mBuf>;
+
+        $r5 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] block>;
+
+        $i4 = $i0 + 1;
+
+        $i1 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int messageLength>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 0, $r5, $i4, $i1);
+
+        $r4 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] block>;
+
+        $i0 = $i0 + 1;
+
+        $i1 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int messageLength>;
+
+        $i0 = $i0 + $i1;
+
+        $i1 = lengthof $r1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, 0, $r4, $i0, $i1);
+
+        $i0 = lengthof $r2;
+
+        $r1 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] block>;
+
+        $i1 = lengthof $r1;
+
+        $i4 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int hLen>;
+
+        $i1 = $i1 - $i4;
+
+        $i1 = $i1 - $b3;
+
+        $r1 = specialinvoke $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] maskGeneratorFunction1(byte[],int,int,int)>($r2, 0, $i0, $i1);
+
+        $i0 = 0;
+
+     label3:
+        $i1 = lengthof $r1;
+
+        if $i0 == $i1 goto label5;
+
+        $r4 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] block>;
+
+        $b5 = $r4[$i0];
+
+        $b6 = $r1[$i0];
+
+        $b5 = $b5 ^ $b6;
+
+        $b5 = (byte) $b5;
+
+        $r4[$i0] = $b5;
+
+        $i0 = $i0 + 1;
+
+        goto label3;
+
+     label4:
+        $i0 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int saltLength>;
+
+        $r1 = newarray (byte)[$i0];
+
+        $r6 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: java.security.SecureRandom random>;
+
+        virtualinvoke $r6.<java.security.SecureRandom: void nextBytes(byte[])>($r1);
+
+        goto label1;
+
+     label5:
+        $r1 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] block>;
+
+        $r4 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] block>;
+
+        $i0 = lengthof $r4;
+
+        $i1 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int hLen>;
+
+        $i0 = $i0 - $i1;
+
+        $i0 = $i0 - $b3;
+
+        $i1 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int hLen>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, 0, $r1, $i0, $i1);
+
+        $i0 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int trailer>;
+
+        if $i0 != 188 goto label7;
+
+        $r2 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] block>;
+
+        $r1 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] block>;
+
+        $i0 = lengthof $r1;
+
+        $i0 = $i0 - 1;
+
+        $r2[$i0] = -68;
+
+     label6:
+        $r2 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] block>;
+
+        $b3 = $r2[0];
+
+        $b3 = $b3 & 127;
+
+        $b3 = (byte) $b3;
+
+        $r2[0] = $b3;
+
+        $r7 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.AsymmetricBlockCipher cipher>;
+
+        $r2 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] block>;
+
+        $r1 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] block>;
+
+        $i0 = lengthof $r1;
+
+        $r2 = interfaceinvoke $r7.<org.bouncycastle.crypto.AsymmetricBlockCipher: byte[] processBlock(byte[],int,int)>($r2, 0, $i0);
+
+        $r1 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] mBuf>;
+
+        specialinvoke $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: void clearBlock(byte[])>($r1);
+
+        $r1 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] block>;
+
+        specialinvoke $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: void clearBlock(byte[])>($r1);
+
+        $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int messageLength> = 0;
+
+        return $r2;
+
+     label7:
+        $r2 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] block>;
+
+        $r1 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] block>;
+
+        $i0 = lengthof $r1;
+
+        $i0 = $i0 - 2;
+
+        $i1 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int trailer>;
+
+        $i1 = $i1 >>> 8;
+
+        $b3 = (byte) $i1;
+
+        $r2[$i0] = $b3;
+
+        $r2 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] block>;
+
+        $r1 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] block>;
+
+        $i0 = lengthof $r1;
+
+        $i0 = $i0 - 1;
+
+        $i1 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int trailer>;
+
+        $b3 = (byte) $i1;
+
+        $r2[$i0] = $b3;
+
+        goto label6;
+    }
+
+    public byte[] getRecoveredMessage()
+    {
+        org.bouncycastle.crypto.signers.ISO9796d2PSSSigner $r0;
+        byte[] r1;
+
+        $r0 := @this: org.bouncycastle.crypto.signers.ISO9796d2PSSSigner;
+
+        r1 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] recoveredMessage>;
+
+        return r1;
+    }
+
+    public boolean hasFullMessage()
+    {
+        org.bouncycastle.crypto.signers.ISO9796d2PSSSigner $r0;
+        boolean z0;
+
+        $r0 := @this: org.bouncycastle.crypto.signers.ISO9796d2PSSSigner;
+
+        z0 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: boolean fullMessage>;
+
+        return z0;
+    }
+
+    public void init(boolean, org.bouncycastle.crypto.CipherParameters)
+    {
+        org.bouncycastle.crypto.signers.ISO9796d2PSSSigner $r0;
+        boolean $z0, $z1;
+        org.bouncycastle.crypto.CipherParameters $r1;
+        int $i0, $i1, $i2;
+        org.bouncycastle.crypto.params.ParametersWithRandom $r2;
+        org.bouncycastle.crypto.params.RSAKeyParameters $r3;
+        java.security.SecureRandom $r4;
+        org.bouncycastle.crypto.AsymmetricBlockCipher $r5;
+        java.math.BigInteger $r6;
+        byte[] $r7;
+        org.bouncycastle.crypto.Digest $r8;
+        org.bouncycastle.crypto.params.ParametersWithSalt $r9;
+
+        $r0 := @this: org.bouncycastle.crypto.signers.ISO9796d2PSSSigner;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 := @parameter1: org.bouncycastle.crypto.CipherParameters;
+
+        $i0 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int saltLength>;
+
+        $z1 = $r1 instanceof org.bouncycastle.crypto.params.ParametersWithRandom;
+
+        if $z1 == 0 goto label3;
+
+        $r2 = (org.bouncycastle.crypto.params.ParametersWithRandom) $r1;
+
+        $r1 = virtualinvoke $r2.<org.bouncycastle.crypto.params.ParametersWithRandom: org.bouncycastle.crypto.CipherParameters getParameters()>();
+
+        $r3 = (org.bouncycastle.crypto.params.RSAKeyParameters) $r1;
+
+        $r4 = virtualinvoke $r2.<org.bouncycastle.crypto.params.ParametersWithRandom: java.security.SecureRandom getRandom()>();
+
+        $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: java.security.SecureRandom random> = $r4;
+
+     label1:
+        $r5 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.AsymmetricBlockCipher cipher>;
+
+        interfaceinvoke $r5.<org.bouncycastle.crypto.AsymmetricBlockCipher: void init(boolean,org.bouncycastle.crypto.CipherParameters)>($z0, $r3);
+
+        $r6 = virtualinvoke $r3.<org.bouncycastle.crypto.params.RSAKeyParameters: java.math.BigInteger getModulus()>();
+
+        $i1 = virtualinvoke $r6.<java.math.BigInteger: int bitLength()>();
+
+        $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int keyBits> = $i1;
+
+        $i1 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int keyBits>;
+
+        $i1 = $i1 + 7;
+
+        $i1 = $i1 / 8;
+
+        $r7 = newarray (byte)[$i1];
+
+        $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] block> = $r7;
+
+        $i1 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int trailer>;
+
+        if $i1 != 188 goto label5;
+
+        $r7 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] block>;
+
+        $i1 = lengthof $r7;
+
+        $r8 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.Digest digest>;
+
+        $i2 = interfaceinvoke $r8.<org.bouncycastle.crypto.Digest: int getDigestSize()>();
+
+        $i1 = $i1 - $i2;
+
+        $i0 = $i1 - $i0;
+
+        $i0 = $i0 - 1;
+
+        $i0 = $i0 - 1;
+
+        $r7 = newarray (byte)[$i0];
+
+        $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] mBuf> = $r7;
+
+     label2:
+        virtualinvoke $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: void reset()>();
+
+        return;
+
+     label3:
+        $z1 = $r1 instanceof org.bouncycastle.crypto.params.ParametersWithSalt;
+
+        if $z1 == 0 goto label4;
+
+        $r9 = (org.bouncycastle.crypto.params.ParametersWithSalt) $r1;
+
+        $r1 = virtualinvoke $r9.<org.bouncycastle.crypto.params.ParametersWithSalt: org.bouncycastle.crypto.CipherParameters getParameters()>();
+
+        $r3 = (org.bouncycastle.crypto.params.RSAKeyParameters) $r1;
+
+        $r7 = virtualinvoke $r9.<org.bouncycastle.crypto.params.ParametersWithSalt: byte[] getSalt()>();
+
+        $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] standardSalt> = $r7;
+
+        $r7 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] standardSalt>;
+
+        $i0 = lengthof $r7;
+
+        goto label1;
+
+     label4:
+        $r3 = (org.bouncycastle.crypto.params.RSAKeyParameters) $r1;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = new java.security.SecureRandom;
+
+        specialinvoke $r4.<java.security.SecureRandom: void <init>()>();
+
+        $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: java.security.SecureRandom random> = $r4;
+
+        goto label1;
+
+     label5:
+        $r7 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] block>;
+
+        $i1 = lengthof $r7;
+
+        $r8 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.Digest digest>;
+
+        $i2 = interfaceinvoke $r8.<org.bouncycastle.crypto.Digest: int getDigestSize()>();
+
+        $i1 = $i1 - $i2;
+
+        $i0 = $i1 - $i0;
+
+        $i0 = $i0 - 1;
+
+        $i0 = $i0 - 2;
+
+        $r7 = newarray (byte)[$i0];
+
+        $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] mBuf> = $r7;
+
+        goto label2;
+    }
+
+    public void reset()
+    {
+        org.bouncycastle.crypto.signers.ISO9796d2PSSSigner $r0;
+        org.bouncycastle.crypto.Digest $r1;
+        byte[] $r2;
+
+        $r0 := @this: org.bouncycastle.crypto.signers.ISO9796d2PSSSigner;
+
+        $r1 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.Digest digest>;
+
+        interfaceinvoke $r1.<org.bouncycastle.crypto.Digest: void reset()>();
+
+        $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int messageLength> = 0;
+
+        $r2 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] recoveredMessage>;
+
+        if $r2 == null goto label1;
+
+        $r2 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] recoveredMessage>;
+
+        specialinvoke $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: void clearBlock(byte[])>($r2);
+
+     label1:
+        $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] recoveredMessage> = null;
+
+        $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: boolean fullMessage> = 0;
+
+        return;
+    }
+
+    public void update(byte)
+    {
+        org.bouncycastle.crypto.signers.ISO9796d2PSSSigner $r0;
+        byte $b0;
+        int $i1, $i2;
+        byte[] $r1;
+        org.bouncycastle.crypto.Digest $r2;
+
+        $r0 := @this: org.bouncycastle.crypto.signers.ISO9796d2PSSSigner;
+
+        $b0 := @parameter0: byte;
+
+        $i1 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int messageLength>;
+
+        $r1 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] mBuf>;
+
+        $i2 = lengthof $r1;
+
+        if $i1 >= $i2 goto label1;
+
+        $r1 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] mBuf>;
+
+        $i2 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int messageLength>;
+
+        $i1 = $i2 + 1;
+
+        $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int messageLength> = $i1;
+
+        $r1[$i2] = $b0;
+
+        return;
+
+     label1:
+        $r2 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.Digest digest>;
+
+        interfaceinvoke $r2.<org.bouncycastle.crypto.Digest: void update(byte)>($b0);
+
+        return;
+    }
+
+    public void update(byte[], int, int)
+    {
+        org.bouncycastle.crypto.signers.ISO9796d2PSSSigner $r0;
+        byte[] $r1, $r2;
+        int $i0, $i1, $i2, $i3;
+        byte $b4;
+        org.bouncycastle.crypto.Digest $r3;
+
+        $r0 := @this: org.bouncycastle.crypto.signers.ISO9796d2PSSSigner;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+     label1:
+        if $i1 <= 0 goto label2;
+
+        $i2 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int messageLength>;
+
+        $r2 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] mBuf>;
+
+        $i3 = lengthof $r2;
+
+        if $i2 >= $i3 goto label2;
+
+        $b4 = $r1[$i0];
+
+        virtualinvoke $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: void update(byte)>($b4);
+
+        $i0 = $i0 + 1;
+
+        $i1 = $i1 + -1;
+
+        goto label1;
+
+     label2:
+        if $i1 <= 0 goto label3;
+
+        $r3 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.Digest digest>;
+
+        interfaceinvoke $r3.<org.bouncycastle.crypto.Digest: void update(byte[],int,int)>($r1, $i0, $i1);
+
+        return;
+
+     label3:
+        return;
+    }
+
+    public boolean verifySignature(byte[])
+    {
+        org.bouncycastle.crypto.signers.ISO9796d2PSSSigner $r0;
+        byte[] $r1, $r3, $r4, $r9, $r10;
+        int $i0, $i1, $i4, $i5;
+        org.bouncycastle.crypto.AsymmetricBlockCipher $r2;
+        byte $b2, $b6, $b7;
+        short $s3;
+        org.bouncycastle.crypto.Digest $r5;
+        java.lang.Exception $r6;
+        java.lang.IllegalArgumentException $r7;
+        boolean $z0;
+        java.lang.IllegalStateException $r8;
+        long $l8;
+
+        $r0 := @this: org.bouncycastle.crypto.signers.ISO9796d2PSSSigner;
+
+        $r1 := @parameter0: byte[];
+
+     label01:
+        $r2 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.AsymmetricBlockCipher cipher>;
+
+        $i0 = lengthof $r1;
+
+        $r3 = interfaceinvoke $r2.<org.bouncycastle.crypto.AsymmetricBlockCipher: byte[] processBlock(byte[],int,int)>($r1, 0, $i0);
+
+     label02:
+        $r1 = $r3;
+
+        $i0 = lengthof $r3;
+
+        $i1 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int keyBits>;
+
+        $i1 = $i1 + 7;
+
+        $i1 = $i1 / 8;
+
+        if $i0 >= $i1 goto label03;
+
+        $i0 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int keyBits>;
+
+        $i0 = $i0 + 7;
+
+        $i0 = $i0 / 8;
+
+        $r1 = newarray (byte)[$i0];
+
+        $i0 = lengthof $r1;
+
+        $i1 = lengthof $r3;
+
+        $i0 = $i0 - $i1;
+
+        $i1 = lengthof $r3;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, 0, $r1, $i0, $i1);
+
+     label03:
+        $i0 = lengthof $r1;
+
+        $i0 = $i0 - 1;
+
+        $b2 = $r1[$i0];
+
+        $s3 = $b2 & 255;
+
+        $s3 = $s3 ^ 188;
+
+        if $s3 != 0 goto label07;
+
+        $b2 = 1;
+
+     label04:
+        $i0 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int hLen>;
+
+        $r4 = newarray (byte)[$i0];
+
+        $r5 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.Digest digest>;
+
+        interfaceinvoke $r5.<org.bouncycastle.crypto.Digest: int doFinal(byte[],int)>($r4, 0);
+
+        $i0 = lengthof $r1;
+
+        $i1 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int hLen>;
+
+        $i0 = $i0 - $i1;
+
+        $i0 = $i0 - $b2;
+
+        $i1 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int hLen>;
+
+        $i4 = lengthof $r1;
+
+        $i5 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int hLen>;
+
+        $i4 = $i4 - $i5;
+
+        $i4 = $i4 - $b2;
+
+        $r3 = specialinvoke $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] maskGeneratorFunction1(byte[],int,int,int)>($r1, $i0, $i1, $i4);
+
+        $i0 = 0;
+
+     label05:
+        $i1 = lengthof $r3;
+
+        if $i0 == $i1 goto label11;
+
+        $b6 = $r1[$i0];
+
+        $b7 = $r3[$i0];
+
+        $b6 = $b6 ^ $b7;
+
+        $b6 = (byte) $b6;
+
+        $r1[$i0] = $b6;
+
+        $i0 = $i0 + 1;
+
+        goto label05;
+
+     label06:
+        $r6 := @caughtexception;
+
+        return 0;
+
+     label07:
+        $i0 = lengthof $r1;
+
+        $i0 = $i0 - 2;
+
+        $b2 = $r1[$i0];
+
+        $s3 = $b2 & 255;
+
+        $i0 = $s3 << 8;
+
+        $i1 = lengthof $r1;
+
+        $i1 = $i1 - 1;
+
+        $b2 = $r1[$i1];
+
+        $s3 = $b2 & 255;
+
+        $i0 = $i0 | $s3;
+
+        lookupswitch($i0)
+        {
+            case 13260: goto label09;
+            default: goto label08;
+        };
+
+     label08:
+        $r7 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r7.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("unrecognised hash in signature");
+
+        throw $r7;
+
+     label09:
+        $r5 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.Digest digest>;
+
+        $z0 = $r5 instanceof org.bouncycastle.crypto.digests.SHA1Digest;
+
+        if $z0 != 0 goto label10;
+
+        $r8 = new java.lang.IllegalStateException;
+
+        specialinvoke $r8.<java.lang.IllegalStateException: void <init>(java.lang.String)>("signer should be initialised with SHA1");
+
+        throw $r8;
+
+     label10:
+        $b2 = 2;
+
+        goto label04;
+
+     label11:
+        $b6 = $r1[0];
+
+        $b6 = $b6 & 127;
+
+        $b6 = (byte) $b6;
+
+        $r1[0] = $b6;
+
+        $i0 = 0;
+
+     label12:
+        $i1 = lengthof $r1;
+
+        if $i0 == $i1 goto label13;
+
+        $b6 = $r1[$i0];
+
+        if $b6 != 1 goto label14;
+
+     label13:
+        $i0 = $i0 + 1;
+
+        $i1 = lengthof $r1;
+
+        if $i0 < $i1 goto label15;
+
+        specialinvoke $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: void clearBlock(byte[])>($r1);
+
+        return 0;
+
+     label14:
+        $i0 = $i0 + 1;
+
+        goto label12;
+
+     label15:
+        if $i0 <= 1 goto label19;
+
+        $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: boolean fullMessage> = 1;
+
+     label16:
+        $i1 = lengthof $r3;
+
+        $i1 = $i1 - $i0;
+
+        $i4 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int saltLength>;
+
+        $i1 = $i1 - $i4;
+
+        $r9 = newarray (byte)[$i1];
+
+        $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] recoveredMessage> = $r9;
+
+        $r9 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] recoveredMessage>;
+
+        $r10 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] recoveredMessage>;
+
+        $i1 = lengthof $r10;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, $i0, $r9, 0, $i1);
+
+        $r9 = newarray (byte)[8];
+
+        $r10 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] recoveredMessage>;
+
+        $i1 = lengthof $r10;
+
+        $i1 = $i1 * 8;
+
+        $l8 = (long) $i1;
+
+        specialinvoke $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: void LtoOSP(long,byte[])>($l8, $r9);
+
+        $r5 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.Digest digest>;
+
+        $i1 = lengthof $r9;
+
+        interfaceinvoke $r5.<org.bouncycastle.crypto.Digest: void update(byte[],int,int)>($r9, 0, $i1);
+
+        $r9 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] recoveredMessage>;
+
+        $i1 = lengthof $r9;
+
+        if $i1 == 0 goto label17;
+
+        $r5 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.Digest digest>;
+
+        $r9 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] recoveredMessage>;
+
+        $r10 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] recoveredMessage>;
+
+        $i1 = lengthof $r10;
+
+        interfaceinvoke $r5.<org.bouncycastle.crypto.Digest: void update(byte[],int,int)>($r9, 0, $i1);
+
+     label17:
+        $r5 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.Digest digest>;
+
+        $i1 = lengthof $r4;
+
+        interfaceinvoke $r5.<org.bouncycastle.crypto.Digest: void update(byte[],int,int)>($r4, 0, $i1);
+
+        $r5 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.Digest digest>;
+
+        $i1 = interfaceinvoke $r5.<org.bouncycastle.crypto.Digest: int getDigestSize()>();
+
+        $r4 = newarray (byte)[$i1];
+
+        $r5 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.Digest digest>;
+
+        $r9 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] recoveredMessage>;
+
+        $i1 = lengthof $r9;
+
+        $i1 = $i1 + $i0;
+
+        $i4 = lengthof $r3;
+
+        $i0 = $i4 - $i0;
+
+        $r3 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] recoveredMessage>;
+
+        $i4 = lengthof $r3;
+
+        $i0 = $i0 - $i4;
+
+        interfaceinvoke $r5.<org.bouncycastle.crypto.Digest: void update(byte[],int,int)>($r1, $i1, $i0);
+
+        $r5 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: org.bouncycastle.crypto.Digest digest>;
+
+        interfaceinvoke $r5.<org.bouncycastle.crypto.Digest: int doFinal(byte[],int)>($r4, 0);
+
+        $i0 = lengthof $r1;
+
+        $i0 = $i0 - $b2;
+
+        $i1 = lengthof $r4;
+
+        $i0 = $i0 - $i1;
+
+        $i1 = 0;
+
+     label18:
+        $i4 = lengthof $r4;
+
+        if $i1 == $i4 goto label21;
+
+        $b2 = $r4[$i1];
+
+        $i4 = $i0 + $i1;
+
+        $b6 = $r1[$i4];
+
+        if $b2 == $b6 goto label20;
+
+        specialinvoke $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: void clearBlock(byte[])>($r1);
+
+        specialinvoke $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: void clearBlock(byte[])>($r4);
+
+        $r1 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] recoveredMessage>;
+
+        specialinvoke $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: void clearBlock(byte[])>($r1);
+
+        $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: boolean fullMessage> = 0;
+
+        return 0;
+
+     label19:
+        $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: boolean fullMessage> = 0;
+
+        goto label16;
+
+     label20:
+        $i1 = $i1 + 1;
+
+        goto label18;
+
+     label21:
+        $i0 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int messageLength>;
+
+        if $i0 == 0 goto label22;
+
+        $r3 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] mBuf>;
+
+        $r4 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] recoveredMessage>;
+
+        $z0 = specialinvoke $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: boolean isSameAs(byte[],byte[])>($r3, $r4);
+
+        if $z0 != 0 goto label22;
+
+        $r3 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] mBuf>;
+
+        specialinvoke $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: void clearBlock(byte[])>($r3);
+
+        specialinvoke $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: void clearBlock(byte[])>($r1);
+
+        return 0;
+
+     label22:
+        $r3 = $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: byte[] mBuf>;
+
+        specialinvoke $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: void clearBlock(byte[])>($r3);
+
+        specialinvoke $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: void clearBlock(byte[])>($r1);
+
+        $r0.<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int messageLength> = 0;
+
+        return 1;
+
+        catch java.lang.Exception from label01 to label02 with label06;
+    }
+
+    public static void <clinit>()
+    {
+        <org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int TRAILER_SHA1> = 13260;
+
+        <org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int TRAILER_RIPEMD160> = 12748;
+
+        <org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int TRAILER_RIPEMD128> = 13004;
+
+        <org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: int TRAILER_IMPLICIT> = 188;
+
+        return;
+    }
+}

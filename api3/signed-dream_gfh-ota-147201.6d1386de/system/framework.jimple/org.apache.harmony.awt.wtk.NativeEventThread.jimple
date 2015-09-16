@@ -1,0 +1,164 @@
+public class org.apache.harmony.awt.wtk.NativeEventThread extends java.lang.Thread
+{
+    org.apache.harmony.awt.wtk.NativeEventThread$Init init;
+    org.apache.harmony.awt.wtk.NativeEventQueue nativeQueue;
+    private org.apache.harmony.awt.wtk.WTK wtk;
+
+    public void <init>()
+    {
+        org.apache.harmony.awt.wtk.NativeEventThread $r0;
+
+        $r0 := @this: org.apache.harmony.awt.wtk.NativeEventThread;
+
+        specialinvoke $r0.<java.lang.Thread: void <init>(java.lang.String)>("AWT-NativeEventThread");
+
+        virtualinvoke $r0.<java.lang.Thread: void setDaemon(boolean)>(1);
+
+        return;
+    }
+
+    public org.apache.harmony.awt.wtk.WTK getWTK()
+    {
+        org.apache.harmony.awt.wtk.NativeEventThread $r0;
+        org.apache.harmony.awt.wtk.WTK r1;
+
+        $r0 := @this: org.apache.harmony.awt.wtk.NativeEventThread;
+
+        r1 = $r0.<org.apache.harmony.awt.wtk.NativeEventThread: org.apache.harmony.awt.wtk.WTK wtk>;
+
+        return r1;
+    }
+
+    public void run()
+    {
+        org.apache.harmony.awt.wtk.NativeEventThread $r0;
+        org.apache.harmony.awt.wtk.NativeEventThread$Init $r1;
+        org.apache.harmony.awt.wtk.WTK $r2;
+        org.apache.harmony.awt.wtk.NativeEventQueue $r3;
+        java.lang.Throwable $r4, $r5;
+
+        $r0 := @this: org.apache.harmony.awt.wtk.NativeEventThread;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = $r0.<org.apache.harmony.awt.wtk.NativeEventThread: org.apache.harmony.awt.wtk.NativeEventThread$Init init>;
+
+        $r2 = interfaceinvoke $r1.<org.apache.harmony.awt.wtk.NativeEventThread$Init: org.apache.harmony.awt.wtk.WTK init()>();
+
+        $r0.<org.apache.harmony.awt.wtk.NativeEventThread: org.apache.harmony.awt.wtk.WTK wtk> = $r2;
+
+        $r2 = $r0.<org.apache.harmony.awt.wtk.NativeEventThread: org.apache.harmony.awt.wtk.WTK wtk>;
+
+        $r3 = virtualinvoke $r2.<org.apache.harmony.awt.wtk.WTK: org.apache.harmony.awt.wtk.NativeEventQueue getNativeEventQueue()>();
+
+        $r0.<org.apache.harmony.awt.wtk.NativeEventThread: org.apache.harmony.awt.wtk.NativeEventQueue nativeQueue> = $r3;
+
+     label2:
+        virtualinvoke $r0.<java.lang.Object: void notifyAll()>();
+
+        exitmonitor $r0;
+
+     label3:
+        virtualinvoke $r0.<org.apache.harmony.awt.wtk.NativeEventThread: void runModalLoop()>();
+
+        return;
+
+     label4:
+        $r4 := @caughtexception;
+
+     label5:
+        virtualinvoke $r0.<java.lang.Object: void notifyAll()>();
+
+        throw $r4;
+
+     label6:
+        $r5 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label7:
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label4;
+        catch java.lang.Throwable from label2 to label3 with label6;
+        catch java.lang.Throwable from label5 to label7 with label6;
+    }
+
+    void runModalLoop()
+    {
+        org.apache.harmony.awt.wtk.NativeEventThread $r0;
+        boolean $z0;
+        org.apache.harmony.awt.wtk.NativeEventQueue $r1;
+
+        $r0 := @this: org.apache.harmony.awt.wtk.NativeEventThread;
+
+     label1:
+        $r1 = $r0.<org.apache.harmony.awt.wtk.NativeEventThread: org.apache.harmony.awt.wtk.NativeEventQueue nativeQueue>;
+
+        $z0 = virtualinvoke $r1.<org.apache.harmony.awt.wtk.NativeEventQueue: boolean waitEvent()>();
+
+        if $z0 == 0 goto label2;
+
+        $r1 = $r0.<org.apache.harmony.awt.wtk.NativeEventThread: org.apache.harmony.awt.wtk.NativeEventQueue nativeQueue>;
+
+        virtualinvoke $r1.<org.apache.harmony.awt.wtk.NativeEventQueue: void dispatchEvent()>();
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void start(org.apache.harmony.awt.wtk.NativeEventThread$Init)
+    {
+        org.apache.harmony.awt.wtk.NativeEventThread $r0;
+        org.apache.harmony.awt.wtk.NativeEventThread$Init $r1;
+        java.lang.InterruptedException $r2;
+        java.lang.RuntimeException $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: org.apache.harmony.awt.wtk.NativeEventThread;
+
+        $r1 := @parameter0: org.apache.harmony.awt.wtk.NativeEventThread$Init;
+
+        entermonitor $r0;
+
+     label1:
+        $r0.<org.apache.harmony.awt.wtk.NativeEventThread: org.apache.harmony.awt.wtk.NativeEventThread$Init init> = $r1;
+
+        specialinvoke $r0.<java.lang.Thread: void start()>();
+
+     label2:
+        virtualinvoke $r0.<java.lang.Object: void wait()>();
+
+     label3:
+        exitmonitor $r0;
+
+     label4:
+        return;
+
+     label5:
+        $r2 := @caughtexception;
+
+        $r3 = new java.lang.RuntimeException;
+
+        specialinvoke $r3.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r2);
+
+        throw $r3;
+
+     label6:
+        $r4 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label7:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.InterruptedException from label2 to label3 with label5;
+        catch java.lang.Throwable from label2 to label3 with label6;
+        catch java.lang.Throwable from label3 to label4 with label6;
+        catch java.lang.Throwable from label5 to label7 with label6;
+    }
+}

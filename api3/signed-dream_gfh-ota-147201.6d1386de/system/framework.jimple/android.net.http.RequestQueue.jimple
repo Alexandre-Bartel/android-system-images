@@ -1,0 +1,982 @@
+public class android.net.http.RequestQueue extends java.lang.Object implements android.net.http.RequestFeeder
+{
+    private static final int CONNECTION_COUNT;
+    public static final java.lang.String HTTP_NETWORK_STATE_CHANGED_INTENT;
+    public static final java.lang.String HTTP_NETWORK_STATE_UP;
+    private android.net.http.RequestQueue$ActivePool mActivePool;
+    private boolean mClientWaiting;
+    private android.content.Context mContext;
+    boolean mNetworkConnected;
+    private android.net.http.RequestQueue$NetworkStateTracker mNetworkStateTracker;
+    private java.util.LinkedHashMap mPending;
+    private android.content.BroadcastReceiver mProxyChangeReceiver;
+    private org.apache.http.HttpHost mProxyHost;
+
+    public void <init>(android.content.Context)
+    {
+        android.net.http.RequestQueue $r0;
+        android.content.Context $r1;
+
+        $r0 := @this: android.net.http.RequestQueue;
+
+        $r1 := @parameter0: android.content.Context;
+
+        specialinvoke $r0.<android.net.http.RequestQueue: void <init>(android.content.Context,int)>($r1, 4);
+
+        return;
+    }
+
+    public void <init>(android.content.Context, int)
+    {
+        android.net.http.RequestQueue $r0;
+        android.content.Context $r1;
+        int $i0;
+        java.util.LinkedHashMap $r2;
+        android.net.http.RequestQueue$ActivePool $r3;
+
+        $r0 := @this: android.net.http.RequestQueue;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $i0 := @parameter1: int;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r0.<android.net.http.RequestQueue: boolean mClientWaiting> = 0;
+
+        $r0.<android.net.http.RequestQueue: boolean mNetworkConnected> = 1;
+
+        $r0.<android.net.http.RequestQueue: org.apache.http.HttpHost mProxyHost> = null;
+
+        $r0.<android.net.http.RequestQueue: android.content.Context mContext> = $r1;
+
+        $r2 = new java.util.LinkedHashMap;
+
+        specialinvoke $r2.<java.util.LinkedHashMap: void <init>(int)>(32);
+
+        $r0.<android.net.http.RequestQueue: java.util.LinkedHashMap mPending> = $r2;
+
+        $r3 = new android.net.http.RequestQueue$ActivePool;
+
+        specialinvoke $r3.<android.net.http.RequestQueue$ActivePool: void <init>(android.net.http.RequestQueue,int)>($r0, $i0);
+
+        $r0.<android.net.http.RequestQueue: android.net.http.RequestQueue$ActivePool mActivePool> = $r3;
+
+        $r3 = $r0.<android.net.http.RequestQueue: android.net.http.RequestQueue$ActivePool mActivePool>;
+
+        virtualinvoke $r3.<android.net.http.RequestQueue$ActivePool: void startup()>();
+
+        return;
+    }
+
+    static void access$000(android.net.http.RequestQueue)
+    {
+        android.net.http.RequestQueue $r0;
+
+        $r0 := @parameter0: android.net.http.RequestQueue;
+
+        specialinvoke $r0.<android.net.http.RequestQueue: void setProxyConfig()>();
+
+        return;
+    }
+
+    static android.content.Context access$100(android.net.http.RequestQueue)
+    {
+        android.net.http.RequestQueue $r0;
+        android.content.Context r1;
+
+        $r0 := @parameter0: android.net.http.RequestQueue;
+
+        r1 = $r0.<android.net.http.RequestQueue: android.content.Context mContext>;
+
+        return r1;
+    }
+
+    static org.apache.http.HttpHost access$200(android.net.http.RequestQueue)
+    {
+        android.net.http.RequestQueue $r0;
+        org.apache.http.HttpHost r1;
+
+        $r0 := @parameter0: android.net.http.RequestQueue;
+
+        r1 = $r0.<android.net.http.RequestQueue: org.apache.http.HttpHost mProxyHost>;
+
+        return r1;
+    }
+
+    private android.net.http.Request removeFirst(java.util.LinkedHashMap)
+    {
+        android.net.http.RequestQueue $r0;
+        java.util.LinkedHashMap $r1;
+        android.net.http.Request $r2;
+        java.util.Set $r3;
+        java.util.Iterator $r4;
+        boolean $z0;
+        java.lang.Object $r5;
+        java.util.Map$Entry $r6;
+        java.util.LinkedList $r7;
+
+        $r0 := @this: android.net.http.RequestQueue;
+
+        $r1 := @parameter0: java.util.LinkedHashMap;
+
+        $r3 = virtualinvoke $r1.<java.util.LinkedHashMap: java.util.Set entrySet()>();
+
+        $r4 = interfaceinvoke $r3.<java.util.Set: java.util.Iterator iterator()>();
+
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label1;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        $r6 = (java.util.Map$Entry) $r5;
+
+        $r5 = interfaceinvoke $r6.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r7 = (java.util.LinkedList) $r5;
+
+        $r5 = virtualinvoke $r7.<java.util.LinkedList: java.lang.Object removeFirst()>();
+
+        $r2 = (android.net.http.Request) $r5;
+
+        $z0 = virtualinvoke $r7.<java.util.AbstractCollection: boolean isEmpty()>();
+
+        if $z0 == 0 goto label2;
+
+        $r5 = interfaceinvoke $r6.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        virtualinvoke $r1.<java.util.LinkedHashMap: java.lang.Object remove(java.lang.Object)>($r5);
+
+        return $r2;
+
+     label1:
+        return null;
+
+     label2:
+        return $r2;
+    }
+
+    private void setProxyConfig()
+    {
+        android.net.http.RequestQueue $r0;
+        android.net.http.RequestQueue$NetworkStateTracker $r1;
+        int $i0;
+        android.content.Context $r2;
+        java.lang.String $r3;
+        java.lang.Throwable $r4;
+        android.net.http.RequestQueue$ActivePool $r5;
+        org.apache.http.HttpHost $r6;
+
+        $r0 := @this: android.net.http.RequestQueue;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = $r0.<android.net.http.RequestQueue: android.net.http.RequestQueue$NetworkStateTracker mNetworkStateTracker>;
+
+        $i0 = virtualinvoke $r1.<android.net.http.RequestQueue$NetworkStateTracker: int getCurrentNetworkType()>();
+
+        if $i0 != 1 goto label3;
+
+        $r0.<android.net.http.RequestQueue: org.apache.http.HttpHost mProxyHost> = null;
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r2 = $r0.<android.net.http.RequestQueue: android.content.Context mContext>;
+
+        $r3 = staticinvoke <android.net.Proxy: java.lang.String getHost(android.content.Context)>($r2);
+
+        if $r3 != null goto label6;
+
+        $r0.<android.net.http.RequestQueue: org.apache.http.HttpHost mProxyHost> = null;
+
+     label4:
+        goto label2;
+
+     label5:
+        $r4 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r4;
+
+     label6:
+        $r5 = $r0.<android.net.http.RequestQueue: android.net.http.RequestQueue$ActivePool mActivePool>;
+
+        virtualinvoke $r5.<android.net.http.RequestQueue$ActivePool: void disablePersistence()>();
+
+        $r6 = new org.apache.http.HttpHost;
+
+        $r2 = $r0.<android.net.http.RequestQueue: android.content.Context mContext>;
+
+        $i0 = staticinvoke <android.net.Proxy: int getPort(android.content.Context)>($r2);
+
+        specialinvoke $r6.<org.apache.http.HttpHost: void <init>(java.lang.String,int,java.lang.String)>($r3, $i0, "http");
+
+        $r0.<android.net.http.RequestQueue: org.apache.http.HttpHost mProxyHost> = $r6;
+
+     label7:
+        goto label2;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label6 to label7 with label5;
+    }
+
+    public void disablePlatformNotifications()
+    {
+        android.net.http.RequestQueue $r0;
+        android.content.BroadcastReceiver $r1;
+        android.net.http.RequestQueue$NetworkStateTracker $r2;
+        android.content.Context $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: android.net.http.RequestQueue;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.net.http.RequestQueue: android.net.http.RequestQueue$NetworkStateTracker mNetworkStateTracker>;
+
+        if $r2 == null goto label2;
+
+        $r2 = $r0.<android.net.http.RequestQueue: android.net.http.RequestQueue$NetworkStateTracker mNetworkStateTracker>;
+
+        virtualinvoke $r2.<android.net.http.RequestQueue$NetworkStateTracker: void disable()>();
+
+     label2:
+        $r1 = $r0.<android.net.http.RequestQueue: android.content.BroadcastReceiver mProxyChangeReceiver>;
+
+        if $r1 == null goto label3;
+
+        $r3 = $r0.<android.net.http.RequestQueue: android.content.Context mContext>;
+
+        $r1 = $r0.<android.net.http.RequestQueue: android.content.BroadcastReceiver mProxyChangeReceiver>;
+
+        virtualinvoke $r3.<android.content.Context: void unregisterReceiver(android.content.BroadcastReceiver)>($r1);
+
+        $r0.<android.net.http.RequestQueue: android.content.BroadcastReceiver mProxyChangeReceiver> = null;
+
+     label3:
+        exitmonitor $r0;
+
+        return;
+
+     label4:
+        $r4 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+    }
+
+    void dump()
+    {
+        android.net.http.RequestQueue $r0;
+        java.lang.StringBuilder $r1, $r2, $r10;
+        java.util.LinkedHashMap $r3;
+        boolean $z0;
+        java.util.Set $r4;
+        java.util.Iterator $r5;
+        int $i0, $i1;
+        java.lang.Object $r6;
+        java.util.Map$Entry $r7;
+        org.apache.http.HttpHost $r8;
+        java.lang.String $r9;
+        java.util.LinkedList $r11;
+        android.net.http.Request $r12;
+        java.lang.Throwable $r13;
+
+        $r0 := @this: android.net.http.RequestQueue;
+
+        entermonitor $r0;
+
+     label1:
+        staticinvoke <android.net.http.HttpLog: void v(java.lang.String)>("dump()");
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = $r0.<android.net.http.RequestQueue: java.util.LinkedHashMap mPending>;
+
+        $z0 = virtualinvoke $r3.<java.util.HashMap: boolean isEmpty()>();
+
+        if $z0 != 0 goto label7;
+
+        $r3 = $r0.<android.net.http.RequestQueue: java.util.LinkedHashMap mPending>;
+
+        $r4 = virtualinvoke $r3.<java.util.LinkedHashMap: java.util.Set entrySet()>();
+
+        $r5 = interfaceinvoke $r4.<java.util.Set: java.util.Iterator iterator()>();
+
+        $i0 = 0;
+
+     label2:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label7;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        $r7 = (java.util.Map$Entry) $r6;
+
+        $r6 = interfaceinvoke $r7.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r8 = (org.apache.http.HttpHost) $r6;
+
+        $r9 = virtualinvoke $r8.<org.apache.http.HttpHost: java.lang.String getHostName()>();
+
+        $r2 = new java.lang.StringBuilder;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("p");
+
+        $i1 = $i0 + 1;
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r9 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>(java.lang.String)>($r9);
+
+        $r6 = interfaceinvoke $r7.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r11 = (java.util.LinkedList) $r6;
+
+        virtualinvoke $r11.<java.util.LinkedList: java.util.ListIterator listIterator(int)>(0);
+
+     label3:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label6;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        $r12 = (android.net.http.Request) $r6;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r12);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r9 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+     label4:
+        goto label3;
+
+     label5:
+        $r13 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r13;
+
+     label6:
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.CharSequence)>($r2);
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        $i0 = $i1;
+
+        goto label2;
+
+     label7:
+        $r9 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.net.http.HttpLog: void v(java.lang.String)>($r9);
+
+     label8:
+        exitmonitor $r0;
+
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label6 to label8 with label5;
+    }
+
+    public void enablePlatformNotifications()
+    {
+        android.net.http.RequestQueue $r0;
+        android.content.IntentFilter $r1;
+        android.content.BroadcastReceiver $r2;
+        android.net.http.RequestQueue$1 $r3;
+        android.content.Context $r4;
+        java.lang.String $r5;
+        boolean $z0;
+        android.net.http.RequestQueue$NetworkStateTracker $r6;
+        java.lang.Throwable $r7;
+
+        $r0 := @this: android.net.http.RequestQueue;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.net.http.RequestQueue: android.content.BroadcastReceiver mProxyChangeReceiver>;
+
+        if $r2 != null goto label2;
+
+        $r3 = new android.net.http.RequestQueue$1;
+
+        specialinvoke $r3.<android.net.http.RequestQueue$1: void <init>(android.net.http.RequestQueue)>($r0);
+
+        $r0.<android.net.http.RequestQueue: android.content.BroadcastReceiver mProxyChangeReceiver> = $r3;
+
+        $r4 = $r0.<android.net.http.RequestQueue: android.content.Context mContext>;
+
+        $r2 = $r0.<android.net.http.RequestQueue: android.content.BroadcastReceiver mProxyChangeReceiver>;
+
+        $r1 = new android.content.IntentFilter;
+
+        specialinvoke $r1.<android.content.IntentFilter: void <init>(java.lang.String)>("android.intent.action.PROXY_CHANGE");
+
+        virtualinvoke $r4.<android.content.Context: android.content.Intent registerReceiver(android.content.BroadcastReceiver,android.content.IntentFilter)>($r2, $r1);
+
+     label2:
+        $r5 = staticinvoke <android.os.SystemProperties: java.lang.String get(java.lang.String)>("ro.product.device");
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r5);
+
+        if $z0 != 0 goto label4;
+
+        $r6 = $r0.<android.net.http.RequestQueue: android.net.http.RequestQueue$NetworkStateTracker mNetworkStateTracker>;
+
+        if $r6 != null goto label3;
+
+        $r6 = new android.net.http.RequestQueue$NetworkStateTracker;
+
+        $r4 = $r0.<android.net.http.RequestQueue: android.content.Context mContext>;
+
+        specialinvoke $r6.<android.net.http.RequestQueue$NetworkStateTracker: void <init>(android.net.http.RequestQueue,android.content.Context)>($r0, $r4);
+
+        $r0.<android.net.http.RequestQueue: android.net.http.RequestQueue$NetworkStateTracker mNetworkStateTracker> = $r6;
+
+     label3:
+        $r6 = $r0.<android.net.http.RequestQueue: android.net.http.RequestQueue$NetworkStateTracker mNetworkStateTracker>;
+
+        virtualinvoke $r6.<android.net.http.RequestQueue$NetworkStateTracker: void enable()>();
+
+     label4:
+        exitmonitor $r0;
+
+        return;
+
+     label5:
+        $r7 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r7;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+    }
+
+    public org.apache.http.HttpHost getProxyHost()
+    {
+        android.net.http.RequestQueue $r0;
+        org.apache.http.HttpHost r1;
+
+        $r0 := @this: android.net.http.RequestQueue;
+
+        r1 = $r0.<android.net.http.RequestQueue: org.apache.http.HttpHost mProxyHost>;
+
+        return r1;
+    }
+
+    public android.net.http.Request getRequest()
+    {
+        android.net.http.RequestQueue $r0;
+        android.net.http.Request $r1;
+        boolean $z0;
+        java.util.LinkedHashMap $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.net.http.RequestQueue;
+
+        entermonitor $r0;
+
+        $r1 = null;
+
+     label1:
+        $z0 = $r0.<android.net.http.RequestQueue: boolean mNetworkConnected>;
+
+        if $z0 == 0 goto label2;
+
+        $r2 = $r0.<android.net.http.RequestQueue: java.util.LinkedHashMap mPending>;
+
+        $z0 = virtualinvoke $r2.<java.util.HashMap: boolean isEmpty()>();
+
+        if $z0 != 0 goto label2;
+
+        $r2 = $r0.<android.net.http.RequestQueue: java.util.LinkedHashMap mPending>;
+
+        $r1 = specialinvoke $r0.<android.net.http.RequestQueue: android.net.http.Request removeFirst(java.util.LinkedHashMap)>($r2);
+
+     label2:
+        exitmonitor $r0;
+
+        return $r1;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public android.net.http.Request getRequest(org.apache.http.HttpHost)
+    {
+        android.net.http.RequestQueue $r0;
+        org.apache.http.HttpHost $r1;
+        android.net.http.Request $r2;
+        boolean $z0;
+        java.util.LinkedHashMap $r3;
+        java.lang.Object $r4;
+        java.util.LinkedList $r5;
+        java.lang.Throwable $r6;
+
+        $r0 := @this: android.net.http.RequestQueue;
+
+        $r1 := @parameter0: org.apache.http.HttpHost;
+
+        entermonitor $r0;
+
+        $r2 = null;
+
+     label1:
+        $z0 = $r0.<android.net.http.RequestQueue: boolean mNetworkConnected>;
+
+        if $z0 == 0 goto label2;
+
+        $r3 = $r0.<android.net.http.RequestQueue: java.util.LinkedHashMap mPending>;
+
+        $z0 = virtualinvoke $r3.<java.util.HashMap: boolean containsKey(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label2;
+
+        $r3 = $r0.<android.net.http.RequestQueue: java.util.LinkedHashMap mPending>;
+
+        $r4 = virtualinvoke $r3.<java.util.LinkedHashMap: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r5 = (java.util.LinkedList) $r4;
+
+        $r4 = virtualinvoke $r5.<java.util.LinkedList: java.lang.Object removeFirst()>();
+
+        $r2 = (android.net.http.Request) $r4;
+
+        $z0 = virtualinvoke $r5.<java.util.AbstractCollection: boolean isEmpty()>();
+
+        if $z0 == 0 goto label2;
+
+        $r3 = $r0.<android.net.http.RequestQueue: java.util.LinkedHashMap mPending>;
+
+        virtualinvoke $r3.<java.util.LinkedHashMap: java.lang.Object remove(java.lang.Object)>($r1);
+
+     label2:
+        exitmonitor $r0;
+
+        return $r2;
+
+     label3:
+        $r6 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public boolean haveRequest(org.apache.http.HttpHost)
+    {
+        android.net.http.RequestQueue $r0;
+        org.apache.http.HttpHost $r1;
+        boolean $z0;
+        java.util.LinkedHashMap $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.net.http.RequestQueue;
+
+        $r1 := @parameter0: org.apache.http.HttpHost;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.net.http.RequestQueue: java.util.LinkedHashMap mPending>;
+
+        $z0 = virtualinvoke $r2.<java.util.HashMap: boolean containsKey(java.lang.Object)>($r1);
+
+     label2:
+        exitmonitor $r0;
+
+        return $z0;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public android.net.http.RequestHandle queueRequest(java.lang.String, android.net.WebAddress, java.lang.String, java.util.Map, android.net.http.EventHandler, java.io.InputStream, int, boolean)
+    {
+        android.net.http.RequestQueue $r0;
+        java.lang.String $r1, $r3, $r9, $r10;
+        android.net.WebAddress $r2;
+        java.util.Map $r4;
+        java.io.InputStream $r5;
+        int $i0, $i1;
+        boolean $z0;
+        android.net.http.Request $r6, r15;
+        org.apache.http.HttpHost $r7, $r11;
+        android.net.http.EventHandler $r8;
+        android.net.http.RequestQueue$ActivePool $r12;
+        android.net.http.LoggingEventHandler r14;
+        android.net.http.RequestHandle r16;
+
+        $r0 := @this: android.net.http.RequestQueue;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: android.net.WebAddress;
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r4 := @parameter3: java.util.Map;
+
+        $r8 := @parameter4: android.net.http.EventHandler;
+
+        $r5 := @parameter5: java.io.InputStream;
+
+        $i0 := @parameter6: int;
+
+        $z0 := @parameter7: boolean;
+
+        if $r8 != null goto label1;
+
+        r14 = new android.net.http.LoggingEventHandler;
+
+        $r8 = r14;
+
+        specialinvoke r14.<android.net.http.LoggingEventHandler: void <init>()>();
+
+     label1:
+        $r11 = new org.apache.http.HttpHost;
+
+        $r7 = $r11;
+
+        $r9 = $r2.<android.net.WebAddress: java.lang.String mHost>;
+
+        $i1 = $r2.<android.net.WebAddress: int mPort>;
+
+        $r10 = $r2.<android.net.WebAddress: java.lang.String mScheme>;
+
+        specialinvoke $r11.<org.apache.http.HttpHost: void <init>(java.lang.String,int,java.lang.String)>($r9, $i1, $r10);
+
+        r15 = new android.net.http.Request;
+
+        $r6 = r15;
+
+        $r11 = $r0.<android.net.http.RequestQueue: org.apache.http.HttpHost mProxyHost>;
+
+        $r9 = $r2.<android.net.WebAddress: java.lang.String mPath>;
+
+        specialinvoke r15.<android.net.http.Request: void <init>(java.lang.String,org.apache.http.HttpHost,org.apache.http.HttpHost,java.lang.String,java.io.InputStream,int,android.net.http.EventHandler,java.util.Map,boolean)>($r3, $r7, $r11, $r9, $r5, $i0, $r8, $r4, $z0);
+
+        virtualinvoke $r0.<android.net.http.RequestQueue: void queueRequest(android.net.http.Request,boolean)>($r6, $z0);
+
+        $r12 = $r0.<android.net.http.RequestQueue: android.net.http.RequestQueue$ActivePool mActivePool>;
+
+        staticinvoke <android.net.http.RequestQueue$ActivePool: int access$308(android.net.http.RequestQueue$ActivePool)>($r12);
+
+        $r12 = $r0.<android.net.http.RequestQueue: android.net.http.RequestQueue$ActivePool mActivePool>;
+
+        virtualinvoke $r12.<android.net.http.RequestQueue$ActivePool: void startConnectionThread()>();
+
+        r16 = new android.net.http.RequestHandle;
+
+        specialinvoke r16.<android.net.http.RequestHandle: void <init>(android.net.http.RequestQueue,java.lang.String,android.net.WebAddress,java.lang.String,java.util.Map,java.io.InputStream,int,android.net.http.Request)>($r0, $r1, $r2, $r3, $r4, $r5, $i0, $r6);
+
+        return r16;
+    }
+
+    public android.net.http.RequestHandle queueRequest(java.lang.String, java.lang.String, java.util.Map, android.net.http.EventHandler, java.io.InputStream, int, boolean)
+    {
+        android.net.http.RequestQueue $r0;
+        java.lang.String $r1, $r2;
+        java.util.Map $r3;
+        android.net.http.EventHandler $r4;
+        java.io.InputStream $r5;
+        int $i0;
+        boolean $z0;
+        android.net.WebAddress $r6;
+        android.net.http.RequestHandle $r7;
+
+        $r0 := @this: android.net.http.RequestQueue;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.util.Map;
+
+        $r4 := @parameter3: android.net.http.EventHandler;
+
+        $r5 := @parameter4: java.io.InputStream;
+
+        $i0 := @parameter5: int;
+
+        $z0 := @parameter6: boolean;
+
+        $r6 = new android.net.WebAddress;
+
+        specialinvoke $r6.<android.net.WebAddress: void <init>(java.lang.String)>($r1);
+
+        $r7 = virtualinvoke $r0.<android.net.http.RequestQueue: android.net.http.RequestHandle queueRequest(java.lang.String,android.net.WebAddress,java.lang.String,java.util.Map,android.net.http.EventHandler,java.io.InputStream,int,boolean)>($r1, $r6, $r2, $r3, $r4, $r5, $i0, $z0);
+
+        return $r7;
+    }
+
+    protected void queueRequest(android.net.http.Request, boolean)
+    {
+        android.net.http.RequestQueue $r0;
+        android.net.http.Request $r1;
+        boolean $z0, $z1;
+        org.apache.http.HttpHost $r2;
+        java.util.LinkedHashMap $r3;
+        java.lang.Object $r4;
+        java.util.LinkedList $r5;
+        java.lang.Throwable $r6;
+
+        $r0 := @this: android.net.http.RequestQueue;
+
+        $r1 := @parameter0: android.net.http.Request;
+
+        $z0 := @parameter1: boolean;
+
+        entermonitor $r0;
+
+     label01:
+        $r2 = $r1.<android.net.http.Request: org.apache.http.HttpHost mProxyHost>;
+
+        if $r2 != null goto label05;
+
+        $r2 = $r1.<android.net.http.Request: org.apache.http.HttpHost mHost>;
+
+     label02:
+        $r3 = $r0.<android.net.http.RequestQueue: java.util.LinkedHashMap mPending>;
+
+        $z1 = virtualinvoke $r3.<java.util.HashMap: boolean containsKey(java.lang.Object)>($r2);
+
+        if $z1 == 0 goto label06;
+
+        $r3 = $r0.<android.net.http.RequestQueue: java.util.LinkedHashMap mPending>;
+
+        $r4 = virtualinvoke $r3.<java.util.LinkedHashMap: java.lang.Object get(java.lang.Object)>($r2);
+
+        $r5 = (java.util.LinkedList) $r4;
+
+     label03:
+        if $z0 == 0 goto label09;
+
+        virtualinvoke $r5.<java.util.LinkedList: void addFirst(java.lang.Object)>($r1);
+
+     label04:
+        exitmonitor $r0;
+
+        return;
+
+     label05:
+        $r2 = $r1.<android.net.http.Request: org.apache.http.HttpHost mProxyHost>;
+
+        goto label02;
+
+     label06:
+        $r5 = new java.util.LinkedList;
+
+        specialinvoke $r5.<java.util.LinkedList: void <init>()>();
+
+        $r3 = $r0.<android.net.http.RequestQueue: java.util.LinkedHashMap mPending>;
+
+        virtualinvoke $r3.<java.util.LinkedHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r2, $r5);
+
+     label07:
+        goto label03;
+
+     label08:
+        $r6 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r6;
+
+     label09:
+        virtualinvoke $r5.<java.util.LinkedList: boolean add(java.lang.Object)>($r1);
+
+     label10:
+        goto label04;
+
+        catch java.lang.Throwable from label01 to label04 with label08;
+        catch java.lang.Throwable from label05 to label07 with label08;
+        catch java.lang.Throwable from label09 to label10 with label08;
+    }
+
+    boolean requestsPending()
+    {
+        android.net.http.RequestQueue $r0;
+        boolean $z0;
+        java.util.LinkedHashMap $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: android.net.http.RequestQueue;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = $r0.<android.net.http.RequestQueue: java.util.LinkedHashMap mPending>;
+
+        $z0 = virtualinvoke $r1.<java.util.HashMap: boolean isEmpty()>();
+
+     label2:
+        if $z0 != 0 goto label4;
+
+        $z0 = 1;
+
+     label3:
+        exitmonitor $r0;
+
+        return $z0;
+
+     label4:
+        $z0 = 0;
+
+        goto label3;
+
+     label5:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+    }
+
+    public void requeueRequest(android.net.http.Request)
+    {
+        android.net.http.RequestQueue $r0;
+        android.net.http.Request $r1;
+
+        $r0 := @this: android.net.http.RequestQueue;
+
+        $r1 := @parameter0: android.net.http.Request;
+
+        virtualinvoke $r0.<android.net.http.RequestQueue: void queueRequest(android.net.http.Request,boolean)>($r1, 1);
+
+        return;
+    }
+
+    public void setNetworkState(boolean)
+    {
+        android.net.http.RequestQueue $r0;
+        boolean $z0;
+        android.net.http.RequestQueue$ActivePool $r1;
+
+        $r0 := @this: android.net.http.RequestQueue;
+
+        $z0 := @parameter0: boolean;
+
+        $r0.<android.net.http.RequestQueue: boolean mNetworkConnected> = $z0;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = $r0.<android.net.http.RequestQueue: android.net.http.RequestQueue$ActivePool mActivePool>;
+
+        virtualinvoke $r1.<android.net.http.RequestQueue$ActivePool: void startConnectionThread()>();
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public void shutdown()
+    {
+        android.net.http.RequestQueue $r0;
+        android.net.http.RequestQueue$ActivePool $r1;
+
+        $r0 := @this: android.net.http.RequestQueue;
+
+        $r1 = $r0.<android.net.http.RequestQueue: android.net.http.RequestQueue$ActivePool mActivePool>;
+
+        virtualinvoke $r1.<android.net.http.RequestQueue$ActivePool: void shutdown()>();
+
+        return;
+    }
+
+    public void startTiming()
+    {
+        android.net.http.RequestQueue $r0;
+        android.net.http.RequestQueue$ActivePool $r1;
+
+        $r0 := @this: android.net.http.RequestQueue;
+
+        $r1 = $r0.<android.net.http.RequestQueue: android.net.http.RequestQueue$ActivePool mActivePool>;
+
+        virtualinvoke $r1.<android.net.http.RequestQueue$ActivePool: void startTiming()>();
+
+        return;
+    }
+
+    public void stopTiming()
+    {
+        android.net.http.RequestQueue $r0;
+        android.net.http.RequestQueue$ActivePool $r1;
+
+        $r0 := @this: android.net.http.RequestQueue;
+
+        $r1 = $r0.<android.net.http.RequestQueue: android.net.http.RequestQueue$ActivePool mActivePool>;
+
+        virtualinvoke $r1.<android.net.http.RequestQueue$ActivePool: void stopTiming()>();
+
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <android.net.http.RequestQueue: java.lang.String HTTP_NETWORK_STATE_UP> = "up";
+
+        <android.net.http.RequestQueue: java.lang.String HTTP_NETWORK_STATE_CHANGED_INTENT> = "android.net.http.NETWORK_STATE";
+
+        <android.net.http.RequestQueue: int CONNECTION_COUNT> = 4;
+
+        return;
+    }
+}

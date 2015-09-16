@@ -1,0 +1,393 @@
+class com.google.googlenav.map.MapBiller extends java.lang.Object
+{
+    static final int BILLING_POINT_REQUEST_ID;
+    private com.google.map.MapPoint lastBilled;
+    private com.google.map.Zoom lastBilledZoom;
+    private com.google.googlenav.map.Map$BillingPointListener listener;
+    private com.google.map.MapPoint previousBilled;
+    private com.google.map.Zoom previousBilledZoom;
+
+    void <init>()
+    {
+        com.google.googlenav.map.MapBiller $r0;
+
+        $r0 := @this: com.google.googlenav.map.MapBiller;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r0.<com.google.googlenav.map.MapBiller: com.google.map.MapPoint lastBilled> = null;
+
+        $r0.<com.google.googlenav.map.MapBiller: com.google.map.Zoom lastBilledZoom> = null;
+
+        $r0.<com.google.googlenav.map.MapBiller: com.google.googlenav.map.Map$BillingPointListener listener> = null;
+
+        $r0.<com.google.googlenav.map.MapBiller: com.google.map.MapPoint previousBilled> = null;
+
+        $r0.<com.google.googlenav.map.MapBiller: com.google.map.Zoom previousBilledZoom> = null;
+
+        return;
+    }
+
+    private static boolean isBillingRequiredForSatellite()
+    {
+        byte $b0;
+
+        $b0 = staticinvoke <com.google.googlenav.map.Tile: byte getSatType()>();
+
+        if $b0 != 6 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    private void sendBill(com.google.map.MapPoint, boolean, boolean, com.google.googlenav.map.Map)
+    {
+        com.google.googlenav.map.MapBiller $r0;
+        com.google.map.MapPoint $r1, $r6;
+        boolean $z0, $z1;
+        com.google.googlenav.map.Map $r2;
+        com.google.map.MapState $r3;
+        java.lang.StringBuilder $r4;
+        java.lang.String $r5;
+        com.google.map.Zoom $r7;
+        com.google.googlenav.map.Map$BillingPointListener $r8;
+
+        $r0 := @this: com.google.googlenav.map.MapBiller;
+
+        $r1 := @parameter0: com.google.map.MapPoint;
+
+        $z0 := @parameter1: boolean;
+
+        $z1 := @parameter2: boolean;
+
+        $r2 := @parameter3: com.google.googlenav.map.Map;
+
+        $r3 = virtualinvoke $r2.<com.google.googlenav.map.Map: com.google.map.MapState getMapState()>();
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("New Billing Point: ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.google.common.Log: void log(java.lang.String,java.lang.String)>("MAP", $r5);
+
+        $r6 = $r0.<com.google.googlenav.map.MapBiller: com.google.map.MapPoint lastBilled>;
+
+        $r0.<com.google.googlenav.map.MapBiller: com.google.map.MapPoint previousBilled> = $r6;
+
+        $r7 = $r0.<com.google.googlenav.map.MapBiller: com.google.map.Zoom lastBilledZoom>;
+
+        $r0.<com.google.googlenav.map.MapBiller: com.google.map.Zoom previousBilledZoom> = $r7;
+
+        $r0.<com.google.googlenav.map.MapBiller: com.google.map.MapPoint lastBilled> = $r1;
+
+        $r7 = virtualinvoke $r3.<com.google.map.MapState: com.google.map.Zoom getZoom()>();
+
+        $r0.<com.google.googlenav.map.MapBiller: com.google.map.Zoom lastBilledZoom> = $r7;
+
+        staticinvoke <com.google.googlenav.map.MapBiller: void sendBillingPointToServer(com.google.map.MapPoint,boolean,boolean,com.google.googlenav.map.Map)>($r1, $z0, $z1, $r2);
+
+        $r8 = $r0.<com.google.googlenav.map.MapBiller: com.google.googlenav.map.Map$BillingPointListener listener>;
+
+        if $r8 == null goto label1;
+
+        $r8 = $r0.<com.google.googlenav.map.MapBiller: com.google.googlenav.map.Map$BillingPointListener listener>;
+
+        interfaceinvoke $r8.<com.google.googlenav.map.Map$BillingPointListener: void billingPointSent(com.google.map.MapState)>($r3);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    private static void sendBillingPointToServer(com.google.map.MapPoint, boolean, boolean, com.google.googlenav.map.Map)
+    {
+        com.google.map.MapPoint $r0;
+        boolean $z0, $z1;
+        com.google.googlenav.map.Map $r1;
+        com.google.map.MapState $r2;
+        java.io.ByteArrayOutputStream $r3;
+        java.io.DataOutputStream $r4;
+        com.google.map.Zoom $r5;
+        int $i0;
+        com.google.common.DataRequestDispatcher $r6;
+        byte[] $r7;
+        java.io.IOException $r8;
+        java.lang.RuntimeException $r9;
+        java.lang.String $r10;
+
+        $r0 := @parameter0: com.google.map.MapPoint;
+
+        $z0 := @parameter1: boolean;
+
+        $z1 := @parameter2: boolean;
+
+        $r1 := @parameter3: com.google.googlenav.map.Map;
+
+        $r2 = virtualinvoke $r1.<com.google.googlenav.map.Map: com.google.map.MapState getMapState()>();
+
+        $r3 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r3.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        $r4 = new java.io.DataOutputStream;
+
+        specialinvoke $r4.<java.io.DataOutputStream: void <init>(java.io.OutputStream)>($r3);
+
+     label1:
+        staticinvoke <com.google.map.MapPoint: void writePoint(com.google.map.MapPoint,java.io.DataOutput)>($r0, $r4);
+
+        $r0 = virtualinvoke $r2.<com.google.map.MapState: com.google.map.MapPoint getCenterPoint()>();
+
+        staticinvoke <com.google.map.MapPoint: void writePoint(com.google.map.MapPoint,java.io.DataOutput)>($r0, $r4);
+
+        $r5 = virtualinvoke $r2.<com.google.map.MapState: com.google.map.Zoom getZoom()>();
+
+        $i0 = virtualinvoke $r5.<com.google.map.Zoom: int getZoomLevel()>();
+
+        virtualinvoke $r4.<java.io.DataOutputStream: void writeShort(int)>($i0);
+
+        $i0 = virtualinvoke $r1.<com.google.googlenav.map.Map: int getLatitudeSpan(com.google.map.MapState)>($r2);
+
+        virtualinvoke $r4.<java.io.DataOutputStream: void writeInt(int)>($i0);
+
+        $i0 = virtualinvoke $r1.<com.google.googlenav.map.Map: int getLongitudeSpan(com.google.map.MapState)>($r2);
+
+        virtualinvoke $r4.<java.io.DataOutputStream: void writeInt(int)>($i0);
+
+        virtualinvoke $r4.<java.io.DataOutputStream: void writeBoolean(boolean)>($z0);
+
+        virtualinvoke $r4.<java.io.DataOutputStream: void writeBoolean(boolean)>($z1);
+
+     label2:
+        $r6 = staticinvoke <com.google.common.DataRequestDispatcher: com.google.common.DataRequestDispatcher getInstance()>();
+
+        $r7 = virtualinvoke $r3.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        virtualinvoke $r6.<com.google.common.DataRequestDispatcher: void addSimpleRequest(int,byte[],boolean,boolean)>(7, $r7, 0, 0);
+
+        return;
+
+     label3:
+        $r8 := @caughtexception;
+
+        $r9 = new java.lang.RuntimeException;
+
+        $r10 = virtualinvoke $r8.<java.lang.Throwable: java.lang.String toString()>();
+
+        specialinvoke $r9.<java.lang.RuntimeException: void <init>(java.lang.String)>($r10);
+
+        throw $r9;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    void doBilling(boolean, boolean, com.google.googlenav.map.Map)
+    {
+        com.google.googlenav.map.MapBiller $r0;
+        boolean $z0, $z1, $z2;
+        com.google.googlenav.map.Map $r1;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i9;
+        com.google.map.MapState $r2;
+        com.google.map.MapPoint $r3, $r6, $r8;
+        com.google.map.Zoom $r4, $r5;
+        com.google.common.geom.Point $r7;
+        long $l6, $l7;
+        byte $b8;
+
+        $r0 := @this: com.google.googlenav.map.MapBiller;
+
+        $z0 := @parameter0: boolean;
+
+        $z1 := @parameter1: boolean;
+
+        $r1 := @parameter2: com.google.googlenav.map.Map;
+
+        $r2 = virtualinvoke $r1.<com.google.googlenav.map.Map: com.google.map.MapState getMapState()>();
+
+        $z2 = virtualinvoke $r2.<com.google.map.MapState: boolean isSatellite()>();
+
+        if $z2 == 0 goto label01;
+
+        $z2 = staticinvoke <com.google.googlenav.map.MapBiller: boolean isBillingRequiredForSatellite()>();
+
+        if $z2 != 0 goto label01;
+
+        return;
+
+     label01:
+        $r3 = $r0.<com.google.googlenav.map.MapBiller: com.google.map.MapPoint lastBilled>;
+
+        if $r3 == null goto label02;
+
+        $r4 = $r0.<com.google.googlenav.map.MapBiller: com.google.map.Zoom lastBilledZoom>;
+
+        $r5 = virtualinvoke $r2.<com.google.map.MapState: com.google.map.Zoom getZoom()>();
+
+        if $r4 == $r5 goto label03;
+
+     label02:
+        $r3 = virtualinvoke $r2.<com.google.map.MapState: com.google.map.MapPoint getCenterPoint()>();
+
+        specialinvoke $r0.<com.google.googlenav.map.MapBiller: void sendBill(com.google.map.MapPoint,boolean,boolean,com.google.googlenav.map.Map)>($r3, $z0, $z1, $r1);
+
+        return;
+
+     label03:
+        $r3 = null;
+
+        $r6 = $r0.<com.google.googlenav.map.MapBiller: com.google.map.MapPoint lastBilled>;
+
+        $r7 = virtualinvoke $r1.<com.google.googlenav.map.Map: com.google.common.geom.Point getPixelOffsetFromCenter(com.google.map.MapPoint)>($r6);
+
+        $i2 = virtualinvoke $r1.<com.google.googlenav.map.Map: int getWidth()>();
+
+        $i3 = $i2;
+
+        $i4 = virtualinvoke $r1.<com.google.googlenav.map.Map: int getHeight()>();
+
+        $i5 = $i2 / 2;
+
+        $i0 = $i4 / 2;
+
+        $i1 = $r7.<com.google.common.geom.Point: int x>;
+
+        $i1 = staticinvoke <java.lang.Math: int abs(int)>($i1);
+
+        if $i1 > $i2 goto label04;
+
+        $i1 = $r7.<com.google.common.geom.Point: int y>;
+
+        $i1 = staticinvoke <java.lang.Math: int abs(int)>($i1);
+
+        if $i1 <= $i4 goto label07;
+
+     label04:
+        $r3 = virtualinvoke $r2.<com.google.map.MapState: com.google.map.MapPoint getCenterPoint()>();
+
+     label05:
+        if $r3 == null goto label15;
+
+        $r6 = $r0.<com.google.googlenav.map.MapBiller: com.google.map.MapPoint previousBilled>;
+
+        if $r6 == null goto label06;
+
+        $r4 = $r0.<com.google.googlenav.map.MapBiller: com.google.map.Zoom previousBilledZoom>;
+
+        $r5 = $r0.<com.google.googlenav.map.MapBiller: com.google.map.Zoom lastBilledZoom>;
+
+        if $r4 != $r5 goto label06;
+
+        $r6 = virtualinvoke $r2.<com.google.map.MapState: com.google.map.MapPoint getCenterPoint()>();
+
+        $l6 = virtualinvoke $r6.<com.google.map.MapPoint: long distanceSquared(com.google.map.MapPoint)>($r3);
+
+        $r6 = virtualinvoke $r2.<com.google.map.MapState: com.google.map.MapPoint getCenterPoint()>();
+
+        $r8 = $r0.<com.google.googlenav.map.MapBiller: com.google.map.MapPoint lastBilled>;
+
+        $l7 = virtualinvoke $r6.<com.google.map.MapPoint: long distanceSquared(com.google.map.MapPoint)>($r8);
+
+        $b8 = $l6 cmp $l7;
+
+        if $b8 >= 0 goto label16;
+
+     label06:
+        specialinvoke $r0.<com.google.googlenav.map.MapBiller: void sendBill(com.google.map.MapPoint,boolean,boolean,com.google.googlenav.map.Map)>($r3, $z0, $z1, $r1);
+
+        return;
+
+     label07:
+        $i9 = $r7.<com.google.common.geom.Point: int x>;
+
+        $i1 = neg $i5;
+
+        if $i9 >= $i1 goto label11;
+
+     label08:
+        $i2 = $r7.<com.google.common.geom.Point: int y>;
+
+        $i5 = neg $i0;
+
+        if $i2 >= $i5 goto label12;
+
+        $i0 = $i4;
+
+     label09:
+        if $i0 != 0 goto label10;
+
+        if $i3 == 0 goto label05;
+
+     label10:
+        $r3 = $r0.<com.google.googlenav.map.MapBiller: com.google.map.MapPoint lastBilled>;
+
+        $r4 = virtualinvoke $r2.<com.google.map.MapState: com.google.map.Zoom getZoom()>();
+
+        $r3 = virtualinvoke $r3.<com.google.map.MapPoint: com.google.map.MapPoint pixelOffset(int,int,com.google.map.Zoom)>($i3, $i0, $r4);
+
+        goto label05;
+
+     label11:
+        $i3 = $r7.<com.google.common.geom.Point: int x>;
+
+        if $i3 <= $i5 goto label14;
+
+        $i3 = neg $i2;
+
+        goto label08;
+
+     label12:
+        $i2 = $r7.<com.google.common.geom.Point: int y>;
+
+        if $i2 <= $i0 goto label13;
+
+        $i0 = neg $i4;
+
+        goto label09;
+
+     label13:
+        $i0 = 0;
+
+        goto label09;
+
+     label14:
+        $i3 = 0;
+
+        goto label08;
+
+     label15:
+        return;
+
+     label16:
+        return;
+    }
+
+    void setBillingPointListener(com.google.googlenav.map.Map$BillingPointListener)
+    {
+        com.google.googlenav.map.MapBiller $r0;
+        com.google.googlenav.map.Map$BillingPointListener $r1;
+
+        $r0 := @this: com.google.googlenav.map.MapBiller;
+
+        $r1 := @parameter0: com.google.googlenav.map.Map$BillingPointListener;
+
+        $r0.<com.google.googlenav.map.MapBiller: com.google.googlenav.map.Map$BillingPointListener listener> = $r1;
+
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <com.google.googlenav.map.MapBiller: int BILLING_POINT_REQUEST_ID> = 7;
+
+        return;
+    }
+}

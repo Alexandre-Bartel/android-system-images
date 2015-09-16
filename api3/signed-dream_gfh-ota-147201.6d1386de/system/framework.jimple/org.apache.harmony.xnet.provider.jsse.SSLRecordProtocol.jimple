@@ -1,0 +1,1132 @@
+public class org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol extends java.lang.Object
+{
+    protected static int MAX_CIPHERED_DATA_LENGTH;
+    protected static int MAX_COMPRESSED_DATA_LENGTH;
+    protected static int MAX_DATA_LENGTH;
+    protected static int MAX_SSL_PACKET_SIZE;
+    private static final byte[] change_cipher_spec_byte;
+    private org.apache.harmony.xnet.provider.jsse.ConnectionState activeReadState;
+    private org.apache.harmony.xnet.provider.jsse.ConnectionState activeWriteState;
+    private org.apache.harmony.xnet.provider.jsse.AlertProtocol alertProtocol;
+    private org.apache.harmony.xnet.provider.jsse.Appendable appData;
+    private org.apache.harmony.xnet.provider.jsse.HandshakeProtocol handshakeProtocol;
+    private org.apache.harmony.xnet.provider.jsse.SSLInputStream in;
+    private org.apache.harmony.xnet.provider.jsse.Logger$Stream logger;
+    private org.apache.harmony.xnet.provider.jsse.ConnectionState pendingConnectionState;
+    private org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session;
+    private boolean sessionWasChanged;
+    private byte[] version;
+
+    static void <clinit>()
+    {
+        int $i0;
+        byte[] $r0;
+
+        <org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: int MAX_DATA_LENGTH> = 16384;
+
+        $i0 = <org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: int MAX_DATA_LENGTH>;
+
+        $i0 = $i0 + 1024;
+
+        <org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: int MAX_COMPRESSED_DATA_LENGTH> = $i0;
+
+        $i0 = <org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: int MAX_COMPRESSED_DATA_LENGTH>;
+
+        $i0 = $i0 + 1024;
+
+        <org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: int MAX_CIPHERED_DATA_LENGTH> = $i0;
+
+        $i0 = <org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: int MAX_CIPHERED_DATA_LENGTH>;
+
+        $i0 = $i0 + 5;
+
+        <org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: int MAX_SSL_PACKET_SIZE> = $i0;
+
+        $r0 = newarray (byte)[1];
+
+        $r0[0] = 1;
+
+        <org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: byte[] change_cipher_spec_byte> = $r0;
+
+        return;
+    }
+
+    protected void <init>(org.apache.harmony.xnet.provider.jsse.HandshakeProtocol, org.apache.harmony.xnet.provider.jsse.AlertProtocol, org.apache.harmony.xnet.provider.jsse.SSLInputStream, org.apache.harmony.xnet.provider.jsse.Appendable)
+    {
+        org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol $r0;
+        org.apache.harmony.xnet.provider.jsse.HandshakeProtocol $r1;
+        org.apache.harmony.xnet.provider.jsse.AlertProtocol $r2;
+        org.apache.harmony.xnet.provider.jsse.SSLInputStream $r3;
+        org.apache.harmony.xnet.provider.jsse.Appendable $r4;
+        org.apache.harmony.xnet.provider.jsse.Logger$Stream $r5;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol;
+
+        $r1 := @parameter0: org.apache.harmony.xnet.provider.jsse.HandshakeProtocol;
+
+        $r2 := @parameter1: org.apache.harmony.xnet.provider.jsse.AlertProtocol;
+
+        $r3 := @parameter2: org.apache.harmony.xnet.provider.jsse.SSLInputStream;
+
+        $r4 := @parameter3: org.apache.harmony.xnet.provider.jsse.Appendable;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r5 = staticinvoke <org.apache.harmony.xnet.provider.jsse.Logger: org.apache.harmony.xnet.provider.jsse.Logger$Stream getStream(java.lang.String)>("record");
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger> = $r5;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: boolean sessionWasChanged> = 0;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.HandshakeProtocol handshakeProtocol> = $r1;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.HandshakeProtocol handshakeProtocol>;
+
+        virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void setRecordProtocol(org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol)>($r0);
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.AlertProtocol alertProtocol> = $r2;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.AlertProtocol alertProtocol>;
+
+        virtualinvoke $r2.<org.apache.harmony.xnet.provider.jsse.AlertProtocol: void setRecordProtocol(org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol)>($r0);
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.SSLInputStream in> = $r3;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Appendable appData> = $r4;
+
+        return;
+    }
+
+    private byte[] packetize(byte, byte[], byte[])
+    {
+        org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol $r0;
+        byte $b0;
+        byte[] $r1, $r2, $r3;
+        int $i1;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol;
+
+        $b0 := @parameter0: byte;
+
+        $r1 := @parameter1: byte[];
+
+        $r2 := @parameter2: byte[];
+
+        $i1 = lengthof $r2;
+
+        $i1 = $i1 + 5;
+
+        $r3 = newarray (byte)[$i1];
+
+        $r3[0] = $b0;
+
+        if $r1 == null goto label2;
+
+        $b0 = $r1[0];
+
+        $r3[1] = $b0;
+
+        $b0 = $r1[1];
+
+        $r3[2] = $b0;
+
+     label1:
+        $i1 = lengthof $r2;
+
+        $i1 = 65280 & $i1;
+
+        $i1 = $i1 >> 8;
+
+        $b0 = (byte) $i1;
+
+        $r3[3] = $b0;
+
+        $i1 = lengthof $r2;
+
+        $i1 = $i1 & 255;
+
+        $b0 = (byte) $i1;
+
+        $r3[4] = $b0;
+
+        $i1 = lengthof $r2;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, 0, $r3, 5, $i1);
+
+        return $r3;
+
+     label2:
+        $r3[1] = 3;
+
+        $r3[2] = 1;
+
+        goto label1;
+    }
+
+    private void setSession(org.apache.harmony.xnet.provider.jsse.SSLSessionImpl)
+    {
+        org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol $r0;
+        org.apache.harmony.xnet.provider.jsse.SSLSessionImpl $r1;
+        boolean $z0;
+        org.apache.harmony.xnet.provider.jsse.Logger$Stream $r2;
+        java.lang.StringBuilder $r3, r7;
+        java.lang.String $r4;
+        byte[] $r5;
+        byte $b0;
+        org.apache.harmony.xnet.provider.jsse.ConnectionState $r6;
+        org.apache.harmony.xnet.provider.jsse.ConnectionStateTLS r8;
+        org.apache.harmony.xnet.provider.jsse.ConnectionStateSSLv3 r9;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol;
+
+        $r1 := @parameter0: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl;
+
+        $z0 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: boolean sessionWasChanged>;
+
+        if $z0 != 0 goto label5;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        if $r2 == null goto label1;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        virtualinvoke $r2.<org.apache.harmony.xnet.provider.jsse.Logger$Stream: void println(java.lang.String)>("SSLRecordProtocol.setSession: Set pending session");
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        r7 = new java.lang.StringBuilder;
+
+        specialinvoke r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  cipher name: ");
+
+        $r4 = virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: java.lang.String getCipherSuite()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<org.apache.harmony.xnet.provider.jsse.Logger$Stream: void println(java.lang.String)>($r4);
+
+     label1:
+        $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session> = $r1;
+
+        $r5 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: byte[] version>;
+
+        if $r5 == null goto label2;
+
+        $r5 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: byte[] version>;
+
+        $b0 = $r5[1];
+
+        if $b0 != 1 goto label4;
+
+     label2:
+        r8 = new org.apache.harmony.xnet.provider.jsse.ConnectionStateTLS;
+
+        $r6 = r8;
+
+        $r1 = virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl getSession()>();
+
+        specialinvoke r8.<org.apache.harmony.xnet.provider.jsse.ConnectionStateTLS: void <init>(org.apache.harmony.xnet.provider.jsse.SSLSessionImpl)>($r1);
+
+     label3:
+        $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.ConnectionState pendingConnectionState> = $r6;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: boolean sessionWasChanged> = 1;
+
+        return;
+
+     label4:
+        r9 = new org.apache.harmony.xnet.provider.jsse.ConnectionStateSSLv3;
+
+        $r6 = r9;
+
+        $r1 = virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl getSession()>();
+
+        specialinvoke r9.<org.apache.harmony.xnet.provider.jsse.ConnectionStateSSLv3: void <init>(org.apache.harmony.xnet.provider.jsse.SSLSessionImpl)>($r1);
+
+        goto label3;
+
+     label5:
+        $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: boolean sessionWasChanged> = 0;
+
+        return;
+    }
+
+    protected void alert(byte, byte)
+    {
+        org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol $r0;
+        byte $b0, $b1;
+        org.apache.harmony.xnet.provider.jsse.Logger$Stream $r1;
+        java.lang.StringBuilder $r2;
+        java.lang.String $r3;
+        org.apache.harmony.xnet.provider.jsse.AlertProtocol $r4;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol;
+
+        $b0 := @parameter0: byte;
+
+        $b1 := @parameter1: byte;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SSLRecordProtocol.allert: ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($b0);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($b1);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.Logger$Stream: void println(java.lang.String)>($r3);
+
+     label1:
+        $r4 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.AlertProtocol alertProtocol>;
+
+        virtualinvoke $r4.<org.apache.harmony.xnet.provider.jsse.AlertProtocol: void alert(byte,byte)>($b0, $b1);
+
+        return;
+    }
+
+    protected byte[] getChangeCipherSpecMesage(org.apache.harmony.xnet.provider.jsse.SSLSessionImpl)
+    {
+        org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol $r0;
+        org.apache.harmony.xnet.provider.jsse.SSLSessionImpl $r1;
+        byte[] $r2, $r4;
+        org.apache.harmony.xnet.provider.jsse.ConnectionState $r3;
+        byte $b0;
+        org.apache.harmony.xnet.provider.jsse.Logger$Stream $r5;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol;
+
+        $r1 := @parameter0: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl;
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.ConnectionState activeWriteState>;
+
+        if $r3 != null goto label2;
+
+        $r4 = newarray (byte)[6];
+
+        $r4[0] = 20;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: byte[] version>;
+
+        $b0 = $r2[0];
+
+        $r4[1] = $b0;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: byte[] version>;
+
+        $b0 = $r2[1];
+
+        $r4[2] = $b0;
+
+        $r4[3] = 0;
+
+        $r4[4] = 1;
+
+        $r4[5] = 1;
+
+     label1:
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: void setSession(org.apache.harmony.xnet.provider.jsse.SSLSessionImpl)>($r1);
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.ConnectionState pendingConnectionState>;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.ConnectionState activeWriteState> = $r3;
+
+        $r5 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        if $r5 == null goto label3;
+
+        $r5 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        virtualinvoke $r5.<org.apache.harmony.xnet.provider.jsse.Logger$Stream: void println(java.lang.String)>("SSLRecordProtocol.getChangeCipherSpecMesage");
+
+        $r5 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        virtualinvoke $r5.<org.apache.harmony.xnet.provider.jsse.Logger$Stream: void println(java.lang.String)>("activeWriteState = pendingConnectionState");
+
+        $r5 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        virtualinvoke $r5.<org.apache.harmony.xnet.provider.jsse.Logger$Stream: void print(byte[])>($r4);
+
+        return $r4;
+
+     label2:
+        $r4 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: byte[] version>;
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.ConnectionState activeWriteState>;
+
+        $r2 = <org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: byte[] change_cipher_spec_byte>;
+
+        $r2 = virtualinvoke $r3.<org.apache.harmony.xnet.provider.jsse.ConnectionState: byte[] encrypt(byte,byte[],int,int)>(20, $r2, 0, 1);
+
+        $r4 = specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: byte[] packetize(byte,byte[],byte[])>(20, $r4, $r2);
+
+        goto label1;
+
+     label3:
+        return $r4;
+    }
+
+    protected int getDataSize(int)
+    {
+        org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol $r0;
+        int $i0, $i1;
+        org.apache.harmony.xnet.provider.jsse.ConnectionState $r1;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol;
+
+        $i0 := @parameter0: int;
+
+        $i0 = $i0 + -5;
+
+        $i1 = <org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: int MAX_CIPHERED_DATA_LENGTH>;
+
+        if $i0 <= $i1 goto label1;
+
+        $i0 = <org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: int MAX_DATA_LENGTH>;
+
+        return $i0;
+
+     label1:
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.ConnectionState activeReadState>;
+
+        if $r1 != null goto label2;
+
+        return $i0;
+
+     label2:
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.ConnectionState activeReadState>;
+
+        $i0 = virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.ConnectionState: int getContentSize(int)>($i0);
+
+        return $i0;
+    }
+
+    protected int getMinRecordSize()
+    {
+        org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol $r0;
+        int $i0;
+        org.apache.harmony.xnet.provider.jsse.ConnectionState $r1;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.ConnectionState activeReadState>;
+
+        if $r1 != null goto label1;
+
+        return 6;
+
+     label1:
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.ConnectionState activeReadState>;
+
+        $i0 = virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.ConnectionState: int getMinFragmentSize()>();
+
+        $i0 = $i0 + 5;
+
+        return $i0;
+    }
+
+    protected int getRecordSize(int)
+    {
+        org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol $r0;
+        int $i0, $i1;
+        org.apache.harmony.xnet.provider.jsse.ConnectionState $r1;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.ConnectionState activeWriteState>;
+
+        if $r1 != null goto label1;
+
+        $i0 = $i0 + 5;
+
+        return $i0;
+
+     label1:
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.ConnectionState activeWriteState>;
+
+        $i0 = virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.ConnectionState: int getFragmentSize(int)>($i0);
+
+        $i0 = $i0 + 5;
+
+        $i1 = <org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: int MAX_CIPHERED_DATA_LENGTH>;
+
+        if $i0 <= $i1 goto label2;
+
+        $i0 = <org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: int MAX_CIPHERED_DATA_LENGTH>;
+
+        return $i0;
+
+     label2:
+        return $i0;
+    }
+
+    protected org.apache.harmony.xnet.provider.jsse.SSLSessionImpl getSession()
+    {
+        org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol $r0;
+        org.apache.harmony.xnet.provider.jsse.SSLSessionImpl r1;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol;
+
+        r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        return r1;
+    }
+
+    protected void setVersion(byte[])
+    {
+        org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol $r0;
+        byte[] $r1;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol;
+
+        $r1 := @parameter0: byte[];
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: byte[] version> = $r1;
+
+        return;
+    }
+
+    protected void shutdown()
+    {
+        org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol $r0;
+        org.apache.harmony.xnet.provider.jsse.ConnectionState $r1;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session> = null;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: byte[] version> = null;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.SSLInputStream in> = null;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.HandshakeProtocol handshakeProtocol> = null;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.AlertProtocol alertProtocol> = null;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Appendable appData> = null;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.ConnectionState pendingConnectionState>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.ConnectionState pendingConnectionState>;
+
+        virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.ConnectionState: void shutdown()>();
+
+     label1:
+        $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.ConnectionState pendingConnectionState> = null;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.ConnectionState activeReadState>;
+
+        if $r1 == null goto label2;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.ConnectionState activeReadState>;
+
+        virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.ConnectionState: void shutdown()>();
+
+     label2:
+        $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.ConnectionState activeReadState> = null;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.ConnectionState activeReadState>;
+
+        if $r1 == null goto label3;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.ConnectionState activeReadState>;
+
+        virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.ConnectionState: void shutdown()>();
+
+     label3:
+        $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.ConnectionState activeWriteState> = null;
+
+        return;
+    }
+
+    protected int unwrap() throws java.io.IOException
+    {
+        org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol $r0;
+        org.apache.harmony.xnet.provider.jsse.Logger$Stream $r1;
+        org.apache.harmony.xnet.provider.jsse.SSLInputStream $r2;
+        int $i0, $i1, $i3, $i4;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+        byte[] $r5, $r9;
+        org.apache.harmony.xnet.provider.jsse.HandshakeProtocol $r6;
+        org.apache.harmony.xnet.provider.jsse.AlertException $r7;
+        javax.net.ssl.SSLProtocolException $r8;
+        byte $b2, $b5;
+        org.apache.harmony.xnet.provider.jsse.ConnectionState $r10;
+        org.apache.harmony.xnet.provider.jsse.SSLSessionImpl $r11;
+        org.apache.harmony.xnet.provider.jsse.Appendable $r12;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        if $r1 == null goto label01;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.Logger$Stream: void println(java.lang.String)>("SSLRecordProtocol.unwrap: BEGIN [");
+
+     label01:
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.SSLInputStream in>;
+
+        $i0 = virtualinvoke $r2.<org.apache.harmony.xnet.provider.jsse.SSLInputStream: int readUint8()>();
+
+        if $i0 < 20 goto label02;
+
+        if $i0 <= 23 goto label06;
+
+     label02:
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        if $r1 == null goto label03;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Non v3.1 message type:");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.Logger$Stream: void println(java.lang.String)>($r4);
+
+     label03:
+        if $i0 < 128 goto label05;
+
+        $i0 = $i0 & 127;
+
+        $i0 = $i0 << 8;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.SSLInputStream in>;
+
+        $i1 = virtualinvoke $r2.<org.apache.harmony.xnet.provider.jsse.SSLInputStream: int read()>();
+
+        $i0 = $i0 | $i1;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.SSLInputStream in>;
+
+        $r5 = virtualinvoke $r2.<org.apache.harmony.xnet.provider.jsse.SSLInputStream: byte[] read(int)>($i0);
+
+        $r6 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.HandshakeProtocol handshakeProtocol>;
+
+        virtualinvoke $r6.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void unwrapSSLv2(byte[])>($r5);
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        if $r1 == null goto label04;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.Logger$Stream: void println(java.lang.String)>("SSLRecordProtocol:unwrap ] END, SSLv2 type");
+
+     label04:
+        return 22;
+
+     label05:
+        $r7 = new org.apache.harmony.xnet.provider.jsse.AlertException;
+
+        $r8 = new javax.net.ssl.SSLProtocolException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unexpected message type has been received: ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r8.<javax.net.ssl.SSLProtocolException: void <init>(java.lang.String)>($r4);
+
+        specialinvoke $r7.<org.apache.harmony.xnet.provider.jsse.AlertException: void <init>(byte,javax.net.ssl.SSLException)>(10, $r8);
+
+        throw $r7;
+
+     label06:
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        if $r1 == null goto label07;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Got the message of type: ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.Logger$Stream: void println(java.lang.String)>($r4);
+
+     label07:
+        $r5 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: byte[] version>;
+
+        if $r5 == null goto label09;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.SSLInputStream in>;
+
+        $i1 = virtualinvoke $r2.<org.apache.harmony.xnet.provider.jsse.SSLInputStream: int read()>();
+
+        $r5 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: byte[] version>;
+
+        $b2 = $r5[0];
+
+        if $i1 != $b2 goto label08;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.SSLInputStream in>;
+
+        $i1 = virtualinvoke $r2.<org.apache.harmony.xnet.provider.jsse.SSLInputStream: int read()>();
+
+        $r5 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: byte[] version>;
+
+        $b2 = $r5[1];
+
+        if $i1 == $b2 goto label10;
+
+     label08:
+        $r7 = new org.apache.harmony.xnet.provider.jsse.AlertException;
+
+        $r8 = new javax.net.ssl.SSLProtocolException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unexpected message type has been received: ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r8.<javax.net.ssl.SSLProtocolException: void <init>(java.lang.String)>($r4);
+
+        specialinvoke $r7.<org.apache.harmony.xnet.provider.jsse.AlertException: void <init>(byte,javax.net.ssl.SSLException)>(10, $r8);
+
+        throw $r7;
+
+     label09:
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.SSLInputStream in>;
+
+        virtualinvoke $r2.<org.apache.harmony.xnet.provider.jsse.SSLInputStream: long skip(long)>(2L);
+
+     label10:
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.SSLInputStream in>;
+
+        $i1 = virtualinvoke $r2.<org.apache.harmony.xnet.provider.jsse.SSLInputStream: int readUint16()>();
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        if $r1 == null goto label11;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("TLSCiphertext.fragment[");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]: ...");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.Logger$Stream: void println(java.lang.String)>($r4);
+
+     label11:
+        $i3 = <org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: int MAX_CIPHERED_DATA_LENGTH>;
+
+        if $i1 <= $i3 goto label12;
+
+        $r7 = new org.apache.harmony.xnet.provider.jsse.AlertException;
+
+        $r8 = new javax.net.ssl.SSLProtocolException;
+
+        specialinvoke $r8.<javax.net.ssl.SSLProtocolException: void <init>(java.lang.String)>("Received message is too big.");
+
+        specialinvoke $r7.<org.apache.harmony.xnet.provider.jsse.AlertException: void <init>(byte,javax.net.ssl.SSLException)>(22, $r8);
+
+        throw $r7;
+
+     label12:
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.SSLInputStream in>;
+
+        $r9 = virtualinvoke $r2.<org.apache.harmony.xnet.provider.jsse.SSLInputStream: byte[] read(int)>($i1);
+
+        $r5 = $r9;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        if $r1 == null goto label13;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.Logger$Stream: void print(byte[])>($r9);
+
+     label13:
+        $r10 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.ConnectionState activeReadState>;
+
+        if $r10 == null goto label14;
+
+        $r10 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.ConnectionState activeReadState>;
+
+        $b2 = (byte) $i0;
+
+        $r9 = virtualinvoke $r10.<org.apache.harmony.xnet.provider.jsse.ConnectionState: byte[] decrypt(byte,byte[])>($b2, $r9);
+
+        $r5 = $r9;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        if $r1 == null goto label14;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.Logger$Stream: void println(java.lang.String)>("TLSPlaintext.fragment:");
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.Logger$Stream: void print(byte[])>($r9);
+
+     label14:
+        $i3 = lengthof $r5;
+
+        $i4 = <org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: int MAX_DATA_LENGTH>;
+
+        if $i3 <= $i4 goto label15;
+
+        $r7 = new org.apache.harmony.xnet.provider.jsse.AlertException;
+
+        $r8 = new javax.net.ssl.SSLProtocolException;
+
+        specialinvoke $r8.<javax.net.ssl.SSLProtocolException: void <init>(java.lang.String)>("Decompressed plain data is too big.");
+
+        specialinvoke $r7.<org.apache.harmony.xnet.provider.jsse.AlertException: void <init>(byte,javax.net.ssl.SSLException)>(30, $r8);
+
+        throw $r7;
+
+     label15:
+        lookupswitch($i0)
+        {
+            case 20: goto label17;
+            case 21: goto label21;
+            case 22: goto label22;
+            case 23: goto label23;
+            default: goto label16;
+        };
+
+     label16:
+        $r7 = new org.apache.harmony.xnet.provider.jsse.AlertException;
+
+        $r8 = new javax.net.ssl.SSLProtocolException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unexpected message type has been received: ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r8.<javax.net.ssl.SSLProtocolException: void <init>(java.lang.String)>($r4);
+
+        specialinvoke $r7.<org.apache.harmony.xnet.provider.jsse.AlertException: void <init>(byte,javax.net.ssl.SSLException)>(10, $r8);
+
+        throw $r7;
+
+     label17:
+        $r6 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.HandshakeProtocol handshakeProtocol>;
+
+        virtualinvoke $r6.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void receiveChangeCipherSpec()>();
+
+        $r6 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.HandshakeProtocol handshakeProtocol>;
+
+        $r11 = virtualinvoke $r6.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl getSession()>();
+
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: void setSession(org.apache.harmony.xnet.provider.jsse.SSLSessionImpl)>($r11);
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        if $r1 == null goto label18;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.Logger$Stream: void println(java.lang.String)>("activeReadState = pendingConnectionState");
+
+     label18:
+        $r10 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.ConnectionState pendingConnectionState>;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.ConnectionState activeReadState> = $r10;
+
+     label19:
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        if $r1 == null goto label20;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SSLRecordProtocol:unwrap ] END, type: ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.Logger$Stream: void println(java.lang.String)>($r4);
+
+     label20:
+        return $i0;
+
+     label21:
+        $b2 = $r5[0];
+
+        $b5 = $r5[1];
+
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: void alert(byte,byte)>($b2, $b5);
+
+        goto label19;
+
+     label22:
+        $r6 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.HandshakeProtocol handshakeProtocol>;
+
+        virtualinvoke $r6.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void unwrap(byte[])>($r5);
+
+        goto label19;
+
+     label23:
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        if $r1 == null goto label24;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("TLSCiphertext.unwrap: APP DATA[");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]:");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.Logger$Stream: void println(java.lang.String)>($r4);
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        $r4 = new java.lang.String;
+
+        specialinvoke $r4.<java.lang.String: void <init>(byte[])>($r5);
+
+        virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.Logger$Stream: void println(java.lang.String)>($r4);
+
+     label24:
+        $r12 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Appendable appData>;
+
+        interfaceinvoke $r12.<org.apache.harmony.xnet.provider.jsse.Appendable: void append(byte[])>($r5);
+
+        goto label19;
+    }
+
+    protected byte[] wrap(byte, org.apache.harmony.xnet.provider.jsse.DataStream)
+    {
+        org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol $r0;
+        byte $b0;
+        org.apache.harmony.xnet.provider.jsse.DataStream $r1;
+        int $i1;
+        byte[] $r2;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol;
+
+        $b0 := @parameter0: byte;
+
+        $r1 := @parameter1: org.apache.harmony.xnet.provider.jsse.DataStream;
+
+        $i1 = <org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: int MAX_DATA_LENGTH>;
+
+        $r2 = interfaceinvoke $r1.<org.apache.harmony.xnet.provider.jsse.DataStream: byte[] getData(int)>($i1);
+
+        $i1 = lengthof $r2;
+
+        $r2 = virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: byte[] wrap(byte,byte[],int,int)>($b0, $r2, 0, $i1);
+
+        return $r2;
+    }
+
+    protected byte[] wrap(byte, byte[], int, int)
+    {
+        org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol $r0;
+        byte $b0;
+        byte[] $r1, $r7;
+        int $i1, $i2, $i3;
+        org.apache.harmony.xnet.provider.jsse.Logger$Stream $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+        org.apache.harmony.xnet.provider.jsse.AlertException $r5;
+        javax.net.ssl.SSLProtocolException $r6;
+        org.apache.harmony.xnet.provider.jsse.ConnectionState $r8;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol;
+
+        $b0 := @parameter0: byte;
+
+        $r1 := @parameter1: byte[];
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        if $r2 == null goto label1;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SSLRecordProtocol.wrap: TLSPlaintext.fragment[");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]:");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<org.apache.harmony.xnet.provider.jsse.Logger$Stream: void println(java.lang.String)>($r4);
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        virtualinvoke $r2.<org.apache.harmony.xnet.provider.jsse.Logger$Stream: void print(byte[],int,int)>($r1, $i1, $i2);
+
+     label1:
+        $i3 = <org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: int MAX_DATA_LENGTH>;
+
+        if $i2 <= $i3 goto label2;
+
+        $r5 = new org.apache.harmony.xnet.provider.jsse.AlertException;
+
+        $r6 = new javax.net.ssl.SSLProtocolException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("The provided chunk of data is too big: ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" > MAX_DATA_LENGTH == ");
+
+        $i1 = <org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: int MAX_DATA_LENGTH>;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<javax.net.ssl.SSLProtocolException: void <init>(java.lang.String)>($r4);
+
+        specialinvoke $r5.<org.apache.harmony.xnet.provider.jsse.AlertException: void <init>(byte,javax.net.ssl.SSLException)>(80, $r6);
+
+        throw $r5;
+
+     label2:
+        $r7 = $r1;
+
+        $r8 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.ConnectionState activeWriteState>;
+
+        if $r8 == null goto label4;
+
+        $r8 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.ConnectionState activeWriteState>;
+
+        $r1 = virtualinvoke $r8.<org.apache.harmony.xnet.provider.jsse.ConnectionState: byte[] encrypt(byte,byte[],int,int)>($b0, $r1, $i1, $i2);
+
+        $r7 = $r1;
+
+        $i1 = lengthof $r1;
+
+        $i2 = <org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: int MAX_CIPHERED_DATA_LENGTH>;
+
+        if $i1 <= $i2 goto label3;
+
+        $r5 = new org.apache.harmony.xnet.provider.jsse.AlertException;
+
+        $r6 = new javax.net.ssl.SSLProtocolException;
+
+        specialinvoke $r6.<javax.net.ssl.SSLProtocolException: void <init>(java.lang.String)>("The ciphered data increased more than on 1024 bytes");
+
+        specialinvoke $r5.<org.apache.harmony.xnet.provider.jsse.AlertException: void <init>(byte,javax.net.ssl.SSLException)>(80, $r6);
+
+        throw $r5;
+
+     label3:
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        if $r2 == null goto label4;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SSLRecordProtocol.wrap: TLSCiphertext.fragment[");
+
+        $i1 = lengthof $r1;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]:");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<org.apache.harmony.xnet.provider.jsse.Logger$Stream: void println(java.lang.String)>($r4);
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: org.apache.harmony.xnet.provider.jsse.Logger$Stream logger>;
+
+        virtualinvoke $r2.<org.apache.harmony.xnet.provider.jsse.Logger$Stream: void print(byte[])>($r1);
+
+     label4:
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: byte[] version>;
+
+        $r1 = specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: byte[] packetize(byte,byte[],byte[])>($b0, $r1, $r7);
+
+        return $r1;
+    }
+}

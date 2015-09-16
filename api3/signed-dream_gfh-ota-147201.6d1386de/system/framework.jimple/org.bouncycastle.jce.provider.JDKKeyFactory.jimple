@@ -1,0 +1,595 @@
+public abstract class org.bouncycastle.jce.provider.JDKKeyFactory extends java.security.KeyFactorySpi
+{
+    protected boolean elGamalFactory;
+
+    public void <init>()
+    {
+        org.bouncycastle.jce.provider.JDKKeyFactory $r0;
+
+        $r0 := @this: org.bouncycastle.jce.provider.JDKKeyFactory;
+
+        specialinvoke $r0.<java.security.KeyFactorySpi: void <init>()>();
+
+        $r0.<org.bouncycastle.jce.provider.JDKKeyFactory: boolean elGamalFactory> = 0;
+
+        return;
+    }
+
+    static java.security.PrivateKey createPrivateKeyFromDERStream(byte[]) throws java.io.IOException
+    {
+        org.bouncycastle.asn1.ASN1InputStream $r0;
+        byte[] $r1;
+        org.bouncycastle.asn1.pkcs.PrivateKeyInfo $r2;
+        org.bouncycastle.asn1.DERObject $r3;
+        org.bouncycastle.asn1.ASN1Sequence $r4;
+        java.security.PrivateKey $r5;
+
+        $r1 := @parameter0: byte[];
+
+        $r2 = new org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+
+        $r0 = new org.bouncycastle.asn1.ASN1InputStream;
+
+        specialinvoke $r0.<org.bouncycastle.asn1.ASN1InputStream: void <init>(byte[])>($r1);
+
+        $r3 = virtualinvoke $r0.<org.bouncycastle.asn1.ASN1InputStream: org.bouncycastle.asn1.DERObject readObject()>();
+
+        $r4 = (org.bouncycastle.asn1.ASN1Sequence) $r3;
+
+        $r4 = (org.bouncycastle.asn1.ASN1Sequence) $r4;
+
+        specialinvoke $r2.<org.bouncycastle.asn1.pkcs.PrivateKeyInfo: void <init>(org.bouncycastle.asn1.ASN1Sequence)>($r4);
+
+        $r5 = staticinvoke <org.bouncycastle.jce.provider.JDKKeyFactory: java.security.PrivateKey createPrivateKeyFromPrivateKeyInfo(org.bouncycastle.asn1.pkcs.PrivateKeyInfo)>($r2);
+
+        return $r5;
+    }
+
+    static java.security.PrivateKey createPrivateKeyFromPrivateKeyInfo(org.bouncycastle.asn1.pkcs.PrivateKeyInfo)
+    {
+        org.bouncycastle.asn1.pkcs.PrivateKeyInfo $r0;
+        org.bouncycastle.asn1.x509.AlgorithmIdentifier $r1;
+        org.bouncycastle.asn1.DERObjectIdentifier $r2, $r4;
+        boolean $z0;
+        java.lang.StringBuilder $r6, r11;
+        java.lang.String $r7;
+        org.bouncycastle.jce.provider.JCERSAPrivateCrtKey r8;
+        org.bouncycastle.jce.provider.JCEDHPrivateKey r9;
+        org.bouncycastle.jce.provider.JDKDSAPrivateKey r10;
+        java.lang.RuntimeException r12;
+
+        $r0 := @parameter0: org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+
+        $r1 = virtualinvoke $r0.<org.bouncycastle.asn1.pkcs.PrivateKeyInfo: org.bouncycastle.asn1.x509.AlgorithmIdentifier getAlgorithmId()>();
+
+        $r2 = virtualinvoke $r1.<org.bouncycastle.asn1.x509.AlgorithmIdentifier: org.bouncycastle.asn1.DERObjectIdentifier getObjectId()>();
+
+        $z0 = staticinvoke <org.bouncycastle.jce.provider.RSAUtil: boolean isRsaOid(org.bouncycastle.asn1.DERObjectIdentifier)>($r2);
+
+        if $z0 == 0 goto label1;
+
+        r8 = new org.bouncycastle.jce.provider.JCERSAPrivateCrtKey;
+
+        specialinvoke r8.<org.bouncycastle.jce.provider.JCERSAPrivateCrtKey: void <init>(org.bouncycastle.asn1.pkcs.PrivateKeyInfo)>($r0);
+
+        return r8;
+
+     label1:
+        $r4 = <org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers: org.bouncycastle.asn1.DERObjectIdentifier dhKeyAgreement>;
+
+        $z0 = virtualinvoke $r2.<org.bouncycastle.asn1.DERObjectIdentifier: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 == 0 goto label2;
+
+        r9 = new org.bouncycastle.jce.provider.JCEDHPrivateKey;
+
+        specialinvoke r9.<org.bouncycastle.jce.provider.JCEDHPrivateKey: void <init>(org.bouncycastle.asn1.pkcs.PrivateKeyInfo)>($r0);
+
+        return r9;
+
+     label2:
+        $r4 = <org.bouncycastle.asn1.x9.X9ObjectIdentifiers: org.bouncycastle.asn1.DERObjectIdentifier id_dsa>;
+
+        $z0 = virtualinvoke $r2.<org.bouncycastle.asn1.DERObjectIdentifier: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 == 0 goto label3;
+
+        r10 = new org.bouncycastle.jce.provider.JDKDSAPrivateKey;
+
+        specialinvoke r10.<org.bouncycastle.jce.provider.JDKDSAPrivateKey: void <init>(org.bouncycastle.asn1.pkcs.PrivateKeyInfo)>($r0);
+
+        return r10;
+
+     label3:
+        r12 = new java.lang.RuntimeException;
+
+        r11 = new java.lang.StringBuilder;
+
+        specialinvoke r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("algorithm identifier ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" in key not recognised");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r12.<java.lang.RuntimeException: void <init>(java.lang.String)>($r7);
+
+        throw r12;
+    }
+
+    static java.security.PublicKey createPublicKeyFromDERStream(byte[]) throws java.io.IOException
+    {
+        org.bouncycastle.asn1.ASN1InputStream $r0;
+        byte[] $r1;
+        org.bouncycastle.asn1.x509.SubjectPublicKeyInfo $r2;
+        org.bouncycastle.asn1.DERObject $r3;
+        org.bouncycastle.asn1.ASN1Sequence $r4;
+        java.security.PublicKey $r5;
+
+        $r1 := @parameter0: byte[];
+
+        $r2 = new org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+
+        $r0 = new org.bouncycastle.asn1.ASN1InputStream;
+
+        specialinvoke $r0.<org.bouncycastle.asn1.ASN1InputStream: void <init>(byte[])>($r1);
+
+        $r3 = virtualinvoke $r0.<org.bouncycastle.asn1.ASN1InputStream: org.bouncycastle.asn1.DERObject readObject()>();
+
+        $r4 = (org.bouncycastle.asn1.ASN1Sequence) $r3;
+
+        $r4 = (org.bouncycastle.asn1.ASN1Sequence) $r4;
+
+        specialinvoke $r2.<org.bouncycastle.asn1.x509.SubjectPublicKeyInfo: void <init>(org.bouncycastle.asn1.ASN1Sequence)>($r4);
+
+        $r5 = staticinvoke <org.bouncycastle.jce.provider.JDKKeyFactory: java.security.PublicKey createPublicKeyFromPublicKeyInfo(org.bouncycastle.asn1.x509.SubjectPublicKeyInfo)>($r2);
+
+        return $r5;
+    }
+
+    static java.security.PublicKey createPublicKeyFromPublicKeyInfo(org.bouncycastle.asn1.x509.SubjectPublicKeyInfo)
+    {
+        org.bouncycastle.asn1.x509.SubjectPublicKeyInfo $r0;
+        org.bouncycastle.asn1.x509.AlgorithmIdentifier $r1;
+        org.bouncycastle.asn1.DERObjectIdentifier $r2, $r4;
+        boolean $z0;
+        java.lang.StringBuilder $r6, r11;
+        java.lang.String $r7;
+        org.bouncycastle.jce.provider.JCERSAPublicKey r8;
+        org.bouncycastle.jce.provider.JCEDHPublicKey r9;
+        org.bouncycastle.jce.provider.JDKDSAPublicKey r10;
+        java.lang.RuntimeException r12;
+
+        $r0 := @parameter0: org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+
+        $r1 = virtualinvoke $r0.<org.bouncycastle.asn1.x509.SubjectPublicKeyInfo: org.bouncycastle.asn1.x509.AlgorithmIdentifier getAlgorithmId()>();
+
+        $r2 = virtualinvoke $r1.<org.bouncycastle.asn1.x509.AlgorithmIdentifier: org.bouncycastle.asn1.DERObjectIdentifier getObjectId()>();
+
+        $z0 = staticinvoke <org.bouncycastle.jce.provider.RSAUtil: boolean isRsaOid(org.bouncycastle.asn1.DERObjectIdentifier)>($r2);
+
+        if $z0 == 0 goto label1;
+
+        r8 = new org.bouncycastle.jce.provider.JCERSAPublicKey;
+
+        specialinvoke r8.<org.bouncycastle.jce.provider.JCERSAPublicKey: void <init>(org.bouncycastle.asn1.x509.SubjectPublicKeyInfo)>($r0);
+
+        return r8;
+
+     label1:
+        $r4 = <org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers: org.bouncycastle.asn1.DERObjectIdentifier dhKeyAgreement>;
+
+        $z0 = virtualinvoke $r2.<org.bouncycastle.asn1.DERObjectIdentifier: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 == 0 goto label2;
+
+        r9 = new org.bouncycastle.jce.provider.JCEDHPublicKey;
+
+        specialinvoke r9.<org.bouncycastle.jce.provider.JCEDHPublicKey: void <init>(org.bouncycastle.asn1.x509.SubjectPublicKeyInfo)>($r0);
+
+        return r9;
+
+     label2:
+        $r4 = <org.bouncycastle.asn1.x9.X9ObjectIdentifiers: org.bouncycastle.asn1.DERObjectIdentifier dhpublicnumber>;
+
+        $z0 = virtualinvoke $r2.<org.bouncycastle.asn1.DERObjectIdentifier: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 == 0 goto label3;
+
+        r9 = new org.bouncycastle.jce.provider.JCEDHPublicKey;
+
+        specialinvoke r9.<org.bouncycastle.jce.provider.JCEDHPublicKey: void <init>(org.bouncycastle.asn1.x509.SubjectPublicKeyInfo)>($r0);
+
+        return r9;
+
+     label3:
+        $r4 = <org.bouncycastle.asn1.x9.X9ObjectIdentifiers: org.bouncycastle.asn1.DERObjectIdentifier id_dsa>;
+
+        $z0 = virtualinvoke $r2.<org.bouncycastle.asn1.DERObjectIdentifier: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 == 0 goto label4;
+
+        r10 = new org.bouncycastle.jce.provider.JDKDSAPublicKey;
+
+        specialinvoke r10.<org.bouncycastle.jce.provider.JDKDSAPublicKey: void <init>(org.bouncycastle.asn1.x509.SubjectPublicKeyInfo)>($r0);
+
+        return r10;
+
+     label4:
+        $r4 = <org.bouncycastle.asn1.oiw.OIWObjectIdentifiers: org.bouncycastle.asn1.DERObjectIdentifier dsaWithSHA1>;
+
+        $z0 = virtualinvoke $r2.<org.bouncycastle.asn1.DERObjectIdentifier: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 == 0 goto label5;
+
+        r10 = new org.bouncycastle.jce.provider.JDKDSAPublicKey;
+
+        specialinvoke r10.<org.bouncycastle.jce.provider.JDKDSAPublicKey: void <init>(org.bouncycastle.asn1.x509.SubjectPublicKeyInfo)>($r0);
+
+        return r10;
+
+     label5:
+        r12 = new java.lang.RuntimeException;
+
+        r11 = new java.lang.StringBuilder;
+
+        specialinvoke r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("algorithm identifier ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" in key not recognised");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r12.<java.lang.RuntimeException: void <init>(java.lang.String)>($r7);
+
+        throw r12;
+    }
+
+    protected java.security.spec.KeySpec engineGetKeySpec(java.security.Key, java.lang.Class) throws java.security.spec.InvalidKeySpecException
+    {
+        org.bouncycastle.jce.provider.JDKKeyFactory $r0;
+        java.security.Key $r1;
+        java.lang.Class $r2;
+        boolean $z0;
+        java.lang.String $r3;
+        byte[] $r5;
+        java.security.interfaces.RSAPublicKey $r6;
+        java.math.BigInteger $r7, $r8, $r11, $r12, $r13, $r14, $r15, $r16;
+        java.security.interfaces.RSAPrivateKey $r9;
+        java.security.interfaces.RSAPrivateCrtKey $r10;
+        javax.crypto.interfaces.DHPrivateKey $r17;
+        javax.crypto.spec.DHParameterSpec $r18;
+        javax.crypto.interfaces.DHPublicKey $r19;
+        java.lang.StringBuilder $r21, r29;
+        java.security.spec.PKCS8EncodedKeySpec r22;
+        java.security.spec.X509EncodedKeySpec r23;
+        java.security.spec.RSAPublicKeySpec r24;
+        java.security.spec.RSAPrivateKeySpec r25;
+        java.security.spec.RSAPrivateCrtKeySpec r26;
+        javax.crypto.spec.DHPrivateKeySpec r27;
+        javax.crypto.spec.DHPublicKeySpec r28;
+        java.lang.RuntimeException r30;
+
+        $r0 := @this: org.bouncycastle.jce.provider.JDKKeyFactory;
+
+        $r1 := @parameter0: java.security.Key;
+
+        $r2 := @parameter1: java.lang.Class;
+
+        $z0 = virtualinvoke $r2.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(class "java/security/spec/PKCS8EncodedKeySpec");
+
+        if $z0 == 0 goto label1;
+
+        $r3 = interfaceinvoke $r1.<java.security.Key: java.lang.String getFormat()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("PKCS#8");
+
+        if $z0 == 0 goto label1;
+
+        r22 = new java.security.spec.PKCS8EncodedKeySpec;
+
+        $r5 = interfaceinvoke $r1.<java.security.Key: byte[] getEncoded()>();
+
+        specialinvoke r22.<java.security.spec.PKCS8EncodedKeySpec: void <init>(byte[])>($r5);
+
+        return r22;
+
+     label1:
+        $z0 = virtualinvoke $r2.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(class "java/security/spec/X509EncodedKeySpec");
+
+        if $z0 == 0 goto label2;
+
+        $r3 = interfaceinvoke $r1.<java.security.Key: java.lang.String getFormat()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("X.509");
+
+        if $z0 == 0 goto label2;
+
+        r23 = new java.security.spec.X509EncodedKeySpec;
+
+        $r5 = interfaceinvoke $r1.<java.security.Key: byte[] getEncoded()>();
+
+        specialinvoke r23.<java.security.spec.X509EncodedKeySpec: void <init>(byte[])>($r5);
+
+        return r23;
+
+     label2:
+        $z0 = virtualinvoke $r2.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(class "java/security/spec/RSAPublicKeySpec");
+
+        if $z0 == 0 goto label3;
+
+        $z0 = $r1 instanceof java.security.interfaces.RSAPublicKey;
+
+        if $z0 == 0 goto label3;
+
+        $r6 = (java.security.interfaces.RSAPublicKey) $r1;
+
+        r24 = new java.security.spec.RSAPublicKeySpec;
+
+        $r7 = interfaceinvoke $r6.<java.security.interfaces.RSAPublicKey: java.math.BigInteger getModulus()>();
+
+        $r8 = interfaceinvoke $r6.<java.security.interfaces.RSAPublicKey: java.math.BigInteger getPublicExponent()>();
+
+        specialinvoke r24.<java.security.spec.RSAPublicKeySpec: void <init>(java.math.BigInteger,java.math.BigInteger)>($r7, $r8);
+
+        return r24;
+
+     label3:
+        $z0 = virtualinvoke $r2.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(class "java/security/spec/RSAPrivateKeySpec");
+
+        if $z0 == 0 goto label4;
+
+        $z0 = $r1 instanceof java.security.interfaces.RSAPrivateKey;
+
+        if $z0 == 0 goto label4;
+
+        $r9 = (java.security.interfaces.RSAPrivateKey) $r1;
+
+        r25 = new java.security.spec.RSAPrivateKeySpec;
+
+        $r7 = interfaceinvoke $r9.<java.security.interfaces.RSAPrivateKey: java.math.BigInteger getModulus()>();
+
+        $r8 = interfaceinvoke $r9.<java.security.interfaces.RSAPrivateKey: java.math.BigInteger getPrivateExponent()>();
+
+        specialinvoke r25.<java.security.spec.RSAPrivateKeySpec: void <init>(java.math.BigInteger,java.math.BigInteger)>($r7, $r8);
+
+        return r25;
+
+     label4:
+        $z0 = virtualinvoke $r2.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(class "java/security/spec/RSAPrivateCrtKeySpec");
+
+        if $z0 == 0 goto label5;
+
+        $z0 = $r1 instanceof java.security.interfaces.RSAPrivateCrtKey;
+
+        if $z0 == 0 goto label5;
+
+        $r10 = (java.security.interfaces.RSAPrivateCrtKey) $r1;
+
+        r26 = new java.security.spec.RSAPrivateCrtKeySpec;
+
+        $r7 = interfaceinvoke $r10.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getModulus()>();
+
+        $r8 = interfaceinvoke $r10.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getPublicExponent()>();
+
+        $r11 = interfaceinvoke $r10.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getPrivateExponent()>();
+
+        $r12 = interfaceinvoke $r10.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getPrimeP()>();
+
+        $r13 = interfaceinvoke $r10.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getPrimeQ()>();
+
+        $r14 = interfaceinvoke $r10.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getPrimeExponentP()>();
+
+        $r15 = interfaceinvoke $r10.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getPrimeExponentQ()>();
+
+        $r16 = interfaceinvoke $r10.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getCrtCoefficient()>();
+
+        specialinvoke r26.<java.security.spec.RSAPrivateCrtKeySpec: void <init>(java.math.BigInteger,java.math.BigInteger,java.math.BigInteger,java.math.BigInteger,java.math.BigInteger,java.math.BigInteger,java.math.BigInteger,java.math.BigInteger)>($r7, $r8, $r11, $r12, $r13, $r14, $r15, $r16);
+
+        return r26;
+
+     label5:
+        $z0 = virtualinvoke $r2.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(class "javax/crypto/spec/DHPrivateKeySpec");
+
+        if $z0 == 0 goto label6;
+
+        $z0 = $r1 instanceof javax.crypto.interfaces.DHPrivateKey;
+
+        if $z0 == 0 goto label6;
+
+        $r17 = (javax.crypto.interfaces.DHPrivateKey) $r1;
+
+        r27 = new javax.crypto.spec.DHPrivateKeySpec;
+
+        $r7 = interfaceinvoke $r17.<javax.crypto.interfaces.DHPrivateKey: java.math.BigInteger getX()>();
+
+        $r18 = interfaceinvoke $r17.<javax.crypto.interfaces.DHPrivateKey: javax.crypto.spec.DHParameterSpec getParams()>();
+
+        $r8 = virtualinvoke $r18.<javax.crypto.spec.DHParameterSpec: java.math.BigInteger getP()>();
+
+        $r18 = interfaceinvoke $r17.<javax.crypto.interfaces.DHPrivateKey: javax.crypto.spec.DHParameterSpec getParams()>();
+
+        $r11 = virtualinvoke $r18.<javax.crypto.spec.DHParameterSpec: java.math.BigInteger getG()>();
+
+        specialinvoke r27.<javax.crypto.spec.DHPrivateKeySpec: void <init>(java.math.BigInteger,java.math.BigInteger,java.math.BigInteger)>($r7, $r8, $r11);
+
+        return r27;
+
+     label6:
+        $z0 = virtualinvoke $r2.<java.lang.Class: boolean isAssignableFrom(java.lang.Class)>(class "javax/crypto/spec/DHPublicKeySpec");
+
+        if $z0 == 0 goto label7;
+
+        $z0 = $r1 instanceof javax.crypto.interfaces.DHPublicKey;
+
+        if $z0 == 0 goto label7;
+
+        $r19 = (javax.crypto.interfaces.DHPublicKey) $r1;
+
+        r28 = new javax.crypto.spec.DHPublicKeySpec;
+
+        $r7 = interfaceinvoke $r19.<javax.crypto.interfaces.DHPublicKey: java.math.BigInteger getY()>();
+
+        $r18 = interfaceinvoke $r19.<javax.crypto.interfaces.DHPublicKey: javax.crypto.spec.DHParameterSpec getParams()>();
+
+        $r8 = virtualinvoke $r18.<javax.crypto.spec.DHParameterSpec: java.math.BigInteger getP()>();
+
+        $r18 = interfaceinvoke $r19.<javax.crypto.interfaces.DHPublicKey: javax.crypto.spec.DHParameterSpec getParams()>();
+
+        $r11 = virtualinvoke $r18.<javax.crypto.spec.DHParameterSpec: java.math.BigInteger getG()>();
+
+        specialinvoke r28.<javax.crypto.spec.DHPublicKeySpec: void <init>(java.math.BigInteger,java.math.BigInteger,java.math.BigInteger)>($r7, $r8, $r11);
+
+        return r28;
+
+     label7:
+        r30 = new java.lang.RuntimeException;
+
+        r29 = new java.lang.StringBuilder;
+
+        specialinvoke r29.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke r29.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("not implemented yet ");
+
+        $r21 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r21 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r21 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r3 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r30.<java.lang.RuntimeException: void <init>(java.lang.String)>($r3);
+
+        throw r30;
+    }
+
+    protected java.security.Key engineTranslateKey(java.security.Key) throws java.security.InvalidKeyException
+    {
+        org.bouncycastle.jce.provider.JDKKeyFactory $r0;
+        java.security.Key $r1;
+        boolean $z0;
+        java.security.interfaces.RSAPublicKey $r3;
+        java.security.interfaces.RSAPrivateCrtKey $r4;
+        java.security.interfaces.RSAPrivateKey $r5;
+        javax.crypto.interfaces.DHPublicKey $r6;
+        javax.crypto.interfaces.DHPrivateKey $r7;
+        java.security.interfaces.DSAPublicKey $r8;
+        java.security.interfaces.DSAPrivateKey $r9;
+        org.bouncycastle.jce.provider.JCERSAPublicKey r11;
+        org.bouncycastle.jce.provider.JCERSAPrivateCrtKey r12;
+        org.bouncycastle.jce.provider.JCERSAPrivateKey r13;
+        org.bouncycastle.jce.provider.JCEDHPublicKey r14;
+        org.bouncycastle.jce.provider.JCEDHPrivateKey r15;
+        org.bouncycastle.jce.provider.JDKDSAPublicKey r16;
+        org.bouncycastle.jce.provider.JDKDSAPrivateKey r17;
+        java.security.InvalidKeyException r18;
+
+        $r0 := @this: org.bouncycastle.jce.provider.JDKKeyFactory;
+
+        $r1 := @parameter0: java.security.Key;
+
+        $z0 = $r1 instanceof java.security.interfaces.RSAPublicKey;
+
+        if $z0 == 0 goto label1;
+
+        r11 = new org.bouncycastle.jce.provider.JCERSAPublicKey;
+
+        $r3 = (java.security.interfaces.RSAPublicKey) $r1;
+
+        specialinvoke r11.<org.bouncycastle.jce.provider.JCERSAPublicKey: void <init>(java.security.interfaces.RSAPublicKey)>($r3);
+
+        return r11;
+
+     label1:
+        $z0 = $r1 instanceof java.security.interfaces.RSAPrivateCrtKey;
+
+        if $z0 == 0 goto label2;
+
+        r12 = new org.bouncycastle.jce.provider.JCERSAPrivateCrtKey;
+
+        $r4 = (java.security.interfaces.RSAPrivateCrtKey) $r1;
+
+        specialinvoke r12.<org.bouncycastle.jce.provider.JCERSAPrivateCrtKey: void <init>(java.security.interfaces.RSAPrivateCrtKey)>($r4);
+
+        return r12;
+
+     label2:
+        $z0 = $r1 instanceof java.security.interfaces.RSAPrivateKey;
+
+        if $z0 == 0 goto label3;
+
+        r13 = new org.bouncycastle.jce.provider.JCERSAPrivateKey;
+
+        $r5 = (java.security.interfaces.RSAPrivateKey) $r1;
+
+        specialinvoke r13.<org.bouncycastle.jce.provider.JCERSAPrivateKey: void <init>(java.security.interfaces.RSAPrivateKey)>($r5);
+
+        return r13;
+
+     label3:
+        $z0 = $r1 instanceof javax.crypto.interfaces.DHPublicKey;
+
+        if $z0 == 0 goto label4;
+
+        r14 = new org.bouncycastle.jce.provider.JCEDHPublicKey;
+
+        $r6 = (javax.crypto.interfaces.DHPublicKey) $r1;
+
+        specialinvoke r14.<org.bouncycastle.jce.provider.JCEDHPublicKey: void <init>(javax.crypto.interfaces.DHPublicKey)>($r6);
+
+        return r14;
+
+     label4:
+        $z0 = $r1 instanceof javax.crypto.interfaces.DHPrivateKey;
+
+        if $z0 == 0 goto label5;
+
+        r15 = new org.bouncycastle.jce.provider.JCEDHPrivateKey;
+
+        $r7 = (javax.crypto.interfaces.DHPrivateKey) $r1;
+
+        specialinvoke r15.<org.bouncycastle.jce.provider.JCEDHPrivateKey: void <init>(javax.crypto.interfaces.DHPrivateKey)>($r7);
+
+        return r15;
+
+     label5:
+        $z0 = $r1 instanceof java.security.interfaces.DSAPublicKey;
+
+        if $z0 == 0 goto label6;
+
+        r16 = new org.bouncycastle.jce.provider.JDKDSAPublicKey;
+
+        $r8 = (java.security.interfaces.DSAPublicKey) $r1;
+
+        specialinvoke r16.<org.bouncycastle.jce.provider.JDKDSAPublicKey: void <init>(java.security.interfaces.DSAPublicKey)>($r8);
+
+        return r16;
+
+     label6:
+        $z0 = $r1 instanceof java.security.interfaces.DSAPrivateKey;
+
+        if $z0 == 0 goto label7;
+
+        r17 = new org.bouncycastle.jce.provider.JDKDSAPrivateKey;
+
+        $r9 = (java.security.interfaces.DSAPrivateKey) $r1;
+
+        specialinvoke r17.<org.bouncycastle.jce.provider.JDKDSAPrivateKey: void <init>(java.security.interfaces.DSAPrivateKey)>($r9);
+
+        return r17;
+
+     label7:
+        r18 = new java.security.InvalidKeyException;
+
+        specialinvoke r18.<java.security.InvalidKeyException: void <init>(java.lang.String)>("key type unknown");
+
+        throw r18;
+    }
+}

@@ -1,0 +1,2523 @@
+public class org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl extends javax.net.ssl.SSLSocket
+{
+    private static long SSL_OP_NO_SSLv3;
+    private static long SSL_OP_NO_TLSv1;
+    private static int instanceCount;
+    private static final java.lang.String[] supportedProtocols;
+    private java.net.InetSocketAddress address;
+    private boolean autoClose;
+    private final java.lang.Object handshakeLock;
+    private boolean handshakeStarted;
+    private java.io.InputStream is;
+    private java.util.ArrayList listeners;
+    private java.io.OutputStream os;
+    private java.lang.Object readLock;
+    private java.net.Socket socket;
+    private int ssl;
+    private org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters;
+    private org.apache.harmony.xnet.provider.jsse.OpenSSLSessionImpl sslSession;
+    private int ssl_ctx;
+    private long ssl_op_no;
+    private int timeout;
+    private java.lang.Object writeLock;
+
+    static void <clinit>()
+    {
+        java.lang.String[] $r0;
+
+        $r0 = newarray (java.lang.String)[2];
+
+        $r0[0] = "SSLv3";
+
+        $r0[1] = "TLSv1";
+
+        <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.String[] supportedProtocols> = $r0;
+
+        <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: int instanceCount> = 0;
+
+        staticinvoke <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: void nativeinitstatic()>();
+
+        <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: long SSL_OP_NO_SSLv3> = 33554432L;
+
+        <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: long SSL_OP_NO_TLSv1> = 67108864L;
+
+        return;
+    }
+
+    protected void <init>(java.lang.String, int, java.net.InetAddress, int, org.apache.harmony.xnet.provider.jsse.SSLParameters) throws java.io.IOException
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        java.lang.String $r1;
+        int $i0, $i1;
+        java.net.InetAddress $r2;
+        org.apache.harmony.xnet.provider.jsse.SSLParameters $r3;
+        java.lang.Object $r4;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: java.net.InetAddress;
+
+        $i1 := @parameter3: int;
+
+        $r3 := @parameter4: org.apache.harmony.xnet.provider.jsse.SSLParameters;
+
+        specialinvoke $r0.<javax.net.ssl.SSLSocket: void <init>(java.lang.String,int,java.net.InetAddress,int)>($r1, $i0, $r2, $i1);
+
+        $r4 = new java.lang.Object;
+
+        specialinvoke $r4.<java.lang.Object: void <init>()>();
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.Object handshakeLock> = $r4;
+
+        $r4 = new java.lang.Object;
+
+        specialinvoke $r4.<java.lang.Object: void <init>()>();
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.Object readLock> = $r4;
+
+        $r4 = new java.lang.Object;
+
+        specialinvoke $r4.<java.lang.Object: void <init>()>();
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.Object writeLock> = $r4;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: boolean handshakeStarted> = 0;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: long ssl_op_no> = 0L;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: int timeout> = 0;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters> = $r3;
+
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: void init()>();
+
+        staticinvoke <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: void updateInstanceCount(int)>(1);
+
+        return;
+    }
+
+    protected void <init>(java.lang.String, int, org.apache.harmony.xnet.provider.jsse.SSLParameters) throws java.io.IOException
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        java.lang.String $r1;
+        int $i0;
+        org.apache.harmony.xnet.provider.jsse.SSLParameters $r2;
+        java.lang.Object $r3;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: org.apache.harmony.xnet.provider.jsse.SSLParameters;
+
+        specialinvoke $r0.<javax.net.ssl.SSLSocket: void <init>(java.lang.String,int)>($r1, $i0);
+
+        $r3 = new java.lang.Object;
+
+        specialinvoke $r3.<java.lang.Object: void <init>()>();
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.Object handshakeLock> = $r3;
+
+        $r3 = new java.lang.Object;
+
+        specialinvoke $r3.<java.lang.Object: void <init>()>();
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.Object readLock> = $r3;
+
+        $r3 = new java.lang.Object;
+
+        specialinvoke $r3.<java.lang.Object: void <init>()>();
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.Object writeLock> = $r3;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: boolean handshakeStarted> = 0;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: long ssl_op_no> = 0L;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: int timeout> = 0;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters> = $r2;
+
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: void init()>();
+
+        staticinvoke <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: void updateInstanceCount(int)>(1);
+
+        return;
+    }
+
+    protected void <init>(java.net.InetAddress, int, java.net.InetAddress, int, org.apache.harmony.xnet.provider.jsse.SSLParameters) throws java.io.IOException
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        java.net.InetAddress $r1, $r2;
+        int $i0, $i1;
+        org.apache.harmony.xnet.provider.jsse.SSLParameters $r3;
+        java.lang.Object $r4;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $r1 := @parameter0: java.net.InetAddress;
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: java.net.InetAddress;
+
+        $i1 := @parameter3: int;
+
+        $r3 := @parameter4: org.apache.harmony.xnet.provider.jsse.SSLParameters;
+
+        specialinvoke $r0.<javax.net.ssl.SSLSocket: void <init>(java.net.InetAddress,int,java.net.InetAddress,int)>($r1, $i0, $r2, $i1);
+
+        $r4 = new java.lang.Object;
+
+        specialinvoke $r4.<java.lang.Object: void <init>()>();
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.Object handshakeLock> = $r4;
+
+        $r4 = new java.lang.Object;
+
+        specialinvoke $r4.<java.lang.Object: void <init>()>();
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.Object readLock> = $r4;
+
+        $r4 = new java.lang.Object;
+
+        specialinvoke $r4.<java.lang.Object: void <init>()>();
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.Object writeLock> = $r4;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: boolean handshakeStarted> = 0;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: long ssl_op_no> = 0L;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: int timeout> = 0;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters> = $r3;
+
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: void init()>();
+
+        staticinvoke <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: void updateInstanceCount(int)>(1);
+
+        return;
+    }
+
+    protected void <init>(java.net.InetAddress, int, org.apache.harmony.xnet.provider.jsse.SSLParameters) throws java.io.IOException
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        java.net.InetAddress $r1;
+        int $i0;
+        org.apache.harmony.xnet.provider.jsse.SSLParameters $r2;
+        java.lang.Object $r3;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $r1 := @parameter0: java.net.InetAddress;
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: org.apache.harmony.xnet.provider.jsse.SSLParameters;
+
+        specialinvoke $r0.<javax.net.ssl.SSLSocket: void <init>(java.net.InetAddress,int)>($r1, $i0);
+
+        $r3 = new java.lang.Object;
+
+        specialinvoke $r3.<java.lang.Object: void <init>()>();
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.Object handshakeLock> = $r3;
+
+        $r3 = new java.lang.Object;
+
+        specialinvoke $r3.<java.lang.Object: void <init>()>();
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.Object readLock> = $r3;
+
+        $r3 = new java.lang.Object;
+
+        specialinvoke $r3.<java.lang.Object: void <init>()>();
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.Object writeLock> = $r3;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: boolean handshakeStarted> = 0;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: long ssl_op_no> = 0L;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: int timeout> = 0;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters> = $r2;
+
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: void init()>();
+
+        staticinvoke <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: void updateInstanceCount(int)>(1);
+
+        return;
+    }
+
+    protected void <init>(java.net.Socket, java.lang.String, int, boolean, org.apache.harmony.xnet.provider.jsse.SSLParameters) throws java.io.IOException
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        java.net.Socket $r1;
+        java.lang.String $r2;
+        int $i0, $i1;
+        boolean $z0;
+        org.apache.harmony.xnet.provider.jsse.SSLParameters $r3;
+        java.lang.Object $r4;
+        java.net.InetSocketAddress $r5;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $r1 := @parameter0: java.net.Socket;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $i0 := @parameter2: int;
+
+        $z0 := @parameter3: boolean;
+
+        $r3 := @parameter4: org.apache.harmony.xnet.provider.jsse.SSLParameters;
+
+        specialinvoke $r0.<javax.net.ssl.SSLSocket: void <init>()>();
+
+        $r4 = new java.lang.Object;
+
+        specialinvoke $r4.<java.lang.Object: void <init>()>();
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.Object handshakeLock> = $r4;
+
+        $r4 = new java.lang.Object;
+
+        specialinvoke $r4.<java.lang.Object: void <init>()>();
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.Object readLock> = $r4;
+
+        $r4 = new java.lang.Object;
+
+        specialinvoke $r4.<java.lang.Object: void <init>()>();
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.Object writeLock> = $r4;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: boolean handshakeStarted> = 0;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: long ssl_op_no> = 0L;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: int timeout> = 0;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.net.Socket socket> = $r1;
+
+        $i1 = virtualinvoke $r1.<java.net.Socket: int getSoTimeout()>();
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: int timeout> = $i1;
+
+        $r5 = new java.net.InetSocketAddress;
+
+        specialinvoke $r5.<java.net.InetSocketAddress: void <init>(java.lang.String,int)>($r2, $i0);
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.net.InetSocketAddress address> = $r5;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: boolean autoClose> = $z0;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters> = $r3;
+
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: void init()>();
+
+        staticinvoke <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: void updateInstanceCount(int)>(1);
+
+        return;
+    }
+
+    protected void <init>(org.apache.harmony.xnet.provider.jsse.SSLParameters) throws java.io.IOException
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        org.apache.harmony.xnet.provider.jsse.SSLParameters $r1;
+        java.lang.Object $r2;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $r1 := @parameter0: org.apache.harmony.xnet.provider.jsse.SSLParameters;
+
+        specialinvoke $r0.<javax.net.ssl.SSLSocket: void <init>()>();
+
+        $r2 = new java.lang.Object;
+
+        specialinvoke $r2.<java.lang.Object: void <init>()>();
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.Object handshakeLock> = $r2;
+
+        $r2 = new java.lang.Object;
+
+        specialinvoke $r2.<java.lang.Object: void <init>()>();
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.Object readLock> = $r2;
+
+        $r2 = new java.lang.Object;
+
+        specialinvoke $r2.<java.lang.Object: void <init>()>();
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.Object writeLock> = $r2;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: boolean handshakeStarted> = 0;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: long ssl_op_no> = 0L;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: int timeout> = 0;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters> = $r1;
+
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: void init()>();
+
+        staticinvoke <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: void updateInstanceCount(int)>(1);
+
+        return;
+    }
+
+    protected void <init>(org.apache.harmony.xnet.provider.jsse.SSLParameters, long) throws java.io.IOException
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        org.apache.harmony.xnet.provider.jsse.SSLParameters $r1;
+        long $l0;
+        java.lang.Object $r2;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $r1 := @parameter0: org.apache.harmony.xnet.provider.jsse.SSLParameters;
+
+        $l0 := @parameter1: long;
+
+        specialinvoke $r0.<javax.net.ssl.SSLSocket: void <init>()>();
+
+        $r2 = new java.lang.Object;
+
+        specialinvoke $r2.<java.lang.Object: void <init>()>();
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.Object handshakeLock> = $r2;
+
+        $r2 = new java.lang.Object;
+
+        specialinvoke $r2.<java.lang.Object: void <init>()>();
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.Object readLock> = $r2;
+
+        $r2 = new java.lang.Object;
+
+        specialinvoke $r2.<java.lang.Object: void <init>()>();
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.Object writeLock> = $r2;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: boolean handshakeStarted> = 0;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: long ssl_op_no> = 0L;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: int timeout> = 0;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters> = $r1;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: long ssl_op_no> = $l0;
+
+        staticinvoke <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: void updateInstanceCount(int)>(1);
+
+        return;
+    }
+
+    static java.lang.Object access$000(org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl)
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        java.lang.Object r1;
+
+        $r0 := @parameter0: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        r1 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.Object readLock>;
+
+        return r1;
+    }
+
+    static int access$100(org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl)
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        int i0;
+
+        $r0 := @parameter0: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        i0 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: int timeout>;
+
+        return i0;
+    }
+
+    static int access$200(org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl, int) throws java.io.IOException
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        int $i0;
+
+        $r0 := @parameter0: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $i0 := @parameter1: int;
+
+        $i0 = specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: int nativeread(int)>($i0);
+
+        return $i0;
+    }
+
+    static int access$300(org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl, byte[], int, int, int) throws java.io.IOException
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        byte[] $r1;
+        int $i0, $i1, $i2;
+
+        $r0 := @parameter0: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $r1 := @parameter1: byte[];
+
+        $i0 := @parameter2: int;
+
+        $i1 := @parameter3: int;
+
+        $i2 := @parameter4: int;
+
+        $i0 = specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: int nativeread(byte[],int,int,int)>($r1, $i0, $i1, $i2);
+
+        return $i0;
+    }
+
+    static java.lang.Object access$400(org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl)
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        java.lang.Object r1;
+
+        $r0 := @parameter0: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        r1 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.Object writeLock>;
+
+        return r1;
+    }
+
+    static void access$500(org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl, int) throws java.io.IOException
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        int $i0;
+
+        $r0 := @parameter0: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $i0 := @parameter1: int;
+
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: void nativewrite(int)>($i0);
+
+        return;
+    }
+
+    static void access$600(org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl, byte[], int, int) throws java.io.IOException
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        byte[] $r1;
+        int $i0, $i1;
+
+        $r0 := @parameter0: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $r1 := @parameter1: byte[];
+
+        $i0 := @parameter2: int;
+
+        $i1 := @parameter3: int;
+
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: void nativewrite(byte[],int,int)>($r1, $i0, $i1);
+
+        return;
+    }
+
+    static java.net.Socket access$800(org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl)
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        java.net.Socket r1;
+
+        $r0 := @parameter0: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        r1 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.net.Socket socket>;
+
+        return r1;
+    }
+
+    private boolean findSuite(java.lang.String)
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        java.lang.String $r1, $r3;
+        java.lang.String[] $r2;
+        int $i0, $i1;
+        boolean $z0;
+        java.lang.IllegalArgumentException $r4;
+        java.lang.StringBuilder $r5;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = staticinvoke <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.String[] nativegetsupportedciphersuites()>();
+
+        $i0 = 0;
+
+     label1:
+        $i1 = lengthof $r2;
+
+        if $i0 >= $i1 goto label3;
+
+        $r3 = $r2[$i0];
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label2;
+
+        return 1;
+
+     label2:
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label3:
+        $r4 = new java.lang.IllegalArgumentException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Protocol ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is not supported.");
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r1);
+
+        throw $r4;
+    }
+
+    private org.apache.harmony.xnet.provider.jsse.OpenSSLSessionImpl getCachedClientSession()
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        java.net.InetAddress $r1;
+        java.lang.String $r2;
+        org.apache.harmony.xnet.provider.jsse.SSLParameters $r3;
+        org.apache.harmony.xnet.provider.jsse.ClientSessionContext $r4;
+        int $i0;
+        javax.net.ssl.SSLSession $r5;
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSessionImpl $r6;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $r1 = specialinvoke $r0.<java.net.Socket: java.net.InetAddress getInetAddress()>();
+
+        if $r1 == null goto label1;
+
+        $r1 = specialinvoke $r0.<java.net.Socket: java.net.InetAddress getInetAddress()>();
+
+        $r2 = virtualinvoke $r1.<java.net.InetAddress: java.lang.String getHostAddress()>();
+
+        if $r2 == null goto label1;
+
+        $r1 = specialinvoke $r0.<java.net.Socket: java.net.InetAddress getInetAddress()>();
+
+        $r2 = virtualinvoke $r1.<java.net.InetAddress: java.lang.String getHostName()>();
+
+        if $r2 != null goto label2;
+
+     label1:
+        return null;
+
+     label2:
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters>;
+
+        $r4 = virtualinvoke $r3.<org.apache.harmony.xnet.provider.jsse.SSLParameters: org.apache.harmony.xnet.provider.jsse.ClientSessionContext getClientSessionContext()>();
+
+        $r1 = specialinvoke $r0.<java.net.Socket: java.net.InetAddress getInetAddress()>();
+
+        $r2 = virtualinvoke $r1.<java.net.InetAddress: java.lang.String getHostName()>();
+
+        $i0 = specialinvoke $r0.<java.net.Socket: int getPort()>();
+
+        $r5 = virtualinvoke $r4.<org.apache.harmony.xnet.provider.jsse.ClientSessionContext: javax.net.ssl.SSLSession getSession(java.lang.String,int)>($r2, $i0);
+
+        $r6 = (org.apache.harmony.xnet.provider.jsse.OpenSSLSessionImpl) $r5;
+
+        return $r6;
+    }
+
+    public static int getInstanceCount()
+    {
+        java.lang.Throwable $r0;
+        int i0;
+
+        entermonitor class "org/apache/harmony/xnet/provider/jsse/OpenSSLSocketImpl";
+
+     label1:
+        i0 = <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: int instanceCount>;
+
+        exitmonitor class "org/apache/harmony/xnet/provider/jsse/OpenSSLSocketImpl";
+
+     label2:
+        return i0;
+
+     label3:
+        $r0 := @caughtexception;
+
+        exitmonitor class "org/apache/harmony/xnet/provider/jsse/OpenSSLSocketImpl";
+
+     label4:
+        throw $r0;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private void init() throws java.io.IOException
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        java.io.ByteArrayOutputStream $r1, $r3;
+        org.bouncycastle.openssl.PEMWriter $r2;
+        org.apache.harmony.xnet.provider.jsse.SSLParameters $r4;
+        javax.net.ssl.X509KeyManager $r5;
+        java.lang.String[] $r6;
+        java.lang.String $r7, $r12;
+        java.security.PrivateKey $r8;
+        java.security.cert.X509Certificate[] $r9;
+        java.io.OutputStreamWriter $r10;
+        int $i0, $i1;
+        java.security.cert.X509Certificate $r11;
+        java.security.SecureRandom $r13;
+        byte[] $r14;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $r4 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters>;
+
+        $r5 = virtualinvoke $r4.<org.apache.harmony.xnet.provider.jsse.SSLParameters: javax.net.ssl.X509KeyManager getKeyManager()>();
+
+        $r6 = newarray (java.lang.String)[1];
+
+        $r6[0] = "RSA";
+
+        $r7 = interfaceinvoke $r5.<javax.net.ssl.X509KeyManager: java.lang.String chooseClientAlias(java.lang.String[],java.security.Principal[],java.net.Socket)>($r6, null, null);
+
+        if $r7 == null goto label5;
+
+        $r4 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters>;
+
+        $r5 = virtualinvoke $r4.<org.apache.harmony.xnet.provider.jsse.SSLParameters: javax.net.ssl.X509KeyManager getKeyManager()>();
+
+        $r8 = interfaceinvoke $r5.<javax.net.ssl.X509KeyManager: java.security.PrivateKey getPrivateKey(java.lang.String)>($r7);
+
+        $r4 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters>;
+
+        $r5 = virtualinvoke $r4.<org.apache.harmony.xnet.provider.jsse.SSLParameters: javax.net.ssl.X509KeyManager getKeyManager()>();
+
+        $r9 = interfaceinvoke $r5.<javax.net.ssl.X509KeyManager: java.security.cert.X509Certificate[] getCertificateChain(java.lang.String)>($r7);
+
+        $r3 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r3.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        $r2 = new org.bouncycastle.openssl.PEMWriter;
+
+        $r10 = new java.io.OutputStreamWriter;
+
+        specialinvoke $r10.<java.io.OutputStreamWriter: void <init>(java.io.OutputStream)>($r3);
+
+        specialinvoke $r2.<org.bouncycastle.openssl.PEMWriter: void <init>(java.io.Writer)>($r10);
+
+        virtualinvoke $r2.<org.bouncycastle.openssl.PEMWriter: void writeObject(java.lang.Object)>($r8);
+
+        virtualinvoke $r2.<java.io.BufferedWriter: void close()>();
+
+        $r1 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r1.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        $r2 = new org.bouncycastle.openssl.PEMWriter;
+
+        $r10 = new java.io.OutputStreamWriter;
+
+        specialinvoke $r10.<java.io.OutputStreamWriter: void <init>(java.io.OutputStream)>($r1);
+
+        specialinvoke $r2.<org.bouncycastle.openssl.PEMWriter: void <init>(java.io.Writer)>($r10);
+
+        $i0 = 0;
+
+     label1:
+        $i1 = lengthof $r9;
+
+        if $i0 >= $i1 goto label2;
+
+        $r11 = $r9[$i0];
+
+        virtualinvoke $r2.<org.bouncycastle.openssl.PEMWriter: void writeObject(java.lang.Object)>($r11);
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label2:
+        virtualinvoke $r2.<java.io.BufferedWriter: void close()>();
+
+        $r7 = virtualinvoke $r3.<java.io.ByteArrayOutputStream: java.lang.String toString()>();
+
+        $r12 = virtualinvoke $r1.<java.io.ByteArrayOutputStream: java.lang.String toString()>();
+
+        $r4 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters>;
+
+        $r13 = virtualinvoke $r4.<org.apache.harmony.xnet.provider.jsse.SSLParameters: java.security.SecureRandom getSecureRandomMember()>();
+
+        if $r13 == null goto label4;
+
+        $r4 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters>;
+
+        $r13 = virtualinvoke $r4.<org.apache.harmony.xnet.provider.jsse.SSLParameters: java.security.SecureRandom getSecureRandomMember()>();
+
+        $r14 = virtualinvoke $r13.<java.security.SecureRandom: byte[] generateSeed(int)>(1024);
+
+     label3:
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: void nativeinit(java.lang.String,java.lang.String,byte[])>($r7, $r12, $r14);
+
+        return;
+
+     label4:
+        $r14 = null;
+
+        goto label3;
+
+     label5:
+        $r4 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters>;
+
+        $r13 = virtualinvoke $r4.<org.apache.harmony.xnet.provider.jsse.SSLParameters: java.security.SecureRandom getSecureRandomMember()>();
+
+        if $r13 == null goto label7;
+
+        $r4 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters>;
+
+        $r13 = virtualinvoke $r4.<org.apache.harmony.xnet.provider.jsse.SSLParameters: java.security.SecureRandom getSecureRandomMember()>();
+
+        $r14 = virtualinvoke $r13.<java.security.SecureRandom: byte[] generateSeed(int)>(1024);
+
+     label6:
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: void nativeinit(java.lang.String,java.lang.String,byte[])>(null, null, $r14);
+
+        return;
+
+     label7:
+        $r14 = null;
+
+        goto label6;
+    }
+
+    private native java.lang.String nativecipherauthenticationmethod();
+
+    private native void nativeclose() throws java.io.IOException;
+
+    private native boolean nativeconnect(int, java.net.Socket, boolean, int) throws java.io.IOException;
+
+    private native void nativefree();
+
+    private native java.lang.String[] nativegetenabledciphersuites();
+
+    private native int nativegetsslsession(int);
+
+    static native java.lang.String[] nativegetsupportedciphersuites();
+
+    private native void nativeinit(java.lang.String, java.lang.String, byte[]);
+
+    private static native void nativeinitstatic();
+
+    private native void nativeinterrupt() throws java.io.IOException;
+
+    private native int nativeread(int) throws java.io.IOException;
+
+    private native int nativeread(byte[], int, int, int) throws java.io.IOException;
+
+    private native void nativesetenabledciphersuites(java.lang.String);
+
+    private native void nativesetenabledprotocols(long);
+
+    private static native int nativeverifysignature(byte[], byte[], java.lang.String, byte[], byte[]);
+
+    private native void nativewrite(int) throws java.io.IOException;
+
+    private native void nativewrite(byte[], int, int) throws java.io.IOException;
+
+    private static void updateInstanceCount(int)
+    {
+        int $i0, $i1;
+        java.lang.Throwable $r0;
+
+        $i0 := @parameter0: int;
+
+        entermonitor class "org/apache/harmony/xnet/provider/jsse/OpenSSLSocketImpl";
+
+     label1:
+        $i1 = <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: int instanceCount>;
+
+        $i0 = $i1 + $i0;
+
+        <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: int instanceCount> = $i0;
+
+        exitmonitor class "org/apache/harmony/xnet/provider/jsse/OpenSSLSocketImpl";
+
+     label2:
+        return;
+
+     label3:
+        $r0 := @caughtexception;
+
+        exitmonitor class "org/apache/harmony/xnet/provider/jsse/OpenSSLSocketImpl";
+
+     label4:
+        throw $r0;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public static boolean verifySignature(byte[], byte[], java.lang.String, java.security.interfaces.RSAPublicKey)
+    {
+        byte[] $r0, $r1, $r5, $r6;
+        java.lang.String $r2;
+        java.security.interfaces.RSAPublicKey $r3;
+        java.math.BigInteger $r4;
+        int $i0;
+
+        $r0 := @parameter0: byte[];
+
+        $r1 := @parameter1: byte[];
+
+        $r2 := @parameter2: java.lang.String;
+
+        $r3 := @parameter3: java.security.interfaces.RSAPublicKey;
+
+        $r4 = interfaceinvoke $r3.<java.security.interfaces.RSAPublicKey: java.math.BigInteger getModulus()>();
+
+        $r5 = virtualinvoke $r4.<java.math.BigInteger: byte[] toByteArray()>();
+
+        $r4 = interfaceinvoke $r3.<java.security.interfaces.RSAPublicKey: java.math.BigInteger getPublicExponent()>();
+
+        $r6 = virtualinvoke $r4.<java.math.BigInteger: byte[] toByteArray()>();
+
+        $i0 = staticinvoke <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: int nativeverifysignature(byte[],byte[],java.lang.String,byte[],byte[])>($r0, $r1, $r2, $r5, $r6);
+
+        if $i0 != 1 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    private int verify_callback(byte[][])
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        byte[][] $r1;
+        java.security.cert.X509Certificate[] $r2;
+        javax.net.ssl.SSLException $r3;
+        int $i0, $i1;
+        org.apache.harmony.security.provider.cert.X509CertImpl $r4;
+        byte[] $r5;
+        javax.security.cert.X509Certificate $r6;
+        org.apache.harmony.xnet.provider.jsse.SSLParameters $r7;
+        javax.net.ssl.X509TrustManager $r8;
+        java.security.cert.CertificateException $r9;
+        org.apache.harmony.xnet.provider.jsse.AlertException $r10;
+        javax.security.cert.CertificateException $r11;
+        java.io.IOException $r12;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $r1 := @parameter0: byte[][];
+
+        $i0 = lengthof $r1;
+
+        $r2 = newarray (java.security.cert.X509Certificate)[$i0];
+
+        $i0 = 0;
+
+     label01:
+        $i1 = lengthof $r1;
+
+        if $i0 >= $i1 goto label04;
+
+        $r4 = new org.apache.harmony.security.provider.cert.X509CertImpl;
+
+        $r5 = $r1[$i0];
+
+     label02:
+        $r6 = staticinvoke <javax.security.cert.X509Certificate: javax.security.cert.X509Certificate getInstance(byte[])>($r5);
+
+        $r5 = virtualinvoke $r6.<javax.security.cert.Certificate: byte[] getEncoded()>();
+
+        specialinvoke $r4.<org.apache.harmony.security.provider.cert.X509CertImpl: void <init>(byte[])>($r5);
+
+     label03:
+        $r2[$i0] = $r4;
+
+        $i0 = $i0 + 1;
+
+        goto label01;
+
+     label04:
+        $r7 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters>;
+
+     label05:
+        $r8 = virtualinvoke $r7.<org.apache.harmony.xnet.provider.jsse.SSLParameters: javax.net.ssl.X509TrustManager getTrustManager()>();
+
+        interfaceinvoke $r8.<javax.net.ssl.X509TrustManager: void checkClientTrusted(java.security.cert.X509Certificate[],java.lang.String)>($r2, "null");
+
+     label06:
+        return 1;
+
+     label07:
+        $r9 := @caughtexception;
+
+        $r10 = new org.apache.harmony.xnet.provider.jsse.AlertException;
+
+        $r3 = new javax.net.ssl.SSLException;
+
+     label08:
+        specialinvoke $r3.<javax.net.ssl.SSLException: void <init>(java.lang.String,java.lang.Throwable)>("Not trusted server certificate", $r9);
+
+        specialinvoke $r10.<org.apache.harmony.xnet.provider.jsse.AlertException: void <init>(byte,javax.net.ssl.SSLException)>(42, $r3);
+
+     label09:
+        throw $r10;
+
+     label10:
+        $r11 := @caughtexception;
+
+        return 0;
+
+     label11:
+        $r12 := @caughtexception;
+
+        return 0;
+
+        catch javax.security.cert.CertificateException from label02 to label03 with label10;
+        catch java.io.IOException from label02 to label03 with label11;
+        catch java.security.cert.CertificateException from label05 to label06 with label07;
+        catch javax.security.cert.CertificateException from label05 to label06 with label10;
+        catch java.io.IOException from label05 to label06 with label11;
+        catch javax.security.cert.CertificateException from label08 to label09 with label10;
+        catch java.io.IOException from label08 to label09 with label11;
+    }
+
+    protected void accept(int, boolean) throws java.io.IOException
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        int $i0, $i1;
+        boolean $z0;
+        org.apache.harmony.xnet.provider.jsse.SSLParameters $r1;
+        org.apache.harmony.xnet.provider.jsse.ServerSessionContext $r2;
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSessionImpl $r3;
+        java.net.InetAddress $r4;
+        java.lang.String $r5;
+        long $l2;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $i0 := @parameter0: int;
+
+        $z0 := @parameter1: boolean;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: boolean handshakeStarted> = 1;
+
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: void nativeaccept(java.net.Socket,int,boolean)>($r0, $i0, $z0);
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters>;
+
+        $r2 = virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.SSLParameters: org.apache.harmony.xnet.provider.jsse.ServerSessionContext getServerSessionContext()>();
+
+        $r3 = new org.apache.harmony.xnet.provider.jsse.OpenSSLSessionImpl;
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: int ssl>;
+
+        $i0 = specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: int nativegetsslsession(int)>($i0);
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters>;
+
+        $r4 = specialinvoke $r0.<java.net.Socket: java.net.InetAddress getInetAddress()>();
+
+        $r5 = virtualinvoke $r4.<java.net.InetAddress: java.lang.String getHostName()>();
+
+        $i1 = specialinvoke $r0.<java.net.Socket: int getPort()>();
+
+        specialinvoke $r3.<org.apache.harmony.xnet.provider.jsse.OpenSSLSessionImpl: void <init>(int,org.apache.harmony.xnet.provider.jsse.SSLParameters,java.lang.String,int,javax.net.ssl.SSLSessionContext)>($i0, $r1, $r5, $i1, $r2);
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.OpenSSLSessionImpl sslSession> = $r3;
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.OpenSSLSessionImpl sslSession>;
+
+        $l2 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r3.<org.apache.harmony.xnet.provider.jsse.OpenSSLSessionImpl: long lastAccessedTime> = $l2;
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.OpenSSLSessionImpl sslSession>;
+
+        virtualinvoke $r2.<org.apache.harmony.xnet.provider.jsse.ServerSessionContext: void putSession(javax.net.ssl.SSLSession)>($r3);
+
+        return;
+    }
+
+    public void addHandshakeCompletedListener(javax.net.ssl.HandshakeCompletedListener)
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        javax.net.ssl.HandshakeCompletedListener $r1;
+        java.lang.IllegalArgumentException $r2;
+        java.util.ArrayList $r3;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $r1 := @parameter0: javax.net.ssl.HandshakeCompletedListener;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Provided listener is null");
+
+        throw $r2;
+
+     label1:
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.util.ArrayList listeners>;
+
+        if $r3 != null goto label2;
+
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>()>();
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.util.ArrayList listeners> = $r3;
+
+     label2:
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.util.ArrayList listeners>;
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean add(java.lang.Object)>($r1);
+
+        return;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        java.lang.Object $r1, $r5;
+        boolean $z0;
+        java.net.Socket $r2;
+        java.lang.Throwable $r3, $r4, $r7, $r8, $r9;
+        java.io.IOException $r6;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.Object handshakeLock>;
+
+        entermonitor $r1;
+
+     label01:
+        $z0 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: boolean handshakeStarted>;
+
+        if $z0 != 0 goto label11;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: boolean handshakeStarted> = 1;
+
+        entermonitor $r0;
+
+     label02:
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: void nativefree()>();
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.net.Socket socket>;
+
+        if $r2 == null goto label06;
+
+        $z0 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: boolean autoClose>;
+
+        if $z0 == 0 goto label03;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.net.Socket socket>;
+
+        $z0 = virtualinvoke $r2.<java.net.Socket: boolean isClosed()>();
+
+        if $z0 != 0 goto label03;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.net.Socket socket>;
+
+        virtualinvoke $r2.<java.net.Socket: void close()>();
+
+     label03:
+        exitmonitor $r0;
+
+     label04:
+        exitmonitor $r1;
+
+     label05:
+        return;
+
+     label06:
+        $z0 = specialinvoke $r0.<java.net.Socket: boolean isClosed()>();
+
+        if $z0 != 0 goto label03;
+
+        specialinvoke $r0.<java.net.Socket: void close()>();
+
+        goto label03;
+
+     label07:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label08:
+        throw $r3;
+
+     label09:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label10:
+        throw $r4;
+
+     label11:
+        exitmonitor $r1;
+
+     label12:
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: void nativeinterrupt()>();
+
+        entermonitor $r0;
+
+     label13:
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.Object writeLock>;
+
+        entermonitor $r1;
+
+     label14:
+        $r5 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.Object readLock>;
+
+        entermonitor $r5;
+
+     label15:
+        $r6 = null;
+
+     label16:
+        $z0 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: boolean handshakeStarted>;
+
+        if $z0 == 0 goto label18;
+
+     label17:
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: void nativeclose()>();
+
+     label18:
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: void nativefree()>();
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.net.Socket socket>;
+
+        if $r2 == null goto label27;
+
+        $z0 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: boolean autoClose>;
+
+        if $z0 == 0 goto label19;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.net.Socket socket>;
+
+        $z0 = virtualinvoke $r2.<java.net.Socket: boolean isClosed()>();
+
+        if $z0 != 0 goto label19;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.net.Socket socket>;
+
+        virtualinvoke $r2.<java.net.Socket: void close()>();
+
+     label19:
+        if $r6 == null goto label28;
+
+        throw $r6;
+
+     label20:
+        $r7 := @caughtexception;
+
+        exitmonitor $r5;
+
+     label21:
+        throw $r7;
+
+     label22:
+        $r8 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label23:
+        throw $r8;
+
+     label24:
+        $r9 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label25:
+        throw $r9;
+
+     label26:
+        $r6 := @caughtexception;
+
+        goto label18;
+
+     label27:
+        $z0 = specialinvoke $r0.<java.net.Socket: boolean isClosed()>();
+
+        if $z0 != 0 goto label19;
+
+        specialinvoke $r0.<java.net.Socket: void close()>();
+
+        goto label19;
+
+     label28:
+        exitmonitor $r5;
+
+     label29:
+        exitmonitor $r1;
+
+     label30:
+        exitmonitor $r0;
+
+     label31:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label09;
+        catch java.lang.Throwable from label02 to label04 with label07;
+        catch java.lang.Throwable from label04 to label05 with label09;
+        catch java.lang.Throwable from label06 to label08 with label07;
+        catch java.lang.Throwable from label08 to label10 with label09;
+        catch java.lang.Throwable from label11 to label12 with label09;
+        catch java.lang.Throwable from label13 to label14 with label24;
+        catch java.lang.Throwable from label14 to label15 with label22;
+        catch java.io.IOException from label17 to label18 with label26;
+        catch java.lang.Throwable from label16 to label18 with label20;
+        catch java.lang.Throwable from label18 to label21 with label20;
+        catch java.lang.Throwable from label21 to label23 with label22;
+        catch java.lang.Throwable from label23 to label25 with label24;
+        catch java.lang.Throwable from label27 to label29 with label20;
+        catch java.lang.Throwable from label29 to label30 with label22;
+        catch java.lang.Throwable from label30 to label31 with label24;
+    }
+
+    protected void finalize() throws java.io.IOException
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        java.lang.InterruptedException $r1;
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl$Finalizer $r2;
+        java.net.Socket $r3;
+        java.util.logging.Level $r4;
+        int $i0;
+        boolean $z0;
+        java.util.logging.Logger $r5;
+        java.lang.StringBuilder $r6;
+        java.lang.String $r7;
+        java.lang.Thread $r8;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        staticinvoke <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: void updateInstanceCount(int)>(-1);
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: int ssl>;
+
+        if $i0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.net.Socket socket>;
+
+        $r2 = new org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl$Finalizer;
+
+        specialinvoke $r2.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl$Finalizer: void <init>(org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl,org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl$1)>($r0, null);
+
+        virtualinvoke $r2.<java.lang.Thread: void setDaemon(boolean)>(1);
+
+        virtualinvoke $r2.<java.lang.Thread: void start()>();
+
+     label2:
+        virtualinvoke $r2.<java.lang.Thread: void join(long)>(1000L);
+
+     label3:
+        $z0 = virtualinvoke $r2.<java.lang.Thread: boolean isAlive()>();
+
+        if $z0 == 0 goto label5;
+
+        virtualinvoke $r2.<java.lang.Thread: void interrupt()>();
+
+        $r5 = <java.util.logging.Logger: java.util.logging.Logger global>;
+
+        $r4 = <java.util.logging.Level: java.util.logging.Level SEVERE>;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Slow finalization of SSL socket (");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r0);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", for ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r3);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String)>($r4, $r7);
+
+        if $r3 == null goto label6;
+
+        $z0 = virtualinvoke $r3.<java.net.Socket: boolean isClosed()>();
+
+        if $z0 != 0 goto label7;
+
+        virtualinvoke $r3.<java.net.Socket: void close()>();
+
+        return;
+
+     label4:
+        $r1 := @caughtexception;
+
+        $r8 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r8.<java.lang.Thread: void interrupt()>();
+
+        goto label3;
+
+     label5:
+        return;
+
+     label6:
+        return;
+
+     label7:
+        return;
+
+        catch java.lang.InterruptedException from label2 to label3 with label4;
+    }
+
+    public boolean getEnableSessionCreation()
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        boolean $z0;
+        org.apache.harmony.xnet.provider.jsse.SSLParameters $r1;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters>;
+
+        $z0 = virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.SSLParameters: boolean getEnableSessionCreation()>();
+
+        return $z0;
+    }
+
+    public java.lang.String[] getEnabledCipherSuites()
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        java.lang.String[] $r1;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $r1 = specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.String[] nativegetenabledciphersuites()>();
+
+        return $r1;
+    }
+
+    public java.lang.String[] getEnabledProtocols()
+    {
+        java.util.ArrayList $r0;
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r1;
+        long $l0, $l1;
+        byte $b2;
+        java.lang.String[] $r2;
+        java.lang.String $r3;
+        int $i3;
+        java.lang.Object[] $r4;
+
+        $r1 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $r0 = new java.util.ArrayList;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>()>();
+
+        $l0 = $r1.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: long ssl_op_no>;
+
+        $l1 = <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: long SSL_OP_NO_SSLv3>;
+
+        $l0 = $l0 & $l1;
+
+        $b2 = $l0 cmp 0L;
+
+        if $b2 != 0 goto label1;
+
+        $r2 = <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.String[] supportedProtocols>;
+
+        $r3 = $r2[1];
+
+        virtualinvoke $r0.<java.util.ArrayList: boolean add(java.lang.Object)>($r3);
+
+     label1:
+        $l0 = $r1.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: long ssl_op_no>;
+
+        $l1 = <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: long SSL_OP_NO_TLSv1>;
+
+        $l0 = $l0 & $l1;
+
+        $b2 = $l0 cmp 0L;
+
+        if $b2 != 0 goto label2;
+
+        $r2 = <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.String[] supportedProtocols>;
+
+        $r3 = $r2[2];
+
+        virtualinvoke $r0.<java.util.ArrayList: boolean add(java.lang.Object)>($r3);
+
+     label2:
+        $i3 = virtualinvoke $r0.<java.util.ArrayList: int size()>();
+
+        $r2 = newarray (java.lang.String)[$i3];
+
+        $r4 = virtualinvoke $r0.<java.util.ArrayList: java.lang.Object[] toArray(java.lang.Object[])>($r2);
+
+        $r2 = (java.lang.String[]) $r4;
+
+        return $r2;
+    }
+
+    public java.io.InputStream getInputStream() throws java.io.IOException
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        java.io.InputStream $r1;
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl$SSLInputStream $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.io.InputStream is>;
+
+        if $r1 != null goto label2;
+
+        $r2 = new org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl$SSLInputStream;
+
+        specialinvoke $r2.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl$SSLInputStream: void <init>(org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl)>($r0);
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.io.InputStream is> = $r2;
+
+     label2:
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.io.InputStream is>;
+
+        exitmonitor $r0;
+
+     label3:
+        return $r1;
+
+     label4:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label5:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public boolean getNeedClientAuth()
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        boolean $z0;
+        org.apache.harmony.xnet.provider.jsse.SSLParameters $r1;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters>;
+
+        $z0 = virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.SSLParameters: boolean getNeedClientAuth()>();
+
+        return $z0;
+    }
+
+    public java.io.OutputStream getOutputStream() throws java.io.IOException
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        java.io.OutputStream $r1;
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl$SSLOutputStream $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.io.OutputStream os>;
+
+        if $r1 != null goto label2;
+
+        $r2 = new org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl$SSLOutputStream;
+
+        specialinvoke $r2.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl$SSLOutputStream: void <init>(org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl)>($r0);
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.io.OutputStream os> = $r2;
+
+     label2:
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.io.OutputStream os>;
+
+        exitmonitor $r0;
+
+     label3:
+        return $r1;
+
+     label4:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label5:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public javax.net.ssl.SSLSession getSession()
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        java.io.IOException $r1;
+        java.util.logging.Level $r2;
+        java.lang.Class $r3;
+        java.lang.String $r4;
+        java.util.logging.Logger $r5;
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSessionImpl r6;
+        org.apache.harmony.xnet.provider.jsse.SSLSessionImpl r7;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+     label1:
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: void startHandshake()>();
+
+     label2:
+        r6 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.OpenSSLSessionImpl sslSession>;
+
+        return r6;
+
+     label3:
+        $r1 := @caughtexception;
+
+        $r3 = virtualinvoke $r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.Class: java.lang.String getName()>();
+
+        $r5 = staticinvoke <java.util.logging.Logger: java.util.logging.Logger getLogger(java.lang.String)>($r4);
+
+        $r2 = <java.util.logging.Level: java.util.logging.Level WARNING>;
+
+        virtualinvoke $r5.<java.util.logging.Logger: void log(java.util.logging.Level,java.lang.String,java.lang.Throwable)>($r2, "Error negotiating SSL connection.", $r1);
+
+        r7 = <org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl NULL_SESSION>;
+
+        return r7;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public java.lang.String[] getSupportedCipherSuites()
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        java.lang.String[] $r1;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $r1 = staticinvoke <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.String[] nativegetsupportedciphersuites()>();
+
+        return $r1;
+    }
+
+    public java.lang.String[] getSupportedProtocols()
+    {
+        java.lang.String[] $r0;
+        java.lang.Object $r1;
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r2;
+
+        $r2 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $r0 = <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.String[] supportedProtocols>;
+
+        $r1 = virtualinvoke $r0.<java.lang.Object: java.lang.Object clone()>();
+
+        $r0 = (java.lang.String[]) $r1;
+
+        return $r0;
+    }
+
+    public boolean getUseClientMode()
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        boolean $z0;
+        org.apache.harmony.xnet.provider.jsse.SSLParameters $r1;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters>;
+
+        $z0 = virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.SSLParameters: boolean getUseClientMode()>();
+
+        return $z0;
+    }
+
+    public boolean getWantClientAuth()
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        boolean $z0;
+        org.apache.harmony.xnet.provider.jsse.SSLParameters $r1;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters>;
+
+        $z0 = virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.SSLParameters: boolean getWantClientAuth()>();
+
+        return $z0;
+    }
+
+    synchronized native void nativeaccept(java.net.Socket, int, boolean);
+
+    public void removeHandshakeCompletedListener(javax.net.ssl.HandshakeCompletedListener)
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        javax.net.ssl.HandshakeCompletedListener $r1;
+        boolean $z0;
+        java.lang.IllegalArgumentException $r2;
+        java.util.ArrayList $r3;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $r1 := @parameter0: javax.net.ssl.HandshakeCompletedListener;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Provided listener is null");
+
+        throw $r2;
+
+     label1:
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.util.ArrayList listeners>;
+
+        if $r3 != null goto label2;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Provided listener is not registered");
+
+        throw $r2;
+
+     label2:
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.util.ArrayList listeners>;
+
+        $z0 = virtualinvoke $r3.<java.util.ArrayList: boolean remove(java.lang.Object)>($r1);
+
+        if $z0 != 0 goto label3;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Provided listener is not registered");
+
+        throw $r2;
+
+     label3:
+        return;
+    }
+
+    public void sendUrgentData(int) throws java.io.IOException
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        int $i0;
+        java.net.SocketException $r1;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $i0 := @parameter0: int;
+
+        $r1 = new java.net.SocketException;
+
+        specialinvoke $r1.<java.net.SocketException: void <init>(java.lang.String)>("Method sendUrgentData() is not supported.");
+
+        throw $r1;
+    }
+
+    public void setEnableSessionCreation(boolean)
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        boolean $z0;
+        org.apache.harmony.xnet.provider.jsse.SSLParameters $r1;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters>;
+
+        virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.SSLParameters: void setEnableSessionCreation(boolean)>($z0);
+
+        return;
+    }
+
+    public void setEnabledCipherSuites(java.lang.String[])
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        java.lang.String[] $r1;
+        java.lang.IllegalArgumentException $r2;
+        java.lang.String $r3, $r4;
+        int $i0, $i1;
+        java.lang.StringBuilder $r5;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $r1 := @parameter0: java.lang.String[];
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Provided parameter is null");
+
+        throw $r2;
+
+     label1:
+        $r3 = "";
+
+        $i0 = 0;
+
+     label2:
+        $i1 = lengthof $r1;
+
+        if $i0 >= $i1 goto label5;
+
+        $r4 = $r1[$i0];
+
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: boolean findSuite(java.lang.String)>($r4);
+
+        if $i0 != 0 goto label4;
+
+        $r3 = $r1[$i0];
+
+     label3:
+        $i0 = $i0 + 1;
+
+        goto label2;
+
+     label4:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r3 = $r1[$i0];
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label3;
+
+     label5:
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: void nativesetenabledciphersuites(java.lang.String)>($r3);
+
+        return;
+    }
+
+    public void setEnabledProtocols(java.lang.String[])
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        java.lang.String[] $r1;
+        java.lang.IllegalArgumentException $r2;
+        java.lang.Throwable $r3;
+        long $l0, $l1;
+        int $i2, $i3;
+        java.lang.String $r4;
+        boolean $z0;
+        java.lang.StringBuilder $r5;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $r1 := @parameter0: java.lang.String[];
+
+        entermonitor $r0;
+
+        if $r1 != null goto label3;
+
+     label1:
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Provided parameter is null");
+
+        throw $r2;
+
+     label2:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+     label3:
+        $l0 = <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: long SSL_OP_NO_SSLv3>;
+
+        $l1 = <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: long SSL_OP_NO_TLSv1>;
+
+        $l0 = $l0 | $l1;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: long ssl_op_no> = $l0;
+
+        $i2 = 0;
+
+     label4:
+        $i3 = lengthof $r1;
+
+        if $i2 >= $i3 goto label8;
+
+        $r4 = $r1[$i2];
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>("SSLv3");
+
+        if $z0 == 0 goto label6;
+
+        $l0 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: long ssl_op_no>;
+
+        $l1 = <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: long SSL_OP_NO_SSLv3>;
+
+        $l0 = $l0 ^ $l1;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: long ssl_op_no> = $l0;
+
+     label5:
+        $i2 = $i2 + 1;
+
+        goto label4;
+
+     label6:
+        $r4 = $r1[$i2];
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>("TLSv1");
+
+        if $z0 == 0 goto label7;
+
+        $l0 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: long ssl_op_no>;
+
+        $l1 = <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: long SSL_OP_NO_TLSv1>;
+
+        $l0 = $l0 ^ $l1;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: long ssl_op_no> = $l0;
+
+        goto label5;
+
+     label7:
+        $r2 = new java.lang.IllegalArgumentException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Protocol ");
+
+        $r4 = $r1[$i2];
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is not supported.");
+
+        $r4 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r4);
+
+        throw $r2;
+
+     label8:
+        $l0 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: long ssl_op_no>;
+
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: void nativesetenabledprotocols(long)>($l0);
+
+     label9:
+        exitmonitor $r0;
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label2;
+        catch java.lang.Throwable from label3 to label9 with label2;
+    }
+
+    public void setNeedClientAuth(boolean)
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        boolean $z0;
+        org.apache.harmony.xnet.provider.jsse.SSLParameters $r1;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters>;
+
+        virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.SSLParameters: void setNeedClientAuth(boolean)>($z0);
+
+        return;
+    }
+
+    public void setOOBInline(boolean) throws java.net.SocketException
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        boolean $z0;
+        java.net.SocketException $r1;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 = new java.net.SocketException;
+
+        specialinvoke $r1.<java.net.SocketException: void <init>(java.lang.String)>("Methods sendUrgentData, setOOBInline are not supported.");
+
+        throw $r1;
+    }
+
+    public void setSoTimeout(int) throws java.net.SocketException
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        int $i0;
+        java.lang.Throwable $r1;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $i0 := @parameter0: int;
+
+        entermonitor $r0;
+
+     label1:
+        specialinvoke $r0.<java.net.Socket: void setSoTimeout(int)>($i0);
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: int timeout> = $i0;
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public void setUseClientMode(boolean)
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        boolean $z0, $z1;
+        java.lang.IllegalArgumentException $r1;
+        java.lang.Throwable $r2;
+        org.apache.harmony.xnet.provider.jsse.SSLParameters $r3;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $z0 := @parameter0: boolean;
+
+        entermonitor $r0;
+
+     label1:
+        $z1 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: boolean handshakeStarted>;
+
+        if $z1 == 0 goto label3;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Could not change the mode after the initial handshake has begun.");
+
+        throw $r1;
+
+     label2:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r2;
+
+     label3:
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters>;
+
+        virtualinvoke $r3.<org.apache.harmony.xnet.provider.jsse.SSLParameters: void setUseClientMode(boolean)>($z0);
+
+     label4:
+        exitmonitor $r0;
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label2;
+        catch java.lang.Throwable from label3 to label4 with label2;
+    }
+
+    public void setWantClientAuth(boolean)
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        boolean $z0;
+        org.apache.harmony.xnet.provider.jsse.SSLParameters $r1;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters>;
+
+        virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.SSLParameters: void setWantClientAuth(boolean)>($z0);
+
+        return;
+    }
+
+    public void shutdownInput() throws java.io.IOException
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        java.lang.UnsupportedOperationException $r1;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $r1 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r1.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>("Method shutdownInput() is not supported.");
+
+        throw $r1;
+    }
+
+    public void shutdownOutput() throws java.io.IOException
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        java.lang.UnsupportedOperationException $r1;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        $r1 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r1.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>("Method shutdownOutput() is not supported.");
+
+        throw $r1;
+    }
+
+    public void startHandshake() throws java.io.IOException
+    {
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl $r0;
+        javax.net.ssl.HandshakeCompletedEvent $r1;
+        java.lang.Object $r2;
+        boolean $z0;
+        org.apache.harmony.xnet.provider.jsse.OpenSSLSessionImpl $r3;
+        org.apache.harmony.xnet.provider.jsse.SSLParameters $r4;
+        javax.net.ssl.SSLHandshakeException $r5;
+        java.lang.Throwable $r6, $r7, $r15, $r22, $r24;
+        java.net.Socket $r8;
+        int $i0, $i1;
+        long $l2;
+        java.util.logging.Logger $r9;
+        java.lang.StringBuilder $r10;
+        java.net.InetAddress $r11;
+        java.lang.String $r12;
+        java.util.ArrayList $r13;
+        javax.net.ssl.HandshakeCompletedListener $r14;
+        org.apache.harmony.xnet.provider.jsse.ClientSessionContext $r16;
+        java.net.InetSocketAddress $r17;
+        java.security.cert.Certificate[] $r18;
+        java.security.cert.X509Certificate[] $r19;
+        javax.net.ssl.SSLException $r20;
+        java.security.cert.CertificateException $r21;
+        javax.net.ssl.X509TrustManager $r23;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
+
+        entermonitor $r0;
+
+     label01:
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.Object handshakeLock>;
+
+        entermonitor $r2;
+
+     label02:
+        $z0 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: boolean handshakeStarted>;
+
+        if $z0 != 0 goto label05;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: boolean handshakeStarted> = 1;
+
+        exitmonitor $r2;
+
+     label03:
+        $r3 = specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.OpenSSLSessionImpl getCachedClientSession()>();
+
+        if $r3 != null goto label10;
+
+        $r4 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters>;
+
+        $z0 = virtualinvoke $r4.<org.apache.harmony.xnet.provider.jsse.SSLParameters: boolean getEnableSessionCreation()>();
+
+        if $z0 != 0 goto label10;
+
+        $r5 = new javax.net.ssl.SSLHandshakeException;
+
+        specialinvoke $r5.<javax.net.ssl.SSLHandshakeException: void <init>(java.lang.String)>("SSL Session may not be created");
+
+        throw $r5;
+
+     label04:
+        $r6 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r6;
+
+     label05:
+        exitmonitor $r2;
+
+     label06:
+        exitmonitor $r0;
+
+        return;
+
+     label07:
+        $r7 := @caughtexception;
+
+     label08:
+        exitmonitor $r2;
+
+     label09:
+        throw $r7;
+
+     label10:
+        $r8 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.net.Socket socket>;
+
+        if $r8 == null goto label20;
+
+        $r8 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.net.Socket socket>;
+
+     label11:
+        if $r3 == null goto label21;
+
+        $i0 = $r3.<org.apache.harmony.xnet.provider.jsse.OpenSSLSessionImpl: int session>;
+
+     label12:
+        entermonitor class "org/apache/harmony/xnet/provider/jsse/OpenSSLSocketImpl";
+
+     label13:
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: int ssl_ctx>;
+
+        $r4 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters>;
+
+        $z0 = virtualinvoke $r4.<org.apache.harmony.xnet.provider.jsse.SSLParameters: boolean getUseClientMode()>();
+
+        $z0 = specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: boolean nativeconnect(int,java.net.Socket,boolean,int)>($i1, $r8, $z0, $i0);
+
+        exitmonitor class "org/apache/harmony/xnet/provider/jsse/OpenSSLSocketImpl";
+
+     label14:
+        if $z0 == 0 goto label25;
+
+     label15:
+        $l2 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r3.<org.apache.harmony.xnet.provider.jsse.OpenSSLSessionImpl: long lastAccessedTime> = $l2;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.OpenSSLSessionImpl sslSession> = $r3;
+
+        $r9 = <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl$LoggerHolder: java.util.logging.Logger logger>;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Reused cached session for ");
+
+        $r11 = virtualinvoke $r0.<java.net.Socket: java.net.InetAddress getInetAddress()>();
+
+        $r12 = virtualinvoke $r11.<java.net.InetAddress: java.lang.String getHostName()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r9.<java.util.logging.Logger: void fine(java.lang.String)>($r12);
+
+     label16:
+        $r13 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.util.ArrayList listeners>;
+
+        if $r13 == null goto label06;
+
+        $r1 = new javax.net.ssl.HandshakeCompletedEvent;
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.OpenSSLSessionImpl sslSession>;
+
+        specialinvoke $r1.<javax.net.ssl.HandshakeCompletedEvent: void <init>(javax.net.ssl.SSLSocket,javax.net.ssl.SSLSession)>($r0, $r3);
+
+        $r13 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.util.ArrayList listeners>;
+
+        $i0 = virtualinvoke $r13.<java.util.ArrayList: int size()>();
+
+     label17:
+        $i1 = 0;
+
+     label18:
+        if $i1 >= $i0 goto label06;
+
+        $r13 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.util.ArrayList listeners>;
+
+        $r2 = virtualinvoke $r13.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r14 = (javax.net.ssl.HandshakeCompletedListener) $r2;
+
+        interfaceinvoke $r14.<javax.net.ssl.HandshakeCompletedListener: void handshakeCompleted(javax.net.ssl.HandshakeCompletedEvent)>($r1);
+
+     label19:
+        $i1 = $i1 + 1;
+
+        goto label18;
+
+     label20:
+        $r8 = $r0;
+
+        goto label11;
+
+     label21:
+        $i0 = 0;
+
+        goto label12;
+
+     label22:
+        $r15 := @caughtexception;
+
+     label23:
+        exitmonitor class "org/apache/harmony/xnet/provider/jsse/OpenSSLSocketImpl";
+
+     label24:
+        throw $r15;
+
+     label25:
+        if $r3 == null goto label36;
+
+        $r9 = <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl$LoggerHolder: java.util.logging.Logger logger>;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Reuse of cached session for ");
+
+        $r11 = virtualinvoke $r0.<java.net.Socket: java.net.InetAddress getInetAddress()>();
+
+        $r12 = virtualinvoke $r11.<java.net.InetAddress: java.lang.String getHostName()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" failed.");
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r9.<java.util.logging.Logger: void fine(java.lang.String)>($r12);
+
+     label26:
+        $r4 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters>;
+
+        $r16 = virtualinvoke $r4.<org.apache.harmony.xnet.provider.jsse.SSLParameters: org.apache.harmony.xnet.provider.jsse.ClientSessionContext getClientSessionContext()>();
+
+        entermonitor class "org/apache/harmony/xnet/provider/jsse/OpenSSLSocketImpl";
+
+     label27:
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: int ssl>;
+
+        $i0 = specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: int nativegetsslsession(int)>($i0);
+
+        exitmonitor class "org/apache/harmony/xnet/provider/jsse/OpenSSLSocketImpl";
+
+     label28:
+        $r17 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.net.InetSocketAddress address>;
+
+        if $r17 != null goto label41;
+
+        $r3 = new org.apache.harmony.xnet.provider.jsse.OpenSSLSessionImpl;
+
+        $r4 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters>;
+
+        $r11 = specialinvoke $r0.<java.net.Socket: java.net.InetAddress getInetAddress()>();
+
+        $r12 = virtualinvoke $r11.<java.net.InetAddress: java.lang.String getHostName()>();
+
+        $i1 = specialinvoke $r0.<java.net.Socket: int getPort()>();
+
+        specialinvoke $r3.<org.apache.harmony.xnet.provider.jsse.OpenSSLSessionImpl: void <init>(int,org.apache.harmony.xnet.provider.jsse.SSLParameters,java.lang.String,int,javax.net.ssl.SSLSessionContext)>($i0, $r4, $r12, $i1, $r16);
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.OpenSSLSessionImpl sslSession> = $r3;
+
+     label29:
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.OpenSSLSessionImpl sslSession>;
+
+     label30:
+        $r18 = virtualinvoke $r3.<org.apache.harmony.xnet.provider.jsse.OpenSSLSessionImpl: java.security.cert.Certificate[] getPeerCertificates()>();
+
+     label31:
+        $r19 = (java.security.cert.X509Certificate[]) $r18;
+
+        $r19 = (java.security.cert.X509Certificate[]) $r19;
+
+        if $r19 == null goto label32;
+
+        $i0 = lengthof $r19;
+
+        if $i0 != 0 goto label43;
+
+     label32:
+        $r20 = new javax.net.ssl.SSLException;
+
+        specialinvoke $r20.<javax.net.ssl.SSLException: void <init>(java.lang.String)>("Server sends no certificate");
+
+     label33:
+        throw $r20;
+
+     label34:
+        $r21 := @caughtexception;
+
+     label35:
+        $r20 = new javax.net.ssl.SSLException;
+
+        specialinvoke $r20.<javax.net.ssl.SSLException: void <init>(java.lang.String,java.lang.Throwable)>("Not trusted server certificate", $r21);
+
+        throw $r20;
+
+     label36:
+        $r9 = <org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl$LoggerHolder: java.util.logging.Logger logger>;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Created new session for ");
+
+        $r11 = virtualinvoke $r0.<java.net.Socket: java.net.InetAddress getInetAddress()>();
+
+        $r12 = virtualinvoke $r11.<java.net.InetAddress: java.lang.String getHostName()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r9.<java.util.logging.Logger: void fine(java.lang.String)>($r12);
+
+     label37:
+        goto label26;
+
+     label38:
+        $r22 := @caughtexception;
+
+     label39:
+        exitmonitor class "org/apache/harmony/xnet/provider/jsse/OpenSSLSocketImpl";
+
+     label40:
+        throw $r22;
+
+     label41:
+        $r3 = new org.apache.harmony.xnet.provider.jsse.OpenSSLSessionImpl;
+
+        $r4 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters>;
+
+        $r17 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.net.InetSocketAddress address>;
+
+        $r12 = virtualinvoke $r17.<java.net.InetSocketAddress: java.lang.String getHostName()>();
+
+        $r17 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.net.InetSocketAddress address>;
+
+        $i1 = virtualinvoke $r17.<java.net.InetSocketAddress: int getPort()>();
+
+        specialinvoke $r3.<org.apache.harmony.xnet.provider.jsse.OpenSSLSessionImpl: void <init>(int,org.apache.harmony.xnet.provider.jsse.SSLParameters,java.lang.String,int,javax.net.ssl.SSLSessionContext)>($i0, $r4, $r12, $i1, $r16);
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.OpenSSLSessionImpl sslSession> = $r3;
+
+     label42:
+        goto label29;
+
+     label43:
+        entermonitor class "org/apache/harmony/xnet/provider/jsse/OpenSSLSocketImpl";
+
+     label44:
+        $r12 = specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: java.lang.String nativecipherauthenticationmethod()>();
+
+        exitmonitor class "org/apache/harmony/xnet/provider/jsse/OpenSSLSocketImpl";
+
+     label45:
+        $r4 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.SSLParameters sslParameters>;
+
+     label46:
+        $r23 = virtualinvoke $r4.<org.apache.harmony.xnet.provider.jsse.SSLParameters: javax.net.ssl.X509TrustManager getTrustManager()>();
+
+        interfaceinvoke $r23.<javax.net.ssl.X509TrustManager: void checkServerTrusted(java.security.cert.X509Certificate[],java.lang.String)>($r19, $r12);
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl: org.apache.harmony.xnet.provider.jsse.OpenSSLSessionImpl sslSession>;
+
+        virtualinvoke $r16.<org.apache.harmony.xnet.provider.jsse.ClientSessionContext: void putSession(javax.net.ssl.SSLSession)>($r3);
+
+     label47:
+        goto label16;
+
+     label48:
+        $r24 := @caughtexception;
+
+     label49:
+        exitmonitor class "org/apache/harmony/xnet/provider/jsse/OpenSSLSocketImpl";
+
+     label50:
+        throw $r24;
+
+     label51:
+        nop;
+
+        catch java.lang.Throwable from label01 to label02 with label04;
+        catch java.lang.Throwable from label02 to label03 with label07;
+        catch java.lang.Throwable from label03 to label04 with label04;
+        catch java.lang.Throwable from label05 to label06 with label07;
+        catch java.lang.Throwable from label08 to label09 with label07;
+        catch java.lang.Throwable from label09 to label11 with label04;
+        catch java.lang.Throwable from label11 to label13 with label04;
+        catch java.lang.Throwable from label13 to label14 with label22;
+        catch java.lang.Throwable from label15 to label17 with label04;
+        catch java.lang.Throwable from label18 to label19 with label04;
+        catch java.lang.Throwable from label23 to label24 with label22;
+        catch java.lang.Throwable from label24 to label27 with label04;
+        catch java.lang.Throwable from label27 to label28 with label38;
+        catch java.lang.Throwable from label28 to label29 with label04;
+        catch java.security.cert.CertificateException from label30 to label31 with label34;
+        catch java.security.cert.CertificateException from label32 to label33 with label34;
+        catch java.lang.Throwable from label29 to label34 with label04;
+        catch java.lang.Throwable from label35 to label37 with label04;
+        catch java.lang.Throwable from label39 to label40 with label38;
+        catch java.lang.Throwable from label40 to label42 with label04;
+        catch java.lang.Throwable from label43 to label44 with label04;
+        catch java.lang.Throwable from label44 to label45 with label48;
+        catch java.security.cert.CertificateException from label46 to label47 with label34;
+        catch java.lang.Throwable from label45 to label47 with label04;
+        catch java.lang.Throwable from label49 to label50 with label48;
+        catch java.security.cert.CertificateException from label50 to label51 with label34;
+        catch java.lang.Throwable from label50 to label51 with label04;
+    }
+}

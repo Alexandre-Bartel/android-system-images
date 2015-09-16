@@ -1,0 +1,1944 @@
+class com.android.server.TelephonyRegistry extends com.android.internal.telephony.ITelephonyRegistry$Stub
+{
+    private static final java.lang.String TAG;
+    private final com.android.internal.app.IBatteryStats mBatteryStats;
+    private boolean mCallForwarding;
+    private java.lang.String mCallIncomingNumber;
+    private int mCallState;
+    private android.os.Bundle mCellLocation;
+    private final android.content.Context mContext;
+    private int mDataActivity;
+    private java.lang.String mDataConnectionApn;
+    private java.lang.String mDataConnectionInterfaceName;
+    private boolean mDataConnectionPossible;
+    private java.lang.String mDataConnectionReason;
+    private int mDataConnectionState;
+    private boolean mMessageWaiting;
+    private final java.util.ArrayList mRecords;
+    private android.telephony.ServiceState mServiceState;
+    private int mSignalStrength;
+
+    void <init>(android.content.Context)
+    {
+        com.android.server.TelephonyRegistry $r0;
+        android.content.Context $r1;
+        java.util.ArrayList $r2;
+        android.telephony.ServiceState $r3;
+        android.os.Bundle $r4;
+        android.telephony.CellLocation $r5;
+        com.android.internal.app.IBatteryStats $r6;
+
+        $r0 := @this: com.android.server.TelephonyRegistry;
+
+        $r1 := @parameter0: android.content.Context;
+
+        specialinvoke $r0.<com.android.internal.telephony.ITelephonyRegistry$Stub: void <init>()>();
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords> = $r2;
+
+        $r0.<com.android.server.TelephonyRegistry: int mCallState> = 0;
+
+        $r0.<com.android.server.TelephonyRegistry: java.lang.String mCallIncomingNumber> = "";
+
+        $r3 = new android.telephony.ServiceState;
+
+        specialinvoke $r3.<android.telephony.ServiceState: void <init>()>();
+
+        $r0.<com.android.server.TelephonyRegistry: android.telephony.ServiceState mServiceState> = $r3;
+
+        $r0.<com.android.server.TelephonyRegistry: int mSignalStrength> = -1;
+
+        $r0.<com.android.server.TelephonyRegistry: boolean mMessageWaiting> = 0;
+
+        $r0.<com.android.server.TelephonyRegistry: boolean mCallForwarding> = 0;
+
+        $r0.<com.android.server.TelephonyRegistry: int mDataActivity> = 0;
+
+        $r0.<com.android.server.TelephonyRegistry: int mDataConnectionState> = 2;
+
+        $r0.<com.android.server.TelephonyRegistry: boolean mDataConnectionPossible> = 0;
+
+        $r0.<com.android.server.TelephonyRegistry: java.lang.String mDataConnectionReason> = "";
+
+        $r0.<com.android.server.TelephonyRegistry: java.lang.String mDataConnectionApn> = "";
+
+        $r0.<com.android.server.TelephonyRegistry: java.lang.String mDataConnectionInterfaceName> = "";
+
+        $r4 = new android.os.Bundle;
+
+        specialinvoke $r4.<android.os.Bundle: void <init>()>();
+
+        $r0.<com.android.server.TelephonyRegistry: android.os.Bundle mCellLocation> = $r4;
+
+        $r5 = staticinvoke <android.telephony.CellLocation: android.telephony.CellLocation getEmpty()>();
+
+        $r4 = $r0.<com.android.server.TelephonyRegistry: android.os.Bundle mCellLocation>;
+
+        virtualinvoke $r5.<android.telephony.CellLocation: void fillInNotifierBundle(android.os.Bundle)>($r4);
+
+        $r0.<com.android.server.TelephonyRegistry: android.content.Context mContext> = $r1;
+
+        $r6 = staticinvoke <com.android.server.am.BatteryStatsService: com.android.internal.app.IBatteryStats getService()>();
+
+        $r0.<com.android.server.TelephonyRegistry: com.android.internal.app.IBatteryStats mBatteryStats> = $r6;
+
+        return;
+    }
+
+    private void broadcastCallStateChanged(int, java.lang.String)
+    {
+        com.android.server.TelephonyRegistry $r0;
+        int $i0;
+        java.lang.String $r1, $r5;
+        android.content.Intent $r2, r9;
+        long $l1;
+        com.android.internal.app.IBatteryStats $r3;
+        com.android.internal.telephony.Phone$State $r4;
+        boolean $z0;
+        android.content.Context $r6;
+        android.os.RemoteException $r7;
+        java.lang.Throwable $r8;
+        java.lang.Enum r10;
+
+        $r0 := @this: com.android.server.TelephonyRegistry;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $l1 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+        if $i0 != 0 goto label06;
+
+     label01:
+        $r3 = $r0.<com.android.server.TelephonyRegistry: com.android.internal.app.IBatteryStats mBatteryStats>;
+
+     label02:
+        interfaceinvoke $r3.<com.android.internal.app.IBatteryStats: void notePhoneOff()>();
+
+     label03:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+     label04:
+        r9 = new android.content.Intent;
+
+        $r2 = r9;
+
+        specialinvoke r9.<android.content.Intent: void <init>(java.lang.String)>("android.intent.action.PHONE_STATE");
+
+        $r4 = staticinvoke <com.android.internal.telephony.DefaultPhoneNotifier: com.android.internal.telephony.Phone$State convertCallState(int)>($i0);
+
+        r10 = (java.lang.Enum) $r4;
+
+        $r5 = virtualinvoke r10.<java.lang.Enum: java.lang.String toString()>();
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("state", $r5);
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r1);
+
+        if $z0 != 0 goto label05;
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("incoming_number", $r1);
+
+     label05:
+        $r6 = $r0.<com.android.server.TelephonyRegistry: android.content.Context mContext>;
+
+        virtualinvoke $r6.<android.content.Context: void sendBroadcast(android.content.Intent,java.lang.String)>($r2, "android.permission.READ_PHONE_STATE");
+
+        return;
+
+     label06:
+        $r3 = $r0.<com.android.server.TelephonyRegistry: com.android.internal.app.IBatteryStats mBatteryStats>;
+
+     label07:
+        interfaceinvoke $r3.<com.android.internal.app.IBatteryStats: void notePhoneOn()>();
+
+     label08:
+        goto label03;
+
+     label09:
+        $r7 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        goto label04;
+
+     label10:
+        $r8 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        throw $r8;
+
+        catch android.os.RemoteException from label02 to label03 with label09;
+        catch java.lang.Throwable from label01 to label03 with label10;
+        catch android.os.RemoteException from label07 to label08 with label09;
+        catch java.lang.Throwable from label06 to label08 with label10;
+    }
+
+    private void broadcastDataConnectionFailed(java.lang.String)
+    {
+        com.android.server.TelephonyRegistry $r0;
+        java.lang.String $r1;
+        android.content.Intent $r2;
+        android.content.Context $r3;
+
+        $r0 := @this: com.android.server.TelephonyRegistry;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new android.content.Intent;
+
+        specialinvoke $r2.<android.content.Intent: void <init>(java.lang.String)>("android.intent.action.DATA_CONNECTION_FAILED");
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("reason", $r1);
+
+        $r3 = $r0.<com.android.server.TelephonyRegistry: android.content.Context mContext>;
+
+        virtualinvoke $r3.<android.content.Context: void sendStickyBroadcast(android.content.Intent)>($r2);
+
+        return;
+    }
+
+    private void broadcastDataConnectionStateChanged(int, boolean, java.lang.String, java.lang.String, java.lang.String)
+    {
+        com.android.server.TelephonyRegistry $r0;
+        int $i0;
+        boolean $z0;
+        java.lang.String $r1, $r2, $r3, $r6;
+        android.content.Intent $r4, r8;
+        com.android.internal.telephony.Phone$DataState $r5;
+        android.content.Context $r7;
+        java.lang.Enum r9;
+
+        $r0 := @this: com.android.server.TelephonyRegistry;
+
+        $i0 := @parameter0: int;
+
+        $z0 := @parameter1: boolean;
+
+        $r1 := @parameter2: java.lang.String;
+
+        $r2 := @parameter3: java.lang.String;
+
+        $r3 := @parameter4: java.lang.String;
+
+        r8 = new android.content.Intent;
+
+        $r4 = r8;
+
+        specialinvoke r8.<android.content.Intent: void <init>(java.lang.String)>("android.intent.action.ANY_DATA_STATE");
+
+        $r5 = staticinvoke <com.android.internal.telephony.DefaultPhoneNotifier: com.android.internal.telephony.Phone$DataState convertDataState(int)>($i0);
+
+        r9 = (java.lang.Enum) $r5;
+
+        $r6 = virtualinvoke r9.<java.lang.Enum: java.lang.String toString()>();
+
+        virtualinvoke $r4.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("state", $r6);
+
+        if $z0 != 0 goto label1;
+
+        virtualinvoke $r4.<android.content.Intent: android.content.Intent putExtra(java.lang.String,boolean)>("networkUnvailable", 1);
+
+     label1:
+        if $r1 == null goto label2;
+
+        virtualinvoke $r4.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("reason", $r1);
+
+     label2:
+        virtualinvoke $r4.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("apn", $r2);
+
+        virtualinvoke $r4.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("iface", $r3);
+
+        $r7 = $r0.<com.android.server.TelephonyRegistry: android.content.Context mContext>;
+
+        virtualinvoke $r7.<android.content.Context: void sendStickyBroadcast(android.content.Intent)>($r4);
+
+        return;
+    }
+
+    private void broadcastServiceStateChanged(android.telephony.ServiceState)
+    {
+        com.android.server.TelephonyRegistry $r0;
+        android.telephony.ServiceState $r1;
+        android.os.Bundle $r2;
+        android.content.Intent $r3;
+        android.content.Context $r4;
+
+        $r0 := @this: com.android.server.TelephonyRegistry;
+
+        $r1 := @parameter0: android.telephony.ServiceState;
+
+        $r3 = new android.content.Intent;
+
+        specialinvoke $r3.<android.content.Intent: void <init>(java.lang.String)>("android.intent.action.SERVICE_STATE");
+
+        $r2 = new android.os.Bundle;
+
+        specialinvoke $r2.<android.os.Bundle: void <init>()>();
+
+        virtualinvoke $r1.<android.telephony.ServiceState: void fillInNotifierBundle(android.os.Bundle)>($r2);
+
+        virtualinvoke $r3.<android.content.Intent: android.content.Intent putExtras(android.os.Bundle)>($r2);
+
+        $r4 = $r0.<com.android.server.TelephonyRegistry: android.content.Context mContext>;
+
+        virtualinvoke $r4.<android.content.Context: void sendStickyBroadcast(android.content.Intent)>($r3);
+
+        return;
+    }
+
+    private void broadcastSignalStrengthChanged(int)
+    {
+        com.android.server.TelephonyRegistry $r0;
+        int $i0;
+        android.content.Intent $r1;
+        long $l1;
+        com.android.internal.app.IBatteryStats $r2;
+        android.content.Context $r3;
+        android.os.RemoteException $r4;
+        java.lang.Throwable $r5;
+
+        $r0 := @this: com.android.server.TelephonyRegistry;
+
+        $i0 := @parameter0: int;
+
+        $l1 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label1:
+        $r2 = $r0.<com.android.server.TelephonyRegistry: com.android.internal.app.IBatteryStats mBatteryStats>;
+
+     label2:
+        interfaceinvoke $r2.<com.android.internal.app.IBatteryStats: void notePhoneSignalStrength(int)>($i0);
+
+     label3:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+     label4:
+        $r1 = new android.content.Intent;
+
+        specialinvoke $r1.<android.content.Intent: void <init>(java.lang.String)>("android.intent.action.SIG_STR");
+
+        virtualinvoke $r1.<android.content.Intent: android.content.Intent putExtra(java.lang.String,int)>("asu", $i0);
+
+        $r3 = $r0.<com.android.server.TelephonyRegistry: android.content.Context mContext>;
+
+        virtualinvoke $r3.<android.content.Context: void sendStickyBroadcast(android.content.Intent)>($r1);
+
+        return;
+
+     label5:
+        $r4 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        goto label4;
+
+     label6:
+        $r5 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        throw $r5;
+
+        catch android.os.RemoteException from label2 to label3 with label5;
+        catch java.lang.Throwable from label1 to label3 with label6;
+    }
+
+    private boolean checkPhoneStatePermission(java.lang.String)
+    {
+        com.android.server.TelephonyRegistry $r0;
+        java.lang.String $r1;
+        android.content.Context $r2;
+        int $i0;
+        java.lang.StringBuilder $r3;
+
+        $r0 := @this: com.android.server.TelephonyRegistry;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = $r0.<com.android.server.TelephonyRegistry: android.content.Context mContext>;
+
+        $i0 = virtualinvoke $r2.<android.content.Context: int checkCallingOrSelfPermission(java.lang.String)>("android.permission.MODIFY_PHONE_STATE");
+
+        if $i0 != 0 goto label1;
+
+        return 1;
+
+     label1:
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Modify Phone State Permission Denial: ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" from pid=");
+
+        $i0 = staticinvoke <android.os.Binder: int getCallingPid()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", uid=");
+
+        $i0 = staticinvoke <android.os.Binder: int getCallingUid()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("TelephonyRegistry", $r1);
+
+        return 0;
+    }
+
+    private void remove(android.os.IBinder)
+    {
+        com.android.server.TelephonyRegistry $r0;
+        android.os.IBinder $r1, $r6;
+        java.util.ArrayList $r2, $r3;
+        int $i0, $i1;
+        java.lang.Object $r4;
+        com.android.server.TelephonyRegistry$Record $r5;
+        java.lang.Throwable $r7;
+
+        $r0 := @this: com.android.server.TelephonyRegistry;
+
+        $r1 := @parameter0: android.os.IBinder;
+
+        $r2 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        entermonitor $r2;
+
+     label1:
+        $r3 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        $i0 = virtualinvoke $r3.<java.util.ArrayList: int size()>();
+
+        $i1 = 0;
+
+     label2:
+        if $i1 >= $i0 goto label5;
+
+        $r3 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        $r4 = virtualinvoke $r3.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r5 = (com.android.server.TelephonyRegistry$Record) $r4;
+
+        $r6 = $r5.<com.android.server.TelephonyRegistry$Record: android.os.IBinder binder>;
+
+        if $r6 != $r1 goto label4;
+
+        $r3 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        virtualinvoke $r3.<java.util.ArrayList: java.lang.Object remove(int)>($i1);
+
+        exitmonitor $r2;
+
+     label3:
+        return;
+
+     label4:
+        $i1 = $i1 + 1;
+
+        goto label2;
+
+     label5:
+        exitmonitor $r2;
+
+     label6:
+        return;
+
+     label7:
+        $r7 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label8:
+        throw $r7;
+
+        catch java.lang.Throwable from label1 to label3 with label7;
+        catch java.lang.Throwable from label4 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    public void dump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[])
+    {
+        com.android.server.TelephonyRegistry $r0;
+        java.io.FileDescriptor $r1;
+        java.io.PrintWriter $r2;
+        java.lang.String[] $r3;
+        android.content.Context $r4;
+        int $i0, $i1, $i2;
+        java.lang.StringBuilder $r5;
+        java.lang.String $r6;
+        java.util.ArrayList $r7, $r8;
+        android.telephony.ServiceState $r9;
+        boolean $z0;
+        android.os.Bundle $r10;
+        java.lang.Object $r11;
+        com.android.server.TelephonyRegistry$Record $r12;
+        java.lang.Throwable $r13;
+
+        $r0 := @this: com.android.server.TelephonyRegistry;
+
+        $r1 := @parameter0: java.io.FileDescriptor;
+
+        $r2 := @parameter1: java.io.PrintWriter;
+
+        $r3 := @parameter2: java.lang.String[];
+
+        $r4 = $r0.<com.android.server.TelephonyRegistry: android.content.Context mContext>;
+
+        $i0 = virtualinvoke $r4.<android.content.Context: int checkCallingOrSelfPermission(java.lang.String)>("android.permission.DUMP");
+
+        if $i0 == 0 goto label1;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Permission Denial: can\'t dump telephony.registry from from pid=");
+
+        $i0 = staticinvoke <android.os.Binder: int getCallingPid()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", uid=");
+
+        $i0 = staticinvoke <android.os.Binder: int getCallingUid()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        return;
+
+     label1:
+        $r7 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        entermonitor $r7;
+
+     label2:
+        $r8 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        $i0 = virtualinvoke $r8.<java.util.ArrayList: int size()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("last known state:");
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mCallState=");
+
+        $i1 = $r0.<com.android.server.TelephonyRegistry: int mCallState>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mCallIncomingNumber=");
+
+        $r6 = $r0.<com.android.server.TelephonyRegistry: java.lang.String mCallIncomingNumber>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mServiceState=");
+
+        $r9 = $r0.<com.android.server.TelephonyRegistry: android.telephony.ServiceState mServiceState>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mSignalStrength=");
+
+        $i1 = $r0.<com.android.server.TelephonyRegistry: int mSignalStrength>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mMessageWaiting=");
+
+        $z0 = $r0.<com.android.server.TelephonyRegistry: boolean mMessageWaiting>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mCallForwarding=");
+
+        $z0 = $r0.<com.android.server.TelephonyRegistry: boolean mCallForwarding>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mDataActivity=");
+
+        $i1 = $r0.<com.android.server.TelephonyRegistry: int mDataActivity>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mDataConnectionState=");
+
+        $i1 = $r0.<com.android.server.TelephonyRegistry: int mDataConnectionState>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mDataConnectionPossible=");
+
+        $z0 = $r0.<com.android.server.TelephonyRegistry: boolean mDataConnectionPossible>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mDataConnectionReason=");
+
+        $r6 = $r0.<com.android.server.TelephonyRegistry: java.lang.String mDataConnectionReason>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mDataConnectionApn=");
+
+        $r6 = $r0.<com.android.server.TelephonyRegistry: java.lang.String mDataConnectionApn>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mDataConnectionInterfaceName=");
+
+        $r6 = $r0.<com.android.server.TelephonyRegistry: java.lang.String mDataConnectionInterfaceName>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mCellLocation=");
+
+        $r10 = $r0.<com.android.server.TelephonyRegistry: android.os.Bundle mCellLocation>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r10);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("registrations: count=");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $i1 = 0;
+
+     label3:
+        if $i1 >= $i0 goto label4;
+
+        $r8 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        $r11 = virtualinvoke $r8.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r12 = (com.android.server.TelephonyRegistry$Record) $r11;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  ");
+
+        $r6 = $r12.<com.android.server.TelephonyRegistry$Record: java.lang.String pkgForDebug>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" 0x");
+
+        $i2 = $r12.<com.android.server.TelephonyRegistry$Record: int events>;
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i2);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $i1 = $i1 + 1;
+
+        goto label3;
+
+     label4:
+        exitmonitor $r7;
+
+     label5:
+        return;
+
+     label6:
+        $r13 := @caughtexception;
+
+        exitmonitor $r7;
+
+     label7:
+        throw $r13;
+
+        catch java.lang.Throwable from label2 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    public void listen(java.lang.String, com.android.internal.telephony.IPhoneStateListener, int, boolean)
+    {
+        com.android.server.TelephonyRegistry $r0;
+        java.lang.String $r1;
+        com.android.internal.telephony.IPhoneStateListener $r2;
+        int $i0, $i1, $i2;
+        boolean $z0;
+        android.content.Context $r3;
+        java.util.ArrayList $r4, $r6;
+        android.os.IBinder $r5, $r9;
+        java.lang.Object $r7;
+        com.android.server.TelephonyRegistry$Record $r8;
+        android.telephony.ServiceState $r10;
+        android.os.Bundle $r11;
+        java.lang.Throwable $r12;
+        android.os.RemoteException $r13, $r14, $r15, $r16, $r17, $r18;
+
+        $r0 := @this: com.android.server.TelephonyRegistry;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: com.android.internal.telephony.IPhoneStateListener;
+
+        $i0 := @parameter2: int;
+
+        $z0 := @parameter3: boolean;
+
+        if $i0 == 0 goto label44;
+
+        $i1 = $i0 & 16;
+
+        if $i1 == 0 goto label01;
+
+        $r3 = $r0.<com.android.server.TelephonyRegistry: android.content.Context mContext>;
+
+        virtualinvoke $r3.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.ACCESS_COARSE_LOCATION", null);
+
+     label01:
+        $r4 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        entermonitor $r4;
+
+     label02:
+        $r5 = interfaceinvoke $r2.<com.android.internal.telephony.IPhoneStateListener: android.os.IBinder asBinder()>();
+
+        $r6 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        $i1 = virtualinvoke $r6.<java.util.ArrayList: int size()>();
+
+     label03:
+        $i2 = 0;
+
+     label04:
+        if $i2 >= $i1 goto label31;
+
+     label05:
+        $r6 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        $r7 = virtualinvoke $r6.<java.util.ArrayList: java.lang.Object get(int)>($i2);
+
+        $r8 = (com.android.server.TelephonyRegistry$Record) $r7;
+
+     label06:
+        $r9 = $r8.<com.android.server.TelephonyRegistry$Record: android.os.IBinder binder>;
+
+        if $r5 != $r9 goto label30;
+
+     label07:
+        $i1 = $r8.<com.android.server.TelephonyRegistry$Record: int events>;
+
+        $r8.<com.android.server.TelephonyRegistry$Record: int events> = $i0;
+
+        if $z0 == 0 goto label28;
+
+        $i1 = $i0 & 1;
+
+        if $i1 == 0 goto label08;
+
+        $r10 = $r0.<com.android.server.TelephonyRegistry: android.telephony.ServiceState mServiceState>;
+
+        virtualinvoke $r0.<com.android.server.TelephonyRegistry: void sendServiceState(com.android.server.TelephonyRegistry$Record,android.telephony.ServiceState)>($r8, $r10);
+
+     label08:
+        $i1 = $i0 & 2;
+
+        if $i1 == 0 goto label11;
+
+     label09:
+        $r2 = $r8.<com.android.server.TelephonyRegistry$Record: com.android.internal.telephony.IPhoneStateListener callback>;
+
+        $i1 = $r0.<com.android.server.TelephonyRegistry: int mSignalStrength>;
+
+     label10:
+        interfaceinvoke $r2.<com.android.internal.telephony.IPhoneStateListener: void onSignalStrengthChanged(int)>($i1);
+
+     label11:
+        $i1 = $i0 & 4;
+
+        if $i1 == 0 goto label14;
+
+     label12:
+        $r2 = $r8.<com.android.server.TelephonyRegistry$Record: com.android.internal.telephony.IPhoneStateListener callback>;
+
+        $z0 = $r0.<com.android.server.TelephonyRegistry: boolean mMessageWaiting>;
+
+     label13:
+        interfaceinvoke $r2.<com.android.internal.telephony.IPhoneStateListener: void onMessageWaitingIndicatorChanged(boolean)>($z0);
+
+     label14:
+        $i1 = $i0 & 8;
+
+        if $i1 == 0 goto label17;
+
+     label15:
+        $r2 = $r8.<com.android.server.TelephonyRegistry$Record: com.android.internal.telephony.IPhoneStateListener callback>;
+
+        $z0 = $r0.<com.android.server.TelephonyRegistry: boolean mCallForwarding>;
+
+     label16:
+        interfaceinvoke $r2.<com.android.internal.telephony.IPhoneStateListener: void onCallForwardingIndicatorChanged(boolean)>($z0);
+
+     label17:
+        $i1 = $i0 & 16;
+
+        if $i1 == 0 goto label19;
+
+     label18:
+        $r11 = $r0.<com.android.server.TelephonyRegistry: android.os.Bundle mCellLocation>;
+
+        virtualinvoke $r0.<com.android.server.TelephonyRegistry: void sendCellLocation(com.android.server.TelephonyRegistry$Record,android.os.Bundle)>($r8, $r11);
+
+     label19:
+        $i1 = $i0 & 32;
+
+        if $i1 == 0 goto label22;
+
+     label20:
+        $r2 = $r8.<com.android.server.TelephonyRegistry$Record: com.android.internal.telephony.IPhoneStateListener callback>;
+
+        $i1 = $r0.<com.android.server.TelephonyRegistry: int mCallState>;
+
+        $r1 = $r0.<com.android.server.TelephonyRegistry: java.lang.String mCallIncomingNumber>;
+
+     label21:
+        interfaceinvoke $r2.<com.android.internal.telephony.IPhoneStateListener: void onCallStateChanged(int,java.lang.String)>($i1, $r1);
+
+     label22:
+        $i1 = $i0 & 64;
+
+        if $i1 == 0 goto label25;
+
+     label23:
+        $r2 = $r8.<com.android.server.TelephonyRegistry$Record: com.android.internal.telephony.IPhoneStateListener callback>;
+
+        $i1 = $r0.<com.android.server.TelephonyRegistry: int mDataConnectionState>;
+
+     label24:
+        interfaceinvoke $r2.<com.android.internal.telephony.IPhoneStateListener: void onDataConnectionStateChanged(int)>($i1);
+
+     label25:
+        $i0 = $i0 & 128;
+
+        if $i0 == 0 goto label28;
+
+     label26:
+        $r2 = $r8.<com.android.server.TelephonyRegistry$Record: com.android.internal.telephony.IPhoneStateListener callback>;
+
+        $i0 = $r0.<com.android.server.TelephonyRegistry: int mDataActivity>;
+
+     label27:
+        interfaceinvoke $r2.<com.android.internal.telephony.IPhoneStateListener: void onDataActivity(int)>($i0);
+
+     label28:
+        exitmonitor $r4;
+
+     label29:
+        return;
+
+     label30:
+        $i2 = $i2 + 1;
+
+        goto label04;
+
+     label31:
+        $r8 = new com.android.server.TelephonyRegistry$Record;
+
+        specialinvoke $r8.<com.android.server.TelephonyRegistry$Record: void <init>(com.android.server.TelephonyRegistry$1)>(null);
+
+     label32:
+        $r8.<com.android.server.TelephonyRegistry$Record: android.os.IBinder binder> = $r5;
+
+        $r8.<com.android.server.TelephonyRegistry$Record: com.android.internal.telephony.IPhoneStateListener callback> = $r2;
+
+        $r8.<com.android.server.TelephonyRegistry$Record: java.lang.String pkgForDebug> = $r1;
+
+        $r6 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        virtualinvoke $r6.<java.util.ArrayList: boolean add(java.lang.Object)>($r8);
+
+        goto label07;
+
+     label33:
+        $r12 := @caughtexception;
+
+     label34:
+        exitmonitor $r4;
+
+     label35:
+        throw $r12;
+
+     label36:
+        $r13 := @caughtexception;
+
+     label37:
+        $r5 = $r8.<com.android.server.TelephonyRegistry$Record: android.os.IBinder binder>;
+
+        specialinvoke $r0.<com.android.server.TelephonyRegistry: void remove(android.os.IBinder)>($r5);
+
+        goto label11;
+
+     label38:
+        $r14 := @caughtexception;
+
+        $r5 = $r8.<com.android.server.TelephonyRegistry$Record: android.os.IBinder binder>;
+
+        specialinvoke $r0.<com.android.server.TelephonyRegistry: void remove(android.os.IBinder)>($r5);
+
+        goto label14;
+
+     label39:
+        $r15 := @caughtexception;
+
+        $r5 = $r8.<com.android.server.TelephonyRegistry$Record: android.os.IBinder binder>;
+
+        specialinvoke $r0.<com.android.server.TelephonyRegistry: void remove(android.os.IBinder)>($r5);
+
+        goto label17;
+
+     label40:
+        $r16 := @caughtexception;
+
+        $r5 = $r8.<com.android.server.TelephonyRegistry$Record: android.os.IBinder binder>;
+
+        specialinvoke $r0.<com.android.server.TelephonyRegistry: void remove(android.os.IBinder)>($r5);
+
+        goto label22;
+
+     label41:
+        $r17 := @caughtexception;
+
+        $r5 = $r8.<com.android.server.TelephonyRegistry$Record: android.os.IBinder binder>;
+
+        specialinvoke $r0.<com.android.server.TelephonyRegistry: void remove(android.os.IBinder)>($r5);
+
+        goto label25;
+
+     label42:
+        $r18 := @caughtexception;
+
+        $r5 = $r8.<com.android.server.TelephonyRegistry$Record: android.os.IBinder binder>;
+
+        specialinvoke $r0.<com.android.server.TelephonyRegistry: void remove(android.os.IBinder)>($r5);
+
+     label43:
+        goto label28;
+
+     label44:
+        $r5 = interfaceinvoke $r2.<com.android.internal.telephony.IPhoneStateListener: android.os.IBinder asBinder()>();
+
+        specialinvoke $r0.<com.android.server.TelephonyRegistry: void remove(android.os.IBinder)>($r5);
+
+        return;
+
+     label45:
+        $r12 := @caughtexception;
+
+        goto label34;
+
+        catch java.lang.Throwable from label02 to label03 with label33;
+        catch java.lang.Throwable from label05 to label06 with label45;
+        catch java.lang.Throwable from label06 to label08 with label33;
+        catch android.os.RemoteException from label10 to label11 with label36;
+        catch java.lang.Throwable from label09 to label11 with label33;
+        catch android.os.RemoteException from label13 to label14 with label38;
+        catch java.lang.Throwable from label12 to label14 with label33;
+        catch android.os.RemoteException from label16 to label17 with label39;
+        catch java.lang.Throwable from label15 to label17 with label33;
+        catch java.lang.Throwable from label18 to label19 with label33;
+        catch android.os.RemoteException from label21 to label22 with label40;
+        catch java.lang.Throwable from label20 to label22 with label33;
+        catch android.os.RemoteException from label24 to label25 with label41;
+        catch java.lang.Throwable from label23 to label25 with label33;
+        catch android.os.RemoteException from label27 to label28 with label42;
+        catch java.lang.Throwable from label26 to label28 with label33;
+        catch java.lang.Throwable from label28 to label29 with label33;
+        catch java.lang.Throwable from label31 to label32 with label45;
+        catch java.lang.Throwable from label32 to label35 with label33;
+        catch java.lang.Throwable from label37 to label43 with label33;
+    }
+
+    public void notifyCallForwardingChanged(boolean)
+    {
+        com.android.server.TelephonyRegistry $r0;
+        boolean $z0, $z1;
+        java.util.ArrayList $r1, $r2;
+        int $i0, $i1;
+        java.lang.Object $r3;
+        com.android.server.TelephonyRegistry$Record $r4;
+        com.android.internal.telephony.IPhoneStateListener $r5;
+        android.os.RemoteException $r6;
+        android.os.IBinder $r7;
+        java.lang.Throwable $r8;
+
+        $r0 := @this: com.android.server.TelephonyRegistry;
+
+        $z0 := @parameter0: boolean;
+
+        $z1 = specialinvoke $r0.<com.android.server.TelephonyRegistry: boolean checkPhoneStatePermission(java.lang.String)>("notifyCallForwardingChanged()");
+
+        if $z1 != 0 goto label01;
+
+        return;
+
+     label01:
+        $r1 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        entermonitor $r1;
+
+     label02:
+        $r0.<com.android.server.TelephonyRegistry: boolean mCallForwarding> = $z0;
+
+        $r2 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        $i0 = virtualinvoke $r2.<java.util.ArrayList: int size()>();
+
+        $i0 = $i0 - 1;
+
+     label03:
+        if $i0 < 0 goto label12;
+
+        $r2 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        $r3 = virtualinvoke $r2.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r4 = (com.android.server.TelephonyRegistry$Record) $r3;
+
+        $i1 = $r4.<com.android.server.TelephonyRegistry$Record: int events>;
+
+     label04:
+        $i1 = $i1 & 8;
+
+        if $i1 == 0 goto label07;
+
+     label05:
+        $r5 = $r4.<com.android.server.TelephonyRegistry$Record: com.android.internal.telephony.IPhoneStateListener callback>;
+
+     label06:
+        interfaceinvoke $r5.<com.android.internal.telephony.IPhoneStateListener: void onCallForwardingIndicatorChanged(boolean)>($z0);
+
+     label07:
+        $i0 = $i0 + -1;
+
+        goto label03;
+
+     label08:
+        $r6 := @caughtexception;
+
+     label09:
+        $r7 = $r4.<com.android.server.TelephonyRegistry$Record: android.os.IBinder binder>;
+
+        specialinvoke $r0.<com.android.server.TelephonyRegistry: void remove(android.os.IBinder)>($r7);
+
+        goto label07;
+
+     label10:
+        $r8 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label11:
+        throw $r8;
+
+     label12:
+        exitmonitor $r1;
+
+     label13:
+        return;
+
+        catch java.lang.Throwable from label02 to label04 with label10;
+        catch android.os.RemoteException from label06 to label07 with label08;
+        catch java.lang.Throwable from label05 to label07 with label10;
+        catch java.lang.Throwable from label09 to label11 with label10;
+        catch java.lang.Throwable from label12 to label13 with label10;
+    }
+
+    public void notifyCallState(int, java.lang.String)
+    {
+        com.android.server.TelephonyRegistry $r0;
+        int $i0, $i1, $i2;
+        java.lang.String $r1;
+        boolean $z0;
+        java.util.ArrayList $r2, $r3;
+        java.lang.Object $r4;
+        com.android.server.TelephonyRegistry$Record $r5;
+        com.android.internal.telephony.IPhoneStateListener $r6;
+        android.os.RemoteException $r7;
+        android.os.IBinder $r8;
+        java.lang.Throwable $r9;
+
+        $r0 := @this: com.android.server.TelephonyRegistry;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $z0 = specialinvoke $r0.<com.android.server.TelephonyRegistry: boolean checkPhoneStatePermission(java.lang.String)>("notifyCallState()");
+
+        if $z0 != 0 goto label01;
+
+        return;
+
+     label01:
+        $r2 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        entermonitor $r2;
+
+     label02:
+        $r0.<com.android.server.TelephonyRegistry: int mCallState> = $i0;
+
+        $r0.<com.android.server.TelephonyRegistry: java.lang.String mCallIncomingNumber> = $r1;
+
+        $r3 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        $i1 = virtualinvoke $r3.<java.util.ArrayList: int size()>();
+
+        $i1 = $i1 - 1;
+
+     label03:
+        if $i1 < 0 goto label12;
+
+        $r3 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        $r4 = virtualinvoke $r3.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r5 = (com.android.server.TelephonyRegistry$Record) $r4;
+
+        $i2 = $r5.<com.android.server.TelephonyRegistry$Record: int events>;
+
+     label04:
+        $i2 = $i2 & 32;
+
+        if $i2 == 0 goto label07;
+
+     label05:
+        $r6 = $r5.<com.android.server.TelephonyRegistry$Record: com.android.internal.telephony.IPhoneStateListener callback>;
+
+     label06:
+        interfaceinvoke $r6.<com.android.internal.telephony.IPhoneStateListener: void onCallStateChanged(int,java.lang.String)>($i0, $r1);
+
+     label07:
+        $i1 = $i1 + -1;
+
+        goto label03;
+
+     label08:
+        $r7 := @caughtexception;
+
+     label09:
+        $r8 = $r5.<com.android.server.TelephonyRegistry$Record: android.os.IBinder binder>;
+
+        specialinvoke $r0.<com.android.server.TelephonyRegistry: void remove(android.os.IBinder)>($r8);
+
+        goto label07;
+
+     label10:
+        $r9 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label11:
+        throw $r9;
+
+     label12:
+        exitmonitor $r2;
+
+     label13:
+        specialinvoke $r0.<com.android.server.TelephonyRegistry: void broadcastCallStateChanged(int,java.lang.String)>($i0, $r1);
+
+        return;
+
+        catch java.lang.Throwable from label02 to label04 with label10;
+        catch android.os.RemoteException from label06 to label07 with label08;
+        catch java.lang.Throwable from label05 to label07 with label10;
+        catch java.lang.Throwable from label09 to label11 with label10;
+        catch java.lang.Throwable from label12 to label13 with label10;
+    }
+
+    public void notifyCellLocation(android.os.Bundle)
+    {
+        com.android.server.TelephonyRegistry $r0;
+        android.os.Bundle $r1;
+        boolean $z0;
+        java.util.ArrayList $r2, $r3;
+        int $i0, $i1;
+        java.lang.Object $r4;
+        com.android.server.TelephonyRegistry$Record $r5;
+        java.lang.Throwable $r6;
+
+        $r0 := @this: com.android.server.TelephonyRegistry;
+
+        $r1 := @parameter0: android.os.Bundle;
+
+        $z0 = specialinvoke $r0.<com.android.server.TelephonyRegistry: boolean checkPhoneStatePermission(java.lang.String)>("notifyCellLocation()");
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r2 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        entermonitor $r2;
+
+     label2:
+        $r0.<com.android.server.TelephonyRegistry: android.os.Bundle mCellLocation> = $r1;
+
+        $r3 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        $i0 = virtualinvoke $r3.<java.util.ArrayList: int size()>();
+
+        $i0 = $i0 - 1;
+
+     label3:
+        if $i0 < 0 goto label5;
+
+        $r3 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        $r4 = virtualinvoke $r3.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r5 = (com.android.server.TelephonyRegistry$Record) $r4;
+
+        $i1 = $r5.<com.android.server.TelephonyRegistry$Record: int events>;
+
+        $i1 = $i1 & 16;
+
+        if $i1 == 0 goto label4;
+
+        virtualinvoke $r0.<com.android.server.TelephonyRegistry: void sendCellLocation(com.android.server.TelephonyRegistry$Record,android.os.Bundle)>($r5, $r1);
+
+     label4:
+        $i0 = $i0 + -1;
+
+        goto label3;
+
+     label5:
+        exitmonitor $r2;
+
+     label6:
+        return;
+
+     label7:
+        $r6 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label8:
+        throw $r6;
+
+        catch java.lang.Throwable from label2 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    public void notifyDataActivity(int)
+    {
+        com.android.server.TelephonyRegistry $r0;
+        int $i0, $i1, $i2;
+        boolean $z0;
+        java.util.ArrayList $r1, $r2;
+        java.lang.Object $r3;
+        com.android.server.TelephonyRegistry$Record $r4;
+        com.android.internal.telephony.IPhoneStateListener $r5;
+        android.os.RemoteException $r6;
+        android.os.IBinder $r7;
+        java.lang.Throwable $r8;
+
+        $r0 := @this: com.android.server.TelephonyRegistry;
+
+        $i0 := @parameter0: int;
+
+        $z0 = specialinvoke $r0.<com.android.server.TelephonyRegistry: boolean checkPhoneStatePermission(java.lang.String)>("notifyDataActivity()");
+
+        if $z0 != 0 goto label01;
+
+        return;
+
+     label01:
+        $r1 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        entermonitor $r1;
+
+     label02:
+        $r0.<com.android.server.TelephonyRegistry: int mDataActivity> = $i0;
+
+        $r2 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        $i1 = virtualinvoke $r2.<java.util.ArrayList: int size()>();
+
+        $i1 = $i1 - 1;
+
+     label03:
+        if $i1 < 0 goto label12;
+
+        $r2 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        $r3 = virtualinvoke $r2.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r4 = (com.android.server.TelephonyRegistry$Record) $r3;
+
+        $i2 = $r4.<com.android.server.TelephonyRegistry$Record: int events>;
+
+     label04:
+        $i2 = $i2 & 128;
+
+        if $i2 == 0 goto label07;
+
+     label05:
+        $r5 = $r4.<com.android.server.TelephonyRegistry$Record: com.android.internal.telephony.IPhoneStateListener callback>;
+
+     label06:
+        interfaceinvoke $r5.<com.android.internal.telephony.IPhoneStateListener: void onDataActivity(int)>($i0);
+
+     label07:
+        $i1 = $i1 + -1;
+
+        goto label03;
+
+     label08:
+        $r6 := @caughtexception;
+
+     label09:
+        $r7 = $r4.<com.android.server.TelephonyRegistry$Record: android.os.IBinder binder>;
+
+        specialinvoke $r0.<com.android.server.TelephonyRegistry: void remove(android.os.IBinder)>($r7);
+
+        goto label07;
+
+     label10:
+        $r8 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label11:
+        throw $r8;
+
+     label12:
+        exitmonitor $r1;
+
+     label13:
+        return;
+
+        catch java.lang.Throwable from label02 to label04 with label10;
+        catch android.os.RemoteException from label06 to label07 with label08;
+        catch java.lang.Throwable from label05 to label07 with label10;
+        catch java.lang.Throwable from label09 to label11 with label10;
+        catch java.lang.Throwable from label12 to label13 with label10;
+    }
+
+    public void notifyDataConnection(int, boolean, java.lang.String, java.lang.String, java.lang.String)
+    {
+        com.android.server.TelephonyRegistry $r0;
+        int $i0, $i1, $i2;
+        boolean $z0, $z1;
+        java.lang.String $r1, $r2, $r3;
+        java.util.ArrayList $r4, $r5;
+        java.lang.Object $r6;
+        com.android.server.TelephonyRegistry$Record $r7;
+        com.android.internal.telephony.IPhoneStateListener $r8;
+        android.os.RemoteException $r9;
+        android.os.IBinder $r10;
+        java.lang.Throwable $r11;
+
+        $r0 := @this: com.android.server.TelephonyRegistry;
+
+        $i0 := @parameter0: int;
+
+        $z0 := @parameter1: boolean;
+
+        $r1 := @parameter2: java.lang.String;
+
+        $r2 := @parameter3: java.lang.String;
+
+        $r3 := @parameter4: java.lang.String;
+
+        $z1 = specialinvoke $r0.<com.android.server.TelephonyRegistry: boolean checkPhoneStatePermission(java.lang.String)>("notifyDataConnection()");
+
+        if $z1 != 0 goto label01;
+
+        return;
+
+     label01:
+        $r4 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        entermonitor $r4;
+
+     label02:
+        $r0.<com.android.server.TelephonyRegistry: int mDataConnectionState> = $i0;
+
+        $r0.<com.android.server.TelephonyRegistry: boolean mDataConnectionPossible> = $z0;
+
+        $r0.<com.android.server.TelephonyRegistry: java.lang.String mDataConnectionReason> = $r1;
+
+        $r0.<com.android.server.TelephonyRegistry: java.lang.String mDataConnectionApn> = $r2;
+
+        $r0.<com.android.server.TelephonyRegistry: java.lang.String mDataConnectionInterfaceName> = $r3;
+
+        $r5 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        $i1 = virtualinvoke $r5.<java.util.ArrayList: int size()>();
+
+        $i1 = $i1 - 1;
+
+     label03:
+        if $i1 < 0 goto label12;
+
+        $r5 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        $r6 = virtualinvoke $r5.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r7 = (com.android.server.TelephonyRegistry$Record) $r6;
+
+        $i2 = $r7.<com.android.server.TelephonyRegistry$Record: int events>;
+
+     label04:
+        $i2 = $i2 & 64;
+
+        if $i2 == 0 goto label07;
+
+     label05:
+        $r8 = $r7.<com.android.server.TelephonyRegistry$Record: com.android.internal.telephony.IPhoneStateListener callback>;
+
+     label06:
+        interfaceinvoke $r8.<com.android.internal.telephony.IPhoneStateListener: void onDataConnectionStateChanged(int)>($i0);
+
+     label07:
+        $i1 = $i1 + -1;
+
+        goto label03;
+
+     label08:
+        $r9 := @caughtexception;
+
+     label09:
+        $r10 = $r7.<com.android.server.TelephonyRegistry$Record: android.os.IBinder binder>;
+
+        specialinvoke $r0.<com.android.server.TelephonyRegistry: void remove(android.os.IBinder)>($r10);
+
+        goto label07;
+
+     label10:
+        $r11 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label11:
+        throw $r11;
+
+     label12:
+        exitmonitor $r4;
+
+     label13:
+        specialinvoke $r0.<com.android.server.TelephonyRegistry: void broadcastDataConnectionStateChanged(int,boolean,java.lang.String,java.lang.String,java.lang.String)>($i0, $z0, $r1, $r2, $r3);
+
+        return;
+
+        catch java.lang.Throwable from label02 to label04 with label10;
+        catch android.os.RemoteException from label06 to label07 with label08;
+        catch java.lang.Throwable from label05 to label07 with label10;
+        catch java.lang.Throwable from label09 to label11 with label10;
+        catch java.lang.Throwable from label12 to label13 with label10;
+    }
+
+    public void notifyDataConnectionFailed(java.lang.String)
+    {
+        com.android.server.TelephonyRegistry $r0;
+        java.lang.String $r1;
+        boolean $z0;
+
+        $r0 := @this: com.android.server.TelephonyRegistry;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $z0 = specialinvoke $r0.<com.android.server.TelephonyRegistry: boolean checkPhoneStatePermission(java.lang.String)>("notifyDataConnectionFailed()");
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        specialinvoke $r0.<com.android.server.TelephonyRegistry: void broadcastDataConnectionFailed(java.lang.String)>($r1);
+
+        return;
+    }
+
+    public void notifyMessageWaitingChanged(boolean)
+    {
+        com.android.server.TelephonyRegistry $r0;
+        boolean $z0, $z1;
+        java.util.ArrayList $r1, $r2;
+        int $i0, $i1;
+        java.lang.Object $r3;
+        com.android.server.TelephonyRegistry$Record $r4;
+        com.android.internal.telephony.IPhoneStateListener $r5;
+        android.os.RemoteException $r6;
+        android.os.IBinder $r7;
+        java.lang.Throwable $r8;
+
+        $r0 := @this: com.android.server.TelephonyRegistry;
+
+        $z0 := @parameter0: boolean;
+
+        $z1 = specialinvoke $r0.<com.android.server.TelephonyRegistry: boolean checkPhoneStatePermission(java.lang.String)>("notifyMessageWaitingChanged()");
+
+        if $z1 != 0 goto label01;
+
+        return;
+
+     label01:
+        $r1 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        entermonitor $r1;
+
+     label02:
+        $r0.<com.android.server.TelephonyRegistry: boolean mMessageWaiting> = $z0;
+
+        $r2 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        $i0 = virtualinvoke $r2.<java.util.ArrayList: int size()>();
+
+        $i0 = $i0 - 1;
+
+     label03:
+        if $i0 < 0 goto label12;
+
+        $r2 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        $r3 = virtualinvoke $r2.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r4 = (com.android.server.TelephonyRegistry$Record) $r3;
+
+        $i1 = $r4.<com.android.server.TelephonyRegistry$Record: int events>;
+
+     label04:
+        $i1 = $i1 & 4;
+
+        if $i1 == 0 goto label07;
+
+     label05:
+        $r5 = $r4.<com.android.server.TelephonyRegistry$Record: com.android.internal.telephony.IPhoneStateListener callback>;
+
+     label06:
+        interfaceinvoke $r5.<com.android.internal.telephony.IPhoneStateListener: void onMessageWaitingIndicatorChanged(boolean)>($z0);
+
+     label07:
+        $i0 = $i0 + -1;
+
+        goto label03;
+
+     label08:
+        $r6 := @caughtexception;
+
+     label09:
+        $r7 = $r4.<com.android.server.TelephonyRegistry$Record: android.os.IBinder binder>;
+
+        specialinvoke $r0.<com.android.server.TelephonyRegistry: void remove(android.os.IBinder)>($r7);
+
+        goto label07;
+
+     label10:
+        $r8 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label11:
+        throw $r8;
+
+     label12:
+        exitmonitor $r1;
+
+     label13:
+        return;
+
+        catch java.lang.Throwable from label02 to label04 with label10;
+        catch android.os.RemoteException from label06 to label07 with label08;
+        catch java.lang.Throwable from label05 to label07 with label10;
+        catch java.lang.Throwable from label09 to label11 with label10;
+        catch java.lang.Throwable from label12 to label13 with label10;
+    }
+
+    public void notifyServiceState(android.telephony.ServiceState)
+    {
+        com.android.server.TelephonyRegistry $r0;
+        android.telephony.ServiceState $r1;
+        boolean $z0;
+        java.util.ArrayList $r2, $r3;
+        int $i0, $i1;
+        java.lang.Object $r4;
+        com.android.server.TelephonyRegistry$Record $r5;
+        java.lang.Throwable $r6;
+
+        $r0 := @this: com.android.server.TelephonyRegistry;
+
+        $r1 := @parameter0: android.telephony.ServiceState;
+
+        $z0 = specialinvoke $r0.<com.android.server.TelephonyRegistry: boolean checkPhoneStatePermission(java.lang.String)>("notifyServiceState()");
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r2 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        entermonitor $r2;
+
+     label2:
+        $r0.<com.android.server.TelephonyRegistry: android.telephony.ServiceState mServiceState> = $r1;
+
+        $r3 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        $i0 = virtualinvoke $r3.<java.util.ArrayList: int size()>();
+
+        $i0 = $i0 - 1;
+
+     label3:
+        if $i0 < 0 goto label5;
+
+        $r3 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        $r4 = virtualinvoke $r3.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r5 = (com.android.server.TelephonyRegistry$Record) $r4;
+
+        $i1 = $r5.<com.android.server.TelephonyRegistry$Record: int events>;
+
+        $i1 = $i1 & 1;
+
+        if $i1 == 0 goto label4;
+
+        virtualinvoke $r0.<com.android.server.TelephonyRegistry: void sendServiceState(com.android.server.TelephonyRegistry$Record,android.telephony.ServiceState)>($r5, $r1);
+
+     label4:
+        $i0 = $i0 + -1;
+
+        goto label3;
+
+     label5:
+        exitmonitor $r2;
+
+     label6:
+        specialinvoke $r0.<com.android.server.TelephonyRegistry: void broadcastServiceStateChanged(android.telephony.ServiceState)>($r1);
+
+        return;
+
+     label7:
+        $r6 := @caughtexception;
+
+     label8:
+        exitmonitor $r2;
+
+     label9:
+        throw $r6;
+
+        catch java.lang.Throwable from label2 to label6 with label7;
+        catch java.lang.Throwable from label8 to label9 with label7;
+    }
+
+    public void notifySignalStrength(int)
+    {
+        com.android.server.TelephonyRegistry $r0;
+        int $i0, $i1, $i2;
+        boolean $z0;
+        java.util.ArrayList $r1, $r2;
+        java.lang.Object $r3;
+        com.android.server.TelephonyRegistry$Record $r4;
+        com.android.internal.telephony.IPhoneStateListener $r5;
+        android.os.RemoteException $r6;
+        android.os.IBinder $r7;
+        java.lang.Throwable $r8;
+
+        $r0 := @this: com.android.server.TelephonyRegistry;
+
+        $i0 := @parameter0: int;
+
+        $z0 = specialinvoke $r0.<com.android.server.TelephonyRegistry: boolean checkPhoneStatePermission(java.lang.String)>("notifySignalStrength()");
+
+        if $z0 != 0 goto label01;
+
+        return;
+
+     label01:
+        $r1 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        entermonitor $r1;
+
+     label02:
+        $r0.<com.android.server.TelephonyRegistry: int mSignalStrength> = $i0;
+
+        $r2 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        $i1 = virtualinvoke $r2.<java.util.ArrayList: int size()>();
+
+        $i1 = $i1 - 1;
+
+     label03:
+        if $i1 < 0 goto label12;
+
+        $r2 = $r0.<com.android.server.TelephonyRegistry: java.util.ArrayList mRecords>;
+
+        $r3 = virtualinvoke $r2.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r4 = (com.android.server.TelephonyRegistry$Record) $r3;
+
+        $i2 = $r4.<com.android.server.TelephonyRegistry$Record: int events>;
+
+     label04:
+        $i2 = $i2 & 2;
+
+        if $i2 == 0 goto label07;
+
+     label05:
+        $r5 = $r4.<com.android.server.TelephonyRegistry$Record: com.android.internal.telephony.IPhoneStateListener callback>;
+
+     label06:
+        interfaceinvoke $r5.<com.android.internal.telephony.IPhoneStateListener: void onSignalStrengthChanged(int)>($i0);
+
+     label07:
+        $i1 = $i1 + -1;
+
+        goto label03;
+
+     label08:
+        $r6 := @caughtexception;
+
+     label09:
+        $r7 = $r4.<com.android.server.TelephonyRegistry$Record: android.os.IBinder binder>;
+
+        specialinvoke $r0.<com.android.server.TelephonyRegistry: void remove(android.os.IBinder)>($r7);
+
+        goto label07;
+
+     label10:
+        $r8 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label11:
+        throw $r8;
+
+     label12:
+        exitmonitor $r1;
+
+     label13:
+        specialinvoke $r0.<com.android.server.TelephonyRegistry: void broadcastSignalStrengthChanged(int)>($i0);
+
+        return;
+
+        catch java.lang.Throwable from label02 to label04 with label10;
+        catch android.os.RemoteException from label06 to label07 with label08;
+        catch java.lang.Throwable from label05 to label07 with label10;
+        catch java.lang.Throwable from label09 to label11 with label10;
+        catch java.lang.Throwable from label12 to label13 with label10;
+    }
+
+    public void sendCellLocation(com.android.server.TelephonyRegistry$Record, android.os.Bundle)
+    {
+        com.android.server.TelephonyRegistry $r0;
+        com.android.server.TelephonyRegistry$Record $r1;
+        android.os.Bundle $r2, $r3;
+        com.android.internal.telephony.IPhoneStateListener $r4;
+        android.os.RemoteException $r5;
+        android.os.IBinder $r6;
+
+        $r0 := @this: com.android.server.TelephonyRegistry;
+
+        $r1 := @parameter0: com.android.server.TelephonyRegistry$Record;
+
+        $r2 := @parameter1: android.os.Bundle;
+
+        $r4 = $r1.<com.android.server.TelephonyRegistry$Record: com.android.internal.telephony.IPhoneStateListener callback>;
+
+        $r3 = new android.os.Bundle;
+
+     label1:
+        specialinvoke $r3.<android.os.Bundle: void <init>(android.os.Bundle)>($r2);
+
+        interfaceinvoke $r4.<com.android.internal.telephony.IPhoneStateListener: void onCellLocationChanged(android.os.Bundle)>($r3);
+
+     label2:
+        return;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = $r1.<com.android.server.TelephonyRegistry$Record: android.os.IBinder binder>;
+
+        specialinvoke $r0.<com.android.server.TelephonyRegistry: void remove(android.os.IBinder)>($r6);
+
+        return;
+
+        catch android.os.RemoteException from label1 to label2 with label3;
+    }
+
+    public void sendServiceState(com.android.server.TelephonyRegistry$Record, android.telephony.ServiceState)
+    {
+        com.android.server.TelephonyRegistry $r0;
+        com.android.server.TelephonyRegistry$Record $r1;
+        android.telephony.ServiceState $r2, $r3;
+        com.android.internal.telephony.IPhoneStateListener $r4;
+        android.os.RemoteException $r5;
+        android.os.IBinder $r6;
+
+        $r0 := @this: com.android.server.TelephonyRegistry;
+
+        $r1 := @parameter0: com.android.server.TelephonyRegistry$Record;
+
+        $r2 := @parameter1: android.telephony.ServiceState;
+
+        $r4 = $r1.<com.android.server.TelephonyRegistry$Record: com.android.internal.telephony.IPhoneStateListener callback>;
+
+        $r3 = new android.telephony.ServiceState;
+
+     label1:
+        specialinvoke $r3.<android.telephony.ServiceState: void <init>(android.telephony.ServiceState)>($r2);
+
+        interfaceinvoke $r4.<com.android.internal.telephony.IPhoneStateListener: void onServiceStateChanged(android.telephony.ServiceState)>($r3);
+
+     label2:
+        return;
+
+     label3:
+        $r5 := @caughtexception;
+
+        $r6 = $r1.<com.android.server.TelephonyRegistry$Record: android.os.IBinder binder>;
+
+        specialinvoke $r0.<com.android.server.TelephonyRegistry: void remove(android.os.IBinder)>($r6);
+
+        return;
+
+        catch android.os.RemoteException from label1 to label2 with label3;
+    }
+
+    public static void <clinit>()
+    {
+        <com.android.server.TelephonyRegistry: java.lang.String TAG> = "TelephonyRegistry";
+
+        return;
+    }
+}

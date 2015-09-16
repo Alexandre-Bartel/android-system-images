@@ -1,0 +1,1429 @@
+public class org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream extends org.apache.harmony.xnet.provider.jsse.SSLInputStream implements org.apache.harmony.xnet.provider.jsse.Appendable, org.apache.harmony.xnet.provider.jsse.DataStream
+{
+    private static final java.security.MessageDigest md5;
+    private static final java.security.MessageDigest sha;
+    private int buff_size;
+    private byte[] buffer;
+    private int inc_buff_size;
+    private int marked_pos;
+    private int read_pos;
+    private int read_pos_end;
+    private int write_pos;
+    private int write_pos_beg;
+
+    static void <clinit>()
+    {
+        java.security.MessageDigest $r0;
+        java.lang.Exception $r1;
+        java.lang.RuntimeException $r2;
+
+     label1:
+        $r0 = staticinvoke <java.security.MessageDigest: java.security.MessageDigest getInstance(java.lang.String)>("MD5");
+
+        <org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: java.security.MessageDigest md5> = $r0;
+
+        $r0 = staticinvoke <java.security.MessageDigest: java.security.MessageDigest getInstance(java.lang.String)>("SHA-1");
+
+     label2:
+        <org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: java.security.MessageDigest sha> = $r0;
+
+        return;
+
+     label3:
+        $r1 := @caughtexception;
+
+        virtualinvoke $r1.<java.lang.Throwable: void printStackTrace()>();
+
+        $r2 = new java.lang.RuntimeException;
+
+        specialinvoke $r2.<java.lang.RuntimeException: void <init>(java.lang.String)>("Could not initialize the Digest Algorithms.");
+
+        throw $r2;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    public void <init>()
+    {
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r0;
+        int $i0;
+        byte[] $r1;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream;
+
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.SSLInputStream: void <init>()>();
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int buff_size> = 1024;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int inc_buff_size> = 1024;
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int buff_size>;
+
+        $r1 = newarray (byte)[$i0];
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer> = $r1;
+
+        return;
+    }
+
+    private void append(byte[], int, int)
+    {
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r0;
+        byte[] $r1, $r4;
+        int $i0, $i1, $i2, $i3;
+        javax.net.ssl.SSLHandshakeException $r2;
+        org.apache.harmony.xnet.provider.jsse.AlertException $r3;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos>;
+
+        $i3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos_end>;
+
+        if $i2 != $i3 goto label2;
+
+        $i2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos_beg>;
+
+        $i3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        if $i2 == $i3 goto label1;
+
+        $r3 = new org.apache.harmony.xnet.provider.jsse.AlertException;
+
+        $r2 = new javax.net.ssl.SSLHandshakeException;
+
+        specialinvoke $r2.<javax.net.ssl.SSLHandshakeException: void <init>(java.lang.String)>("Handshake message has been received before the last oubound message had been sent.");
+
+        specialinvoke $r3.<org.apache.harmony.xnet.provider.jsse.AlertException: void <init>(byte,javax.net.ssl.SSLException)>(10, $r2);
+
+        throw $r3;
+
+     label1:
+        $i2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos>;
+
+        $i3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        if $i2 >= $i3 goto label2;
+
+        $i2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos> = $i2;
+
+        $i2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos>;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos_end> = $i2;
+
+     label2:
+        $i2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos_end>;
+
+        $i2 = $i2 + $i1;
+
+        $i3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int buff_size>;
+
+        if $i2 <= $i3 goto label3;
+
+        $i2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos_end>;
+
+        $i2 = $i2 + $i1;
+
+        $i3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int buff_size>;
+
+        $i2 = $i2 - $i3;
+
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: void enlargeBuffer(int)>($i2);
+
+     label3:
+        $r4 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos_end>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, $i0, $r4, $i2, $i1);
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos_end>;
+
+        $i0 = $i0 + $i1;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos_end> = $i0;
+
+        return;
+    }
+
+    private void check(int)
+    {
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r0;
+        int $i0, $i1, $i2;
+        javax.net.ssl.SSLHandshakeException $r1;
+        org.apache.harmony.xnet.provider.jsse.AlertException $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream;
+
+        $i0 := @parameter0: int;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        $i2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos_beg>;
+
+        if $i1 != $i2 goto label2;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos>;
+
+        $i2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos_end>;
+
+        if $i1 == $i2 goto label1;
+
+        $r2 = new org.apache.harmony.xnet.provider.jsse.AlertException;
+
+        $r1 = new javax.net.ssl.SSLHandshakeException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Data was not fully read: ");
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos>;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos_end>;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<javax.net.ssl.SSLHandshakeException: void <init>(java.lang.String)>($r4);
+
+        specialinvoke $r2.<org.apache.harmony.xnet.provider.jsse.AlertException: void <init>(byte,javax.net.ssl.SSLException)>(80, $r1);
+
+        throw $r2;
+
+     label1:
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos_beg>;
+
+        $i2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos_end>;
+
+        if $i1 >= $i2 goto label2;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos_end>;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos_beg> = $i1;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos_beg>;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos> = $i1;
+
+     label2:
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        $i1 = $i1 + $i0;
+
+        $i2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int buff_size>;
+
+        if $i1 < $i2 goto label3;
+
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: void enlargeBuffer(int)>($i0);
+
+        return;
+
+     label3:
+        return;
+    }
+
+    private void enlargeBuffer(int)
+    {
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r0;
+        int $i0, $i1;
+        byte[] $r1, $r2, $r3;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream;
+
+        $i0 := @parameter0: int;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int inc_buff_size>;
+
+        if $i0 >= $i1 goto label2;
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int buff_size>;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int inc_buff_size>;
+
+        $i0 = $i0 + $i1;
+
+     label1:
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int buff_size> = $i0;
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int buff_size>;
+
+        $r1 = newarray (byte)[$i0];
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i0 = lengthof $r3;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, 0, $r1, 0, $i0);
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer> = $r1;
+
+        return;
+
+     label2:
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int buff_size>;
+
+        $i0 = $i1 + $i0;
+
+        goto label1;
+    }
+
+    public void append(byte[])
+    {
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r0;
+        byte[] $r1;
+        int $i0;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 = lengthof $r1;
+
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: void append(byte[],int,int)>($r1, 0, $i0);
+
+        return;
+    }
+
+    public int available()
+    {
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r0;
+        int $i0, $i1;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos_end>;
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos>;
+
+        $i0 = $i1 - $i0;
+
+        return $i0;
+    }
+
+    protected void clearBuffer()
+    {
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r0;
+        byte[] $r1;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos> = 0;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int marked_pos> = 0;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos_end> = 0;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos> = 0;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos_beg> = 0;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        staticinvoke <java.util.Arrays: void fill(byte[],byte)>($r1, 0);
+
+        return;
+    }
+
+    public byte[] getData(int)
+    {
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r0;
+        int $i0, $i1, $i2;
+        byte[] $r1, $r2;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream;
+
+        $i0 := @parameter0: int;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        $i2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos_beg>;
+
+        $i1 = $i1 - $i2;
+
+        if $i1 >= $i0 goto label1;
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos_beg>;
+
+        $i0 = $i0 - $i1;
+
+        $r1 = newarray (byte)[$i0];
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos_beg>;
+
+        $i2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos_beg>;
+
+        $i1 = $i2 - $i1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, $i0, $r1, 0, $i1);
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos_beg> = $i0;
+
+        return $r1;
+
+     label1:
+        $r1 = newarray (byte)[$i0];
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos_beg>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, $i1, $r1, 0, $i0);
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos_beg>;
+
+        $i0 = $i1 + $i0;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos_beg> = $i0;
+
+        return $r1;
+    }
+
+    protected byte[] getDigestMD5()
+    {
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r0;
+        java.security.MessageDigest $r1, $r3;
+        byte[] $r2;
+        int $i0, $i1;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream;
+
+        $r1 = <org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: java.security.MessageDigest md5>;
+
+        entermonitor $r1;
+
+     label1:
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos_end>;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        if $i0 <= $i1 goto label4;
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos_end>;
+
+     label2:
+        $r3 = <org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: java.security.MessageDigest md5>;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        virtualinvoke $r3.<java.security.MessageDigest: void update(byte[],int,int)>($r2, 0, $i0);
+
+        $r3 = <org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: java.security.MessageDigest md5>;
+
+        $r2 = virtualinvoke $r3.<java.security.MessageDigest: byte[] digest()>();
+
+        exitmonitor $r1;
+
+     label3:
+        return $r2;
+
+     label4:
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        goto label2;
+
+     label5:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label3 with label5;
+        catch java.lang.Throwable from label4 to label6 with label5;
+    }
+
+    protected byte[] getDigestMD5withoutLast()
+    {
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r0;
+        java.security.MessageDigest $r1, $r3;
+        byte[] $r2;
+        int $i0;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream;
+
+        $r1 = <org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: java.security.MessageDigest md5>;
+
+        entermonitor $r1;
+
+     label1:
+        $r3 = <org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: java.security.MessageDigest md5>;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int marked_pos>;
+
+        virtualinvoke $r3.<java.security.MessageDigest: void update(byte[],int,int)>($r2, 0, $i0);
+
+        $r3 = <org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: java.security.MessageDigest md5>;
+
+        $r2 = virtualinvoke $r3.<java.security.MessageDigest: byte[] digest()>();
+
+        exitmonitor $r1;
+
+     label2:
+        return $r2;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    protected byte[] getDigestSHA()
+    {
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r0;
+        java.security.MessageDigest $r1, $r3;
+        byte[] $r2;
+        int $i0, $i1;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream;
+
+        $r1 = <org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: java.security.MessageDigest sha>;
+
+        entermonitor $r1;
+
+     label1:
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos_end>;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        if $i0 <= $i1 goto label4;
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos_end>;
+
+     label2:
+        $r3 = <org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: java.security.MessageDigest sha>;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        virtualinvoke $r3.<java.security.MessageDigest: void update(byte[],int,int)>($r2, 0, $i0);
+
+        $r3 = <org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: java.security.MessageDigest sha>;
+
+        $r2 = virtualinvoke $r3.<java.security.MessageDigest: byte[] digest()>();
+
+        exitmonitor $r1;
+
+     label3:
+        return $r2;
+
+     label4:
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        goto label2;
+
+     label5:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label3 with label5;
+        catch java.lang.Throwable from label4 to label6 with label5;
+    }
+
+    protected byte[] getDigestSHAwithoutLast()
+    {
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r0;
+        java.security.MessageDigest $r1, $r3;
+        byte[] $r2;
+        int $i0;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream;
+
+        $r1 = <org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: java.security.MessageDigest sha>;
+
+        entermonitor $r1;
+
+     label1:
+        $r3 = <org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: java.security.MessageDigest sha>;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int marked_pos>;
+
+        virtualinvoke $r3.<java.security.MessageDigest: void update(byte[],int,int)>($r2, 0, $i0);
+
+        $r3 = <org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: java.security.MessageDigest sha>;
+
+        $r2 = virtualinvoke $r3.<java.security.MessageDigest: byte[] digest()>();
+
+        exitmonitor $r1;
+
+     label2:
+        return $r2;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    protected byte[] getMessages()
+    {
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r0;
+        byte[] $r1, $r2;
+        int $i0, $i1;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos_end>;
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        if $i1 <= $i0 goto label2;
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos_end>;
+
+     label1:
+        $r1 = newarray (byte)[$i0];
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, 0, $r1, 0, $i0);
+
+        return $r1;
+
+     label2:
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        goto label1;
+    }
+
+    public boolean hasData()
+    {
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r0;
+        int $i0, $i1;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos_beg>;
+
+        if $i1 <= $i0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    public void mark()
+    {
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r0;
+        int $i0;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream;
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos>;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int marked_pos> = $i0;
+
+        return;
+    }
+
+    public void mark(int)
+    {
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r0;
+        int $i0;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream;
+
+        $i0 := @parameter0: int;
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos>;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int marked_pos> = $i0;
+
+        return;
+    }
+
+    public boolean markSupported()
+    {
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r0;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream;
+
+        return 1;
+    }
+
+    protected void printContent(java.io.PrintStream)
+    {
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r0;
+        java.io.PrintStream $r1;
+        int $i0, $i1;
+        byte[] $r2;
+        byte $b2;
+        short $s3;
+        java.lang.String $r3, $r4;
+        java.lang.StringBuilder $r5;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream;
+
+        $r1 := @parameter0: java.io.PrintStream;
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos_beg>;
+
+     label1:
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        if $i0 >= $i1 goto label5;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $b2 = $r2[$i0];
+
+        $s3 = $b2 & 255;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($s3);
+
+        $r3 = virtualinvoke $r3.<java.lang.String: java.lang.String toUpperCase()>();
+
+        $r4 = $r3;
+
+        $i1 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        if $i1 != 1 goto label2;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("0");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r4 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label2:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r3 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<java.io.PrintStream: void print(java.lang.String)>($r3);
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos_beg>;
+
+        $i1 = $i0 - $i1;
+
+        $i1 = $i1 + 1;
+
+        $i1 = $i1 % 10;
+
+        if $i1 != 0 goto label3;
+
+        virtualinvoke $r1.<java.io.PrintStream: void print(java.lang.String)>(" ");
+
+     label3:
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos_beg>;
+
+        $i1 = $i0 - $i1;
+
+        $i1 = $i1 + 1;
+
+        $i1 = $i1 % 20;
+
+        if $i1 != 0 goto label4;
+
+        virtualinvoke $r1.<java.io.PrintStream: void println()>();
+
+     label4:
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label5:
+        virtualinvoke $r1.<java.io.PrintStream: void println()>();
+
+        return;
+    }
+
+    public int read() throws java.io.IOException
+    {
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r0;
+        int $i0, $i1;
+        org.apache.harmony.xnet.provider.jsse.EndOfBufferException $r1;
+        byte[] $r2;
+        byte $b2;
+        short $s3;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream;
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos>;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos_end>;
+
+        if $i0 != $i1 goto label1;
+
+        $r1 = new org.apache.harmony.xnet.provider.jsse.EndOfBufferException;
+
+        specialinvoke $r1.<org.apache.harmony.xnet.provider.jsse.EndOfBufferException: void <init>()>();
+
+        throw $r1;
+
+     label1:
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos>;
+
+        $i0 = $i1 + 1;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos> = $i0;
+
+        $b2 = $r2[$i1];
+
+        $s3 = $b2 & 255;
+
+        return $s3;
+    }
+
+    public int read(byte[], int, int) throws java.io.IOException
+    {
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r0;
+        byte[] $r1, $r3;
+        int $i0, $i1, $i2;
+        org.apache.harmony.xnet.provider.jsse.EndOfBufferException $r2;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i2 = virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int available()>();
+
+        if $i1 <= $i2 goto label1;
+
+        $r2 = new org.apache.harmony.xnet.provider.jsse.EndOfBufferException;
+
+        specialinvoke $r2.<org.apache.harmony.xnet.provider.jsse.EndOfBufferException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, $i2, $r1, $i0, $i1);
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos>;
+
+        $i0 = $i0 + $i1;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos> = $i0;
+
+        return $i1;
+    }
+
+    public byte[] read(int) throws java.io.IOException
+    {
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r0;
+        int $i0, $i1;
+        byte[] $r1, $r3;
+        org.apache.harmony.xnet.provider.jsse.EndOfBufferException $r2;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream;
+
+        $i0 := @parameter0: int;
+
+        $i1 = virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int available()>();
+
+        if $i0 <= $i1 goto label1;
+
+        $r2 = new org.apache.harmony.xnet.provider.jsse.EndOfBufferException;
+
+        specialinvoke $r2.<org.apache.harmony.xnet.provider.jsse.EndOfBufferException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        $r1 = newarray (byte)[$i0];
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, $i1, $r1, 0, $i0);
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos>;
+
+        $i0 = $i1 + $i0;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos> = $i0;
+
+        return $r1;
+    }
+
+    protected void removeFromMarkedPosition()
+    {
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r0;
+        int $i0, $i1, $i2, $i3;
+        byte[] $r1, $r2;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos>;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int marked_pos>;
+
+        $i3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos_end>;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos>;
+
+        $i1 = $i3 - $i1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, $i2, $r2, $i0, $i1);
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos_end>;
+
+        $i2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos>;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int marked_pos>;
+
+        $i2 = $i2 - $i1;
+
+        $i0 = $i0 - $i2;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos_end> = $i0;
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int marked_pos>;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos> = $i0;
+
+        return;
+    }
+
+    public void reset()
+    {
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r0;
+        int $i0;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream;
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int marked_pos>;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read_pos> = $i0;
+
+        return;
+    }
+
+    public void write(byte)
+    {
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r0;
+        byte $b0;
+        int $i1, $i2;
+        byte[] $r1;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream;
+
+        $b0 := @parameter0: byte;
+
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: void check(int)>(1);
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        $i2 = $i1 + 1;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos> = $i2;
+
+        $r1[$i1] = $b0;
+
+        return;
+    }
+
+    public void write(byte[])
+    {
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r0;
+        byte[] $r1, $r2;
+        int $i0, $i1;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 = lengthof $r1;
+
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: void check(int)>($i0);
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        $i1 = lengthof $r1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, 0, $r2, $i0, $i1);
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        $i1 = lengthof $r1;
+
+        $i0 = $i0 + $i1;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos> = $i0;
+
+        return;
+    }
+
+    public void writeUint16(long)
+    {
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r0;
+        long $l0, $l3;
+        byte[] $r1;
+        int $i1, $i2;
+        byte $b4;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream;
+
+        $l0 := @parameter0: long;
+
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: void check(int)>(2);
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        $i2 = $i1 + 1;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos> = $i2;
+
+        $l3 = 65280L & $l0;
+
+        $l3 = $l3 >> 8;
+
+        $i2 = (int) $l3;
+
+        $b4 = (byte) $i2;
+
+        $r1[$i1] = $b4;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        $i2 = $i1 + 1;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos> = $i2;
+
+        $l0 = 255L & $l0;
+
+        $i2 = (int) $l0;
+
+        $b4 = (byte) $i2;
+
+        $r1[$i1] = $b4;
+
+        return;
+    }
+
+    public void writeUint24(long)
+    {
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r0;
+        long $l0, $l3;
+        byte[] $r1;
+        int $i1, $i2;
+        byte $b4;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream;
+
+        $l0 := @parameter0: long;
+
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: void check(int)>(3);
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        $i2 = $i1 + 1;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos> = $i2;
+
+        $l3 = 16711680L & $l0;
+
+        $l3 = $l3 >> 16;
+
+        $i2 = (int) $l3;
+
+        $b4 = (byte) $i2;
+
+        $r1[$i1] = $b4;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        $i2 = $i1 + 1;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos> = $i2;
+
+        $l3 = 65280L & $l0;
+
+        $l3 = $l3 >> 8;
+
+        $i2 = (int) $l3;
+
+        $b4 = (byte) $i2;
+
+        $r1[$i1] = $b4;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        $i2 = $i1 + 1;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos> = $i2;
+
+        $l0 = 255L & $l0;
+
+        $i2 = (int) $l0;
+
+        $b4 = (byte) $i2;
+
+        $r1[$i1] = $b4;
+
+        return;
+    }
+
+    public void writeUint32(long)
+    {
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r0;
+        long $l0, $l3;
+        byte[] $r1;
+        int $i1, $i2;
+        byte $b4;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream;
+
+        $l0 := @parameter0: long;
+
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: void check(int)>(4);
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        $i2 = $i1 + 1;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos> = $i2;
+
+        $l3 = -16777216L & $l0;
+
+        $l3 = $l3 >> 24;
+
+        $i2 = (int) $l3;
+
+        $b4 = (byte) $i2;
+
+        $r1[$i1] = $b4;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        $i2 = $i1 + 1;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos> = $i2;
+
+        $l3 = 16711680L & $l0;
+
+        $l3 = $l3 >> 16;
+
+        $i2 = (int) $l3;
+
+        $b4 = (byte) $i2;
+
+        $r1[$i1] = $b4;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        $i2 = $i1 + 1;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos> = $i2;
+
+        $l3 = 65280L & $l0;
+
+        $l3 = $l3 >> 8;
+
+        $i2 = (int) $l3;
+
+        $b4 = (byte) $i2;
+
+        $r1[$i1] = $b4;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        $i2 = $i1 + 1;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos> = $i2;
+
+        $l0 = 255L & $l0;
+
+        $i2 = (int) $l0;
+
+        $b4 = (byte) $i2;
+
+        $r1[$i1] = $b4;
+
+        return;
+    }
+
+    public void writeUint64(long)
+    {
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r0;
+        long $l0, $l3;
+        byte[] $r1;
+        int $i1, $i2;
+        byte $b4;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream;
+
+        $l0 := @parameter0: long;
+
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: void check(int)>(8);
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        $i2 = $i1 + 1;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos> = $i2;
+
+        $l3 = -72057594037927936L & $l0;
+
+        $l3 = $l3 >> 56;
+
+        $i2 = (int) $l3;
+
+        $b4 = (byte) $i2;
+
+        $r1[$i1] = $b4;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        $i2 = $i1 + 1;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos> = $i2;
+
+        $l3 = 71776119061217280L & $l0;
+
+        $l3 = $l3 >> 48;
+
+        $i2 = (int) $l3;
+
+        $b4 = (byte) $i2;
+
+        $r1[$i1] = $b4;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        $i2 = $i1 + 1;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos> = $i2;
+
+        $l3 = 280375465082880L & $l0;
+
+        $l3 = $l3 >> 40;
+
+        $i2 = (int) $l3;
+
+        $b4 = (byte) $i2;
+
+        $r1[$i1] = $b4;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        $i2 = $i1 + 1;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos> = $i2;
+
+        $l3 = 1095216660480L & $l0;
+
+        $l3 = $l3 >> 32;
+
+        $i2 = (int) $l3;
+
+        $b4 = (byte) $i2;
+
+        $r1[$i1] = $b4;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        $i2 = $i1 + 1;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos> = $i2;
+
+        $l3 = -16777216L & $l0;
+
+        $l3 = $l3 >> 24;
+
+        $i2 = (int) $l3;
+
+        $b4 = (byte) $i2;
+
+        $r1[$i1] = $b4;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        $i2 = $i1 + 1;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos> = $i2;
+
+        $l3 = 16711680L & $l0;
+
+        $l3 = $l3 >> 16;
+
+        $i2 = (int) $l3;
+
+        $b4 = (byte) $i2;
+
+        $r1[$i1] = $b4;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        $i2 = $i1 + 1;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos> = $i2;
+
+        $l3 = 65280L & $l0;
+
+        $l3 = $l3 >> 8;
+
+        $i2 = (int) $l3;
+
+        $b4 = (byte) $i2;
+
+        $r1[$i1] = $b4;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        $i2 = $i1 + 1;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos> = $i2;
+
+        $l0 = 255L & $l0;
+
+        $i2 = (int) $l0;
+
+        $b4 = (byte) $i2;
+
+        $r1[$i1] = $b4;
+
+        return;
+    }
+
+    public void writeUint8(long)
+    {
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r0;
+        long $l0;
+        int $i1, $i2;
+        byte[] $r1;
+        byte $b3;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream;
+
+        $l0 := @parameter0: long;
+
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: void check(int)>(1);
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] buffer>;
+
+        $i1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos>;
+
+        $i2 = $i1 + 1;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int write_pos> = $i2;
+
+        $l0 = 255L & $l0;
+
+        $i2 = (int) $l0;
+
+        $b3 = (byte) $i2;
+
+        $r1[$i1] = $b3;
+
+        return;
+    }
+}

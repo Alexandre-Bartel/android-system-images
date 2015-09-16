@@ -1,0 +1,225 @@
+class com.android.internal.policy.impl.ShortcutManager extends android.database.ContentObserver
+{
+    private static final int COLUMN_INTENT;
+    private static final int COLUMN_SHORTCUT;
+    private static final java.lang.String TAG;
+    private static final java.lang.String[] sProjection;
+    private android.content.Context mContext;
+    private android.database.Cursor mCursor;
+    private android.util.SparseArray mShortcutIntents;
+
+    static void <clinit>()
+    {
+        java.lang.String[] $r0;
+
+        <com.android.internal.policy.impl.ShortcutManager: java.lang.String TAG> = "ShortcutManager";
+
+        <com.android.internal.policy.impl.ShortcutManager: int COLUMN_SHORTCUT> = 0;
+
+        <com.android.internal.policy.impl.ShortcutManager: int COLUMN_INTENT> = 1;
+
+        $r0 = newarray (java.lang.String)[2];
+
+        $r0[0] = "shortcut";
+
+        $r0[1] = "intent";
+
+        <com.android.internal.policy.impl.ShortcutManager: java.lang.String[] sProjection> = $r0;
+
+        return;
+    }
+
+    public void <init>(android.content.Context, android.os.Handler)
+    {
+        com.android.internal.policy.impl.ShortcutManager $r0;
+        android.content.Context $r1;
+        android.os.Handler $r2;
+        android.util.SparseArray $r3;
+
+        $r0 := @this: com.android.internal.policy.impl.ShortcutManager;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: android.os.Handler;
+
+        specialinvoke $r0.<android.database.ContentObserver: void <init>(android.os.Handler)>($r2);
+
+        $r0.<com.android.internal.policy.impl.ShortcutManager: android.content.Context mContext> = $r1;
+
+        $r3 = new android.util.SparseArray;
+
+        specialinvoke $r3.<android.util.SparseArray: void <init>()>();
+
+        $r0.<com.android.internal.policy.impl.ShortcutManager: android.util.SparseArray mShortcutIntents> = $r3;
+
+        return;
+    }
+
+    private void updateShortcuts()
+    {
+        com.android.internal.policy.impl.ShortcutManager $r0;
+        android.database.Cursor $r1;
+        java.net.URISyntaxException $r2;
+        boolean $z0;
+        android.util.SparseArray $r3;
+        int $i0;
+        java.lang.String $r4;
+        android.content.Intent $r5;
+
+        $r0 := @this: com.android.internal.policy.impl.ShortcutManager;
+
+        $r1 = $r0.<com.android.internal.policy.impl.ShortcutManager: android.database.Cursor mCursor>;
+
+        $z0 = interfaceinvoke $r1.<android.database.Cursor: boolean requery()>();
+
+        if $z0 != 0 goto label1;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("ShortcutManager", "ShortcutObserver could not re-query shortcuts.");
+
+        return;
+
+     label1:
+        $r3 = $r0.<com.android.internal.policy.impl.ShortcutManager: android.util.SparseArray mShortcutIntents>;
+
+        virtualinvoke $r3.<android.util.SparseArray: void clear()>();
+
+     label2:
+        $z0 = interfaceinvoke $r1.<android.database.Cursor: boolean moveToNext()>();
+
+        if $z0 == 0 goto label6;
+
+        $i0 = interfaceinvoke $r1.<android.database.Cursor: int getInt(int)>(0);
+
+        if $i0 == 0 goto label2;
+
+        $r4 = interfaceinvoke $r1.<android.database.Cursor: java.lang.String getString(int)>(1);
+
+        $r5 = null;
+
+     label3:
+        $r5 = staticinvoke <android.content.Intent: android.content.Intent getIntent(java.lang.String)>($r4);
+
+     label4:
+        if $r5 == null goto label2;
+
+        $r3 = $r0.<com.android.internal.policy.impl.ShortcutManager: android.util.SparseArray mShortcutIntents>;
+
+        virtualinvoke $r3.<android.util.SparseArray: void put(int,java.lang.Object)>($i0, $r5);
+
+        goto label2;
+
+     label5:
+        $r2 := @caughtexception;
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String,java.lang.Throwable)>("ShortcutManager", "Intent URI for shortcut invalid.", $r2);
+
+        goto label4;
+
+     label6:
+        return;
+
+        catch java.net.URISyntaxException from label3 to label4 with label5;
+    }
+
+    public android.content.Intent getIntent(int, int)
+    {
+        int $i0, $i1;
+        com.android.internal.policy.impl.ShortcutManager $r0;
+        android.view.KeyCharacterMap $r1;
+        android.util.SparseArray $r2;
+        java.lang.Object $r3;
+        android.content.Intent $r4;
+
+        $r0 := @this: com.android.internal.policy.impl.ShortcutManager;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 = staticinvoke <android.view.KeyCharacterMap: android.view.KeyCharacterMap load(int)>(0);
+
+        $i1 = virtualinvoke $r1.<android.view.KeyCharacterMap: int get(int,int)>($i0, $i1);
+
+        if $i1 == 0 goto label2;
+
+        $r2 = $r0.<com.android.internal.policy.impl.ShortcutManager: android.util.SparseArray mShortcutIntents>;
+
+        $r3 = virtualinvoke $r2.<android.util.SparseArray: java.lang.Object get(int)>($i1);
+
+        $r4 = (android.content.Intent) $r3;
+
+     label1:
+        if $r4 == null goto label3;
+
+        return $r4;
+
+     label2:
+        $r4 = null;
+
+        goto label1;
+
+     label3:
+        $i0 = virtualinvoke $r1.<android.view.KeyCharacterMap: int get(int,int)>($i0, 0);
+
+        $i0 = staticinvoke <java.lang.Character: int toLowerCase(int)>($i0);
+
+        if $i0 == 0 goto label4;
+
+        $r2 = $r0.<com.android.internal.policy.impl.ShortcutManager: android.util.SparseArray mShortcutIntents>;
+
+        $r3 = virtualinvoke $r2.<android.util.SparseArray: java.lang.Object get(int)>($i0);
+
+        $r4 = (android.content.Intent) $r3;
+
+        return $r4;
+
+     label4:
+        return null;
+    }
+
+    public void observe()
+    {
+        com.android.internal.policy.impl.ShortcutManager $r0;
+        android.net.Uri $r1;
+        java.lang.String[] $r2;
+        android.content.Context $r3;
+        android.content.ContentResolver $r4;
+        android.database.Cursor $r5;
+
+        $r0 := @this: com.android.internal.policy.impl.ShortcutManager;
+
+        $r3 = $r0.<com.android.internal.policy.impl.ShortcutManager: android.content.Context mContext>;
+
+        $r4 = virtualinvoke $r3.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r1 = <android.provider.Settings$Bookmarks: android.net.Uri CONTENT_URI>;
+
+        $r2 = <com.android.internal.policy.impl.ShortcutManager: java.lang.String[] sProjection>;
+
+        $r5 = virtualinvoke $r4.<android.content.ContentResolver: android.database.Cursor query(android.net.Uri,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String)>($r1, $r2, null, null, null);
+
+        $r0.<com.android.internal.policy.impl.ShortcutManager: android.database.Cursor mCursor> = $r5;
+
+        $r5 = $r0.<com.android.internal.policy.impl.ShortcutManager: android.database.Cursor mCursor>;
+
+        interfaceinvoke $r5.<android.database.Cursor: void registerContentObserver(android.database.ContentObserver)>($r0);
+
+        specialinvoke $r0.<com.android.internal.policy.impl.ShortcutManager: void updateShortcuts()>();
+
+        return;
+    }
+
+    public void onChange(boolean)
+    {
+        com.android.internal.policy.impl.ShortcutManager $r0;
+        boolean $z0;
+
+        $r0 := @this: com.android.internal.policy.impl.ShortcutManager;
+
+        $z0 := @parameter0: boolean;
+
+        specialinvoke $r0.<com.android.internal.policy.impl.ShortcutManager: void updateShortcuts()>();
+
+        return;
+    }
+}

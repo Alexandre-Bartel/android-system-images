@@ -1,0 +1,2750 @@
+public final class com.android.commands.pm.Pm extends java.lang.Object
+{
+    private static final java.lang.String PM_NOT_RUNNING_ERR;
+    private java.lang.String[] mArgs;
+    private java.lang.String mCurArgData;
+    private int mNextArg;
+    android.content.pm.IPackageManager mPm;
+    private java.util.WeakHashMap mResourceCache;
+
+    public void <init>()
+    {
+        com.android.commands.pm.Pm $r0;
+        java.util.WeakHashMap $r1;
+
+        $r0 := @this: com.android.commands.pm.Pm;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.WeakHashMap;
+
+        specialinvoke $r1.<java.util.WeakHashMap: void <init>()>();
+
+        $r0.<com.android.commands.pm.Pm: java.util.WeakHashMap mResourceCache> = $r1;
+
+        return;
+    }
+
+    private boolean deletePackage(java.lang.String, int)
+    {
+        com.android.commands.pm.Pm $r0;
+        java.lang.String $r1;
+        int $i0;
+        com.android.commands.pm.Pm$PackageDeleteObserver $r2, r8;
+        android.content.pm.IPackageManager $r3;
+        boolean $z0;
+        java.lang.InterruptedException $r4;
+        java.lang.Throwable $r5;
+        android.os.RemoteException $r6;
+        java.io.PrintStream $r7;
+        android.content.pm.IPackageDeleteObserver r9;
+
+        $r0 := @this: com.android.commands.pm.Pm;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        r8 = new com.android.commands.pm.Pm$PackageDeleteObserver;
+
+        $r2 = r8;
+
+        specialinvoke r8.<com.android.commands.pm.Pm$PackageDeleteObserver: void <init>(com.android.commands.pm.Pm)>($r0);
+
+        $r3 = $r0.<com.android.commands.pm.Pm: android.content.pm.IPackageManager mPm>;
+
+        r9 = (android.content.pm.IPackageDeleteObserver) $r2;
+
+     label01:
+        interfaceinvoke $r3.<android.content.pm.IPackageManager: void deletePackage(java.lang.String,android.content.pm.IPackageDeleteObserver,int)>($r1, r9, $i0);
+
+     label02:
+        entermonitor $r2;
+
+     label03:
+        $z0 = $r2.<com.android.commands.pm.Pm$PackageDeleteObserver: boolean finished>;
+
+     label04:
+        if $z0 != 0 goto label08;
+
+     label05:
+        virtualinvoke $r2.<java.lang.Object: void wait()>();
+
+     label06:
+        goto label03;
+
+     label07:
+        $r4 := @caughtexception;
+
+        goto label03;
+
+     label08:
+        exitmonitor $r2;
+
+     label09:
+        $z0 = $r2.<com.android.commands.pm.Pm$PackageDeleteObserver: boolean result>;
+
+        return $z0;
+
+     label10:
+        $r5 := @caughtexception;
+
+     label11:
+        exitmonitor $r2;
+
+     label12:
+        throw $r5;
+
+     label13:
+        $r6 := @caughtexception;
+
+        $r7 = <java.lang.System: java.io.PrintStream err>;
+
+        $r1 = virtualinvoke $r6.<java.lang.Throwable: java.lang.String toString()>();
+
+        virtualinvoke $r7.<java.io.PrintStream: void println(java.lang.String)>($r1);
+
+        $r7 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r7.<java.io.PrintStream: void println(java.lang.String)>("Error: Could not access the Package Manager.  Is the system running?");
+
+        goto label09;
+
+        catch android.os.RemoteException from label01 to label02 with label13;
+        catch java.lang.Throwable from label03 to label04 with label10;
+        catch java.lang.InterruptedException from label05 to label06 with label07;
+        catch java.lang.Throwable from label05 to label06 with label10;
+        catch java.lang.Throwable from label08 to label09 with label10;
+        catch java.lang.Throwable from label11 to label12 with label10;
+        catch android.os.RemoteException from label12 to label13 with label13;
+    }
+
+    private void displayPackageFilePath(java.lang.String)
+    {
+        com.android.commands.pm.Pm $r0;
+        java.lang.String $r1;
+        android.content.pm.IPackageManager $r2;
+        android.content.pm.PackageInfo $r3;
+        android.content.pm.ApplicationInfo $r4;
+        java.io.PrintStream $r5;
+        android.os.RemoteException $r6;
+
+        $r0 := @this: com.android.commands.pm.Pm;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = $r0.<com.android.commands.pm.Pm: android.content.pm.IPackageManager mPm>;
+
+     label1:
+        $r3 = interfaceinvoke $r2.<android.content.pm.IPackageManager: android.content.pm.PackageInfo getPackageInfo(java.lang.String,int)>($r1, 0);
+
+     label2:
+        if $r3 == null goto label8;
+
+        $r4 = $r3.<android.content.pm.PackageInfo: android.content.pm.ApplicationInfo applicationInfo>;
+
+        if $r4 == null goto label9;
+
+     label3:
+        $r5 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r5.<java.io.PrintStream: void print(java.lang.String)>("package:");
+
+     label4:
+        $r5 = <java.lang.System: java.io.PrintStream out>;
+
+        $r4 = $r3.<android.content.pm.PackageInfo: android.content.pm.ApplicationInfo applicationInfo>;
+
+     label5:
+        $r1 = $r4.<android.content.pm.ApplicationInfo: java.lang.String sourceDir>;
+
+        virtualinvoke $r5.<java.io.PrintStream: void println(java.lang.String)>($r1);
+
+     label6:
+        return;
+
+     label7:
+        $r6 := @caughtexception;
+
+        $r5 = <java.lang.System: java.io.PrintStream err>;
+
+        $r1 = virtualinvoke $r6.<java.lang.Throwable: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.io.PrintStream: void println(java.lang.String)>($r1);
+
+        $r5 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r5.<java.io.PrintStream: void println(java.lang.String)>("Error: Could not access the Package Manager.  Is the system running?");
+
+        return;
+
+     label8:
+        return;
+
+     label9:
+        return;
+
+        catch android.os.RemoteException from label1 to label2 with label7;
+        catch android.os.RemoteException from label3 to label4 with label7;
+        catch android.os.RemoteException from label5 to label6 with label7;
+    }
+
+    private void doListPermissions(java.util.ArrayList, boolean, boolean, boolean, int, int) throws android.os.RemoteException
+    {
+        com.android.commands.pm.Pm $r0;
+        java.util.ArrayList $r1;
+        boolean $z0, $z1, $z2, $z3;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        java.lang.Object $r2;
+        java.lang.String $r3, $r4, $r11;
+        java.io.PrintStream $r5;
+        android.content.pm.IPackageManager $r6;
+        android.content.pm.PermissionGroupInfo $r7;
+        android.content.res.Resources $r8;
+        java.lang.StringBuilder $r9;
+        java.lang.CharSequence $r10;
+        java.util.List $r12;
+        android.content.pm.PermissionInfo $r13;
+
+        $r0 := @this: com.android.commands.pm.Pm;
+
+        $r1 := @parameter0: java.util.ArrayList;
+
+        $z0 := @parameter1: boolean;
+
+        $z1 := @parameter2: boolean;
+
+        $z2 := @parameter3: boolean;
+
+        $i0 := @parameter4: int;
+
+        $i1 := @parameter5: int;
+
+        $i2 = 0;
+
+     label01:
+        $i3 = virtualinvoke $r1.<java.util.ArrayList: int size()>();
+
+        if $i2 >= $i3 goto label29;
+
+        $r2 = virtualinvoke $r1.<java.util.ArrayList: java.lang.Object get(int)>($i2);
+
+        $r3 = (java.lang.String) $r2;
+
+        $r4 = "";
+
+        if $z0 == 0 goto label04;
+
+        if $i2 <= 0 goto label02;
+
+        $r5 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r5.<java.io.PrintStream: void println(java.lang.String)>("");
+
+     label02:
+        if $r3 == null goto label11;
+
+        $r6 = $r0.<com.android.commands.pm.Pm: android.content.pm.IPackageManager mPm>;
+
+        $r7 = interfaceinvoke $r6.<android.content.pm.IPackageManager: android.content.pm.PermissionGroupInfo getPermissionGroupInfo(java.lang.String,int)>($r3, 0);
+
+        if $z2 == 0 goto label08;
+
+        $r8 = specialinvoke $r0.<com.android.commands.pm.Pm: android.content.res.Resources getResources(android.content.pm.PackageItemInfo)>($r7);
+
+        if $r8 == null goto label07;
+
+        $r5 = <java.lang.System: java.io.PrintStream out>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $i3 = $r7.<android.content.pm.PackageItemInfo: int labelRes>;
+
+        $r10 = $r7.<android.content.pm.PackageItemInfo: java.lang.CharSequence nonLocalizedLabel>;
+
+        $r4 = specialinvoke $r0.<com.android.commands.pm.Pm: java.lang.String loadText(android.content.pm.PackageItemInfo,int,java.lang.CharSequence)>($r7, $i3, $r10);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r4 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.io.PrintStream: void print(java.lang.String)>($r4);
+
+     label03:
+        $r4 = "  ";
+
+     label04:
+        $r6 = $r0.<com.android.commands.pm.Pm: android.content.pm.IPackageManager mPm>;
+
+        $r2 = virtualinvoke $r1.<java.util.ArrayList: java.lang.Object get(int)>($i2);
+
+        $r11 = (java.lang.String) $r2;
+
+        $r12 = interfaceinvoke $r6.<android.content.pm.IPackageManager: java.util.List queryPermissionsByGroup(java.lang.String,int)>($r11, 0);
+
+        $i3 = interfaceinvoke $r12.<java.util.List: int size()>();
+
+        $z3 = 1;
+
+        $i4 = 0;
+
+     label05:
+        if $i4 >= $i3 goto label27;
+
+        $r2 = interfaceinvoke $r12.<java.util.List: java.lang.Object get(int)>($i4);
+
+        $r13 = (android.content.pm.PermissionInfo) $r2;
+
+        if $z0 == 0 goto label14;
+
+        if $r3 != null goto label14;
+
+        $r11 = $r13.<android.content.pm.PermissionInfo: java.lang.String group>;
+
+        if $r11 == null goto label14;
+
+     label06:
+        $i4 = $i4 + 1;
+
+        goto label05;
+
+     label07:
+        $r5 = <java.lang.System: java.io.PrintStream out>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = $r7.<android.content.pm.PackageItemInfo: java.lang.String name>;
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r4 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.io.PrintStream: void print(java.lang.String)>($r4);
+
+        goto label03;
+
+     label08:
+        $r5 = <java.lang.System: java.io.PrintStream out>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        if $z1 == 0 goto label10;
+
+        $r4 = "+ ";
+
+     label09:
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("group:");
+
+        $r4 = $r7.<android.content.pm.PackageItemInfo: java.lang.String name>;
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.io.PrintStream: void println(java.lang.String)>($r4);
+
+        if $z1 == 0 goto label03;
+
+        $r5 = <java.lang.System: java.io.PrintStream out>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  package:");
+
+        $r4 = $r7.<android.content.pm.PackageItemInfo: java.lang.String packageName>;
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.io.PrintStream: void println(java.lang.String)>($r4);
+
+        $r8 = specialinvoke $r0.<com.android.commands.pm.Pm: android.content.res.Resources getResources(android.content.pm.PackageItemInfo)>($r7);
+
+        if $r8 == null goto label03;
+
+        $r5 = <java.lang.System: java.io.PrintStream out>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  label:");
+
+        $i3 = $r7.<android.content.pm.PackageItemInfo: int labelRes>;
+
+        $r10 = $r7.<android.content.pm.PackageItemInfo: java.lang.CharSequence nonLocalizedLabel>;
+
+        $r4 = specialinvoke $r0.<com.android.commands.pm.Pm: java.lang.String loadText(android.content.pm.PackageItemInfo,int,java.lang.CharSequence)>($r7, $i3, $r10);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.io.PrintStream: void println(java.lang.String)>($r4);
+
+        $r5 = <java.lang.System: java.io.PrintStream out>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  description:");
+
+        $i3 = $r7.<android.content.pm.PermissionGroupInfo: int descriptionRes>;
+
+        $r10 = $r7.<android.content.pm.PermissionGroupInfo: java.lang.CharSequence nonLocalizedDescription>;
+
+        $r4 = specialinvoke $r0.<com.android.commands.pm.Pm: java.lang.String loadText(android.content.pm.PackageItemInfo,int,java.lang.CharSequence)>($r7, $i3, $r10);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.io.PrintStream: void println(java.lang.String)>($r4);
+
+        goto label03;
+
+     label10:
+        $r4 = "";
+
+        goto label09;
+
+     label11:
+        $r5 = <java.lang.System: java.io.PrintStream out>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        if $z1 == 0 goto label13;
+
+        if $z2 != 0 goto label13;
+
+        $r4 = "+ ";
+
+     label12:
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ungrouped:");
+
+        $r4 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.io.PrintStream: void println(java.lang.String)>($r4);
+
+        goto label03;
+
+     label13:
+        $r4 = "";
+
+        goto label12;
+
+     label14:
+        $i5 = $r13.<android.content.pm.PermissionInfo: int protectionLevel>;
+
+        if $i5 < $i0 goto label06;
+
+        $i5 = $r13.<android.content.pm.PermissionInfo: int protectionLevel>;
+
+        if $i5 > $i1 goto label06;
+
+        if $z2 == 0 goto label18;
+
+        if $z3 == 0 goto label16;
+
+        $z3 = 0;
+
+     label15:
+        $r8 = specialinvoke $r0.<com.android.commands.pm.Pm: android.content.res.Resources getResources(android.content.pm.PackageItemInfo)>($r13);
+
+        if $r8 == null goto label17;
+
+        $r5 = <java.lang.System: java.io.PrintStream out>;
+
+        $i5 = $r13.<android.content.pm.PackageItemInfo: int labelRes>;
+
+        $r10 = $r13.<android.content.pm.PackageItemInfo: java.lang.CharSequence nonLocalizedLabel>;
+
+        $r11 = specialinvoke $r0.<com.android.commands.pm.Pm: java.lang.String loadText(android.content.pm.PackageItemInfo,int,java.lang.CharSequence)>($r13, $i5, $r10);
+
+        virtualinvoke $r5.<java.io.PrintStream: void print(java.lang.String)>($r11);
+
+        goto label06;
+
+     label16:
+        $r5 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r5.<java.io.PrintStream: void print(java.lang.String)>(", ");
+
+        goto label15;
+
+     label17:
+        $r5 = <java.lang.System: java.io.PrintStream out>;
+
+        $r11 = $r13.<android.content.pm.PackageItemInfo: java.lang.String name>;
+
+        virtualinvoke $r5.<java.io.PrintStream: void print(java.lang.String)>($r11);
+
+        goto label06;
+
+     label18:
+        $r5 = <java.lang.System: java.io.PrintStream out>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        if $z1 == 0 goto label22;
+
+        $r11 = "+ ";
+
+     label19:
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("permission:");
+
+        $r11 = $r13.<android.content.pm.PackageItemInfo: java.lang.String name>;
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.io.PrintStream: void println(java.lang.String)>($r11);
+
+        if $z1 == 0 goto label06;
+
+        $r5 = <java.lang.System: java.io.PrintStream out>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  package:");
+
+        $r11 = $r13.<android.content.pm.PackageItemInfo: java.lang.String packageName>;
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.io.PrintStream: void println(java.lang.String)>($r11);
+
+        $r8 = specialinvoke $r0.<com.android.commands.pm.Pm: android.content.res.Resources getResources(android.content.pm.PackageItemInfo)>($r13);
+
+        if $r8 == null goto label20;
+
+        $r5 = <java.lang.System: java.io.PrintStream out>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  label:");
+
+        $i5 = $r13.<android.content.pm.PackageItemInfo: int labelRes>;
+
+        $r10 = $r13.<android.content.pm.PackageItemInfo: java.lang.CharSequence nonLocalizedLabel>;
+
+        $r11 = specialinvoke $r0.<com.android.commands.pm.Pm: java.lang.String loadText(android.content.pm.PackageItemInfo,int,java.lang.CharSequence)>($r13, $i5, $r10);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.io.PrintStream: void println(java.lang.String)>($r11);
+
+        $r5 = <java.lang.System: java.io.PrintStream out>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  description:");
+
+        $i5 = $r13.<android.content.pm.PermissionInfo: int descriptionRes>;
+
+        $r10 = $r13.<android.content.pm.PermissionInfo: java.lang.CharSequence nonLocalizedDescription>;
+
+        $r11 = specialinvoke $r0.<com.android.commands.pm.Pm: java.lang.String loadText(android.content.pm.PackageItemInfo,int,java.lang.CharSequence)>($r13, $i5, $r10);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.io.PrintStream: void println(java.lang.String)>($r11);
+
+     label20:
+        $r11 = "unknown";
+
+        $i5 = $r13.<android.content.pm.PermissionInfo: int protectionLevel>;
+
+        lookupswitch($i5)
+        {
+            case 0: goto label24;
+            case 1: goto label23;
+            case 2: goto label25;
+            case 3: goto label26;
+            default: goto label21;
+        };
+
+     label21:
+        $r5 = <java.lang.System: java.io.PrintStream out>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  protectionLevel:");
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r11 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.io.PrintStream: void println(java.lang.String)>($r11);
+
+        goto label06;
+
+     label22:
+        $r11 = "";
+
+        goto label19;
+
+     label23:
+        $r11 = "dangerous";
+
+        goto label21;
+
+     label24:
+        $r11 = "normal";
+
+        goto label21;
+
+     label25:
+        $r11 = "signature";
+
+        goto label21;
+
+     label26:
+        $r11 = "signatureOrSystem";
+
+        goto label21;
+
+     label27:
+        if $z2 == 0 goto label28;
+
+        $r5 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r5.<java.io.PrintStream: void println(java.lang.String)>("");
+
+     label28:
+        $i2 = $i2 + 1;
+
+        goto label01;
+
+     label29:
+        return;
+    }
+
+    private static java.lang.String enabledSettingToString(int)
+    {
+        int $i0;
+
+        $i0 := @parameter0: int;
+
+        lookupswitch($i0)
+        {
+            case 0: goto label2;
+            case 1: goto label3;
+            case 2: goto label4;
+            default: goto label1;
+        };
+
+     label1:
+        return "unknown";
+
+     label2:
+        return "default";
+
+     label3:
+        return "enabled";
+
+     label4:
+        return "disabled";
+    }
+
+    private android.content.res.Resources getResources(android.content.pm.PackageItemInfo)
+    {
+        com.android.commands.pm.Pm $r0;
+        android.content.pm.PackageItemInfo $r1;
+        android.content.res.AssetManager $r2;
+        android.content.res.Resources $r3;
+        java.util.WeakHashMap $r4;
+        java.lang.String $r5;
+        java.lang.Object $r6;
+        android.content.pm.IPackageManager $r7;
+        android.content.pm.ApplicationInfo $r8;
+        android.os.RemoteException $r9, $r11;
+        java.io.PrintStream $r10;
+
+        $r0 := @this: com.android.commands.pm.Pm;
+
+        $r1 := @parameter0: android.content.pm.PackageItemInfo;
+
+        $r4 = $r0.<com.android.commands.pm.Pm: java.util.WeakHashMap mResourceCache>;
+
+        $r5 = $r1.<android.content.pm.PackageItemInfo: java.lang.String packageName>;
+
+        $r6 = virtualinvoke $r4.<java.util.WeakHashMap: java.lang.Object get(java.lang.Object)>($r5);
+
+        $r3 = (android.content.res.Resources) $r6;
+
+        if $r3 == null goto label1;
+
+        return $r3;
+
+     label1:
+        $r7 = $r0.<com.android.commands.pm.Pm: android.content.pm.IPackageManager mPm>;
+
+        $r5 = $r1.<android.content.pm.PackageItemInfo: java.lang.String packageName>;
+
+     label2:
+        $r8 = interfaceinvoke $r7.<android.content.pm.IPackageManager: android.content.pm.ApplicationInfo getApplicationInfo(java.lang.String,int)>($r5, 0);
+
+        $r2 = new android.content.res.AssetManager;
+
+        specialinvoke $r2.<android.content.res.AssetManager: void <init>()>();
+
+        $r5 = $r8.<android.content.pm.ApplicationInfo: java.lang.String publicSourceDir>;
+
+        virtualinvoke $r2.<android.content.res.AssetManager: int addAssetPath(java.lang.String)>($r5);
+
+        $r3 = new android.content.res.Resources;
+
+        specialinvoke $r3.<android.content.res.Resources: void <init>(android.content.res.AssetManager,android.util.DisplayMetrics,android.content.res.Configuration)>($r2, null, null);
+
+     label3:
+        $r4 = $r0.<com.android.commands.pm.Pm: java.util.WeakHashMap mResourceCache>;
+
+        $r5 = $r1.<android.content.pm.PackageItemInfo: java.lang.String packageName>;
+
+     label4:
+        virtualinvoke $r4.<java.util.WeakHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r5, $r3);
+
+     label5:
+        return $r3;
+
+     label6:
+        $r9 := @caughtexception;
+
+     label7:
+        $r10 = <java.lang.System: java.io.PrintStream err>;
+
+        $r5 = virtualinvoke $r9.<java.lang.Throwable: java.lang.String toString()>();
+
+        virtualinvoke $r10.<java.io.PrintStream: void println(java.lang.String)>($r5);
+
+        $r10 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r10.<java.io.PrintStream: void println(java.lang.String)>("Error: Could not access the Package Manager.  Is the system running?");
+
+        return null;
+
+     label8:
+        $r11 := @caughtexception;
+
+        $r9 = $r11;
+
+        goto label7;
+
+        catch android.os.RemoteException from label2 to label3 with label6;
+        catch android.os.RemoteException from label4 to label5 with label8;
+    }
+
+    private java.lang.String installFailureToString(int)
+    {
+        com.android.commands.pm.Pm $r0;
+        int $i0;
+        java.lang.String $r1;
+
+        $r0 := @this: com.android.commands.pm.Pm;
+
+        $i0 := @parameter0: int;
+
+        lookupswitch($i0)
+        {
+            case -109: goto label23;
+            case -108: goto label22;
+            case -107: goto label21;
+            case -106: goto label20;
+            case -105: goto label19;
+            case -104: goto label18;
+            case -103: goto label17;
+            case -102: goto label16;
+            case -101: goto label15;
+            case -100: goto label14;
+            case -13: goto label13;
+            case -12: goto label12;
+            case -11: goto label11;
+            case -9: goto label10;
+            case -8: goto label09;
+            case -7: goto label08;
+            case -6: goto label07;
+            case -5: goto label06;
+            case -4: goto label05;
+            case -3: goto label04;
+            case -2: goto label03;
+            case -1: goto label02;
+            default: goto label01;
+        };
+
+     label01:
+        $r1 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>($i0);
+
+        return $r1;
+
+     label02:
+        return "INSTALL_FAILED_ALREADY_EXISTS";
+
+     label03:
+        return "INSTALL_FAILED_INVALID_APK";
+
+     label04:
+        return "INSTALL_FAILED_INVALID_URI";
+
+     label05:
+        return "INSTALL_FAILED_INSUFFICIENT_STORAGE";
+
+     label06:
+        return "INSTALL_FAILED_DUPLICATE_PACKAGE";
+
+     label07:
+        return "INSTALL_FAILED_NO_SHARED_USER";
+
+     label08:
+        return "INSTALL_FAILED_UPDATE_INCOMPATIBLE";
+
+     label09:
+        return "INSTALL_FAILED_SHARED_USER_INCOMPATIBLE";
+
+     label10:
+        return "INSTALL_FAILED_MISSING_SHARED_LIBRARY";
+
+     label11:
+        return "INSTALL_FAILED_DEXOPT";
+
+     label12:
+        return "INSTALL_FAILED_OLDER_SDK";
+
+     label13:
+        return "INSTALL_FAILED_CONFLICTING_PROVIDER";
+
+     label14:
+        return "INSTALL_PARSE_FAILED_NOT_APK";
+
+     label15:
+        return "INSTALL_PARSE_FAILED_BAD_MANIFEST";
+
+     label16:
+        return "INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION";
+
+     label17:
+        return "INSTALL_PARSE_FAILED_NO_CERTIFICATES";
+
+     label18:
+        return "INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES";
+
+     label19:
+        return "INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING";
+
+     label20:
+        return "INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME";
+
+     label21:
+        return "INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID";
+
+     label22:
+        return "INSTALL_PARSE_FAILED_MANIFEST_MALFORMED";
+
+     label23:
+        return "INSTALL_PARSE_FAILED_MANIFEST_EMPTY";
+    }
+
+    private java.lang.String loadText(android.content.pm.PackageItemInfo, int, java.lang.CharSequence)
+    {
+        com.android.commands.pm.Pm $r0;
+        android.content.pm.PackageItemInfo $r1;
+        int $i0;
+        java.lang.CharSequence $r2;
+        java.lang.String $r3;
+        android.content.res.Resources $r4;
+
+        $r0 := @this: com.android.commands.pm.Pm;
+
+        $r1 := @parameter0: android.content.pm.PackageItemInfo;
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: java.lang.CharSequence;
+
+        if $r2 == null goto label1;
+
+        $r3 = virtualinvoke $r2.<java.lang.Object: java.lang.String toString()>();
+
+        return $r3;
+
+     label1:
+        $r4 = specialinvoke $r0.<com.android.commands.pm.Pm: android.content.res.Resources getResources(android.content.pm.PackageItemInfo)>($r1);
+
+        if $r4 == null goto label2;
+
+        $r3 = virtualinvoke $r4.<android.content.res.Resources: java.lang.String getString(int)>($i0);
+
+        return $r3;
+
+     label2:
+        return null;
+    }
+
+    public static void main(java.lang.String[])
+    {
+        java.lang.String[] $r0;
+        com.android.commands.pm.Pm $r1;
+
+        $r0 := @parameter0: java.lang.String[];
+
+        $r1 = new com.android.commands.pm.Pm;
+
+        specialinvoke $r1.<com.android.commands.pm.Pm: void <init>()>();
+
+        virtualinvoke $r1.<com.android.commands.pm.Pm: void run(java.lang.String[])>($r0);
+
+        return;
+    }
+
+    private java.lang.String nextArg()
+    {
+        com.android.commands.pm.Pm $r0;
+        java.lang.String $r1;
+        int $i0, $i1;
+        java.lang.String[] $r2;
+
+        $r0 := @this: com.android.commands.pm.Pm;
+
+        $i0 = $r0.<com.android.commands.pm.Pm: int mNextArg>;
+
+        $r2 = $r0.<com.android.commands.pm.Pm: java.lang.String[] mArgs>;
+
+        $i1 = lengthof $r2;
+
+        if $i0 < $i1 goto label1;
+
+        return null;
+
+     label1:
+        $r2 = $r0.<com.android.commands.pm.Pm: java.lang.String[] mArgs>;
+
+        $i0 = $r0.<com.android.commands.pm.Pm: int mNextArg>;
+
+        $r1 = $r2[$i0];
+
+        $i0 = $r0.<com.android.commands.pm.Pm: int mNextArg>;
+
+        $i0 = $i0 + 1;
+
+        $r0.<com.android.commands.pm.Pm: int mNextArg> = $i0;
+
+        return $r1;
+    }
+
+    private java.lang.String nextOption()
+    {
+        com.android.commands.pm.Pm $r0;
+        java.lang.String $r1, $r3;
+        int $i0, $i1;
+        java.lang.String[] $r2;
+        boolean $z0;
+        char $c2;
+
+        $r0 := @this: com.android.commands.pm.Pm;
+
+        $i0 = $r0.<com.android.commands.pm.Pm: int mNextArg>;
+
+        $r2 = $r0.<com.android.commands.pm.Pm: java.lang.String[] mArgs>;
+
+        $i1 = lengthof $r2;
+
+        if $i0 < $i1 goto label1;
+
+        return null;
+
+     label1:
+        $r2 = $r0.<com.android.commands.pm.Pm: java.lang.String[] mArgs>;
+
+        $i0 = $r0.<com.android.commands.pm.Pm: int mNextArg>;
+
+        $r1 = $r2[$i0];
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>("-");
+
+        if $z0 != 0 goto label2;
+
+        return null;
+
+     label2:
+        $i0 = $r0.<com.android.commands.pm.Pm: int mNextArg>;
+
+        $i0 = $i0 + 1;
+
+        $r0.<com.android.commands.pm.Pm: int mNextArg> = $i0;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("--");
+
+        if $z0 == 0 goto label3;
+
+        return null;
+
+     label3:
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 <= 1 goto label5;
+
+        $c2 = virtualinvoke $r1.<java.lang.String: char charAt(int)>(1);
+
+        if $c2 == 45 goto label5;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 <= 2 goto label4;
+
+        $r3 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int)>(2);
+
+        $r0.<com.android.commands.pm.Pm: java.lang.String mCurArgData> = $r3;
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(0, 2);
+
+        return $r1;
+
+     label4:
+        $r0.<com.android.commands.pm.Pm: java.lang.String mCurArgData> = null;
+
+        return $r1;
+
+     label5:
+        $r0.<com.android.commands.pm.Pm: java.lang.String mCurArgData> = null;
+
+        return $r1;
+    }
+
+    private java.lang.String nextOptionData()
+    {
+        com.android.commands.pm.Pm $r0;
+        java.lang.String $r1;
+        int $i0, $i1;
+        java.lang.String[] $r2;
+
+        $r0 := @this: com.android.commands.pm.Pm;
+
+        $r1 = $r0.<com.android.commands.pm.Pm: java.lang.String mCurArgData>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<com.android.commands.pm.Pm: java.lang.String mCurArgData>;
+
+        return $r1;
+
+     label1:
+        $i0 = $r0.<com.android.commands.pm.Pm: int mNextArg>;
+
+        $r2 = $r0.<com.android.commands.pm.Pm: java.lang.String[] mArgs>;
+
+        $i1 = lengthof $r2;
+
+        if $i0 < $i1 goto label2;
+
+        return null;
+
+     label2:
+        $r2 = $r0.<com.android.commands.pm.Pm: java.lang.String[] mArgs>;
+
+        $i0 = $r0.<com.android.commands.pm.Pm: int mNextArg>;
+
+        $r1 = $r2[$i0];
+
+        $i0 = $r0.<com.android.commands.pm.Pm: int mNextArg>;
+
+        $i0 = $i0 + 1;
+
+        $r0.<com.android.commands.pm.Pm: int mNextArg> = $i0;
+
+        return $r1;
+    }
+
+    private void runInstall()
+    {
+        com.android.commands.pm.Pm $r0;
+        com.android.commands.pm.Pm$PackageInstallObserver $r1, r13;
+        byte $b0;
+        java.lang.String $r2, $r5;
+        boolean $z0;
+        java.io.PrintStream $r3;
+        java.lang.StringBuilder $r4, r12;
+        android.content.pm.IPackageManager $r6;
+        java.io.File $r7, r14;
+        android.net.Uri $r8;
+        java.lang.InterruptedException $r9;
+        int $i1;
+        java.lang.Throwable $r10;
+        android.os.RemoteException $r11;
+        android.content.pm.IPackageInstallObserver r15;
+
+        $r0 := @this: com.android.commands.pm.Pm;
+
+        $b0 = 0;
+
+     label01:
+        $r2 = specialinvoke $r0.<com.android.commands.pm.Pm: java.lang.String nextOption()>();
+
+        if $r2 == null goto label04;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("-l");
+
+        if $z0 == 0 goto label02;
+
+        $b0 = $b0 | 1;
+
+        goto label01;
+
+     label02:
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("-r");
+
+        if $z0 == 0 goto label03;
+
+        $b0 = $b0 | 2;
+
+        goto label01;
+
+     label03:
+        $r3 = <java.lang.System: java.io.PrintStream err>;
+
+        r12 = new java.lang.StringBuilder;
+
+        specialinvoke r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error: Unknown option: ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>($r2);
+
+        staticinvoke <com.android.commands.pm.Pm: void showUsage()>();
+
+        return;
+
+     label04:
+        $r2 = specialinvoke $r0.<com.android.commands.pm.Pm: java.lang.String nextArg()>();
+
+        $r3 = <java.lang.System: java.io.PrintStream err>;
+
+        r12 = new java.lang.StringBuilder;
+
+        specialinvoke r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\tpkg: ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>($r5);
+
+        if $r2 != null goto label05;
+
+        $r3 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>("Error: no package specified");
+
+        staticinvoke <com.android.commands.pm.Pm: void showUsage()>();
+
+        return;
+
+     label05:
+        r13 = new com.android.commands.pm.Pm$PackageInstallObserver;
+
+        $r1 = r13;
+
+        specialinvoke r13.<com.android.commands.pm.Pm$PackageInstallObserver: void <init>(com.android.commands.pm.Pm)>($r0);
+
+        $r6 = $r0.<com.android.commands.pm.Pm: android.content.pm.IPackageManager mPm>;
+
+        r14 = new java.io.File;
+
+        $r7 = r14;
+
+     label06:
+        specialinvoke r14.<java.io.File: void <init>(java.lang.String)>($r2);
+
+        $r8 = staticinvoke <android.net.Uri: android.net.Uri fromFile(java.io.File)>($r7);
+
+        r15 = (android.content.pm.IPackageInstallObserver) $r1;
+
+        interfaceinvoke $r6.<android.content.pm.IPackageManager: void installPackage(android.net.Uri,android.content.pm.IPackageInstallObserver,int)>($r8, r15, $b0);
+
+     label07:
+        entermonitor $r1;
+
+     label08:
+        $z0 = $r1.<com.android.commands.pm.Pm$PackageInstallObserver: boolean finished>;
+
+     label09:
+        if $z0 != 0 goto label13;
+
+     label10:
+        virtualinvoke $r1.<java.lang.Object: void wait()>();
+
+     label11:
+        goto label08;
+
+     label12:
+        $r9 := @caughtexception;
+
+        goto label08;
+
+     label13:
+        $i1 = $r1.<com.android.commands.pm.Pm$PackageInstallObserver: int result>;
+
+        if $i1 != 1 goto label19;
+
+        $r3 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>("Success");
+
+     label14:
+        exitmonitor $r1;
+
+     label15:
+        return;
+
+     label16:
+        $r10 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label17:
+        throw $r10;
+
+     label18:
+        $r11 := @caughtexception;
+
+        $r3 = <java.lang.System: java.io.PrintStream err>;
+
+        $r2 = virtualinvoke $r11.<java.lang.Throwable: java.lang.String toString()>();
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>($r2);
+
+        $r3 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>("Error: Could not access the Package Manager.  Is the system running?");
+
+        return;
+
+     label19:
+        $r3 = <java.lang.System: java.io.PrintStream err>;
+
+        r12 = new java.lang.StringBuilder;
+
+        specialinvoke r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failure [");
+
+        $i1 = $r1.<com.android.commands.pm.Pm$PackageInstallObserver: int result>;
+
+        $r2 = specialinvoke $r0.<com.android.commands.pm.Pm: java.lang.String installFailureToString(int)>($i1);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r2 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>($r2);
+
+     label20:
+        goto label14;
+
+        catch android.os.RemoteException from label06 to label07 with label18;
+        catch java.lang.Throwable from label08 to label09 with label16;
+        catch java.lang.InterruptedException from label10 to label11 with label12;
+        catch java.lang.Throwable from label10 to label11 with label16;
+        catch java.lang.Throwable from label13 to label15 with label16;
+        catch java.lang.Throwable from label16 to label17 with label16;
+        catch android.os.RemoteException from label17 to label18 with label18;
+        catch java.lang.Throwable from label19 to label20 with label16;
+    }
+
+    private void runList()
+    {
+        com.android.commands.pm.Pm $r0;
+        java.lang.String $r1, $r3;
+        java.io.PrintStream $r2;
+        boolean $z0;
+        java.lang.StringBuilder $r4;
+
+        $r0 := @this: com.android.commands.pm.Pm;
+
+        $r1 = specialinvoke $r0.<com.android.commands.pm.Pm: java.lang.String nextArg()>();
+
+        if $r1 != null goto label1;
+
+        $r2 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r2.<java.io.PrintStream: void println(java.lang.String)>("Error: didn\'t specify type of data to list");
+
+        staticinvoke <com.android.commands.pm.Pm: void showUsage()>();
+
+        return;
+
+     label1:
+        $r3 = "package";
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 != 0 goto label2;
+
+        $r3 = "packages";
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label3;
+
+     label2:
+        specialinvoke $r0.<com.android.commands.pm.Pm: void runListPackages(boolean)>(0);
+
+        return;
+
+     label3:
+        $r3 = "permission-groups";
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label4;
+
+        specialinvoke $r0.<com.android.commands.pm.Pm: void runListPermissionGroups()>();
+
+        return;
+
+     label4:
+        $r3 = "permissions";
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label5;
+
+        specialinvoke $r0.<com.android.commands.pm.Pm: void runListPermissions()>();
+
+        return;
+
+     label5:
+        $r3 = "instrumentation";
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label6;
+
+        specialinvoke $r0.<com.android.commands.pm.Pm: void runListInstrumentation()>();
+
+        return;
+
+     label6:
+        $r2 = <java.lang.System: java.io.PrintStream err>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error: unknown list type \'");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r1 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintStream: void println(java.lang.String)>($r1);
+
+        staticinvoke <com.android.commands.pm.Pm: void showUsage()>();
+
+        return;
+    }
+
+    private void runListInstrumentation()
+    {
+        com.android.commands.pm.Pm $r0;
+        android.content.ComponentName $r1;
+        boolean $z0, $z1;
+        java.lang.String $r2, $r3;
+        char $c0;
+        java.io.PrintStream $r4;
+        java.lang.StringBuilder $r5;
+        java.lang.RuntimeException $r6;
+        android.content.pm.IPackageManager $r7;
+        java.util.List $r8;
+        com.android.commands.pm.Pm$1 $r9;
+        int $i1, $i2;
+        java.lang.Object $r10;
+        android.content.pm.InstrumentationInfo $r11;
+        android.os.RemoteException $r12;
+
+        $r0 := @this: com.android.commands.pm.Pm;
+
+        $z0 = 0;
+
+        $r2 = null;
+
+     label01:
+        $r3 = specialinvoke $r0.<com.android.commands.pm.Pm: java.lang.String nextArg()>();
+
+        if $r3 == null goto label11;
+
+        $z1 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("-f");
+
+        if $z1 == 0 goto label04;
+
+     label02:
+        $z0 = 1;
+
+     label03:
+        goto label01;
+
+     label04:
+        $c0 = virtualinvoke $r3.<java.lang.String: char charAt(int)>(0);
+
+     label05:
+        if $c0 == 45 goto label07;
+
+        $r2 = $r3;
+
+     label06:
+        goto label01;
+
+     label07:
+        $r4 = <java.lang.System: java.io.PrintStream err>;
+
+     label08:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error: Unknown option: ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r2 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r4.<java.io.PrintStream: void println(java.lang.String)>($r2);
+
+        staticinvoke <com.android.commands.pm.Pm: void showUsage()>();
+
+     label09:
+        return;
+
+     label10:
+        $r6 := @caughtexception;
+
+        $r4 = <java.lang.System: java.io.PrintStream err>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error: ");
+
+        $r2 = virtualinvoke $r6.<java.lang.Throwable: java.lang.String toString()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r4.<java.io.PrintStream: void println(java.lang.String)>($r2);
+
+        staticinvoke <com.android.commands.pm.Pm: void showUsage()>();
+
+        return;
+
+     label11:
+        $r7 = $r0.<com.android.commands.pm.Pm: android.content.pm.IPackageManager mPm>;
+
+     label12:
+        $r8 = interfaceinvoke $r7.<android.content.pm.IPackageManager: java.util.List queryInstrumentation(java.lang.String,int)>($r2, 0);
+
+        $r9 = new com.android.commands.pm.Pm$1;
+
+        specialinvoke $r9.<com.android.commands.pm.Pm$1: void <init>(com.android.commands.pm.Pm)>($r0);
+
+        staticinvoke <java.util.Collections: void sort(java.util.List,java.util.Comparator)>($r8, $r9);
+
+        if $r8 == null goto label24;
+
+        $i1 = interfaceinvoke $r8.<java.util.List: int size()>();
+
+     label13:
+        $i2 = 0;
+
+     label14:
+        if $i2 >= $i1 goto label26;
+
+        $r10 = interfaceinvoke $r8.<java.util.List: java.lang.Object get(int)>($i2);
+
+     label15:
+        $r11 = (android.content.pm.InstrumentationInfo) $r10;
+
+     label16:
+        $r4 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r4.<java.io.PrintStream: void print(java.lang.String)>("instrumentation:");
+
+     label17:
+        if $z0 == 0 goto label19;
+
+        $r4 = <java.lang.System: java.io.PrintStream out>;
+
+     label18:
+        $r2 = $r11.<android.content.pm.InstrumentationInfo: java.lang.String sourceDir>;
+
+        virtualinvoke $r4.<java.io.PrintStream: void print(java.lang.String)>($r2);
+
+        $r4 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r4.<java.io.PrintStream: void print(java.lang.String)>("=");
+
+     label19:
+        $r1 = new android.content.ComponentName;
+
+        $r2 = $r11.<android.content.pm.PackageItemInfo: java.lang.String packageName>;
+
+     label20:
+        $r3 = $r11.<android.content.pm.PackageItemInfo: java.lang.String name>;
+
+        specialinvoke $r1.<android.content.ComponentName: void <init>(java.lang.String,java.lang.String)>($r2, $r3);
+
+        $r4 = <java.lang.System: java.io.PrintStream out>;
+
+        $r2 = virtualinvoke $r1.<android.content.ComponentName: java.lang.String flattenToShortString()>();
+
+        virtualinvoke $r4.<java.io.PrintStream: void print(java.lang.String)>($r2);
+
+        $r4 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r4.<java.io.PrintStream: void print(java.lang.String)>(" (target=");
+
+     label21:
+        $r4 = <java.lang.System: java.io.PrintStream out>;
+
+     label22:
+        $r2 = $r11.<android.content.pm.InstrumentationInfo: java.lang.String targetPackage>;
+
+        virtualinvoke $r4.<java.io.PrintStream: void print(java.lang.String)>($r2);
+
+        $r4 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r4.<java.io.PrintStream: void println(java.lang.String)>(")");
+
+     label23:
+        $i2 = $i2 + 1;
+
+        goto label14;
+
+     label24:
+        $i1 = 0;
+
+        goto label13;
+
+     label25:
+        $r12 := @caughtexception;
+
+        $r4 = <java.lang.System: java.io.PrintStream err>;
+
+        $r2 = virtualinvoke $r12.<java.lang.Throwable: java.lang.String toString()>();
+
+        virtualinvoke $r4.<java.io.PrintStream: void println(java.lang.String)>($r2);
+
+        $r4 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r4.<java.io.PrintStream: void println(java.lang.String)>("Error: Could not access the Package Manager.  Is the system running?");
+
+        return;
+
+     label26:
+        return;
+
+        catch java.lang.RuntimeException from label01 to label02 with label10;
+        catch java.lang.RuntimeException from label03 to label05 with label10;
+        catch java.lang.RuntimeException from label06 to label07 with label10;
+        catch java.lang.RuntimeException from label08 to label09 with label10;
+        catch android.os.RemoteException from label12 to label13 with label25;
+        catch android.os.RemoteException from label14 to label15 with label25;
+        catch android.os.RemoteException from label16 to label17 with label25;
+        catch android.os.RemoteException from label18 to label19 with label25;
+        catch android.os.RemoteException from label20 to label21 with label25;
+        catch android.os.RemoteException from label22 to label23 with label25;
+    }
+
+    private void runListPackages(boolean)
+    {
+        com.android.commands.pm.Pm $r0;
+        boolean $z0, $z1;
+        java.lang.String $r1;
+        java.io.PrintStream $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.RuntimeException $r4;
+        android.content.pm.IPackageManager $r5;
+        java.util.List $r6;
+        int $i0, $i1;
+        java.lang.Object $r7;
+        android.content.pm.PackageInfo $r8;
+        android.content.pm.ApplicationInfo $r9;
+        android.os.RemoteException $r10;
+
+        $r0 := @this: com.android.commands.pm.Pm;
+
+        $z0 := @parameter0: boolean;
+
+     label01:
+        $r1 = specialinvoke $r0.<com.android.commands.pm.Pm: java.lang.String nextOption()>();
+
+        if $r1 == null goto label11;
+
+        $z1 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("-l");
+
+        if $z1 != 0 goto label01;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("-lf");
+
+        if $z0 == 0 goto label04;
+
+     label02:
+        $z0 = 1;
+
+     label03:
+        goto label01;
+
+     label04:
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("-f");
+
+     label05:
+        if $z0 == 0 goto label07;
+
+        $z0 = 1;
+
+     label06:
+        goto label01;
+
+     label07:
+        $r2 = <java.lang.System: java.io.PrintStream err>;
+
+     label08:
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error: Unknown option: ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintStream: void println(java.lang.String)>($r1);
+
+        staticinvoke <com.android.commands.pm.Pm: void showUsage()>();
+
+     label09:
+        return;
+
+     label10:
+        $r4 := @caughtexception;
+
+        $r2 = <java.lang.System: java.io.PrintStream err>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error: ");
+
+        $r1 = virtualinvoke $r4.<java.lang.Throwable: java.lang.String toString()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintStream: void println(java.lang.String)>($r1);
+
+        staticinvoke <com.android.commands.pm.Pm: void showUsage()>();
+
+        return;
+
+     label11:
+        $r5 = $r0.<com.android.commands.pm.Pm: android.content.pm.IPackageManager mPm>;
+
+     label12:
+        $r6 = interfaceinvoke $r5.<android.content.pm.IPackageManager: java.util.List getInstalledPackages(int)>(0);
+
+        $i0 = interfaceinvoke $r6.<java.util.List: int size()>();
+
+     label13:
+        $i1 = 0;
+
+     label14:
+        if $i1 >= $i0 goto label23;
+
+        $r7 = interfaceinvoke $r6.<java.util.List: java.lang.Object get(int)>($i1);
+
+     label15:
+        $r8 = (android.content.pm.PackageInfo) $r7;
+
+     label16:
+        $r2 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r2.<java.io.PrintStream: void print(java.lang.String)>("package:");
+
+     label17:
+        if $z0 == 0 goto label19;
+
+        $r2 = <java.lang.System: java.io.PrintStream out>;
+
+        $r9 = $r8.<android.content.pm.PackageInfo: android.content.pm.ApplicationInfo applicationInfo>;
+
+     label18:
+        $r1 = $r9.<android.content.pm.ApplicationInfo: java.lang.String sourceDir>;
+
+        virtualinvoke $r2.<java.io.PrintStream: void print(java.lang.String)>($r1);
+
+        $r2 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r2.<java.io.PrintStream: void print(java.lang.String)>("=");
+
+     label19:
+        $r2 = <java.lang.System: java.io.PrintStream out>;
+
+     label20:
+        $r1 = $r8.<android.content.pm.PackageInfo: java.lang.String packageName>;
+
+        virtualinvoke $r2.<java.io.PrintStream: void println(java.lang.String)>($r1);
+
+     label21:
+        $i1 = $i1 + 1;
+
+        goto label14;
+
+     label22:
+        $r10 := @caughtexception;
+
+        $r2 = <java.lang.System: java.io.PrintStream err>;
+
+        $r1 = virtualinvoke $r10.<java.lang.Throwable: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintStream: void println(java.lang.String)>($r1);
+
+        $r2 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r2.<java.io.PrintStream: void println(java.lang.String)>("Error: Could not access the Package Manager.  Is the system running?");
+
+        return;
+
+     label23:
+        return;
+
+        catch java.lang.RuntimeException from label01 to label02 with label10;
+        catch java.lang.RuntimeException from label03 to label05 with label10;
+        catch java.lang.RuntimeException from label06 to label07 with label10;
+        catch java.lang.RuntimeException from label08 to label09 with label10;
+        catch android.os.RemoteException from label12 to label13 with label22;
+        catch android.os.RemoteException from label14 to label15 with label22;
+        catch android.os.RemoteException from label16 to label17 with label22;
+        catch android.os.RemoteException from label18 to label19 with label22;
+        catch android.os.RemoteException from label20 to label21 with label22;
+    }
+
+    private void runListPermissionGroups()
+    {
+        com.android.commands.pm.Pm $r0;
+        android.content.pm.IPackageManager $r1;
+        java.util.List $r2;
+        int $i0, $i1;
+        java.lang.Object $r3;
+        android.content.pm.PermissionGroupInfo $r4;
+        java.io.PrintStream $r5;
+        java.lang.String $r6;
+        android.os.RemoteException $r7;
+
+        $r0 := @this: com.android.commands.pm.Pm;
+
+        $r1 = $r0.<com.android.commands.pm.Pm: android.content.pm.IPackageManager mPm>;
+
+     label01:
+        $r2 = interfaceinvoke $r1.<android.content.pm.IPackageManager: java.util.List getAllPermissionGroups(int)>(0);
+
+        $i0 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+     label02:
+        $i1 = 0;
+
+     label03:
+        if $i1 >= $i0 goto label10;
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.lang.Object get(int)>($i1);
+
+     label04:
+        $r4 = (android.content.pm.PermissionGroupInfo) $r3;
+
+     label05:
+        $r5 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r5.<java.io.PrintStream: void print(java.lang.String)>("permission group:");
+
+     label06:
+        $r5 = <java.lang.System: java.io.PrintStream out>;
+
+     label07:
+        $r6 = $r4.<android.content.pm.PackageItemInfo: java.lang.String name>;
+
+        virtualinvoke $r5.<java.io.PrintStream: void println(java.lang.String)>($r6);
+
+     label08:
+        $i1 = $i1 + 1;
+
+        goto label03;
+
+     label09:
+        $r7 := @caughtexception;
+
+        $r5 = <java.lang.System: java.io.PrintStream err>;
+
+        $r6 = virtualinvoke $r7.<java.lang.Throwable: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.io.PrintStream: void println(java.lang.String)>($r6);
+
+        $r5 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r5.<java.io.PrintStream: void println(java.lang.String)>("Error: Could not access the Package Manager.  Is the system running?");
+
+        return;
+
+     label10:
+        return;
+
+        catch android.os.RemoteException from label01 to label02 with label09;
+        catch android.os.RemoteException from label03 to label04 with label09;
+        catch android.os.RemoteException from label05 to label06 with label09;
+        catch android.os.RemoteException from label07 to label08 with label09;
+    }
+
+    private void runListPermissions()
+    {
+        com.android.commands.pm.Pm $r0;
+        java.util.ArrayList $r1;
+        boolean $z0, $z1, $z2, $z3, $z4, $z5;
+        java.lang.String $r2;
+        java.io.PrintStream $r3;
+        java.lang.StringBuilder $r4;
+        android.content.pm.IPackageManager $r5;
+        java.util.List $r6;
+        int $i0, $i1;
+        java.lang.Object $r7;
+        android.content.pm.PermissionGroupInfo $r8;
+        android.os.RemoteException $r9;
+
+        $r0 := @this: com.android.commands.pm.Pm;
+
+        $z0 = 0;
+
+        $z1 = 0;
+
+        $z2 = 0;
+
+        $z3 = 0;
+
+        $z4 = 0;
+
+     label01:
+        $r2 = specialinvoke $r0.<com.android.commands.pm.Pm: java.lang.String nextOption()>();
+
+        if $r2 == null goto label19;
+
+        $z5 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("-f");
+
+        if $z5 == 0 goto label04;
+
+     label02:
+        $z0 = 1;
+
+     label03:
+        goto label01;
+
+     label04:
+        $z5 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("-g");
+
+        if $z5 == 0 goto label07;
+
+     label05:
+        $z1 = 1;
+
+     label06:
+        goto label01;
+
+     label07:
+        $z5 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("-s");
+
+        if $z5 == 0 goto label10;
+
+     label08:
+        $z1 = 1;
+
+        $z0 = 1;
+
+        $z3 = 1;
+
+     label09:
+        goto label01;
+
+     label10:
+        $z5 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("-u");
+
+        if $z5 == 0 goto label13;
+
+     label11:
+        $z2 = 1;
+
+     label12:
+        goto label01;
+
+     label13:
+        $z4 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("-d");
+
+     label14:
+        if $z4 == 0 goto label16;
+
+        $z4 = 1;
+
+     label15:
+        goto label01;
+
+     label16:
+        $r3 = <java.lang.System: java.io.PrintStream err>;
+
+     label17:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error: Unknown option: ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>($r2);
+
+        staticinvoke <com.android.commands.pm.Pm: void showUsage()>();
+
+     label18:
+        return;
+
+     label19:
+        $r2 = specialinvoke $r0.<com.android.commands.pm.Pm: java.lang.String nextOption()>();
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        if $z1 == 0 goto label32;
+
+        $r5 = $r0.<com.android.commands.pm.Pm: android.content.pm.IPackageManager mPm>;
+
+        $r6 = interfaceinvoke $r5.<android.content.pm.IPackageManager: java.util.List getAllPermissionGroups(int)>(0);
+
+        $i0 = 0;
+
+     label20:
+        $i1 = interfaceinvoke $r6.<java.util.List: int size()>();
+
+        if $i0 >= $i1 goto label25;
+
+        $r7 = interfaceinvoke $r6.<java.util.List: java.lang.Object get(int)>($i0);
+
+     label21:
+        $r8 = (android.content.pm.PermissionGroupInfo) $r7;
+
+     label22:
+        $r2 = $r8.<android.content.pm.PackageItemInfo: java.lang.String name>;
+
+        virtualinvoke $r1.<java.util.ArrayList: boolean add(java.lang.Object)>($r2);
+
+     label23:
+        $i0 = $i0 + 1;
+
+     label24:
+        goto label20;
+
+     label25:
+        virtualinvoke $r1.<java.util.ArrayList: boolean add(java.lang.Object)>(null);
+
+     label26:
+        if $z4 == 0 goto label34;
+
+     label27:
+        $r3 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>("Dangerous Permissions:");
+
+        $r3 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>("");
+
+        specialinvoke $r0.<com.android.commands.pm.Pm: void doListPermissions(java.util.ArrayList,boolean,boolean,boolean,int,int)>($r1, $z1, $z0, $z3, 1, 1);
+
+     label28:
+        if $z2 == 0 goto label39;
+
+     label29:
+        $r3 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>("Normal Permissions:");
+
+        $r3 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>("");
+
+        specialinvoke $r0.<com.android.commands.pm.Pm: void doListPermissions(java.util.ArrayList,boolean,boolean,boolean,int,int)>($r1, $z1, $z0, $z3, 0, 0);
+
+     label30:
+        return;
+
+     label31:
+        $r9 := @caughtexception;
+
+        $r3 = <java.lang.System: java.io.PrintStream err>;
+
+        $r2 = virtualinvoke $r9.<java.lang.Throwable: java.lang.String toString()>();
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>($r2);
+
+        $r3 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>("Error: Could not access the Package Manager.  Is the system running?");
+
+        return;
+
+     label32:
+        virtualinvoke $r1.<java.util.ArrayList: boolean add(java.lang.Object)>($r2);
+
+     label33:
+        goto label26;
+
+     label34:
+        if $z2 == 0 goto label37;
+
+     label35:
+        $r3 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>("Dangerous and Normal Permissions:");
+
+        $r3 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>("");
+
+        specialinvoke $r0.<com.android.commands.pm.Pm: void doListPermissions(java.util.ArrayList,boolean,boolean,boolean,int,int)>($r1, $z1, $z0, $z3, 0, 1);
+
+     label36:
+        return;
+
+     label37:
+        $r3 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>("All Permissions:");
+
+        $r3 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r3.<java.io.PrintStream: void println(java.lang.String)>("");
+
+        specialinvoke $r0.<com.android.commands.pm.Pm: void doListPermissions(java.util.ArrayList,boolean,boolean,boolean,int,int)>($r1, $z1, $z0, $z3, -10000, 10000);
+
+     label38:
+        return;
+
+     label39:
+        return;
+
+        catch android.os.RemoteException from label01 to label02 with label31;
+        catch android.os.RemoteException from label03 to label05 with label31;
+        catch android.os.RemoteException from label06 to label08 with label31;
+        catch android.os.RemoteException from label09 to label11 with label31;
+        catch android.os.RemoteException from label12 to label14 with label31;
+        catch android.os.RemoteException from label15 to label16 with label31;
+        catch android.os.RemoteException from label17 to label18 with label31;
+        catch android.os.RemoteException from label19 to label21 with label31;
+        catch android.os.RemoteException from label22 to label23 with label31;
+        catch android.os.RemoteException from label24 to label26 with label31;
+        catch android.os.RemoteException from label27 to label28 with label31;
+        catch android.os.RemoteException from label29 to label30 with label31;
+        catch android.os.RemoteException from label32 to label33 with label31;
+        catch android.os.RemoteException from label35 to label36 with label31;
+        catch android.os.RemoteException from label37 to label38 with label31;
+    }
+
+    private void runPath()
+    {
+        com.android.commands.pm.Pm $r0;
+        java.io.PrintStream $r1;
+        java.lang.String $r2;
+
+        $r0 := @this: com.android.commands.pm.Pm;
+
+        $r2 = specialinvoke $r0.<com.android.commands.pm.Pm: java.lang.String nextArg()>();
+
+        if $r2 != null goto label1;
+
+        $r1 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>("Error: no package specified");
+
+        staticinvoke <com.android.commands.pm.Pm: void showUsage()>();
+
+        return;
+
+     label1:
+        specialinvoke $r0.<com.android.commands.pm.Pm: void displayPackageFilePath(java.lang.String)>($r2);
+
+        return;
+    }
+
+    private void runSetEnabledSetting(int)
+    {
+        com.android.commands.pm.Pm $r0;
+        int $i0;
+        java.lang.String $r1;
+        java.io.PrintStream $r2;
+        android.content.ComponentName $r3;
+        android.content.pm.IPackageManager $r4;
+        java.lang.StringBuilder $r5;
+        android.os.RemoteException $r6, $r7;
+
+        $r0 := @this: com.android.commands.pm.Pm;
+
+        $i0 := @parameter0: int;
+
+        $r1 = specialinvoke $r0.<com.android.commands.pm.Pm: java.lang.String nextArg()>();
+
+        if $r1 != null goto label01;
+
+        $r2 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r2.<java.io.PrintStream: void println(java.lang.String)>("Error: no package or component specified");
+
+        staticinvoke <com.android.commands.pm.Pm: void showUsage()>();
+
+        return;
+
+     label01:
+        $r3 = staticinvoke <android.content.ComponentName: android.content.ComponentName unflattenFromString(java.lang.String)>($r1);
+
+        if $r3 != null goto label07;
+
+        $r4 = $r0.<com.android.commands.pm.Pm: android.content.pm.IPackageManager mPm>;
+
+     label02:
+        interfaceinvoke $r4.<android.content.pm.IPackageManager: void setApplicationEnabledSetting(java.lang.String,int,int)>($r1, $i0, 0);
+
+     label03:
+        $r2 = <java.lang.System: java.io.PrintStream err>;
+
+     label04:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Package ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" new state: ");
+
+        $r4 = $r0.<com.android.commands.pm.Pm: android.content.pm.IPackageManager mPm>;
+
+        $i0 = interfaceinvoke $r4.<android.content.pm.IPackageManager: int getApplicationEnabledSetting(java.lang.String)>($r1);
+
+        $r1 = staticinvoke <com.android.commands.pm.Pm: java.lang.String enabledSettingToString(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintStream: void println(java.lang.String)>($r1);
+
+     label05:
+        return;
+
+     label06:
+        $r6 := @caughtexception;
+
+        $r2 = <java.lang.System: java.io.PrintStream err>;
+
+        $r1 = virtualinvoke $r6.<java.lang.Throwable: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintStream: void println(java.lang.String)>($r1);
+
+        $r2 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r2.<java.io.PrintStream: void println(java.lang.String)>("Error: Could not access the Package Manager.  Is the system running?");
+
+        return;
+
+     label07:
+        $r4 = $r0.<com.android.commands.pm.Pm: android.content.pm.IPackageManager mPm>;
+
+     label08:
+        interfaceinvoke $r4.<android.content.pm.IPackageManager: void setComponentEnabledSetting(android.content.ComponentName,int,int)>($r3, $i0, 0);
+
+     label09:
+        $r2 = <java.lang.System: java.io.PrintStream err>;
+
+     label10:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Component ");
+
+        $r1 = virtualinvoke $r3.<android.content.ComponentName: java.lang.String toShortString()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" new state: ");
+
+        $r4 = $r0.<com.android.commands.pm.Pm: android.content.pm.IPackageManager mPm>;
+
+        $i0 = interfaceinvoke $r4.<android.content.pm.IPackageManager: int getComponentEnabledSetting(android.content.ComponentName)>($r3);
+
+        $r1 = staticinvoke <com.android.commands.pm.Pm: java.lang.String enabledSettingToString(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintStream: void println(java.lang.String)>($r1);
+
+     label11:
+        return;
+
+     label12:
+        $r7 := @caughtexception;
+
+        $r2 = <java.lang.System: java.io.PrintStream err>;
+
+        $r1 = virtualinvoke $r7.<java.lang.Throwable: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintStream: void println(java.lang.String)>($r1);
+
+        $r2 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r2.<java.io.PrintStream: void println(java.lang.String)>("Error: Could not access the Package Manager.  Is the system running?");
+
+        return;
+
+        catch android.os.RemoteException from label02 to label03 with label06;
+        catch android.os.RemoteException from label04 to label05 with label06;
+        catch android.os.RemoteException from label08 to label09 with label12;
+        catch android.os.RemoteException from label10 to label11 with label12;
+    }
+
+    private void runUninstall()
+    {
+        com.android.commands.pm.Pm $r0;
+        byte $b0;
+        java.lang.String $r1;
+        boolean $z0;
+        java.io.PrintStream $r2;
+
+        $r0 := @this: com.android.commands.pm.Pm;
+
+        $b0 = 0;
+
+        $r1 = specialinvoke $r0.<com.android.commands.pm.Pm: java.lang.String nextOption()>();
+
+        if $r1 == null goto label1;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("-k");
+
+        if $z0 == 0 goto label1;
+
+        $b0 = 1;
+
+     label1:
+        $r1 = specialinvoke $r0.<com.android.commands.pm.Pm: java.lang.String nextArg()>();
+
+        if $r1 != null goto label2;
+
+        $r2 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r2.<java.io.PrintStream: void println(java.lang.String)>("Error: no package specified");
+
+        staticinvoke <com.android.commands.pm.Pm: void showUsage()>();
+
+        return;
+
+     label2:
+        $z0 = specialinvoke $r0.<com.android.commands.pm.Pm: boolean deletePackage(java.lang.String,int)>($r1, $b0);
+
+        if $z0 == 0 goto label3;
+
+        $r2 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r2.<java.io.PrintStream: void println(java.lang.String)>("Success");
+
+        return;
+
+     label3:
+        $r2 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r2.<java.io.PrintStream: void println(java.lang.String)>("Failure");
+
+        return;
+    }
+
+    private static void showUsage()
+    {
+        java.io.PrintStream $r0;
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("usage: pm [list|path|install|uninstall]");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("       pm list packages [-f]");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("       pm list permission-groups");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("       pm list permissions [-g] [-f] [-d] [-u] [GROUP]");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("       pm list instrumentation [-f] [TARGET-PACKAGE]");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("       pm path PACKAGE");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("       pm install [-l] [-r] PATH");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("       pm uninstall [-k] PACKAGE");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("       pm enable PACKAGE_OR_COMPONENT");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("       pm disable PACKAGE_OR_COMPONENT");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("The list packages command prints all packages.  Use");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("the -f option to see their associated file.");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("The list permission-groups command prints all known");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("permission groups.");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("The list permissions command prints all known");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("permissions, optionally only those in GROUP.  Use");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("the -g option to organize by group.  Use");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("the -f option to print all information.  Use");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("the -s option for a short summary.  Use");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("the -d option to only list dangerous permissions.  Use");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("the -u option to list only the permissions users will see.");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("The list instrumentation command prints all instrumentations,");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("or only those that target a specified package.  Use the -f option");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("to see their associated file.");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("The path command prints the path to the .apk of a package.");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("The install command installs a package to the system.  Use");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("the -l option to install the package with FORWARD_LOCK. Use");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("the -r option to reinstall an exisiting app, keeping its data.");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("The uninstall command removes a package from the system. Use");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("the -k option to keep the data and cache directories around");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("after the package removal.");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("The enable and disable commands change the enabled state of");
+
+        $r0 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r0.<java.io.PrintStream: void println(java.lang.String)>("a given package or component (written as \"package/class\").");
+
+        return;
+    }
+
+    public void run(java.lang.String[])
+    {
+        com.android.commands.pm.Pm $r0;
+        java.lang.String[] $r1;
+        java.lang.String $r2, $r6;
+        boolean $z0, $z1;
+        int $i0;
+        android.os.IBinder $r3;
+        android.content.pm.IPackageManager $r4;
+        java.io.PrintStream $r5;
+        java.lang.StringBuilder $r7;
+        java.lang.Throwable $r8;
+
+        $r0 := @this: com.android.commands.pm.Pm;
+
+        $r1 := @parameter0: java.lang.String[];
+
+        $z0 = 0;
+
+        $i0 = lengthof $r1;
+
+        if $i0 >= 1 goto label01;
+
+        staticinvoke <com.android.commands.pm.Pm: void showUsage()>();
+
+        return;
+
+     label01:
+        $r3 = staticinvoke <android.os.ServiceManager: android.os.IBinder getService(java.lang.String)>("package");
+
+        $r4 = staticinvoke <android.content.pm.IPackageManager$Stub: android.content.pm.IPackageManager asInterface(android.os.IBinder)>($r3);
+
+        $r0.<com.android.commands.pm.Pm: android.content.pm.IPackageManager mPm> = $r4;
+
+        $r4 = $r0.<com.android.commands.pm.Pm: android.content.pm.IPackageManager mPm>;
+
+        if $r4 != null goto label02;
+
+        $r5 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r5.<java.io.PrintStream: void println(java.lang.String)>("Error: Could not access the Package Manager.  Is the system running?");
+
+        return;
+
+     label02:
+        $r0.<com.android.commands.pm.Pm: java.lang.String[] mArgs> = $r1;
+
+        $r2 = $r1[0];
+
+        $r0.<com.android.commands.pm.Pm: int mNextArg> = 1;
+
+        $r6 = "list";
+
+        $z1 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z1 == 0 goto label03;
+
+        specialinvoke $r0.<com.android.commands.pm.Pm: void runList()>();
+
+        return;
+
+     label03:
+        $r6 = "path";
+
+        $z1 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z1 == 0 goto label04;
+
+        specialinvoke $r0.<com.android.commands.pm.Pm: void runPath()>();
+
+        return;
+
+     label04:
+        $r6 = "install";
+
+        $z1 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z1 == 0 goto label05;
+
+        specialinvoke $r0.<com.android.commands.pm.Pm: void runInstall()>();
+
+        return;
+
+     label05:
+        $r6 = "uninstall";
+
+        $z1 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z1 == 0 goto label06;
+
+        specialinvoke $r0.<com.android.commands.pm.Pm: void runUninstall()>();
+
+        return;
+
+     label06:
+        $r6 = "enable";
+
+        $z1 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z1 == 0 goto label07;
+
+        specialinvoke $r0.<com.android.commands.pm.Pm: void runSetEnabledSetting(int)>(1);
+
+        return;
+
+     label07:
+        $r6 = "disable";
+
+        $z1 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z1 == 0 goto label08;
+
+        specialinvoke $r0.<com.android.commands.pm.Pm: void runSetEnabledSetting(int)>(2);
+
+        return;
+
+     label08:
+        $i0 = lengthof $r1;
+
+        if $i0 != 1 goto label18;
+
+        $r6 = $r1[0];
+
+        $z1 = virtualinvoke $r6.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("-l");
+
+        if $z1 == 0 goto label11;
+
+        $z0 = 1;
+
+        specialinvoke $r0.<com.android.commands.pm.Pm: void runListPackages(boolean)>(0);
+
+     label09:
+        if $z0 != 0 goto label22;
+
+        if $r2 == null goto label10;
+
+        $r5 = <java.lang.System: java.io.PrintStream err>;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error: unknown command \'");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r2 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.io.PrintStream: void println(java.lang.String)>($r2);
+
+     label10:
+        staticinvoke <com.android.commands.pm.Pm: void showUsage()>();
+
+        return;
+
+     label11:
+        $r6 = $r1[0];
+
+        $z1 = virtualinvoke $r6.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("-lf");
+
+     label12:
+        if $z1 == 0 goto label09;
+
+     label13:
+        $z0 = 1;
+
+        specialinvoke $r0.<com.android.commands.pm.Pm: void runListPackages(boolean)>(1);
+
+     label14:
+        goto label09;
+
+     label15:
+        $r8 := @caughtexception;
+
+        if $z0 != 0 goto label17;
+
+        if $r2 == null goto label16;
+
+        $r5 = <java.lang.System: java.io.PrintStream err>;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error: unknown command \'");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r2 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<java.io.PrintStream: void println(java.lang.String)>($r2);
+
+     label16:
+        staticinvoke <com.android.commands.pm.Pm: void showUsage()>();
+
+     label17:
+        throw $r8;
+
+     label18:
+        $i0 = lengthof $r1;
+
+        if $i0 != 2 goto label09;
+
+        $r6 = $r1[0];
+
+        $z1 = virtualinvoke $r6.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("-p");
+
+     label19:
+        if $z1 == 0 goto label09;
+
+     label20:
+        $z0 = 1;
+
+        $r6 = $r1[1];
+
+        specialinvoke $r0.<com.android.commands.pm.Pm: void displayPackageFilePath(java.lang.String)>($r6);
+
+     label21:
+        goto label09;
+
+     label22:
+        return;
+
+        catch java.lang.Throwable from label08 to label09 with label15;
+        catch java.lang.Throwable from label11 to label12 with label15;
+        catch java.lang.Throwable from label13 to label14 with label15;
+        catch java.lang.Throwable from label18 to label19 with label15;
+        catch java.lang.Throwable from label20 to label21 with label15;
+    }
+
+    public static void <clinit>()
+    {
+        <com.android.commands.pm.Pm: java.lang.String PM_NOT_RUNNING_ERR> = "Error: Could not access the Package Manager.  Is the system running?";
+
+        return;
+    }
+}

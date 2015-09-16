@@ -1,0 +1,2320 @@
+public class com.android.internal.location.TrackProvider extends android.location.LocationProviderImpl
+{
+    private static final long INTERVAL;
+    static final java.lang.String LOG_TAG;
+    private int mAccuracy;
+    private double mAltitude;
+    private long mBaseTime;
+    private float mBearing;
+    private boolean mEnabled;
+    private android.os.Bundle mExtras;
+    private boolean mHasAltitude;
+    private boolean mHasBearing;
+    private boolean mHasMonetaryCost;
+    private boolean mHasSpeed;
+    private android.location.Location mInitialLocation;
+    private long mLastTime;
+    private double mLatitude;
+    private double mLongitude;
+    private long mMaxTime;
+    private long mMinTime;
+    private int mPowerRequirement;
+    private boolean mRepeat;
+    private boolean mRequiresCell;
+    private boolean mRequiresNetwork;
+    private boolean mRequiresSatellite;
+    private float mSpeed;
+    private boolean mSupportsAltitude;
+    private boolean mSupportsBearing;
+    private boolean mSupportsSpeed;
+    private long mTime;
+    private float mTrackSpeed;
+    private int mWaypointIndex;
+    private java.util.List mWaypoints;
+
+    public void <init>(java.lang.String)
+    {
+        com.android.internal.location.TrackProvider $r0;
+        java.lang.String $r1;
+        java.util.ArrayList $r2;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        $r1 := @parameter0: java.lang.String;
+
+        specialinvoke $r0.<android.location.LocationProviderImpl: void <init>(java.lang.String)>($r1);
+
+        $r0.<com.android.internal.location.TrackProvider: boolean mEnabled> = 1;
+
+        $r0.<com.android.internal.location.TrackProvider: long mLastTime> = -1L;
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        $r0.<com.android.internal.location.TrackProvider: java.util.List mWaypoints> = $r2;
+
+        $r0.<com.android.internal.location.TrackProvider: int mWaypointIndex> = 0;
+
+        $r0.<com.android.internal.location.TrackProvider: boolean mRequiresNetwork> = 0;
+
+        $r0.<com.android.internal.location.TrackProvider: boolean mRequiresSatellite> = 0;
+
+        $r0.<com.android.internal.location.TrackProvider: boolean mRequiresCell> = 0;
+
+        $r0.<com.android.internal.location.TrackProvider: boolean mHasMonetaryCost> = 0;
+
+        $r0.<com.android.internal.location.TrackProvider: boolean mSupportsAltitude> = 1;
+
+        $r0.<com.android.internal.location.TrackProvider: boolean mSupportsSpeed> = 1;
+
+        $r0.<com.android.internal.location.TrackProvider: boolean mSupportsBearing> = 1;
+
+        $r0.<com.android.internal.location.TrackProvider: boolean mRepeat> = 0;
+
+        $r0.<com.android.internal.location.TrackProvider: int mPowerRequirement> = 1;
+
+        $r0.<com.android.internal.location.TrackProvider: int mAccuracy> = 2;
+
+        $r0.<com.android.internal.location.TrackProvider: float mTrackSpeed> = 100.0F;
+
+        specialinvoke $r0.<com.android.internal.location.TrackProvider: void setTimes()>();
+
+        return;
+    }
+
+    public void <init>(java.lang.String, java.io.File)
+    {
+        com.android.internal.location.TrackProvider $r0;
+        java.lang.String $r1;
+        java.io.File $r2;
+        boolean $z0;
+        java.lang.StringBuilder $r3;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.io.File;
+
+        specialinvoke $r0.<com.android.internal.location.TrackProvider: void <init>(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r2.<java.io.File: java.lang.String getName()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean endsWith(java.lang.String)>("kml");
+
+        if $z0 == 0 goto label2;
+
+        virtualinvoke $r0.<com.android.internal.location.TrackProvider: void readKml(java.io.File)>($r2);
+
+     label1:
+        specialinvoke $r0.<com.android.internal.location.TrackProvider: void setTimes()>();
+
+        return;
+
+     label2:
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean endsWith(java.lang.String)>("nmea");
+
+        if $z0 == 0 goto label3;
+
+        $r1 = virtualinvoke $r0.<android.location.LocationProvider: java.lang.String getName()>();
+
+        virtualinvoke $r0.<com.android.internal.location.TrackProvider: void readNmea(java.lang.String,java.io.File)>($r1, $r2);
+
+        goto label1;
+
+     label3:
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean endsWith(java.lang.String)>("track");
+
+        if $z0 == 0 goto label4;
+
+        virtualinvoke $r0.<com.android.internal.location.TrackProvider: void readTrack(java.io.File)>($r2);
+
+        goto label1;
+
+     label4:
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Can\'t initialize TrackProvider from file ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" (not *kml, *nmea, or *track)");
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("TrackProvider", $r1);
+
+        goto label1;
+    }
+
+    private static boolean booleanVal(java.lang.String)
+    {
+        java.lang.String $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: java.lang.String;
+
+        if $r0 == null goto label1;
+
+        $z0 = virtualinvoke $r0.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("true");
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    private void close(java.io.Reader)
+    {
+        com.android.internal.location.TrackProvider $r0;
+        java.io.Reader $r1;
+        java.io.IOException $r2;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        $r1 := @parameter0: java.io.Reader;
+
+        if $r1 == null goto label4;
+
+     label1:
+        virtualinvoke $r1.<java.io.Reader: void close()>();
+
+     label2:
+        return;
+
+     label3:
+        $r2 := @caughtexception;
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String,java.lang.Throwable)>("TrackProvider", "Exception closing reader", $r2);
+
+        return;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    private static float floatVal(java.lang.String)
+    {
+        java.lang.String $r0;
+        java.lang.NumberFormatException $r1;
+        float $f0;
+
+        $r0 := @parameter0: java.lang.String;
+
+        if $r0 != null goto label1;
+
+        return 0.0F;
+
+     label1:
+        $f0 = staticinvoke <java.lang.Float: float parseFloat(java.lang.String)>($r0);
+
+     label2:
+        return $f0;
+
+     label3:
+        $r1 := @caughtexception;
+
+        return 0.0F;
+
+        catch java.lang.NumberFormatException from label1 to label2 with label3;
+    }
+
+    private static int intVal(java.lang.String)
+    {
+        java.lang.String $r0;
+        java.lang.NumberFormatException $r1;
+        int $i0;
+
+        $r0 := @parameter0: java.lang.String;
+
+        if $r0 != null goto label1;
+
+        return 0;
+
+     label1:
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r0);
+
+     label2:
+        return $i0;
+
+     label3:
+        $r1 := @caughtexception;
+
+        return 0;
+
+        catch java.lang.NumberFormatException from label1 to label2 with label3;
+    }
+
+    private double interp(double, double, float)
+    {
+        com.android.internal.location.TrackProvider $r0;
+        double $d0, $d1, $d2;
+        float $f0;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        $d0 := @parameter0: double;
+
+        $d1 := @parameter1: double;
+
+        $f0 := @parameter2: float;
+
+        $d2 = (double) $f0;
+
+        $d1 = $d1 - $d0;
+
+        $d1 = $d2 * $d1;
+
+        $d0 = $d1 + $d0;
+
+        return $d0;
+    }
+
+    private void setTimes()
+    {
+        com.android.internal.location.TrackProvider $r0;
+        long $l0;
+        java.util.List $r1, $r4;
+        int $i1;
+        java.lang.Object $r2;
+        com.android.internal.location.Waypoint $r3;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r0.<com.android.internal.location.TrackProvider: long mBaseTime> = $l0;
+
+        $r1 = $r0.<com.android.internal.location.TrackProvider: java.util.List mWaypoints>;
+
+        $i1 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        if $i1 < 2 goto label1;
+
+        $r1 = $r0.<com.android.internal.location.TrackProvider: java.util.List mWaypoints>;
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.lang.Object get(int)>(0);
+
+        $r3 = (com.android.internal.location.Waypoint) $r2;
+
+        $l0 = virtualinvoke $r3.<com.android.internal.location.Waypoint: long getTime()>();
+
+        $r0.<com.android.internal.location.TrackProvider: long mMinTime> = $l0;
+
+        $r1 = $r0.<com.android.internal.location.TrackProvider: java.util.List mWaypoints>;
+
+        $r4 = $r0.<com.android.internal.location.TrackProvider: java.util.List mWaypoints>;
+
+        $i1 = interfaceinvoke $r4.<java.util.List: int size()>();
+
+        $i1 = $i1 - 1;
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.lang.Object get(int)>($i1);
+
+        $r3 = (com.android.internal.location.Waypoint) $r2;
+
+        $l0 = virtualinvoke $r3.<com.android.internal.location.Waypoint: long getTime()>();
+
+        $r0.<com.android.internal.location.TrackProvider: long mMaxTime> = $l0;
+
+        return;
+
+     label1:
+        $r0.<com.android.internal.location.TrackProvider: long mMaxTime> = 0L;
+
+        $r0.<com.android.internal.location.TrackProvider: long mMinTime> = 0L;
+
+        return;
+    }
+
+    private void update()
+    {
+        com.android.internal.location.TrackProvider $r0;
+        long $l0, $l1, $l2, $l5;
+        byte $b3;
+        java.util.List $r1;
+        int $i4;
+        boolean $z0;
+        java.lang.Object $r2;
+        com.android.internal.location.Waypoint $r3, $r4;
+        float $f0, $f1;
+        double $d0, $d1;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l2 = $r0.<com.android.internal.location.TrackProvider: long mBaseTime>;
+
+        $l1 = $l1 - $l2;
+
+        $l2 = $r0.<com.android.internal.location.TrackProvider: long mLastTime>;
+
+        $l2 = $l1 - $l2;
+
+        $b3 = $l2 cmp 1000L;
+
+        if $b3 >= 0 goto label01;
+
+        return;
+
+     label01:
+        $r1 = $r0.<com.android.internal.location.TrackProvider: java.util.List mWaypoints>;
+
+        if $r1 == null goto label24;
+
+        $i4 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        if $i4 < 2 goto label25;
+
+        $l2 = $l1;
+
+        $l0 = $r0.<com.android.internal.location.TrackProvider: long mMinTime>;
+
+        $b3 = $l1 cmp $l0;
+
+        if $b3 >= 0 goto label02;
+
+        $l2 = $r0.<com.android.internal.location.TrackProvider: long mMinTime>;
+
+     label02:
+        $z0 = $r0.<com.android.internal.location.TrackProvider: boolean mRepeat>;
+
+        if $z0 == 0 goto label06;
+
+        $l0 = $r0.<com.android.internal.location.TrackProvider: long mMinTime>;
+
+        $l2 = $l2 - $l0;
+
+        $l0 = $r0.<com.android.internal.location.TrackProvider: long mMaxTime>;
+
+        $l5 = $r0.<com.android.internal.location.TrackProvider: long mMinTime>;
+
+        $l0 = $l0 - $l5;
+
+        $l5 = 2L * $l0;
+
+        $l2 = $l2 % $l5;
+
+        $b3 = $l2 cmp $l0;
+
+        if $b3 <= 0 goto label03;
+
+        $l0 = 2L * $l0;
+
+        $l2 = $l0 - $l2;
+
+     label03:
+        $l0 = $r0.<com.android.internal.location.TrackProvider: long mMinTime>;
+
+        $l2 = $l2 + $l0;
+
+     label04:
+        $i4 = $r0.<com.android.internal.location.TrackProvider: int mWaypointIndex>;
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.lang.Object get(int)>($i4);
+
+        $r3 = (com.android.internal.location.Waypoint) $r2;
+
+        $i4 = $r0.<com.android.internal.location.TrackProvider: int mWaypointIndex>;
+
+        $i4 = $i4 + 1;
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.lang.Object get(int)>($i4);
+
+        $r4 = (com.android.internal.location.Waypoint) $r2;
+
+     label05:
+        $l0 = virtualinvoke $r4.<com.android.internal.location.Waypoint: long getTime()>();
+
+        $b3 = $l2 cmp $l0;
+
+        if $b3 <= 0 goto label07;
+
+        $r3 = $r4;
+
+        $i4 = $r0.<com.android.internal.location.TrackProvider: int mWaypointIndex>;
+
+        $i4 = $i4 + 1;
+
+        $r0.<com.android.internal.location.TrackProvider: int mWaypointIndex> = $i4;
+
+        $i4 = $i4 + 1;
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.lang.Object get(int)>($i4);
+
+        $r4 = (com.android.internal.location.Waypoint) $r2;
+
+        goto label05;
+
+     label06:
+        $l0 = $r0.<com.android.internal.location.TrackProvider: long mMaxTime>;
+
+        $b3 = $l2 cmp $l0;
+
+        if $b3 <= 0 goto label04;
+
+        $l2 = $r0.<com.android.internal.location.TrackProvider: long mMaxTime>;
+
+        goto label04;
+
+     label07:
+        $l0 = virtualinvoke $r3.<com.android.internal.location.Waypoint: long getTime()>();
+
+        $b3 = $l2 cmp $l0;
+
+        if $b3 >= 0 goto label08;
+
+        $r4 = $r3;
+
+        $i4 = $r0.<com.android.internal.location.TrackProvider: int mWaypointIndex>;
+
+        $i4 = $i4 - 1;
+
+        $r0.<com.android.internal.location.TrackProvider: int mWaypointIndex> = $i4;
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.lang.Object get(int)>($i4);
+
+        $r3 = (com.android.internal.location.Waypoint) $r2;
+
+        goto label07;
+
+     label08:
+        $l5 = virtualinvoke $r3.<com.android.internal.location.Waypoint: long getTime()>();
+
+        $l0 = virtualinvoke $r4.<com.android.internal.location.Waypoint: long getTime()>();
+
+        $l0 = $l0 - $l5;
+
+        $b3 = $l0 cmp 0L;
+
+        if $b3 != 0 goto label18;
+
+        $f0 = 0.0F;
+
+     label09:
+        $d0 = virtualinvoke $r3.<com.android.internal.location.Waypoint: double getLatitude()>();
+
+        $d1 = virtualinvoke $r4.<com.android.internal.location.Waypoint: double getLatitude()>();
+
+        $d0 = specialinvoke $r0.<com.android.internal.location.TrackProvider: double interp(double,double,float)>($d0, $d1, $f0);
+
+        $r0.<com.android.internal.location.TrackProvider: double mLatitude> = $d0;
+
+        $d0 = virtualinvoke $r3.<com.android.internal.location.Waypoint: double getLongitude()>();
+
+        $d1 = virtualinvoke $r4.<com.android.internal.location.Waypoint: double getLongitude()>();
+
+        $d0 = specialinvoke $r0.<com.android.internal.location.TrackProvider: double interp(double,double,float)>($d0, $d1, $f0);
+
+        $r0.<com.android.internal.location.TrackProvider: double mLongitude> = $d0;
+
+        $z0 = virtualinvoke $r3.<com.android.internal.location.Waypoint: boolean hasAltitude()>();
+
+        if $z0 == 0 goto label19;
+
+        $z0 = virtualinvoke $r4.<com.android.internal.location.Waypoint: boolean hasAltitude()>();
+
+        if $z0 == 0 goto label19;
+
+        $z0 = 1;
+
+     label10:
+        $r0.<com.android.internal.location.TrackProvider: boolean mHasAltitude> = $z0;
+
+        $z0 = $r0.<com.android.internal.location.TrackProvider: boolean mSupportsAltitude>;
+
+        if $z0 == 0 goto label11;
+
+        $z0 = $r0.<com.android.internal.location.TrackProvider: boolean mHasAltitude>;
+
+        if $z0 == 0 goto label11;
+
+        $d0 = virtualinvoke $r3.<com.android.internal.location.Waypoint: double getAltitude()>();
+
+        $d1 = virtualinvoke $r4.<com.android.internal.location.Waypoint: double getAltitude()>();
+
+        $d0 = specialinvoke $r0.<com.android.internal.location.TrackProvider: double interp(double,double,float)>($d0, $d1, $f0);
+
+        $r0.<com.android.internal.location.TrackProvider: double mAltitude> = $d0;
+
+     label11:
+        $z0 = $r0.<com.android.internal.location.TrackProvider: boolean mSupportsBearing>;
+
+        if $z0 == 0 goto label14;
+
+        $b3 = $f0 cmpg 0.5F;
+
+        if $b3 > 0 goto label20;
+
+        $z0 = virtualinvoke $r3.<com.android.internal.location.Waypoint: boolean hasBearing()>();
+
+     label12:
+        $r0.<com.android.internal.location.TrackProvider: boolean mHasBearing> = $z0;
+
+        $z0 = $r0.<com.android.internal.location.TrackProvider: boolean mHasBearing>;
+
+        if $z0 == 0 goto label14;
+
+        $b3 = $f0 cmpg 0.5F;
+
+        if $b3 > 0 goto label21;
+
+        $f1 = virtualinvoke $r3.<com.android.internal.location.Waypoint: float getBearing()>();
+
+     label13:
+        $r0.<com.android.internal.location.TrackProvider: float mBearing> = $f1;
+
+     label14:
+        $z0 = $r0.<com.android.internal.location.TrackProvider: boolean mSupportsSpeed>;
+
+        if $z0 == 0 goto label17;
+
+        $b3 = $f0 cmpg 0.5F;
+
+        if $b3 > 0 goto label22;
+
+        $z0 = virtualinvoke $r3.<com.android.internal.location.Waypoint: boolean hasSpeed()>();
+
+     label15:
+        $r0.<com.android.internal.location.TrackProvider: boolean mHasSpeed> = $z0;
+
+        $z0 = $r0.<com.android.internal.location.TrackProvider: boolean mHasSpeed>;
+
+        if $z0 == 0 goto label17;
+
+        $b3 = $f0 cmpg 0.5F;
+
+        if $b3 > 0 goto label23;
+
+        $f0 = virtualinvoke $r3.<com.android.internal.location.Waypoint: float getSpeed()>();
+
+     label16:
+        $r0.<com.android.internal.location.TrackProvider: float mSpeed> = $f0;
+
+     label17:
+        $r0.<com.android.internal.location.TrackProvider: long mLastTime> = $l1;
+
+        $r0.<com.android.internal.location.TrackProvider: long mTime> = $l1;
+
+        return;
+
+     label18:
+        $l2 = $l2 - $l5;
+
+        $f0 = (float) $l2;
+
+        $f1 = (float) $l0;
+
+        $f0 = $f0 / $f1;
+
+        goto label09;
+
+     label19:
+        $z0 = 0;
+
+        goto label10;
+
+     label20:
+        $z0 = virtualinvoke $r4.<com.android.internal.location.Waypoint: boolean hasBearing()>();
+
+        goto label12;
+
+     label21:
+        $f1 = virtualinvoke $r4.<com.android.internal.location.Waypoint: float getBearing()>();
+
+        goto label13;
+
+     label22:
+        $z0 = virtualinvoke $r4.<com.android.internal.location.Waypoint: boolean hasSpeed()>();
+
+        goto label15;
+
+     label23:
+        $f0 = virtualinvoke $r4.<com.android.internal.location.Waypoint: float getSpeed()>();
+
+        goto label16;
+
+     label24:
+        return;
+
+     label25:
+        return;
+    }
+
+    public void disable()
+    {
+        com.android.internal.location.TrackProvider $r0;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        $r0.<com.android.internal.location.TrackProvider: boolean mEnabled> = 0;
+
+        return;
+    }
+
+    public void enable()
+    {
+        com.android.internal.location.TrackProvider $r0;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        $r0.<com.android.internal.location.TrackProvider: boolean mEnabled> = 1;
+
+        return;
+    }
+
+    public int getAccuracy()
+    {
+        com.android.internal.location.TrackProvider $r0;
+        int i0;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        i0 = $r0.<com.android.internal.location.TrackProvider: int mAccuracy>;
+
+        return i0;
+    }
+
+    public android.location.Location getInitialLocation()
+    {
+        com.android.internal.location.TrackProvider $r0;
+        android.location.Location r1;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        r1 = $r0.<com.android.internal.location.TrackProvider: android.location.Location mInitialLocation>;
+
+        return r1;
+    }
+
+    public boolean getLocation(android.location.Location)
+    {
+        com.android.internal.location.TrackProvider $r0;
+        android.location.Location $r1;
+        long $l0, $l1;
+        java.lang.String $r2;
+        boolean $z0;
+        double $d0;
+        float $f0;
+        android.os.Bundle $r3;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        $r1 := @parameter0: android.location.Location;
+
+        $z0 = $r0.<com.android.internal.location.TrackProvider: boolean mEnabled>;
+
+        if $z0 == 0 goto label5;
+
+        specialinvoke $r0.<com.android.internal.location.TrackProvider: void update()>();
+
+        $r2 = virtualinvoke $r0.<android.location.LocationProvider: java.lang.String getName()>();
+
+        virtualinvoke $r1.<android.location.Location: void setProvider(java.lang.String)>($r2);
+
+        $l1 = $r0.<com.android.internal.location.TrackProvider: long mTime>;
+
+        $l0 = $r0.<com.android.internal.location.TrackProvider: long mBaseTime>;
+
+        $l0 = $l1 + $l0;
+
+        virtualinvoke $r1.<android.location.Location: void setTime(long)>($l0);
+
+        $d0 = $r0.<com.android.internal.location.TrackProvider: double mLatitude>;
+
+        virtualinvoke $r1.<android.location.Location: void setLatitude(double)>($d0);
+
+        $d0 = $r0.<com.android.internal.location.TrackProvider: double mLongitude>;
+
+        virtualinvoke $r1.<android.location.Location: void setLongitude(double)>($d0);
+
+        $z0 = $r0.<com.android.internal.location.TrackProvider: boolean mSupportsAltitude>;
+
+        if $z0 == 0 goto label1;
+
+        $z0 = $r0.<com.android.internal.location.TrackProvider: boolean mHasAltitude>;
+
+        if $z0 == 0 goto label1;
+
+        $d0 = $r0.<com.android.internal.location.TrackProvider: double mAltitude>;
+
+        virtualinvoke $r1.<android.location.Location: void setAltitude(double)>($d0);
+
+     label1:
+        $z0 = $r0.<com.android.internal.location.TrackProvider: boolean mSupportsBearing>;
+
+        if $z0 == 0 goto label2;
+
+        $z0 = $r0.<com.android.internal.location.TrackProvider: boolean mHasBearing>;
+
+        if $z0 == 0 goto label2;
+
+        $f0 = $r0.<com.android.internal.location.TrackProvider: float mBearing>;
+
+        virtualinvoke $r1.<android.location.Location: void setBearing(float)>($f0);
+
+     label2:
+        $z0 = $r0.<com.android.internal.location.TrackProvider: boolean mSupportsSpeed>;
+
+        if $z0 == 0 goto label3;
+
+        $z0 = $r0.<com.android.internal.location.TrackProvider: boolean mHasSpeed>;
+
+        if $z0 == 0 goto label3;
+
+        $f0 = $r0.<com.android.internal.location.TrackProvider: float mSpeed>;
+
+        virtualinvoke $r1.<android.location.Location: void setSpeed(float)>($f0);
+
+     label3:
+        $r3 = $r0.<com.android.internal.location.TrackProvider: android.os.Bundle mExtras>;
+
+        if $r3 == null goto label4;
+
+        $r3 = $r0.<com.android.internal.location.TrackProvider: android.os.Bundle mExtras>;
+
+        virtualinvoke $r1.<android.location.Location: void setExtras(android.os.Bundle)>($r3);
+
+     label4:
+        return 1;
+
+     label5:
+        return 0;
+    }
+
+    public int getPowerRequirement()
+    {
+        com.android.internal.location.TrackProvider $r0;
+        int i0;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        i0 = $r0.<com.android.internal.location.TrackProvider: int mPowerRequirement>;
+
+        return i0;
+    }
+
+    public int getStatus(android.os.Bundle)
+    {
+        com.android.internal.location.TrackProvider $r0;
+        android.os.Bundle $r1;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        $r1 := @parameter0: android.os.Bundle;
+
+        return 2;
+    }
+
+    public boolean hasMonetaryCost()
+    {
+        com.android.internal.location.TrackProvider $r0;
+        boolean z0;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        z0 = $r0.<com.android.internal.location.TrackProvider: boolean mHasMonetaryCost>;
+
+        return z0;
+    }
+
+    public boolean isEnabled()
+    {
+        com.android.internal.location.TrackProvider $r0;
+        boolean z0;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        z0 = $r0.<com.android.internal.location.TrackProvider: boolean mEnabled>;
+
+        return z0;
+    }
+
+    public void readKml(java.io.File)
+    {
+        com.android.internal.location.TrackProvider $r0;
+        java.io.File $r1;
+        com.android.internal.location.Waypoint $r2;
+        double $d0, $d1, $d2, $d3, $d4;
+        java.io.FileReader $r3, $r7;
+        android.location.Location $r4, $r11, $r16;
+        java.lang.StringBuilder $r5;
+        java.util.StringTokenizer $r6;
+        org.xmlpull.v1.XmlPullParserFactory $r8;
+        org.xmlpull.v1.XmlPullParser $r9;
+        boolean $z0, $z1;
+        int $i0, $i1;
+        java.lang.String $r10, $r12, $r13, $r14;
+        float $f0;
+        long $l2, $l3;
+        java.util.List $r15;
+        java.io.IOException $r17, $r22;
+        java.lang.NumberFormatException $r18;
+        org.xmlpull.v1.XmlPullParserException $r19, $r21;
+        java.lang.Throwable $r20;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        $r1 := @parameter0: java.io.File;
+
+        $r7 = null;
+
+     label01:
+        $r3 = new java.io.FileReader;
+
+     label02:
+        specialinvoke $r3.<java.io.FileReader: void <init>(java.io.File)>($r1);
+
+     label03:
+        $r8 = staticinvoke <org.xmlpull.v1.XmlPullParserFactory: org.xmlpull.v1.XmlPullParserFactory newInstance()>();
+
+        $r9 = virtualinvoke $r8.<org.xmlpull.v1.XmlPullParserFactory: org.xmlpull.v1.XmlPullParser newPullParser()>();
+
+        interfaceinvoke $r9.<org.xmlpull.v1.XmlPullParser: void setInput(java.io.Reader)>($r3);
+
+     label04:
+        $z0 = 0;
+
+     label05:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $i0 = interfaceinvoke $r9.<org.xmlpull.v1.XmlPullParser: int getEventType()>();
+
+     label06:
+        if $i0 != 0 goto label27;
+
+     label07:
+        $i1 = interfaceinvoke $r9.<org.xmlpull.v1.XmlPullParser: int next()>();
+
+     label08:
+        $i0 = $i1;
+
+     label09:
+        if $i1 != 1 goto label06;
+
+        $r10 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label10:
+        $r11 = null;
+
+        $f0 = $r0.<com.android.internal.location.TrackProvider: float mTrackSpeed>;
+
+        $d0 = (double) $f0;
+
+     label11:
+        $d0 = 1.0 / $d0;
+
+        $d0 = $d0 * 0.001;
+
+        $d0 = $d0 * 3600000.0;
+
+     label12:
+        $l2 = 0L;
+
+     label13:
+        $r6 = new java.util.StringTokenizer;
+
+        specialinvoke $r6.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>($r10, ", ");
+
+     label14:
+        $z0 = virtualinvoke $r6.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+     label15:
+        if $z0 == 0 goto label46;
+
+     label16:
+        $r10 = virtualinvoke $r6.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $r12 = virtualinvoke $r6.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $r13 = virtualinvoke $r6.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("lon=");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", lat=");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", alt=");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r14 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("TrackProvider", $r14);
+
+        $d1 = staticinvoke <java.lang.Double: double parseDouble(java.lang.String)>($r10);
+
+        $d2 = staticinvoke <java.lang.Double: double parseDouble(java.lang.String)>($r12);
+
+        $d3 = staticinvoke <java.lang.Double: double parseDouble(java.lang.String)>($r13);
+
+        $r4 = new android.location.Location;
+
+        $r10 = virtualinvoke $r0.<android.location.LocationProvider: java.lang.String getName()>();
+
+        specialinvoke $r4.<android.location.Location: void <init>(java.lang.String)>($r10);
+
+        virtualinvoke $r4.<android.location.Location: void setLatitude(double)>($d2);
+
+        virtualinvoke $r4.<android.location.Location: void setLongitude(double)>($d1);
+
+        if $r11 == null goto label20;
+
+        $f0 = virtualinvoke $r11.<android.location.Location: float distanceTo(android.location.Location)>($r4);
+
+     label17:
+        $d4 = (double) $f0;
+
+     label18:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("distance = ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>($d4);
+
+        $r10 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("TrackProvider", $r10);
+
+     label19:
+        $d4 = $d4 * $d0;
+
+        $l3 = (long) $d4;
+
+        $l2 = $l2 + $l3;
+
+     label20:
+        $r2 = new com.android.internal.location.Waypoint;
+
+        $r10 = virtualinvoke $r0.<android.location.LocationProvider: java.lang.String getName()>();
+
+        specialinvoke $r2.<com.android.internal.location.Waypoint: void <init>(java.lang.String,long,double,double,double)>($r10, $l2, $d2, $d1, $d3);
+
+        $z0 = virtualinvoke $r0.<com.android.internal.location.TrackProvider: boolean supportsSpeed()>();
+
+        if $z0 == 0 goto label21;
+
+        $f0 = $r0.<com.android.internal.location.TrackProvider: float mTrackSpeed>;
+
+        virtualinvoke $r2.<com.android.internal.location.Waypoint: void setSpeed(float)>($f0);
+
+     label21:
+        $z0 = virtualinvoke $r0.<com.android.internal.location.TrackProvider: boolean supportsBearing()>();
+
+        if $z0 == 0 goto label22;
+
+        virtualinvoke $r2.<com.android.internal.location.Waypoint: void setBearing(float)>(0.0F);
+
+     label22:
+        $r15 = $r0.<com.android.internal.location.TrackProvider: java.util.List mWaypoints>;
+
+        interfaceinvoke $r15.<java.util.List: boolean add(java.lang.Object)>($r2);
+
+     label23:
+        $r16 = $r0.<com.android.internal.location.TrackProvider: android.location.Location mInitialLocation>;
+
+     label24:
+        if $r16 != null goto label26;
+
+        $r16 = virtualinvoke $r2.<com.android.internal.location.Waypoint: android.location.Location getLocation()>();
+
+     label25:
+        $r0.<com.android.internal.location.TrackProvider: android.location.Location mInitialLocation> = $r16;
+
+     label26:
+        $r11 = $r4;
+
+        goto label14;
+
+     label27:
+        if $i0 == 1 goto label07;
+
+        if $i0 != 2 goto label31;
+
+     label28:
+        $r10 = interfaceinvoke $r9.<org.xmlpull.v1.XmlPullParser: java.lang.String getName()>();
+
+        $z1 = virtualinvoke $r10.<java.lang.String: boolean equals(java.lang.Object)>("coordinates");
+
+        if $z1 == 0 goto label07;
+
+     label29:
+        $z0 = 1;
+
+     label30:
+        goto label07;
+
+     label31:
+        if $i0 != 3 goto label34;
+
+        $r10 = interfaceinvoke $r9.<org.xmlpull.v1.XmlPullParser: java.lang.String getName()>();
+
+        $z1 = virtualinvoke $r10.<java.lang.String: boolean equals(java.lang.Object)>("coordinates");
+
+        if $z1 == 0 goto label07;
+
+     label32:
+        $z0 = 0;
+
+     label33:
+        goto label07;
+
+     label34:
+        if $i0 != 4 goto label07;
+
+        if $z0 == 0 goto label07;
+
+        $r10 = interfaceinvoke $r9.<org.xmlpull.v1.XmlPullParser: java.lang.String getText()>();
+
+        virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(32);
+
+     label35:
+        goto label07;
+
+     label36:
+        $r17 := @caughtexception;
+
+        $r7 = $r3;
+
+     label37:
+        $r15 = $r0.<com.android.internal.location.TrackProvider: java.util.List mWaypoints>;
+
+        interfaceinvoke $r15.<java.util.List: void clear()>();
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exception reading KML data: ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r17);
+
+        $r10 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("TrackProvider", $r10, $r17);
+
+     label38:
+        specialinvoke $r0.<com.android.internal.location.TrackProvider: void close(java.io.Reader)>($r7);
+
+        return;
+
+     label39:
+        $r18 := @caughtexception;
+
+     label40:
+        $r5 = new java.lang.StringBuilder;
+
+     label41:
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Got NumberFormatException reading KML data: ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r18);
+
+        $r10 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("TrackProvider", $r10, $r18);
+
+     label42:
+        goto label14;
+
+     label43:
+        $r19 := @caughtexception;
+
+        $r7 = $r3;
+
+     label44:
+        $r15 = $r0.<com.android.internal.location.TrackProvider: java.util.List mWaypoints>;
+
+        interfaceinvoke $r15.<java.util.List: void clear()>();
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exception reading KML data: ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r19);
+
+        $r10 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("TrackProvider", $r10, $r19);
+
+     label45:
+        specialinvoke $r0.<com.android.internal.location.TrackProvider: void close(java.io.Reader)>($r7);
+
+        return;
+
+     label46:
+        specialinvoke $r0.<com.android.internal.location.TrackProvider: void setTimes()>();
+
+     label47:
+        specialinvoke $r0.<com.android.internal.location.TrackProvider: void close(java.io.Reader)>($r3);
+
+        return;
+
+     label48:
+        $r20 := @caughtexception;
+
+     label49:
+        specialinvoke $r0.<com.android.internal.location.TrackProvider: void close(java.io.Reader)>($r7);
+
+        throw $r20;
+
+     label50:
+        $r20 := @caughtexception;
+
+        $r7 = $r3;
+
+        goto label49;
+
+     label51:
+        $r21 := @caughtexception;
+
+        $r19 = $r21;
+
+        goto label44;
+
+     label52:
+        $r22 := @caughtexception;
+
+        $r17 = $r22;
+
+        goto label37;
+
+        catch java.io.IOException from label02 to label03 with label52;
+        catch org.xmlpull.v1.XmlPullParserException from label02 to label03 with label51;
+        catch java.lang.Throwable from label01 to label03 with label48;
+        catch java.io.IOException from label03 to label04 with label36;
+        catch java.io.IOException from label05 to label06 with label36;
+        catch java.io.IOException from label06 to label08 with label36;
+        catch java.io.IOException from label09 to label10 with label36;
+        catch java.io.IOException from label13 to label15 with label36;
+        catch org.xmlpull.v1.XmlPullParserException from label03 to label04 with label43;
+        catch org.xmlpull.v1.XmlPullParserException from label05 to label06 with label43;
+        catch org.xmlpull.v1.XmlPullParserException from label06 to label08 with label43;
+        catch org.xmlpull.v1.XmlPullParserException from label09 to label10 with label43;
+        catch org.xmlpull.v1.XmlPullParserException from label13 to label15 with label43;
+        catch java.lang.Throwable from label03 to label06 with label50;
+        catch java.lang.Throwable from label06 to label08 with label50;
+        catch java.lang.Throwable from label09 to label11 with label50;
+        catch java.lang.Throwable from label12 to label15 with label50;
+        catch java.lang.NumberFormatException from label16 to label17 with label39;
+        catch java.lang.NumberFormatException from label18 to label19 with label39;
+        catch java.lang.NumberFormatException from label20 to label23 with label39;
+        catch java.lang.NumberFormatException from label24 to label25 with label39;
+        catch java.io.IOException from label16 to label17 with label36;
+        catch java.io.IOException from label18 to label19 with label36;
+        catch java.io.IOException from label20 to label23 with label36;
+        catch java.io.IOException from label24 to label25 with label36;
+        catch org.xmlpull.v1.XmlPullParserException from label16 to label17 with label43;
+        catch org.xmlpull.v1.XmlPullParserException from label18 to label19 with label43;
+        catch org.xmlpull.v1.XmlPullParserException from label20 to label23 with label43;
+        catch org.xmlpull.v1.XmlPullParserException from label24 to label25 with label43;
+        catch java.lang.Throwable from label16 to label26 with label50;
+        catch java.io.IOException from label28 to label29 with label36;
+        catch java.io.IOException from label30 to label32 with label36;
+        catch java.io.IOException from label33 to label35 with label36;
+        catch org.xmlpull.v1.XmlPullParserException from label28 to label29 with label43;
+        catch org.xmlpull.v1.XmlPullParserException from label30 to label32 with label43;
+        catch org.xmlpull.v1.XmlPullParserException from label33 to label35 with label43;
+        catch java.lang.Throwable from label28 to label29 with label50;
+        catch java.lang.Throwable from label30 to label32 with label50;
+        catch java.lang.Throwable from label33 to label35 with label50;
+        catch java.lang.Throwable from label37 to label38 with label48;
+        catch java.io.IOException from label41 to label42 with label36;
+        catch org.xmlpull.v1.XmlPullParserException from label41 to label42 with label43;
+        catch java.lang.Throwable from label40 to label42 with label50;
+        catch java.lang.Throwable from label44 to label45 with label48;
+        catch java.io.IOException from label46 to label47 with label36;
+        catch org.xmlpull.v1.XmlPullParserException from label46 to label47 with label43;
+        catch java.lang.Throwable from label46 to label47 with label50;
+    }
+
+    public void readNmea(java.lang.String, java.io.File)
+    {
+        com.android.internal.location.TrackProvider $r0;
+        java.lang.String $r1;
+        java.io.File $r2;
+        java.io.BufferedReader $r3, $r6;
+        com.android.internal.location.NmeaParser $r4;
+        com.android.internal.location.Waypoint $r5;
+        java.io.FileReader $r7;
+        boolean $z0;
+        android.location.Location $r8;
+        java.util.List $r9;
+        java.io.IOException $r10, $r13;
+        java.lang.StringBuilder $r11;
+        java.lang.Throwable $r12;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.io.File;
+
+        $r6 = null;
+
+     label01:
+        $r3 = new java.io.BufferedReader;
+
+        $r7 = new java.io.FileReader;
+
+     label02:
+        specialinvoke $r7.<java.io.FileReader: void <init>(java.io.File)>($r2);
+
+        specialinvoke $r3.<java.io.BufferedReader: void <init>(java.io.Reader,int)>($r7, 8192);
+
+     label03:
+        virtualinvoke $r0.<android.location.LocationProvider: java.lang.String getName()>();
+
+        $r4 = new com.android.internal.location.NmeaParser;
+
+        specialinvoke $r4.<com.android.internal.location.NmeaParser: void <init>(java.lang.String)>($r1);
+
+     label04:
+        $r1 = virtualinvoke $r3.<java.io.BufferedReader: java.lang.String readLine()>();
+
+        if $r1 == null goto label09;
+
+        $z0 = virtualinvoke $r4.<com.android.internal.location.NmeaParser: boolean parseSentence(java.lang.String)>($r1);
+
+        if $z0 == 0 goto label04;
+
+        $r8 = virtualinvoke $r4.<com.android.internal.location.NmeaParser: android.location.Location getLocation()>();
+
+        $r5 = new com.android.internal.location.Waypoint;
+
+        specialinvoke $r5.<com.android.internal.location.Waypoint: void <init>(android.location.Location)>($r8);
+
+        $r9 = $r0.<com.android.internal.location.TrackProvider: java.util.List mWaypoints>;
+
+        interfaceinvoke $r9.<java.util.List: boolean add(java.lang.Object)>($r5);
+
+     label05:
+        goto label04;
+
+     label06:
+        $r10 := @caughtexception;
+
+        $r6 = $r3;
+
+     label07:
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exception reading NMEA data: ");
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r10);
+
+        $r1 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("TrackProvider", $r1);
+
+        $r9 = $r0.<com.android.internal.location.TrackProvider: java.util.List mWaypoints>;
+
+        interfaceinvoke $r9.<java.util.List: void clear()>();
+
+     label08:
+        specialinvoke $r0.<com.android.internal.location.TrackProvider: void close(java.io.Reader)>($r6);
+
+        return;
+
+     label09:
+        specialinvoke $r0.<com.android.internal.location.TrackProvider: void setTimes()>();
+
+     label10:
+        specialinvoke $r0.<com.android.internal.location.TrackProvider: void close(java.io.Reader)>($r3);
+
+        return;
+
+     label11:
+        $r12 := @caughtexception;
+
+     label12:
+        specialinvoke $r0.<com.android.internal.location.TrackProvider: void close(java.io.Reader)>($r6);
+
+        throw $r12;
+
+     label13:
+        $r12 := @caughtexception;
+
+        $r6 = $r3;
+
+        goto label12;
+
+     label14:
+        $r13 := @caughtexception;
+
+        $r10 = $r13;
+
+        goto label07;
+
+        catch java.io.IOException from label02 to label03 with label14;
+        catch java.lang.Throwable from label01 to label03 with label11;
+        catch java.io.IOException from label03 to label05 with label06;
+        catch java.lang.Throwable from label03 to label05 with label13;
+        catch java.lang.Throwable from label07 to label08 with label11;
+        catch java.io.IOException from label09 to label10 with label06;
+        catch java.lang.Throwable from label09 to label10 with label13;
+    }
+
+    public void readProperties(java.io.File)
+    {
+        com.android.internal.location.TrackProvider $r0;
+        java.io.File $r1;
+        java.io.BufferedReader $r2, $r4;
+        java.util.StringTokenizer $r3;
+        boolean $z0;
+        java.lang.StringBuilder $r5;
+        java.lang.String $r6, $r8;
+        java.io.FileReader $r7;
+        java.io.IOException $r9, $r10, $r12, $r13, $r14;
+        java.lang.Throwable $r11;
+        int $i0;
+        float $f0;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        $r1 := @parameter0: java.io.File;
+
+        $r4 = null;
+
+        $z0 = virtualinvoke $r1.<java.io.File: boolean exists()>();
+
+        if $z0 != 0 goto label01;
+
+        return;
+
+     label01:
+        $r5 = new java.lang.StringBuilder;
+
+     label02:
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Loading properties file ");
+
+        $r6 = virtualinvoke $r1.<java.io.File: java.lang.String getPath()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("TrackProvider", $r6);
+
+     label03:
+        $r2 = new java.io.BufferedReader;
+
+     label04:
+        $r7 = new java.io.FileReader;
+
+        specialinvoke $r7.<java.io.FileReader: void <init>(java.io.File)>($r1);
+
+        specialinvoke $r2.<java.io.BufferedReader: void <init>(java.io.Reader,int)>($r7, 8192);
+
+     label05:
+        $r6 = virtualinvoke $r2.<java.io.BufferedReader: java.lang.String readLine()>();
+
+     label06:
+        if $r6 == null goto label33;
+
+     label07:
+        $r3 = new java.util.StringTokenizer;
+
+        specialinvoke $r3.<java.util.StringTokenizer: void <init>(java.lang.String)>($r6);
+
+        $r8 = null;
+
+        $z0 = virtualinvoke $r3.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z0 == 0 goto label05;
+
+        $r6 = virtualinvoke $r3.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $z0 = virtualinvoke $r3.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z0 == 0 goto label08;
+
+        $r8 = virtualinvoke $r3.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+     label08:
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("requiresNetwork");
+
+        if $z0 == 0 goto label16;
+
+        $z0 = staticinvoke <com.android.internal.location.TrackProvider: boolean booleanVal(java.lang.String)>($r8);
+
+        virtualinvoke $r0.<com.android.internal.location.TrackProvider: void setRequiresNetwork(boolean)>($z0);
+
+     label09:
+        goto label05;
+
+     label10:
+        $r9 := @caughtexception;
+
+        $r4 = $r2;
+
+     label11:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("IOException reading properties file ");
+
+        $r6 = virtualinvoke $r1.<java.io.File: java.lang.String getPath()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("TrackProvider", $r6, $r9);
+
+     label12:
+        if $r4 == null goto label40;
+
+     label13:
+        virtualinvoke $r4.<java.io.BufferedReader: void close()>();
+
+     label14:
+        return;
+
+     label15:
+        $r10 := @caughtexception;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("IOException closing properties file ");
+
+        $r6 = virtualinvoke $r1.<java.io.File: java.lang.String getPath()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String,java.lang.Throwable)>("TrackProvider", $r6, $r10);
+
+        return;
+
+     label16:
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("requiresSatellite");
+
+        if $z0 == 0 goto label22;
+
+        $z0 = staticinvoke <com.android.internal.location.TrackProvider: boolean booleanVal(java.lang.String)>($r8);
+
+        virtualinvoke $r0.<com.android.internal.location.TrackProvider: void setRequiresSatellite(boolean)>($z0);
+
+     label17:
+        goto label05;
+
+     label18:
+        $r11 := @caughtexception;
+
+        $r4 = $r2;
+
+     label19:
+        if $r4 == null goto label21;
+
+     label20:
+        virtualinvoke $r4.<java.io.BufferedReader: void close()>();
+
+     label21:
+        throw $r11;
+
+     label22:
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("requiresCell");
+
+        if $z0 == 0 goto label23;
+
+        $z0 = staticinvoke <com.android.internal.location.TrackProvider: boolean booleanVal(java.lang.String)>($r8);
+
+        virtualinvoke $r0.<com.android.internal.location.TrackProvider: void setRequiresCell(boolean)>($z0);
+
+        goto label05;
+
+     label23:
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("hasMonetaryCost");
+
+        if $z0 == 0 goto label24;
+
+        $z0 = staticinvoke <com.android.internal.location.TrackProvider: boolean booleanVal(java.lang.String)>($r8);
+
+        virtualinvoke $r0.<com.android.internal.location.TrackProvider: void setHasMonetaryCost(boolean)>($z0);
+
+        goto label05;
+
+     label24:
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("supportsAltitude");
+
+        if $z0 == 0 goto label25;
+
+        $z0 = staticinvoke <com.android.internal.location.TrackProvider: boolean booleanVal(java.lang.String)>($r8);
+
+        virtualinvoke $r0.<com.android.internal.location.TrackProvider: void setSupportsAltitude(boolean)>($z0);
+
+        goto label05;
+
+     label25:
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("supportsBearing");
+
+        if $z0 == 0 goto label26;
+
+        $z0 = staticinvoke <com.android.internal.location.TrackProvider: boolean booleanVal(java.lang.String)>($r8);
+
+        virtualinvoke $r0.<com.android.internal.location.TrackProvider: void setSupportsBearing(boolean)>($z0);
+
+        goto label05;
+
+     label26:
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("repeat");
+
+        if $z0 == 0 goto label27;
+
+        $z0 = staticinvoke <com.android.internal.location.TrackProvider: boolean booleanVal(java.lang.String)>($r8);
+
+        virtualinvoke $r0.<com.android.internal.location.TrackProvider: void setRepeat(boolean)>($z0);
+
+        goto label05;
+
+     label27:
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("supportsSpeed");
+
+        if $z0 == 0 goto label28;
+
+        $z0 = staticinvoke <com.android.internal.location.TrackProvider: boolean booleanVal(java.lang.String)>($r8);
+
+        virtualinvoke $r0.<com.android.internal.location.TrackProvider: void setSupportsSpeed(boolean)>($z0);
+
+        goto label05;
+
+     label28:
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("powerRequirement");
+
+        if $z0 == 0 goto label29;
+
+        $i0 = staticinvoke <com.android.internal.location.TrackProvider: int intVal(java.lang.String)>($r8);
+
+        virtualinvoke $r0.<com.android.internal.location.TrackProvider: void setPowerRequirement(int)>($i0);
+
+        goto label05;
+
+     label29:
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("accuracy");
+
+        if $z0 == 0 goto label30;
+
+        $i0 = staticinvoke <com.android.internal.location.TrackProvider: int intVal(java.lang.String)>($r8);
+
+        virtualinvoke $r0.<com.android.internal.location.TrackProvider: void setAccuracy(int)>($i0);
+
+        goto label05;
+
+     label30:
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("trackspeed");
+
+        if $z0 == 0 goto label31;
+
+        $f0 = staticinvoke <com.android.internal.location.TrackProvider: float floatVal(java.lang.String)>($r8);
+
+        virtualinvoke $r0.<com.android.internal.location.TrackProvider: void setTrackSpeed(float)>($f0);
+
+        goto label05;
+
+     label31:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown command \"");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("TrackProvider", $r6);
+
+     label32:
+        goto label05;
+
+     label33:
+        if $r2 == null goto label35;
+
+     label34:
+        virtualinvoke $r2.<java.io.BufferedReader: void close()>();
+
+     label35:
+        return;
+
+     label36:
+        $r12 := @caughtexception;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("IOException closing properties file ");
+
+        $r6 = virtualinvoke $r1.<java.io.File: java.lang.String getPath()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String,java.lang.Throwable)>("TrackProvider", $r6, $r12);
+
+        return;
+
+     label37:
+        $r13 := @caughtexception;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("IOException closing properties file ");
+
+        $r6 = virtualinvoke $r1.<java.io.File: java.lang.String getPath()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String,java.lang.Throwable)>("TrackProvider", $r6, $r13);
+
+        goto label21;
+
+     label38:
+        $r11 := @caughtexception;
+
+        goto label19;
+
+     label39:
+        $r14 := @caughtexception;
+
+        $r9 = $r14;
+
+        goto label11;
+
+     label40:
+        return;
+
+        catch java.io.IOException from label02 to label03 with label39;
+        catch java.io.IOException from label04 to label05 with label39;
+        catch java.lang.Throwable from label01 to label05 with label38;
+        catch java.io.IOException from label05 to label06 with label10;
+        catch java.io.IOException from label07 to label09 with label10;
+        catch java.lang.Throwable from label05 to label09 with label18;
+        catch java.lang.Throwable from label11 to label12 with label38;
+        catch java.io.IOException from label13 to label14 with label15;
+        catch java.io.IOException from label16 to label17 with label10;
+        catch java.lang.Throwable from label16 to label17 with label18;
+        catch java.io.IOException from label20 to label21 with label37;
+        catch java.io.IOException from label22 to label32 with label10;
+        catch java.lang.Throwable from label22 to label32 with label18;
+        catch java.io.IOException from label34 to label35 with label36;
+    }
+
+    public void readTrack(java.io.File)
+    {
+        com.android.internal.location.TrackProvider $r0;
+        java.io.File $r1;
+        com.android.internal.location.Waypoint $r2;
+        java.io.BufferedReader $r3, $r4;
+        java.io.FileReader $r5;
+        long $l0, $l2;
+        java.lang.String $r6, $r11;
+        java.lang.String[] $r7;
+        int $i1;
+        java.lang.StringBuilder $r8;
+        java.io.IOException $r9, $r16;
+        java.util.List $r10;
+        double $d0, $d1, $d2;
+        float $f0, $f1;
+        android.location.Location $r12;
+        byte $b3;
+        java.lang.Throwable $r13;
+        java.lang.NumberFormatException $r14, $r15;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        $r1 := @parameter0: java.io.File;
+
+        $r4 = null;
+
+     label01:
+        $r3 = new java.io.BufferedReader;
+
+        $r5 = new java.io.FileReader;
+
+     label02:
+        specialinvoke $r5.<java.io.FileReader: void <init>(java.io.File)>($r1);
+
+        specialinvoke $r3.<java.io.BufferedReader: void <init>(java.io.Reader,int)>($r5, 8192);
+
+     label03:
+        $l0 = -9223372036854775807L;
+
+     label04:
+        $r6 = virtualinvoke $r3.<java.io.BufferedReader: java.lang.String readLine()>();
+
+        if $r6 == null goto label40;
+
+        $r7 = virtualinvoke $r6.<java.lang.String: java.lang.String[] split(java.lang.String)>("\\s+");
+
+     label05:
+        $i1 = lengthof $r7;
+
+        if $i1 == 4 goto label11;
+
+        $i1 = lengthof $r7;
+
+        if $i1 == 6 goto label11;
+
+     label06:
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Got track \"");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\", wanted <time> <long> <lat> <alt> [<bearing> <speed>]");
+
+        $r6 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("TrackProvider", $r6);
+
+     label07:
+        goto label04;
+
+     label08:
+        $r9 := @caughtexception;
+
+        $r4 = $r3;
+
+     label09:
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("TrackProvider", "Exception reading track file", $r9);
+
+        $r10 = $r0.<com.android.internal.location.TrackProvider: java.util.List mWaypoints>;
+
+        interfaceinvoke $r10.<java.util.List: void clear()>();
+
+     label10:
+        specialinvoke $r0.<com.android.internal.location.TrackProvider: void close(java.io.Reader)>($r4);
+
+        return;
+
+     label11:
+        $r11 = $r7[0];
+
+     label12:
+        $l2 = staticinvoke <java.lang.Long: long parseLong(java.lang.String)>($r11);
+
+        $r11 = $r7[1];
+
+        $d0 = staticinvoke <java.lang.Double: double parseDouble(java.lang.String)>($r11);
+
+        $r11 = $r7[2];
+
+        $d1 = staticinvoke <java.lang.Double: double parseDouble(java.lang.String)>($r11);
+
+        $r11 = $r7[3];
+
+        $d2 = staticinvoke <java.lang.Double: double parseDouble(java.lang.String)>($r11);
+
+     label13:
+        $r2 = new com.android.internal.location.Waypoint;
+
+     label14:
+        $r6 = virtualinvoke $r0.<android.location.LocationProvider: java.lang.String getName()>();
+
+        specialinvoke $r2.<com.android.internal.location.Waypoint: void <init>(java.lang.String,long,double,double,double)>($r6, $l2, $d1, $d0, $d2);
+
+     label15:
+        $i1 = lengthof $r7;
+
+     label16:
+        if $i1 < 6 goto label19;
+
+     label17:
+        $r6 = $r7[4];
+
+     label18:
+        $f0 = staticinvoke <java.lang.Float: float parseFloat(java.lang.String)>($r6);
+
+        $r6 = $r7[5];
+
+        $f1 = staticinvoke <java.lang.Float: float parseFloat(java.lang.String)>($r6);
+
+        virtualinvoke $r2.<com.android.internal.location.Waypoint: void setBearing(float)>($f0);
+
+        virtualinvoke $r2.<com.android.internal.location.Waypoint: void setSpeed(float)>($f1);
+
+     label19:
+        $r12 = $r0.<com.android.internal.location.TrackProvider: android.location.Location mInitialLocation>;
+
+        if $r12 != null goto label22;
+
+     label20:
+        $r12 = virtualinvoke $r2.<com.android.internal.location.Waypoint: android.location.Location getLocation()>();
+
+     label21:
+        $r0.<com.android.internal.location.TrackProvider: android.location.Location mInitialLocation> = $r12;
+
+     label22:
+        $b3 = $l2 cmp 0L;
+
+     label23:
+        if $b3 >= 0 goto label34;
+
+     label24:
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignoring waypoint at negative time=");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l2);
+
+        $r6 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("TrackProvider", $r6);
+
+     label25:
+        goto label04;
+
+     label26:
+        $r13 := @caughtexception;
+
+        $r4 = $r3;
+
+     label27:
+        specialinvoke $r0.<com.android.internal.location.TrackProvider: void close(java.io.Reader)>($r4);
+
+        throw $r13;
+
+     label28:
+        $r14 := @caughtexception;
+
+     label29:
+        $r8 = new java.lang.StringBuilder;
+
+     label30:
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Got track \"");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\", wanted <time> <long> <lat> <alt> ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[<bearing> <speed>]");
+
+        $r6 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("TrackProvider", $r6, $r14);
+
+        goto label04;
+
+     label31:
+        $r15 := @caughtexception;
+
+     label32:
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignoring bearing and speed \"");
+
+        $r6 = $r7[4];
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\", \"");
+
+        $r6 = $r7[5];
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $r6 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("TrackProvider", $r6, $r15);
+
+     label33:
+        goto label19;
+
+     label34:
+        $b3 = $l2 cmp $l0;
+
+     label35:
+        if $b3 > 0 goto label37;
+
+     label36:
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignoring waypoint at time=");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l2);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" (< ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r6 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("TrackProvider", $r6);
+
+        goto label04;
+
+     label37:
+        $r10 = $r0.<com.android.internal.location.TrackProvider: java.util.List mWaypoints>;
+
+        interfaceinvoke $r10.<java.util.List: boolean add(java.lang.Object)>($r2);
+
+     label38:
+        $l0 = $l2;
+
+     label39:
+        goto label04;
+
+     label40:
+        specialinvoke $r0.<com.android.internal.location.TrackProvider: void setTimes()>();
+
+     label41:
+        specialinvoke $r0.<com.android.internal.location.TrackProvider: void close(java.io.Reader)>($r3);
+
+        return;
+
+     label42:
+        $r13 := @caughtexception;
+
+        goto label27;
+
+     label43:
+        $r16 := @caughtexception;
+
+        $r9 = $r16;
+
+        goto label09;
+
+        catch java.io.IOException from label02 to label03 with label43;
+        catch java.lang.Throwable from label01 to label03 with label42;
+        catch java.io.IOException from label04 to label05 with label08;
+        catch java.io.IOException from label06 to label07 with label08;
+        catch java.lang.Throwable from label04 to label07 with label26;
+        catch java.lang.Throwable from label09 to label10 with label42;
+        catch java.lang.NumberFormatException from label12 to label13 with label28;
+        catch java.io.IOException from label12 to label13 with label08;
+        catch java.lang.Throwable from label11 to label13 with label26;
+        catch java.io.IOException from label14 to label15 with label08;
+        catch java.lang.Throwable from label13 to label16 with label26;
+        catch java.lang.NumberFormatException from label18 to label19 with label31;
+        catch java.io.IOException from label18 to label19 with label08;
+        catch java.lang.Throwable from label17 to label19 with label26;
+        catch java.io.IOException from label20 to label21 with label08;
+        catch java.io.IOException from label24 to label25 with label08;
+        catch java.lang.Throwable from label19 to label22 with label26;
+        catch java.lang.Throwable from label23 to label25 with label26;
+        catch java.io.IOException from label30 to label31 with label08;
+        catch java.io.IOException from label32 to label33 with label08;
+        catch java.io.IOException from label36 to label38 with label08;
+        catch java.io.IOException from label39 to label41 with label08;
+        catch java.lang.Throwable from label29 to label34 with label26;
+        catch java.lang.Throwable from label35 to label38 with label26;
+        catch java.lang.Throwable from label39 to label41 with label26;
+    }
+
+    public boolean requiresCell()
+    {
+        com.android.internal.location.TrackProvider $r0;
+        boolean z0;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        z0 = $r0.<com.android.internal.location.TrackProvider: boolean mRequiresCell>;
+
+        return z0;
+    }
+
+    public boolean requiresNetwork()
+    {
+        com.android.internal.location.TrackProvider $r0;
+        boolean z0;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        z0 = $r0.<com.android.internal.location.TrackProvider: boolean mRequiresNetwork>;
+
+        return z0;
+    }
+
+    public boolean requiresSatellite()
+    {
+        com.android.internal.location.TrackProvider $r0;
+        boolean z0;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        z0 = $r0.<com.android.internal.location.TrackProvider: boolean mRequiresSatellite>;
+
+        return z0;
+    }
+
+    public void setAccuracy(int)
+    {
+        com.android.internal.location.TrackProvider $r0;
+        int $i0;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        $i0 := @parameter0: int;
+
+        $r0.<com.android.internal.location.TrackProvider: int mAccuracy> = $i0;
+
+        return;
+    }
+
+    public void setHasMonetaryCost(boolean)
+    {
+        com.android.internal.location.TrackProvider $r0;
+        boolean $z0;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        $z0 := @parameter0: boolean;
+
+        $r0.<com.android.internal.location.TrackProvider: boolean mHasMonetaryCost> = $z0;
+
+        return;
+    }
+
+    public void setPowerRequirement(int)
+    {
+        com.android.internal.location.TrackProvider $r0;
+        int $i0;
+        java.lang.IllegalArgumentException $r1;
+        java.lang.StringBuilder $r2;
+        java.lang.String $r3;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        $i0 := @parameter0: int;
+
+        if $i0 < 1 goto label1;
+
+        if $i0 <= 3 goto label2;
+
+     label1:
+        $r1 = new java.lang.IllegalArgumentException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("powerRequirement = ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r3);
+
+        throw $r1;
+
+     label2:
+        $r0.<com.android.internal.location.TrackProvider: int mPowerRequirement> = $i0;
+
+        return;
+    }
+
+    public void setRepeat(boolean)
+    {
+        com.android.internal.location.TrackProvider $r0;
+        boolean $z0;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        $z0 := @parameter0: boolean;
+
+        $r0.<com.android.internal.location.TrackProvider: boolean mRepeat> = $z0;
+
+        return;
+    }
+
+    public void setRequiresCell(boolean)
+    {
+        com.android.internal.location.TrackProvider $r0;
+        boolean $z0;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        $z0 := @parameter0: boolean;
+
+        $r0.<com.android.internal.location.TrackProvider: boolean mRequiresCell> = $z0;
+
+        return;
+    }
+
+    public void setRequiresNetwork(boolean)
+    {
+        com.android.internal.location.TrackProvider $r0;
+        boolean $z0;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        $z0 := @parameter0: boolean;
+
+        $r0.<com.android.internal.location.TrackProvider: boolean mRequiresNetwork> = $z0;
+
+        return;
+    }
+
+    public void setRequiresSatellite(boolean)
+    {
+        com.android.internal.location.TrackProvider $r0;
+        boolean $z0;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        $z0 := @parameter0: boolean;
+
+        $r0.<com.android.internal.location.TrackProvider: boolean mRequiresSatellite> = $z0;
+
+        return;
+    }
+
+    public void setSupportsAltitude(boolean)
+    {
+        com.android.internal.location.TrackProvider $r0;
+        boolean $z0;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        $z0 := @parameter0: boolean;
+
+        $r0.<com.android.internal.location.TrackProvider: boolean mSupportsAltitude> = $z0;
+
+        return;
+    }
+
+    public void setSupportsBearing(boolean)
+    {
+        com.android.internal.location.TrackProvider $r0;
+        boolean $z0;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        $z0 := @parameter0: boolean;
+
+        $r0.<com.android.internal.location.TrackProvider: boolean mSupportsBearing> = $z0;
+
+        return;
+    }
+
+    public void setSupportsSpeed(boolean)
+    {
+        com.android.internal.location.TrackProvider $r0;
+        boolean $z0;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        $z0 := @parameter0: boolean;
+
+        $r0.<com.android.internal.location.TrackProvider: boolean mSupportsSpeed> = $z0;
+
+        return;
+    }
+
+    public void setTrackSpeed(float)
+    {
+        com.android.internal.location.TrackProvider $r0;
+        float $f0;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        $f0 := @parameter0: float;
+
+        $r0.<com.android.internal.location.TrackProvider: float mTrackSpeed> = $f0;
+
+        return;
+    }
+
+    public boolean supportsAltitude()
+    {
+        com.android.internal.location.TrackProvider $r0;
+        boolean z0;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        z0 = $r0.<com.android.internal.location.TrackProvider: boolean mSupportsAltitude>;
+
+        return z0;
+    }
+
+    public boolean supportsBearing()
+    {
+        com.android.internal.location.TrackProvider $r0;
+        boolean z0;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        z0 = $r0.<com.android.internal.location.TrackProvider: boolean mSupportsBearing>;
+
+        return z0;
+    }
+
+    public boolean supportsSpeed()
+    {
+        com.android.internal.location.TrackProvider $r0;
+        boolean z0;
+
+        $r0 := @this: com.android.internal.location.TrackProvider;
+
+        z0 = $r0.<com.android.internal.location.TrackProvider: boolean mSupportsSpeed>;
+
+        return z0;
+    }
+
+    public static void <clinit>()
+    {
+        <com.android.internal.location.TrackProvider: java.lang.String LOG_TAG> = "TrackProvider";
+
+        <com.android.internal.location.TrackProvider: long INTERVAL> = 1000L;
+
+        return;
+    }
+}

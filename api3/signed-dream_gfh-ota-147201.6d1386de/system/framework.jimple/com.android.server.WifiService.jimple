@@ -1,0 +1,4164 @@
+public class com.android.server.WifiService extends android.net.wifi.IWifiManager$Stub
+{
+    private static final java.lang.String ACTION_DEVICE_IDLE;
+    private static final boolean DBG;
+    private static final long DEFAULT_IDLE_MILLIS;
+    private static final int DEFAULT_WAKELOCK_TIMEOUT;
+    private static final int IDLE_REQUEST;
+    private static final int MESSAGE_DISABLE_WIFI;
+    private static final int MESSAGE_ENABLE_WIFI;
+    private static final int MESSAGE_RELEASE_WAKELOCK;
+    private static final int MESSAGE_START_WIFI;
+    private static final int MESSAGE_STOP_WIFI;
+    private static final int SCAN_RESULT_BUFFER_SIZE;
+    private static final int SCAN_RESULT_CACHE_SIZE;
+    private static final boolean SET_DUE_TO_A_HIDDEN_NETWORK;
+    private static final java.lang.String TAG;
+    private static final java.lang.String WAKELOCK_TAG;
+    private static android.os.PowerManager$WakeLock sDriverStopWakeLock;
+    private static int[] sValidRegulatoryChannelCounts;
+    private static android.os.PowerManager$WakeLock sWakeLock;
+    private static final java.util.regex.Pattern scanResultPattern;
+    private android.app.AlarmManager mAlarmManager;
+    private final com.android.internal.app.IBatteryStats mBatteryStats;
+    private android.content.Context mContext;
+    private boolean mDeviceIdle;
+    private int mFullLocksAcquired;
+    private int mFullLocksReleased;
+    private android.app.PendingIntent mIdleIntent;
+    private final java.util.Map mIsHiddenNetworkPresent;
+    private int mLastEnableUid;
+    private final com.android.server.WifiService$LockList mLocks;
+    private boolean mNeedReconfig;
+    private int mNumHiddenNetworkPresent;
+    private int mPluggedType;
+    private final android.content.BroadcastReceiver mReceiver;
+    private int mScanLocksAcquired;
+    private int mScanLocksReleased;
+    private char[] mScanResultBuffer;
+    private final java.util.LinkedHashMap mScanResultCache;
+    private boolean mScreenOff;
+    private final com.android.server.WifiService$WifiHandler mWifiHandler;
+    private int mWifiState;
+    private final android.net.wifi.WifiStateTracker mWifiStateTracker;
+
+    static void <clinit>()
+    {
+        java.util.regex.Pattern $r0;
+        int[] $r1;
+
+        <com.android.server.WifiService: java.lang.String WAKELOCK_TAG> = "WifiService";
+
+        <com.android.server.WifiService: java.lang.String TAG> = "WifiService";
+
+        <com.android.server.WifiService: boolean SET_DUE_TO_A_HIDDEN_NETWORK> = 1;
+
+        <com.android.server.WifiService: int SCAN_RESULT_CACHE_SIZE> = 80;
+
+        <com.android.server.WifiService: int SCAN_RESULT_BUFFER_SIZE> = 512;
+
+        <com.android.server.WifiService: int MESSAGE_STOP_WIFI> = 2;
+
+        <com.android.server.WifiService: int MESSAGE_START_WIFI> = 3;
+
+        <com.android.server.WifiService: int MESSAGE_RELEASE_WAKELOCK> = 4;
+
+        <com.android.server.WifiService: int MESSAGE_ENABLE_WIFI> = 0;
+
+        <com.android.server.WifiService: int MESSAGE_DISABLE_WIFI> = 1;
+
+        <com.android.server.WifiService: int IDLE_REQUEST> = 0;
+
+        <com.android.server.WifiService: int DEFAULT_WAKELOCK_TIMEOUT> = 8000;
+
+        <com.android.server.WifiService: long DEFAULT_IDLE_MILLIS> = 900000L;
+
+        <com.android.server.WifiService: boolean DBG> = 0;
+
+        <com.android.server.WifiService: java.lang.String ACTION_DEVICE_IDLE> = "com.android.server.WifiManager.action.DEVICE_IDLE";
+
+        $r0 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>("\t+");
+
+        <com.android.server.WifiService: java.util.regex.Pattern scanResultPattern> = $r0;
+
+        $r1 = newarray (int)[3];
+
+        $r1[0] = 11;
+
+        $r1[1] = 13;
+
+        $r1[2] = 14;
+
+        <com.android.server.WifiService: int[] sValidRegulatoryChannelCounts> = $r1;
+
+        return;
+    }
+
+    void <init>(android.content.Context, android.net.wifi.WifiStateTracker)
+    {
+        com.android.server.WifiService $r0;
+        android.content.Context $r1;
+        android.net.wifi.WifiStateTracker $r2;
+        android.content.Intent $r3;
+        android.os.HandlerThread $r4;
+        com.android.server.WifiService$LockList $r5;
+        int $i0;
+        com.android.server.WifiService$4 $r6;
+        com.android.internal.app.IBatteryStats $r7;
+        java.util.HashMap $r8;
+        com.android.server.WifiService$1 $r9;
+        char[] $r10;
+        com.android.server.WifiService$WifiHandler $r11;
+        android.os.Looper $r12;
+        boolean $z0;
+        java.lang.Object $r13;
+        android.app.AlarmManager $r14;
+        android.app.PendingIntent $r15;
+        android.os.PowerManager $r16;
+        android.os.PowerManager$WakeLock $r17;
+        com.android.server.WifiService$2 $r18;
+        java.lang.StringBuilder $r19;
+        java.lang.String $r20;
+        com.android.server.WifiService$3 $r21;
+        android.content.IntentFilter $r22;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: android.net.wifi.WifiStateTracker;
+
+        specialinvoke $r0.<android.net.wifi.IWifiManager$Stub: void <init>()>();
+
+        $r5 = new com.android.server.WifiService$LockList;
+
+        specialinvoke $r5.<com.android.server.WifiService$LockList: void <init>(com.android.server.WifiService,com.android.server.WifiService$1)>($r0, null);
+
+        $r0.<com.android.server.WifiService: com.android.server.WifiService$LockList mLocks> = $r5;
+
+        $i0 = staticinvoke <android.os.Process: int myUid()>();
+
+        $r0.<com.android.server.WifiService: int mLastEnableUid> = $i0;
+
+        $r6 = new com.android.server.WifiService$4;
+
+        specialinvoke $r6.<com.android.server.WifiService$4: void <init>(com.android.server.WifiService)>($r0);
+
+        $r0.<com.android.server.WifiService: android.content.BroadcastReceiver mReceiver> = $r6;
+
+        $r0.<com.android.server.WifiService: android.content.Context mContext> = $r1;
+
+        $r0.<com.android.server.WifiService: android.net.wifi.WifiStateTracker mWifiStateTracker> = $r2;
+
+        $r7 = staticinvoke <com.android.server.am.BatteryStatsService: com.android.internal.app.IBatteryStats getService()>();
+
+        $r0.<com.android.server.WifiService: com.android.internal.app.IBatteryStats mBatteryStats> = $r7;
+
+        $r8 = new java.util.HashMap;
+
+        specialinvoke $r8.<java.util.HashMap: void <init>()>();
+
+        $r0.<com.android.server.WifiService: java.util.Map mIsHiddenNetworkPresent> = $r8;
+
+        $r0.<com.android.server.WifiService: int mNumHiddenNetworkPresent> = 0;
+
+        $r9 = new com.android.server.WifiService$1;
+
+        specialinvoke $r9.<com.android.server.WifiService$1: void <init>(com.android.server.WifiService,int,float,boolean)>($r0, 80, 0.75F, 1);
+
+        $r0.<com.android.server.WifiService: java.util.LinkedHashMap mScanResultCache> = $r9;
+
+        $r10 = newarray (char)[512];
+
+        $r0.<com.android.server.WifiService: char[] mScanResultBuffer> = $r10;
+
+        $r4 = new android.os.HandlerThread;
+
+        specialinvoke $r4.<android.os.HandlerThread: void <init>(java.lang.String)>("WifiService");
+
+        virtualinvoke $r4.<java.lang.Thread: void start()>();
+
+        $r11 = new com.android.server.WifiService$WifiHandler;
+
+        $r12 = virtualinvoke $r4.<android.os.HandlerThread: android.os.Looper getLooper()>();
+
+        specialinvoke $r11.<com.android.server.WifiService$WifiHandler: void <init>(com.android.server.WifiService,android.os.Looper)>($r0, $r12);
+
+        $r0.<com.android.server.WifiService: com.android.server.WifiService$WifiHandler mWifiHandler> = $r11;
+
+        $r0.<com.android.server.WifiService: int mWifiState> = 1;
+
+        $z0 = specialinvoke $r0.<com.android.server.WifiService: boolean getPersistedWifiEnabled()>();
+
+        $r1 = $r0.<com.android.server.WifiService: android.content.Context mContext>;
+
+        $r13 = virtualinvoke $r1.<android.content.Context: java.lang.Object getSystemService(java.lang.String)>("alarm");
+
+        $r14 = (android.app.AlarmManager) $r13;
+
+        $r0.<com.android.server.WifiService: android.app.AlarmManager mAlarmManager> = $r14;
+
+        $r3 = new android.content.Intent;
+
+        specialinvoke $r3.<android.content.Intent: void <init>(java.lang.String,android.net.Uri)>("com.android.server.WifiManager.action.DEVICE_IDLE", null);
+
+        $r1 = $r0.<com.android.server.WifiService: android.content.Context mContext>;
+
+        $r15 = staticinvoke <android.app.PendingIntent: android.app.PendingIntent getBroadcast(android.content.Context,int,android.content.Intent,int)>($r1, 0, $r3, 0);
+
+        $r0.<com.android.server.WifiService: android.app.PendingIntent mIdleIntent> = $r15;
+
+        $r1 = $r0.<com.android.server.WifiService: android.content.Context mContext>;
+
+        $r13 = virtualinvoke $r1.<android.content.Context: java.lang.Object getSystemService(java.lang.String)>("power");
+
+        $r16 = (android.os.PowerManager) $r13;
+
+        $r17 = virtualinvoke $r16.<android.os.PowerManager: android.os.PowerManager$WakeLock newWakeLock(int,java.lang.String)>(1, "WifiService");
+
+        <com.android.server.WifiService: android.os.PowerManager$WakeLock sWakeLock> = $r17;
+
+        $r17 = virtualinvoke $r16.<android.os.PowerManager: android.os.PowerManager$WakeLock newWakeLock(int,java.lang.String)>(1, "WifiService");
+
+        <com.android.server.WifiService: android.os.PowerManager$WakeLock sDriverStopWakeLock> = $r17;
+
+        $r2 = $r0.<com.android.server.WifiService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        $r18 = new com.android.server.WifiService$2;
+
+        specialinvoke $r18.<com.android.server.WifiService$2: void <init>(com.android.server.WifiService)>($r0);
+
+        virtualinvoke $r2.<android.net.wifi.WifiStateTracker: void setReleaseWakeLockCallback(java.lang.Runnable)>($r18);
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("WifiService starting up with Wi-Fi ");
+
+        if $z0 == 0 goto label2;
+
+        $r20 = "enabled";
+
+     label1:
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r20);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("WifiService", $r20);
+
+        $r1 = $r0.<com.android.server.WifiService: android.content.Context mContext>;
+
+        $r21 = new com.android.server.WifiService$3;
+
+        specialinvoke $r21.<com.android.server.WifiService$3: void <init>(com.android.server.WifiService)>($r0);
+
+        $r22 = new android.content.IntentFilter;
+
+        specialinvoke $r22.<android.content.IntentFilter: void <init>(java.lang.String)>("android.intent.action.AIRPLANE_MODE");
+
+        virtualinvoke $r1.<android.content.Context: android.content.Intent registerReceiver(android.content.BroadcastReceiver,android.content.IntentFilter)>($r21, $r22);
+
+        $i0 = staticinvoke <android.os.Process: int myUid()>();
+
+        specialinvoke $r0.<com.android.server.WifiService: boolean setWifiEnabledBlocking(boolean,boolean,int)>($z0, 0, $i0);
+
+        return;
+
+     label2:
+        $r20 = "disabled";
+
+        goto label1;
+    }
+
+    static com.android.server.WifiService$WifiHandler access$100(com.android.server.WifiService)
+    {
+        com.android.server.WifiService $r0;
+        com.android.server.WifiService$WifiHandler r1;
+
+        $r0 := @parameter0: com.android.server.WifiService;
+
+        r1 = $r0.<com.android.server.WifiService: com.android.server.WifiService$WifiHandler mWifiHandler>;
+
+        return r1;
+    }
+
+    static android.net.wifi.WifiStateTracker access$1000(com.android.server.WifiService)
+    {
+        com.android.server.WifiService $r0;
+        android.net.wifi.WifiStateTracker r1;
+
+        $r0 := @parameter0: com.android.server.WifiService;
+
+        r1 = $r0.<com.android.server.WifiService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        return r1;
+    }
+
+    static boolean access$1300(com.android.server.WifiService, boolean, boolean, int)
+    {
+        com.android.server.WifiService $r0;
+        boolean $z0, $z1;
+        int $i0;
+
+        $r0 := @parameter0: com.android.server.WifiService;
+
+        $z0 := @parameter1: boolean;
+
+        $z1 := @parameter2: boolean;
+
+        $i0 := @parameter3: int;
+
+        $z0 = specialinvoke $r0.<com.android.server.WifiService: boolean setWifiEnabledBlocking(boolean,boolean,int)>($z0, $z1, $i0);
+
+        return $z0;
+    }
+
+    static android.os.PowerManager$WakeLock access$1400()
+    {
+        android.os.PowerManager$WakeLock r0;
+
+        r0 = <com.android.server.WifiService: android.os.PowerManager$WakeLock sWakeLock>;
+
+        return r0;
+    }
+
+    static com.android.server.WifiService$LockList access$1600(com.android.server.WifiService)
+    {
+        com.android.server.WifiService $r0;
+        com.android.server.WifiService$LockList r1;
+
+        $r0 := @parameter0: com.android.server.WifiService;
+
+        r1 = $r0.<com.android.server.WifiService: com.android.server.WifiService$LockList mLocks>;
+
+        return r1;
+    }
+
+    static boolean access$1700(com.android.server.WifiService, android.os.IBinder)
+    {
+        com.android.server.WifiService $r0;
+        android.os.IBinder $r1;
+        boolean $z0;
+
+        $r0 := @parameter0: com.android.server.WifiService;
+
+        $r1 := @parameter1: android.os.IBinder;
+
+        $z0 = specialinvoke $r0.<com.android.server.WifiService: boolean releaseWifiLockLocked(android.os.IBinder)>($r1);
+
+        return $z0;
+    }
+
+    static android.os.PowerManager$WakeLock access$200()
+    {
+        android.os.PowerManager$WakeLock r0;
+
+        r0 = <com.android.server.WifiService: android.os.PowerManager$WakeLock sDriverStopWakeLock>;
+
+        return r0;
+    }
+
+    static void access$300(com.android.server.WifiService)
+    {
+        com.android.server.WifiService $r0;
+
+        $r0 := @parameter0: com.android.server.WifiService;
+
+        specialinvoke $r0.<com.android.server.WifiService: void updateWifiState()>();
+
+        return;
+    }
+
+    static android.content.Context access$400(com.android.server.WifiService)
+    {
+        com.android.server.WifiService $r0;
+        android.content.Context r1;
+
+        $r0 := @parameter0: com.android.server.WifiService;
+
+        r1 = $r0.<com.android.server.WifiService: android.content.Context mContext>;
+
+        return r1;
+    }
+
+    static android.app.PendingIntent access$500(com.android.server.WifiService)
+    {
+        com.android.server.WifiService $r0;
+        android.app.PendingIntent r1;
+
+        $r0 := @parameter0: com.android.server.WifiService;
+
+        r1 = $r0.<com.android.server.WifiService: android.app.PendingIntent mIdleIntent>;
+
+        return r1;
+    }
+
+    static android.app.AlarmManager access$600(com.android.server.WifiService)
+    {
+        com.android.server.WifiService $r0;
+        android.app.AlarmManager r1;
+
+        $r0 := @parameter0: com.android.server.WifiService;
+
+        r1 = $r0.<com.android.server.WifiService: android.app.AlarmManager mAlarmManager>;
+
+        return r1;
+    }
+
+    static boolean access$702(com.android.server.WifiService, boolean)
+    {
+        com.android.server.WifiService $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: com.android.server.WifiService;
+
+        $z0 := @parameter1: boolean;
+
+        $r0.<com.android.server.WifiService: boolean mDeviceIdle> = $z0;
+
+        return $z0;
+    }
+
+    static boolean access$800(com.android.server.WifiService)
+    {
+        com.android.server.WifiService $r0;
+        boolean z0;
+
+        $r0 := @parameter0: com.android.server.WifiService;
+
+        z0 = $r0.<com.android.server.WifiService: boolean mScreenOff>;
+
+        return z0;
+    }
+
+    static boolean access$802(com.android.server.WifiService, boolean)
+    {
+        com.android.server.WifiService $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: com.android.server.WifiService;
+
+        $z0 := @parameter1: boolean;
+
+        $r0.<com.android.server.WifiService: boolean mScreenOff> = $z0;
+
+        return $z0;
+    }
+
+    static int access$900(com.android.server.WifiService)
+    {
+        com.android.server.WifiService $r0;
+        int i0;
+
+        $r0 := @parameter0: com.android.server.WifiService;
+
+        i0 = $r0.<com.android.server.WifiService: int mPluggedType>;
+
+        return i0;
+    }
+
+    static int access$902(com.android.server.WifiService, int)
+    {
+        com.android.server.WifiService $r0;
+        int $i0;
+
+        $r0 := @parameter0: com.android.server.WifiService;
+
+        $i0 := @parameter1: int;
+
+        $r0.<com.android.server.WifiService: int mPluggedType> = $i0;
+
+        return $i0;
+    }
+
+    private boolean acquireWifiLockLocked(com.android.server.WifiService$WifiLock)
+    {
+        com.android.server.WifiService $r0;
+        com.android.server.WifiService$WifiLock $r1;
+        com.android.server.WifiService$LockList $r2;
+        int $i0, $i2;
+        long $l1;
+        com.android.internal.app.IBatteryStats $r3;
+        android.os.RemoteException $r4;
+        java.lang.Throwable $r5;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $r1 := @parameter0: com.android.server.WifiService$WifiLock;
+
+        $r2 = $r0.<com.android.server.WifiService: com.android.server.WifiService$LockList mLocks>;
+
+        staticinvoke <com.android.server.WifiService$LockList: void access$1800(com.android.server.WifiService$LockList,com.android.server.WifiService$WifiLock)>($r2, $r1);
+
+        $i0 = staticinvoke <android.os.Binder: int getCallingUid()>();
+
+        $l1 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label01:
+        $i2 = $r1.<com.android.server.WifiService$WifiLock: int mLockMode>;
+
+     label02:
+        lookupswitch($i2)
+        {
+            case 1: goto label05;
+            case 2: goto label09;
+            default: goto label03;
+        };
+
+     label03:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+     label04:
+        specialinvoke $r0.<com.android.server.WifiService: void updateWifiState()>();
+
+        return 1;
+
+     label05:
+        $i2 = $r0.<com.android.server.WifiService: int mFullLocksAcquired>;
+
+        $i2 = $i2 + 1;
+
+        $r0.<com.android.server.WifiService: int mFullLocksAcquired> = $i2;
+
+        $r3 = $r0.<com.android.server.WifiService: com.android.internal.app.IBatteryStats mBatteryStats>;
+
+     label06:
+        interfaceinvoke $r3.<com.android.internal.app.IBatteryStats: void noteFullWifiLockAcquired(int)>($i0);
+
+     label07:
+        goto label03;
+
+     label08:
+        $r4 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        goto label04;
+
+     label09:
+        $i2 = $r0.<com.android.server.WifiService: int mScanLocksAcquired>;
+
+        $i2 = $i2 + 1;
+
+        $r0.<com.android.server.WifiService: int mScanLocksAcquired> = $i2;
+
+        $r3 = $r0.<com.android.server.WifiService: com.android.internal.app.IBatteryStats mBatteryStats>;
+
+     label10:
+        interfaceinvoke $r3.<com.android.internal.app.IBatteryStats: void noteScanWifiLockAcquired(int)>($i0);
+
+     label11:
+        goto label03;
+
+     label12:
+        $r5 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        throw $r5;
+
+        catch java.lang.Throwable from label01 to label02 with label12;
+        catch android.os.RemoteException from label06 to label07 with label08;
+        catch java.lang.Throwable from label05 to label07 with label12;
+        catch android.os.RemoteException from label10 to label11 with label08;
+        catch java.lang.Throwable from label09 to label11 with label12;
+    }
+
+    private void addOrUpdateHiddenNetwork(int, boolean)
+    {
+        com.android.server.WifiService $r0;
+        int $i0;
+        boolean $z0, $z1;
+        java.util.Map $r1;
+        java.lang.Integer $r2;
+        java.lang.Object $r3;
+        java.lang.Boolean $r4;
+        java.lang.Throwable $r5;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $i0 := @parameter0: int;
+
+        $z0 := @parameter1: boolean;
+
+        entermonitor $r0;
+
+        if $i0 < 0 goto label09;
+
+     label01:
+        $r1 = $r0.<com.android.server.WifiService: java.util.Map mIsHiddenNetworkPresent>;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3 = interfaceinvoke $r1.<java.util.Map: java.lang.Object get(java.lang.Object)>($r2);
+
+        $r4 = (java.lang.Boolean) $r3;
+
+        if $r4 == null goto label02;
+
+        $z1 = virtualinvoke $r4.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z1 == $z0 goto label04;
+
+     label02:
+        if $z0 == 0 goto label05;
+
+        specialinvoke $r0.<com.android.server.WifiService: void incrementHiddentNetworkPresentCounter()>();
+
+     label03:
+        $r1 = $r0.<com.android.server.WifiService: java.util.Map mIsHiddenNetworkPresent>;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r4 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z0);
+
+        interfaceinvoke $r1.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r2, $r4);
+
+     label04:
+        exitmonitor $r0;
+
+        return;
+
+     label05:
+        if $r4 == null goto label03;
+
+     label06:
+        specialinvoke $r0.<com.android.server.WifiService: void decrementHiddentNetworkPresentCounter()>();
+
+     label07:
+        goto label03;
+
+     label08:
+        $r5 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r5;
+
+     label09:
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("WifiService", "addOrUpdateHiddenNetwork(): Invalid (negative) network id!");
+
+     label10:
+        goto label04;
+
+        catch java.lang.Throwable from label01 to label04 with label08;
+        catch java.lang.Throwable from label06 to label07 with label08;
+        catch java.lang.Throwable from label09 to label10 with label08;
+    }
+
+    private void decrementHiddentNetworkPresentCounter()
+    {
+        com.android.server.WifiService $r0;
+        int $i0;
+        android.net.wifi.WifiStateTracker $r1;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $i0 = $r0.<com.android.server.WifiService: int mNumHiddenNetworkPresent>;
+
+        if $i0 <= 0 goto label1;
+
+        $i0 = $r0.<com.android.server.WifiService: int mNumHiddenNetworkPresent>;
+
+        $i0 = $i0 - 1;
+
+        $r0.<com.android.server.WifiService: int mNumHiddenNetworkPresent> = $i0;
+
+        $i0 = $r0.<com.android.server.WifiService: int mNumHiddenNetworkPresent>;
+
+        if $i0 != 0 goto label2;
+
+        $r1 = $r0.<com.android.server.WifiService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        virtualinvoke $r1.<android.net.wifi.WifiStateTracker: void setScanMode(boolean,boolean)>(0, 1);
+
+        return;
+
+     label1:
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("WifiService", "Hidden-network counter invariant violation!");
+
+        return;
+
+     label2:
+        return;
+    }
+
+    private void enforceAccessPermission()
+    {
+        com.android.server.WifiService $r0;
+        android.content.Context $r1;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $r1 = $r0.<com.android.server.WifiService: android.content.Context mContext>;
+
+        virtualinvoke $r1.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.ACCESS_WIFI_STATE", "WifiService");
+
+        return;
+    }
+
+    private void enforceChangePermission()
+    {
+        com.android.server.WifiService $r0;
+        android.content.Context $r1;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $r1 = $r0.<com.android.server.WifiService: android.content.Context mContext>;
+
+        virtualinvoke $r1.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.CHANGE_WIFI_STATE", "WifiService");
+
+        return;
+    }
+
+    private boolean getPersistedWifiEnabled()
+    {
+        com.android.server.WifiService $r0;
+        android.content.Context $r1;
+        android.content.ContentResolver $r2;
+        int $i0;
+        android.provider.Settings$SettingNotFoundException $r3;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $r1 = $r0.<com.android.server.WifiService: android.content.Context mContext>;
+
+        $r2 = virtualinvoke $r1.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+     label1:
+        $i0 = staticinvoke <android.provider.Settings$Secure: int getInt(android.content.ContentResolver,java.lang.String)>($r2, "wifi_on");
+
+     label2:
+        if $i0 != 1 goto label3;
+
+        return 1;
+
+     label3:
+        return 0;
+
+     label4:
+        $r3 := @caughtexception;
+
+        staticinvoke <android.provider.Settings$Secure: boolean putInt(android.content.ContentResolver,java.lang.String,int)>($r2, "wifi_on", 0);
+
+        return 0;
+
+        catch android.provider.Settings$SettingNotFoundException from label1 to label2 with label4;
+    }
+
+    private void incrementHiddentNetworkPresentCounter()
+    {
+        com.android.server.WifiService $r0;
+        int $i0;
+        android.net.wifi.WifiStateTracker $r1;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $i0 = $r0.<com.android.server.WifiService: int mNumHiddenNetworkPresent>;
+
+        $i0 = $i0 + 1;
+
+        $r0.<com.android.server.WifiService: int mNumHiddenNetworkPresent> = $i0;
+
+        $i0 = $r0.<com.android.server.WifiService: int mNumHiddenNetworkPresent>;
+
+        if 1 != $i0 goto label1;
+
+        $r1 = $r0.<com.android.server.WifiService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        virtualinvoke $r1.<android.net.wifi.WifiStateTracker: void setScanMode(boolean,boolean)>(1, 1);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    private void initializeHiddenNetworksState()
+    {
+        com.android.server.WifiService $r0;
+        java.util.List $r1;
+        boolean $z0;
+        java.util.Iterator $r2;
+        java.lang.Object $r3;
+        android.net.wifi.WifiConfiguration $r4;
+        int $i0, $i1;
+        java.lang.Throwable $r5;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        entermonitor $r0;
+
+     label1:
+        specialinvoke $r0.<com.android.server.WifiService: void resetHiddenNetworksState()>();
+
+        $r1 = virtualinvoke $r0.<com.android.server.WifiService: java.util.List getConfiguredNetworks()>();
+
+        $z0 = interfaceinvoke $r1.<java.util.List: boolean isEmpty()>();
+
+        if $z0 != 0 goto label7;
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label7;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        $r4 = (android.net.wifi.WifiConfiguration) $r3;
+
+        if $r4 == null goto label2;
+
+        $z0 = $r4.<android.net.wifi.WifiConfiguration: boolean hiddenSSID>;
+
+        if $z0 == 0 goto label2;
+
+        $i0 = $r4.<android.net.wifi.WifiConfiguration: int networkId>;
+
+        $i1 = $r4.<android.net.wifi.WifiConfiguration: int status>;
+
+        if $i1 == 1 goto label6;
+
+        $z0 = 1;
+
+     label3:
+        specialinvoke $r0.<com.android.server.WifiService: void addOrUpdateHiddenNetwork(int,boolean)>($i0, $z0);
+
+     label4:
+        goto label2;
+
+     label5:
+        $r5 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r5;
+
+     label6:
+        $z0 = 0;
+
+        goto label3;
+
+     label7:
+        exitmonitor $r0;
+
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+    }
+
+    private boolean isAirplaneModeOn()
+    {
+        com.android.server.WifiService $r0;
+        boolean $z0;
+        android.content.Context $r1;
+        android.content.ContentResolver $r2;
+        int $i0;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $z0 = specialinvoke $r0.<com.android.server.WifiService: boolean isAirplaneSensitive()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = $r0.<com.android.server.WifiService: android.content.Context mContext>;
+
+        $r2 = virtualinvoke $r1.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $i0 = staticinvoke <android.provider.Settings$System: int getInt(android.content.ContentResolver,java.lang.String,int)>($r2, "airplane_mode_on", 0);
+
+        if $i0 != 1 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    private boolean isAirplaneSensitive()
+    {
+        com.android.server.WifiService $r0;
+        android.content.Context $r1;
+        android.content.ContentResolver $r2;
+        java.lang.String $r3;
+        boolean $z0;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $r1 = $r0.<com.android.server.WifiService: android.content.Context mContext>;
+
+        $r2 = virtualinvoke $r1.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r3 = staticinvoke <android.provider.Settings$System: java.lang.String getString(android.content.ContentResolver,java.lang.String)>($r2, "airplane_mode_radios");
+
+        if $r3 == null goto label1;
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean contains(java.lang.CharSequence)>("wifi");
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    private boolean isHiddenNetwork(int)
+    {
+        com.android.server.WifiService $r0;
+        int $i0;
+        java.util.Map $r1;
+        java.lang.Integer $r2;
+        boolean $z0;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $i0 := @parameter0: int;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = $r0.<com.android.server.WifiService: java.util.Map mIsHiddenNetworkPresent>;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $z0 = interfaceinvoke $r1.<java.util.Map: boolean containsKey(java.lang.Object)>($r2);
+
+     label2:
+        exitmonitor $r0;
+
+        return $z0;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    private static int lookupString(java.lang.String, java.lang.String[])
+    {
+        java.lang.String[] $r0;
+        int $i0, $i1;
+        java.lang.String $r1, $r2;
+        boolean $z0;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r0 := @parameter1: java.lang.String[];
+
+        $i0 = lengthof $r0;
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String replace(char,char)>(45, 95);
+
+        $i1 = 0;
+
+     label1:
+        if $i1 >= $i0 goto label3;
+
+        $r2 = $r0[$i1];
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 == 0 goto label2;
+
+        return $i1;
+
+     label2:
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label3:
+        return -1;
+    }
+
+    private static java.lang.String makeString(java.util.BitSet, java.lang.String[])
+    {
+        java.lang.String[] $r0;
+        java.lang.StringBuffer $r1, $r4;
+        java.util.BitSet $r2;
+        int $i0, $i1;
+        java.lang.String $r3;
+
+        $r2 := @parameter0: java.util.BitSet;
+
+        $r0 := @parameter1: java.lang.String[];
+
+        $r1 = new java.lang.StringBuffer;
+
+        specialinvoke $r1.<java.lang.StringBuffer: void <init>()>();
+
+        $i0 = -1;
+
+        $i1 = lengthof $r0;
+
+        $r2 = virtualinvoke $r2.<java.util.BitSet: java.util.BitSet get(int,int)>(0, $i1);
+
+     label1:
+        $i0 = $i0 + 1;
+
+        $i1 = virtualinvoke $r2.<java.util.BitSet: int nextSetBit(int)>($i0);
+
+        $i0 = $i1;
+
+        if $i1 == -1 goto label2;
+
+        $r3 = $r0[$i1];
+
+        $r3 = virtualinvoke $r3.<java.lang.String: java.lang.String replace(char,char)>(95, 45);
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r3);
+
+        virtualinvoke $r4.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(32);
+
+        goto label1;
+
+     label2:
+        $i0 = virtualinvoke $r2.<java.util.BitSet: int cardinality()>();
+
+        if $i0 <= 0 goto label3;
+
+        $i0 = virtualinvoke $r1.<java.lang.StringBuffer: int length()>();
+
+        $i0 = $i0 - 1;
+
+        virtualinvoke $r1.<java.lang.StringBuffer: void setLength(int)>($i0);
+
+     label3:
+        $r3 = virtualinvoke $r1.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r3;
+    }
+
+    private void markAllHiddenNetworksButOneAsNotPresent(int)
+    {
+        com.android.server.WifiService $r0;
+        int $i0, $i1;
+        java.util.Map $r1;
+        java.util.Set $r2;
+        java.util.Iterator $r3;
+        boolean $z0;
+        java.lang.Object $r4;
+        java.util.Map$Entry $r5;
+        java.lang.Integer $r6;
+        java.lang.Throwable $r7;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $i0 := @parameter0: int;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = $r0.<com.android.server.WifiService: java.util.Map mIsHiddenNetworkPresent>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.util.Set entrySet()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.Set: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label5;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        $r5 = (java.util.Map$Entry) $r4;
+
+        if $r5 == null goto label2;
+
+        $r4 = interfaceinvoke $r5.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r6 = (java.lang.Integer) $r4;
+
+        $i1 = virtualinvoke $r6.<java.lang.Integer: int intValue()>();
+
+        if $i1 == $i0 goto label2;
+
+        $i1 = virtualinvoke $r6.<java.lang.Integer: int intValue()>();
+
+        specialinvoke $r0.<com.android.server.WifiService: void updateNetworkIfHidden(int,boolean)>($i1, 0);
+
+     label3:
+        goto label2;
+
+     label4:
+        $r7 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r7;
+
+     label5:
+        exitmonitor $r0;
+
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+    }
+
+    private android.net.wifi.ScanResult parseScanResult(java.lang.String)
+    {
+        com.android.server.WifiService $r0;
+        java.lang.String $r1, $r8, $r9, $r10;
+        java.util.LinkedHashMap $r2, $r4;
+        android.net.wifi.ScanResult $r3;
+        java.lang.Object $r5;
+        java.util.regex.Pattern $r6;
+        java.lang.String[] $r7;
+        int $i0, $i1, $i2;
+        char $c3;
+        java.lang.NumberFormatException $r11;
+        java.lang.StringBuilder $r12;
+        java.lang.Throwable $r13;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        if $r1 == null goto label23;
+
+        $r2 = $r0.<com.android.server.WifiService: java.util.LinkedHashMap mScanResultCache>;
+
+        entermonitor $r2;
+
+     label01:
+        $r4 = $r0.<com.android.server.WifiService: java.util.LinkedHashMap mScanResultCache>;
+
+        $r5 = virtualinvoke $r4.<java.util.LinkedHashMap: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r3 = (android.net.wifi.ScanResult) $r5;
+
+     label02:
+        if $r3 != null goto label18;
+
+     label03:
+        $r6 = <com.android.server.WifiService: java.util.regex.Pattern scanResultPattern>;
+
+        $r7 = virtualinvoke $r6.<java.util.regex.Pattern: java.lang.String[] split(java.lang.CharSequence)>($r1);
+
+        $i0 = lengthof $r7;
+
+        if 3 > $i0 goto label17;
+
+        $i0 = lengthof $r7;
+
+     label04:
+        if $i0 > 5 goto label17;
+
+     label05:
+        $r8 = $r7[1];
+
+     label06:
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r8);
+
+     label07:
+        $r8 = $r7[2];
+
+        $i1 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r8);
+
+     label08:
+        $i2 = lengthof $r7;
+
+        if $i2 != 4 goto label15;
+
+        $r8 = $r7[3];
+
+        $c3 = virtualinvoke $r8.<java.lang.String: char charAt(int)>(0);
+
+        if $c3 != 91 goto label14;
+
+        $r8 = $r7[3];
+
+        $r9 = "";
+
+     label09:
+        $r10 = virtualinvoke $r9.<java.lang.String: java.lang.String trim()>();
+
+        $i2 = virtualinvoke $r10.<java.lang.String: int length()>();
+
+        if $i2 <= 0 goto label18;
+
+        $r3 = new android.net.wifi.ScanResult;
+
+        $r10 = $r7[0];
+
+        specialinvoke $r3.<android.net.wifi.ScanResult: void <init>(java.lang.String,java.lang.String,java.lang.String,int,int)>($r9, $r10, $r8, $i1, $i0);
+
+     label10:
+        $r4 = $r0.<com.android.server.WifiService: java.util.LinkedHashMap mScanResultCache>;
+
+        virtualinvoke $r4.<java.util.LinkedHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, $r3);
+
+     label11:
+        exitmonitor $r2;
+
+     label12:
+        return $r3;
+
+     label13:
+        $r11 := @caughtexception;
+
+        $i0 = 0;
+
+        $i1 = 0;
+
+        goto label08;
+
+     label14:
+        $r8 = "";
+
+        $r9 = $r7[3];
+
+        goto label09;
+
+     label15:
+        $i2 = lengthof $r7;
+
+        if $i2 != 5 goto label16;
+
+        $r8 = $r7[3];
+
+        $r9 = $r7[4];
+
+        goto label09;
+
+     label16:
+        $r8 = "";
+
+        $r9 = "";
+
+        goto label09;
+
+     label17:
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Misformatted scan result text with ");
+
+        $i0 = lengthof $r7;
+
+        $r12 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r12 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" fields: ");
+
+        $r12 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("WifiService", $r1);
+
+     label18:
+        goto label11;
+
+     label19:
+        $r13 := @caughtexception;
+
+     label20:
+        exitmonitor $r2;
+
+     label21:
+        throw $r13;
+
+     label22:
+        $r13 := @caughtexception;
+
+        goto label20;
+
+     label23:
+        return null;
+
+        catch java.lang.Throwable from label01 to label02 with label19;
+        catch java.lang.Throwable from label03 to label04 with label22;
+        catch java.lang.NumberFormatException from label06 to label07 with label13;
+        catch java.lang.NumberFormatException from label07 to label08 with label13;
+        catch java.lang.Throwable from label05 to label08 with label22;
+        catch java.lang.Throwable from label08 to label10 with label22;
+        catch java.lang.Throwable from label10 to label12 with label19;
+        catch java.lang.Throwable from label14 to label18 with label22;
+        catch java.lang.Throwable from label20 to label21 with label19;
+    }
+
+    private void persistWifiEnabled(boolean)
+    {
+        com.android.server.WifiService $r0;
+        boolean $z0;
+        android.content.ContentResolver $r1;
+        android.content.Context $r2;
+        byte $b0;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $z0 := @parameter0: boolean;
+
+        $r2 = $r0.<com.android.server.WifiService: android.content.Context mContext>;
+
+        $r1 = virtualinvoke $r2.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        if $z0 == 0 goto label2;
+
+        $b0 = 1;
+
+     label1:
+        staticinvoke <android.provider.Settings$Secure: boolean putInt(android.content.ContentResolver,java.lang.String,int)>($r1, "wifi_on", $b0);
+
+        return;
+
+     label2:
+        $b0 = 0;
+
+        goto label1;
+    }
+
+    private static void readNetworkVariables(android.net.wifi.WifiConfiguration)
+    {
+        android.net.wifi.WifiConfiguration $r0;
+        int $i0, $i1, $i2;
+        java.lang.String $r1;
+        boolean $z0;
+        java.lang.String[] $r2, $r3;
+        java.util.BitSet $r4;
+        java.lang.NumberFormatException $r5, $r6, $r7;
+
+        $r0 := @parameter0: android.net.wifi.WifiConfiguration;
+
+        $i0 = $r0.<android.net.wifi.WifiConfiguration: int networkId>;
+
+        if $i0 >= 0 goto label01;
+
+        return;
+
+     label01:
+        $r1 = staticinvoke <android.net.wifi.WifiNative: java.lang.String getNetworkVariableCommand(int,java.lang.String)>($i0, "ssid");
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r1);
+
+        if $z0 != 0 goto label16;
+
+        $r0.<android.net.wifi.WifiConfiguration: java.lang.String SSID> = $r1;
+
+     label02:
+        $r1 = staticinvoke <android.net.wifi.WifiNative: java.lang.String getNetworkVariableCommand(int,java.lang.String)>($i0, "bssid");
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r1);
+
+        if $z0 != 0 goto label17;
+
+        $r0.<android.net.wifi.WifiConfiguration: java.lang.String BSSID> = $r1;
+
+     label03:
+        $r1 = staticinvoke <android.net.wifi.WifiNative: java.lang.String getNetworkVariableCommand(int,java.lang.String)>($i0, "priority");
+
+        $r0.<android.net.wifi.WifiConfiguration: int priority> = -1;
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r1);
+
+        if $z0 != 0 goto label06;
+
+     label04:
+        $i1 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r1);
+
+     label05:
+        $r0.<android.net.wifi.WifiConfiguration: int priority> = $i1;
+
+     label06:
+        $r1 = staticinvoke <android.net.wifi.WifiNative: java.lang.String getNetworkVariableCommand(int,java.lang.String)>($i0, "scan_ssid");
+
+        $r0.<android.net.wifi.WifiConfiguration: boolean hiddenSSID> = 0;
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r1);
+
+        if $z0 != 0 goto label10;
+
+     label07:
+        $i1 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r1);
+
+     label08:
+        if $i1 == 0 goto label18;
+
+        $z0 = 1;
+
+     label09:
+        $r0.<android.net.wifi.WifiConfiguration: boolean hiddenSSID> = $z0;
+
+     label10:
+        $r1 = staticinvoke <android.net.wifi.WifiNative: java.lang.String getNetworkVariableCommand(int,java.lang.String)>($i0, "wep_tx_keyidx");
+
+        $r0.<android.net.wifi.WifiConfiguration: int wepTxKeyIndex> = -1;
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r1);
+
+        if $z0 != 0 goto label13;
+
+     label11:
+        $i1 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r1);
+
+     label12:
+        $r0.<android.net.wifi.WifiConfiguration: int wepTxKeyIndex> = $i1;
+
+     label13:
+        $i1 = 0;
+
+     label14:
+        if $i1 >= 4 goto label20;
+
+        $r2 = <android.net.wifi.WifiConfiguration: java.lang.String[] wepKeyVarNames>;
+
+        $r1 = $r2[$i1];
+
+        $r1 = staticinvoke <android.net.wifi.WifiNative: java.lang.String getNetworkVariableCommand(int,java.lang.String)>($i0, $r1);
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r1);
+
+        if $z0 != 0 goto label19;
+
+        $r2 = $r0.<android.net.wifi.WifiConfiguration: java.lang.String[] wepKeys>;
+
+        $r2[$i1] = $r1;
+
+     label15:
+        $i1 = $i1 + 1;
+
+        goto label14;
+
+     label16:
+        $r0.<android.net.wifi.WifiConfiguration: java.lang.String SSID> = null;
+
+        goto label02;
+
+     label17:
+        $r0.<android.net.wifi.WifiConfiguration: java.lang.String BSSID> = null;
+
+        goto label03;
+
+     label18:
+        $z0 = 0;
+
+        goto label09;
+
+     label19:
+        $r2 = $r0.<android.net.wifi.WifiConfiguration: java.lang.String[] wepKeys>;
+
+        $r2[$i1] = null;
+
+        goto label15;
+
+     label20:
+        $r1 = staticinvoke <android.net.wifi.WifiNative: java.lang.String getNetworkVariableCommand(int,java.lang.String)>($i0, "psk");
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r1);
+
+        if $z0 != 0 goto label24;
+
+        $r0.<android.net.wifi.WifiConfiguration: java.lang.String preSharedKey> = $r1;
+
+     label21:
+        $i0 = $r0.<android.net.wifi.WifiConfiguration: int networkId>;
+
+        $r1 = staticinvoke <android.net.wifi.WifiNative: java.lang.String getNetworkVariableCommand(int,java.lang.String)>($i0, "proto");
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r1);
+
+        if $z0 != 0 goto label25;
+
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String[] split(java.lang.String)>(" ");
+
+        $i0 = lengthof $r2;
+
+        $i1 = 0;
+
+     label22:
+        if $i1 >= $i0 goto label25;
+
+        $r1 = $r2[$i1];
+
+        $r3 = <android.net.wifi.WifiConfiguration$Protocol: java.lang.String[] strings>;
+
+        $i2 = staticinvoke <com.android.server.WifiService: int lookupString(java.lang.String,java.lang.String[])>($r1, $r3);
+
+        if $i2 < 0 goto label23;
+
+        $r4 = $r0.<android.net.wifi.WifiConfiguration: java.util.BitSet allowedProtocols>;
+
+        virtualinvoke $r4.<java.util.BitSet: void set(int)>($i2);
+
+     label23:
+        $i1 = $i1 + 1;
+
+        goto label22;
+
+     label24:
+        $r0.<android.net.wifi.WifiConfiguration: java.lang.String preSharedKey> = null;
+
+        goto label21;
+
+     label25:
+        $i0 = $r0.<android.net.wifi.WifiConfiguration: int networkId>;
+
+        $r1 = staticinvoke <android.net.wifi.WifiNative: java.lang.String getNetworkVariableCommand(int,java.lang.String)>($i0, "key_mgmt");
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r1);
+
+        if $z0 != 0 goto label28;
+
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String[] split(java.lang.String)>(" ");
+
+        $i0 = lengthof $r2;
+
+        $i1 = 0;
+
+     label26:
+        if $i1 >= $i0 goto label28;
+
+        $r1 = $r2[$i1];
+
+        $r3 = <android.net.wifi.WifiConfiguration$KeyMgmt: java.lang.String[] strings>;
+
+        $i2 = staticinvoke <com.android.server.WifiService: int lookupString(java.lang.String,java.lang.String[])>($r1, $r3);
+
+        if $i2 < 0 goto label27;
+
+        $r4 = $r0.<android.net.wifi.WifiConfiguration: java.util.BitSet allowedKeyManagement>;
+
+        virtualinvoke $r4.<java.util.BitSet: void set(int)>($i2);
+
+     label27:
+        $i1 = $i1 + 1;
+
+        goto label26;
+
+     label28:
+        $i0 = $r0.<android.net.wifi.WifiConfiguration: int networkId>;
+
+        $r1 = staticinvoke <android.net.wifi.WifiNative: java.lang.String getNetworkVariableCommand(int,java.lang.String)>($i0, "auth_alg");
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r1);
+
+        if $z0 != 0 goto label31;
+
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String[] split(java.lang.String)>(" ");
+
+        $i0 = lengthof $r2;
+
+        $i1 = 0;
+
+     label29:
+        if $i1 >= $i0 goto label31;
+
+        $r1 = $r2[$i1];
+
+        $r3 = <android.net.wifi.WifiConfiguration$AuthAlgorithm: java.lang.String[] strings>;
+
+        $i2 = staticinvoke <com.android.server.WifiService: int lookupString(java.lang.String,java.lang.String[])>($r1, $r3);
+
+        if $i2 < 0 goto label30;
+
+        $r4 = $r0.<android.net.wifi.WifiConfiguration: java.util.BitSet allowedAuthAlgorithms>;
+
+        virtualinvoke $r4.<java.util.BitSet: void set(int)>($i2);
+
+     label30:
+        $i1 = $i1 + 1;
+
+        goto label29;
+
+     label31:
+        $i0 = $r0.<android.net.wifi.WifiConfiguration: int networkId>;
+
+        $r1 = staticinvoke <android.net.wifi.WifiNative: java.lang.String getNetworkVariableCommand(int,java.lang.String)>($i0, "pairwise");
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r1);
+
+        if $z0 != 0 goto label34;
+
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String[] split(java.lang.String)>(" ");
+
+        $i0 = lengthof $r2;
+
+        $i1 = 0;
+
+     label32:
+        if $i1 >= $i0 goto label34;
+
+        $r1 = $r2[$i1];
+
+        $r3 = <android.net.wifi.WifiConfiguration$PairwiseCipher: java.lang.String[] strings>;
+
+        $i2 = staticinvoke <com.android.server.WifiService: int lookupString(java.lang.String,java.lang.String[])>($r1, $r3);
+
+        if $i2 < 0 goto label33;
+
+        $r4 = $r0.<android.net.wifi.WifiConfiguration: java.util.BitSet allowedPairwiseCiphers>;
+
+        virtualinvoke $r4.<java.util.BitSet: void set(int)>($i2);
+
+     label33:
+        $i1 = $i1 + 1;
+
+        goto label32;
+
+     label34:
+        $i0 = $r0.<android.net.wifi.WifiConfiguration: int networkId>;
+
+        $r1 = staticinvoke <android.net.wifi.WifiNative: java.lang.String getNetworkVariableCommand(int,java.lang.String)>($i0, "group");
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r1);
+
+        if $z0 != 0 goto label40;
+
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String[] split(java.lang.String)>(" ");
+
+        $i0 = lengthof $r2;
+
+        $i1 = 0;
+
+     label35:
+        if $i1 >= $i0 goto label41;
+
+        $r1 = $r2[$i1];
+
+        $r3 = <android.net.wifi.WifiConfiguration$GroupCipher: java.lang.String[] strings>;
+
+        $i2 = staticinvoke <com.android.server.WifiService: int lookupString(java.lang.String,java.lang.String[])>($r1, $r3);
+
+        if $i2 < 0 goto label36;
+
+        $r4 = $r0.<android.net.wifi.WifiConfiguration: java.util.BitSet allowedGroupCiphers>;
+
+        virtualinvoke $r4.<java.util.BitSet: void set(int)>($i2);
+
+     label36:
+        $i1 = $i1 + 1;
+
+        goto label35;
+
+     label37:
+        $r5 := @caughtexception;
+
+        goto label13;
+
+     label38:
+        $r6 := @caughtexception;
+
+        goto label10;
+
+     label39:
+        $r7 := @caughtexception;
+
+        goto label06;
+
+     label40:
+        return;
+
+     label41:
+        return;
+
+        catch java.lang.NumberFormatException from label04 to label05 with label39;
+        catch java.lang.NumberFormatException from label07 to label08 with label38;
+        catch java.lang.NumberFormatException from label11 to label12 with label37;
+    }
+
+    private void registerForBroadcasts()
+    {
+        com.android.server.WifiService $r0;
+        android.content.IntentFilter $r1;
+        android.content.BroadcastReceiver $r2;
+        android.content.Context $r3;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $r1 = new android.content.IntentFilter;
+
+        specialinvoke $r1.<android.content.IntentFilter: void <init>()>();
+
+        virtualinvoke $r1.<android.content.IntentFilter: void addAction(java.lang.String)>("android.intent.action.SCREEN_ON");
+
+        virtualinvoke $r1.<android.content.IntentFilter: void addAction(java.lang.String)>("android.intent.action.SCREEN_OFF");
+
+        virtualinvoke $r1.<android.content.IntentFilter: void addAction(java.lang.String)>("android.intent.action.BATTERY_CHANGED");
+
+        virtualinvoke $r1.<android.content.IntentFilter: void addAction(java.lang.String)>("com.android.server.WifiManager.action.DEVICE_IDLE");
+
+        virtualinvoke $r1.<android.content.IntentFilter: void addAction(java.lang.String)>("android.bluetooth.a2dp.intent.action.SINK_STATE_CHANGED");
+
+        $r3 = $r0.<com.android.server.WifiService: android.content.Context mContext>;
+
+        $r2 = $r0.<com.android.server.WifiService: android.content.BroadcastReceiver mReceiver>;
+
+        virtualinvoke $r3.<android.content.Context: android.content.Intent registerReceiver(android.content.BroadcastReceiver,android.content.IntentFilter)>($r2, $r1);
+
+        return;
+    }
+
+    private boolean releaseWifiLockLocked(android.os.IBinder)
+    {
+        com.android.server.WifiService $r0;
+        android.os.IBinder $r1;
+        com.android.server.WifiService$LockList $r2;
+        com.android.server.WifiService$WifiLock $r3;
+        boolean $z0;
+        int $i0, $i2;
+        long $l1;
+        com.android.internal.app.IBatteryStats $r4;
+        android.os.RemoteException $r5;
+        java.lang.Throwable $r6;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $r1 := @parameter0: android.os.IBinder;
+
+        $r2 = $r0.<com.android.server.WifiService: com.android.server.WifiService$LockList mLocks>;
+
+        $r3 = staticinvoke <com.android.server.WifiService$LockList: com.android.server.WifiService$WifiLock access$1900(com.android.server.WifiService$LockList,android.os.IBinder)>($r2, $r1);
+
+        if $r3 == null goto label06;
+
+        $z0 = 1;
+
+     label01:
+        if $z0 == 0 goto label05;
+
+        $i0 = staticinvoke <android.os.Binder: int getCallingUid()>();
+
+        $l1 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label02:
+        $i2 = $r3.<com.android.server.WifiService$WifiLock: int mLockMode>;
+
+     label03:
+        lookupswitch($i2)
+        {
+            case 1: goto label07;
+            case 2: goto label11;
+            default: goto label04;
+        };
+
+     label04:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+     label05:
+        specialinvoke $r0.<com.android.server.WifiService: void updateWifiState()>();
+
+        return $z0;
+
+     label06:
+        $z0 = 0;
+
+        goto label01;
+
+     label07:
+        $i2 = $r0.<com.android.server.WifiService: int mFullLocksReleased>;
+
+        $i2 = $i2 + 1;
+
+        $r0.<com.android.server.WifiService: int mFullLocksReleased> = $i2;
+
+        $r4 = $r0.<com.android.server.WifiService: com.android.internal.app.IBatteryStats mBatteryStats>;
+
+     label08:
+        interfaceinvoke $r4.<com.android.internal.app.IBatteryStats: void noteFullWifiLockReleased(int)>($i0);
+
+     label09:
+        goto label04;
+
+     label10:
+        $r5 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        goto label05;
+
+     label11:
+        $i2 = $r0.<com.android.server.WifiService: int mScanLocksReleased>;
+
+        $i2 = $i2 + 1;
+
+        $r0.<com.android.server.WifiService: int mScanLocksReleased> = $i2;
+
+        $r4 = $r0.<com.android.server.WifiService: com.android.internal.app.IBatteryStats mBatteryStats>;
+
+     label12:
+        interfaceinvoke $r4.<com.android.internal.app.IBatteryStats: void noteScanWifiLockReleased(int)>($i0);
+
+     label13:
+        goto label04;
+
+     label14:
+        $r6 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l1);
+
+        throw $r6;
+
+        catch java.lang.Throwable from label02 to label03 with label14;
+        catch android.os.RemoteException from label08 to label09 with label10;
+        catch java.lang.Throwable from label07 to label09 with label14;
+        catch android.os.RemoteException from label12 to label13 with label10;
+        catch java.lang.Throwable from label11 to label13 with label14;
+    }
+
+    private void removeHiddenNetwork(int)
+    {
+        com.android.server.WifiService $r0;
+        int $i0;
+        java.util.Map $r1;
+        java.lang.Integer $r2;
+        java.lang.Object $r3;
+        java.lang.Boolean $r4;
+        boolean $z0;
+        java.lang.Throwable $r5;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $i0 := @parameter0: int;
+
+        entermonitor $r0;
+
+        if $i0 < 0 goto label3;
+
+     label1:
+        $r1 = $r0.<com.android.server.WifiService: java.util.Map mIsHiddenNetworkPresent>;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3 = interfaceinvoke $r1.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r2);
+
+        $r4 = (java.lang.Boolean) $r3;
+
+        if $r4 == null goto label2;
+
+        $z0 = virtualinvoke $r4.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z0 == 0 goto label2;
+
+        specialinvoke $r0.<com.android.server.WifiService: void decrementHiddentNetworkPresentCounter()>();
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("WifiService", "removeHiddenNetwork(): Invalid (negative) network id!");
+
+     label4:
+        goto label2;
+
+     label5:
+        $r5 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+    }
+
+    private void removeNetworkIfHidden(int)
+    {
+        com.android.server.WifiService $r0;
+        int $i0;
+        boolean $z0;
+        java.lang.Throwable $r1;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $i0 := @parameter0: int;
+
+        entermonitor $r0;
+
+     label1:
+        $z0 = specialinvoke $r0.<com.android.server.WifiService: boolean isHiddenNetwork(int)>($i0);
+
+        if $z0 == 0 goto label2;
+
+        specialinvoke $r0.<com.android.server.WifiService: void removeHiddenNetwork(int)>($i0);
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    private void resetHiddenNetworksState()
+    {
+        com.android.server.WifiService $r0;
+        java.util.Map $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        entermonitor $r0;
+
+     label1:
+        $r0.<com.android.server.WifiService: int mNumHiddenNetworkPresent> = 0;
+
+        $r1 = $r0.<com.android.server.WifiService: java.util.Map mIsHiddenNetworkPresent>;
+
+        interfaceinvoke $r1.<java.util.Map: void clear()>();
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    private void sendEnableMessage(boolean, boolean, int)
+    {
+        com.android.server.WifiService $r0;
+        boolean $z0, $z1;
+        int $i0;
+        com.android.server.WifiService$WifiHandler $r1;
+        android.os.Message $r2;
+        byte $b1, $b2;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $z0 := @parameter0: boolean;
+
+        $z1 := @parameter1: boolean;
+
+        $i0 := @parameter2: int;
+
+        $b1 = 0;
+
+        $r1 = $r0.<com.android.server.WifiService: com.android.server.WifiService$WifiHandler mWifiHandler>;
+
+        if $z0 == 0 goto label3;
+
+        $b2 = 0;
+
+     label1:
+        if $z1 == 0 goto label2;
+
+        $b1 = 1;
+
+     label2:
+        $r2 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int,int,int)>($r1, $b2, $b1, $i0);
+
+        virtualinvoke $r2.<android.os.Message: void sendToTarget()>();
+
+        return;
+
+     label3:
+        $b2 = 1;
+
+        goto label1;
+    }
+
+    private void sendStartMessage(boolean)
+    {
+        com.android.server.WifiService $r0;
+        boolean $z0;
+        android.os.Message $r1;
+        com.android.server.WifiService$WifiHandler $r2;
+        byte $b0;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $z0 := @parameter0: boolean;
+
+        $r2 = $r0.<com.android.server.WifiService: com.android.server.WifiService$WifiHandler mWifiHandler>;
+
+        if $z0 == 0 goto label2;
+
+        $b0 = 1;
+
+     label1:
+        $r1 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int,int,int)>($r2, 3, $b0, 0);
+
+        virtualinvoke $r1.<android.os.Message: void sendToTarget()>();
+
+        return;
+
+     label2:
+        $b0 = 0;
+
+        goto label1;
+    }
+
+    private boolean setWifiEnabledBlocking(boolean, boolean, int)
+    {
+        com.android.server.WifiService $r0;
+        boolean $z0, $z1, $z2, $z3;
+        int $i0, $i2;
+        android.content.BroadcastReceiver $r1;
+        byte $b1, $b3;
+        android.net.wifi.WifiStateTracker $r2;
+        android.content.Context $r3;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $z0 := @parameter0: boolean;
+
+        $z1 := @parameter1: boolean;
+
+        $i0 := @parameter2: int;
+
+        if $z0 == 0 goto label02;
+
+        $b1 = 3;
+
+     label01:
+        $i2 = $r0.<com.android.server.WifiService: int mWifiState>;
+
+        if $i2 != $b1 goto label03;
+
+        return 1;
+
+     label02:
+        $b1 = 1;
+
+        goto label01;
+
+     label03:
+        if $z0 == 0 goto label04;
+
+        $z2 = specialinvoke $r0.<com.android.server.WifiService: boolean isAirplaneModeOn()>();
+
+        if $z2 == 0 goto label04;
+
+        return 0;
+
+     label04:
+        if $z0 == 0 goto label06;
+
+        $b3 = 2;
+
+     label05:
+        specialinvoke $r0.<com.android.server.WifiService: void setWifiEnabledState(int,int)>($b3, $i0);
+
+        if $z0 == 0 goto label12;
+
+        $z2 = staticinvoke <android.net.wifi.WifiNative: boolean loadDriver()>();
+
+        if $z2 != 0 goto label07;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("WifiService", "Failed to load Wi-Fi driver.");
+
+        specialinvoke $r0.<com.android.server.WifiService: void setWifiEnabledState(int,int)>(4, $i0);
+
+        return 0;
+
+     label06:
+        $b3 = 0;
+
+        goto label05;
+
+     label07:
+        $z2 = staticinvoke <android.net.wifi.WifiNative: boolean startSupplicant()>();
+
+        if $z2 != 0 goto label08;
+
+        staticinvoke <android.net.wifi.WifiNative: boolean unloadDriver()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("WifiService", "Failed to start supplicant daemon.");
+
+        specialinvoke $r0.<com.android.server.WifiService: void setWifiEnabledState(int,int)>(4, $i0);
+
+        return 0;
+
+     label08:
+        specialinvoke $r0.<com.android.server.WifiService: void registerForBroadcasts()>();
+
+        $r2 = $r0.<com.android.server.WifiService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        virtualinvoke $r2.<android.net.wifi.WifiStateTracker: void startEventLoop()>();
+
+     label09:
+        if $z1 == 0 goto label10;
+
+        specialinvoke $r0.<com.android.server.WifiService: void persistWifiEnabled(boolean)>($z0);
+
+     label10:
+        specialinvoke $r0.<com.android.server.WifiService: void setWifiEnabledState(int,int)>($b1, $i0);
+
+        if $z0 == 0 goto label11;
+
+        $r2 = $r0.<com.android.server.WifiService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        virtualinvoke $r2.<android.net.wifi.WifiStateTracker: boolean setNumAllowedChannels()>();
+
+        specialinvoke $r0.<com.android.server.WifiService: void initializeHiddenNetworksState()>();
+
+     label11:
+        return 1;
+
+     label12:
+        $r3 = $r0.<com.android.server.WifiService: android.content.Context mContext>;
+
+        $r1 = $r0.<com.android.server.WifiService: android.content.BroadcastReceiver mReceiver>;
+
+        virtualinvoke $r3.<android.content.Context: void unregisterReceiver(android.content.BroadcastReceiver)>($r1);
+
+        $r2 = $r0.<com.android.server.WifiService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        virtualinvoke $r2.<android.net.wifi.WifiStateTracker: void setNotificationVisible(boolean,int,boolean,int)>(0, 0, 0, 0);
+
+        $z2 = 0;
+
+        $z3 = staticinvoke <android.net.wifi.WifiNative: boolean stopSupplicant()>();
+
+        if $z3 != 0 goto label13;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("WifiService", "Failed to stop supplicant daemon.");
+
+        specialinvoke $r0.<com.android.server.WifiService: void setWifiEnabledState(int,int)>(4, $i0);
+
+        $z2 = 1;
+
+     label13:
+        $r2 = $r0.<com.android.server.WifiService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        virtualinvoke $r2.<android.net.wifi.WifiStateTracker: void resetInterface()>();
+
+        $z3 = staticinvoke <android.net.wifi.WifiNative: boolean unloadDriver()>();
+
+        if $z3 != 0 goto label14;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("WifiService", "Failed to unload Wi-Fi driver.");
+
+        if $z2 != 0 goto label14;
+
+        specialinvoke $r0.<com.android.server.WifiService: void setWifiEnabledState(int,int)>(4, $i0);
+
+        $z2 = 1;
+
+     label14:
+        if $z2 == 0 goto label09;
+
+        return 0;
+    }
+
+    private void setWifiEnabledState(int, int)
+    {
+        com.android.server.WifiService $r0;
+        int $i0, $i1, $i2;
+        android.content.Intent $r1;
+        long $l3;
+        com.android.internal.app.IBatteryStats $r2;
+        android.content.Context $r3;
+        android.os.RemoteException $r4;
+        java.lang.Throwable $r5;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i2 = $r0.<com.android.server.WifiService: int mWifiState>;
+
+        $l3 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+        if $i0 != 3 goto label05;
+
+     label01:
+        $r2 = $r0.<com.android.server.WifiService: com.android.internal.app.IBatteryStats mBatteryStats>;
+
+     label02:
+        interfaceinvoke $r2.<com.android.internal.app.IBatteryStats: void noteWifiOn(int)>($i1);
+
+     label03:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l3);
+
+     label04:
+        $r0.<com.android.server.WifiService: int mWifiState> = $i0;
+
+        $r1 = new android.content.Intent;
+
+        specialinvoke $r1.<android.content.Intent: void <init>(java.lang.String)>("android.net.wifi.WIFI_STATE_CHANGED");
+
+        virtualinvoke $r1.<android.content.Intent: android.content.Intent addFlags(int)>(536870912);
+
+        virtualinvoke $r1.<android.content.Intent: android.content.Intent putExtra(java.lang.String,int)>("wifi_state", $i0);
+
+        virtualinvoke $r1.<android.content.Intent: android.content.Intent putExtra(java.lang.String,int)>("previous_wifi_state", $i2);
+
+        $r3 = $r0.<com.android.server.WifiService: android.content.Context mContext>;
+
+        virtualinvoke $r3.<android.content.Context: void sendStickyBroadcast(android.content.Intent)>($r1);
+
+        return;
+
+     label05:
+        if $i0 != 1 goto label03;
+
+     label06:
+        $r2 = $r0.<com.android.server.WifiService: com.android.internal.app.IBatteryStats mBatteryStats>;
+
+     label07:
+        interfaceinvoke $r2.<com.android.internal.app.IBatteryStats: void noteWifiOff(int)>($i1);
+
+     label08:
+        goto label03;
+
+     label09:
+        $r4 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l3);
+
+        goto label04;
+
+     label10:
+        $r5 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l3);
+
+        throw $r5;
+
+        catch android.os.RemoteException from label02 to label03 with label09;
+        catch java.lang.Throwable from label01 to label03 with label10;
+        catch android.os.RemoteException from label07 to label08 with label09;
+        catch java.lang.Throwable from label06 to label08 with label10;
+    }
+
+    private static java.lang.String stateName(int)
+    {
+        int $i0;
+
+        $i0 := @parameter0: int;
+
+        lookupswitch($i0)
+        {
+            case 0: goto label2;
+            case 1: goto label3;
+            case 2: goto label4;
+            case 3: goto label5;
+            case 4: goto label6;
+            default: goto label1;
+        };
+
+     label1:
+        return "[invalid state]";
+
+     label2:
+        return "disabling";
+
+     label3:
+        return "disabled";
+
+     label4:
+        return "enabling";
+
+     label5:
+        return "enabled";
+
+     label6:
+        return "unknown state";
+    }
+
+    private void updateNetworkIfHidden(int, boolean)
+    {
+        com.android.server.WifiService $r0;
+        int $i0;
+        boolean $z0, $z1;
+        java.lang.Throwable $r1;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $i0 := @parameter0: int;
+
+        $z0 := @parameter1: boolean;
+
+        entermonitor $r0;
+
+     label1:
+        $z1 = specialinvoke $r0.<com.android.server.WifiService: boolean isHiddenNetwork(int)>($i0);
+
+        if $z1 == 0 goto label2;
+
+        specialinvoke $r0.<com.android.server.WifiService: void addOrUpdateHiddenNetwork(int,boolean)>($i0, $z0);
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    private void updateWifiState()
+    {
+        com.android.server.WifiService $r0;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        com.android.server.WifiService$LockList $r1;
+        int $i0, $i1;
+        com.android.server.WifiService$WifiHandler $r2, $r7;
+        android.os.PowerManager$WakeLock $r3;
+        java.lang.Throwable $r4;
+        android.content.Context $r5;
+        android.content.ContentResolver $r6;
+        long $l2;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $z0 = specialinvoke $r0.<com.android.server.WifiService: boolean getPersistedWifiEnabled()>();
+
+        $z1 = specialinvoke $r0.<com.android.server.WifiService: boolean isAirplaneModeOn()>();
+
+        $r1 = $r0.<com.android.server.WifiService: com.android.server.WifiService$LockList mLocks>;
+
+        $z2 = staticinvoke <com.android.server.WifiService$LockList: boolean access$1100(com.android.server.WifiService$LockList)>($r1);
+
+        if $z0 == 0 goto label07;
+
+        if $z1 != 0 goto label07;
+
+        $z0 = 1;
+
+     label01:
+        $z3 = $r0.<com.android.server.WifiService: boolean mDeviceIdle>;
+
+        if $z3 == 0 goto label02;
+
+        if $z2 == 0 goto label08;
+
+     label02:
+        $z3 = 1;
+
+     label03:
+        $z4 = $r0.<com.android.server.WifiService: boolean mDeviceIdle>;
+
+        if $z4 == 0 goto label09;
+
+        if $z2 == 0 goto label09;
+
+        $r1 = $r0.<com.android.server.WifiService: com.android.server.WifiService$LockList mLocks>;
+
+        $i0 = staticinvoke <com.android.server.WifiService$LockList: int access$1200(com.android.server.WifiService$LockList)>($r1);
+
+     label04:
+        $r2 = $r0.<com.android.server.WifiService: com.android.server.WifiService$WifiHandler mWifiHandler>;
+
+        entermonitor $r2;
+
+     label05:
+        $i1 = $r0.<com.android.server.WifiService: int mWifiState>;
+
+        if $i1 != 2 goto label10;
+
+        if $z1 != 0 goto label10;
+
+        exitmonitor $r2;
+
+     label06:
+        return;
+
+     label07:
+        $z0 = 0;
+
+        goto label01;
+
+     label08:
+        $z3 = 0;
+
+        goto label03;
+
+     label09:
+        $i0 = 1;
+
+        goto label04;
+
+     label10:
+        if $z0 == 0 goto label18;
+
+        if $z3 == 0 goto label17;
+
+        $r3 = <com.android.server.WifiService: android.os.PowerManager$WakeLock sWakeLock>;
+
+        virtualinvoke $r3.<android.os.PowerManager$WakeLock: void acquire()>();
+
+        $i1 = $r0.<com.android.server.WifiService: int mLastEnableUid>;
+
+        specialinvoke $r0.<com.android.server.WifiService: void sendEnableMessage(boolean,boolean,int)>(1, 0, $i1);
+
+        $r3 = <com.android.server.WifiService: android.os.PowerManager$WakeLock sWakeLock>;
+
+        virtualinvoke $r3.<android.os.PowerManager$WakeLock: void acquire()>();
+
+        if $i0 != 2 goto label16;
+
+        $z1 = 1;
+
+     label11:
+        specialinvoke $r0.<com.android.server.WifiService: void sendStartMessage(boolean)>($z1);
+
+     label12:
+        exitmonitor $r2;
+
+     label13:
+        return;
+
+     label14:
+        $r4 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label15:
+        throw $r4;
+
+     label16:
+        $z1 = 0;
+
+        goto label11;
+
+     label17:
+        $r5 = $r0.<com.android.server.WifiService: android.content.Context mContext>;
+
+        $r6 = virtualinvoke $r5.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $i0 = staticinvoke <android.provider.Settings$Secure: int getInt(android.content.ContentResolver,java.lang.String,int)>($r6, "wifi_mobile_data_transition_wakelock_timeout_ms", 8000);
+
+        $r3 = <com.android.server.WifiService: android.os.PowerManager$WakeLock sDriverStopWakeLock>;
+
+        virtualinvoke $r3.<android.os.PowerManager$WakeLock: void acquire()>();
+
+        $r7 = $r0.<com.android.server.WifiService: com.android.server.WifiService$WifiHandler mWifiHandler>;
+
+        virtualinvoke $r7.<android.os.Handler: boolean sendEmptyMessage(int)>(2);
+
+        $r7 = $r0.<com.android.server.WifiService: com.android.server.WifiService$WifiHandler mWifiHandler>;
+
+        $l2 = (long) $i0;
+
+        virtualinvoke $r7.<android.os.Handler: boolean sendEmptyMessageDelayed(int,long)>(4, $l2);
+
+        goto label12;
+
+     label18:
+        $r3 = <com.android.server.WifiService: android.os.PowerManager$WakeLock sWakeLock>;
+
+        virtualinvoke $r3.<android.os.PowerManager$WakeLock: void acquire()>();
+
+        $i0 = $r0.<com.android.server.WifiService: int mLastEnableUid>;
+
+        specialinvoke $r0.<com.android.server.WifiService: void sendEnableMessage(boolean,boolean,int)>(0, 0, $i0);
+
+     label19:
+        goto label12;
+
+        catch java.lang.Throwable from label05 to label06 with label14;
+        catch java.lang.Throwable from label10 to label13 with label14;
+        catch java.lang.Throwable from label14 to label15 with label14;
+        catch java.lang.Throwable from label17 to label19 with label14;
+    }
+
+    public boolean acquireWifiLock(android.os.IBinder, int, java.lang.String)
+    {
+        com.android.server.WifiService $r0;
+        android.os.IBinder $r1;
+        int $i0;
+        java.lang.String $r2;
+        com.android.server.WifiService$WifiLock $r3;
+        boolean $z0;
+        android.content.Context $r4;
+        com.android.server.WifiService$LockList $r5;
+        java.lang.Throwable $r6;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $r1 := @parameter0: android.os.IBinder;
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: java.lang.String;
+
+        $r4 = $r0.<com.android.server.WifiService: android.content.Context mContext>;
+
+        virtualinvoke $r4.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.WAKE_LOCK", null);
+
+        if $i0 == 1 goto label1;
+
+        if $i0 == 2 goto label1;
+
+        return 0;
+
+     label1:
+        $r3 = new com.android.server.WifiService$WifiLock;
+
+        specialinvoke $r3.<com.android.server.WifiService$WifiLock: void <init>(com.android.server.WifiService,int,java.lang.String,android.os.IBinder)>($r0, $i0, $r2, $r1);
+
+        $r5 = $r0.<com.android.server.WifiService: com.android.server.WifiService$LockList mLocks>;
+
+        entermonitor $r5;
+
+     label2:
+        $z0 = specialinvoke $r0.<com.android.server.WifiService: boolean acquireWifiLockLocked(com.android.server.WifiService$WifiLock)>($r3);
+
+        exitmonitor $r5;
+
+     label3:
+        return $z0;
+
+     label4:
+        $r6 := @caughtexception;
+
+        exitmonitor $r5;
+
+     label5:
+        throw $r6;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public int addOrUpdateNetwork(android.net.wifi.WifiConfiguration)
+    {
+        com.android.server.WifiService $r0;
+        android.net.wifi.WifiConfiguration $r1;
+        int $i0, $i1, $i2;
+        boolean $z0, $z1, $z2;
+        java.lang.String $r2, $r5;
+        java.util.BitSet $r3;
+        java.lang.String[] $r4;
+        byte $b3;
+        java.lang.NumberFormatException $r6;
+        java.lang.Throwable $r7;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $r1 := @parameter0: android.net.wifi.WifiConfiguration;
+
+        entermonitor $r0;
+
+     label01:
+        specialinvoke $r0.<com.android.server.WifiService: void enforceChangePermission()>();
+
+        $i0 = $r1.<android.net.wifi.WifiConfiguration: int networkId>;
+
+        if $i0 != -1 goto label05;
+
+        $z0 = 1;
+
+     label02:
+        if $z0 == 0 goto label14;
+
+        $i1 = staticinvoke <android.net.wifi.WifiNative: int addNetworkCommand()>();
+
+     label03:
+        $i0 = $i1;
+
+        if $i1 >= 0 goto label06;
+
+        $i0 = -1;
+
+     label04:
+        exitmonitor $r0;
+
+        return $i0;
+
+     label05:
+        $z0 = 0;
+
+        goto label02;
+
+     label06:
+        $z1 = 1;
+
+     label07:
+        $z2 = $r0.<com.android.server.WifiService: boolean mNeedReconfig>;
+
+        if $z2 != 0 goto label08;
+
+        if $z1 == 0 goto label20;
+
+     label08:
+        $z1 = 1;
+
+     label09:
+        $r0.<com.android.server.WifiService: boolean mNeedReconfig> = $z1;
+
+        $z1 = $r1.<android.net.wifi.WifiConfiguration: boolean hiddenSSID>;
+
+        if $z1 == 0 goto label11;
+
+        $i1 = $r1.<android.net.wifi.WifiConfiguration: int status>;
+
+        if $i1 == 1 goto label21;
+
+        $z1 = 1;
+
+     label10:
+        specialinvoke $r0.<com.android.server.WifiService: void addOrUpdateHiddenNetwork(int,boolean)>($i0, $z1);
+
+     label11:
+        $r2 = $r1.<android.net.wifi.WifiConfiguration: java.lang.String SSID>;
+
+        if $r2 == null goto label22;
+
+        $r2 = $r1.<android.net.wifi.WifiConfiguration: java.lang.String SSID>;
+
+        $z1 = staticinvoke <android.net.wifi.WifiNative: boolean setNetworkVariableCommand(int,java.lang.String,java.lang.String)>($i0, "ssid", $r2);
+
+        if $z1 != 0 goto label22;
+
+     label12:
+        if $z0 == 0 goto label13;
+
+        virtualinvoke $r0.<com.android.server.WifiService: boolean removeNetwork(int)>($i0);
+
+     label13:
+        $i0 = -1;
+
+        goto label04;
+
+     label14:
+        $r2 = staticinvoke <android.net.wifi.WifiNative: java.lang.String getNetworkVariableCommand(int,java.lang.String)>($i0, "priority");
+
+        $i1 = -1;
+
+        $z1 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r2);
+
+     label15:
+        if $z1 != 0 goto label17;
+
+     label16:
+        $i1 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r2);
+
+     label17:
+        $i2 = $r1.<android.net.wifi.WifiConfiguration: int priority>;
+
+        if $i1 == $i2 goto label19;
+
+        $z1 = 1;
+
+     label18:
+        goto label07;
+
+     label19:
+        $z1 = 0;
+
+        goto label18;
+
+     label20:
+        $z1 = 0;
+
+        goto label09;
+
+     label21:
+        $z1 = 0;
+
+        goto label10;
+
+     label22:
+        $r2 = $r1.<android.net.wifi.WifiConfiguration: java.lang.String BSSID>;
+
+        if $r2 == null goto label23;
+
+        $r2 = $r1.<android.net.wifi.WifiConfiguration: java.lang.String BSSID>;
+
+        $z1 = staticinvoke <android.net.wifi.WifiNative: boolean setNetworkVariableCommand(int,java.lang.String,java.lang.String)>($i0, "bssid", $r2);
+
+        if $z1 == 0 goto label12;
+
+     label23:
+        $r3 = $r1.<android.net.wifi.WifiConfiguration: java.util.BitSet allowedKeyManagement>;
+
+        $r4 = <android.net.wifi.WifiConfiguration$KeyMgmt: java.lang.String[] strings>;
+
+        $r2 = staticinvoke <com.android.server.WifiService: java.lang.String makeString(java.util.BitSet,java.lang.String[])>($r3, $r4);
+
+        $r3 = $r1.<android.net.wifi.WifiConfiguration: java.util.BitSet allowedKeyManagement>;
+
+        $i1 = virtualinvoke $r3.<java.util.BitSet: int cardinality()>();
+
+        if $i1 == 0 goto label24;
+
+        $z1 = staticinvoke <android.net.wifi.WifiNative: boolean setNetworkVariableCommand(int,java.lang.String,java.lang.String)>($i0, "key_mgmt", $r2);
+
+        if $z1 == 0 goto label12;
+
+     label24:
+        $r3 = $r1.<android.net.wifi.WifiConfiguration: java.util.BitSet allowedProtocols>;
+
+        $r4 = <android.net.wifi.WifiConfiguration$Protocol: java.lang.String[] strings>;
+
+        $r2 = staticinvoke <com.android.server.WifiService: java.lang.String makeString(java.util.BitSet,java.lang.String[])>($r3, $r4);
+
+        $r3 = $r1.<android.net.wifi.WifiConfiguration: java.util.BitSet allowedProtocols>;
+
+        $i1 = virtualinvoke $r3.<java.util.BitSet: int cardinality()>();
+
+        if $i1 == 0 goto label25;
+
+        $z1 = staticinvoke <android.net.wifi.WifiNative: boolean setNetworkVariableCommand(int,java.lang.String,java.lang.String)>($i0, "proto", $r2);
+
+        if $z1 == 0 goto label12;
+
+     label25:
+        $r3 = $r1.<android.net.wifi.WifiConfiguration: java.util.BitSet allowedAuthAlgorithms>;
+
+        $r4 = <android.net.wifi.WifiConfiguration$AuthAlgorithm: java.lang.String[] strings>;
+
+        $r2 = staticinvoke <com.android.server.WifiService: java.lang.String makeString(java.util.BitSet,java.lang.String[])>($r3, $r4);
+
+        $r3 = $r1.<android.net.wifi.WifiConfiguration: java.util.BitSet allowedAuthAlgorithms>;
+
+        $i1 = virtualinvoke $r3.<java.util.BitSet: int cardinality()>();
+
+        if $i1 == 0 goto label26;
+
+        $z1 = staticinvoke <android.net.wifi.WifiNative: boolean setNetworkVariableCommand(int,java.lang.String,java.lang.String)>($i0, "auth_alg", $r2);
+
+        if $z1 == 0 goto label12;
+
+     label26:
+        $r3 = $r1.<android.net.wifi.WifiConfiguration: java.util.BitSet allowedPairwiseCiphers>;
+
+        $r4 = <android.net.wifi.WifiConfiguration$PairwiseCipher: java.lang.String[] strings>;
+
+        $r2 = staticinvoke <com.android.server.WifiService: java.lang.String makeString(java.util.BitSet,java.lang.String[])>($r3, $r4);
+
+        $r3 = $r1.<android.net.wifi.WifiConfiguration: java.util.BitSet allowedPairwiseCiphers>;
+
+        $i1 = virtualinvoke $r3.<java.util.BitSet: int cardinality()>();
+
+        if $i1 == 0 goto label27;
+
+        $z1 = staticinvoke <android.net.wifi.WifiNative: boolean setNetworkVariableCommand(int,java.lang.String,java.lang.String)>($i0, "pairwise", $r2);
+
+        if $z1 == 0 goto label12;
+
+     label27:
+        $r3 = $r1.<android.net.wifi.WifiConfiguration: java.util.BitSet allowedGroupCiphers>;
+
+        $r4 = <android.net.wifi.WifiConfiguration$GroupCipher: java.lang.String[] strings>;
+
+        $r2 = staticinvoke <com.android.server.WifiService: java.lang.String makeString(java.util.BitSet,java.lang.String[])>($r3, $r4);
+
+        $r3 = $r1.<android.net.wifi.WifiConfiguration: java.util.BitSet allowedGroupCiphers>;
+
+        $i1 = virtualinvoke $r3.<java.util.BitSet: int cardinality()>();
+
+        if $i1 == 0 goto label28;
+
+        $z1 = staticinvoke <android.net.wifi.WifiNative: boolean setNetworkVariableCommand(int,java.lang.String,java.lang.String)>($i0, "group", $r2);
+
+        if $z1 == 0 goto label12;
+
+     label28:
+        $r2 = $r1.<android.net.wifi.WifiConfiguration: java.lang.String preSharedKey>;
+
+        if $r2 == null goto label29;
+
+        $r2 = $r1.<android.net.wifi.WifiConfiguration: java.lang.String preSharedKey>;
+
+        $z1 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("*");
+
+        if $z1 != 0 goto label29;
+
+        $r2 = $r1.<android.net.wifi.WifiConfiguration: java.lang.String preSharedKey>;
+
+        $z1 = staticinvoke <android.net.wifi.WifiNative: boolean setNetworkVariableCommand(int,java.lang.String,java.lang.String)>($i0, "psk", $r2);
+
+        if $z1 == 0 goto label12;
+
+     label29:
+        $z1 = 0;
+
+        $r4 = $r1.<android.net.wifi.WifiConfiguration: java.lang.String[] wepKeys>;
+
+        if $r4 == null goto label32;
+
+        $i1 = 0;
+
+     label30:
+        $r4 = $r1.<android.net.wifi.WifiConfiguration: java.lang.String[] wepKeys>;
+
+        $i2 = lengthof $r4;
+
+        if $i1 >= $i2 goto label32;
+
+        $r4 = $r1.<android.net.wifi.WifiConfiguration: java.lang.String[] wepKeys>;
+
+        $r2 = $r4[$i1];
+
+        if $r2 == null goto label31;
+
+        $r4 = $r1.<android.net.wifi.WifiConfiguration: java.lang.String[] wepKeys>;
+
+        $r2 = $r4[$i1];
+
+        $z2 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("*");
+
+        if $z2 != 0 goto label31;
+
+        $r4 = <android.net.wifi.WifiConfiguration: java.lang.String[] wepKeyVarNames>;
+
+        $r2 = $r4[$i1];
+
+        $r4 = $r1.<android.net.wifi.WifiConfiguration: java.lang.String[] wepKeys>;
+
+        $r5 = $r4[$i1];
+
+        $z1 = staticinvoke <android.net.wifi.WifiNative: boolean setNetworkVariableCommand(int,java.lang.String,java.lang.String)>($i0, $r2, $r5);
+
+        if $z1 == 0 goto label12;
+
+        $z1 = 1;
+
+     label31:
+        $i1 = $i1 + 1;
+
+        goto label30;
+
+     label32:
+        if $z1 == 0 goto label33;
+
+        $i1 = $r1.<android.net.wifi.WifiConfiguration: int wepTxKeyIndex>;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>($i1);
+
+        $z1 = staticinvoke <android.net.wifi.WifiNative: boolean setNetworkVariableCommand(int,java.lang.String,java.lang.String)>($i0, "wep_tx_keyidx", $r2);
+
+        if $z1 == 0 goto label12;
+
+     label33:
+        $i1 = $r1.<android.net.wifi.WifiConfiguration: int priority>;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>($i1);
+
+        $z1 = staticinvoke <android.net.wifi.WifiNative: boolean setNetworkVariableCommand(int,java.lang.String,java.lang.String)>($i0, "priority", $r2);
+
+        if $z1 == 0 goto label12;
+
+        $z1 = $r1.<android.net.wifi.WifiConfiguration: boolean hiddenSSID>;
+
+        if $z1 == 0 goto label36;
+
+        $z1 = $r1.<android.net.wifi.WifiConfiguration: boolean hiddenSSID>;
+
+        if $z1 == 0 goto label37;
+
+        $b3 = 1;
+
+     label34:
+        $r2 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>($b3);
+
+        $z1 = staticinvoke <android.net.wifi.WifiNative: boolean setNetworkVariableCommand(int,java.lang.String,java.lang.String)>($i0, "scan_ssid", $r2);
+
+     label35:
+        if $z1 == 0 goto label12;
+
+     label36:
+        goto label04;
+
+     label37:
+        $b3 = 0;
+
+        goto label34;
+
+     label38:
+        $r6 := @caughtexception;
+
+        goto label17;
+
+     label39:
+        $r7 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r7;
+
+        catch java.lang.Throwable from label01 to label03 with label39;
+        catch java.lang.Throwable from label07 to label15 with label39;
+        catch java.lang.NumberFormatException from label16 to label17 with label38;
+        catch java.lang.Throwable from label16 to label17 with label39;
+        catch java.lang.Throwable from label17 to label35 with label39;
+    }
+
+    public boolean disableNetwork(int)
+    {
+        com.android.server.WifiService $r0;
+        int $i0;
+        boolean $z0;
+        android.net.wifi.WifiStateTracker $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $i0 := @parameter0: int;
+
+        specialinvoke $r0.<com.android.server.WifiService: void enforceChangePermission()>();
+
+        specialinvoke $r0.<com.android.server.WifiService: void updateNetworkIfHidden(int,boolean)>($i0, 0);
+
+        $r1 = $r0.<com.android.server.WifiService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = staticinvoke <android.net.wifi.WifiNative: boolean disableNetworkCommand(int)>($i0);
+
+        exitmonitor $r1;
+
+     label2:
+        return $z0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public boolean disconnect()
+    {
+        com.android.server.WifiService $r0;
+        android.net.wifi.WifiStateTracker $r1;
+        boolean $z0;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        specialinvoke $r0.<com.android.server.WifiService: void enforceChangePermission()>();
+
+        $r1 = $r0.<com.android.server.WifiService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = staticinvoke <android.net.wifi.WifiNative: boolean disconnectCommand()>();
+
+        exitmonitor $r1;
+
+     label2:
+        return $z0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    protected void dump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[])
+    {
+        com.android.server.WifiService $r0;
+        java.io.FileDescriptor $r1;
+        java.io.PrintWriter $r2;
+        java.lang.String[] $r3;
+        android.content.Context $r4;
+        int $i0;
+        java.lang.StringBuilder $r5;
+        java.lang.String $r6;
+        android.content.ContentResolver $r7;
+        android.net.wifi.WifiStateTracker $r8;
+        java.util.List $r9;
+        java.util.Iterator $r10;
+        boolean $z0;
+        java.lang.Object $r11;
+        android.net.wifi.ScanResult $r12;
+        java.lang.Object[] $r13;
+        java.lang.Integer $r14;
+        com.android.server.WifiService$LockList $r15;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $r1 := @parameter0: java.io.FileDescriptor;
+
+        $r2 := @parameter1: java.io.PrintWriter;
+
+        $r3 := @parameter2: java.lang.String[];
+
+        $r4 = $r0.<com.android.server.WifiService: android.content.Context mContext>;
+
+        $i0 = virtualinvoke $r4.<android.content.Context: int checkCallingOrSelfPermission(java.lang.String)>("android.permission.DUMP");
+
+        if $i0 == 0 goto label1;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Permission Denial: can\'t dump WifiService from from pid=");
+
+        $i0 = staticinvoke <android.os.Binder: int getCallingPid()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", uid=");
+
+        $i0 = staticinvoke <android.os.Binder: int getCallingUid()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        return;
+
+     label1:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Wi-Fi is ");
+
+        $i0 = $r0.<com.android.server.WifiService: int mWifiState>;
+
+        $r6 = staticinvoke <com.android.server.WifiService: java.lang.String stateName(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Stay-awake conditions: ");
+
+        $r4 = $r0.<com.android.server.WifiService: android.content.Context mContext>;
+
+        $r7 = virtualinvoke $r4.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $i0 = staticinvoke <android.provider.Settings$System: int getInt(android.content.ContentResolver,java.lang.String,int)>($r7, "stay_on_while_plugged_in", 0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("Internal state:");
+
+        $r8 = $r0.<com.android.server.WifiService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.Object)>($r8);
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("Latest scan results:");
+
+        $r8 = $r0.<com.android.server.WifiService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        $r9 = virtualinvoke $r8.<android.net.wifi.WifiStateTracker: java.util.List getScanResultsList()>();
+
+        if $r9 == null goto label5;
+
+        $i0 = interfaceinvoke $r9.<java.util.List: int size()>();
+
+        if $i0 == 0 goto label5;
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("  BSSID              Frequency   RSSI  Flags             SSID");
+
+        $r10 = interfaceinvoke $r9.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r10.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label5;
+
+        $r11 = interfaceinvoke $r10.<java.util.Iterator: java.lang.Object next()>();
+
+        $r12 = (android.net.wifi.ScanResult) $r11;
+
+        $r13 = newarray (java.lang.Object)[5];
+
+        $r6 = $r12.<android.net.wifi.ScanResult: java.lang.String BSSID>;
+
+        $r13[0] = $r6;
+
+        $i0 = $r12.<android.net.wifi.ScanResult: int frequency>;
+
+        $r14 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r13[1] = $r14;
+
+        $i0 = $r12.<android.net.wifi.ScanResult: int level>;
+
+        $r14 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r13[2] = $r14;
+
+        $r6 = $r12.<android.net.wifi.ScanResult: java.lang.String capabilities>;
+
+        $r13[3] = $r6;
+
+        $r6 = $r12.<android.net.wifi.ScanResult: java.lang.String SSID>;
+
+        if $r6 != null goto label4;
+
+        $r6 = "";
+
+     label3:
+        $r13[4] = $r6;
+
+        virtualinvoke $r2.<java.io.PrintWriter: java.io.PrintWriter printf(java.lang.String,java.lang.Object[])>("  %17s  %9d  %5d  %-16s  %s%n", $r13);
+
+        goto label2;
+
+     label4:
+        $r6 = $r12.<android.net.wifi.ScanResult: java.lang.String SSID>;
+
+        goto label3;
+
+     label5:
+        virtualinvoke $r2.<java.io.PrintWriter: void println()>();
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Locks acquired: ");
+
+        $i0 = $r0.<com.android.server.WifiService: int mFullLocksAcquired>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" full, ");
+
+        $i0 = $r0.<com.android.server.WifiService: int mScanLocksAcquired>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" scan");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Locks released: ");
+
+        $i0 = $r0.<com.android.server.WifiService: int mFullLocksReleased>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" full, ");
+
+        $i0 = $r0.<com.android.server.WifiService: int mScanLocksReleased>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" scan");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("Locks held:");
+
+        $r15 = $r0.<com.android.server.WifiService: com.android.server.WifiService$LockList mLocks>;
+
+        staticinvoke <com.android.server.WifiService$LockList: void access$1500(com.android.server.WifiService$LockList,java.io.PrintWriter)>($r15, $r2);
+
+        return;
+    }
+
+    public boolean enableNetwork(int, boolean)
+    {
+        com.android.server.WifiService $r0;
+        int $i0;
+        boolean $z0;
+        android.net.wifi.WifiStateTracker $r1;
+        java.lang.Throwable $r2, $r3;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $i0 := @parameter0: int;
+
+        $z0 := @parameter1: boolean;
+
+        specialinvoke $r0.<com.android.server.WifiService: void enforceChangePermission()>();
+
+        entermonitor $r0;
+
+        if $z0 == 0 goto label02;
+
+     label01:
+        specialinvoke $r0.<com.android.server.WifiService: void markAllHiddenNetworksButOneAsNotPresent(int)>($i0);
+
+     label02:
+        specialinvoke $r0.<com.android.server.WifiService: void updateNetworkIfHidden(int,boolean)>($i0, 1);
+
+        exitmonitor $r0;
+
+     label03:
+        $r1 = $r0.<com.android.server.WifiService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        entermonitor $r1;
+
+     label04:
+        $z0 = staticinvoke <android.net.wifi.WifiNative: boolean enableNetworkCommand(int,boolean)>($i0, $z0);
+
+        exitmonitor $r1;
+
+     label05:
+        return $z0;
+
+     label06:
+        $r2 := @caughtexception;
+
+     label07:
+        exitmonitor $r0;
+
+     label08:
+        throw $r2;
+
+     label09:
+        $r3 := @caughtexception;
+
+     label10:
+        exitmonitor $r1;
+
+     label11:
+        throw $r3;
+
+        catch java.lang.Throwable from label01 to label03 with label06;
+        catch java.lang.Throwable from label04 to label05 with label09;
+        catch java.lang.Throwable from label07 to label08 with label06;
+        catch java.lang.Throwable from label10 to label11 with label09;
+    }
+
+    public java.util.List getConfiguredNetworks()
+    {
+        com.android.server.WifiService $r0;
+        android.net.wifi.WifiConfiguration $r1;
+        java.util.ArrayList $r2;
+        android.net.wifi.WifiStateTracker $r3;
+        java.lang.String $r4;
+        java.lang.Throwable $r5, $r9;
+        java.lang.String[] $r6, $r7;
+        int $i0, $i1;
+        java.lang.NumberFormatException $r8;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        specialinvoke $r0.<com.android.server.WifiService: void enforceAccessPermission()>();
+
+        $r3 = $r0.<com.android.server.WifiService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        entermonitor $r3;
+
+     label01:
+        $r4 = staticinvoke <android.net.wifi.WifiNative: java.lang.String listNetworksCommand()>();
+
+        exitmonitor $r3;
+
+     label02:
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        if $r4 != null goto label06;
+
+        return $r2;
+
+     label03:
+        $r5 := @caughtexception;
+
+     label04:
+        exitmonitor $r3;
+
+     label05:
+        throw $r5;
+
+     label06:
+        $r6 = virtualinvoke $r4.<java.lang.String: java.lang.String[] split(java.lang.String)>("\n");
+
+        $i0 = 1;
+
+     label07:
+        $i1 = lengthof $r6;
+
+        if $i0 >= $i1 goto label21;
+
+        $r4 = $r6[$i0];
+
+        $r7 = virtualinvoke $r4.<java.lang.String: java.lang.String[] split(java.lang.String)>("\t");
+
+        $r1 = new android.net.wifi.WifiConfiguration;
+
+        specialinvoke $r1.<android.net.wifi.WifiConfiguration: void <init>()>();
+
+        $r4 = $r7[0];
+
+     label08:
+        $i1 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r4);
+
+     label09:
+        $r1.<android.net.wifi.WifiConfiguration: int networkId> = $i1;
+
+        $i1 = lengthof $r7;
+
+        if $i1 <= 3 goto label17;
+
+        $r4 = $r7[3];
+
+        $i1 = virtualinvoke $r4.<java.lang.String: int indexOf(java.lang.String)>("[CURRENT]");
+
+        if $i1 == -1 goto label15;
+
+        $r1.<android.net.wifi.WifiConfiguration: int status> = 0;
+
+     label10:
+        $r3 = $r0.<com.android.server.WifiService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        entermonitor $r3;
+
+     label11:
+        staticinvoke <com.android.server.WifiService: void readNetworkVariables(android.net.wifi.WifiConfiguration)>($r1);
+
+        exitmonitor $r3;
+
+     label12:
+        interfaceinvoke $r2.<java.util.List: boolean add(java.lang.Object)>($r1);
+
+     label13:
+        $i0 = $i0 + 1;
+
+        goto label07;
+
+     label14:
+        $r8 := @caughtexception;
+
+        goto label13;
+
+     label15:
+        $r4 = $r7[3];
+
+        $i1 = virtualinvoke $r4.<java.lang.String: int indexOf(java.lang.String)>("[DISABLED]");
+
+        if $i1 == -1 goto label16;
+
+        $r1.<android.net.wifi.WifiConfiguration: int status> = 1;
+
+        goto label10;
+
+     label16:
+        $r1.<android.net.wifi.WifiConfiguration: int status> = 2;
+
+        goto label10;
+
+     label17:
+        $r1.<android.net.wifi.WifiConfiguration: int status> = 2;
+
+        goto label10;
+
+     label18:
+        $r9 := @caughtexception;
+
+     label19:
+        exitmonitor $r3;
+
+     label20:
+        throw $r9;
+
+     label21:
+        return $r2;
+
+        catch java.lang.Throwable from label01 to label02 with label03;
+        catch java.lang.Throwable from label04 to label05 with label03;
+        catch java.lang.NumberFormatException from label08 to label09 with label14;
+        catch java.lang.Throwable from label11 to label12 with label18;
+        catch java.lang.Throwable from label19 to label20 with label18;
+    }
+
+    public android.net.wifi.WifiInfo getConnectionInfo()
+    {
+        com.android.server.WifiService $r0;
+        android.net.wifi.WifiInfo $r1;
+        android.net.wifi.WifiStateTracker $r2;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        specialinvoke $r0.<com.android.server.WifiService: void enforceAccessPermission()>();
+
+        $r2 = $r0.<com.android.server.WifiService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        $r1 = virtualinvoke $r2.<android.net.wifi.WifiStateTracker: android.net.wifi.WifiInfo requestConnectionInfo()>();
+
+        return $r1;
+    }
+
+    public android.net.DhcpInfo getDhcpInfo()
+    {
+        com.android.server.WifiService $r0;
+        android.net.DhcpInfo $r1;
+        android.net.wifi.WifiStateTracker $r2;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        specialinvoke $r0.<com.android.server.WifiService: void enforceAccessPermission()>();
+
+        $r2 = $r0.<com.android.server.WifiService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        $r1 = virtualinvoke $r2.<android.net.wifi.WifiStateTracker: android.net.DhcpInfo getDhcpInfo()>();
+
+        return $r1;
+    }
+
+    android.net.NetworkStateTracker getNetworkStateTracker()
+    {
+        com.android.server.WifiService $r0;
+        android.net.wifi.WifiStateTracker r1;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        r1 = $r0.<com.android.server.WifiService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        return r1;
+    }
+
+    public int getNumAllowedChannels()
+    {
+        com.android.server.WifiService $r0;
+        android.net.wifi.WifiStateTracker $r1;
+        int $i0, $i1;
+        android.content.Context $r2;
+        android.content.ContentResolver $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        specialinvoke $r0.<com.android.server.WifiService: void enforceAccessPermission()>();
+
+        $r1 = $r0.<com.android.server.WifiService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        entermonitor $r1;
+
+     label1:
+        $i0 = staticinvoke <android.net.wifi.WifiNative: int getNumAllowedChannelsCommand()>();
+
+        $i1 = $i0;
+
+        if $i0 >= 0 goto label2;
+
+        $r2 = $r0.<com.android.server.WifiService: android.content.Context mContext>;
+
+        $r3 = virtualinvoke $r2.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $i1 = staticinvoke <android.provider.Settings$Secure: int getInt(android.content.ContentResolver,java.lang.String,int)>($r3, "wifi_num_allowed_channels", -1);
+
+     label2:
+        exitmonitor $r1;
+
+     label3:
+        return $i1;
+
+     label4:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public java.util.List getScanResults()
+    {
+        com.android.server.WifiService $r0;
+        int $i0, $i1, $i2, $i3, $i4, $i6, $i7, $i9;
+        java.util.ArrayList $r1;
+        android.net.wifi.WifiStateTracker $r2;
+        java.lang.String $r3, $r7;
+        java.lang.Throwable $r4, $r9;
+        char $c5, $c8;
+        char[] $r5, $r6;
+        boolean $z0;
+        android.net.wifi.ScanResult $r8;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        specialinvoke $r0.<com.android.server.WifiService: void enforceAccessPermission()>();
+
+        $r2 = $r0.<com.android.server.WifiService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        entermonitor $r2;
+
+     label01:
+        $r3 = staticinvoke <android.net.wifi.WifiNative: java.lang.String scanResultsCommand()>();
+
+        exitmonitor $r2;
+
+     label02:
+        if $r3 != null goto label05;
+
+        return null;
+
+     label03:
+        $r4 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label04:
+        throw $r4;
+
+     label05:
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        $i1 = 0;
+
+        $i2 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        $i3 = 0;
+
+        $i4 = 0;
+
+     label06:
+        if $i4 > $i2 goto label22;
+
+        if $i4 == $i2 goto label07;
+
+        $c5 = virtualinvoke $r3.<java.lang.String: char charAt(int)>($i4);
+
+        if $c5 != 10 goto label08;
+
+     label07:
+        $i1 = $i1 + 1;
+
+        if $i1 != 1 goto label09;
+
+        $i3 = $i4 + 1;
+
+     label08:
+        $i4 = $i4 + 1;
+
+        goto label06;
+
+     label09:
+        $i0 = $i4 - $i3;
+
+        if $i0 <= 0 goto label21;
+
+        if $i0 > 512 goto label21;
+
+        $i6 = 0;
+
+        $r5 = $r0.<com.android.server.WifiService: char[] mScanResultBuffer>;
+
+        entermonitor $r5;
+
+        $z0 = 0;
+
+        $i7 = $i3;
+
+     label10:
+        if $i7 >= $i4 goto label16;
+
+     label11:
+        $c5 = virtualinvoke $r3.<java.lang.String: char charAt(int)>($i7);
+
+        $c8 = $c5;
+
+        if $c5 != 45 goto label14;
+
+        if $i6 != 0 goto label13;
+
+        $z0 = 1;
+
+     label12:
+        $r6 = $r0.<com.android.server.WifiService: char[] mScanResultBuffer>;
+
+        $i9 = $i7 - $i3;
+
+        $r6[$i9] = $c8;
+
+        $i7 = $i7 + 1;
+
+        goto label10;
+
+     label13:
+        $z0 = 0;
+
+        goto label12;
+
+     label14:
+        if $z0 == 0 goto label12;
+
+        $i9 = staticinvoke <java.lang.Character: int digit(char,int)>($c5, 10);
+
+        if $i9 < 0 goto label15;
+
+        $i6 = $i6 * 10;
+
+        $i6 = $i6 + $i9;
+
+        $c8 = 48;
+
+        goto label12;
+
+     label15:
+        $z0 = 0;
+
+        goto label12;
+
+     label16:
+        if $i6 == 0 goto label17;
+
+        $r7 = new java.lang.String;
+
+        $r6 = $r0.<com.android.server.WifiService: char[] mScanResultBuffer>;
+
+        specialinvoke $r7.<java.lang.String: void <init>(char[],int,int)>($r6, 0, $i0);
+
+        $r8 = specialinvoke $r0.<com.android.server.WifiService: android.net.wifi.ScanResult parseScanResult(java.lang.String)>($r7);
+
+        if $r8 == null goto label17;
+
+        $i0 = neg $i6;
+
+        $r8.<android.net.wifi.ScanResult: int level> = $i0;
+
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>($r8);
+
+     label17:
+        exitmonitor $r5;
+
+     label18:
+        $i3 = $i4 + 1;
+
+        goto label08;
+
+     label19:
+        $r9 := @caughtexception;
+
+        exitmonitor $r5;
+
+     label20:
+        throw $r9;
+
+     label21:
+        if $i0 <= 0 goto label18;
+
+        goto label18;
+
+     label22:
+        $r2 = $r0.<com.android.server.WifiService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        virtualinvoke $r2.<android.net.wifi.WifiStateTracker: void setScanResultsList(java.util.List)>($r1);
+
+        return $r1;
+
+        catch java.lang.Throwable from label01 to label02 with label03;
+        catch java.lang.Throwable from label03 to label04 with label03;
+        catch java.lang.Throwable from label11 to label18 with label19;
+        catch java.lang.Throwable from label19 to label20 with label19;
+    }
+
+    public int[] getValidChannelCounts()
+    {
+        com.android.server.WifiService $r0;
+        int[] r1;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        specialinvoke $r0.<com.android.server.WifiService: void enforceAccessPermission()>();
+
+        r1 = <com.android.server.WifiService: int[] sValidRegulatoryChannelCounts>;
+
+        return r1;
+    }
+
+    public int getWifiEnabledState()
+    {
+        com.android.server.WifiService $r0;
+        int i0;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        specialinvoke $r0.<com.android.server.WifiService: void enforceAccessPermission()>();
+
+        i0 = $r0.<com.android.server.WifiService: int mWifiState>;
+
+        return i0;
+    }
+
+    android.net.wifi.WifiConfiguration parseScanFlags(java.lang.String)
+    {
+        com.android.server.WifiService $r0;
+        java.lang.String $r1;
+        android.net.wifi.WifiConfiguration $r2;
+        int $i0;
+        java.util.BitSet $r3;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new android.net.wifi.WifiConfiguration;
+
+        specialinvoke $r2.<android.net.wifi.WifiConfiguration: void <init>()>();
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 != 0 goto label1;
+
+        $r3 = $r2.<android.net.wifi.WifiConfiguration: java.util.BitSet allowedKeyManagement>;
+
+        virtualinvoke $r3.<java.util.BitSet: void set(int)>(0);
+
+        return $r2;
+
+     label1:
+        return $r2;
+    }
+
+    public boolean pingSupplicant()
+    {
+        com.android.server.WifiService $r0;
+        android.net.wifi.WifiStateTracker $r1;
+        boolean $z0;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        specialinvoke $r0.<com.android.server.WifiService: void enforceChangePermission()>();
+
+        $r1 = $r0.<com.android.server.WifiService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = staticinvoke <android.net.wifi.WifiNative: boolean pingCommand()>();
+
+        exitmonitor $r1;
+
+     label2:
+        return $z0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public boolean reassociate()
+    {
+        com.android.server.WifiService $r0;
+        android.net.wifi.WifiStateTracker $r1;
+        boolean $z0;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        specialinvoke $r0.<com.android.server.WifiService: void enforceChangePermission()>();
+
+        $r1 = $r0.<com.android.server.WifiService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = staticinvoke <android.net.wifi.WifiNative: boolean reassociateCommand()>();
+
+        exitmonitor $r1;
+
+     label2:
+        return $z0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public boolean reconnect()
+    {
+        com.android.server.WifiService $r0;
+        android.net.wifi.WifiStateTracker $r1;
+        boolean $z0;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        specialinvoke $r0.<com.android.server.WifiService: void enforceChangePermission()>();
+
+        $r1 = $r0.<com.android.server.WifiService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = staticinvoke <android.net.wifi.WifiNative: boolean reconnectCommand()>();
+
+        exitmonitor $r1;
+
+     label2:
+        return $z0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public boolean releaseWifiLock(android.os.IBinder)
+    {
+        com.android.server.WifiService $r0;
+        android.os.IBinder $r1;
+        boolean $z0;
+        android.content.Context $r2;
+        com.android.server.WifiService$LockList $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $r1 := @parameter0: android.os.IBinder;
+
+        $r2 = $r0.<com.android.server.WifiService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.WAKE_LOCK", null);
+
+        $r3 = $r0.<com.android.server.WifiService: com.android.server.WifiService$LockList mLocks>;
+
+        entermonitor $r3;
+
+     label1:
+        $z0 = specialinvoke $r0.<com.android.server.WifiService: boolean releaseWifiLockLocked(android.os.IBinder)>($r1);
+
+        exitmonitor $r3;
+
+     label2:
+        return $z0;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label4:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public boolean removeNetwork(int)
+    {
+        com.android.server.WifiService $r0;
+        int $i0;
+        boolean $z0;
+        android.net.wifi.WifiStateTracker $r1;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $i0 := @parameter0: int;
+
+        specialinvoke $r0.<com.android.server.WifiService: void enforceChangePermission()>();
+
+        specialinvoke $r0.<com.android.server.WifiService: void removeNetworkIfHidden(int)>($i0);
+
+        $r1 = $r0.<com.android.server.WifiService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        $z0 = virtualinvoke $r1.<android.net.wifi.WifiStateTracker: boolean removeNetwork(int)>($i0);
+
+        return $z0;
+    }
+
+    public boolean saveConfiguration()
+    {
+        com.android.server.WifiService $r0;
+        android.content.Intent $r1;
+        android.net.wifi.WifiStateTracker $r2;
+        boolean $z0, $z1;
+        android.content.Context $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        specialinvoke $r0.<com.android.server.WifiService: void enforceChangePermission()>();
+
+        $r2 = $r0.<com.android.server.WifiService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        entermonitor $r2;
+
+     label1:
+        $z0 = staticinvoke <android.net.wifi.WifiNative: boolean saveConfigCommand()>();
+
+        $z1 = $z0;
+
+        if $z0 == 0 goto label2;
+
+        $z0 = $r0.<com.android.server.WifiService: boolean mNeedReconfig>;
+
+        if $z0 == 0 goto label2;
+
+        $r0.<com.android.server.WifiService: boolean mNeedReconfig> = 0;
+
+        $z0 = staticinvoke <android.net.wifi.WifiNative: boolean reloadConfigCommand()>();
+
+        $z1 = $z0;
+
+        if $z0 == 0 goto label2;
+
+        $r1 = new android.content.Intent;
+
+        specialinvoke $r1.<android.content.Intent: void <init>(java.lang.String)>("android.net.wifi.NETWORK_IDS_CHANGED");
+
+        $r3 = $r0.<com.android.server.WifiService: android.content.Context mContext>;
+
+        virtualinvoke $r3.<android.content.Context: void sendBroadcast(android.content.Intent)>($r1);
+
+     label2:
+        exitmonitor $r2;
+
+     label3:
+        return $z1;
+
+     label4:
+        $r4 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label5:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public boolean setNumAllowedChannels(int)
+    {
+        com.android.server.WifiService $r0;
+        int $i0, $i1, $i2, $i3;
+        int[] $r1;
+        android.content.ContentResolver $r2;
+        boolean $z0;
+        android.content.Context $r3;
+        android.net.wifi.WifiStateTracker $r4;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $i0 := @parameter0: int;
+
+        specialinvoke $r0.<com.android.server.WifiService: void enforceChangePermission()>();
+
+        $z0 = 0;
+
+        $r1 = <com.android.server.WifiService: int[] sValidRegulatoryChannelCounts>;
+
+        $i1 = lengthof $r1;
+
+        $i3 = 0;
+
+     label1:
+        if $i3 >= $i1 goto label2;
+
+        $i2 = $r1[$i3];
+
+        if $i2 != $i0 goto label3;
+
+        $z0 = 1;
+
+     label2:
+        if $z0 != 0 goto label4;
+
+        return 0;
+
+     label3:
+        $i3 = $i3 + 1;
+
+        goto label1;
+
+     label4:
+        $r3 = $r0.<com.android.server.WifiService: android.content.Context mContext>;
+
+        $r2 = virtualinvoke $r3.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        staticinvoke <android.provider.Settings$Secure: boolean putInt(android.content.ContentResolver,java.lang.String,int)>($r2, "wifi_num_allowed_channels", $i0);
+
+        $r4 = $r0.<com.android.server.WifiService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        virtualinvoke $r4.<android.net.wifi.WifiStateTracker: boolean setNumAllowedChannels(int)>($i0);
+
+        return 1;
+    }
+
+    public boolean setWifiEnabled(boolean)
+    {
+        com.android.server.WifiService $r0;
+        boolean $z0;
+        com.android.server.WifiService$WifiHandler $r1;
+        android.os.PowerManager$WakeLock $r2;
+        int $i0;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        $z0 := @parameter0: boolean;
+
+        specialinvoke $r0.<com.android.server.WifiService: void enforceChangePermission()>();
+
+        $r1 = $r0.<com.android.server.WifiService: com.android.server.WifiService$WifiHandler mWifiHandler>;
+
+        if $r1 != null goto label1;
+
+        return 0;
+
+     label1:
+        $r1 = $r0.<com.android.server.WifiService: com.android.server.WifiService$WifiHandler mWifiHandler>;
+
+        entermonitor $r1;
+
+     label2:
+        $r2 = <com.android.server.WifiService: android.os.PowerManager$WakeLock sWakeLock>;
+
+        virtualinvoke $r2.<android.os.PowerManager$WakeLock: void acquire()>();
+
+        $i0 = staticinvoke <android.os.Binder: int getCallingUid()>();
+
+        $r0.<com.android.server.WifiService: int mLastEnableUid> = $i0;
+
+        $i0 = staticinvoke <android.os.Binder: int getCallingUid()>();
+
+        specialinvoke $r0.<com.android.server.WifiService: void sendEnableMessage(boolean,boolean,int)>($z0, 1, $i0);
+
+        exitmonitor $r1;
+
+     label3:
+        return 1;
+
+     label4:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r3;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public boolean startScan()
+    {
+        com.android.server.WifiService $r0;
+        android.net.wifi.WifiStateTracker $r1, $r3;
+        int[] $r2;
+        android.net.wifi.SupplicantState $r4;
+        int $i0;
+        boolean $z0;
+        java.lang.Throwable $r5;
+
+        $r0 := @this: com.android.server.WifiService;
+
+        specialinvoke $r0.<com.android.server.WifiService: void enforceChangePermission()>();
+
+        $r1 = $r0.<com.android.server.WifiService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = <com.android.server.WifiService$5: int[] $SwitchMap$android$net$wifi$SupplicantState>;
+
+        $r3 = $r0.<com.android.server.WifiService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        $r4 = virtualinvoke $r3.<android.net.wifi.WifiStateTracker: android.net.wifi.SupplicantState getSupplicantState()>();
+
+        $i0 = virtualinvoke $r4.<java.lang.Enum: int ordinal()>();
+
+        $i0 = $r2[$i0];
+
+        lookupswitch($i0)
+        {
+            case 1: goto label3;
+            case 2: goto label3;
+            case 3: goto label3;
+            case 4: goto label3;
+            default: goto label2;
+        };
+
+     label2:
+        staticinvoke <android.net.wifi.WifiNative: boolean setScanResultHandlingCommand(int)>(2);
+
+     label3:
+        $z0 = staticinvoke <android.net.wifi.WifiNative: boolean scanCommand()>();
+
+        exitmonitor $r1;
+
+     label4:
+        return $z0;
+
+     label5:
+        $r5 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+}

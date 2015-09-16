@@ -1,0 +1,741 @@
+public class org.apache.http.impl.conn.SingleClientConnManager extends java.lang.Object implements org.apache.http.conn.ClientConnectionManager
+{
+    public static final java.lang.String MISUSE_MESSAGE;
+    protected boolean alwaysShutDown;
+    protected org.apache.http.conn.ClientConnectionOperator connOperator;
+    protected long connectionExpiresTime;
+    protected volatile boolean isShutDown;
+    protected long lastReleaseTime;
+    private final org.apache.commons.logging.Log log;
+    protected org.apache.http.impl.conn.SingleClientConnManager$ConnAdapter managedConn;
+    protected org.apache.http.conn.scheme.SchemeRegistry schemeRegistry;
+    protected org.apache.http.impl.conn.SingleClientConnManager$PoolEntry uniquePoolEntry;
+
+    public void <init>(org.apache.http.params.HttpParams, org.apache.http.conn.scheme.SchemeRegistry)
+    {
+        org.apache.http.impl.conn.SingleClientConnManager $r0;
+        org.apache.http.params.HttpParams $r1;
+        org.apache.http.conn.scheme.SchemeRegistry $r2;
+        java.lang.Class $r3;
+        org.apache.commons.logging.Log $r4;
+        java.lang.IllegalArgumentException $r5;
+        org.apache.http.conn.ClientConnectionOperator $r6;
+        org.apache.http.impl.conn.SingleClientConnManager$PoolEntry $r7;
+
+        $r0 := @this: org.apache.http.impl.conn.SingleClientConnManager;
+
+        $r1 := @parameter0: org.apache.http.params.HttpParams;
+
+        $r2 := @parameter1: org.apache.http.conn.scheme.SchemeRegistry;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r3 = virtualinvoke $r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r4 = staticinvoke <org.apache.commons.logging.LogFactory: org.apache.commons.logging.Log getLog(java.lang.Class)>($r3);
+
+        $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.commons.logging.Log log> = $r4;
+
+        if $r2 != null goto label1;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Scheme registry must not be null.");
+
+        throw $r5;
+
+     label1:
+        $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.http.conn.scheme.SchemeRegistry schemeRegistry> = $r2;
+
+        $r6 = virtualinvoke $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.http.conn.ClientConnectionOperator createConnectionOperator(org.apache.http.conn.scheme.SchemeRegistry)>($r2);
+
+        $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.http.conn.ClientConnectionOperator connOperator> = $r6;
+
+        $r7 = new org.apache.http.impl.conn.SingleClientConnManager$PoolEntry;
+
+        specialinvoke $r7.<org.apache.http.impl.conn.SingleClientConnManager$PoolEntry: void <init>(org.apache.http.impl.conn.SingleClientConnManager)>($r0);
+
+        $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.http.impl.conn.SingleClientConnManager$PoolEntry uniquePoolEntry> = $r7;
+
+        $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.http.impl.conn.SingleClientConnManager$ConnAdapter managedConn> = null;
+
+        $r0.<org.apache.http.impl.conn.SingleClientConnManager: long lastReleaseTime> = -1L;
+
+        $r0.<org.apache.http.impl.conn.SingleClientConnManager: boolean alwaysShutDown> = 0;
+
+        $r0.<org.apache.http.impl.conn.SingleClientConnManager: boolean isShutDown> = 0;
+
+        return;
+    }
+
+    protected final void assertStillUp() throws java.lang.IllegalStateException
+    {
+        org.apache.http.impl.conn.SingleClientConnManager $r0;
+        boolean $z0;
+        java.lang.IllegalStateException $r1;
+
+        $r0 := @this: org.apache.http.impl.conn.SingleClientConnManager;
+
+        $z0 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: boolean isShutDown>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Manager is shut down.");
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+
+    public void closeExpiredConnections()
+    {
+        org.apache.http.impl.conn.SingleClientConnManager $r0;
+        long $l0, $l1;
+        byte $b2;
+        java.util.concurrent.TimeUnit $r1;
+
+        $r0 := @this: org.apache.http.impl.conn.SingleClientConnManager;
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l1 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: long connectionExpiresTime>;
+
+        $b2 = $l0 cmp $l1;
+
+        if $b2 < 0 goto label1;
+
+        $r1 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit MILLISECONDS>;
+
+        virtualinvoke $r0.<org.apache.http.impl.conn.SingleClientConnManager: void closeIdleConnections(long,java.util.concurrent.TimeUnit)>(0L, $r1);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public void closeIdleConnections(long, java.util.concurrent.TimeUnit)
+    {
+        org.apache.http.impl.conn.SingleClientConnManager $r0;
+        long $l0, $l1;
+        java.util.concurrent.TimeUnit $r1;
+        java.lang.IllegalArgumentException $r2;
+        org.apache.http.impl.conn.SingleClientConnManager$ConnAdapter $r3;
+        org.apache.http.impl.conn.SingleClientConnManager$PoolEntry $r4;
+        org.apache.http.conn.OperatedClientConnection $r5;
+        boolean $z0;
+        byte $b2;
+        java.io.IOException $r6;
+        org.apache.commons.logging.Log $r7;
+
+        $r0 := @this: org.apache.http.impl.conn.SingleClientConnManager;
+
+        $l0 := @parameter0: long;
+
+        $r1 := @parameter1: java.util.concurrent.TimeUnit;
+
+        virtualinvoke $r0.<org.apache.http.impl.conn.SingleClientConnManager: void assertStillUp()>();
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Time unit must not be null.");
+
+        throw $r2;
+
+     label1:
+        $r3 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.http.impl.conn.SingleClientConnManager$ConnAdapter managedConn>;
+
+        if $r3 != null goto label5;
+
+        $r4 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.http.impl.conn.SingleClientConnManager$PoolEntry uniquePoolEntry>;
+
+        $r5 = $r4.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.OperatedClientConnection connection>;
+
+        $z0 = interfaceinvoke $r5.<org.apache.http.conn.OperatedClientConnection: boolean isOpen()>();
+
+        if $z0 == 0 goto label6;
+
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l0 = virtualinvoke $r1.<java.util.concurrent.TimeUnit: long toMillis(long)>($l0);
+
+        $l0 = $l1 - $l0;
+
+        $l1 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: long lastReleaseTime>;
+
+        $b2 = $l1 cmp $l0;
+
+        if $b2 > 0 goto label7;
+
+        $r4 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.http.impl.conn.SingleClientConnManager$PoolEntry uniquePoolEntry>;
+
+     label2:
+        virtualinvoke $r4.<org.apache.http.impl.conn.SingleClientConnManager$PoolEntry: void close()>();
+
+     label3:
+        return;
+
+     label4:
+        $r6 := @caughtexception;
+
+        $r7 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.commons.logging.Log log>;
+
+        interfaceinvoke $r7.<org.apache.commons.logging.Log: void debug(java.lang.Object,java.lang.Throwable)>("Problem closing idle connection.", $r6);
+
+        return;
+
+     label5:
+        return;
+
+     label6:
+        return;
+
+     label7:
+        return;
+
+        catch java.io.IOException from label2 to label3 with label4;
+    }
+
+    protected org.apache.http.conn.ClientConnectionOperator createConnectionOperator(org.apache.http.conn.scheme.SchemeRegistry)
+    {
+        org.apache.http.impl.conn.SingleClientConnManager $r0;
+        org.apache.http.conn.scheme.SchemeRegistry $r1;
+        org.apache.http.impl.conn.DefaultClientConnectionOperator $r2;
+
+        $r0 := @this: org.apache.http.impl.conn.SingleClientConnManager;
+
+        $r1 := @parameter0: org.apache.http.conn.scheme.SchemeRegistry;
+
+        $r2 = new org.apache.http.impl.conn.DefaultClientConnectionOperator;
+
+        specialinvoke $r2.<org.apache.http.impl.conn.DefaultClientConnectionOperator: void <init>(org.apache.http.conn.scheme.SchemeRegistry)>($r1);
+
+        return $r2;
+    }
+
+    protected void finalize() throws java.lang.Throwable
+    {
+        org.apache.http.impl.conn.SingleClientConnManager $r0;
+
+        $r0 := @this: org.apache.http.impl.conn.SingleClientConnManager;
+
+        virtualinvoke $r0.<org.apache.http.impl.conn.SingleClientConnManager: void shutdown()>();
+
+        specialinvoke $r0.<java.lang.Object: void finalize()>();
+
+        return;
+    }
+
+    public org.apache.http.conn.ManagedClientConnection getConnection(org.apache.http.conn.routing.HttpRoute, java.lang.Object)
+    {
+        org.apache.http.impl.conn.SingleClientConnManager $r0;
+        org.apache.http.conn.routing.HttpRoute $r1, $r11;
+        java.lang.Object $r2;
+        org.apache.http.conn.routing.RouteTracker $r3;
+        java.lang.IllegalArgumentException $r4;
+        org.apache.commons.logging.Log $r5;
+        boolean $z0, $z1, $z2;
+        java.lang.StringBuilder $r6;
+        java.lang.String $r7;
+        org.apache.http.impl.conn.SingleClientConnManager$ConnAdapter $r8;
+        org.apache.http.impl.conn.SingleClientConnManager$PoolEntry $r9;
+        org.apache.http.conn.OperatedClientConnection $r10;
+        java.io.IOException $r12;
+
+        $r0 := @this: org.apache.http.impl.conn.SingleClientConnManager;
+
+        $r1 := @parameter0: org.apache.http.conn.routing.HttpRoute;
+
+        $r2 := @parameter1: java.lang.Object;
+
+        if $r1 != null goto label01;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Route may not be null.");
+
+        throw $r4;
+
+     label01:
+        virtualinvoke $r0.<org.apache.http.impl.conn.SingleClientConnManager: void assertStillUp()>();
+
+        $r5 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.commons.logging.Log log>;
+
+        $z0 = interfaceinvoke $r5.<org.apache.commons.logging.Log: boolean isDebugEnabled()>();
+
+        if $z0 == 0 goto label02;
+
+        $r5 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.commons.logging.Log log>;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Get connection for route ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r5.<org.apache.commons.logging.Log: void debug(java.lang.Object)>($r7);
+
+     label02:
+        $r8 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.http.impl.conn.SingleClientConnManager$ConnAdapter managedConn>;
+
+        if $r8 == null goto label03;
+
+        virtualinvoke $r0.<org.apache.http.impl.conn.SingleClientConnManager: void revokeConnection()>();
+
+     label03:
+        $z0 = 0;
+
+        $z1 = 0;
+
+        virtualinvoke $r0.<org.apache.http.impl.conn.SingleClientConnManager: void closeExpiredConnections()>();
+
+        $r9 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.http.impl.conn.SingleClientConnManager$PoolEntry uniquePoolEntry>;
+
+        $r10 = $r9.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.OperatedClientConnection connection>;
+
+        $z2 = interfaceinvoke $r10.<org.apache.http.conn.OperatedClientConnection: boolean isOpen()>();
+
+        if $z2 == 0 goto label10;
+
+        $r9 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.http.impl.conn.SingleClientConnManager$PoolEntry uniquePoolEntry>;
+
+        $r3 = $r9.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.routing.RouteTracker tracker>;
+
+        if $r3 == null goto label04;
+
+        $r11 = virtualinvoke $r3.<org.apache.http.conn.routing.RouteTracker: org.apache.http.conn.routing.HttpRoute toRoute()>();
+
+        $z1 = virtualinvoke $r11.<org.apache.http.conn.routing.HttpRoute: boolean equals(java.lang.Object)>($r1);
+
+        if $z1 != 0 goto label09;
+
+     label04:
+        $z1 = 1;
+
+     label05:
+        if $z1 == 0 goto label07;
+
+        $z0 = 1;
+
+        $r9 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.http.impl.conn.SingleClientConnManager$PoolEntry uniquePoolEntry>;
+
+     label06:
+        virtualinvoke $r9.<org.apache.http.impl.conn.SingleClientConnManager$PoolEntry: void shutdown()>();
+
+     label07:
+        if $z0 == 0 goto label08;
+
+        $r9 = new org.apache.http.impl.conn.SingleClientConnManager$PoolEntry;
+
+        specialinvoke $r9.<org.apache.http.impl.conn.SingleClientConnManager$PoolEntry: void <init>(org.apache.http.impl.conn.SingleClientConnManager)>($r0);
+
+        $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.http.impl.conn.SingleClientConnManager$PoolEntry uniquePoolEntry> = $r9;
+
+     label08:
+        $r8 = new org.apache.http.impl.conn.SingleClientConnManager$ConnAdapter;
+
+        $r9 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.http.impl.conn.SingleClientConnManager$PoolEntry uniquePoolEntry>;
+
+        specialinvoke $r8.<org.apache.http.impl.conn.SingleClientConnManager$ConnAdapter: void <init>(org.apache.http.impl.conn.SingleClientConnManager,org.apache.http.impl.conn.SingleClientConnManager$PoolEntry,org.apache.http.conn.routing.HttpRoute)>($r0, $r9, $r1);
+
+        $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.http.impl.conn.SingleClientConnManager$ConnAdapter managedConn> = $r8;
+
+        $r8 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.http.impl.conn.SingleClientConnManager$ConnAdapter managedConn>;
+
+        return $r8;
+
+     label09:
+        $z1 = 0;
+
+        goto label05;
+
+     label10:
+        $z0 = 1;
+
+        goto label05;
+
+     label11:
+        $r12 := @caughtexception;
+
+        $r5 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.commons.logging.Log log>;
+
+        interfaceinvoke $r5.<org.apache.commons.logging.Log: void debug(java.lang.Object,java.lang.Throwable)>("Problem shutting down connection.", $r12);
+
+        goto label07;
+
+        catch java.io.IOException from label06 to label07 with label11;
+    }
+
+    public org.apache.http.conn.scheme.SchemeRegistry getSchemeRegistry()
+    {
+        org.apache.http.impl.conn.SingleClientConnManager $r0;
+        org.apache.http.conn.scheme.SchemeRegistry r1;
+
+        $r0 := @this: org.apache.http.impl.conn.SingleClientConnManager;
+
+        r1 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.http.conn.scheme.SchemeRegistry schemeRegistry>;
+
+        return r1;
+    }
+
+    public void releaseConnection(org.apache.http.conn.ManagedClientConnection, long, java.util.concurrent.TimeUnit)
+    {
+        org.apache.http.impl.conn.SingleClientConnManager $r0;
+        org.apache.http.conn.ManagedClientConnection $r1;
+        long $l0, $l1;
+        java.util.concurrent.TimeUnit $r2;
+        boolean $z0;
+        java.lang.IllegalArgumentException $r3;
+        org.apache.commons.logging.Log $r4;
+        java.lang.StringBuilder $r5;
+        java.lang.String $r6;
+        org.apache.http.impl.conn.SingleClientConnManager$ConnAdapter $r7;
+        org.apache.http.impl.conn.AbstractPoolEntry $r8;
+        org.apache.http.conn.ClientConnectionManager $r9;
+        byte $b2;
+        java.io.IOException $r10;
+        java.lang.Throwable $r11;
+
+        $r0 := @this: org.apache.http.impl.conn.SingleClientConnManager;
+
+        $r1 := @parameter0: org.apache.http.conn.ManagedClientConnection;
+
+        $l0 := @parameter1: long;
+
+        $r2 := @parameter2: java.util.concurrent.TimeUnit;
+
+        virtualinvoke $r0.<org.apache.http.impl.conn.SingleClientConnManager: void assertStillUp()>();
+
+        $z0 = $r1 instanceof org.apache.http.impl.conn.SingleClientConnManager$ConnAdapter;
+
+        if $z0 != 0 goto label01;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Connection class mismatch, connection not obtained from this manager.");
+
+        throw $r3;
+
+     label01:
+        $r4 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.commons.logging.Log log>;
+
+        $z0 = interfaceinvoke $r4.<org.apache.commons.logging.Log: boolean isDebugEnabled()>();
+
+        if $z0 == 0 goto label02;
+
+        $r4 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.commons.logging.Log log>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Releasing connection ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r4.<org.apache.commons.logging.Log: void debug(java.lang.Object)>($r6);
+
+     label02:
+        $r7 = (org.apache.http.impl.conn.SingleClientConnManager$ConnAdapter) $r1;
+
+        $r8 = $r7.<org.apache.http.impl.conn.AbstractPooledConnAdapter: org.apache.http.impl.conn.AbstractPoolEntry poolEntry>;
+
+        if $r8 != null goto label03;
+
+        return;
+
+     label03:
+        $r9 = virtualinvoke $r7.<org.apache.http.impl.conn.AbstractClientConnAdapter: org.apache.http.conn.ClientConnectionManager getManager()>();
+
+        if $r9 == null goto label04;
+
+        if $r9 == $r0 goto label04;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Connection not obtained from this manager.");
+
+        throw $r3;
+
+     label04:
+        $z0 = virtualinvoke $r7.<org.apache.http.impl.conn.AbstractClientConnAdapter: boolean isOpen()>();
+
+     label05:
+        if $z0 == 0 goto label10;
+
+        $z0 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: boolean alwaysShutDown>;
+
+     label06:
+        if $z0 != 0 goto label08;
+
+        $z0 = virtualinvoke $r7.<org.apache.http.impl.conn.AbstractClientConnAdapter: boolean isMarkedReusable()>();
+
+     label07:
+        if $z0 != 0 goto label10;
+
+     label08:
+        $r4 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.commons.logging.Log log>;
+
+        $z0 = interfaceinvoke $r4.<org.apache.commons.logging.Log: boolean isDebugEnabled()>();
+
+        if $z0 == 0 goto label09;
+
+        $r4 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.commons.logging.Log log>;
+
+        interfaceinvoke $r4.<org.apache.commons.logging.Log: void debug(java.lang.Object)>("Released connection open but not reusable.");
+
+     label09:
+        virtualinvoke $r7.<org.apache.http.impl.conn.AbstractPooledConnAdapter: void shutdown()>();
+
+     label10:
+        virtualinvoke $r7.<org.apache.http.impl.conn.AbstractPooledConnAdapter: void detach()>();
+
+        $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.http.impl.conn.SingleClientConnManager$ConnAdapter managedConn> = null;
+
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r0.<org.apache.http.impl.conn.SingleClientConnManager: long lastReleaseTime> = $l1;
+
+        $b2 = $l0 cmp 0L;
+
+        if $b2 <= 0 goto label11;
+
+        $l0 = virtualinvoke $r2.<java.util.concurrent.TimeUnit: long toMillis(long)>($l0);
+
+        $l1 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: long lastReleaseTime>;
+
+        $l0 = $l0 + $l1;
+
+        $r0.<org.apache.http.impl.conn.SingleClientConnManager: long connectionExpiresTime> = $l0;
+
+        return;
+
+     label11:
+        $r0.<org.apache.http.impl.conn.SingleClientConnManager: long connectionExpiresTime> = 9223372036854775807L;
+
+        return;
+
+     label12:
+        $r10 := @caughtexception;
+
+     label13:
+        $r4 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.commons.logging.Log log>;
+
+        $z0 = interfaceinvoke $r4.<org.apache.commons.logging.Log: boolean isDebugEnabled()>();
+
+        if $z0 == 0 goto label14;
+
+        $r4 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.commons.logging.Log log>;
+
+        interfaceinvoke $r4.<org.apache.commons.logging.Log: void debug(java.lang.Object,java.lang.Throwable)>("Exception shutting down released connection.", $r10);
+
+     label14:
+        virtualinvoke $r7.<org.apache.http.impl.conn.AbstractPooledConnAdapter: void detach()>();
+
+        $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.http.impl.conn.SingleClientConnManager$ConnAdapter managedConn> = null;
+
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r0.<org.apache.http.impl.conn.SingleClientConnManager: long lastReleaseTime> = $l1;
+
+        $b2 = $l0 cmp 0L;
+
+        if $b2 <= 0 goto label15;
+
+        $l0 = virtualinvoke $r2.<java.util.concurrent.TimeUnit: long toMillis(long)>($l0);
+
+        $l1 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: long lastReleaseTime>;
+
+        $l0 = $l0 + $l1;
+
+        $r0.<org.apache.http.impl.conn.SingleClientConnManager: long connectionExpiresTime> = $l0;
+
+        return;
+
+     label15:
+        $r0.<org.apache.http.impl.conn.SingleClientConnManager: long connectionExpiresTime> = 9223372036854775807L;
+
+        return;
+
+     label16:
+        $r11 := @caughtexception;
+
+        virtualinvoke $r7.<org.apache.http.impl.conn.AbstractPooledConnAdapter: void detach()>();
+
+        $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.http.impl.conn.SingleClientConnManager$ConnAdapter managedConn> = null;
+
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r0.<org.apache.http.impl.conn.SingleClientConnManager: long lastReleaseTime> = $l1;
+
+        $b2 = $l0 cmp 0L;
+
+        if $b2 <= 0 goto label18;
+
+        $l0 = virtualinvoke $r2.<java.util.concurrent.TimeUnit: long toMillis(long)>($l0);
+
+        $l1 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: long lastReleaseTime>;
+
+        $l0 = $l0 + $l1;
+
+        $r0.<org.apache.http.impl.conn.SingleClientConnManager: long connectionExpiresTime> = $l0;
+
+     label17:
+        throw $r11;
+
+     label18:
+        $r0.<org.apache.http.impl.conn.SingleClientConnManager: long connectionExpiresTime> = 9223372036854775807L;
+
+        goto label17;
+
+        catch java.io.IOException from label04 to label05 with label12;
+        catch java.io.IOException from label06 to label07 with label12;
+        catch java.io.IOException from label08 to label10 with label12;
+        catch java.lang.Throwable from label04 to label10 with label16;
+        catch java.lang.Throwable from label13 to label14 with label16;
+    }
+
+    public final org.apache.http.conn.ClientConnectionRequest requestConnection(org.apache.http.conn.routing.HttpRoute, java.lang.Object)
+    {
+        org.apache.http.impl.conn.SingleClientConnManager $r0;
+        org.apache.http.conn.routing.HttpRoute $r1;
+        java.lang.Object $r2;
+        org.apache.http.impl.conn.SingleClientConnManager$1 $r3;
+
+        $r0 := @this: org.apache.http.impl.conn.SingleClientConnManager;
+
+        $r1 := @parameter0: org.apache.http.conn.routing.HttpRoute;
+
+        $r2 := @parameter1: java.lang.Object;
+
+        $r3 = new org.apache.http.impl.conn.SingleClientConnManager$1;
+
+        specialinvoke $r3.<org.apache.http.impl.conn.SingleClientConnManager$1: void <init>(org.apache.http.impl.conn.SingleClientConnManager,org.apache.http.conn.routing.HttpRoute,java.lang.Object)>($r0, $r1, $r2);
+
+        return $r3;
+    }
+
+    protected void revokeConnection()
+    {
+        org.apache.http.impl.conn.SingleClientConnManager $r0;
+        org.apache.http.impl.conn.SingleClientConnManager$ConnAdapter $r1;
+        org.apache.commons.logging.Log $r2;
+        org.apache.http.impl.conn.SingleClientConnManager$PoolEntry $r3;
+        java.io.IOException $r4;
+
+        $r0 := @this: org.apache.http.impl.conn.SingleClientConnManager;
+
+        $r1 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.http.impl.conn.SingleClientConnManager$ConnAdapter managedConn>;
+
+        if $r1 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.commons.logging.Log log>;
+
+        interfaceinvoke $r2.<org.apache.commons.logging.Log: void warn(java.lang.Object)>("Invalid use of SingleClientConnManager: connection still allocated.\nMake sure to release the connection before allocating another one.");
+
+        $r1 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.http.impl.conn.SingleClientConnManager$ConnAdapter managedConn>;
+
+        virtualinvoke $r1.<org.apache.http.impl.conn.AbstractPooledConnAdapter: void detach()>();
+
+        $r3 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.http.impl.conn.SingleClientConnManager$PoolEntry uniquePoolEntry>;
+
+     label2:
+        virtualinvoke $r3.<org.apache.http.impl.conn.SingleClientConnManager$PoolEntry: void shutdown()>();
+
+     label3:
+        return;
+
+     label4:
+        $r4 := @caughtexception;
+
+        $r2 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.commons.logging.Log log>;
+
+        interfaceinvoke $r2.<org.apache.commons.logging.Log: void debug(java.lang.Object,java.lang.Throwable)>("Problem while shutting down connection.", $r4);
+
+        return;
+
+        catch java.io.IOException from label2 to label3 with label4;
+    }
+
+    public void shutdown()
+    {
+        org.apache.http.impl.conn.SingleClientConnManager $r0;
+        org.apache.http.impl.conn.SingleClientConnManager$ConnAdapter $r1;
+        org.apache.http.impl.conn.SingleClientConnManager$PoolEntry $r2;
+        java.io.IOException $r3;
+        org.apache.commons.logging.Log $r4;
+        java.lang.Throwable $r5;
+
+        $r0 := @this: org.apache.http.impl.conn.SingleClientConnManager;
+
+        $r0.<org.apache.http.impl.conn.SingleClientConnManager: boolean isShutDown> = 1;
+
+        $r1 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.http.impl.conn.SingleClientConnManager$ConnAdapter managedConn>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.http.impl.conn.SingleClientConnManager$ConnAdapter managedConn>;
+
+        virtualinvoke $r1.<org.apache.http.impl.conn.AbstractPooledConnAdapter: void detach()>();
+
+     label1:
+        $r2 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.http.impl.conn.SingleClientConnManager$PoolEntry uniquePoolEntry>;
+
+        if $r2 == null goto label3;
+
+        $r2 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.http.impl.conn.SingleClientConnManager$PoolEntry uniquePoolEntry>;
+
+     label2:
+        virtualinvoke $r2.<org.apache.http.impl.conn.SingleClientConnManager$PoolEntry: void shutdown()>();
+
+     label3:
+        $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.http.impl.conn.SingleClientConnManager$PoolEntry uniquePoolEntry> = null;
+
+        return;
+
+     label4:
+        $r3 := @caughtexception;
+
+     label5:
+        $r4 = $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.commons.logging.Log log>;
+
+        interfaceinvoke $r4.<org.apache.commons.logging.Log: void debug(java.lang.Object,java.lang.Throwable)>("Problem while shutting down manager.", $r3);
+
+     label6:
+        $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.http.impl.conn.SingleClientConnManager$PoolEntry uniquePoolEntry> = null;
+
+        return;
+
+     label7:
+        $r5 := @caughtexception;
+
+        $r0.<org.apache.http.impl.conn.SingleClientConnManager: org.apache.http.impl.conn.SingleClientConnManager$PoolEntry uniquePoolEntry> = null;
+
+        throw $r5;
+
+        catch java.io.IOException from label2 to label3 with label4;
+        catch java.lang.Throwable from label1 to label3 with label7;
+        catch java.lang.Throwable from label5 to label6 with label7;
+    }
+
+    public static void <clinit>()
+    {
+        <org.apache.http.impl.conn.SingleClientConnManager: java.lang.String MISUSE_MESSAGE> = "Invalid use of SingleClientConnManager: connection still allocated.\nMake sure to release the connection before allocating another one.";
+
+        return;
+    }
+}

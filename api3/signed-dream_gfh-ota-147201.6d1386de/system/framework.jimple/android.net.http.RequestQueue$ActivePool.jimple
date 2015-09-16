@@ -1,0 +1,550 @@
+class android.net.http.RequestQueue$ActivePool extends java.lang.Object implements android.net.http.RequestQueue$ConnectionManager
+{
+    private int mConnectionCount;
+    android.net.http.IdleCache mIdleCache;
+    android.net.http.ConnectionThread[] mThreads;
+    private int mTotalConnection;
+    private int mTotalRequest;
+    final android.net.http.RequestQueue this$0;
+
+    void <init>(android.net.http.RequestQueue, int)
+    {
+        android.net.http.RequestQueue$ActivePool $r0;
+        android.net.http.RequestQueue $r1;
+        int $i0, $i1;
+        android.net.http.ConnectionThread $r2;
+        android.content.Context $r3;
+        android.net.http.IdleCache $r4;
+        android.net.http.ConnectionThread[] $r5;
+
+        $r0 := @this: android.net.http.RequestQueue$ActivePool;
+
+        $r1 := @parameter0: android.net.http.RequestQueue;
+
+        $i0 := @parameter1: int;
+
+        $r0.<android.net.http.RequestQueue$ActivePool: android.net.http.RequestQueue this$0> = $r1;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r4 = new android.net.http.IdleCache;
+
+        specialinvoke $r4.<android.net.http.IdleCache: void <init>()>();
+
+        $r0.<android.net.http.RequestQueue$ActivePool: android.net.http.IdleCache mIdleCache> = $r4;
+
+        $r0.<android.net.http.RequestQueue$ActivePool: int mConnectionCount> = $i0;
+
+        $i0 = $r0.<android.net.http.RequestQueue$ActivePool: int mConnectionCount>;
+
+        $r5 = newarray (android.net.http.ConnectionThread)[$i0];
+
+        $r0.<android.net.http.RequestQueue$ActivePool: android.net.http.ConnectionThread[] mThreads> = $r5;
+
+        $i0 = 0;
+
+     label1:
+        $i1 = $r0.<android.net.http.RequestQueue$ActivePool: int mConnectionCount>;
+
+        if $i0 >= $i1 goto label2;
+
+        $r5 = $r0.<android.net.http.RequestQueue$ActivePool: android.net.http.ConnectionThread[] mThreads>;
+
+        $r2 = new android.net.http.ConnectionThread;
+
+        $r3 = staticinvoke <android.net.http.RequestQueue: android.content.Context access$100(android.net.http.RequestQueue)>($r1);
+
+        specialinvoke $r2.<android.net.http.ConnectionThread: void <init>(android.content.Context,int,android.net.http.RequestQueue$ConnectionManager,android.net.http.RequestFeeder)>($r3, $i0, $r0, $r1);
+
+        $r5[$i0] = $r2;
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    static int access$308(android.net.http.RequestQueue$ActivePool)
+    {
+        android.net.http.RequestQueue$ActivePool $r0;
+        int $i0, $i1;
+
+        $r0 := @parameter0: android.net.http.RequestQueue$ActivePool;
+
+        $i0 = $r0.<android.net.http.RequestQueue$ActivePool: int mTotalRequest>;
+
+        $i1 = $i0 + 1;
+
+        $r0.<android.net.http.RequestQueue$ActivePool: int mTotalRequest> = $i1;
+
+        return $i0;
+    }
+
+    void disablePersistence()
+    {
+        android.net.http.RequestQueue$ActivePool $r0;
+        android.net.http.Connection $r1;
+        int $i0, $i1;
+        android.net.http.ConnectionThread[] $r2;
+        android.net.http.ConnectionThread $r3;
+        android.net.http.IdleCache $r4;
+
+        $r0 := @this: android.net.http.RequestQueue$ActivePool;
+
+        $i0 = 0;
+
+     label1:
+        $i1 = $r0.<android.net.http.RequestQueue$ActivePool: int mConnectionCount>;
+
+        if $i0 >= $i1 goto label3;
+
+        $r2 = $r0.<android.net.http.RequestQueue$ActivePool: android.net.http.ConnectionThread[] mThreads>;
+
+        $r3 = $r2[$i0];
+
+        $r1 = $r3.<android.net.http.ConnectionThread: android.net.http.Connection mConnection>;
+
+        if $r1 == null goto label2;
+
+        virtualinvoke $r1.<android.net.http.Connection: void setCanPersist(boolean)>(0);
+
+     label2:
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label3:
+        $r4 = $r0.<android.net.http.RequestQueue$ActivePool: android.net.http.IdleCache mIdleCache>;
+
+        virtualinvoke $r4.<android.net.http.IdleCache: void clear()>();
+
+        return;
+    }
+
+    public android.net.http.Connection getConnection(android.content.Context, org.apache.http.HttpHost)
+    {
+        android.net.http.RequestQueue$ActivePool $r0;
+        android.content.Context $r1;
+        org.apache.http.HttpHost $r2;
+        android.net.http.RequestQueue $r3;
+        android.net.http.IdleCache $r4;
+        android.net.http.Connection $r5;
+        int $i0;
+
+        $r0 := @this: android.net.http.RequestQueue$ActivePool;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: org.apache.http.HttpHost;
+
+        $r4 = $r0.<android.net.http.RequestQueue$ActivePool: android.net.http.IdleCache mIdleCache>;
+
+        $r5 = virtualinvoke $r4.<android.net.http.IdleCache: android.net.http.Connection getConnection(org.apache.http.HttpHost)>($r2);
+
+        if $r5 != null goto label1;
+
+        $i0 = $r0.<android.net.http.RequestQueue$ActivePool: int mTotalConnection>;
+
+        $i0 = $i0 + 1;
+
+        $r0.<android.net.http.RequestQueue$ActivePool: int mTotalConnection> = $i0;
+
+        $r3 = $r0.<android.net.http.RequestQueue$ActivePool: android.net.http.RequestQueue this$0>;
+
+        $r1 = staticinvoke <android.net.http.RequestQueue: android.content.Context access$100(android.net.http.RequestQueue)>($r3);
+
+        $r3 = $r0.<android.net.http.RequestQueue$ActivePool: android.net.http.RequestQueue this$0>;
+
+        $r5 = staticinvoke <android.net.http.Connection: android.net.http.Connection getConnection(android.content.Context,org.apache.http.HttpHost,android.net.http.RequestQueue$ConnectionManager,android.net.http.RequestFeeder)>($r1, $r2, $r0, $r3);
+
+        return $r5;
+
+     label1:
+        return $r5;
+    }
+
+    public org.apache.http.HttpHost getProxyHost()
+    {
+        android.net.http.RequestQueue$ActivePool $r0;
+        org.apache.http.HttpHost $r1;
+        android.net.http.RequestQueue $r2;
+
+        $r0 := @this: android.net.http.RequestQueue$ActivePool;
+
+        $r2 = $r0.<android.net.http.RequestQueue$ActivePool: android.net.http.RequestQueue this$0>;
+
+        $r1 = staticinvoke <android.net.http.RequestQueue: org.apache.http.HttpHost access$200(android.net.http.RequestQueue)>($r2);
+
+        return $r1;
+    }
+
+    android.net.http.ConnectionThread getThread(org.apache.http.HttpHost)
+    {
+        android.net.http.RequestQueue$ActivePool $r0;
+        org.apache.http.HttpHost $r1, $r6;
+        android.net.http.Connection $r2;
+        android.net.http.ConnectionThread $r3;
+        boolean $z0;
+        android.net.http.RequestQueue $r4;
+        int $i0, $i1;
+        android.net.http.ConnectionThread[] $r5;
+        java.lang.Throwable $r7;
+
+        $r0 := @this: android.net.http.RequestQueue$ActivePool;
+
+        $r1 := @parameter0: org.apache.http.HttpHost;
+
+        $r4 = $r0.<android.net.http.RequestQueue$ActivePool: android.net.http.RequestQueue this$0>;
+
+        entermonitor $r4;
+
+        $i0 = 0;
+
+     label1:
+        $r5 = $r0.<android.net.http.RequestQueue$ActivePool: android.net.http.ConnectionThread[] mThreads>;
+
+        $i1 = lengthof $r5;
+
+        if $i0 >= $i1 goto label4;
+
+        $r5 = $r0.<android.net.http.RequestQueue$ActivePool: android.net.http.ConnectionThread[] mThreads>;
+
+        $r3 = $r5[$i0];
+
+        $r2 = $r3.<android.net.http.ConnectionThread: android.net.http.Connection mConnection>;
+
+        if $r2 == null goto label3;
+
+        $r6 = $r2.<android.net.http.Connection: org.apache.http.HttpHost mHost>;
+
+        $z0 = virtualinvoke $r6.<org.apache.http.HttpHost: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label3;
+
+        exitmonitor $r4;
+
+     label2:
+        return $r3;
+
+     label3:
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label4:
+        exitmonitor $r4;
+
+     label5:
+        return null;
+
+     label6:
+        $r7 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label7:
+        throw $r7;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label3 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    public boolean isNetworkConnected()
+    {
+        android.net.http.RequestQueue$ActivePool $r0;
+        android.net.http.RequestQueue $r1;
+        boolean z0;
+
+        $r0 := @this: android.net.http.RequestQueue$ActivePool;
+
+        $r1 = $r0.<android.net.http.RequestQueue$ActivePool: android.net.http.RequestQueue this$0>;
+
+        z0 = $r1.<android.net.http.RequestQueue: boolean mNetworkConnected>;
+
+        return z0;
+    }
+
+    void logState()
+    {
+        android.net.http.RequestQueue$ActivePool $r0;
+        java.lang.StringBuilder $r1, $r2;
+        int $i0, $i1;
+        android.net.http.ConnectionThread[] $r3;
+        android.net.http.ConnectionThread $r4;
+        java.lang.String $r5;
+
+        $r0 := @this: android.net.http.RequestQueue$ActivePool;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $i0 = 0;
+
+     label1:
+        $i1 = $r0.<android.net.http.RequestQueue$ActivePool: int mConnectionCount>;
+
+        if $i0 >= $i1 goto label2;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = $r0.<android.net.http.RequestQueue$ActivePool: android.net.http.ConnectionThread[] mThreads>;
+
+        $r4 = $r3[$i0];
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r4);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        $r5 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label2:
+        $r5 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.net.http.HttpLog: void v(java.lang.String)>($r5);
+
+        return;
+    }
+
+    public boolean recycleConnection(org.apache.http.HttpHost, android.net.http.Connection)
+    {
+        android.net.http.RequestQueue$ActivePool $r0;
+        org.apache.http.HttpHost $r1;
+        android.net.http.Connection $r2;
+        boolean $z0;
+        android.net.http.IdleCache $r3;
+
+        $r0 := @this: android.net.http.RequestQueue$ActivePool;
+
+        $r1 := @parameter0: org.apache.http.HttpHost;
+
+        $r2 := @parameter1: android.net.http.Connection;
+
+        $r3 = $r0.<android.net.http.RequestQueue$ActivePool: android.net.http.IdleCache mIdleCache>;
+
+        $z0 = virtualinvoke $r3.<android.net.http.IdleCache: boolean cacheConnection(org.apache.http.HttpHost,android.net.http.Connection)>($r1, $r2);
+
+        return $z0;
+    }
+
+    void shutdown()
+    {
+        android.net.http.RequestQueue$ActivePool $r0;
+        int $i0, $i1;
+        android.net.http.ConnectionThread[] $r1;
+        android.net.http.ConnectionThread $r2;
+
+        $r0 := @this: android.net.http.RequestQueue$ActivePool;
+
+        $i0 = 0;
+
+     label1:
+        $i1 = $r0.<android.net.http.RequestQueue$ActivePool: int mConnectionCount>;
+
+        if $i0 >= $i1 goto label2;
+
+        $r1 = $r0.<android.net.http.RequestQueue$ActivePool: android.net.http.ConnectionThread[] mThreads>;
+
+        $r2 = $r1[$i0];
+
+        virtualinvoke $r2.<android.net.http.ConnectionThread: void requestStop()>();
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    void startConnectionThread()
+    {
+        android.net.http.RequestQueue$ActivePool $r0;
+        android.net.http.RequestQueue $r1, $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.net.http.RequestQueue$ActivePool;
+
+        $r1 = $r0.<android.net.http.RequestQueue$ActivePool: android.net.http.RequestQueue this$0>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = $r0.<android.net.http.RequestQueue$ActivePool: android.net.http.RequestQueue this$0>;
+
+        virtualinvoke $r2.<java.lang.Object: void notify()>();
+
+        exitmonitor $r1;
+
+     label2:
+        return;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void startTiming()
+    {
+        android.net.http.RequestQueue$ActivePool $r0;
+        int $i0, $i1;
+        android.net.http.ConnectionThread[] $r1;
+        android.net.http.ConnectionThread $r2, $r3;
+        long $l2;
+
+        $r0 := @this: android.net.http.RequestQueue$ActivePool;
+
+        $i0 = 0;
+
+     label1:
+        $i1 = $r0.<android.net.http.RequestQueue$ActivePool: int mConnectionCount>;
+
+        if $i0 >= $i1 goto label2;
+
+        $r1 = $r0.<android.net.http.RequestQueue$ActivePool: android.net.http.ConnectionThread[] mThreads>;
+
+        $r2 = $r1[$i0];
+
+        $r1 = $r0.<android.net.http.RequestQueue$ActivePool: android.net.http.ConnectionThread[] mThreads>;
+
+        $r3 = $r1[$i0];
+
+        $l2 = $r3.<android.net.http.ConnectionThread: long mCurrentThreadTime>;
+
+        $r2.<android.net.http.ConnectionThread: long mStartThreadTime> = $l2;
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label2:
+        $r0.<android.net.http.RequestQueue$ActivePool: int mTotalRequest> = 0;
+
+        $r0.<android.net.http.RequestQueue$ActivePool: int mTotalConnection> = 0;
+
+        return;
+    }
+
+    void startup()
+    {
+        android.net.http.RequestQueue$ActivePool $r0;
+        int $i0, $i1;
+        android.net.http.ConnectionThread[] $r1;
+        android.net.http.ConnectionThread $r2;
+
+        $r0 := @this: android.net.http.RequestQueue$ActivePool;
+
+        $i0 = 0;
+
+     label1:
+        $i1 = $r0.<android.net.http.RequestQueue$ActivePool: int mConnectionCount>;
+
+        if $i0 >= $i1 goto label2;
+
+        $r1 = $r0.<android.net.http.RequestQueue$ActivePool: android.net.http.ConnectionThread[] mThreads>;
+
+        $r2 = $r1[$i0];
+
+        virtualinvoke $r2.<java.lang.Thread: void start()>();
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void stopTiming()
+    {
+        android.net.http.RequestQueue$ActivePool $r0;
+        android.net.http.ConnectionThread $r1;
+        long $l0, $l4, $l5;
+        int $i1, $i2, $i3;
+        android.net.http.ConnectionThread[] $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+
+        $r0 := @this: android.net.http.RequestQueue$ActivePool;
+
+        $i1 = 0;
+
+        $i2 = 0;
+
+     label1:
+        $i3 = $r0.<android.net.http.RequestQueue$ActivePool: int mConnectionCount>;
+
+        if $i2 >= $i3 goto label2;
+
+        $r2 = $r0.<android.net.http.RequestQueue$ActivePool: android.net.http.ConnectionThread[] mThreads>;
+
+        $r1 = $r2[$i2];
+
+        $l4 = (long) $i1;
+
+        $l5 = $r1.<android.net.http.ConnectionThread: long mCurrentThreadTime>;
+
+        $l0 = $r1.<android.net.http.ConnectionThread: long mStartThreadTime>;
+
+        $l0 = $l5 - $l0;
+
+        $l4 = $l4 + $l0;
+
+        $i1 = (int) $l4;
+
+        $r1.<android.net.http.ConnectionThread: long mStartThreadTime> = -1L;
+
+        $i2 = $i2 + 1;
+
+        goto label1;
+
+     label2:
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Http thread used ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ms ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" for ");
+
+        $i1 = $r0.<android.net.http.RequestQueue$ActivePool: int mTotalRequest>;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" requests and ");
+
+        $i1 = $r0.<android.net.http.RequestQueue$ActivePool: int mTotalConnection>;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" connections");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Http", $r4);
+
+        return;
+    }
+}

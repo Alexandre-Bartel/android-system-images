@@ -1,0 +1,3460 @@
+public class android.server.BluetoothDeviceService extends android.bluetooth.IBluetoothDevice$Stub
+{
+    private static final java.lang.String BLUETOOTH_ADMIN_PERM;
+    private static final java.lang.String BLUETOOTH_PERM;
+    private static final boolean DBG;
+    private static final int MAX_OUTSTANDING_ASYNC;
+    private static final int MESSAGE_FINISH_DISABLE;
+    private static final int MESSAGE_REGISTER_SDP_RECORDS;
+    private static final java.lang.String TAG;
+    private final com.android.internal.app.IBatteryStats mBatteryStats;
+    private int mBluetoothState;
+    private final android.server.BluetoothDeviceService$BondState mBondState;
+    private final android.content.Context mContext;
+    private android.server.BluetoothDeviceService$EnableThread mEnableThread;
+    private android.server.BluetoothEventLoop mEventLoop;
+    private final android.os.Handler mHandler;
+    private android.content.IntentFilter mIntentFilter;
+    private boolean mIsAirplaneSensitive;
+    private boolean mIsDiscovering;
+    private int mNativeData;
+    private final android.content.BroadcastReceiver mReceiver;
+    private boolean mRestart;
+
+    static void <clinit>()
+    {
+        <android.server.BluetoothDeviceService: java.lang.String TAG> = "BluetoothDeviceService";
+
+        <android.server.BluetoothDeviceService: int MESSAGE_REGISTER_SDP_RECORDS> = 1;
+
+        <android.server.BluetoothDeviceService: int MESSAGE_FINISH_DISABLE> = 2;
+
+        <android.server.BluetoothDeviceService: int MAX_OUTSTANDING_ASYNC> = 32;
+
+        <android.server.BluetoothDeviceService: boolean DBG> = 1;
+
+        <android.server.BluetoothDeviceService: java.lang.String BLUETOOTH_PERM> = "android.permission.BLUETOOTH";
+
+        <android.server.BluetoothDeviceService: java.lang.String BLUETOOTH_ADMIN_PERM> = "android.permission.BLUETOOTH_ADMIN";
+
+        staticinvoke <android.server.BluetoothDeviceService: void classInitNative()>();
+
+        return;
+    }
+
+    public void <init>(android.content.Context)
+    {
+        android.server.BluetoothDeviceService $r0;
+        android.content.Context $r1;
+        android.server.BluetoothDeviceService$BondState $r2;
+        android.server.BluetoothDeviceService$1 $r3;
+        android.server.BluetoothDeviceService$2 $r4;
+        android.os.IBinder $r5;
+        com.android.internal.app.IBatteryStats $r6;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $r1 := @parameter0: android.content.Context;
+
+        specialinvoke $r0.<android.bluetooth.IBluetoothDevice$Stub: void <init>()>();
+
+        $r0.<android.server.BluetoothDeviceService: boolean mRestart> = 0;
+
+        $r2 = new android.server.BluetoothDeviceService$BondState;
+
+        specialinvoke $r2.<android.server.BluetoothDeviceService$BondState: void <init>(android.server.BluetoothDeviceService)>($r0);
+
+        $r0.<android.server.BluetoothDeviceService: android.server.BluetoothDeviceService$BondState mBondState> = $r2;
+
+        $r3 = new android.server.BluetoothDeviceService$1;
+
+        specialinvoke $r3.<android.server.BluetoothDeviceService$1: void <init>(android.server.BluetoothDeviceService)>($r0);
+
+        $r0.<android.server.BluetoothDeviceService: android.os.Handler mHandler> = $r3;
+
+        $r4 = new android.server.BluetoothDeviceService$2;
+
+        specialinvoke $r4.<android.server.BluetoothDeviceService$2: void <init>(android.server.BluetoothDeviceService)>($r0);
+
+        $r0.<android.server.BluetoothDeviceService: android.content.BroadcastReceiver mReceiver> = $r4;
+
+        $r0.<android.server.BluetoothDeviceService: android.content.Context mContext> = $r1;
+
+        $r5 = staticinvoke <android.os.ServiceManager: android.os.IBinder getService(java.lang.String)>("batteryinfo");
+
+        $r6 = staticinvoke <com.android.internal.app.IBatteryStats$Stub: com.android.internal.app.IBatteryStats asInterface(android.os.IBinder)>($r5);
+
+        $r0.<android.server.BluetoothDeviceService: com.android.internal.app.IBatteryStats mBatteryStats> = $r6;
+
+        return;
+    }
+
+    static void access$100(android.server.BluetoothDeviceService, boolean)
+    {
+        android.server.BluetoothDeviceService $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: android.server.BluetoothDeviceService;
+
+        $z0 := @parameter1: boolean;
+
+        specialinvoke $r0.<android.server.BluetoothDeviceService: void finishDisable(boolean)>($z0);
+
+        return;
+    }
+
+    static com.android.internal.app.IBatteryStats access$1000(android.server.BluetoothDeviceService)
+    {
+        android.server.BluetoothDeviceService $r0;
+        com.android.internal.app.IBatteryStats r1;
+
+        $r0 := @parameter0: android.server.BluetoothDeviceService;
+
+        r1 = $r0.<android.server.BluetoothDeviceService: com.android.internal.app.IBatteryStats mBatteryStats>;
+
+        return r1;
+    }
+
+    static android.server.BluetoothDeviceService$EnableThread access$1102(android.server.BluetoothDeviceService, android.server.BluetoothDeviceService$EnableThread)
+    {
+        android.server.BluetoothDeviceService $r0;
+        android.server.BluetoothDeviceService$EnableThread $r1;
+
+        $r0 := @parameter0: android.server.BluetoothDeviceService;
+
+        $r1 := @parameter1: android.server.BluetoothDeviceService$EnableThread;
+
+        $r0.<android.server.BluetoothDeviceService: android.server.BluetoothDeviceService$EnableThread mEnableThread> = $r1;
+
+        return $r1;
+    }
+
+    static void access$1200(android.server.BluetoothDeviceService, int)
+    {
+        android.server.BluetoothDeviceService $r0;
+        int $i0;
+
+        $r0 := @parameter0: android.server.BluetoothDeviceService;
+
+        $i0 := @parameter1: int;
+
+        specialinvoke $r0.<android.server.BluetoothDeviceService: void setBluetoothState(int)>($i0);
+
+        return;
+    }
+
+    static java.lang.String access$1300(android.server.BluetoothDeviceService)
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String $r1;
+
+        $r0 := @parameter0: android.server.BluetoothDeviceService;
+
+        $r1 = specialinvoke $r0.<android.server.BluetoothDeviceService: java.lang.String getModeNative()>();
+
+        return $r1;
+    }
+
+    static int access$1400(android.server.BluetoothDeviceService)
+    {
+        android.server.BluetoothDeviceService $r0;
+        int i0;
+
+        $r0 := @parameter0: android.server.BluetoothDeviceService;
+
+        i0 = $r0.<android.server.BluetoothDeviceService: int mBluetoothState>;
+
+        return i0;
+    }
+
+    static java.lang.String[] access$1500(android.server.BluetoothDeviceService)
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String[] $r1;
+
+        $r0 := @parameter0: android.server.BluetoothDeviceService;
+
+        $r1 = specialinvoke $r0.<android.server.BluetoothDeviceService: java.lang.String[] listBondingsNative()>();
+
+        return $r1;
+    }
+
+    static android.content.Context access$1600(android.server.BluetoothDeviceService)
+    {
+        android.server.BluetoothDeviceService $r0;
+        android.content.Context r1;
+
+        $r0 := @parameter0: android.server.BluetoothDeviceService;
+
+        r1 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        return r1;
+    }
+
+    static boolean access$1700(android.server.BluetoothDeviceService)
+    {
+        android.server.BluetoothDeviceService $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: android.server.BluetoothDeviceService;
+
+        $z0 = specialinvoke $r0.<android.server.BluetoothDeviceService: boolean isAirplaneModeOn()>();
+
+        return $z0;
+    }
+
+    static int access$200(android.server.BluetoothDeviceService)
+    {
+        android.server.BluetoothDeviceService $r0;
+        int $i0;
+
+        $r0 := @parameter0: android.server.BluetoothDeviceService;
+
+        $i0 = specialinvoke $r0.<android.server.BluetoothDeviceService: int enableNative()>();
+
+        return $i0;
+    }
+
+    static android.server.BluetoothEventLoop access$300(android.server.BluetoothDeviceService)
+    {
+        android.server.BluetoothDeviceService $r0;
+        android.server.BluetoothEventLoop r1;
+
+        $r0 := @parameter0: android.server.BluetoothDeviceService;
+
+        r1 = $r0.<android.server.BluetoothDeviceService: android.server.BluetoothEventLoop mEventLoop>;
+
+        return r1;
+    }
+
+    static void access$400(java.lang.String)
+    {
+        java.lang.String $r0;
+
+        $r0 := @parameter0: java.lang.String;
+
+        staticinvoke <android.server.BluetoothDeviceService: void log(java.lang.String)>($r0);
+
+        return;
+    }
+
+    static int access$500(android.server.BluetoothDeviceService)
+    {
+        android.server.BluetoothDeviceService $r0;
+        int $i0;
+
+        $r0 := @parameter0: android.server.BluetoothDeviceService;
+
+        $i0 = specialinvoke $r0.<android.server.BluetoothDeviceService: int disableNative()>();
+
+        return $i0;
+    }
+
+    static void access$600(android.server.BluetoothDeviceService, boolean)
+    {
+        android.server.BluetoothDeviceService $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: android.server.BluetoothDeviceService;
+
+        $z0 := @parameter1: boolean;
+
+        specialinvoke $r0.<android.server.BluetoothDeviceService: void persistBluetoothOnSetting(boolean)>($z0);
+
+        return;
+    }
+
+    static boolean access$702(android.server.BluetoothDeviceService, boolean)
+    {
+        android.server.BluetoothDeviceService $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: android.server.BluetoothDeviceService;
+
+        $z0 := @parameter1: boolean;
+
+        $r0.<android.server.BluetoothDeviceService: boolean mIsDiscovering> = $z0;
+
+        return $z0;
+    }
+
+    static android.server.BluetoothDeviceService$BondState access$800(android.server.BluetoothDeviceService)
+    {
+        android.server.BluetoothDeviceService $r0;
+        android.server.BluetoothDeviceService$BondState r1;
+
+        $r0 := @parameter0: android.server.BluetoothDeviceService;
+
+        r1 = $r0.<android.server.BluetoothDeviceService: android.server.BluetoothDeviceService$BondState mBondState>;
+
+        return r1;
+    }
+
+    static android.os.Handler access$900(android.server.BluetoothDeviceService)
+    {
+        android.server.BluetoothDeviceService $r0;
+        android.os.Handler r1;
+
+        $r0 := @parameter0: android.server.BluetoothDeviceService;
+
+        r1 = $r0.<android.server.BluetoothDeviceService: android.os.Handler mHandler>;
+
+        return r1;
+    }
+
+    static int bluezStringToScanMode(java.lang.String)
+    {
+        java.lang.String $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: java.lang.String;
+
+        if $r0 != null goto label1;
+
+        return -1000;
+
+     label1:
+        $r0 = virtualinvoke $r0.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $z0 = virtualinvoke $r0.<java.lang.String: boolean equals(java.lang.Object)>("off");
+
+        if $z0 == 0 goto label2;
+
+        return 0;
+
+     label2:
+        $z0 = virtualinvoke $r0.<java.lang.String: boolean equals(java.lang.Object)>("connectable");
+
+        if $z0 == 0 goto label3;
+
+        return 1;
+
+     label3:
+        $z0 = virtualinvoke $r0.<java.lang.String: boolean equals(java.lang.Object)>("discoverable");
+
+        if $z0 == 0 goto label4;
+
+        return 3;
+
+     label4:
+        return -1000;
+    }
+
+    private native boolean cancelBondingProcessNative(java.lang.String);
+
+    private native boolean cancelDiscoveryNative();
+
+    private native boolean cancelPinNative(java.lang.String, int);
+
+    private static native void classInitNative();
+
+    private native void cleanupNativeDataNative();
+
+    private native boolean createBondingNative(java.lang.String, int);
+
+    private native int disableNative();
+
+    private native boolean disconnectRemoteDeviceNative(java.lang.String);
+
+    private native int enableNative();
+
+    private void finishDisable(boolean)
+    {
+        android.server.BluetoothDeviceService $r0;
+        boolean $z0, $z1;
+        android.content.Intent $r1;
+        int $i0, $i1;
+        android.server.BluetoothEventLoop $r2;
+        android.server.BluetoothDeviceService$BondState $r3;
+        java.lang.String[] $r4;
+        java.lang.String $r5;
+        java.util.HashMap $r6;
+        java.util.Set $r7;
+        java.util.Iterator $r8;
+        java.lang.Object $r9;
+        android.bluetooth.IBluetoothDeviceCallback $r10;
+        java.lang.Throwable $r11, $r15;
+        android.content.Context $r12;
+        long $l2;
+        com.android.internal.app.IBatteryStats $r13;
+        android.os.RemoteException $r14, $r16;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $z0 := @parameter0: boolean;
+
+        entermonitor $r0;
+
+     label01:
+        $i0 = $r0.<android.server.BluetoothDeviceService: int mBluetoothState>;
+
+     label02:
+        if $i0 == 3 goto label04;
+
+     label03:
+        exitmonitor $r0;
+
+        return;
+
+     label04:
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.server.BluetoothEventLoop mEventLoop>;
+
+        virtualinvoke $r2.<android.server.BluetoothEventLoop: void stop()>();
+
+        specialinvoke $r0.<android.server.BluetoothDeviceService: int disableNative()>();
+
+        $r3 = $r0.<android.server.BluetoothDeviceService: android.server.BluetoothDeviceService$BondState mBondState>;
+
+        $r4 = staticinvoke <android.server.BluetoothDeviceService$BondState: java.lang.String[] access$000(android.server.BluetoothDeviceService$BondState,int)>($r3, 2);
+
+        $i0 = lengthof $r4;
+
+        $i1 = 0;
+
+     label05:
+        if $i1 >= $i0 goto label06;
+
+        $r5 = $r4[$i1];
+
+        $r3 = $r0.<android.server.BluetoothDeviceService: android.server.BluetoothDeviceService$BondState mBondState>;
+
+        virtualinvoke $r3.<android.server.BluetoothDeviceService$BondState: void setBondState(java.lang.String,int,int)>($r5, 0, 3);
+
+        $i1 = $i1 + 1;
+
+        goto label05;
+
+     label06:
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.server.BluetoothEventLoop mEventLoop>;
+
+        $r6 = virtualinvoke $r2.<android.server.BluetoothEventLoop: java.util.HashMap getRemoteServiceChannelCallbacks()>();
+
+        $r7 = virtualinvoke $r6.<java.util.HashMap: java.util.Set keySet()>();
+
+        $r8 = interfaceinvoke $r7.<java.util.Set: java.util.Iterator iterator()>();
+
+     label07:
+        $z1 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label12;
+
+        $r9 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        $r5 = (java.lang.String) $r9;
+
+        $r9 = virtualinvoke $r6.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r5);
+
+        $r10 = (android.bluetooth.IBluetoothDeviceCallback) $r9;
+
+     label08:
+        interfaceinvoke $r10.<android.bluetooth.IBluetoothDeviceCallback: void onGetRemoteServiceChannelResult(java.lang.String,int)>($r5, -1001);
+
+     label09:
+        interfaceinvoke $r8.<java.util.Iterator: void remove()>();
+
+     label10:
+        goto label07;
+
+     label11:
+        $r11 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r11;
+
+     label12:
+        $r1 = new android.content.Intent;
+
+        specialinvoke $r1.<android.content.Intent: void <init>(java.lang.String)>("android.bluetooth.intent.action.SCAN_MODE_CHANGED");
+
+        virtualinvoke $r1.<android.content.Intent: android.content.Intent putExtra(java.lang.String,int)>("android.bluetooth.intent.SCAN_MODE", 0);
+
+        $r12 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r12.<android.content.Context: void sendBroadcast(android.content.Intent,java.lang.String)>($r1, "android.permission.BLUETOOTH");
+
+        $r0.<android.server.BluetoothDeviceService: boolean mIsDiscovering> = 0;
+
+        if $z0 == 0 goto label13;
+
+        specialinvoke $r0.<android.server.BluetoothDeviceService: void persistBluetoothOnSetting(boolean)>(0);
+
+     label13:
+        specialinvoke $r0.<android.server.BluetoothDeviceService: void setBluetoothState(int)>(0);
+
+        $l2 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label14:
+        $r13 = $r0.<android.server.BluetoothDeviceService: com.android.internal.app.IBatteryStats mBatteryStats>;
+
+     label15:
+        interfaceinvoke $r13.<com.android.internal.app.IBatteryStats: void noteBluetoothOff()>();
+
+     label16:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l2);
+
+     label17:
+        $z0 = $r0.<android.server.BluetoothDeviceService: boolean mRestart>;
+
+        if $z0 == 0 goto label03;
+
+        $r0.<android.server.BluetoothDeviceService: boolean mRestart> = 0;
+
+        virtualinvoke $r0.<android.server.BluetoothDeviceService: boolean enable()>();
+
+        goto label03;
+
+     label18:
+        $r14 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l2);
+
+        goto label17;
+
+     label19:
+        $r15 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l2);
+
+        throw $r15;
+
+     label20:
+        $r16 := @caughtexception;
+
+        goto label09;
+
+        catch java.lang.Throwable from label01 to label02 with label11;
+        catch java.lang.Throwable from label04 to label08 with label11;
+        catch android.os.RemoteException from label08 to label09 with label20;
+        catch java.lang.Throwable from label08 to label09 with label11;
+        catch java.lang.Throwable from label09 to label10 with label11;
+        catch java.lang.Throwable from label12 to label14 with label11;
+        catch android.os.RemoteException from label15 to label16 with label18;
+        catch java.lang.Throwable from label14 to label16 with label19;
+        catch java.lang.Throwable from label16 to label20 with label11;
+    }
+
+    private native java.lang.String getAddressNative();
+
+    private native java.lang.String getCompanyNative();
+
+    private native int getDiscoverableTimeoutNative();
+
+    private native java.lang.String getManufacturerNative();
+
+    private native java.lang.String getModeNative();
+
+    private native java.lang.String getNameNative();
+
+    private native int getRemoteClassNative(java.lang.String);
+
+    private native java.lang.String getRemoteCompanyNative(java.lang.String);
+
+    private native byte[] getRemoteFeaturesNative(java.lang.String);
+
+    private native java.lang.String getRemoteManufacturerNative(java.lang.String);
+
+    private native java.lang.String getRemoteNameNative(java.lang.String);
+
+    private native java.lang.String getRemoteRevisionNative(java.lang.String);
+
+    private native boolean getRemoteServiceChannelNative(java.lang.String, short);
+
+    private native int[] getRemoteServiceHandlesNative(java.lang.String, java.lang.String);
+
+    private native byte[] getRemoteServiceRecordNative(java.lang.String, int);
+
+    private native java.lang.String getRemoteVersionNative(java.lang.String);
+
+    private native java.lang.String getRevisionNative();
+
+    private native java.lang.String getVersionNative();
+
+    private native void initializeNativeDataNative();
+
+    private final boolean isAirplaneModeOn()
+    {
+        android.server.BluetoothDeviceService $r0;
+        android.content.Context $r1;
+        android.content.ContentResolver $r2;
+        int $i0;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $r1 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        $r2 = virtualinvoke $r1.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $i0 = staticinvoke <android.provider.Settings$System: int getInt(android.content.ContentResolver,java.lang.String,int)>($r2, "airplane_mode_on", 0);
+
+        if $i0 != 1 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    private native boolean isConnectedNative(java.lang.String);
+
+    private native int isEnabledNative();
+
+    private native boolean isPeriodicDiscoveryNative();
+
+    private native java.lang.String lastSeenNative(java.lang.String);
+
+    private native java.lang.String lastUsedNative(java.lang.String);
+
+    private native java.lang.String[] listBondingsNative();
+
+    private native java.lang.String[] listConnectionsNative();
+
+    private native java.lang.String[] listRemoteDevicesNative();
+
+    private static void log(java.lang.String)
+    {
+        java.lang.String $r0;
+
+        $r0 := @parameter0: java.lang.String;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("BluetoothDeviceService", $r0);
+
+        return;
+    }
+
+    private void persistBluetoothOnSetting(boolean)
+    {
+        android.server.BluetoothDeviceService $r0;
+        boolean $z0;
+        long $l0;
+        android.content.Context $r1;
+        android.content.ContentResolver $r2;
+        byte $b1;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $z0 := @parameter0: boolean;
+
+        $l0 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+        $r1 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        $r2 = virtualinvoke $r1.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        if $z0 == 0 goto label2;
+
+        $b1 = 1;
+
+     label1:
+        staticinvoke <android.provider.Settings$Secure: boolean putInt(android.content.ContentResolver,java.lang.String,int)>($r2, "bluetooth_on", $b1);
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l0);
+
+        return;
+
+     label2:
+        $b1 = 0;
+
+        goto label1;
+    }
+
+    private void registerForAirplaneMode()
+    {
+        android.server.BluetoothDeviceService $r0;
+        android.content.IntentFilter $r1;
+        android.content.Context $r2;
+        android.content.ContentResolver $r3;
+        java.lang.String $r4;
+        boolean $z0;
+        android.content.BroadcastReceiver $r5;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        $r3 = virtualinvoke $r2.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r4 = staticinvoke <android.provider.Settings$System: java.lang.String getString(android.content.ContentResolver,java.lang.String)>($r3, "airplane_mode_radios");
+
+        if $r4 != null goto label2;
+
+        $z0 = 1;
+
+     label1:
+        $r0.<android.server.BluetoothDeviceService: boolean mIsAirplaneSensitive> = $z0;
+
+        $z0 = $r0.<android.server.BluetoothDeviceService: boolean mIsAirplaneSensitive>;
+
+        if $z0 == 0 goto label3;
+
+        $r1 = new android.content.IntentFilter;
+
+        specialinvoke $r1.<android.content.IntentFilter: void <init>(java.lang.String)>("android.intent.action.AIRPLANE_MODE");
+
+        $r0.<android.server.BluetoothDeviceService: android.content.IntentFilter mIntentFilter> = $r1;
+
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        $r5 = $r0.<android.server.BluetoothDeviceService: android.content.BroadcastReceiver mReceiver>;
+
+        $r1 = $r0.<android.server.BluetoothDeviceService: android.content.IntentFilter mIntentFilter>;
+
+        virtualinvoke $r2.<android.content.Context: android.content.Intent registerReceiver(android.content.BroadcastReceiver,android.content.IntentFilter)>($r5, $r1);
+
+        return;
+
+     label2:
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean contains(java.lang.CharSequence)>("bluetooth");
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    private native boolean removeBondingNative(java.lang.String);
+
+    static java.lang.String scanModeToBluezString(int)
+    {
+        int $i0;
+
+        $i0 := @parameter0: int;
+
+        lookupswitch($i0)
+        {
+            case 0: goto label2;
+            case 1: goto label3;
+            case 2: goto label1;
+            case 3: goto label4;
+            default: goto label1;
+        };
+
+     label1:
+        return null;
+
+     label2:
+        return "off";
+
+     label3:
+        return "connectable";
+
+     label4:
+        return "discoverable";
+    }
+
+    private void setBluetoothState(int)
+    {
+        android.server.BluetoothDeviceService $r0;
+        int $i0, $i1;
+        android.content.Intent $r1;
+        java.lang.StringBuilder $r2;
+        java.lang.String $r3;
+        android.content.Context $r4;
+        java.lang.Throwable $r5;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $i0 := @parameter0: int;
+
+        entermonitor $r0;
+
+     label1:
+        $i1 = $r0.<android.server.BluetoothDeviceService: int mBluetoothState>;
+
+     label2:
+        if $i0 != $i1 goto label4;
+
+     label3:
+        exitmonitor $r0;
+
+        return;
+
+     label4:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Bluetooth state ");
+
+        $i1 = $r0.<android.server.BluetoothDeviceService: int mBluetoothState>;
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" -> ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.server.BluetoothDeviceService: void log(java.lang.String)>($r3);
+
+        $r1 = new android.content.Intent;
+
+        specialinvoke $r1.<android.content.Intent: void <init>(java.lang.String)>("android.bluetooth.intent.action.BLUETOOTH_STATE_CHANGED");
+
+        $i1 = $r0.<android.server.BluetoothDeviceService: int mBluetoothState>;
+
+        virtualinvoke $r1.<android.content.Intent: android.content.Intent putExtra(java.lang.String,int)>("android.bluetooth.intent.BLUETOOTH_PREVIOUS_STATE", $i1);
+
+        virtualinvoke $r1.<android.content.Intent: android.content.Intent putExtra(java.lang.String,int)>("android.bluetooth.intent.BLUETOOTH_STATE", $i0);
+
+        virtualinvoke $r1.<android.content.Intent: android.content.Intent addFlags(int)>(536870912);
+
+        $r0.<android.server.BluetoothDeviceService: int mBluetoothState> = $i0;
+
+        $r4 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r4.<android.content.Context: void sendBroadcast(android.content.Intent,java.lang.String)>($r1, "android.permission.BLUETOOTH");
+
+     label5:
+        goto label3;
+
+     label6:
+        $r5 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+    }
+
+    private native boolean setDiscoverableTimeoutNative(int);
+
+    private native boolean setModeNative(java.lang.String);
+
+    private native boolean setNameNative(java.lang.String);
+
+    private native boolean setPinNative(java.lang.String, java.lang.String, int);
+
+    private native boolean startDiscoveryNative(boolean);
+
+    private native boolean startPeriodicDiscoveryNative();
+
+    private native boolean stopPeriodicDiscoveryNative();
+
+    private static java.lang.String toBondStateString(int)
+    {
+        int $i0;
+
+        $i0 := @parameter0: int;
+
+        lookupswitch($i0)
+        {
+            case 0: goto label2;
+            case 1: goto label4;
+            case 2: goto label3;
+            default: goto label1;
+        };
+
+     label1:
+        return "??????";
+
+     label2:
+        return "not bonded";
+
+     label3:
+        return "bonding";
+
+     label4:
+        return "bonded";
+    }
+
+    public boolean cancelBondProcess(java.lang.String)
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String $r1;
+        android.content.Context $r2;
+        boolean $z0;
+        android.server.BluetoothDeviceService$BondState $r3;
+        int $i0;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH_ADMIN", "Need BLUETOOTH_ADMIN permission");
+
+        $z0 = staticinvoke <android.bluetooth.BluetoothDevice: boolean checkBluetoothAddress(java.lang.String)>($r1);
+
+     label2:
+        if $z0 != 0 goto label4;
+
+        $z0 = 0;
+
+     label3:
+        exitmonitor $r0;
+
+        return $z0;
+
+     label4:
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String toUpperCase()>();
+
+        $r3 = $r0.<android.server.BluetoothDeviceService: android.server.BluetoothDeviceService$BondState mBondState>;
+
+        $i0 = virtualinvoke $r3.<android.server.BluetoothDeviceService$BondState: int getBondState(java.lang.String)>($r1);
+
+        if $i0 == 2 goto label5;
+
+        $z0 = 0;
+
+        goto label3;
+
+     label5:
+        $r3 = $r0.<android.server.BluetoothDeviceService: android.server.BluetoothDeviceService$BondState mBondState>;
+
+        virtualinvoke $r3.<android.server.BluetoothDeviceService$BondState: void setBondState(java.lang.String,int,int)>($r1, 0, 3);
+
+        specialinvoke $r0.<android.server.BluetoothDeviceService: boolean cancelBondingProcessNative(java.lang.String)>($r1);
+
+     label6:
+        $z0 = 1;
+
+        goto label3;
+
+     label7:
+        $r4 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label4 to label6 with label7;
+    }
+
+    public boolean cancelDiscovery()
+    {
+        android.server.BluetoothDeviceService $r0;
+        boolean $z0;
+        android.content.Context $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r1.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH_ADMIN", "Need BLUETOOTH_ADMIN permission");
+
+        $z0 = specialinvoke $r0.<android.server.BluetoothDeviceService: boolean cancelDiscoveryNative()>();
+
+     label2:
+        exitmonitor $r0;
+
+        return $z0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public boolean cancelPin(java.lang.String)
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String $r1;
+        android.content.Context $r2;
+        boolean $z0;
+        android.server.BluetoothEventLoop $r3;
+        java.util.HashMap $r4;
+        java.lang.Object $r5;
+        java.lang.Integer $r6;
+        java.lang.StringBuilder $r7;
+        int $i0;
+        java.lang.Throwable $r8;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH_ADMIN", "Need BLUETOOTH_ADMIN permission");
+
+        $z0 = staticinvoke <android.bluetooth.BluetoothDevice: boolean checkBluetoothAddress(java.lang.String)>($r1);
+
+     label2:
+        if $z0 != 0 goto label4;
+
+        $z0 = 0;
+
+     label3:
+        exitmonitor $r0;
+
+        return $z0;
+
+     label4:
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String toUpperCase()>();
+
+        $r3 = $r0.<android.server.BluetoothDeviceService: android.server.BluetoothEventLoop mEventLoop>;
+
+        $r4 = virtualinvoke $r3.<android.server.BluetoothEventLoop: java.util.HashMap getPasskeyAgentRequestData()>();
+
+        $r5 = virtualinvoke $r4.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>($r1);
+
+        $r6 = (java.lang.Integer) $r5;
+
+        if $r6 != null goto label5;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("cancelPin(");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") called but no native data available, ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ignoring. Maybe the PasskeyAgent Request was already cancelled by the remote ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("or by bluez.\n");
+
+        $r1 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("BluetoothDeviceService", $r1);
+
+        $z0 = 0;
+
+        goto label3;
+
+     label5:
+        $i0 = virtualinvoke $r6.<java.lang.Integer: int intValue()>();
+
+        $z0 = specialinvoke $r0.<android.server.BluetoothDeviceService: boolean cancelPinNative(java.lang.String,int)>($r1, $i0);
+
+     label6:
+        goto label3;
+
+     label7:
+        $r8 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r8;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label4 to label6 with label7;
+    }
+
+    public boolean createBond(java.lang.String)
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String $r1, $r5;
+        android.content.Context $r2;
+        boolean $z0;
+        android.server.BluetoothDeviceService$BondState $r3;
+        java.lang.String[] $r4;
+        int $i0;
+        java.lang.Throwable $r6;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH_ADMIN", "Need BLUETOOTH_ADMIN permission");
+
+        $z0 = staticinvoke <android.bluetooth.BluetoothDevice: boolean checkBluetoothAddress(java.lang.String)>($r1);
+
+     label2:
+        if $z0 != 0 goto label4;
+
+        $z0 = 0;
+
+     label3:
+        exitmonitor $r0;
+
+        return $z0;
+
+     label4:
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String toUpperCase()>();
+
+        $r3 = $r0.<android.server.BluetoothDeviceService: android.server.BluetoothDeviceService$BondState mBondState>;
+
+        $r4 = staticinvoke <android.server.BluetoothDeviceService$BondState: java.lang.String[] access$000(android.server.BluetoothDeviceService$BondState,int)>($r3, 2);
+
+        $i0 = lengthof $r4;
+
+        if $i0 <= 0 goto label5;
+
+        $r5 = $r4[0];
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 != 0 goto label5;
+
+        staticinvoke <android.server.BluetoothDeviceService: void log(java.lang.String)>("Ignoring createBond(): another device is bonding");
+
+        $z0 = 0;
+
+        goto label3;
+
+     label5:
+        $r3 = $r0.<android.server.BluetoothDeviceService: android.server.BluetoothDeviceService$BondState mBondState>;
+
+        $z0 = virtualinvoke $r3.<android.server.BluetoothDeviceService$BondState: boolean isAutoPairingAttemptsInProgress(java.lang.String)>($r1);
+
+        if $z0 != 0 goto label6;
+
+        $r3 = $r0.<android.server.BluetoothDeviceService: android.server.BluetoothDeviceService$BondState mBondState>;
+
+        $i0 = virtualinvoke $r3.<android.server.BluetoothDeviceService$BondState: int getBondState(java.lang.String)>($r1);
+
+        if $i0 == 0 goto label6;
+
+        staticinvoke <android.server.BluetoothDeviceService: void log(java.lang.String)>("Ignoring createBond(): this device is already bonding or bonded");
+
+        $z0 = 0;
+
+        goto label3;
+
+     label6:
+        $z0 = specialinvoke $r0.<android.server.BluetoothDeviceService: boolean createBondingNative(java.lang.String,int)>($r1, 60000);
+
+        if $z0 != 0 goto label7;
+
+        $z0 = 0;
+
+        goto label3;
+
+     label7:
+        $r3 = $r0.<android.server.BluetoothDeviceService: android.server.BluetoothDeviceService$BondState mBondState>;
+
+        virtualinvoke $r3.<android.server.BluetoothDeviceService$BondState: void setBondState(java.lang.String,int)>($r1, 2);
+
+     label8:
+        $z0 = 1;
+
+        goto label3;
+
+     label9:
+        $r6 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label2 with label9;
+        catch java.lang.Throwable from label4 to label8 with label9;
+    }
+
+    public boolean disable()
+    {
+        android.server.BluetoothDeviceService $r0;
+        boolean $z0;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $z0 = virtualinvoke $r0.<android.server.BluetoothDeviceService: boolean disable(boolean)>(1);
+
+        return $z0;
+    }
+
+    public boolean disable(boolean)
+    {
+        android.server.BluetoothDeviceService $r0;
+        boolean $z0, $z1;
+        byte $b0;
+        android.content.Context $r1;
+        int $i1;
+        android.server.BluetoothDeviceService$EnableThread $r2;
+        android.os.Handler $r3, $r4;
+        android.os.Message $r5;
+        java.lang.Throwable $r6;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $z0 := @parameter0: boolean;
+
+        $b0 = 0;
+
+        entermonitor $r0;
+
+     label01:
+        $r1 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r1.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH_ADMIN", "Need BLUETOOTH_ADMIN permission");
+
+        $i1 = $r0.<android.server.BluetoothDeviceService: int mBluetoothState>;
+
+     label02:
+        lookupswitch($i1)
+        {
+            case 0: goto label05;
+            case 1: goto label03;
+            case 2: goto label06;
+            default: goto label03;
+        };
+
+     label03:
+        $z0 = 0;
+
+     label04:
+        exitmonitor $r0;
+
+        return $z0;
+
+     label05:
+        $z0 = 1;
+
+        goto label04;
+
+     label06:
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.server.BluetoothDeviceService$EnableThread mEnableThread>;
+
+        if $r2 == null goto label07;
+
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.server.BluetoothDeviceService$EnableThread mEnableThread>;
+
+        $z1 = virtualinvoke $r2.<java.lang.Thread: boolean isAlive()>();
+
+        if $z1 == 0 goto label07;
+
+        $z0 = 0;
+
+        goto label04;
+
+     label07:
+        specialinvoke $r0.<android.server.BluetoothDeviceService: void setBluetoothState(int)>(3);
+
+        $r3 = $r0.<android.server.BluetoothDeviceService: android.os.Handler mHandler>;
+
+        $r4 = $r0.<android.server.BluetoothDeviceService: android.os.Handler mHandler>;
+
+        if $z0 == 0 goto label08;
+
+        $b0 = 1;
+
+     label08:
+        $r5 = virtualinvoke $r4.<android.os.Handler: android.os.Message obtainMessage(int,int,int)>(2, $b0, 0);
+
+        virtualinvoke $r3.<android.os.Handler: boolean sendMessageDelayed(android.os.Message,long)>($r5, 3000L);
+
+     label09:
+        $z0 = 1;
+
+        goto label04;
+
+     label10:
+        $r6 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r6;
+
+        catch java.lang.Throwable from label01 to label02 with label10;
+        catch java.lang.Throwable from label06 to label09 with label10;
+    }
+
+    public boolean disconnectRemoteDeviceAcl(java.lang.String)
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String $r1;
+        android.content.Context $r2;
+        boolean $z0;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH_ADMIN", "Need BLUETOOTH_ADMIN permission");
+
+        $z0 = staticinvoke <android.bluetooth.BluetoothDevice: boolean checkBluetoothAddress(java.lang.String)>($r1);
+
+     label2:
+        if $z0 != 0 goto label4;
+
+        $z0 = 0;
+
+     label3:
+        exitmonitor $r0;
+
+        return $z0;
+
+     label4:
+        $z0 = specialinvoke $r0.<android.server.BluetoothDeviceService: boolean disconnectRemoteDeviceNative(java.lang.String)>($r1);
+
+     label5:
+        goto label3;
+
+     label6:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+    }
+
+    protected void dump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[])
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.io.FileDescriptor $r1;
+        java.io.PrintWriter $r2;
+        java.lang.String[] $r3;
+        android.bluetooth.BluetoothHeadset $r4;
+        java.lang.StringBuilder $r5;
+        boolean $z0;
+        java.lang.String $r6, $r10;
+        int $i0, $i1, $i2;
+        android.content.Context $r7;
+        java.lang.Object[] $r8;
+        android.server.BluetoothDeviceService$BondState $r9;
+        java.lang.Integer $r11;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $r1 := @parameter0: java.io.FileDescriptor;
+
+        $r2 := @parameter1: java.io.PrintWriter;
+
+        $r3 := @parameter2: java.lang.String[];
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\nmIsAirplaneSensitive = ");
+
+        $z0 = $r0.<android.server.BluetoothDeviceService: boolean mIsAirplaneSensitive>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $i0 = $r0.<android.server.BluetoothDeviceService: int mBluetoothState>;
+
+        lookupswitch($i0)
+        {
+            case 0: goto label03;
+            case 1: goto label04;
+            case 2: goto label06;
+            case 3: goto label05;
+            default: goto label01;
+        };
+
+     label01:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\nLocal address = ");
+
+        $r6 = virtualinvoke $r0.<android.server.BluetoothDeviceService: java.lang.String getAddress()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\nLocal name = ");
+
+        $r6 = virtualinvoke $r0.<android.server.BluetoothDeviceService: java.lang.String getName()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\nisDiscovering() = ");
+
+        $z0 = virtualinvoke $r0.<android.server.BluetoothDeviceService: boolean isDiscovering()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r4 = new android.bluetooth.BluetoothHeadset;
+
+        $r7 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        specialinvoke $r4.<android.bluetooth.BluetoothHeadset: void <init>(android.content.Context,android.bluetooth.BluetoothHeadset$ServiceListener)>($r7, null);
+
+        $r3 = virtualinvoke $r0.<android.server.BluetoothDeviceService: java.lang.String[] listRemoteDevices()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("\n--Known devices--");
+
+        $i0 = lengthof $r3;
+
+        $i1 = 0;
+
+     label02:
+        if $i1 >= $i0 goto label07;
+
+        $r6 = $r3[$i1];
+
+        $r8 = newarray (java.lang.Object)[4];
+
+        $r8[0] = $r6;
+
+        $r9 = $r0.<android.server.BluetoothDeviceService: android.server.BluetoothDeviceService$BondState mBondState>;
+
+        $i2 = virtualinvoke $r9.<android.server.BluetoothDeviceService$BondState: int getBondState(java.lang.String)>($r6);
+
+        $r10 = staticinvoke <android.server.BluetoothDeviceService: java.lang.String toBondStateString(int)>($i2);
+
+        $r8[1] = $r10;
+
+        $r9 = $r0.<android.server.BluetoothDeviceService: android.server.BluetoothDeviceService$BondState mBondState>;
+
+        $i2 = virtualinvoke $r9.<android.server.BluetoothDeviceService$BondState: int getAttempt(java.lang.String)>($r6);
+
+        $r11 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r8[2] = $r11;
+
+        $r6 = virtualinvoke $r0.<android.server.BluetoothDeviceService: java.lang.String getRemoteName(java.lang.String)>($r6);
+
+        $r8[3] = $r6;
+
+        virtualinvoke $r2.<java.io.PrintWriter: java.io.PrintWriter printf(java.lang.String,java.lang.Object[])>("%s %10s (%d) %s\n", $r8);
+
+        $i1 = $i1 + 1;
+
+        goto label02;
+
+     label03:
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("\nBluetooth OFF\n");
+
+        return;
+
+     label04:
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("\nBluetooth TURNING ON\n");
+
+        return;
+
+     label05:
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("\nBluetooth TURNING OFF\n");
+
+        return;
+
+     label06:
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("\nBluetooth ON\n");
+
+        goto label01;
+
+     label07:
+        $r3 = virtualinvoke $r0.<android.server.BluetoothDeviceService: java.lang.String[] listAclConnections()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("\n--ACL connected devices--");
+
+        $i0 = lengthof $r3;
+
+        $i1 = 0;
+
+     label08:
+        if $i1 >= $i0 goto label09;
+
+        $r6 = $r3[$i1];
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $i1 = $i1 + 1;
+
+        goto label08;
+
+     label09:
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("\n--Headset Service--");
+
+        $i0 = virtualinvoke $r4.<android.bluetooth.BluetoothHeadset: int getState()>();
+
+        lookupswitch($i0)
+        {
+            case -1: goto label14;
+            case 0: goto label11;
+            case 1: goto label12;
+            case 2: goto label13;
+            default: goto label10;
+        };
+
+     label10:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("getHeadsetAddress() = ");
+
+        $r6 = virtualinvoke $r4.<android.bluetooth.BluetoothHeadset: java.lang.String getHeadsetAddress()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        virtualinvoke $r4.<android.bluetooth.BluetoothHeadset: void close()>();
+
+        return;
+
+     label11:
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("getState() = STATE_DISCONNECTED");
+
+        goto label10;
+
+     label12:
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("getState() = STATE_CONNECTING");
+
+        goto label10;
+
+     label13:
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("getState() = STATE_CONNECTED");
+
+        goto label10;
+
+     label14:
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("getState() = STATE_ERROR");
+
+        goto label10;
+    }
+
+    public boolean enable()
+    {
+        android.server.BluetoothDeviceService $r0;
+        boolean $z0;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $z0 = virtualinvoke $r0.<android.server.BluetoothDeviceService: boolean enable(boolean)>(1);
+
+        return $z0;
+    }
+
+    public boolean enable(boolean)
+    {
+        android.server.BluetoothDeviceService $r0;
+        boolean $z0, $z1;
+        android.content.Context $r1;
+        int $i0;
+        android.server.BluetoothDeviceService$EnableThread $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $z0 := @parameter0: boolean;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r1.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH_ADMIN", "Need BLUETOOTH_ADMIN permission");
+
+        $z1 = $r0.<android.server.BluetoothDeviceService: boolean mIsAirplaneSensitive>;
+
+        if $z1 == 0 goto label4;
+
+        $z1 = specialinvoke $r0.<android.server.BluetoothDeviceService: boolean isAirplaneModeOn()>();
+
+     label2:
+        if $z1 == 0 goto label4;
+
+        $z0 = 0;
+
+     label3:
+        exitmonitor $r0;
+
+        return $z0;
+
+     label4:
+        $i0 = $r0.<android.server.BluetoothDeviceService: int mBluetoothState>;
+
+        if $i0 == 0 goto label5;
+
+        $z0 = 0;
+
+        goto label3;
+
+     label5:
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.server.BluetoothDeviceService$EnableThread mEnableThread>;
+
+        if $r2 == null goto label6;
+
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.server.BluetoothDeviceService$EnableThread mEnableThread>;
+
+        $z1 = virtualinvoke $r2.<java.lang.Thread: boolean isAlive()>();
+
+        if $z1 == 0 goto label6;
+
+        $z0 = 0;
+
+        goto label3;
+
+     label6:
+        specialinvoke $r0.<android.server.BluetoothDeviceService: void setBluetoothState(int)>(1);
+
+        $r2 = new android.server.BluetoothDeviceService$EnableThread;
+
+        specialinvoke $r2.<android.server.BluetoothDeviceService$EnableThread: void <init>(android.server.BluetoothDeviceService,boolean)>($r0, $z0);
+
+        $r0.<android.server.BluetoothDeviceService: android.server.BluetoothDeviceService$EnableThread mEnableThread> = $r2;
+
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.server.BluetoothDeviceService$EnableThread mEnableThread>;
+
+        virtualinvoke $r2.<java.lang.Thread: void start()>();
+
+     label7:
+        $z0 = 1;
+
+        goto label3;
+
+     label8:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label8;
+        catch java.lang.Throwable from label4 to label7 with label8;
+    }
+
+    protected void finalize() throws java.lang.Throwable
+    {
+        android.server.BluetoothDeviceService $r0;
+        android.content.BroadcastReceiver $r1;
+        boolean $z0;
+        android.content.Context $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $z0 = $r0.<android.server.BluetoothDeviceService: boolean mIsAirplaneSensitive>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        $r1 = $r0.<android.server.BluetoothDeviceService: android.content.BroadcastReceiver mReceiver>;
+
+        virtualinvoke $r2.<android.content.Context: void unregisterReceiver(android.content.BroadcastReceiver)>($r1);
+
+     label1:
+        specialinvoke $r0.<android.server.BluetoothDeviceService: void cleanupNativeDataNative()>();
+
+     label2:
+        specialinvoke $r0.<android.os.Binder: void finalize()>();
+
+        return;
+
+     label3:
+        $r3 := @caughtexception;
+
+        specialinvoke $r0.<android.os.Binder: void finalize()>();
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    native java.lang.String getAdapterPathNative();
+
+    public java.lang.String getAddress()
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String $r1;
+        android.content.Context $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        $r1 = specialinvoke $r0.<android.server.BluetoothDeviceService: java.lang.String getAddressNative()>();
+
+     label2:
+        exitmonitor $r0;
+
+        return $r1;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public int getBluetoothState()
+    {
+        android.server.BluetoothDeviceService $r0;
+        android.content.Context $r1;
+        int i0;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $r1 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r1.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        i0 = $r0.<android.server.BluetoothDeviceService: int mBluetoothState>;
+
+        return i0;
+    }
+
+    public int getBondState(java.lang.String)
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String $r1;
+        android.content.Context $r2;
+        boolean $z0;
+        int $i0;
+        android.server.BluetoothDeviceService$BondState $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        $z0 = staticinvoke <android.bluetooth.BluetoothDevice: boolean checkBluetoothAddress(java.lang.String)>($r1);
+
+     label2:
+        if $z0 != 0 goto label4;
+
+        $i0 = -1000;
+
+     label3:
+        exitmonitor $r0;
+
+        return $i0;
+
+     label4:
+        $r3 = $r0.<android.server.BluetoothDeviceService: android.server.BluetoothDeviceService$BondState mBondState>;
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String toUpperCase()>();
+
+        $i0 = virtualinvoke $r3.<android.server.BluetoothDeviceService$BondState: int getBondState(java.lang.String)>($r1);
+
+     label5:
+        goto label3;
+
+     label6:
+        $r4 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+    }
+
+    android.server.BluetoothDeviceService$BondState getBondState()
+    {
+        android.server.BluetoothDeviceService $r0;
+        android.server.BluetoothDeviceService$BondState r1;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        r1 = $r0.<android.server.BluetoothDeviceService: android.server.BluetoothDeviceService$BondState mBondState>;
+
+        return r1;
+    }
+
+    public java.lang.String getCompany()
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String $r1;
+        android.content.Context $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        $r1 = specialinvoke $r0.<android.server.BluetoothDeviceService: java.lang.String getCompanyNative()>();
+
+     label2:
+        exitmonitor $r0;
+
+        return $r1;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public int getDiscoverableTimeout()
+    {
+        android.server.BluetoothDeviceService $r0;
+        int $i0;
+        android.content.Context $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r1.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        $i0 = specialinvoke $r0.<android.server.BluetoothDeviceService: int getDiscoverableTimeoutNative()>();
+
+     label2:
+        exitmonitor $r0;
+
+        return $i0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public java.lang.String getManufacturer()
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String $r1;
+        android.content.Context $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        $r1 = specialinvoke $r0.<android.server.BluetoothDeviceService: java.lang.String getManufacturerNative()>();
+
+     label2:
+        exitmonitor $r0;
+
+        return $r1;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public java.lang.String getName()
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String $r1;
+        android.content.Context $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        $r1 = specialinvoke $r0.<android.server.BluetoothDeviceService: java.lang.String getNameNative()>();
+
+     label2:
+        exitmonitor $r0;
+
+        return $r1;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public int getRemoteClass(java.lang.String)
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String $r1;
+        boolean $z0;
+        android.content.Context $r2;
+        int $i0;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        $z0 = staticinvoke <android.bluetooth.BluetoothDevice: boolean checkBluetoothAddress(java.lang.String)>($r1);
+
+        if $z0 != 0 goto label4;
+
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+     label2:
+        $i0 = -16777216;
+
+     label3:
+        exitmonitor $r0;
+
+        return $i0;
+
+     label4:
+        $i0 = specialinvoke $r0.<android.server.BluetoothDeviceService: int getRemoteClassNative(java.lang.String)>($r1);
+
+     label5:
+        goto label3;
+
+     label6:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+    }
+
+    public java.lang.String getRemoteCompany(java.lang.String)
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String $r1;
+        android.content.Context $r2;
+        boolean $z0;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        $z0 = staticinvoke <android.bluetooth.BluetoothDevice: boolean checkBluetoothAddress(java.lang.String)>($r1);
+
+     label2:
+        if $z0 != 0 goto label4;
+
+        $r1 = null;
+
+     label3:
+        exitmonitor $r0;
+
+        return $r1;
+
+     label4:
+        $r1 = specialinvoke $r0.<android.server.BluetoothDeviceService: java.lang.String getRemoteCompanyNative(java.lang.String)>($r1);
+
+     label5:
+        goto label3;
+
+     label6:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+    }
+
+    public byte[] getRemoteFeatures(java.lang.String)
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String $r1;
+        android.content.Context $r2;
+        boolean $z0;
+        byte[] $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        $z0 = staticinvoke <android.bluetooth.BluetoothDevice: boolean checkBluetoothAddress(java.lang.String)>($r1);
+
+     label2:
+        if $z0 != 0 goto label4;
+
+        $r3 = null;
+
+     label3:
+        exitmonitor $r0;
+
+        return $r3;
+
+     label4:
+        $r3 = specialinvoke $r0.<android.server.BluetoothDeviceService: byte[] getRemoteFeaturesNative(java.lang.String)>($r1);
+
+     label5:
+        goto label3;
+
+     label6:
+        $r4 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+    }
+
+    public java.lang.String getRemoteManufacturer(java.lang.String)
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String $r1;
+        android.content.Context $r2;
+        boolean $z0;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        $z0 = staticinvoke <android.bluetooth.BluetoothDevice: boolean checkBluetoothAddress(java.lang.String)>($r1);
+
+     label2:
+        if $z0 != 0 goto label4;
+
+        $r1 = null;
+
+     label3:
+        exitmonitor $r0;
+
+        return $r1;
+
+     label4:
+        $r1 = specialinvoke $r0.<android.server.BluetoothDeviceService: java.lang.String getRemoteManufacturerNative(java.lang.String)>($r1);
+
+     label5:
+        goto label3;
+
+     label6:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+    }
+
+    public java.lang.String getRemoteName(java.lang.String)
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String $r1;
+        android.content.Context $r2;
+        boolean $z0;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        $z0 = staticinvoke <android.bluetooth.BluetoothDevice: boolean checkBluetoothAddress(java.lang.String)>($r1);
+
+     label2:
+        if $z0 != 0 goto label4;
+
+        $r1 = null;
+
+     label3:
+        exitmonitor $r0;
+
+        return $r1;
+
+     label4:
+        $r1 = specialinvoke $r0.<android.server.BluetoothDeviceService: java.lang.String getRemoteNameNative(java.lang.String)>($r1);
+
+     label5:
+        goto label3;
+
+     label6:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+    }
+
+    public java.lang.String getRemoteRevision(java.lang.String)
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String $r1;
+        android.content.Context $r2;
+        boolean $z0;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        $z0 = staticinvoke <android.bluetooth.BluetoothDevice: boolean checkBluetoothAddress(java.lang.String)>($r1);
+
+     label2:
+        if $z0 != 0 goto label4;
+
+        $r1 = null;
+
+     label3:
+        exitmonitor $r0;
+
+        return $r1;
+
+     label4:
+        $r1 = specialinvoke $r0.<android.server.BluetoothDeviceService: java.lang.String getRemoteRevisionNative(java.lang.String)>($r1);
+
+     label5:
+        goto label3;
+
+     label6:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+    }
+
+    public boolean getRemoteServiceChannel(java.lang.String, int, android.bluetooth.IBluetoothDeviceCallback)
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String $r1;
+        int $i0, $i1;
+        android.bluetooth.IBluetoothDeviceCallback $r2;
+        android.content.Context $r3;
+        boolean $z0;
+        android.server.BluetoothEventLoop $r4;
+        java.util.HashMap $r5;
+        java.lang.StringBuilder $r6;
+        short $s2;
+        java.lang.Throwable $r7;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: android.bluetooth.IBluetoothDeviceCallback;
+
+        entermonitor $r0;
+
+     label1:
+        $r3 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r3.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        $z0 = staticinvoke <android.bluetooth.BluetoothDevice: boolean checkBluetoothAddress(java.lang.String)>($r1);
+
+     label2:
+        if $z0 != 0 goto label4;
+
+        $z0 = 0;
+
+     label3:
+        exitmonitor $r0;
+
+        return $z0;
+
+     label4:
+        $r4 = $r0.<android.server.BluetoothDeviceService: android.server.BluetoothEventLoop mEventLoop>;
+
+        $r5 = virtualinvoke $r4.<android.server.BluetoothEventLoop: java.util.HashMap getRemoteServiceChannelCallbacks()>();
+
+        $z0 = virtualinvoke $r5.<java.util.HashMap: boolean containsKey(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label5;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SDP request already in progress for ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("BluetoothDeviceService", $r1);
+
+        $z0 = 0;
+
+        goto label3;
+
+     label5:
+        $i1 = virtualinvoke $r5.<java.util.HashMap: int size()>();
+
+        if $i1 <= 32 goto label6;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Too many outstanding SDP requests, dropping request for ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("BluetoothDeviceService", $r1);
+
+        $z0 = 0;
+
+        goto label3;
+
+     label6:
+        virtualinvoke $r5.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, $r2);
+
+        $s2 = (short) $i0;
+
+        $z0 = specialinvoke $r0.<android.server.BluetoothDeviceService: boolean getRemoteServiceChannelNative(java.lang.String,short)>($r1, $s2);
+
+        if $z0 != 0 goto label8;
+
+        virtualinvoke $r5.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>($r1);
+
+     label7:
+        $z0 = 0;
+
+        goto label3;
+
+     label8:
+        $z0 = 1;
+
+        goto label3;
+
+     label9:
+        $r7 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r7;
+
+        catch java.lang.Throwable from label1 to label2 with label9;
+        catch java.lang.Throwable from label4 to label7 with label9;
+    }
+
+    public int[] getRemoteServiceHandles(java.lang.String, java.lang.String)
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String $r1, $r2;
+        android.content.Context $r3;
+        boolean $z0;
+        int[] $r4;
+        java.lang.Throwable $r5;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        $r3 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r3.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        $z0 = staticinvoke <android.bluetooth.BluetoothDevice: boolean checkBluetoothAddress(java.lang.String)>($r1);
+
+     label2:
+        if $z0 != 0 goto label4;
+
+        $r4 = null;
+
+     label3:
+        exitmonitor $r0;
+
+        return $r4;
+
+     label4:
+        if $r2 != null goto label6;
+
+     label5:
+        $r2 = "";
+
+     label6:
+        $r4 = specialinvoke $r0.<android.server.BluetoothDeviceService: int[] getRemoteServiceHandlesNative(java.lang.String,java.lang.String)>($r1, $r2);
+
+     label7:
+        goto label3;
+
+     label8:
+        $r5 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label8;
+        catch java.lang.Throwable from label5 to label7 with label8;
+    }
+
+    public byte[] getRemoteServiceRecord(java.lang.String, int)
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String $r1;
+        int $i0;
+        android.content.Context $r2;
+        boolean $z0;
+        byte[] $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        $z0 = staticinvoke <android.bluetooth.BluetoothDevice: boolean checkBluetoothAddress(java.lang.String)>($r1);
+
+     label2:
+        if $z0 != 0 goto label4;
+
+        $r3 = null;
+
+     label3:
+        exitmonitor $r0;
+
+        return $r3;
+
+     label4:
+        $r3 = specialinvoke $r0.<android.server.BluetoothDeviceService: byte[] getRemoteServiceRecordNative(java.lang.String,int)>($r1, $i0);
+
+     label5:
+        goto label3;
+
+     label6:
+        $r4 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+    }
+
+    public java.lang.String getRemoteVersion(java.lang.String)
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String $r1;
+        android.content.Context $r2;
+        boolean $z0;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        $z0 = staticinvoke <android.bluetooth.BluetoothDevice: boolean checkBluetoothAddress(java.lang.String)>($r1);
+
+     label2:
+        if $z0 != 0 goto label4;
+
+        $r1 = null;
+
+     label3:
+        exitmonitor $r0;
+
+        return $r1;
+
+     label4:
+        $r1 = specialinvoke $r0.<android.server.BluetoothDeviceService: java.lang.String getRemoteVersionNative(java.lang.String)>($r1);
+
+     label5:
+        goto label3;
+
+     label6:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+    }
+
+    public java.lang.String getRevision()
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String $r1;
+        android.content.Context $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        $r1 = specialinvoke $r0.<android.server.BluetoothDeviceService: java.lang.String getRevisionNative()>();
+
+     label2:
+        exitmonitor $r0;
+
+        return $r1;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public int getScanMode()
+    {
+        android.server.BluetoothDeviceService $r0;
+        android.content.Context $r1;
+        java.lang.String $r2;
+        int $i0;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r1.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        $r2 = specialinvoke $r0.<android.server.BluetoothDeviceService: java.lang.String getModeNative()>();
+
+        $i0 = staticinvoke <android.server.BluetoothDeviceService: int bluezStringToScanMode(java.lang.String)>($r2);
+
+     label2:
+        exitmonitor $r0;
+
+        return $i0;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public java.lang.String getVersion()
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String $r1;
+        android.content.Context $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        $r1 = specialinvoke $r0.<android.server.BluetoothDeviceService: java.lang.String getVersionNative()>();
+
+     label2:
+        exitmonitor $r0;
+
+        return $r1;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public void init()
+    {
+        android.server.BluetoothDeviceService $r0;
+        int $i0;
+        android.server.BluetoothEventLoop $r1;
+        android.content.Context $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        entermonitor $r0;
+
+     label1:
+        specialinvoke $r0.<android.server.BluetoothDeviceService: void initializeNativeDataNative()>();
+
+        $i0 = specialinvoke $r0.<android.server.BluetoothDeviceService: int isEnabledNative()>();
+
+        if $i0 != 1 goto label2;
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("BluetoothDeviceService", "Bluetooth daemons already running - runtime restart? ");
+
+        specialinvoke $r0.<android.server.BluetoothDeviceService: int disableNative()>();
+
+     label2:
+        specialinvoke $r0.<android.server.BluetoothDeviceService: void setBluetoothState(int)>(0);
+
+        $r0.<android.server.BluetoothDeviceService: boolean mIsDiscovering> = 0;
+
+        $r1 = new android.server.BluetoothEventLoop;
+
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        specialinvoke $r1.<android.server.BluetoothEventLoop: void <init>(android.content.Context,android.server.BluetoothDeviceService)>($r2, $r0);
+
+        $r0.<android.server.BluetoothDeviceService: android.server.BluetoothEventLoop mEventLoop> = $r1;
+
+        specialinvoke $r0.<android.server.BluetoothDeviceService: void registerForAirplaneMode()>();
+
+     label3:
+        exitmonitor $r0;
+
+        return;
+
+     label4:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+    }
+
+    public boolean isAclConnected(java.lang.String)
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String $r1;
+        android.content.Context $r2;
+        boolean $z0;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        $z0 = staticinvoke <android.bluetooth.BluetoothDevice: boolean checkBluetoothAddress(java.lang.String)>($r1);
+
+     label2:
+        if $z0 != 0 goto label4;
+
+        $z0 = 0;
+
+     label3:
+        exitmonitor $r0;
+
+        return $z0;
+
+     label4:
+        $z0 = specialinvoke $r0.<android.server.BluetoothDeviceService: boolean isConnectedNative(java.lang.String)>($r1);
+
+     label5:
+        goto label3;
+
+     label6:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+    }
+
+    public boolean isDiscovering()
+    {
+        android.server.BluetoothDeviceService $r0;
+        android.content.Context $r1;
+        java.lang.Throwable $r2;
+        boolean z0;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r1.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        z0 = $r0.<android.server.BluetoothDeviceService: boolean mIsDiscovering>;
+
+     label2:
+        exitmonitor $r0;
+
+        return z0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public boolean isEnabled()
+    {
+        android.server.BluetoothDeviceService $r0;
+        android.content.Context $r1;
+        int $i0;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $r1 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r1.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        $i0 = $r0.<android.server.BluetoothDeviceService: int mBluetoothState>;
+
+        if $i0 != 2 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    public boolean isPeriodicDiscovery()
+    {
+        android.server.BluetoothDeviceService $r0;
+        boolean $z0;
+        android.content.Context $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r1.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        $z0 = specialinvoke $r0.<android.server.BluetoothDeviceService: boolean isPeriodicDiscoveryNative()>();
+
+     label2:
+        exitmonitor $r0;
+
+        return $z0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public java.lang.String lastSeen(java.lang.String)
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String $r1;
+        android.content.Context $r2;
+        boolean $z0;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        $z0 = staticinvoke <android.bluetooth.BluetoothDevice: boolean checkBluetoothAddress(java.lang.String)>($r1);
+
+     label2:
+        if $z0 != 0 goto label4;
+
+        $r1 = null;
+
+     label3:
+        exitmonitor $r0;
+
+        return $r1;
+
+     label4:
+        $r1 = specialinvoke $r0.<android.server.BluetoothDeviceService: java.lang.String lastSeenNative(java.lang.String)>($r1);
+
+     label5:
+        goto label3;
+
+     label6:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+    }
+
+    public java.lang.String lastUsed(java.lang.String)
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String $r1;
+        android.content.Context $r2;
+        boolean $z0;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        $z0 = staticinvoke <android.bluetooth.BluetoothDevice: boolean checkBluetoothAddress(java.lang.String)>($r1);
+
+     label2:
+        if $z0 != 0 goto label4;
+
+        $r1 = null;
+
+     label3:
+        exitmonitor $r0;
+
+        return $r1;
+
+     label4:
+        $r1 = specialinvoke $r0.<android.server.BluetoothDeviceService: java.lang.String lastUsedNative(java.lang.String)>($r1);
+
+     label5:
+        goto label3;
+
+     label6:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+    }
+
+    public java.lang.String[] listAclConnections()
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String[] $r1;
+        android.content.Context $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        $r1 = specialinvoke $r0.<android.server.BluetoothDeviceService: java.lang.String[] listConnectionsNative()>();
+
+     label2:
+        exitmonitor $r0;
+
+        return $r1;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public java.lang.String[] listBonds()
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String[] $r1;
+        android.content.Context $r2;
+        android.server.BluetoothDeviceService$BondState $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        $r3 = $r0.<android.server.BluetoothDeviceService: android.server.BluetoothDeviceService$BondState mBondState>;
+
+        $r1 = staticinvoke <android.server.BluetoothDeviceService$BondState: java.lang.String[] access$000(android.server.BluetoothDeviceService$BondState,int)>($r3, 1);
+
+     label2:
+        exitmonitor $r0;
+
+        return $r1;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public java.lang.String[] listRemoteDevices()
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String[] $r1;
+        android.content.Context $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH", "Need BLUETOOTH permission");
+
+        $r1 = specialinvoke $r0.<android.server.BluetoothDeviceService: java.lang.String[] listRemoteDevicesNative()>();
+
+     label2:
+        exitmonitor $r0;
+
+        return $r1;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public boolean removeBond(java.lang.String)
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String $r1;
+        android.content.Context $r2;
+        boolean $z0;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH_ADMIN", "Need BLUETOOTH_ADMIN permission");
+
+        $z0 = staticinvoke <android.bluetooth.BluetoothDevice: boolean checkBluetoothAddress(java.lang.String)>($r1);
+
+     label2:
+        if $z0 != 0 goto label4;
+
+        $z0 = 0;
+
+     label3:
+        exitmonitor $r0;
+
+        return $z0;
+
+     label4:
+        $z0 = specialinvoke $r0.<android.server.BluetoothDeviceService: boolean removeBondingNative(java.lang.String)>($r1);
+
+     label5:
+        goto label3;
+
+     label6:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+    }
+
+    void restart()
+    {
+        android.server.BluetoothDeviceService $r0;
+        boolean $z0;
+        int $i0;
+        java.lang.Throwable $r1;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        entermonitor $r0;
+
+     label1:
+        $i0 = $r0.<android.server.BluetoothDeviceService: int mBluetoothState>;
+
+     label2:
+        if $i0 == 2 goto label4;
+
+     label3:
+        exitmonitor $r0;
+
+        return;
+
+     label4:
+        $r0.<android.server.BluetoothDeviceService: boolean mRestart> = 1;
+
+        $z0 = virtualinvoke $r0.<android.server.BluetoothDeviceService: boolean disable(boolean)>(0);
+
+        if $z0 != 0 goto label3;
+
+        $r0.<android.server.BluetoothDeviceService: boolean mRestart> = 0;
+
+     label5:
+        goto label3;
+
+     label6:
+        $r1 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+    }
+
+    public boolean setDiscoverableTimeout(int)
+    {
+        android.server.BluetoothDeviceService $r0;
+        int $i0;
+        boolean $z0;
+        android.content.Context $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $i0 := @parameter0: int;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r1.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH_ADMIN", "Need BLUETOOTH_ADMIN permission");
+
+        $z0 = specialinvoke $r0.<android.server.BluetoothDeviceService: boolean setDiscoverableTimeoutNative(int)>($i0);
+
+     label2:
+        exitmonitor $r0;
+
+        return $z0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    void setIsDiscovering(boolean)
+    {
+        android.server.BluetoothDeviceService $r0;
+        boolean $z0;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $z0 := @parameter0: boolean;
+
+        $r0.<android.server.BluetoothDeviceService: boolean mIsDiscovering> = $z0;
+
+        return;
+    }
+
+    public boolean setName(java.lang.String)
+    {
+        android.server.BluetoothDeviceService $r0;
+        java.lang.String $r1;
+        boolean $z0;
+        android.content.Context $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH_ADMIN", "Need BLUETOOTH_ADMIN permission");
+
+     label2:
+        if $r1 != null goto label4;
+
+        $z0 = 0;
+
+     label3:
+        exitmonitor $r0;
+
+        return $z0;
+
+     label4:
+        $z0 = specialinvoke $r0.<android.server.BluetoothDeviceService: boolean setNameNative(java.lang.String)>($r1);
+
+     label5:
+        goto label3;
+
+     label6:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+    }
+
+    public boolean setPin(java.lang.String, byte[])
+    {
+        android.server.BluetoothDeviceService $r0;
+        byte[] $r1;
+        java.lang.String $r2, $r4;
+        android.content.Context $r3;
+        int $i0;
+        boolean $z0;
+        android.server.BluetoothEventLoop $r5;
+        java.util.HashMap $r6;
+        java.lang.Object $r7;
+        java.lang.Integer $r8;
+        java.lang.StringBuilder $r9;
+        java.io.UnsupportedEncodingException $r10;
+        java.lang.Throwable $r11;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $r2 := @parameter0: java.lang.String;
+
+        $r1 := @parameter1: byte[];
+
+        entermonitor $r0;
+
+     label01:
+        $r3 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r3.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH_ADMIN", "Need BLUETOOTH_ADMIN permission");
+
+        if $r1 == null goto label03;
+
+        $i0 = lengthof $r1;
+
+        if $i0 <= 0 goto label03;
+
+        $i0 = lengthof $r1;
+
+        if $i0 > 16 goto label03;
+
+        $z0 = staticinvoke <android.bluetooth.BluetoothDevice: boolean checkBluetoothAddress(java.lang.String)>($r2);
+
+     label02:
+        if $z0 != 0 goto label05;
+
+     label03:
+        $z0 = 0;
+
+     label04:
+        exitmonitor $r0;
+
+        return $z0;
+
+     label05:
+        $r4 = virtualinvoke $r2.<java.lang.String: java.lang.String toUpperCase()>();
+
+        $r5 = $r0.<android.server.BluetoothDeviceService: android.server.BluetoothEventLoop mEventLoop>;
+
+        $r6 = virtualinvoke $r5.<android.server.BluetoothEventLoop: java.util.HashMap getPasskeyAgentRequestData()>();
+
+        $r7 = virtualinvoke $r6.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>($r4);
+
+        $r8 = (java.lang.Integer) $r7;
+
+        if $r8 != null goto label07;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("setPin(");
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") called but no native data available, ");
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ignoring. Maybe the PasskeyAgent Request was cancelled by the remote device");
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" or by bluez.\n");
+
+        $r2 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("BluetoothDeviceService", $r2);
+
+     label06:
+        $z0 = 0;
+
+        goto label04;
+
+     label07:
+        $r2 = new java.lang.String;
+
+     label08:
+        specialinvoke $r2.<java.lang.String: void <init>(byte[],java.lang.String)>($r1, "UTF8");
+
+     label09:
+        $i0 = virtualinvoke $r8.<java.lang.Integer: int intValue()>();
+
+        $z0 = specialinvoke $r0.<android.server.BluetoothDeviceService: boolean setPinNative(java.lang.String,java.lang.String,int)>($r4, $r2, $i0);
+
+        goto label04;
+
+     label10:
+        $r10 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("BluetoothDeviceService", "UTF8 not supported?!?");
+
+     label11:
+        $z0 = 0;
+
+        goto label04;
+
+     label12:
+        $r11 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r11;
+
+        catch java.lang.Throwable from label01 to label02 with label12;
+        catch java.lang.Throwable from label05 to label06 with label12;
+        catch java.io.UnsupportedEncodingException from label08 to label09 with label10;
+        catch java.lang.Throwable from label07 to label09 with label12;
+        catch java.lang.Throwable from label09 to label11 with label12;
+    }
+
+    public boolean setScanMode(int)
+    {
+        android.server.BluetoothDeviceService $r0;
+        int $i0;
+        android.content.Context $r1;
+        java.lang.String $r2;
+        boolean $z0;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $i0 := @parameter0: int;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r1.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH_ADMIN", "Need BLUETOOTH_ADMIN permission");
+
+        $r2 = staticinvoke <android.server.BluetoothDeviceService: java.lang.String scanModeToBluezString(int)>($i0);
+
+        if $r2 == null goto label3;
+
+        $z0 = specialinvoke $r0.<android.server.BluetoothDeviceService: boolean setModeNative(java.lang.String)>($r2);
+
+     label2:
+        exitmonitor $r0;
+
+        return $z0;
+
+     label3:
+        $z0 = 0;
+
+        goto label2;
+
+     label4:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label4;
+    }
+
+    public boolean startDiscovery(boolean)
+    {
+        android.server.BluetoothDeviceService $r0;
+        boolean $z0;
+        android.content.Context $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        $z0 := @parameter0: boolean;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r1.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH_ADMIN", "Need BLUETOOTH_ADMIN permission");
+
+        $z0 = specialinvoke $r0.<android.server.BluetoothDeviceService: boolean startDiscoveryNative(boolean)>($z0);
+
+     label2:
+        exitmonitor $r0;
+
+        return $z0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public boolean startPeriodicDiscovery()
+    {
+        android.server.BluetoothDeviceService $r0;
+        boolean $z0;
+        android.content.Context $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r1.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH_ADMIN", "Need BLUETOOTH_ADMIN permission");
+
+        $z0 = specialinvoke $r0.<android.server.BluetoothDeviceService: boolean startPeriodicDiscoveryNative()>();
+
+     label2:
+        exitmonitor $r0;
+
+        return $z0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public boolean stopPeriodicDiscovery()
+    {
+        android.server.BluetoothDeviceService $r0;
+        boolean $z0;
+        android.content.Context $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: android.server.BluetoothDeviceService;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = $r0.<android.server.BluetoothDeviceService: android.content.Context mContext>;
+
+        virtualinvoke $r1.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.BLUETOOTH_ADMIN", "Need BLUETOOTH_ADMIN permission");
+
+        $z0 = specialinvoke $r0.<android.server.BluetoothDeviceService: boolean stopPeriodicDiscoveryNative()>();
+
+     label2:
+        exitmonitor $r0;
+
+        return $z0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+}

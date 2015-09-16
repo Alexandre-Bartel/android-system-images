@@ -1,0 +1,493 @@
+public class com.android.internal.telephony.WapPushOverSms extends java.lang.Object
+{
+    private static final java.lang.String LOG_TAG;
+    private final int WAKE_LOCK_TIMEOUT;
+    private final android.content.Context mContext;
+    private android.os.PowerManager$WakeLock mWakeLock;
+    private com.android.internal.telephony.WspTypeDecoder pduDecoder;
+
+    public void <init>(com.android.internal.telephony.Phone)
+    {
+        com.android.internal.telephony.WapPushOverSms $r0;
+        com.android.internal.telephony.Phone $r1;
+        android.content.Context $r2;
+
+        $r0 := @this: com.android.internal.telephony.WapPushOverSms;
+
+        $r1 := @parameter0: com.android.internal.telephony.Phone;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r0.<com.android.internal.telephony.WapPushOverSms: int WAKE_LOCK_TIMEOUT> = 5000;
+
+        $r2 = interfaceinvoke $r1.<com.android.internal.telephony.Phone: android.content.Context getContext()>();
+
+        $r0.<com.android.internal.telephony.WapPushOverSms: android.content.Context mContext> = $r2;
+
+        specialinvoke $r0.<com.android.internal.telephony.WapPushOverSms: void createWakelock()>();
+
+        return;
+    }
+
+    private void createWakelock()
+    {
+        com.android.internal.telephony.WapPushOverSms $r0;
+        android.content.Context $r1;
+        java.lang.Object $r2;
+        android.os.PowerManager $r3;
+        android.os.PowerManager$WakeLock $r4;
+
+        $r0 := @this: com.android.internal.telephony.WapPushOverSms;
+
+        $r1 = $r0.<com.android.internal.telephony.WapPushOverSms: android.content.Context mContext>;
+
+        $r2 = virtualinvoke $r1.<android.content.Context: java.lang.Object getSystemService(java.lang.String)>("power");
+
+        $r3 = (android.os.PowerManager) $r2;
+
+        $r4 = virtualinvoke $r3.<android.os.PowerManager: android.os.PowerManager$WakeLock newWakeLock(int,java.lang.String)>(1, "WapPushOverSms");
+
+        $r0.<com.android.internal.telephony.WapPushOverSms: android.os.PowerManager$WakeLock mWakeLock> = $r4;
+
+        $r4 = $r0.<com.android.internal.telephony.WapPushOverSms: android.os.PowerManager$WakeLock mWakeLock>;
+
+        virtualinvoke $r4.<android.os.PowerManager$WakeLock: void setReferenceCounted(boolean)>(1);
+
+        return;
+    }
+
+    private void dispatchWapPdu_MMS(byte[], int, int, int)
+    {
+        com.android.internal.telephony.WapPushOverSms $r0;
+        byte[] $r1, $r2;
+        int $i0, $i1, $i2, $i3;
+        android.content.Intent $r3;
+
+        $r0 := @this: com.android.internal.telephony.WapPushOverSms;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        $i3 = lengthof $r1;
+
+        $i3 = $i3 - $i2;
+
+        $r2 = newarray (byte)[$i3];
+
+        $i3 = lengthof $r2;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, $i2, $r2, 0, $i3);
+
+        $r3 = new android.content.Intent;
+
+        specialinvoke $r3.<android.content.Intent: void <init>(java.lang.String)>("android.provider.Telephony.WAP_PUSH_RECEIVED");
+
+        virtualinvoke $r3.<android.content.Intent: android.content.Intent setType(java.lang.String)>("application/vnd.wap.mms-message");
+
+        virtualinvoke $r3.<android.content.Intent: android.content.Intent putExtra(java.lang.String,int)>("transactionId", $i0);
+
+        virtualinvoke $r3.<android.content.Intent: android.content.Intent putExtra(java.lang.String,int)>("pduType", $i1);
+
+        virtualinvoke $r3.<android.content.Intent: android.content.Intent putExtra(java.lang.String,byte[])>("data", $r2);
+
+        specialinvoke $r0.<com.android.internal.telephony.WapPushOverSms: void sendBroadcast(android.content.Intent,java.lang.String)>($r3, "android.permission.RECEIVE_MMS");
+
+        return;
+    }
+
+    private void dispatchWapPdu_PushCO(byte[], int, int)
+    {
+        com.android.internal.telephony.WapPushOverSms $r0;
+        byte[] $r1;
+        int $i0, $i1;
+        android.content.Intent $r2;
+
+        $r0 := @this: com.android.internal.telephony.WapPushOverSms;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $r2 = new android.content.Intent;
+
+        specialinvoke $r2.<android.content.Intent: void <init>(java.lang.String)>("android.provider.Telephony.WAP_PUSH_RECEIVED");
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent setType(java.lang.String)>("application/vnd.wap.coc");
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,int)>("transactionId", $i0);
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,int)>("pduType", $i1);
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,byte[])>("data", $r1);
+
+        specialinvoke $r0.<com.android.internal.telephony.WapPushOverSms: void sendBroadcast(android.content.Intent,java.lang.String)>($r2, "android.permission.RECEIVE_WAP_PUSH");
+
+        return;
+    }
+
+    private void dispatchWapPdu_default(byte[], int, int, java.lang.String, int)
+    {
+        com.android.internal.telephony.WapPushOverSms $r0;
+        byte[] $r1, $r3;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String $r2;
+        android.content.Intent $r4;
+
+        $r0 := @this: com.android.internal.telephony.WapPushOverSms;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $r2 := @parameter3: java.lang.String;
+
+        $i2 := @parameter4: int;
+
+        $i3 = lengthof $r1;
+
+        $i3 = $i3 - $i2;
+
+        $r3 = newarray (byte)[$i3];
+
+        $i3 = lengthof $r3;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, $i2, $r3, 0, $i3);
+
+        $r4 = new android.content.Intent;
+
+        specialinvoke $r4.<android.content.Intent: void <init>(java.lang.String)>("android.provider.Telephony.WAP_PUSH_RECEIVED");
+
+        virtualinvoke $r4.<android.content.Intent: android.content.Intent setType(java.lang.String)>($r2);
+
+        virtualinvoke $r4.<android.content.Intent: android.content.Intent putExtra(java.lang.String,int)>("transactionId", $i0);
+
+        virtualinvoke $r4.<android.content.Intent: android.content.Intent putExtra(java.lang.String,int)>("pduType", $i1);
+
+        virtualinvoke $r4.<android.content.Intent: android.content.Intent putExtra(java.lang.String,byte[])>("data", $r3);
+
+        specialinvoke $r0.<com.android.internal.telephony.WapPushOverSms: void sendBroadcast(android.content.Intent,java.lang.String)>($r4, "android.permission.RECEIVE_WAP_PUSH");
+
+        return;
+    }
+
+    private void sendBroadcast(android.content.Intent, java.lang.String)
+    {
+        com.android.internal.telephony.WapPushOverSms $r0;
+        android.content.Intent $r1;
+        java.lang.String $r2;
+        android.os.PowerManager$WakeLock $r3;
+        android.content.Context $r4;
+
+        $r0 := @this: com.android.internal.telephony.WapPushOverSms;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 = $r0.<com.android.internal.telephony.WapPushOverSms: android.os.PowerManager$WakeLock mWakeLock>;
+
+        virtualinvoke $r3.<android.os.PowerManager$WakeLock: void acquire(long)>(5000L);
+
+        $r4 = $r0.<com.android.internal.telephony.WapPushOverSms: android.content.Context mContext>;
+
+        virtualinvoke $r4.<android.content.Context: void sendBroadcast(android.content.Intent,java.lang.String)>($r1, $r2);
+
+        return;
+    }
+
+    public void dispatchWapPdu(byte[])
+    {
+        com.android.internal.telephony.WapPushOverSms $r0;
+        byte[] $r1;
+        short $s0, $s1;
+        int $i2, $i4, $i6;
+        java.lang.StringBuilder $r2;
+        java.lang.String $r3, $r5;
+        byte $b3;
+        com.android.internal.telephony.WspTypeDecoder $r4;
+        boolean $z0;
+        long $l5;
+
+        $r0 := @this: com.android.internal.telephony.WapPushOverSms;
+
+        $r1 := @parameter0: byte[];
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Rx: ");
+
+        $r3 = staticinvoke <com.android.internal.telephony.gsm.SimUtils: java.lang.String bytesToHexString(byte[])>($r1);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("WAP PUSH", $r3);
+
+        $i2 = 0 + 1;
+
+        $b3 = $r1[0];
+
+        $s0 = $b3 & 255;
+
+        $i4 = $i2 + 1;
+
+        $b3 = $r1[$i2];
+
+        $s1 = $b3 & 255;
+
+        if $s1 == 6 goto label01;
+
+        if $s1 == 7 goto label01;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Received non-PUSH WAP PDU. Type = ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($s1);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("WAP PUSH", $r3);
+
+        return;
+
+     label01:
+        $r4 = new com.android.internal.telephony.WspTypeDecoder;
+
+        specialinvoke $r4.<com.android.internal.telephony.WspTypeDecoder: void <init>(byte[])>($r1);
+
+        $r0.<com.android.internal.telephony.WapPushOverSms: com.android.internal.telephony.WspTypeDecoder pduDecoder> = $r4;
+
+        $r4 = $r0.<com.android.internal.telephony.WapPushOverSms: com.android.internal.telephony.WspTypeDecoder pduDecoder>;
+
+        $z0 = virtualinvoke $r4.<com.android.internal.telephony.WspTypeDecoder: boolean decodeUintvarInteger(int)>($i4);
+
+        if $z0 != 0 goto label02;
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("WAP PUSH", "Received PDU. Header Length error.");
+
+        return;
+
+     label02:
+        $r4 = $r0.<com.android.internal.telephony.WapPushOverSms: com.android.internal.telephony.WspTypeDecoder pduDecoder>;
+
+        $l5 = virtualinvoke $r4.<com.android.internal.telephony.WspTypeDecoder: long getValue32()>();
+
+        $i2 = (int) $l5;
+
+        $r4 = $r0.<com.android.internal.telephony.WapPushOverSms: com.android.internal.telephony.WspTypeDecoder pduDecoder>;
+
+        $i4 = virtualinvoke $r4.<com.android.internal.telephony.WspTypeDecoder: int getDecodedDataLength()>();
+
+        $i6 = $i4 + 2;
+
+        $r4 = $r0.<com.android.internal.telephony.WapPushOverSms: com.android.internal.telephony.WspTypeDecoder pduDecoder>;
+
+        $z0 = virtualinvoke $r4.<com.android.internal.telephony.WspTypeDecoder: boolean decodeContentType(int)>($i6);
+
+        if $z0 != 0 goto label03;
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("WAP PUSH", "Received PDU. Header Content-Type error.");
+
+        return;
+
+     label03:
+        $r4 = $r0.<com.android.internal.telephony.WapPushOverSms: com.android.internal.telephony.WspTypeDecoder pduDecoder>;
+
+        $r3 = virtualinvoke $r4.<com.android.internal.telephony.WspTypeDecoder: java.lang.String getValueString()>();
+
+        $r5 = $r3;
+
+        if $r3 != null goto label13;
+
+        $r4 = $r0.<com.android.internal.telephony.WapPushOverSms: com.android.internal.telephony.WspTypeDecoder pduDecoder>;
+
+        $l5 = virtualinvoke $r4.<com.android.internal.telephony.WspTypeDecoder: long getValue32()>();
+
+        $i4 = (int) $l5;
+
+        lookupswitch($i4)
+        {
+            case 46: goto label09;
+            case 48: goto label10;
+            case 50: goto label11;
+            case 62: goto label12;
+            case 74: goto label05;
+            case 75: goto label08;
+            default: goto label04;
+        };
+
+     label04:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Received PDU. Unsupported Content-Type = ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("WAP PUSH", $r3);
+
+        return;
+
+     label05:
+        $r5 = "application/vnd.oma.drm.rights+xml";
+
+     label06:
+        $r4 = $r0.<com.android.internal.telephony.WapPushOverSms: com.android.internal.telephony.WspTypeDecoder pduDecoder>;
+
+        virtualinvoke $r4.<com.android.internal.telephony.WspTypeDecoder: int getDecodedDataLength()>();
+
+        $i2 = $i6 + $i2;
+
+        $z0 = 0;
+
+        lookupswitch($i4)
+        {
+            case 50: goto label20;
+            case 62: goto label21;
+            default: goto label07;
+        };
+
+     label07:
+        if $z0 != 0 goto label22;
+
+        specialinvoke $r0.<com.android.internal.telephony.WapPushOverSms: void dispatchWapPdu_default(byte[],int,int,java.lang.String,int)>($r1, $s0, $s1, $r5, $i2);
+
+        return;
+
+     label08:
+        $r5 = "application/vnd.oma.drm.rights+wbxml";
+
+        goto label06;
+
+     label09:
+        $r5 = "application/vnd.wap.sic";
+
+        goto label06;
+
+     label10:
+        $r5 = "application/vnd.wap.slc";
+
+        goto label06;
+
+     label11:
+        $r5 = "application/vnd.wap.coc";
+
+        goto label06;
+
+     label12:
+        $r5 = "application/vnd.wap.mms-message";
+
+        goto label06;
+
+     label13:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("application/vnd.oma.drm.rights+xml");
+
+        if $z0 == 0 goto label14;
+
+        $i4 = 74;
+
+        goto label06;
+
+     label14:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("application/vnd.oma.drm.rights+wbxml");
+
+        if $z0 == 0 goto label15;
+
+        $i4 = 75;
+
+        goto label06;
+
+     label15:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("application/vnd.wap.sic");
+
+        if $z0 == 0 goto label16;
+
+        $i4 = 46;
+
+        goto label06;
+
+     label16:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("application/vnd.wap.slc");
+
+        if $z0 == 0 goto label17;
+
+        $i4 = 48;
+
+        goto label06;
+
+     label17:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("application/vnd.wap.coc");
+
+        if $z0 == 0 goto label18;
+
+        $i4 = 50;
+
+        goto label06;
+
+     label18:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("application/vnd.wap.mms-message");
+
+        if $z0 == 0 goto label19;
+
+        $i4 = 62;
+
+        goto label06;
+
+     label19:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Received PDU. Unknown Content-Type = ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("WAP PUSH", $r3);
+
+        return;
+
+     label20:
+        specialinvoke $r0.<com.android.internal.telephony.WapPushOverSms: void dispatchWapPdu_PushCO(byte[],int,int)>($r1, $s0, $s1);
+
+        $z0 = 1;
+
+        goto label07;
+
+     label21:
+        specialinvoke $r0.<com.android.internal.telephony.WapPushOverSms: void dispatchWapPdu_MMS(byte[],int,int,int)>($r1, $s0, $s1, $i2);
+
+        $z0 = 1;
+
+        goto label07;
+
+     label22:
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <com.android.internal.telephony.WapPushOverSms: java.lang.String LOG_TAG> = "WAP PUSH";
+
+        return;
+    }
+}

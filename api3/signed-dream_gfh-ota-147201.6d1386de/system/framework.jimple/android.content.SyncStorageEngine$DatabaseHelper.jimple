@@ -1,0 +1,151 @@
+class android.content.SyncStorageEngine$DatabaseHelper extends android.database.sqlite.SQLiteOpenHelper
+{
+    final android.content.SyncStorageEngine this$0;
+
+    void <init>(android.content.SyncStorageEngine, android.content.Context)
+    {
+        android.content.SyncStorageEngine$DatabaseHelper $r0;
+        android.content.SyncStorageEngine $r1;
+        android.content.Context $r2;
+
+        $r0 := @this: android.content.SyncStorageEngine$DatabaseHelper;
+
+        $r1 := @parameter0: android.content.SyncStorageEngine;
+
+        $r2 := @parameter1: android.content.Context;
+
+        $r0.<android.content.SyncStorageEngine$DatabaseHelper: android.content.SyncStorageEngine this$0> = $r1;
+
+        specialinvoke $r0.<android.database.sqlite.SQLiteOpenHelper: void <init>(android.content.Context,java.lang.String,android.database.sqlite.SQLiteDatabase$CursorFactory,int)>($r2, "syncmanager.db", null, 10);
+
+        return;
+    }
+
+    public void onCreate(android.database.sqlite.SQLiteDatabase)
+    {
+        android.content.SyncStorageEngine$DatabaseHelper $r0;
+        android.database.sqlite.SQLiteDatabase $r1;
+
+        $r0 := @this: android.content.SyncStorageEngine$DatabaseHelper;
+
+        $r1 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE TABLE pending (_id INTEGER PRIMARY KEY,authority TEXT NOT NULL,account TEXT NOT NULL,extras BLOB NOT NULL,source INTEGER NOT NULL);");
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE TABLE stats (_id INTEGER PRIMARY KEY,account TEXT, authority TEXT, syncdata TEXT, UNIQUE (account, authority));");
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE TABLE history (_id INTEGER PRIMARY KEY,stats_id INTEGER,eventTime INTEGER,elapsedTime INTEGER,source INTEGER,event INTEGER,upstreamActivity INTEGER,downstreamActivity INTEGER,mesg TEXT);");
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE TABLE status (_id INTEGER PRIMARY KEY,stats_id INTEGER NOT NULL,totalElapsedTime INTEGER NOT NULL DEFAULT 0,numSyncs INTEGER NOT NULL DEFAULT 0,numSourcePoll INTEGER NOT NULL DEFAULT 0,numSourceServer INTEGER NOT NULL DEFAULT 0,numSourceLocal INTEGER NOT NULL DEFAULT 0,numSourceUser INTEGER NOT NULL DEFAULT 0,lastSuccessTime INTEGER,lastSuccessSource INTEGER,lastFailureTime INTEGER,lastFailureSource INTEGER,lastFailureMesg STRING,initialFailureTime INTEGER,pending INTEGER NOT NULL DEFAULT 0);");
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE TABLE active (_id INTEGER PRIMARY KEY,authority TEXT,account TEXT,startTime INTEGER);");
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE INDEX historyEventTime ON history (eventTime)");
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE TABLE settings (name TEXT PRIMARY KEY,value TEXT);");
+
+        return;
+    }
+
+    public void onOpen(android.database.sqlite.SQLiteDatabase)
+    {
+        android.content.SyncStorageEngine$DatabaseHelper $r0;
+        android.database.sqlite.SQLiteDatabase $r1;
+        boolean $z0;
+
+        $r0 := @this: android.content.SyncStorageEngine$DatabaseHelper;
+
+        $r1 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        $z0 = virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: boolean isReadOnly()>();
+
+        if $z0 != 0 goto label1;
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: int delete(java.lang.String,java.lang.String,java.lang.String[])>("active", null, null);
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: long insert(java.lang.String,java.lang.String,android.content.ContentValues)>("active", "account", null);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public void onUpgrade(android.database.sqlite.SQLiteDatabase, int, int)
+    {
+        android.content.SyncStorageEngine$DatabaseHelper $r0;
+        android.database.sqlite.SQLiteDatabase $r1;
+        int $i0, $i1;
+        java.lang.StringBuilder $r2;
+        java.lang.String $r3;
+
+        $r0 := @this: android.content.SyncStorageEngine$DatabaseHelper;
+
+        $r1 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        if $i0 != 9 goto label1;
+
+        if $i1 != 10 goto label1;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Upgrading database from version ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" to ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", which will preserve old data");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("SyncManager", $r3);
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("ALTER TABLE status ADD COLUMN initialFailureTime INTEGER");
+
+        return;
+
+     label1:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Upgrading database from version ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" to ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", which will destroy all old data");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("SyncManager", $r3);
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP TABLE IF EXISTS pending");
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP TABLE IF EXISTS stats");
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP TABLE IF EXISTS history");
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP TABLE IF EXISTS settings");
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP TABLE IF EXISTS active");
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP TABLE IF EXISTS status");
+
+        virtualinvoke $r0.<android.content.SyncStorageEngine$DatabaseHelper: void onCreate(android.database.sqlite.SQLiteDatabase)>($r1);
+
+        return;
+    }
+}

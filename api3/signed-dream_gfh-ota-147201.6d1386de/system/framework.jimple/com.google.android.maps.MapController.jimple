@@ -1,0 +1,1159 @@
+public final class com.google.android.maps.MapController extends java.lang.Object implements android.view.View$OnKeyListener
+{
+    private static final android.view.animation.Transformation EMPTY_TRANSFORM;
+    private static final java.lang.String LOG_TAG;
+    private static final int MAX_PAN_SPEED;
+    private static final int MAX_PAN_SPEED_NEG;
+    private static final long TRACKBALL_RELEASE_SLOP_TIME_MILLIS;
+    private android.os.Message mAnimationCompletedMessage;
+    private java.lang.Runnable mAnimationCompletedRunnable;
+    private int mDeferredLatSpanE6;
+    private int mDeferredLonSpanE6;
+    private final int[] mDeltas;
+    private volatile boolean mDirty;
+    private boolean mHasBeenMeasured;
+    private com.google.android.maps.MapController$HorizPanState mHorizPan;
+    private final com.google.googlenav.map.Map mMap;
+    private com.google.android.maps.MapView mMapView;
+    private final float[] mOrigin;
+    private android.view.animation.Animation mPanAnimation;
+    private com.google.map.MapPoint mPanPoint;
+    private com.google.android.maps.MapController$VertPanState mVertPan;
+    private float mXPanSpeed;
+    private float mYPanSpeed;
+
+    static void <clinit>()
+    {
+        android.view.animation.Transformation $r0;
+
+        <com.google.android.maps.MapController: long TRACKBALL_RELEASE_SLOP_TIME_MILLIS> = 250L;
+
+        <com.google.android.maps.MapController: int MAX_PAN_SPEED_NEG> = -8;
+
+        <com.google.android.maps.MapController: int MAX_PAN_SPEED> = 8;
+
+        <com.google.android.maps.MapController: java.lang.String LOG_TAG> = "Maps.MapController";
+
+        $r0 = new android.view.animation.Transformation;
+
+        specialinvoke $r0.<android.view.animation.Transformation: void <init>()>();
+
+        <com.google.android.maps.MapController: android.view.animation.Transformation EMPTY_TRANSFORM> = $r0;
+
+        return;
+    }
+
+    void <init>(com.google.googlenav.map.Map, com.google.android.maps.MapView)
+    {
+        com.google.android.maps.MapController $r0;
+        com.google.googlenav.map.Map $r1;
+        com.google.android.maps.MapView $r2;
+        float[] $r3;
+        int[] $r4;
+        com.google.android.maps.MapController$HorizPanState $r5;
+        com.google.android.maps.MapController$VertPanState $r6;
+
+        $r0 := @this: com.google.android.maps.MapController;
+
+        $r1 := @parameter0: com.google.googlenav.map.Map;
+
+        $r2 := @parameter1: com.google.android.maps.MapView;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r3 = newarray (float)[2];
+
+        $r3[0] = 0.0F;
+
+        $r3[1] = 0.0F;
+
+        $r0.<com.google.android.maps.MapController: float[] mOrigin> = $r3;
+
+        $r4 = newarray (int)[2];
+
+        $r4[0] = 0;
+
+        $r4[1] = 0;
+
+        $r0.<com.google.android.maps.MapController: int[] mDeltas> = $r4;
+
+        $r5 = <com.google.android.maps.MapController$HorizPanState: com.google.android.maps.MapController$HorizPanState NONE>;
+
+        $r0.<com.google.android.maps.MapController: com.google.android.maps.MapController$HorizPanState mHorizPan> = $r5;
+
+        $r6 = <com.google.android.maps.MapController$VertPanState: com.google.android.maps.MapController$VertPanState NONE>;
+
+        $r0.<com.google.android.maps.MapController: com.google.android.maps.MapController$VertPanState mVertPan> = $r6;
+
+        $r0.<com.google.android.maps.MapController: float mXPanSpeed> = 0.0F;
+
+        $r0.<com.google.android.maps.MapController: float mYPanSpeed> = 0.0F;
+
+        $r0.<com.google.android.maps.MapController: android.view.animation.Animation mPanAnimation> = null;
+
+        $r0.<com.google.android.maps.MapController: com.google.map.MapPoint mPanPoint> = null;
+
+        $r0.<com.google.android.maps.MapController: com.google.android.maps.MapView mMapView> = null;
+
+        $r0.<com.google.android.maps.MapController: android.os.Message mAnimationCompletedMessage> = null;
+
+        $r0.<com.google.android.maps.MapController: java.lang.Runnable mAnimationCompletedRunnable> = null;
+
+        $r0.<com.google.android.maps.MapController: boolean mHasBeenMeasured> = 0;
+
+        $r0.<com.google.android.maps.MapController: int mDeferredLatSpanE6> = -1;
+
+        $r0.<com.google.android.maps.MapController: int mDeferredLonSpanE6> = -1;
+
+        $r0.<com.google.android.maps.MapController: com.google.googlenav.map.Map mMap> = $r1;
+
+        $r0.<com.google.android.maps.MapController: com.google.android.maps.MapView mMapView> = $r2;
+
+        return;
+    }
+
+    private void animateTo(com.google.android.maps.GeoPoint, java.lang.Runnable, android.os.Message)
+    {
+        com.google.android.maps.MapController $r0;
+        com.google.android.maps.GeoPoint $r1;
+        java.lang.Runnable $r2;
+        android.os.Message $r3;
+        int $i0, $i2;
+        com.google.map.MapPoint $r4, $r6;
+        com.google.googlenav.map.Map $r5;
+        com.google.map.Zoom $r7;
+        long $l1;
+        double $d0;
+        android.view.animation.TranslateAnimation $r8;
+        float $f0, $f1, $f2, $f3;
+        android.view.animation.Animation $r9;
+        android.view.animation.AccelerateDecelerateInterpolator $r10;
+
+        $r0 := @this: com.google.android.maps.MapController;
+
+        $r1 := @parameter0: com.google.android.maps.GeoPoint;
+
+        $r2 := @parameter1: java.lang.Runnable;
+
+        $r3 := @parameter2: android.os.Message;
+
+        $r0.<com.google.android.maps.MapController: java.lang.Runnable mAnimationCompletedRunnable> = $r2;
+
+        $r0.<com.google.android.maps.MapController: android.os.Message mAnimationCompletedMessage> = $r3;
+
+        $r4 = virtualinvoke $r1.<com.google.android.maps.GeoPoint: com.google.map.MapPoint getMapPoint()>();
+
+        virtualinvoke $r0.<com.google.android.maps.MapController: void stopAnimation(boolean)>(0);
+
+        $r5 = $r0.<com.google.android.maps.MapController: com.google.googlenav.map.Map mMap>;
+
+        virtualinvoke $r5.<com.google.googlenav.map.Map: void preLoad(com.google.map.MapPoint)>($r4);
+
+        $r0.<com.google.android.maps.MapController: com.google.map.MapPoint mPanPoint> = $r4;
+
+        $r5 = $r0.<com.google.android.maps.MapController: com.google.googlenav.map.Map mMap>;
+
+        $r6 = virtualinvoke $r5.<com.google.googlenav.map.Map: com.google.map.MapPoint getCenterPoint()>();
+
+        $r5 = $r0.<com.google.android.maps.MapController: com.google.googlenav.map.Map mMap>;
+
+        $r7 = virtualinvoke $r5.<com.google.googlenav.map.Map: com.google.map.Zoom getZoom()>();
+
+        $l1 = virtualinvoke $r4.<com.google.map.MapPoint: long pixelDistanceSquared(com.google.map.MapPoint,com.google.map.Zoom)>($r6, $r7);
+
+        $i0 = (int) $l1;
+
+        $d0 = (double) $i0;
+
+        $d0 = staticinvoke <java.lang.Math: double sqrt(double)>($d0);
+
+        $d0 = 10.0 * $d0;
+
+        $d0 = 200.0 + $d0;
+
+        $d0 = staticinvoke <java.lang.Math: double min(double,double)>($d0, 800.0);
+
+        $i0 = (int) $d0;
+
+        $r8 = new android.view.animation.TranslateAnimation;
+
+        $i2 = virtualinvoke $r6.<com.google.map.MapPoint: int getLatitude()>();
+
+        $f0 = (float) $i2;
+
+        $f0 = $f0 / 1000000.0F;
+
+        $i2 = virtualinvoke $r4.<com.google.map.MapPoint: int getLatitude()>();
+
+        $f1 = (float) $i2;
+
+        $f1 = $f1 / 1000000.0F;
+
+        $i2 = virtualinvoke $r6.<com.google.map.MapPoint: int getLongitude()>();
+
+        $f2 = (float) $i2;
+
+        $f2 = $f2 / 1000000.0F;
+
+        $i2 = virtualinvoke $r4.<com.google.map.MapPoint: int getLongitude()>();
+
+        $f3 = (float) $i2;
+
+        $f3 = $f3 / 1000000.0F;
+
+        specialinvoke $r8.<android.view.animation.TranslateAnimation: void <init>(float,float,float,float)>($f0, $f1, $f2, $f3);
+
+        $r0.<com.google.android.maps.MapController: android.view.animation.Animation mPanAnimation> = $r8;
+
+        $r9 = $r0.<com.google.android.maps.MapController: android.view.animation.Animation mPanAnimation>;
+
+        $l1 = (long) $i0;
+
+        virtualinvoke $r9.<android.view.animation.Animation: void setDuration(long)>($l1);
+
+        $r9 = $r0.<com.google.android.maps.MapController: android.view.animation.Animation mPanAnimation>;
+
+        virtualinvoke $r9.<android.view.animation.Animation: void startNow()>();
+
+        $r9 = $r0.<com.google.android.maps.MapController: android.view.animation.Animation mPanAnimation>;
+
+        $r10 = new android.view.animation.AccelerateDecelerateInterpolator;
+
+        specialinvoke $r10.<android.view.animation.AccelerateDecelerateInterpolator: void <init>()>();
+
+        virtualinvoke $r9.<android.view.animation.Animation: void setInterpolator(android.view.animation.Interpolator)>($r10);
+
+        $r9 = $r0.<com.google.android.maps.MapController: android.view.animation.Animation mPanAnimation>;
+
+        virtualinvoke $r9.<android.view.animation.Animation: void initialize(int,int,int,int)>(0, 0, 0, 0);
+
+        virtualinvoke $r0.<com.google.android.maps.MapController: void repaint()>();
+
+        return;
+    }
+
+    private void centerMapToInternal(com.google.map.MapPoint)
+    {
+        com.google.android.maps.MapController $r0;
+        com.google.map.MapPoint $r1;
+        com.google.googlenav.map.Map $r2;
+
+        $r0 := @this: com.google.android.maps.MapController;
+
+        $r1 := @parameter0: com.google.map.MapPoint;
+
+        $r2 = $r0.<com.google.android.maps.MapController: com.google.googlenav.map.Map mMap>;
+
+        virtualinvoke $r2.<com.google.googlenav.map.Map: void setCenterPoint(com.google.map.MapPoint)>($r1);
+
+        virtualinvoke $r0.<com.google.android.maps.MapController: void repaint()>();
+
+        return;
+    }
+
+    private float curve(float, float)
+    {
+        com.google.android.maps.MapController $r0;
+        float $f0, $f1;
+
+        $r0 := @this: com.google.android.maps.MapController;
+
+        $f0 := @parameter0: float;
+
+        $f1 := @parameter1: float;
+
+        $f1 = $f1 - $f0;
+
+        $f1 = $f1 / 8.0F;
+
+        $f0 = $f1 + $f0;
+
+        return $f0;
+    }
+
+    private boolean onKeyDown(int)
+    {
+        com.google.android.maps.MapController $r0;
+        int $i0;
+        com.google.android.maps.MapController$VertPanState $r1;
+        com.google.android.maps.MapController$HorizPanState $r2;
+
+        $r0 := @this: com.google.android.maps.MapController;
+
+        $i0 := @parameter0: int;
+
+        lookupswitch($i0)
+        {
+            case 19: goto label2;
+            case 20: goto label3;
+            case 21: goto label4;
+            case 22: goto label5;
+            default: goto label1;
+        };
+
+     label1:
+        return 0;
+
+     label2:
+        $r1 = <com.google.android.maps.MapController$VertPanState: com.google.android.maps.MapController$VertPanState UP>;
+
+        $r0.<com.google.android.maps.MapController: com.google.android.maps.MapController$VertPanState mVertPan> = $r1;
+
+        return 1;
+
+     label3:
+        $r1 = <com.google.android.maps.MapController$VertPanState: com.google.android.maps.MapController$VertPanState DOWN>;
+
+        $r0.<com.google.android.maps.MapController: com.google.android.maps.MapController$VertPanState mVertPan> = $r1;
+
+        return 1;
+
+     label4:
+        $r2 = <com.google.android.maps.MapController$HorizPanState: com.google.android.maps.MapController$HorizPanState LEFT>;
+
+        $r0.<com.google.android.maps.MapController: com.google.android.maps.MapController$HorizPanState mHorizPan> = $r2;
+
+        return 1;
+
+     label5:
+        $r2 = <com.google.android.maps.MapController$HorizPanState: com.google.android.maps.MapController$HorizPanState RIGHT>;
+
+        $r0.<com.google.android.maps.MapController: com.google.android.maps.MapController$HorizPanState mHorizPan> = $r2;
+
+        return 1;
+    }
+
+    private boolean onKeyUp(int)
+    {
+        com.google.android.maps.MapController $r0;
+        int $i0;
+        com.google.android.maps.MapController$VertPanState $r1, $r2;
+        com.google.android.maps.MapController$HorizPanState $r3, $r4;
+
+        $r0 := @this: com.google.android.maps.MapController;
+
+        $i0 := @parameter0: int;
+
+        lookupswitch($i0)
+        {
+            case 19: goto label2;
+            case 20: goto label4;
+            case 21: goto label6;
+            case 22: goto label8;
+            default: goto label1;
+        };
+
+     label1:
+        return 0;
+
+     label2:
+        $r1 = $r0.<com.google.android.maps.MapController: com.google.android.maps.MapController$VertPanState mVertPan>;
+
+        $r2 = <com.google.android.maps.MapController$VertPanState: com.google.android.maps.MapController$VertPanState UP>;
+
+        if $r1 != $r2 goto label3;
+
+        $r1 = <com.google.android.maps.MapController$VertPanState: com.google.android.maps.MapController$VertPanState NONE>;
+
+        $r0.<com.google.android.maps.MapController: com.google.android.maps.MapController$VertPanState mVertPan> = $r1;
+
+        return 1;
+
+     label3:
+        return 0;
+
+     label4:
+        $r1 = $r0.<com.google.android.maps.MapController: com.google.android.maps.MapController$VertPanState mVertPan>;
+
+        $r2 = <com.google.android.maps.MapController$VertPanState: com.google.android.maps.MapController$VertPanState DOWN>;
+
+        if $r1 != $r2 goto label5;
+
+        $r1 = <com.google.android.maps.MapController$VertPanState: com.google.android.maps.MapController$VertPanState NONE>;
+
+        $r0.<com.google.android.maps.MapController: com.google.android.maps.MapController$VertPanState mVertPan> = $r1;
+
+        return 1;
+
+     label5:
+        return 0;
+
+     label6:
+        $r3 = $r0.<com.google.android.maps.MapController: com.google.android.maps.MapController$HorizPanState mHorizPan>;
+
+        $r4 = <com.google.android.maps.MapController$HorizPanState: com.google.android.maps.MapController$HorizPanState LEFT>;
+
+        if $r3 != $r4 goto label7;
+
+        $r3 = <com.google.android.maps.MapController$HorizPanState: com.google.android.maps.MapController$HorizPanState NONE>;
+
+        $r0.<com.google.android.maps.MapController: com.google.android.maps.MapController$HorizPanState mHorizPan> = $r3;
+
+        return 1;
+
+     label7:
+        return 0;
+
+     label8:
+        $r3 = $r0.<com.google.android.maps.MapController: com.google.android.maps.MapController$HorizPanState mHorizPan>;
+
+        $r4 = <com.google.android.maps.MapController$HorizPanState: com.google.android.maps.MapController$HorizPanState RIGHT>;
+
+        if $r3 != $r4 goto label9;
+
+        $r3 = <com.google.android.maps.MapController$HorizPanState: com.google.android.maps.MapController$HorizPanState NONE>;
+
+        $r0.<com.google.android.maps.MapController: com.google.android.maps.MapController$HorizPanState mHorizPan> = $r3;
+
+        return 1;
+
+     label9:
+        return 0;
+    }
+
+    public void animateTo(com.google.android.maps.GeoPoint)
+    {
+        com.google.android.maps.MapController $r0;
+        com.google.android.maps.GeoPoint $r1;
+
+        $r0 := @this: com.google.android.maps.MapController;
+
+        $r1 := @parameter0: com.google.android.maps.GeoPoint;
+
+        specialinvoke $r0.<com.google.android.maps.MapController: void animateTo(com.google.android.maps.GeoPoint,java.lang.Runnable,android.os.Message)>($r1, null, null);
+
+        return;
+    }
+
+    public void animateTo(com.google.android.maps.GeoPoint, android.os.Message)
+    {
+        com.google.android.maps.MapController $r0;
+        com.google.android.maps.GeoPoint $r1;
+        android.os.Message $r2;
+
+        $r0 := @this: com.google.android.maps.MapController;
+
+        $r1 := @parameter0: com.google.android.maps.GeoPoint;
+
+        $r2 := @parameter1: android.os.Message;
+
+        specialinvoke $r0.<com.google.android.maps.MapController: void animateTo(com.google.android.maps.GeoPoint,java.lang.Runnable,android.os.Message)>($r1, null, $r2);
+
+        return;
+    }
+
+    public void animateTo(com.google.android.maps.GeoPoint, java.lang.Runnable)
+    {
+        com.google.android.maps.MapController $r0;
+        com.google.android.maps.GeoPoint $r1;
+        java.lang.Runnable $r2;
+
+        $r0 := @this: com.google.android.maps.MapController;
+
+        $r1 := @parameter0: com.google.android.maps.GeoPoint;
+
+        $r2 := @parameter1: java.lang.Runnable;
+
+        specialinvoke $r0.<com.google.android.maps.MapController: void animateTo(com.google.android.maps.GeoPoint,java.lang.Runnable,android.os.Message)>($r1, $r2, null);
+
+        return;
+    }
+
+    void clean()
+    {
+        com.google.android.maps.MapController $r0;
+
+        $r0 := @this: com.google.android.maps.MapController;
+
+        $r0.<com.google.android.maps.MapController: boolean mDirty> = 0;
+
+        return;
+    }
+
+    int[] getDeltas()
+    {
+        com.google.android.maps.MapController $r0;
+        int[] $r1;
+        com.google.android.maps.MapController$HorizPanState $r2;
+        int $i0;
+        com.google.android.maps.MapController$VertPanState $r3;
+        float $f0;
+
+        $r0 := @this: com.google.android.maps.MapController;
+
+        $r1 = <com.google.android.maps.MapController$1: int[] $SwitchMap$com$google$android$maps$MapController$HorizPanState>;
+
+        $r2 = $r0.<com.google.android.maps.MapController: com.google.android.maps.MapController$HorizPanState mHorizPan>;
+
+        $i0 = virtualinvoke $r2.<java.lang.Enum: int ordinal()>();
+
+        $i0 = $r1[$i0];
+
+        lookupswitch($i0)
+        {
+            case 1: goto label3;
+            case 2: goto label4;
+            case 3: goto label5;
+            default: goto label1;
+        };
+
+     label1:
+        $r1 = <com.google.android.maps.MapController$1: int[] $SwitchMap$com$google$android$maps$MapController$VertPanState>;
+
+        $r3 = $r0.<com.google.android.maps.MapController: com.google.android.maps.MapController$VertPanState mVertPan>;
+
+        $i0 = virtualinvoke $r3.<java.lang.Enum: int ordinal()>();
+
+        $i0 = $r1[$i0];
+
+        lookupswitch($i0)
+        {
+            case 1: goto label6;
+            case 2: goto label7;
+            case 3: goto label8;
+            default: goto label2;
+        };
+
+     label2:
+        $r1 = $r0.<com.google.android.maps.MapController: int[] mDeltas>;
+
+        $f0 = $r0.<com.google.android.maps.MapController: float mXPanSpeed>;
+
+        $i0 = (int) $f0;
+
+        $r1[0] = $i0;
+
+        $r1 = $r0.<com.google.android.maps.MapController: int[] mDeltas>;
+
+        $f0 = $r0.<com.google.android.maps.MapController: float mYPanSpeed>;
+
+        $i0 = (int) $f0;
+
+        $r1[1] = $i0;
+
+        $r1 = $r0.<com.google.android.maps.MapController: int[] mDeltas>;
+
+        return $r1;
+
+     label3:
+        $f0 = $r0.<com.google.android.maps.MapController: float mXPanSpeed>;
+
+        $f0 = specialinvoke $r0.<com.google.android.maps.MapController: float curve(float,float)>($f0, -8.0F);
+
+        $r0.<com.google.android.maps.MapController: float mXPanSpeed> = $f0;
+
+        goto label1;
+
+     label4:
+        $f0 = $r0.<com.google.android.maps.MapController: float mXPanSpeed>;
+
+        $f0 = specialinvoke $r0.<com.google.android.maps.MapController: float curve(float,float)>($f0, 8.0F);
+
+        $r0.<com.google.android.maps.MapController: float mXPanSpeed> = $f0;
+
+        goto label1;
+
+     label5:
+        $r0.<com.google.android.maps.MapController: float mXPanSpeed> = 0.0F;
+
+        goto label1;
+
+     label6:
+        $f0 = $r0.<com.google.android.maps.MapController: float mYPanSpeed>;
+
+        $f0 = specialinvoke $r0.<com.google.android.maps.MapController: float curve(float,float)>($f0, -8.0F);
+
+        $r0.<com.google.android.maps.MapController: float mYPanSpeed> = $f0;
+
+        goto label2;
+
+     label7:
+        $f0 = $r0.<com.google.android.maps.MapController: float mYPanSpeed>;
+
+        $f0 = specialinvoke $r0.<com.google.android.maps.MapController: float curve(float,float)>($f0, 8.0F);
+
+        $r0.<com.google.android.maps.MapController: float mYPanSpeed> = $f0;
+
+        goto label2;
+
+     label8:
+        $r0.<com.google.android.maps.MapController: float mYPanSpeed> = 0.0F;
+
+        goto label2;
+    }
+
+    boolean isDirty()
+    {
+        com.google.android.maps.MapController $r0;
+        boolean z0;
+
+        $r0 := @this: com.google.android.maps.MapController;
+
+        z0 = $r0.<com.google.android.maps.MapController: boolean mDirty>;
+
+        return z0;
+    }
+
+    public boolean onKey(android.view.View, int, android.view.KeyEvent)
+    {
+        com.google.android.maps.MapController $r0;
+        android.view.View $r1;
+        int $i0, $i1;
+        android.view.KeyEvent $r2;
+        java.lang.IllegalArgumentException $r3;
+        java.lang.StringBuilder $r4;
+        java.lang.String $r5;
+        boolean $z0;
+
+        $r0 := @this: com.google.android.maps.MapController;
+
+        $r1 := @parameter0: android.view.View;
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: android.view.KeyEvent;
+
+        $i1 = virtualinvoke $r2.<android.view.KeyEvent: int getAction()>();
+
+        lookupswitch($i1)
+        {
+            case 0: goto label2;
+            case 1: goto label4;
+            default: goto label1;
+        };
+
+     label1:
+        $r3 = new java.lang.IllegalArgumentException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown key action: ");
+
+        $i0 = virtualinvoke $r2.<android.view.KeyEvent: int getAction()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r5);
+
+        throw $r3;
+
+     label2:
+        $z0 = specialinvoke $r0.<com.google.android.maps.MapController: boolean onKeyDown(int)>($i0);
+
+        if $z0 == 0 goto label3;
+
+        virtualinvoke $r0.<com.google.android.maps.MapController: void repaint()>();
+
+        return 1;
+
+     label3:
+        return 0;
+
+     label4:
+        $z0 = specialinvoke $r0.<com.google.android.maps.MapController: boolean onKeyUp(int)>($i0);
+
+        if $z0 == 0 goto label5;
+
+        virtualinvoke $r0.<com.google.android.maps.MapController: void repaint()>();
+
+        return 1;
+
+     label5:
+        return 0;
+    }
+
+    void onMeasure()
+    {
+        com.google.android.maps.MapController $r0;
+        int $i0, $i1;
+        boolean $z0;
+
+        $r0 := @this: com.google.android.maps.MapController;
+
+        $z0 = $r0.<com.google.android.maps.MapController: boolean mHasBeenMeasured>;
+
+        if $z0 != 0 goto label1;
+
+        $r0.<com.google.android.maps.MapController: boolean mHasBeenMeasured> = 1;
+
+        $i0 = $r0.<com.google.android.maps.MapController: int mDeferredLatSpanE6>;
+
+        if $i0 < 0 goto label2;
+
+        $i1 = $r0.<com.google.android.maps.MapController: int mDeferredLatSpanE6>;
+
+        $i0 = $r0.<com.google.android.maps.MapController: int mDeferredLonSpanE6>;
+
+        virtualinvoke $r0.<com.google.android.maps.MapController: void zoomToSpan(int,int)>($i1, $i0);
+
+        return;
+
+     label1:
+        return;
+
+     label2:
+        return;
+    }
+
+    void repaint()
+    {
+        com.google.android.maps.MapController $r0;
+        com.google.android.maps.MapView $r1;
+
+        $r0 := @this: com.google.android.maps.MapController;
+
+        $r0.<com.google.android.maps.MapController: boolean mDirty> = 1;
+
+        $r1 = $r0.<com.google.android.maps.MapController: com.google.android.maps.MapView mMapView>;
+
+        virtualinvoke $r1.<android.view.View: void postInvalidate()>();
+
+        return;
+    }
+
+    public void scrollBy(int, int)
+    {
+        com.google.android.maps.MapController $r0;
+        int $i0, $i1;
+        com.google.googlenav.map.Map $r1;
+        com.google.map.MapPoint $r2;
+        com.google.map.Zoom $r3;
+
+        $r0 := @this: com.google.android.maps.MapController;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        virtualinvoke $r0.<com.google.android.maps.MapController: void stopAnimation(boolean)>(0);
+
+        $r1 = $r0.<com.google.android.maps.MapController: com.google.googlenav.map.Map mMap>;
+
+        $r2 = virtualinvoke $r1.<com.google.googlenav.map.Map: com.google.map.MapPoint getCenterPoint()>();
+
+        $r1 = $r0.<com.google.android.maps.MapController: com.google.googlenav.map.Map mMap>;
+
+        $r3 = virtualinvoke $r1.<com.google.googlenav.map.Map: com.google.map.Zoom getZoom()>();
+
+        $r2 = virtualinvoke $r2.<com.google.map.MapPoint: com.google.map.MapPoint pixelOffset(int,int,com.google.map.Zoom)>($i0, $i1, $r3);
+
+        specialinvoke $r0.<com.google.android.maps.MapController: void centerMapToInternal(com.google.map.MapPoint)>($r2);
+
+        return;
+    }
+
+    void scrollByTrackball(int, int)
+    {
+        com.google.android.maps.MapController $r0;
+        int $i0, $i1;
+        long $l2, $l3;
+        android.view.animation.Animation $r1;
+        byte $b4;
+
+        $r0 := @this: com.google.android.maps.MapController;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 = $r0.<com.google.android.maps.MapController: android.view.animation.Animation mPanAnimation>;
+
+        if $r1 == null goto label1;
+
+        $l2 = staticinvoke <android.view.animation.AnimationUtils: long currentAnimationTimeMillis()>();
+
+        $r1 = $r0.<com.google.android.maps.MapController: android.view.animation.Animation mPanAnimation>;
+
+        $l3 = virtualinvoke $r1.<android.view.animation.Animation: long getStartTime()>();
+
+        $l2 = $l2 - $l3;
+
+        $b4 = $l2 cmp 250L;
+
+        if $b4 >= 0 goto label1;
+
+        return;
+
+     label1:
+        virtualinvoke $r0.<com.google.android.maps.MapController: void scrollBy(int,int)>($i0, $i1);
+
+        return;
+    }
+
+    public void setCenter(com.google.android.maps.GeoPoint)
+    {
+        com.google.android.maps.MapController $r0;
+        com.google.android.maps.GeoPoint $r1;
+        com.google.map.MapPoint $r2;
+
+        $r0 := @this: com.google.android.maps.MapController;
+
+        $r1 := @parameter0: com.google.android.maps.GeoPoint;
+
+        $r2 = virtualinvoke $r1.<com.google.android.maps.GeoPoint: com.google.map.MapPoint getMapPoint()>();
+
+        specialinvoke $r0.<com.google.android.maps.MapController: void centerMapToInternal(com.google.map.MapPoint)>($r2);
+
+        return;
+    }
+
+    public int setZoom(int)
+    {
+        com.google.android.maps.MapController $r0;
+        int $i0;
+        com.google.map.Zoom $r1;
+
+        $r0 := @this: com.google.android.maps.MapController;
+
+        $i0 := @parameter0: int;
+
+        $i0 = staticinvoke <java.lang.Math: int max(int,int)>(1, $i0);
+
+        $i0 = staticinvoke <java.lang.Math: int min(int,int)>(22, $i0);
+
+        $r1 = staticinvoke <com.google.map.Zoom: com.google.map.Zoom getZoom(int)>($i0);
+
+        virtualinvoke $r0.<com.google.android.maps.MapController: void zoomTo(com.google.map.Zoom)>($r1);
+
+        return $i0;
+    }
+
+    boolean stepAnimation(long)
+    {
+        com.google.android.maps.MapController $r0;
+        long $l0;
+        com.google.map.MapPoint $r1, r10;
+        android.view.animation.Transformation $r2;
+        int[] $r3;
+        int $i1, $i2;
+        android.view.animation.Animation $r4;
+        boolean $z0;
+        float[] $r5;
+        android.graphics.Matrix $r6;
+        float $f0;
+        double $d0;
+        android.os.Message $r7;
+        java.lang.Runnable $r8;
+        com.google.android.maps.MapView $r9;
+
+        $r0 := @this: com.google.android.maps.MapController;
+
+        $l0 := @parameter0: long;
+
+        $r3 = virtualinvoke $r0.<com.google.android.maps.MapController: int[] getDeltas()>();
+
+        $i1 = $r3[0];
+
+        if $i1 != 0 goto label1;
+
+        $i1 = $r3[1];
+
+        if $i1 == 0 goto label2;
+
+     label1:
+        $i1 = $r3[0];
+
+        $i2 = $r3[1];
+
+        virtualinvoke $r0.<com.google.android.maps.MapController: void scrollBy(int,int)>($i1, $i2);
+
+        return 1;
+
+     label2:
+        $r4 = $r0.<com.google.android.maps.MapController: android.view.animation.Animation mPanAnimation>;
+
+        if $r4 == null goto label6;
+
+        $r2 = <com.google.android.maps.MapController: android.view.animation.Transformation EMPTY_TRANSFORM>;
+
+        virtualinvoke $r2.<android.view.animation.Transformation: void clear()>();
+
+        $r4 = $r0.<com.google.android.maps.MapController: android.view.animation.Animation mPanAnimation>;
+
+        $z0 = virtualinvoke $r4.<android.view.animation.Animation: boolean getTransformation(long,android.view.animation.Transformation)>($l0, $r2);
+
+        if $z0 == 0 goto label3;
+
+        $r5 = $r0.<com.google.android.maps.MapController: float[] mOrigin>;
+
+        $f0 = 0.0F;
+
+        $r5[0] = $f0;
+
+        $r5 = $r0.<com.google.android.maps.MapController: float[] mOrigin>;
+
+        $f0 = 0.0F;
+
+        $r5[1] = $f0;
+
+        $r6 = virtualinvoke $r2.<android.view.animation.Transformation: android.graphics.Matrix getMatrix()>();
+
+        $r5 = $r0.<com.google.android.maps.MapController: float[] mOrigin>;
+
+        virtualinvoke $r6.<android.graphics.Matrix: void mapPoints(float[])>($r5);
+
+        r10 = new com.google.map.MapPoint;
+
+        $r5 = $r0.<com.google.android.maps.MapController: float[] mOrigin>;
+
+        $f0 = $r5[0];
+
+        $d0 = (double) $f0;
+
+        $d0 = $d0 * 1000000.0;
+
+        $i1 = (int) $d0;
+
+        $r5 = $r0.<com.google.android.maps.MapController: float[] mOrigin>;
+
+        $f0 = $r5[1];
+
+        $d0 = (double) $f0;
+
+        $d0 = $d0 * 1000000.0;
+
+        $i2 = (int) $d0;
+
+        specialinvoke r10.<com.google.map.MapPoint: void <init>(int,int)>($i1, $i2);
+
+        specialinvoke $r0.<com.google.android.maps.MapController: void centerMapToInternal(com.google.map.MapPoint)>(r10);
+
+        return 1;
+
+     label3:
+        $r1 = $r0.<com.google.android.maps.MapController: com.google.map.MapPoint mPanPoint>;
+
+        specialinvoke $r0.<com.google.android.maps.MapController: void centerMapToInternal(com.google.map.MapPoint)>($r1);
+
+        $r0.<com.google.android.maps.MapController: com.google.map.MapPoint mPanPoint> = null;
+
+        $r0.<com.google.android.maps.MapController: android.view.animation.Animation mPanAnimation> = null;
+
+        $r7 = $r0.<com.google.android.maps.MapController: android.os.Message mAnimationCompletedMessage>;
+
+        if $r7 == null goto label4;
+
+        $r7 = $r0.<com.google.android.maps.MapController: android.os.Message mAnimationCompletedMessage>;
+
+        virtualinvoke $r7.<android.os.Message: void sendToTarget()>();
+
+        $r0.<com.google.android.maps.MapController: android.os.Message mAnimationCompletedMessage> = null;
+
+     label4:
+        $r8 = $r0.<com.google.android.maps.MapController: java.lang.Runnable mAnimationCompletedRunnable>;
+
+        if $r8 == null goto label5;
+
+        $r9 = $r0.<com.google.android.maps.MapController: com.google.android.maps.MapView mMapView>;
+
+        $r8 = $r0.<com.google.android.maps.MapController: java.lang.Runnable mAnimationCompletedRunnable>;
+
+        virtualinvoke $r9.<android.view.View: boolean post(java.lang.Runnable)>($r8);
+
+        $r0.<com.google.android.maps.MapController: java.lang.Runnable mAnimationCompletedRunnable> = null;
+
+     label5:
+        return 0;
+
+     label6:
+        return 0;
+    }
+
+    public void stopAnimation(boolean)
+    {
+        com.google.android.maps.MapController $r0;
+        boolean $z0;
+        android.view.animation.Animation $r1;
+        com.google.googlenav.map.Map $r2;
+        com.google.map.MapPoint $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: com.google.android.maps.MapController;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 = $r0.<com.google.android.maps.MapController: android.view.animation.Animation mPanAnimation>;
+
+        if $r1 == null goto label3;
+
+        if $z0 == 0 goto label2;
+
+        $r2 = $r0.<com.google.android.maps.MapController: com.google.googlenav.map.Map mMap>;
+
+        entermonitor $r2;
+
+     label1:
+        $r3 = $r0.<com.google.android.maps.MapController: com.google.map.MapPoint mPanPoint>;
+
+        specialinvoke $r0.<com.google.android.maps.MapController: void centerMapToInternal(com.google.map.MapPoint)>($r3);
+
+        exitmonitor $r2;
+
+     label2:
+        $r0.<com.google.android.maps.MapController: android.view.animation.Animation mPanAnimation> = null;
+
+        $r0.<com.google.android.maps.MapController: com.google.map.MapPoint mPanPoint> = null;
+
+     label3:
+        $r0.<com.google.android.maps.MapController: android.os.Message mAnimationCompletedMessage> = null;
+
+        return;
+
+     label4:
+        $r4 := @caughtexception;
+
+     label5:
+        exitmonitor $r2;
+
+     label6:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label4;
+        catch java.lang.Throwable from label5 to label6 with label4;
+    }
+
+    public void stopPanning()
+    {
+        com.google.android.maps.MapController $r0;
+        com.google.android.maps.MapController$HorizPanState $r1;
+        com.google.android.maps.MapController$VertPanState $r2;
+
+        $r0 := @this: com.google.android.maps.MapController;
+
+        $r1 = <com.google.android.maps.MapController$HorizPanState: com.google.android.maps.MapController$HorizPanState NONE>;
+
+        $r0.<com.google.android.maps.MapController: com.google.android.maps.MapController$HorizPanState mHorizPan> = $r1;
+
+        $r2 = <com.google.android.maps.MapController$VertPanState: com.google.android.maps.MapController$VertPanState NONE>;
+
+        $r0.<com.google.android.maps.MapController: com.google.android.maps.MapController$VertPanState mVertPan> = $r2;
+
+        return;
+    }
+
+    public boolean zoomIn()
+    {
+        com.google.android.maps.MapController $r0;
+        boolean $z0;
+        com.google.android.maps.MapView $r1;
+
+        $r0 := @this: com.google.android.maps.MapController;
+
+        $r1 = $r0.<com.google.android.maps.MapController: com.google.android.maps.MapView mMapView>;
+
+        $z0 = virtualinvoke $r1.<com.google.android.maps.MapView: boolean doZoom(boolean)>(1);
+
+        return $z0;
+    }
+
+    public boolean zoomInFixing(int, int)
+    {
+        com.google.android.maps.MapController $r0;
+        int $i0, $i1;
+        boolean $z0;
+        com.google.android.maps.MapView $r1;
+
+        $r0 := @this: com.google.android.maps.MapController;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 = $r0.<com.google.android.maps.MapController: com.google.android.maps.MapView mMapView>;
+
+        $z0 = virtualinvoke $r1.<com.google.android.maps.MapView: boolean doZoom(boolean,int,int)>(1, $i0, $i1);
+
+        return $z0;
+    }
+
+    public boolean zoomOut()
+    {
+        com.google.android.maps.MapController $r0;
+        boolean $z0;
+        com.google.android.maps.MapView $r1;
+
+        $r0 := @this: com.google.android.maps.MapController;
+
+        $r1 = $r0.<com.google.android.maps.MapController: com.google.android.maps.MapView mMapView>;
+
+        $z0 = virtualinvoke $r1.<com.google.android.maps.MapView: boolean doZoom(boolean)>(0);
+
+        return $z0;
+    }
+
+    public boolean zoomOutFixing(int, int)
+    {
+        com.google.android.maps.MapController $r0;
+        int $i0, $i1;
+        boolean $z0;
+        com.google.android.maps.MapView $r1;
+
+        $r0 := @this: com.google.android.maps.MapController;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 = $r0.<com.google.android.maps.MapController: com.google.android.maps.MapView mMapView>;
+
+        $z0 = virtualinvoke $r1.<com.google.android.maps.MapView: boolean doZoom(boolean,int,int)>(0, $i0, $i1);
+
+        return $z0;
+    }
+
+    void zoomTo(com.google.map.Zoom)
+    {
+        com.google.android.maps.MapController $r0;
+        com.google.map.Zoom $r1;
+        com.google.googlenav.map.Map $r2;
+
+        $r0 := @this: com.google.android.maps.MapController;
+
+        $r1 := @parameter0: com.google.map.Zoom;
+
+        $r2 = $r0.<com.google.android.maps.MapController: com.google.googlenav.map.Map mMap>;
+
+        virtualinvoke $r2.<com.google.googlenav.map.Map: void setZoom(com.google.map.Zoom)>($r1);
+
+        virtualinvoke $r0.<com.google.android.maps.MapController: void repaint()>();
+
+        return;
+    }
+
+    public void zoomToSpan(int, int)
+    {
+        com.google.android.maps.MapController $r0;
+        int $i0, $i1;
+        boolean $z0;
+        com.google.googlenav.map.Map $r1;
+
+        $r0 := @this: com.google.android.maps.MapController;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $z0 = $r0.<com.google.android.maps.MapController: boolean mHasBeenMeasured>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = $r0.<com.google.android.maps.MapController: com.google.googlenav.map.Map mMap>;
+
+        virtualinvoke $r1.<com.google.googlenav.map.Map: void zoomToSpan(int,int)>($i0, $i1);
+
+        virtualinvoke $r0.<com.google.android.maps.MapController: void repaint()>();
+
+        return;
+
+     label1:
+        $r0.<com.google.android.maps.MapController: int mDeferredLatSpanE6> = $i0;
+
+        $r0.<com.google.android.maps.MapController: int mDeferredLonSpanE6> = $i1;
+
+        return;
+    }
+}

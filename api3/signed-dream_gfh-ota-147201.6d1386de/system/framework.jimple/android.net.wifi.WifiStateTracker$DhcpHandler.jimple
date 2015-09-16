@@ -1,0 +1,301 @@
+class android.net.wifi.WifiStateTracker$DhcpHandler extends android.os.Handler
+{
+    private android.bluetooth.BluetoothHeadset mBluetoothHeadset;
+    private boolean mCancelCallback;
+    private android.os.Handler mTarget;
+    final android.net.wifi.WifiStateTracker this$0;
+
+    public void <init>(android.net.wifi.WifiStateTracker, android.os.Looper, android.os.Handler)
+    {
+        android.net.wifi.WifiStateTracker$DhcpHandler $r0;
+        android.net.wifi.WifiStateTracker $r1;
+        android.os.Looper $r2;
+        android.os.Handler $r3;
+        android.bluetooth.BluetoothHeadset $r4;
+        android.content.Context $r5;
+
+        $r0 := @this: android.net.wifi.WifiStateTracker$DhcpHandler;
+
+        $r1 := @parameter0: android.net.wifi.WifiStateTracker;
+
+        $r2 := @parameter1: android.os.Looper;
+
+        $r3 := @parameter2: android.os.Handler;
+
+        $r0.<android.net.wifi.WifiStateTracker$DhcpHandler: android.net.wifi.WifiStateTracker this$0> = $r1;
+
+        specialinvoke $r0.<android.os.Handler: void <init>(android.os.Looper)>($r2);
+
+        $r0.<android.net.wifi.WifiStateTracker$DhcpHandler: android.os.Handler mTarget> = $r3;
+
+        $r4 = new android.bluetooth.BluetoothHeadset;
+
+        $r5 = staticinvoke <android.net.wifi.WifiStateTracker: android.content.Context access$000(android.net.wifi.WifiStateTracker)>($r1);
+
+        specialinvoke $r4.<android.bluetooth.BluetoothHeadset: void <init>(android.content.Context,android.bluetooth.BluetoothHeadset$ServiceListener)>($r5, null);
+
+        $r0.<android.net.wifi.WifiStateTracker$DhcpHandler: android.bluetooth.BluetoothHeadset mBluetoothHeadset> = $r4;
+
+        return;
+    }
+
+    private boolean shouldDisableCoexistenceMode()
+    {
+        android.net.wifi.WifiStateTracker$DhcpHandler $r0;
+        int $i0;
+        android.bluetooth.BluetoothHeadset $r1;
+
+        $r0 := @this: android.net.wifi.WifiStateTracker$DhcpHandler;
+
+        $r1 = $r0.<android.net.wifi.WifiStateTracker$DhcpHandler: android.bluetooth.BluetoothHeadset mBluetoothHeadset>;
+
+        $i0 = virtualinvoke $r1.<android.bluetooth.BluetoothHeadset: int getState()>();
+
+        if $i0 != 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    public void handleMessage(android.os.Message)
+    {
+        android.net.wifi.WifiStateTracker$DhcpHandler $r0;
+        android.os.Message $r1;
+        int $i0;
+        boolean $z0, $z1;
+        android.net.wifi.WifiStateTracker $r2;
+        java.lang.String $r3;
+        android.net.DhcpInfo $r4;
+        byte $b1;
+        android.os.Handler $r5;
+        java.lang.Throwable $r6, $r7, $r8, $r9, $r11, $r12;
+        java.lang.StringBuilder $r10;
+
+        $r0 := @this: android.net.wifi.WifiStateTracker$DhcpHandler;
+
+        $r1 := @parameter0: android.os.Message;
+
+        $i0 = $r1.<android.os.Message: int what>;
+
+        lookupswitch($i0)
+        {
+            case 9: goto label02;
+            default: goto label01;
+        };
+
+     label01:
+        return;
+
+     label02:
+        $z0 = 0;
+
+        $z1 = specialinvoke $r0.<android.net.wifi.WifiStateTracker$DhcpHandler: boolean shouldDisableCoexistenceMode()>();
+
+        if $z1 == 0 goto label04;
+
+        $z0 = 1;
+
+        $r2 = $r0.<android.net.wifi.WifiStateTracker$DhcpHandler: android.net.wifi.WifiStateTracker this$0>;
+
+        entermonitor $r2;
+
+     label03:
+        staticinvoke <android.net.wifi.WifiNative: boolean setBluetoothCoexistenceModeCommand(int)>(1);
+
+        exitmonitor $r2;
+
+     label04:
+        $r2 = $r0.<android.net.wifi.WifiStateTracker$DhcpHandler: android.net.wifi.WifiStateTracker this$0>;
+
+        entermonitor $r2;
+
+     label05:
+        staticinvoke <android.net.wifi.WifiNative: boolean setPowerModeCommand(int)>(1);
+
+        exitmonitor $r2;
+
+     label06:
+        entermonitor $r0;
+
+     label07:
+        $r0.<android.net.wifi.WifiStateTracker$DhcpHandler: boolean mCancelCallback> = 0;
+
+        exitmonitor $r0;
+
+     label08:
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("WifiStateTracker", "DhcpHandler: DHCP request started");
+
+        $r2 = $r0.<android.net.wifi.WifiStateTracker$DhcpHandler: android.net.wifi.WifiStateTracker this$0>;
+
+        $r3 = staticinvoke <android.net.wifi.WifiStateTracker: java.lang.String access$100(android.net.wifi.WifiStateTracker)>($r2);
+
+        $r2 = $r0.<android.net.wifi.WifiStateTracker$DhcpHandler: android.net.wifi.WifiStateTracker this$0>;
+
+        $r4 = staticinvoke <android.net.wifi.WifiStateTracker: android.net.DhcpInfo access$200(android.net.wifi.WifiStateTracker)>($r2);
+
+        $z1 = staticinvoke <android.net.NetworkUtils: boolean runDhcp(java.lang.String,android.net.DhcpInfo)>($r3, $r4);
+
+        if $z1 == 0 goto label28;
+
+        $b1 = 6;
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("WifiStateTracker", "DhcpHandler: DHCP request succeeded");
+
+     label09:
+        $r2 = $r0.<android.net.wifi.WifiStateTracker$DhcpHandler: android.net.wifi.WifiStateTracker this$0>;
+
+        entermonitor $r2;
+
+     label10:
+        staticinvoke <android.net.wifi.WifiNative: boolean setPowerModeCommand(int)>(0);
+
+        exitmonitor $r2;
+
+     label11:
+        if $z0 == 0 goto label13;
+
+        $r2 = $r0.<android.net.wifi.WifiStateTracker$DhcpHandler: android.net.wifi.WifiStateTracker this$0>;
+
+        entermonitor $r2;
+
+     label12:
+        staticinvoke <android.net.wifi.WifiNative: boolean setBluetoothCoexistenceModeCommand(int)>(2);
+
+        exitmonitor $r2;
+
+     label13:
+        entermonitor $r0;
+
+     label14:
+        $z0 = $r0.<android.net.wifi.WifiStateTracker$DhcpHandler: boolean mCancelCallback>;
+
+        if $z0 != 0 goto label15;
+
+        $r5 = $r0.<android.net.wifi.WifiStateTracker$DhcpHandler: android.os.Handler mTarget>;
+
+        virtualinvoke $r5.<android.os.Handler: boolean sendEmptyMessage(int)>($b1);
+
+     label15:
+        exitmonitor $r0;
+
+     label16:
+        return;
+
+     label17:
+        $r6 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label18:
+        throw $r6;
+
+     label19:
+        $r7 := @caughtexception;
+
+     label20:
+        exitmonitor $r2;
+
+     label21:
+        throw $r7;
+
+     label22:
+        $r8 := @caughtexception;
+
+     label23:
+        exitmonitor $r2;
+
+     label24:
+        throw $r8;
+
+     label25:
+        $r9 := @caughtexception;
+
+     label26:
+        exitmonitor $r0;
+
+     label27:
+        throw $r9;
+
+     label28:
+        $b1 = 7;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("DhcpHandler: DHCP request failed: ");
+
+        $r3 = staticinvoke <android.net.NetworkUtils: java.lang.String getDhcpError()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("WifiStateTracker", $r3);
+
+        goto label09;
+
+     label29:
+        $r11 := @caughtexception;
+
+     label30:
+        exitmonitor $r2;
+
+     label31:
+        throw $r11;
+
+     label32:
+        $r12 := @caughtexception;
+
+     label33:
+        exitmonitor $r2;
+
+     label34:
+        throw $r12;
+
+        catch java.lang.Throwable from label03 to label04 with label19;
+        catch java.lang.Throwable from label05 to label06 with label22;
+        catch java.lang.Throwable from label07 to label08 with label25;
+        catch java.lang.Throwable from label10 to label11 with label29;
+        catch java.lang.Throwable from label12 to label13 with label32;
+        catch java.lang.Throwable from label14 to label16 with label17;
+        catch java.lang.Throwable from label17 to label18 with label17;
+        catch java.lang.Throwable from label20 to label21 with label19;
+        catch java.lang.Throwable from label23 to label24 with label22;
+        catch java.lang.Throwable from label26 to label27 with label25;
+        catch java.lang.Throwable from label30 to label31 with label29;
+        catch java.lang.Throwable from label33 to label34 with label32;
+    }
+
+    public void setCancelCallback(boolean)
+    {
+        android.net.wifi.WifiStateTracker$DhcpHandler $r0;
+        boolean $z0;
+        java.lang.Throwable $r1;
+
+        $r0 := @this: android.net.wifi.WifiStateTracker$DhcpHandler;
+
+        $z0 := @parameter0: boolean;
+
+        entermonitor $r0;
+
+     label1:
+        $r0.<android.net.wifi.WifiStateTracker$DhcpHandler: boolean mCancelCallback> = $z0;
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+}

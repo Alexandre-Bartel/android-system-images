@@ -1,0 +1,2127 @@
+public class org.apache.harmony.awt.gl.font.TextRunBreaker extends java.lang.Object implements java.lang.Cloneable
+{
+    java.text.AttributedCharacterIterator aci;
+    java.util.HashMap decorations;
+    java.util.HashMap fonts;
+    int[] forcedFontRunStarts;
+    java.awt.font.FontRenderContext frc;
+    private boolean haveAllSegments;
+    float justification;
+    byte[] levels;
+    int[] logical2segment;
+    int[] logical2visual;
+    java.util.ArrayList runSegments;
+    int[] segment2visual;
+    int segmentsEnd;
+    int segmentsStart;
+    org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo storedSegments;
+    char[] text;
+    int[] visual2logical;
+    int[] visual2segment;
+
+    public void <init>(java.text.AttributedCharacterIterator, java.awt.font.FontRenderContext)
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        java.text.AttributedCharacterIterator $r1;
+        java.awt.font.FontRenderContext $r2;
+        java.util.ArrayList $r3;
+        int $i0, $i1;
+        char[] $r4;
+        char $c2;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $r1 := @parameter0: java.text.AttributedCharacterIterator;
+
+        $r2 := @parameter1: java.awt.font.FontRenderContext;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>()>();
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.ArrayList runSegments> = $r3;
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: boolean haveAllSegments> = 0;
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: float justification> = 1.0F;
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.text.AttributedCharacterIterator aci> = $r1;
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.awt.font.FontRenderContext frc> = $r2;
+
+        $i0 = interfaceinvoke $r1.<java.text.AttributedCharacterIterator: int getBeginIndex()>();
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int segmentsStart> = $i0;
+
+        $i0 = interfaceinvoke $r1.<java.text.AttributedCharacterIterator: int getEndIndex()>();
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int segmentsEnd> = $i0;
+
+        $i0 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int segmentsEnd>;
+
+        $i1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int segmentsStart>;
+
+        $i0 = $i0 - $i1;
+
+        $r4 = newarray (char)[$i0];
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: char[] text> = $r4;
+
+        $i1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int segmentsEnd>;
+
+        interfaceinvoke $r1.<java.text.AttributedCharacterIterator: char setIndex(int)>($i1);
+
+     label1:
+        $i1 = $i0 - 1;
+
+        if $i0 == 0 goto label2;
+
+        $r4 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: char[] text>;
+
+        $c2 = interfaceinvoke $r1.<java.text.AttributedCharacterIterator: char previous()>();
+
+        $r4[$i1] = $c2;
+
+        $i0 = $i1;
+
+        goto label1;
+
+     label2:
+        virtualinvoke $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: void createStyleRuns()>();
+
+        return;
+    }
+
+    private void resetSegments()
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        java.util.ArrayList $r1;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.ArrayList runSegments> = $r1;
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int[] logical2segment> = null;
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int[] segment2visual> = null;
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int[] visual2segment> = null;
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: byte[] levels> = null;
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: boolean haveAllSegments> = 0;
+
+        return;
+    }
+
+    private void shiftStyleRuns(java.lang.Integer, int)
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        java.lang.Integer $r1, $r7;
+        int $i0, $i1, $i2;
+        java.util.ArrayList $r2;
+        java.util.HashMap $r3, $r8;
+        java.util.Set $r4;
+        java.util.Iterator $r5;
+        boolean $z0;
+        java.lang.Object $r6;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $r1 := @parameter0: java.lang.Integer;
+
+        $i0 := @parameter1: int;
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.HashMap fonts>;
+
+        $r4 = virtualinvoke $r3.<java.util.HashMap: java.util.Set keySet()>();
+
+        $r5 = interfaceinvoke $r4.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        $r7 = (java.lang.Integer) $r6;
+
+        $i1 = virtualinvoke $r7.<java.lang.Integer: int intValue()>();
+
+        $i2 = virtualinvoke $r1.<java.lang.Integer: int intValue()>();
+
+        if $i1 <= $i2 goto label1;
+
+        virtualinvoke $r2.<java.util.ArrayList: boolean add(java.lang.Object)>($r7);
+
+        goto label1;
+
+     label2:
+        $i1 = 0;
+
+     label3:
+        $i2 = virtualinvoke $r2.<java.util.ArrayList: int size()>();
+
+        if $i1 >= $i2 goto label4;
+
+        $r6 = virtualinvoke $r2.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r7 = (java.lang.Integer) $r6;
+
+        $r1 = new java.lang.Integer;
+
+        $i2 = virtualinvoke $r7.<java.lang.Integer: int intValue()>();
+
+        $i2 = $i2 + $i0;
+
+        specialinvoke $r1.<java.lang.Integer: void <init>(int)>($i2);
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.HashMap fonts>;
+
+        $r8 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.HashMap fonts>;
+
+        $r6 = virtualinvoke $r8.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>($r7);
+
+        virtualinvoke $r3.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, $r6);
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.HashMap decorations>;
+
+        $r8 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.HashMap decorations>;
+
+        $r6 = virtualinvoke $r8.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>($r7);
+
+        virtualinvoke $r3.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, $r6);
+
+        $i1 = $i1 + 1;
+
+        goto label3;
+
+     label4:
+        return;
+    }
+
+    public java.lang.Object clone()
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0, $r3;
+        java.util.ArrayList $r1, $r4;
+        java.lang.Object $r2;
+        int $i0, $i1;
+        org.apache.harmony.awt.gl.font.TextRunSegment $r5;
+        java.lang.CloneNotSupportedException $r6;
+        java.lang.UnsupportedOperationException $r7;
+        java.lang.String $r8;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+     label01:
+        $r2 = specialinvoke $r0.<java.lang.Object: java.lang.Object clone()>();
+
+     label02:
+        $r3 = (org.apache.harmony.awt.gl.font.TextRunBreaker) $r2;
+
+        $r3.<org.apache.harmony.awt.gl.font.TextRunBreaker: org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo storedSegments> = null;
+
+        $r1 = new java.util.ArrayList;
+
+     label03:
+        $r4 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.ArrayList runSegments>;
+
+        $i0 = virtualinvoke $r4.<java.util.ArrayList: int size()>();
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>(int)>($i0);
+
+     label04:
+        $i0 = 0;
+
+     label05:
+        $r4 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.ArrayList runSegments>;
+
+        $i1 = virtualinvoke $r4.<java.util.ArrayList: int size()>();
+
+     label06:
+        if $i0 >= $i1 goto label09;
+
+     label07:
+        $r4 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.ArrayList runSegments>;
+
+        $r2 = virtualinvoke $r4.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r5 = (org.apache.harmony.awt.gl.font.TextRunSegment) $r2;
+
+        $r2 = virtualinvoke $r5.<org.apache.harmony.awt.gl.font.TextRunSegment: java.lang.Object clone()>();
+
+        $r5 = (org.apache.harmony.awt.gl.font.TextRunSegment) $r2;
+
+        virtualinvoke $r1.<java.util.ArrayList: boolean add(java.lang.Object)>($r5);
+
+     label08:
+        $i0 = $i0 + 1;
+
+        goto label05;
+
+     label09:
+        $r3.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.ArrayList runSegments> = $r1;
+
+        return $r3;
+
+     label10:
+        $r6 := @caughtexception;
+
+        $r7 = new java.lang.UnsupportedOperationException;
+
+        $r8 = staticinvoke <org.apache.harmony.awt.internal.nls.Messages: java.lang.String getString(java.lang.String)>("awt.3E");
+
+        specialinvoke $r7.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>($r8);
+
+        throw $r7;
+
+        catch java.lang.CloneNotSupportedException from label01 to label02 with label10;
+        catch java.lang.CloneNotSupportedException from label03 to label04 with label10;
+        catch java.lang.CloneNotSupportedException from label05 to label06 with label10;
+        catch java.lang.CloneNotSupportedException from label07 to label08 with label10;
+    }
+
+    public void createAllSegments()
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        int $i0, $i1, $i2;
+        boolean $z0;
+        int[] $r1;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $z0 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: boolean haveAllSegments>;
+
+        if $z0 != 0 goto label2;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int[] logical2segment>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int[] logical2segment>;
+
+        $i1 = lengthof $r1;
+
+        $i2 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int segmentsEnd>;
+
+        $i0 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int segmentsStart>;
+
+        $i0 = $i2 - $i0;
+
+        if $i1 == $i0 goto label2;
+
+     label1:
+        specialinvoke $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: void resetSegments()>();
+
+        $i1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int segmentsStart>;
+
+        $i0 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int segmentsEnd>;
+
+        virtualinvoke $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: void createSegments(int,int)>($i1, $i0);
+
+     label2:
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: boolean haveAllSegments> = 1;
+
+        return;
+    }
+
+    public void createSegments(int, int)
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        org.apache.harmony.awt.gl.font.TextRunSegmentImpl$TextSegmentInfo $r1;
+        java.text.AttributedCharacterIterator $r2;
+        java.util.HashMap $r3;
+        java.lang.Integer $r4;
+        java.lang.Object $r5, $r6;
+        int[] $r7;
+        boolean $z0;
+        java.util.ArrayList $r8;
+        org.apache.harmony.awt.gl.font.TextRunSegmentImpl$TextRunSegmentGraphic $r9;
+        java.awt.font.GraphicAttribute $r10;
+        byte[] $r11;
+        byte $b9;
+        java.awt.Font $r12;
+        java.awt.font.FontRenderContext $r13;
+        char[] $r14;
+        org.apache.harmony.awt.gl.font.TextRunSegmentImpl$TextRunSegmentCommon $r15;
+        org.apache.harmony.awt.gl.font.TextDecorator$Decoration $r16;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i4 = $i0;
+
+        $r2 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.text.AttributedCharacterIterator aci>;
+
+        interfaceinvoke $r2.<java.text.AttributedCharacterIterator: char setIndex(int)>($i0);
+
+        $r2 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.text.AttributedCharacterIterator aci>;
+
+        $i6 = interfaceinvoke $r2.<java.text.AttributedCharacterIterator: int getRunStart()>();
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.HashMap decorations>;
+
+        $r4 = new java.lang.Integer;
+
+        specialinvoke $r4.<java.lang.Integer: void <init>(int)>($i6);
+
+        $r5 = virtualinvoke $r3.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r4);
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.HashMap fonts>;
+
+        $r4 = new java.lang.Integer;
+
+        specialinvoke $r4.<java.lang.Integer: void <init>(int)>($i6);
+
+        $r6 = virtualinvoke $r3.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r4);
+
+        $i6 = $i1 - $i0;
+
+        $r7 = newarray (int)[$i6];
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int[] logical2segment> = $r7;
+
+     label1:
+        $i6 = virtualinvoke $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int getStyleRunLimit(int,int)>($i4, $i1);
+
+        $i5 = $i4 - $i0;
+
+        $i4 = $i6 - $i0;
+
+        $i7 = $i5;
+
+     label2:
+        $i8 = virtualinvoke $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int getLevelRunLimit(int,int)>($i7, $i4);
+
+        $z0 = $r6 instanceof java.awt.font.GraphicAttribute;
+
+        if $z0 == 0 goto label4;
+
+        $r8 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.ArrayList runSegments>;
+
+        $r9 = new org.apache.harmony.awt.gl.font.TextRunSegmentImpl$TextRunSegmentGraphic;
+
+        $r10 = (java.awt.font.GraphicAttribute) $r6;
+
+        $i2 = $i8 - $i7;
+
+        $i3 = $i7 + $i0;
+
+        specialinvoke $r9.<org.apache.harmony.awt.gl.font.TextRunSegmentImpl$TextRunSegmentGraphic: void <init>(java.awt.font.GraphicAttribute,int,int)>($r10, $i2, $i3);
+
+        virtualinvoke $r8.<java.util.ArrayList: boolean add(java.lang.Object)>($r9);
+
+        $r7 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int[] logical2segment>;
+
+        $r8 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.ArrayList runSegments>;
+
+        $i2 = virtualinvoke $r8.<java.util.ArrayList: int size()>();
+
+        $i2 = $i2 - 1;
+
+        staticinvoke <java.util.Arrays: void fill(int[],int,int,int)>($r7, $i7, $i8, $i2);
+
+     label3:
+        $i7 = $i8;
+
+        if $i8 < $i4 goto label2;
+
+        $i4 = $i6;
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.HashMap decorations>;
+
+        $r4 = new java.lang.Integer;
+
+        specialinvoke $r4.<java.lang.Integer: void <init>(int)>($i6);
+
+        $r5 = virtualinvoke $r3.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r4);
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.HashMap fonts>;
+
+        $r4 = new java.lang.Integer;
+
+        specialinvoke $r4.<java.lang.Integer: void <init>(int)>($i6);
+
+        $r6 = virtualinvoke $r3.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r4);
+
+        if $i6 < $i1 goto label1;
+
+        return;
+
+     label4:
+        $r1 = new org.apache.harmony.awt.gl.font.TextRunSegmentImpl$TextSegmentInfo;
+
+        $r11 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: byte[] levels>;
+
+        if $r11 != null goto label6;
+
+        $b9 = 0;
+
+     label5:
+        $r12 = (java.awt.Font) $r6;
+
+        $r13 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.awt.font.FontRenderContext frc>;
+
+        $r14 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: char[] text>;
+
+        $i2 = $i7 + $i0;
+
+        $i3 = $i8 + $i0;
+
+        specialinvoke $r1.<org.apache.harmony.awt.gl.font.TextRunSegmentImpl$TextSegmentInfo: void <init>(byte,java.awt.Font,java.awt.font.FontRenderContext,char[],int,int)>($b9, $r12, $r13, $r14, $i2, $i3);
+
+        $r8 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.ArrayList runSegments>;
+
+        $r15 = new org.apache.harmony.awt.gl.font.TextRunSegmentImpl$TextRunSegmentCommon;
+
+        $r16 = (org.apache.harmony.awt.gl.font.TextDecorator$Decoration) $r5;
+
+        specialinvoke $r15.<org.apache.harmony.awt.gl.font.TextRunSegmentImpl$TextRunSegmentCommon: void <init>(org.apache.harmony.awt.gl.font.TextRunSegmentImpl$TextSegmentInfo,org.apache.harmony.awt.gl.font.TextDecorator$Decoration)>($r1, $r16);
+
+        virtualinvoke $r8.<java.util.ArrayList: boolean add(java.lang.Object)>($r15);
+
+        $r7 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int[] logical2segment>;
+
+        $r8 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.ArrayList runSegments>;
+
+        $i2 = virtualinvoke $r8.<java.util.ArrayList: int size()>();
+
+        $i2 = $i2 - 1;
+
+        staticinvoke <java.util.Arrays: void fill(int[],int,int,int)>($r7, $i7, $i8, $i2);
+
+        goto label3;
+
+     label6:
+        $r11 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: byte[] levels>;
+
+        $b9 = $r11[$i5];
+
+        goto label5;
+    }
+
+    void createStyleRuns()
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        java.util.HashMap $r1;
+        java.util.ArrayList $r2;
+        java.text.AttributedCharacterIterator $r3;
+        java.awt.font.TextAttribute $r4;
+        java.lang.Object $r5;
+        java.lang.Float $r6;
+        float $f0;
+        int $i0, $i1;
+        java.util.Map $r7;
+        org.apache.harmony.awt.gl.font.TextDecorator$Decoration $r8;
+        java.lang.Integer $r9;
+        java.awt.Font $r10;
+        char[] $r11;
+        int[] $r12;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>()>();
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.HashMap fonts> = $r1;
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>()>();
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.HashMap decorations> = $r1;
+
+        $r2 = null;
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.text.AttributedCharacterIterator aci>;
+
+        $r4 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute JUSTIFICATION>;
+
+        $r5 = interfaceinvoke $r3.<java.text.AttributedCharacterIterator: java.lang.Object getAttribute(java.text.AttributedCharacterIterator$Attribute)>($r4);
+
+        if $r5 == null goto label1;
+
+        $r6 = (java.lang.Float) $r5;
+
+        $f0 = virtualinvoke $r6.<java.lang.Float: float floatValue()>();
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: float justification> = $f0;
+
+     label1:
+        $i0 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int segmentsStart>;
+
+     label2:
+        $i1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int segmentsEnd>;
+
+        if $i0 >= $i1 goto label6;
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.text.AttributedCharacterIterator aci>;
+
+        $i1 = interfaceinvoke $r3.<java.text.AttributedCharacterIterator: int getRunLimit()>();
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.text.AttributedCharacterIterator aci>;
+
+        $r7 = interfaceinvoke $r3.<java.text.AttributedCharacterIterator: java.util.Map getAttributes()>();
+
+        $r7 = virtualinvoke $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.Map unpackAttributes(java.util.Map)>($r7);
+
+        $r8 = staticinvoke <org.apache.harmony.awt.gl.font.TextDecorator: org.apache.harmony.awt.gl.font.TextDecorator$Decoration getDecoration(java.util.Map)>($r7);
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.HashMap decorations>;
+
+        $r9 = new java.lang.Integer;
+
+        specialinvoke $r9.<java.lang.Integer: void <init>(int)>($i0);
+
+        virtualinvoke $r1.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r9, $r8);
+
+        $r4 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute CHAR_REPLACEMENT>;
+
+        $r5 = interfaceinvoke $r7.<java.util.Map: java.lang.Object get(java.lang.Object)>($r4);
+
+        $r10 = (java.awt.Font) $r5;
+
+        if $r10 != null goto label5;
+
+        $r4 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute FONT>;
+
+        $r5 = interfaceinvoke $r7.<java.util.Map: java.lang.Object get(java.lang.Object)>($r4);
+
+        $r10 = (java.awt.Font) $r5;
+
+        if $r10 != null goto label5;
+
+        $r4 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute FAMILY>;
+
+        $r5 = interfaceinvoke $r7.<java.util.Map: java.lang.Object get(java.lang.Object)>($r4);
+
+        if $r5 == null goto label3;
+
+        $r10 = staticinvoke <java.awt.Font: java.awt.Font getFont(java.util.Map)>($r7);
+
+     label3:
+        if $r10 != null goto label5;
+
+        if $r2 != null goto label4;
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+     label4:
+        $r11 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: char[] text>;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.HashMap fonts>;
+
+        staticinvoke <org.apache.harmony.awt.gl.font.FontFinder: void findFonts(char[],int,int,java.util.List,java.util.Map)>($r11, $i0, $i1, $r2, $r1);
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.HashMap fonts>;
+
+        $r9 = new java.lang.Integer;
+
+        specialinvoke $r9.<java.lang.Integer: void <init>(int)>($i0);
+
+        $r5 = virtualinvoke $r1.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r9);
+
+        $r10 = (java.awt.Font) $r5;
+
+     label5:
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.HashMap fonts>;
+
+        $r9 = new java.lang.Integer;
+
+        specialinvoke $r9.<java.lang.Integer: void <init>(int)>($i0);
+
+        virtualinvoke $r1.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r9, $r10);
+
+        $i0 = $i1;
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.text.AttributedCharacterIterator aci>;
+
+        interfaceinvoke $r3.<java.text.AttributedCharacterIterator: char setIndex(int)>($i1);
+
+        goto label2;
+
+     label6:
+        if $r2 == null goto label8;
+
+        $i0 = virtualinvoke $r2.<java.util.ArrayList: int size()>();
+
+        $r12 = newarray (int)[$i0];
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int[] forcedFontRunStarts> = $r12;
+
+        $i0 = 0;
+
+     label7:
+        $i1 = virtualinvoke $r2.<java.util.ArrayList: int size()>();
+
+        if $i0 >= $i1 goto label9;
+
+        $r12 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int[] forcedFontRunStarts>;
+
+        $r5 = virtualinvoke $r2.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r9 = (java.lang.Integer) $r5;
+
+        $i1 = virtualinvoke $r9.<java.lang.Integer: int intValue()>();
+
+        $r12[$i0] = $i1;
+
+        $i0 = $i0 + 1;
+
+        goto label7;
+
+     label8:
+        return;
+
+     label9:
+        return;
+    }
+
+    public void deleteChar(java.text.AttributedCharacterIterator, int)
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        java.text.AttributedCharacterIterator $r1;
+        java.lang.Integer $r2;
+        char[] $r3, $r4;
+        int $i0, $i1, $i2;
+        java.util.HashMap $r5;
+        java.lang.Object $r6;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $r1 := @parameter0: java.text.AttributedCharacterIterator;
+
+        $i0 := @parameter1: int;
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.text.AttributedCharacterIterator aci> = $r1;
+
+        $r2 = new java.lang.Integer;
+
+        specialinvoke $r2.<java.lang.Integer: void <init>(int)>($i0);
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.text.AttributedCharacterIterator aci>;
+
+        $i1 = interfaceinvoke $r1.<java.text.AttributedCharacterIterator: int getBeginIndex()>();
+
+        $i0 = $i0 - $i1;
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: char[] text>;
+
+        $i1 = lengthof $r3;
+
+        $i1 = $i1 - 1;
+
+        $r3 = newarray (char)[$i1];
+
+        $r4 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: char[] text>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 0, $r3, 0, $i0);
+
+        $r4 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: char[] text>;
+
+        $i1 = $i0 + 1;
+
+        $i2 = lengthof $r3;
+
+        $i2 = $i2 - $i0;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, $i1, $r3, $i0, $i2);
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: char[] text> = $r3;
+
+        $r5 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.HashMap fonts>;
+
+        $r6 = virtualinvoke $r5.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r2);
+
+        if $r6 == null goto label1;
+
+        $r5 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.HashMap fonts>;
+
+        virtualinvoke $r5.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>($r2);
+
+     label1:
+        specialinvoke $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: void shiftStyleRuns(java.lang.Integer,int)>($r2, -1);
+
+        specialinvoke $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: void resetSegments()>();
+
+        $i0 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int segmentsEnd>;
+
+        $i0 = $i0 - 1;
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int segmentsEnd> = $i0;
+
+        return;
+    }
+
+    public void drawSegments(java.awt.Graphics2D, float, float)
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        java.awt.Graphics2D $r1;
+        float $f0, $f1;
+        int $i0, $i1;
+        java.util.ArrayList $r2;
+        java.lang.Object $r3;
+        org.apache.harmony.awt.gl.font.TextRunSegment $r4;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $r1 := @parameter0: java.awt.Graphics2D;
+
+        $f0 := @parameter1: float;
+
+        $f1 := @parameter2: float;
+
+        $i0 = 0;
+
+     label1:
+        $r2 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.ArrayList runSegments>;
+
+        $i1 = virtualinvoke $r2.<java.util.ArrayList: int size()>();
+
+        if $i0 >= $i1 goto label2;
+
+        $r2 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.ArrayList runSegments>;
+
+        $r3 = virtualinvoke $r2.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r4 = (org.apache.harmony.awt.gl.font.TextRunSegment) $r3;
+
+        virtualinvoke $r4.<org.apache.harmony.awt.gl.font.TextRunSegment: void draw(java.awt.Graphics2D,float,float)>($r1, $f0, $f1);
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public boolean equals(java.lang.Object)
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0, $r2;
+        java.lang.Object $r1;
+        boolean $z0;
+        java.text.AttributedCharacterIterator $r3, $r4;
+        java.awt.font.FontRenderContext $r5, $r6;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $r1 := @parameter0: java.lang.Object;
+
+        $z0 = $r1 instanceof org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        if $z0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $r2 = (org.apache.harmony.awt.gl.font.TextRunBreaker) $r1;
+
+        $r3 = virtualinvoke $r2.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.text.AttributedCharacterIterator getACI()>();
+
+        $r4 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.text.AttributedCharacterIterator aci>;
+
+        $z0 = virtualinvoke $r3.<java.lang.Object: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 == 0 goto label2;
+
+        $r5 = $r2.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.awt.font.FontRenderContext frc>;
+
+        $r6 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.awt.font.FontRenderContext frc>;
+
+        $z0 = virtualinvoke $r5.<java.awt.font.FontRenderContext: boolean equals(java.awt.font.FontRenderContext)>($r6);
+
+        if $z0 == 0 goto label2;
+
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    public java.text.AttributedCharacterIterator getACI()
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        java.text.AttributedCharacterIterator r1;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.text.AttributedCharacterIterator aci>;
+
+        return r1;
+    }
+
+    public int getBaseLevel()
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        return 0;
+    }
+
+    public java.awt.Shape getBlackBoxBounds(int, int)
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        int $i0, $i1, $i2;
+        java.awt.geom.GeneralPath $r1;
+        java.util.ArrayList $r2;
+        int[] $r3;
+        java.lang.Object $r4;
+        org.apache.harmony.awt.gl.font.TextRunSegment $r5;
+        java.awt.Shape $r6;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 = new java.awt.geom.GeneralPath;
+
+        specialinvoke $r1.<java.awt.geom.GeneralPath: void <init>()>();
+
+     label1:
+        if $i0 >= $i1 goto label2;
+
+        $r2 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.ArrayList runSegments>;
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int[] logical2segment>;
+
+        $i2 = $r3[$i0];
+
+        $r4 = virtualinvoke $r2.<java.util.ArrayList: java.lang.Object get(int)>($i2);
+
+        $r5 = (org.apache.harmony.awt.gl.font.TextRunSegment) $r4;
+
+        $r6 = virtualinvoke $r5.<org.apache.harmony.awt.gl.font.TextRunSegment: java.awt.Shape getCharsBlackBoxBounds(int,int)>($i0, $i1);
+
+        virtualinvoke $r1.<java.awt.geom.GeneralPath: void append(java.awt.Shape,boolean)>($r6, 0);
+
+        $i0 = virtualinvoke $r5.<org.apache.harmony.awt.gl.font.TextRunSegment: int getEnd()>();
+
+        goto label1;
+
+     label2:
+        return $r1;
+    }
+
+    public char getChar(int)
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        int $i0;
+        char[] $r1;
+        char $c1;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: char[] text>;
+
+        $c1 = $r1[$i0];
+
+        return $c1;
+    }
+
+    public int getCharCount()
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        int $i0, $i1;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $i1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int segmentsEnd>;
+
+        $i0 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int segmentsStart>;
+
+        $i0 = $i1 - $i0;
+
+        return $i0;
+    }
+
+    public float getJustification()
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        float f0;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        f0 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: float justification>;
+
+        return f0;
+    }
+
+    public int getLastNonWhitespace()
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        boolean $z0;
+        char[] $r1;
+        int $i0;
+        char $c1;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: char[] text>;
+
+        $i0 = lengthof $r1;
+
+     label1:
+        if $i0 < 0 goto label2;
+
+        $i0 = $i0 + -1;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: char[] text>;
+
+        $c1 = $r1[$i0];
+
+        $z0 = staticinvoke <java.lang.Character: boolean isWhitespace(char)>($c1);
+
+        if $z0 != 0 goto label1;
+
+        return $i0;
+
+     label2:
+        return $i0;
+    }
+
+    public byte getLevel(int)
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        int $i0;
+        byte[] $r1;
+        byte $b1;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: byte[] levels>;
+
+        if $r1 != null goto label1;
+
+        return 0;
+
+     label1:
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: byte[] levels>;
+
+        $b1 = $r1[$i0];
+
+        return $b1;
+    }
+
+    int getLevelRunLimit(int, int)
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        int $i0, $i1, $i3;
+        byte $b2, $b4;
+        byte[] $r1;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: byte[] levels>;
+
+        if $r1 != null goto label1;
+
+        return $i1;
+
+     label1:
+        $i3 = $i0 + 1;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: byte[] levels>;
+
+        $b2 = $r1[$i0];
+
+     label2:
+        if $i3 > $i1 goto label3;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: byte[] levels>;
+
+        $b4 = $r1[$i3];
+
+        if $b4 != $b2 goto label3;
+
+        $i3 = $i3 + 1;
+
+        goto label2;
+
+     label3:
+        return $i3;
+    }
+
+    public int getLineBreakIndex(int, float)
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        int $i0, $i1, $i2, $i3;
+        float $f0, $f1;
+        org.apache.harmony.awt.gl.font.TextRunSegment $r1;
+        int[] $r2;
+        java.util.ArrayList $r3;
+        java.lang.Object $r4;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $i0 := @parameter0: int;
+
+        $f0 := @parameter1: float;
+
+        $r1 = null;
+
+        $r2 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int[] logical2segment>;
+
+        $i1 = $r2[$i0];
+
+     label1:
+        $r3 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.ArrayList runSegments>;
+
+        $i2 = virtualinvoke $r3.<java.util.ArrayList: int size()>();
+
+        if $i1 >= $i2 goto label3;
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.ArrayList runSegments>;
+
+        $r4 = virtualinvoke $r3.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r1 = (org.apache.harmony.awt.gl.font.TextRunSegment) $r4;
+
+        $i2 = virtualinvoke $r1.<org.apache.harmony.awt.gl.font.TextRunSegment: int getCharIndexFromAdvance(float,int)>($f0, $i0);
+
+        $i3 = virtualinvoke $r1.<org.apache.harmony.awt.gl.font.TextRunSegment: int getEnd()>();
+
+        if $i2 >= $i3 goto label2;
+
+        return $i2;
+
+     label2:
+        $i2 = virtualinvoke $r1.<org.apache.harmony.awt.gl.font.TextRunSegment: int getEnd()>();
+
+        $f1 = virtualinvoke $r1.<org.apache.harmony.awt.gl.font.TextRunSegment: float getAdvanceDelta(int,int)>($i0, $i2);
+
+        $f0 = $f0 - $f1;
+
+        $i0 = virtualinvoke $r1.<org.apache.harmony.awt.gl.font.TextRunSegment: int getEnd()>();
+
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label3:
+        $i0 = virtualinvoke $r1.<org.apache.harmony.awt.gl.font.TextRunSegment: int getEnd()>();
+
+        return $i0;
+    }
+
+    public java.awt.geom.Rectangle2D getLogicalBounds()
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        java.awt.geom.Rectangle2D $r1, $r5;
+        int $i0, $i1;
+        java.util.ArrayList $r2;
+        java.lang.Object $r3;
+        org.apache.harmony.awt.gl.font.TextRunSegment $r4;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $r1 = null;
+
+        $i0 = 0;
+
+     label1:
+        $r2 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.ArrayList runSegments>;
+
+        $i1 = virtualinvoke $r2.<java.util.ArrayList: int size()>();
+
+        if $i0 >= $i1 goto label4;
+
+        $r2 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.ArrayList runSegments>;
+
+        $r3 = virtualinvoke $r2.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r4 = (org.apache.harmony.awt.gl.font.TextRunSegment) $r3;
+
+        if $r1 == null goto label3;
+
+        $r5 = virtualinvoke $r4.<org.apache.harmony.awt.gl.font.TextRunSegment: java.awt.geom.Rectangle2D getLogicalBounds()>();
+
+        staticinvoke <java.awt.geom.Rectangle2D: void union(java.awt.geom.Rectangle2D,java.awt.geom.Rectangle2D,java.awt.geom.Rectangle2D)>($r1, $r5, $r1);
+
+     label2:
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label3:
+        $r1 = virtualinvoke $r4.<org.apache.harmony.awt.gl.font.TextRunSegment: java.awt.geom.Rectangle2D getLogicalBounds()>();
+
+        goto label2;
+
+     label4:
+        return $r1;
+    }
+
+    int getLogicalFromVisual(int)
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        int $i0;
+        int[] $r1;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int[] visual2logical>;
+
+        if $r1 != null goto label1;
+
+        return $i0;
+
+     label1:
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int[] visual2logical>;
+
+        $i0 = $r1[$i0];
+
+        return $i0;
+    }
+
+    public java.awt.geom.GeneralPath getOutline()
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        java.awt.geom.GeneralPath $r1;
+        int $i0, $i1;
+        java.util.ArrayList $r2;
+        java.lang.Object $r3;
+        org.apache.harmony.awt.gl.font.TextRunSegment $r4;
+        java.awt.Shape $r5;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $r1 = new java.awt.geom.GeneralPath;
+
+        specialinvoke $r1.<java.awt.geom.GeneralPath: void <init>()>();
+
+        $i0 = 0;
+
+     label1:
+        $r2 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.ArrayList runSegments>;
+
+        $i1 = virtualinvoke $r2.<java.util.ArrayList: int size()>();
+
+        if $i0 >= $i1 goto label2;
+
+        $r2 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.ArrayList runSegments>;
+
+        $r3 = virtualinvoke $r2.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r4 = (org.apache.harmony.awt.gl.font.TextRunSegment) $r3;
+
+        $r5 = virtualinvoke $r4.<org.apache.harmony.awt.gl.font.TextRunSegment: java.awt.Shape getOutline()>();
+
+        virtualinvoke $r1.<java.awt.geom.GeneralPath: void append(java.awt.Shape,boolean)>($r5, 0);
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label2:
+        return $r1;
+    }
+
+    int getSegmentFromVisualOrder(int)
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        int $i0;
+        int[] $r1;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int[] visual2segment>;
+
+        if $r1 != null goto label1;
+
+        return $i0;
+
+     label1:
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int[] visual2segment>;
+
+        $i0 = $r1[$i0];
+
+        return $i0;
+    }
+
+    int getStyleRunLimit(int, int)
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        int $i0, $i1, $i2, $i3, $i4;
+        int[] $r1;
+        java.text.AttributedCharacterIterator $r2;
+        java.lang.IllegalArgumentException $r3;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $i0 := @parameter0: int;
+
+        $i3 := @parameter1: int;
+
+        $r2 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.text.AttributedCharacterIterator aci>;
+
+     label1:
+        interfaceinvoke $r2.<java.text.AttributedCharacterIterator: char setIndex(int)>($i0);
+
+     label2:
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int[] forcedFontRunStarts>;
+
+        if $r1 == null goto label4;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int[] forcedFontRunStarts>;
+
+        $i2 = lengthof $r1;
+
+        $i4 = 0;
+
+     label3:
+        if $i4 >= $i2 goto label4;
+
+        $i1 = $r1[$i4];
+
+        if $i1 <= $i0 goto label7;
+
+        $i3 = staticinvoke <java.lang.Math: int min(int,int)>($i1, $i3);
+
+     label4:
+        $r2 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.text.AttributedCharacterIterator aci>;
+
+        $i0 = interfaceinvoke $r2.<java.text.AttributedCharacterIterator: int getRunLimit()>();
+
+        $i0 = staticinvoke <java.lang.Math: int min(int,int)>($i0, $i3);
+
+        return $i0;
+
+     label5:
+        $r3 := @caughtexception;
+
+        $i1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int segmentsStart>;
+
+        if $i0 >= $i1 goto label6;
+
+        $r2 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.text.AttributedCharacterIterator aci>;
+
+        interfaceinvoke $r2.<java.text.AttributedCharacterIterator: char first()>();
+
+        goto label2;
+
+     label6:
+        $r2 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.text.AttributedCharacterIterator aci>;
+
+        interfaceinvoke $r2.<java.text.AttributedCharacterIterator: char last()>();
+
+        goto label2;
+
+     label7:
+        $i4 = $i4 + 1;
+
+        goto label3;
+
+        catch java.lang.IllegalArgumentException from label1 to label2 with label5;
+    }
+
+    public java.awt.geom.Rectangle2D getVisualBounds()
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        java.awt.geom.Rectangle2D $r1, $r5;
+        int $i0, $i1;
+        java.util.ArrayList $r2;
+        java.lang.Object $r3;
+        org.apache.harmony.awt.gl.font.TextRunSegment $r4;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $r1 = null;
+
+        $i0 = 0;
+
+     label1:
+        $r2 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.ArrayList runSegments>;
+
+        $i1 = virtualinvoke $r2.<java.util.ArrayList: int size()>();
+
+        if $i0 >= $i1 goto label4;
+
+        $r2 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.ArrayList runSegments>;
+
+        $r3 = virtualinvoke $r2.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r4 = (org.apache.harmony.awt.gl.font.TextRunSegment) $r3;
+
+        if $r1 == null goto label3;
+
+        $r5 = virtualinvoke $r4.<org.apache.harmony.awt.gl.font.TextRunSegment: java.awt.geom.Rectangle2D getVisualBounds()>();
+
+        staticinvoke <java.awt.geom.Rectangle2D: void union(java.awt.geom.Rectangle2D,java.awt.geom.Rectangle2D,java.awt.geom.Rectangle2D)>($r1, $r5, $r1);
+
+     label2:
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label3:
+        $r1 = virtualinvoke $r4.<org.apache.harmony.awt.gl.font.TextRunSegment: java.awt.geom.Rectangle2D getVisualBounds()>();
+
+        goto label2;
+
+     label4:
+        return $r1;
+    }
+
+    int getVisualFromLogical(int)
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        int $i0;
+        int[] $r1;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int[] logical2visual>;
+
+        if $r1 != null goto label1;
+
+        return $i0;
+
+     label1:
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int[] logical2visual>;
+
+        $i0 = $r1[$i0];
+
+        return $i0;
+    }
+
+    int getVisualFromSegmentOrder(int)
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        int $i0;
+        int[] $r1;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int[] segment2visual>;
+
+        if $r1 != null goto label1;
+
+        return $i0;
+
+     label1:
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int[] segment2visual>;
+
+        $i0 = $r1[$i0];
+
+        return $i0;
+    }
+
+    public int hashCode()
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        java.text.AttributedCharacterIterator $r1;
+        int $i0, $i1;
+        java.awt.font.FontRenderContext $r2;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.text.AttributedCharacterIterator aci>;
+
+        $i0 = virtualinvoke $r1.<java.lang.Object: int hashCode()>();
+
+        $r2 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.awt.font.FontRenderContext frc>;
+
+        $i1 = virtualinvoke $r2.<java.awt.font.FontRenderContext: int hashCode()>();
+
+        $i0 = staticinvoke <org.apache.harmony.misc.HashCode: int combine(int,int)>($i0, $i1);
+
+        return $i0;
+    }
+
+    public java.awt.font.TextHitInfo hitTest(float, float)
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        float $f0, $f1;
+        double $d0, $d1, $d2;
+        int $i0, $i1;
+        java.util.ArrayList $r1;
+        java.lang.Object $r2;
+        org.apache.harmony.awt.gl.font.TextRunSegment $r3;
+        java.awt.geom.Rectangle2D $r4;
+        byte $b2;
+        java.awt.font.TextHitInfo $r5;
+        boolean $z0;
+        char[] $r6;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $f0 := @parameter0: float;
+
+        $f1 := @parameter1: float;
+
+        $d0 = -1.0;
+
+        $i0 = 0;
+
+     label1:
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.ArrayList runSegments>;
+
+        $i1 = virtualinvoke $r1.<java.util.ArrayList: int size()>();
+
+        if $i0 >= $i1 goto label5;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.ArrayList runSegments>;
+
+        $r2 = virtualinvoke $r1.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r3 = (org.apache.harmony.awt.gl.font.TextRunSegment) $r2;
+
+        $r4 = virtualinvoke $r3.<org.apache.harmony.awt.gl.font.TextRunSegment: java.awt.geom.Rectangle2D getVisualBounds()>();
+
+        $d1 = virtualinvoke $r4.<java.awt.geom.RectangularShape: double getMinX()>();
+
+        $d2 = (double) $f0;
+
+        $b2 = $d1 cmpg $d2;
+
+        if $b2 > 0 goto label2;
+
+        $d1 = virtualinvoke $r4.<java.awt.geom.RectangularShape: double getMaxX()>();
+
+        $d2 = (double) $f0;
+
+        $b2 = $d1 cmpl $d2;
+
+        if $b2 >= 0 goto label3;
+
+     label2:
+        $d1 = (double) $f0;
+
+        $b2 = $d0 cmpg $d1;
+
+        if $b2 >= 0 goto label4;
+
+        $d0 = virtualinvoke $r4.<java.awt.geom.RectangularShape: double getMinX()>();
+
+        $d1 = (double) $f0;
+
+        $b2 = $d0 cmpl $d1;
+
+        if $b2 <= 0 goto label4;
+
+     label3:
+        $r5 = virtualinvoke $r3.<org.apache.harmony.awt.gl.font.TextRunSegment: java.awt.font.TextHitInfo hitTest(float,float)>($f0, $f1);
+
+        return $r5;
+
+     label4:
+        $d0 = virtualinvoke $r4.<java.awt.geom.RectangularShape: double getMaxX()>();
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label5:
+        $z0 = virtualinvoke $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: boolean isLTR()>();
+
+        if $z0 == 0 goto label6;
+
+        $r6 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: char[] text>;
+
+        $i0 = lengthof $r6;
+
+        $r5 = staticinvoke <java.awt.font.TextHitInfo: java.awt.font.TextHitInfo trailing(int)>($i0);
+
+        return $r5;
+
+     label6:
+        $r5 = staticinvoke <java.awt.font.TextHitInfo: java.awt.font.TextHitInfo leading(int)>(0);
+
+        return $r5;
+    }
+
+    public void insertChar(java.text.AttributedCharacterIterator, int)
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        java.text.AttributedCharacterIterator $r1;
+        java.lang.Integer $r2;
+        char[] $r3, $r4, $r5;
+        int $i0, $i2, $i3;
+        char $c1;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $r1 := @parameter0: java.text.AttributedCharacterIterator;
+
+        $i0 := @parameter1: int;
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.text.AttributedCharacterIterator aci> = $r1;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.text.AttributedCharacterIterator aci>;
+
+        $c1 = interfaceinvoke $r1.<java.text.AttributedCharacterIterator: char setIndex(int)>($i0);
+
+        $r2 = new java.lang.Integer;
+
+        specialinvoke $r2.<java.lang.Integer: void <init>(int)>($i0);
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.text.AttributedCharacterIterator aci>;
+
+        $i2 = interfaceinvoke $r1.<java.text.AttributedCharacterIterator: int getBeginIndex()>();
+
+        $i0 = $i0 - $i2;
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: char[] text>;
+
+        $i2 = lengthof $r3;
+
+        $i2 = $i2 + 1;
+
+        $r3 = newarray (char)[$i2];
+
+        $r4 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: char[] text>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 0, $r3, 0, $i0);
+
+        $r3[$i0] = $c1;
+
+        $r4 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: char[] text>;
+
+        $i2 = $i0 + 1;
+
+        $r5 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: char[] text>;
+
+        $i3 = lengthof $r5;
+
+        $i3 = $i3 - $i0;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, $i0, $r3, $i2, $i3);
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: char[] text> = $r3;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.text.AttributedCharacterIterator aci>;
+
+        $i0 = interfaceinvoke $r1.<java.text.AttributedCharacterIterator: int getRunStart()>();
+
+        $i2 = virtualinvoke $r2.<java.lang.Integer: int intValue()>();
+
+        if $i0 != $i2 goto label2;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.text.AttributedCharacterIterator aci>;
+
+        $i0 = interfaceinvoke $r1.<java.text.AttributedCharacterIterator: int getRunLimit()>();
+
+        $i2 = virtualinvoke $r2.<java.lang.Integer: int intValue()>();
+
+        $i2 = $i2 + 1;
+
+        if $i0 != $i2 goto label2;
+
+        virtualinvoke $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: void createStyleRuns()>();
+
+     label1:
+        specialinvoke $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: void resetSegments()>();
+
+        $i0 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int segmentsEnd>;
+
+        $i0 = $i0 + 1;
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int segmentsEnd> = $i0;
+
+        return;
+
+     label2:
+        specialinvoke $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: void shiftStyleRuns(java.lang.Integer,int)>($r2, 1);
+
+        goto label1;
+    }
+
+    public boolean isLTR()
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        return 1;
+    }
+
+    public void justify(float)
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        float $f0, $f1, $f2;
+        int $i0, $i1, $i2, $i3, $i5, $i6;
+        org.apache.harmony.awt.gl.font.TextRunBreaker$JustificationInfo $r1;
+        org.apache.harmony.awt.gl.font.TextRunBreaker$JustificationInfo[] $r2;
+        byte $b4;
+        boolean $z0, $z1;
+        java.util.ArrayList $r3;
+        java.lang.Object $r4;
+        org.apache.harmony.awt.gl.font.TextRunSegment $r5;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $f0 := @parameter0: float;
+
+        $i0 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int segmentsStart>;
+
+        $i1 = virtualinvoke $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int getLastNonWhitespace()>();
+
+        $i2 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int segmentsStart>;
+
+        $i1 = $i1 + $i2;
+
+        $r2 = newarray (org.apache.harmony.awt.gl.font.TextRunBreaker$JustificationInfo)[5];
+
+        $f1 = $f0;
+
+        $i2 = -1;
+
+        $i3 = 0;
+
+     label01:
+        if $i3 > 4 goto label13;
+
+        $r1 = new org.apache.harmony.awt.gl.font.TextRunBreaker$JustificationInfo;
+
+        specialinvoke $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$JustificationInfo: void <init>(org.apache.harmony.awt.gl.font.TextRunBreaker)>($r0);
+
+        $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$JustificationInfo: int lastIdx> = $i1;
+
+        $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$JustificationInfo: int firstIdx> = $i0;
+
+        $b4 = $f0 cmpl 0.0F;
+
+        if $b4 <= 0 goto label06;
+
+        $z0 = 1;
+
+     label02:
+        $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$JustificationInfo: boolean grow> = $z0;
+
+        $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$JustificationInfo: float gapToFill> = $f1;
+
+        if $i3 > 3 goto label07;
+
+        $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$JustificationInfo: int priority> = $i3;
+
+     label03:
+        $i5 = 0;
+
+     label04:
+        $r3 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.ArrayList runSegments>;
+
+        $i6 = virtualinvoke $r3.<java.util.ArrayList: int size()>();
+
+        if $i5 >= $i6 goto label08;
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.ArrayList runSegments>;
+
+        $r4 = virtualinvoke $r3.<java.util.ArrayList: java.lang.Object get(int)>($i5);
+
+        $r5 = (org.apache.harmony.awt.gl.font.TextRunSegment) $r4;
+
+        $i6 = virtualinvoke $r5.<org.apache.harmony.awt.gl.font.TextRunSegment: int getStart()>();
+
+        if $i6 > $i1 goto label05;
+
+        virtualinvoke $r5.<org.apache.harmony.awt.gl.font.TextRunSegment: void updateJustificationInfo(org.apache.harmony.awt.gl.font.TextRunBreaker$JustificationInfo)>($r1);
+
+     label05:
+        $i5 = $i5 + 1;
+
+        goto label04;
+
+     label06:
+        $z0 = 0;
+
+        goto label02;
+
+     label07:
+        $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$JustificationInfo: int priority> = $i2;
+
+        goto label03;
+
+     label08:
+        $i5 = $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$JustificationInfo: int priority>;
+
+        if $i5 != $i2 goto label09;
+
+        $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$JustificationInfo: boolean absorb> = 1;
+
+        $f2 = $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$JustificationInfo: float weight>;
+
+        $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$JustificationInfo: float absorbedWeight> = $f2;
+
+     label09:
+        $f2 = $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$JustificationInfo: float weight>;
+
+        $b4 = $f2 cmpl 0.0F;
+
+        if $b4 == 0 goto label17;
+
+        if $i2 >= 0 goto label10;
+
+        $i2 = $i3;
+
+     label10:
+        $r2[$i3] = $r1;
+
+        $f2 = $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$JustificationInfo: float growLimit>;
+
+        $f1 = $f1 - $f2;
+
+        $b4 = $f1 cmpl 0.0F;
+
+        if $b4 <= 0 goto label15;
+
+        $z0 = 1;
+
+     label11:
+        $z1 = $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$JustificationInfo: boolean grow>;
+
+        $z0 = $z0 ^ $z1;
+
+        if $z0 != 0 goto label12;
+
+        $b4 = $f1 cmpl 0.0F;
+
+        if $b4 != 0 goto label16;
+
+     label12:
+        $f0 = $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$JustificationInfo: float gapToFill>;
+
+        $f1 = $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$JustificationInfo: float weight>;
+
+        $f0 = $f0 / $f1;
+
+        $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$JustificationInfo: float gapPerUnit> = $f0;
+
+     label13:
+        $f0 = 0.0F;
+
+        $i0 = 0;
+
+     label14:
+        $r3 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.ArrayList runSegments>;
+
+        $i1 = virtualinvoke $r3.<java.util.ArrayList: int size()>();
+
+        if $i0 >= $i1 goto label18;
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.ArrayList runSegments>;
+
+        $i1 = virtualinvoke $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int getSegmentFromVisualOrder(int)>($i0);
+
+        $r4 = virtualinvoke $r3.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r5 = (org.apache.harmony.awt.gl.font.TextRunSegment) $r4;
+
+        $f1 = $r5.<org.apache.harmony.awt.gl.font.TextRunSegment: float x>;
+
+        $f1 = $f1 + $f0;
+
+        $r5.<org.apache.harmony.awt.gl.font.TextRunSegment: float x> = $f1;
+
+        $f1 = virtualinvoke $r5.<org.apache.harmony.awt.gl.font.TextRunSegment: float doJustification(org.apache.harmony.awt.gl.font.TextRunBreaker$JustificationInfo[])>($r2);
+
+        $f0 = $f0 + $f1;
+
+        $i0 = $i0 + 1;
+
+        goto label14;
+
+     label15:
+        $z0 = 0;
+
+        goto label11;
+
+     label16:
+        $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$JustificationInfo: boolean useLimits> = 1;
+
+        $f2 = $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$JustificationInfo: float absorbedWeight>;
+
+        $b4 = $f2 cmpl 0.0F;
+
+        if $b4 <= 0 goto label17;
+
+        $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$JustificationInfo: boolean absorb> = 1;
+
+        $f0 = $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$JustificationInfo: float gapToFill>;
+
+        $f1 = $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$JustificationInfo: float growLimit>;
+
+        $f0 = $f0 - $f1;
+
+        $f1 = $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$JustificationInfo: float absorbedWeight>;
+
+        $f0 = $f0 / $f1;
+
+        $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$JustificationInfo: float absorbedGapPerUnit> = $f0;
+
+        goto label13;
+
+     label17:
+        $i3 = $i3 + 1;
+
+        goto label01;
+
+     label18:
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: float justification> = -1.0F;
+
+        return;
+    }
+
+    public void popSegments()
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        int $i0;
+        org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo $r1;
+        java.util.ArrayList $r2;
+        int[] $r3;
+        byte[] $r4;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo storedSegments>;
+
+        if $r1 != null goto label1;
+
+        return;
+
+     label1:
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo storedSegments>;
+
+        $r2 = $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo: java.util.ArrayList runSegments>;
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.ArrayList runSegments> = $r2;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo storedSegments>;
+
+        $r3 = $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo: int[] logical2segment>;
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int[] logical2segment> = $r3;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo storedSegments>;
+
+        $r3 = $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo: int[] segment2visual>;
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int[] segment2visual> = $r3;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo storedSegments>;
+
+        $r3 = $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo: int[] visual2segment>;
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int[] visual2segment> = $r3;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo storedSegments>;
+
+        $r4 = $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo: byte[] levels>;
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: byte[] levels> = $r4;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo storedSegments>;
+
+        $i0 = $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo: int segmentsStart>;
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int segmentsStart> = $i0;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo storedSegments>;
+
+        $i0 = $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo: int segmentsEnd>;
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int segmentsEnd> = $i0;
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo storedSegments> = null;
+
+        $r2 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.ArrayList runSegments>;
+
+        $i0 = virtualinvoke $r2.<java.util.ArrayList: int size()>();
+
+        if $i0 != 0 goto label2;
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int[] logical2segment>;
+
+        if $r3 != null goto label2;
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: boolean haveAllSegments> = 0;
+
+        return;
+
+     label2:
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: boolean haveAllSegments> = 1;
+
+        return;
+    }
+
+    public void pushSegments(int, int)
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        int $i0, $i1, $i2;
+        org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo $r1;
+        java.util.ArrayList $r2;
+        int[] $r3;
+        byte[] $r4;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 = new org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo;
+
+        specialinvoke $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo: void <init>(org.apache.harmony.awt.gl.font.TextRunBreaker,org.apache.harmony.awt.gl.font.TextRunBreaker$1)>($r0, null);
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo storedSegments> = $r1;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo storedSegments>;
+
+        $r2 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: java.util.ArrayList runSegments>;
+
+        $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo: java.util.ArrayList runSegments> = $r2;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo storedSegments>;
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int[] logical2segment>;
+
+        $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo: int[] logical2segment> = $r3;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo storedSegments>;
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int[] segment2visual>;
+
+        $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo: int[] segment2visual> = $r3;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo storedSegments>;
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int[] visual2segment>;
+
+        $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo: int[] visual2segment> = $r3;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo storedSegments>;
+
+        $r4 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: byte[] levels>;
+
+        $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo: byte[] levels> = $r4;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo storedSegments>;
+
+        $i2 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int segmentsStart>;
+
+        $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo: int segmentsStart> = $i2;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo storedSegments>;
+
+        $i2 = $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int segmentsEnd>;
+
+        $r1.<org.apache.harmony.awt.gl.font.TextRunBreaker$SegmentsInfo: int segmentsEnd> = $i2;
+
+        specialinvoke $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: void resetSegments()>();
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int segmentsStart> = $i0;
+
+        $r0.<org.apache.harmony.awt.gl.font.TextRunBreaker: int segmentsEnd> = $i1;
+
+        return;
+    }
+
+    java.util.Map unpackAttributes(java.util.Map)
+    {
+        org.apache.harmony.awt.gl.font.TextRunBreaker $r0;
+        java.util.Map $r1, $r4, $r9;
+        java.util.HashMap $r2;
+        java.awt.font.TextAttribute $r3;
+        boolean $z0;
+        java.lang.Object $r5, $r6;
+        java.text.Annotation $r7;
+        java.awt.im.InputMethodHighlight $r8;
+        java.awt.Toolkit $r10;
+
+        $r0 := @this: org.apache.harmony.awt.gl.font.TextRunBreaker;
+
+        $r1 := @parameter0: java.util.Map;
+
+        $r3 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute INPUT_METHOD_HIGHLIGHT>;
+
+        $z0 = interfaceinvoke $r1.<java.util.Map: boolean containsKey(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label3;
+
+        $r4 = null;
+
+        $r3 = <java.awt.font.TextAttribute: java.awt.font.TextAttribute INPUT_METHOD_HIGHLIGHT>;
+
+        $r5 = interfaceinvoke $r1.<java.util.Map: java.lang.Object get(java.lang.Object)>($r3);
+
+        $r6 = $r5;
+
+        $z0 = $r5 instanceof java.text.Annotation;
+
+        if $z0 == 0 goto label1;
+
+        $r7 = (java.text.Annotation) $r5;
+
+        $r6 = virtualinvoke $r7.<java.text.Annotation: java.lang.Object getValue()>();
+
+     label1:
+        $z0 = $r6 instanceof java.awt.im.InputMethodHighlight;
+
+        if $z0 == 0 goto label2;
+
+        $r8 = (java.awt.im.InputMethodHighlight) $r6;
+
+        $r9 = virtualinvoke $r8.<java.awt.im.InputMethodHighlight: java.util.Map getStyle()>();
+
+        $r4 = $r9;
+
+        if $r9 != null goto label2;
+
+        $r10 = staticinvoke <java.awt.Toolkit: java.awt.Toolkit getDefaultToolkit()>();
+
+        $r4 = virtualinvoke $r10.<java.awt.Toolkit: java.util.Map mapInputMethodHighlight(java.awt.im.InputMethodHighlight)>($r8);
+
+     label2:
+        if $r4 == null goto label3;
+
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>()>();
+
+        virtualinvoke $r2.<java.util.HashMap: void putAll(java.util.Map)>($r1);
+
+        virtualinvoke $r2.<java.util.HashMap: void putAll(java.util.Map)>($r4);
+
+        return $r2;
+
+     label3:
+        return $r1;
+    }
+}

@@ -1,0 +1,249 @@
+public class org.apache.http.impl.entity.LaxContentLengthStrategy extends java.lang.Object implements org.apache.http.entity.ContentLengthStrategy
+{
+
+    public void <init>()
+    {
+        org.apache.http.impl.entity.LaxContentLengthStrategy $r0;
+
+        $r0 := @this: org.apache.http.impl.entity.LaxContentLengthStrategy;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public long determineLength(org.apache.http.HttpMessage) throws org.apache.http.HttpException
+    {
+        org.apache.http.impl.entity.LaxContentLengthStrategy $r0;
+        org.apache.http.HttpMessage $r1;
+        org.apache.http.Header $r2, $r6;
+        int $i0, $i1;
+        org.apache.http.ParseException $r3;
+        java.lang.IllegalArgumentException $r4;
+        org.apache.http.params.HttpParams $r5;
+        boolean $z0, $z1;
+        org.apache.http.HeaderElement[] $r7;
+        org.apache.http.HeaderElement $r8;
+        java.lang.String $r9, $r12;
+        org.apache.http.ProtocolException $r10;
+        java.lang.StringBuilder $r11;
+        long $l2;
+        org.apache.http.Header[] $r13;
+        byte $b3;
+        java.lang.NumberFormatException $r14;
+
+        $r0 := @this: org.apache.http.impl.entity.LaxContentLengthStrategy;
+
+        $r1 := @parameter0: org.apache.http.HttpMessage;
+
+        if $r1 != null goto label01;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("HTTP message may not be null");
+
+        throw $r4;
+
+     label01:
+        $r5 = interfaceinvoke $r1.<org.apache.http.HttpMessage: org.apache.http.params.HttpParams getParams()>();
+
+        $z0 = interfaceinvoke $r5.<org.apache.http.params.HttpParams: boolean isParameterTrue(java.lang.String)>("http.protocol.strict-transfer-encoding");
+
+        $r2 = interfaceinvoke $r1.<org.apache.http.HttpMessage: org.apache.http.Header getFirstHeader(java.lang.String)>("Transfer-Encoding");
+
+        $r6 = interfaceinvoke $r1.<org.apache.http.HttpMessage: org.apache.http.Header getFirstHeader(java.lang.String)>("Content-Length");
+
+        if $r2 == null goto label11;
+
+     label02:
+        $r7 = interfaceinvoke $r2.<org.apache.http.Header: org.apache.http.HeaderElement[] getElements()>();
+
+     label03:
+        if $z0 == 0 goto label07;
+
+        $i0 = 0;
+
+     label04:
+        $i1 = lengthof $r7;
+
+        if $i0 >= $i1 goto label07;
+
+        $r8 = $r7[$i0];
+
+        $r9 = interfaceinvoke $r8.<org.apache.http.HeaderElement: java.lang.String getName()>();
+
+        if $r9 == null goto label06;
+
+        $i1 = virtualinvoke $r9.<java.lang.String: int length()>();
+
+        if $i1 <= 0 goto label06;
+
+        $z1 = virtualinvoke $r9.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("chunked");
+
+        if $z1 != 0 goto label06;
+
+        $z1 = virtualinvoke $r9.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("identity");
+
+        if $z1 != 0 goto label06;
+
+        $r10 = new org.apache.http.ProtocolException;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported transfer encoding: ");
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r9 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r10.<org.apache.http.ProtocolException: void <init>(java.lang.String)>($r9);
+
+        throw $r10;
+
+     label05:
+        $r3 := @caughtexception;
+
+        $r10 = new org.apache.http.ProtocolException;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid Transfer-Encoding header value: ");
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r9 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r10.<org.apache.http.ProtocolException: void <init>(java.lang.String,java.lang.Throwable)>($r9, $r3);
+
+        throw $r10;
+
+     label06:
+        $i0 = $i0 + 1;
+
+        goto label04;
+
+     label07:
+        $i0 = lengthof $r7;
+
+        $r9 = "identity";
+
+        $r12 = interfaceinvoke $r2.<org.apache.http.Header: java.lang.String getValue()>();
+
+        $z1 = virtualinvoke $r9.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r12);
+
+        if $z1 == 0 goto label08;
+
+        return -1L;
+
+     label08:
+        if $i0 <= 0 goto label09;
+
+        $r9 = "chunked";
+
+        $i0 = $i0 - 1;
+
+        $r8 = $r7[$i0];
+
+        $r12 = interfaceinvoke $r8.<org.apache.http.HeaderElement: java.lang.String getName()>();
+
+        $z1 = virtualinvoke $r9.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r12);
+
+        if $z1 == 0 goto label09;
+
+        return -2L;
+
+     label09:
+        if $z0 == 0 goto label10;
+
+        $r10 = new org.apache.http.ProtocolException;
+
+        specialinvoke $r10.<org.apache.http.ProtocolException: void <init>(java.lang.String)>("Chunk-encoding must be the last one applied");
+
+        throw $r10;
+
+     label10:
+        return -1L;
+
+     label11:
+        if $r6 == null goto label19;
+
+        $l2 = -1L;
+
+        $r13 = interfaceinvoke $r1.<org.apache.http.HttpMessage: org.apache.http.Header[] getHeaders(java.lang.String)>("Content-Length");
+
+        if $z0 == 0 goto label12;
+
+        $i0 = lengthof $r13;
+
+        if $i0 <= 1 goto label12;
+
+        $r10 = new org.apache.http.ProtocolException;
+
+        specialinvoke $r10.<org.apache.http.ProtocolException: void <init>(java.lang.String)>("Multiple content length headers");
+
+        throw $r10;
+
+     label12:
+        $i0 = lengthof $r13;
+
+        $i0 = $i0 - 1;
+
+     label13:
+        if $i0 < 0 goto label15;
+
+        $r2 = $r13[$i0];
+
+     label14:
+        $r9 = interfaceinvoke $r2.<org.apache.http.Header: java.lang.String getValue()>();
+
+        $l2 = staticinvoke <java.lang.Long: long parseLong(java.lang.String)>($r9);
+
+     label15:
+        $b3 = $l2 cmp 0L;
+
+        if $b3 < 0 goto label18;
+
+        return $l2;
+
+     label16:
+        $r14 := @caughtexception;
+
+        if $z0 == 0 goto label17;
+
+        $r10 = new org.apache.http.ProtocolException;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid content length: ");
+
+        $r9 = interfaceinvoke $r2.<org.apache.http.Header: java.lang.String getValue()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r9 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r10.<org.apache.http.ProtocolException: void <init>(java.lang.String)>($r9);
+
+        throw $r10;
+
+     label17:
+        $i0 = $i0 + -1;
+
+        goto label13;
+
+     label18:
+        return -1L;
+
+     label19:
+        return -1L;
+
+        catch org.apache.http.ParseException from label02 to label03 with label05;
+        catch java.lang.NumberFormatException from label14 to label15 with label16;
+    }
+}

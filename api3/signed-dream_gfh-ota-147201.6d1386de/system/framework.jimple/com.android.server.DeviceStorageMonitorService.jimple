@@ -1,0 +1,637 @@
+class com.android.server.DeviceStorageMonitorService extends android.os.Binder
+{
+    private static final java.lang.String DATA_PATH;
+    private static final boolean DEBUG;
+    private static final long DEFAULT_CHECK_INTERVAL;
+    private static final long DEFAULT_DISK_FREE_CHANGE_REPORTING_THRESHOLD;
+    private static final int DEFAULT_FREE_STORAGE_LOG_INTERVAL_IN_MINUTES;
+    private static final int DEFAULT_THRESHOLD_PERCENTAGE;
+    private static final int DEVICE_MEMORY_WHAT;
+    private static final int EVENT_LOG_FREE_STORAGE_LEFT;
+    private static final int EVENT_LOG_LOW_STORAGE_NOTIFICATION;
+    private static final int EVENT_LOG_STORAGE_BELOW_THRESHOLD;
+    private static final int LOW_MEMORY_NOTIFICATION_ID;
+    private static final int MONITOR_INTERVAL;
+    static final java.lang.String SERVICE;
+    private static final java.lang.String TAG;
+    private static final int _FALSE;
+    private static final int _TRUE;
+    private static final boolean localLOGV;
+    int mBlkSize;
+    private com.android.server.DeviceStorageMonitorService$CachePackageDataObserver mClearCacheObserver;
+    boolean mClearSucceeded;
+    boolean mClearingCache;
+    private android.content.ContentResolver mContentResolver;
+    private android.content.Context mContext;
+    android.os.StatFs mFileStats;
+    private long mFreeMem;
+    android.os.Handler mHandler;
+    private long mLastReportedFreeMem;
+    private long mLastReportedFreeMemTime;
+    private boolean mLowMemFlag;
+    private android.content.Intent mStorageLowIntent;
+    private android.content.Intent mStorageOkIntent;
+    long mThreadStartTime;
+    long mTotalMemory;
+
+    public void <init>(android.content.Context)
+    {
+        com.android.server.DeviceStorageMonitorService $r0;
+        android.content.Context $r1;
+        com.android.server.DeviceStorageMonitorService$1 $r2;
+        android.content.ContentResolver $r3;
+        android.os.StatFs $r4;
+        int $i0, $i1;
+        long $l2;
+        android.content.Intent $r5;
+
+        $r0 := @this: com.android.server.DeviceStorageMonitorService;
+
+        $r1 := @parameter0: android.content.Context;
+
+        specialinvoke $r0.<android.os.Binder: void <init>()>();
+
+        $r0.<com.android.server.DeviceStorageMonitorService: boolean mLowMemFlag> = 0;
+
+        $r0.<com.android.server.DeviceStorageMonitorService: long mThreadStartTime> = -1L;
+
+        $r0.<com.android.server.DeviceStorageMonitorService: boolean mClearSucceeded> = 0;
+
+        $r2 = new com.android.server.DeviceStorageMonitorService$1;
+
+        specialinvoke $r2.<com.android.server.DeviceStorageMonitorService$1: void <init>(com.android.server.DeviceStorageMonitorService)>($r0);
+
+        $r0.<com.android.server.DeviceStorageMonitorService: android.os.Handler mHandler> = $r2;
+
+        $r0.<com.android.server.DeviceStorageMonitorService: long mLastReportedFreeMemTime> = 0L;
+
+        $r0.<com.android.server.DeviceStorageMonitorService: android.content.Context mContext> = $r1;
+
+        $r1 = $r0.<com.android.server.DeviceStorageMonitorService: android.content.Context mContext>;
+
+        $r3 = virtualinvoke $r1.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r0.<com.android.server.DeviceStorageMonitorService: android.content.ContentResolver mContentResolver> = $r3;
+
+        $r4 = new android.os.StatFs;
+
+        specialinvoke $r4.<android.os.StatFs: void <init>(java.lang.String)>("/data");
+
+        $r0.<com.android.server.DeviceStorageMonitorService: android.os.StatFs mFileStats> = $r4;
+
+        $r4 = $r0.<com.android.server.DeviceStorageMonitorService: android.os.StatFs mFileStats>;
+
+        $i0 = virtualinvoke $r4.<android.os.StatFs: int getBlockSize()>();
+
+        $r0.<com.android.server.DeviceStorageMonitorService: int mBlkSize> = $i0;
+
+        $r4 = $r0.<com.android.server.DeviceStorageMonitorService: android.os.StatFs mFileStats>;
+
+        $i0 = virtualinvoke $r4.<android.os.StatFs: int getBlockCount()>();
+
+        $i1 = $r0.<com.android.server.DeviceStorageMonitorService: int mBlkSize>;
+
+        $i0 = $i0 * $i1;
+
+        $i0 = $i0 / 100;
+
+        $l2 = (long) $i0;
+
+        $r0.<com.android.server.DeviceStorageMonitorService: long mTotalMemory> = $l2;
+
+        $r5 = new android.content.Intent;
+
+        specialinvoke $r5.<android.content.Intent: void <init>(java.lang.String)>("android.intent.action.DEVICE_STORAGE_LOW");
+
+        $r0.<com.android.server.DeviceStorageMonitorService: android.content.Intent mStorageLowIntent> = $r5;
+
+        $r5 = new android.content.Intent;
+
+        specialinvoke $r5.<android.content.Intent: void <init>(java.lang.String)>("android.intent.action.DEVICE_STORAGE_OK");
+
+        $r0.<com.android.server.DeviceStorageMonitorService: android.content.Intent mStorageOkIntent> = $r5;
+
+        specialinvoke $r0.<com.android.server.DeviceStorageMonitorService: void checkMemory(boolean)>(1);
+
+        return;
+    }
+
+    static void access$000(com.android.server.DeviceStorageMonitorService, boolean)
+    {
+        com.android.server.DeviceStorageMonitorService $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: com.android.server.DeviceStorageMonitorService;
+
+        $z0 := @parameter1: boolean;
+
+        specialinvoke $r0.<com.android.server.DeviceStorageMonitorService: void checkMemory(boolean)>($z0);
+
+        return;
+    }
+
+    static void access$100(com.android.server.DeviceStorageMonitorService, boolean, long)
+    {
+        com.android.server.DeviceStorageMonitorService $r0;
+        boolean $z0;
+        long $l0;
+
+        $r0 := @parameter0: com.android.server.DeviceStorageMonitorService;
+
+        $z0 := @parameter1: boolean;
+
+        $l0 := @parameter2: long;
+
+        specialinvoke $r0.<com.android.server.DeviceStorageMonitorService: void postCheckMemoryMsg(boolean,long)>($z0, $l0);
+
+        return;
+    }
+
+    private final void cancelNotification()
+    {
+        com.android.server.DeviceStorageMonitorService $r0;
+        java.lang.Object $r1;
+        android.content.Context $r2;
+        android.app.NotificationManager $r3;
+        android.content.Intent $r4;
+
+        $r0 := @this: com.android.server.DeviceStorageMonitorService;
+
+        $r2 = $r0.<com.android.server.DeviceStorageMonitorService: android.content.Context mContext>;
+
+        $r1 = virtualinvoke $r2.<android.content.Context: java.lang.Object getSystemService(java.lang.String)>("notification");
+
+        $r3 = (android.app.NotificationManager) $r1;
+
+        virtualinvoke $r3.<android.app.NotificationManager: void cancel(int)>(1);
+
+        $r2 = $r0.<com.android.server.DeviceStorageMonitorService: android.content.Context mContext>;
+
+        $r4 = $r0.<com.android.server.DeviceStorageMonitorService: android.content.Intent mStorageLowIntent>;
+
+        virtualinvoke $r2.<android.content.Context: void removeStickyBroadcast(android.content.Intent)>($r4);
+
+        $r2 = $r0.<com.android.server.DeviceStorageMonitorService: android.content.Context mContext>;
+
+        $r4 = $r0.<com.android.server.DeviceStorageMonitorService: android.content.Intent mStorageOkIntent>;
+
+        virtualinvoke $r2.<android.content.Context: void sendBroadcast(android.content.Intent)>($r4);
+
+        return;
+    }
+
+    private final void checkMemory(boolean)
+    {
+        com.android.server.DeviceStorageMonitorService $r0;
+        boolean $z0, $z1;
+        long $l0, $l1;
+        byte $b2;
+
+        $r0 := @this: com.android.server.DeviceStorageMonitorService;
+
+        $z0 := @parameter0: boolean;
+
+        $z1 = $r0.<com.android.server.DeviceStorageMonitorService: boolean mClearingCache>;
+
+        if $z1 == 0 goto label2;
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l1 = $r0.<com.android.server.DeviceStorageMonitorService: long mThreadStartTime>;
+
+        $l0 = $l0 - $l1;
+
+        $b2 = $l0 cmp 600000L;
+
+        if $b2 <= 0 goto label1;
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("DeviceStorageMonitorService", "Thread that clears cache file seems to run for ever");
+
+     label1:
+        specialinvoke $r0.<com.android.server.DeviceStorageMonitorService: void postCheckMemoryMsg(boolean,long)>(1, 60000L);
+
+        return;
+
+     label2:
+        specialinvoke $r0.<com.android.server.DeviceStorageMonitorService: void restatDataDir()>();
+
+        $l0 = specialinvoke $r0.<com.android.server.DeviceStorageMonitorService: long getMemThreshold()>();
+
+        $l1 = $r0.<com.android.server.DeviceStorageMonitorService: long mFreeMem>;
+
+        $b2 = $l1 cmp $l0;
+
+        if $b2 >= 0 goto label4;
+
+        $z1 = $r0.<com.android.server.DeviceStorageMonitorService: boolean mLowMemFlag>;
+
+        if $z1 != 0 goto label1;
+
+        if $z0 == 0 goto label3;
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r0.<com.android.server.DeviceStorageMonitorService: long mThreadStartTime> = $l0;
+
+        $r0.<com.android.server.DeviceStorageMonitorService: boolean mClearSucceeded> = 0;
+
+        specialinvoke $r0.<com.android.server.DeviceStorageMonitorService: void clearCache()>();
+
+        goto label1;
+
+     label3:
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("DeviceStorageMonitorService", "Running low on memory. Sending notification");
+
+        specialinvoke $r0.<com.android.server.DeviceStorageMonitorService: void sendNotification()>();
+
+        $r0.<com.android.server.DeviceStorageMonitorService: boolean mLowMemFlag> = 1;
+
+        goto label1;
+
+     label4:
+        $z0 = $r0.<com.android.server.DeviceStorageMonitorService: boolean mLowMemFlag>;
+
+        if $z0 == 0 goto label1;
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("DeviceStorageMonitorService", "Memory available. Cancelling notification");
+
+        specialinvoke $r0.<com.android.server.DeviceStorageMonitorService: void cancelNotification()>();
+
+        $r0.<com.android.server.DeviceStorageMonitorService: boolean mLowMemFlag> = 0;
+
+        goto label1;
+    }
+
+    private final void clearCache()
+    {
+        com.android.server.DeviceStorageMonitorService $r0;
+        com.android.server.DeviceStorageMonitorService$CachePackageDataObserver $r1, r7;
+        android.os.IBinder $r2;
+        android.content.pm.IPackageManager $r3;
+        long $l0;
+        android.os.RemoteException $r4;
+        java.lang.StringBuilder $r5, r8;
+        java.lang.String $r6;
+        android.content.pm.IPackageDataObserver r9;
+
+        $r0 := @this: com.android.server.DeviceStorageMonitorService;
+
+        $r1 = $r0.<com.android.server.DeviceStorageMonitorService: com.android.server.DeviceStorageMonitorService$CachePackageDataObserver mClearCacheObserver>;
+
+        if $r1 != null goto label1;
+
+        r7 = new com.android.server.DeviceStorageMonitorService$CachePackageDataObserver;
+
+        specialinvoke r7.<com.android.server.DeviceStorageMonitorService$CachePackageDataObserver: void <init>(com.android.server.DeviceStorageMonitorService)>($r0);
+
+        $r0.<com.android.server.DeviceStorageMonitorService: com.android.server.DeviceStorageMonitorService$CachePackageDataObserver mClearCacheObserver> = r7;
+
+     label1:
+        $r0.<com.android.server.DeviceStorageMonitorService: boolean mClearingCache> = 1;
+
+     label2:
+        $r2 = staticinvoke <android.os.ServiceManager: android.os.IBinder getService(java.lang.String)>("package");
+
+        $r3 = staticinvoke <android.content.pm.IPackageManager$Stub: android.content.pm.IPackageManager asInterface(android.os.IBinder)>($r2);
+
+        $l0 = specialinvoke $r0.<com.android.server.DeviceStorageMonitorService: long getMemThreshold()>();
+
+     label3:
+        $r1 = $r0.<com.android.server.DeviceStorageMonitorService: com.android.server.DeviceStorageMonitorService$CachePackageDataObserver mClearCacheObserver>;
+
+     label4:
+        r9 = (android.content.pm.IPackageDataObserver) $r1;
+
+        interfaceinvoke $r3.<android.content.pm.IPackageManager: void freeStorageAndNotify(long,android.content.pm.IPackageDataObserver)>($l0, r9);
+
+     label5:
+        return;
+
+     label6:
+        $r4 := @caughtexception;
+
+        r8 = new java.lang.StringBuilder;
+
+        specialinvoke r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed to get handle for PackageManger Exception: ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("DeviceStorageMonitorService", $r6);
+
+        $r0.<com.android.server.DeviceStorageMonitorService: boolean mClearingCache> = 0;
+
+        $r0.<com.android.server.DeviceStorageMonitorService: boolean mClearSucceeded> = 0;
+
+        return;
+
+        catch android.os.RemoteException from label2 to label3 with label6;
+        catch android.os.RemoteException from label4 to label5 with label6;
+    }
+
+    private long getMemThreshold()
+    {
+        com.android.server.DeviceStorageMonitorService $r0;
+        int $i0;
+        android.content.ContentResolver $r1;
+        long $l1, $l2;
+
+        $r0 := @this: com.android.server.DeviceStorageMonitorService;
+
+        $r1 = $r0.<com.android.server.DeviceStorageMonitorService: android.content.ContentResolver mContentResolver>;
+
+        $i0 = staticinvoke <android.provider.Settings$Gservices: int getInt(android.content.ContentResolver,java.lang.String,int)>($r1, "sys_storage_threshold_percentage", 10);
+
+        $l1 = $r0.<com.android.server.DeviceStorageMonitorService: long mTotalMemory>;
+
+        $l2 = (long) $i0;
+
+        $l1 = $l1 * $l2;
+
+        return $l1;
+    }
+
+    private void postCheckMemoryMsg(boolean, long)
+    {
+        com.android.server.DeviceStorageMonitorService $r0;
+        boolean $z0;
+        long $l0;
+        android.os.Message $r1;
+        android.os.Handler $r2, $r3;
+        byte $b1;
+
+        $r0 := @this: com.android.server.DeviceStorageMonitorService;
+
+        $z0 := @parameter0: boolean;
+
+        $l0 := @parameter1: long;
+
+        $r2 = $r0.<com.android.server.DeviceStorageMonitorService: android.os.Handler mHandler>;
+
+        virtualinvoke $r2.<android.os.Handler: void removeMessages(int)>(1);
+
+        $r2 = $r0.<com.android.server.DeviceStorageMonitorService: android.os.Handler mHandler>;
+
+        $r3 = $r0.<com.android.server.DeviceStorageMonitorService: android.os.Handler mHandler>;
+
+        if $z0 == 0 goto label2;
+
+        $b1 = 1;
+
+     label1:
+        $r1 = virtualinvoke $r3.<android.os.Handler: android.os.Message obtainMessage(int,int,int)>(1, $b1, 0);
+
+        virtualinvoke $r2.<android.os.Handler: boolean sendMessageDelayed(android.os.Message,long)>($r1, $l0);
+
+        return;
+
+     label2:
+        $b1 = 0;
+
+        goto label1;
+    }
+
+    private final void restatDataDir()
+    {
+        com.android.server.DeviceStorageMonitorService $r0;
+        long $l0, $l1, $l4;
+        android.os.StatFs $r1;
+        int $i2, $i3;
+        java.lang.String $r2, $r3;
+        boolean $z0;
+        android.content.ContentResolver $r4;
+        byte $b5;
+
+        $r0 := @this: com.android.server.DeviceStorageMonitorService;
+
+        $r1 = $r0.<com.android.server.DeviceStorageMonitorService: android.os.StatFs mFileStats>;
+
+        virtualinvoke $r1.<android.os.StatFs: void restat(java.lang.String)>("/data");
+
+        $r1 = $r0.<com.android.server.DeviceStorageMonitorService: android.os.StatFs mFileStats>;
+
+        $i2 = virtualinvoke $r1.<android.os.StatFs: int getAvailableBlocks()>();
+
+        $i3 = $r0.<com.android.server.DeviceStorageMonitorService: int mBlkSize>;
+
+        $i2 = $i2 * $i3;
+
+        $l1 = (long) $i2;
+
+        $r0.<com.android.server.DeviceStorageMonitorService: long mFreeMem> = $l1;
+
+        $r2 = staticinvoke <android.os.SystemProperties: java.lang.String get(java.lang.String)>("debug.freemem");
+
+        $r3 = "";
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 != 0 goto label1;
+
+        $l1 = staticinvoke <java.lang.Long: long parseLong(java.lang.String)>($r2);
+
+        $r0.<com.android.server.DeviceStorageMonitorService: long mFreeMem> = $l1;
+
+     label1:
+        $r4 = $r0.<com.android.server.DeviceStorageMonitorService: android.content.ContentResolver mContentResolver>;
+
+        $l1 = staticinvoke <android.provider.Settings$Gservices: long getLong(android.content.ContentResolver,java.lang.String,long)>($r4, "sys_free_storage_log_interval", 720L);
+
+        $l1 = $l1 * 60L;
+
+        $l1 = $l1 * 1000L;
+
+        $l0 = staticinvoke <android.os.SystemClock: long elapsedRealtime()>();
+
+        $l4 = $r0.<com.android.server.DeviceStorageMonitorService: long mLastReportedFreeMemTime>;
+
+        $b5 = $l4 cmp 0L;
+
+        if $b5 == 0 goto label2;
+
+        $l4 = $r0.<com.android.server.DeviceStorageMonitorService: long mLastReportedFreeMemTime>;
+
+        $l4 = $l0 - $l4;
+
+        $b5 = $l4 cmp $l1;
+
+        if $b5 < 0 goto label3;
+
+     label2:
+        $r0.<com.android.server.DeviceStorageMonitorService: long mLastReportedFreeMemTime> = $l0;
+
+        $l1 = $r0.<com.android.server.DeviceStorageMonitorService: long mFreeMem>;
+
+        staticinvoke <android.util.EventLog: int writeEvent(int,long)>(2746, $l1);
+
+     label3:
+        $r4 = $r0.<com.android.server.DeviceStorageMonitorService: android.content.ContentResolver mContentResolver>;
+
+        $l1 = staticinvoke <android.provider.Settings$Gservices: long getLong(android.content.ContentResolver,java.lang.String,long)>($r4, "disk_free_change_reporting_threshold", 2097152L);
+
+        $l0 = $r0.<com.android.server.DeviceStorageMonitorService: long mFreeMem>;
+
+        $l4 = $r0.<com.android.server.DeviceStorageMonitorService: long mLastReportedFreeMem>;
+
+        $l0 = $l0 - $l4;
+
+        $b5 = $l0 cmp $l1;
+
+        if $b5 > 0 goto label4;
+
+        $l1 = neg $l1;
+
+        $b5 = $l0 cmp $l1;
+
+        if $b5 >= 0 goto label5;
+
+     label4:
+        $l1 = $r0.<com.android.server.DeviceStorageMonitorService: long mFreeMem>;
+
+        $r0.<com.android.server.DeviceStorageMonitorService: long mLastReportedFreeMem> = $l1;
+
+        $l1 = $r0.<com.android.server.DeviceStorageMonitorService: long mFreeMem>;
+
+        staticinvoke <android.util.EventLog: int writeEvent(int,long)>(2744, $l1);
+
+        return;
+
+     label5:
+        return;
+    }
+
+    private final void sendNotification()
+    {
+        com.android.server.DeviceStorageMonitorService $r0;
+        android.content.Intent $r1;
+        android.app.Notification $r2;
+        long $l0;
+        android.content.Context $r3;
+        java.lang.Object $r4;
+        android.app.NotificationManager $r5;
+        java.lang.CharSequence $r6, $r7;
+        android.app.PendingIntent $r8;
+        int $i1;
+
+        $r0 := @this: com.android.server.DeviceStorageMonitorService;
+
+        $l0 = $r0.<com.android.server.DeviceStorageMonitorService: long mFreeMem>;
+
+        staticinvoke <android.util.EventLog: int writeEvent(int,long)>(2745, $l0);
+
+        $r1 = new android.content.Intent;
+
+        specialinvoke $r1.<android.content.Intent: void <init>(java.lang.String)>("android.intent.action.MANAGE_PACKAGE_STORAGE");
+
+        $l0 = $r0.<com.android.server.DeviceStorageMonitorService: long mFreeMem>;
+
+        virtualinvoke $r1.<android.content.Intent: android.content.Intent putExtra(java.lang.String,long)>("memory", $l0);
+
+        virtualinvoke $r1.<android.content.Intent: android.content.Intent addFlags(int)>(268435456);
+
+        $r3 = $r0.<com.android.server.DeviceStorageMonitorService: android.content.Context mContext>;
+
+        $r4 = virtualinvoke $r3.<android.content.Context: java.lang.Object getSystemService(java.lang.String)>("notification");
+
+        $r5 = (android.app.NotificationManager) $r4;
+
+        $r3 = $r0.<com.android.server.DeviceStorageMonitorService: android.content.Context mContext>;
+
+        $r6 = virtualinvoke $r3.<android.content.Context: java.lang.CharSequence getText(int)>(17039939);
+
+        $r3 = $r0.<com.android.server.DeviceStorageMonitorService: android.content.Context mContext>;
+
+        $r7 = virtualinvoke $r3.<android.content.Context: java.lang.CharSequence getText(int)>(17039940);
+
+        $r3 = $r0.<com.android.server.DeviceStorageMonitorService: android.content.Context mContext>;
+
+        $r8 = staticinvoke <android.app.PendingIntent: android.app.PendingIntent getActivity(android.content.Context,int,android.content.Intent,int)>($r3, 0, $r1, 0);
+
+        $r2 = new android.app.Notification;
+
+        specialinvoke $r2.<android.app.Notification: void <init>()>();
+
+        $r2.<android.app.Notification: int icon> = 17302023;
+
+        $r2.<android.app.Notification: java.lang.CharSequence tickerText> = $r6;
+
+        $i1 = $r2.<android.app.Notification: int flags>;
+
+        $i1 = $i1 | 32;
+
+        $r2.<android.app.Notification: int flags> = $i1;
+
+        $r3 = $r0.<com.android.server.DeviceStorageMonitorService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.app.Notification: void setLatestEventInfo(android.content.Context,java.lang.CharSequence,java.lang.CharSequence,android.app.PendingIntent)>($r3, $r6, $r7, $r8);
+
+        virtualinvoke $r5.<android.app.NotificationManager: void notify(int,android.app.Notification)>(1, $r2);
+
+        $r3 = $r0.<com.android.server.DeviceStorageMonitorService: android.content.Context mContext>;
+
+        $r1 = $r0.<com.android.server.DeviceStorageMonitorService: android.content.Intent mStorageLowIntent>;
+
+        virtualinvoke $r3.<android.content.Context: void sendStickyBroadcast(android.content.Intent)>($r1);
+
+        return;
+    }
+
+    public void updateMemory()
+    {
+        com.android.server.DeviceStorageMonitorService $r0;
+        int $i0;
+
+        $r0 := @this: com.android.server.DeviceStorageMonitorService;
+
+        $i0 = staticinvoke <com.android.server.DeviceStorageMonitorService: int getCallingUid()>();
+
+        if $i0 == 1000 goto label1;
+
+        return;
+
+     label1:
+        specialinvoke $r0.<com.android.server.DeviceStorageMonitorService: void postCheckMemoryMsg(boolean,long)>(1, 0L);
+
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <com.android.server.DeviceStorageMonitorService: int _TRUE> = 1;
+
+        <com.android.server.DeviceStorageMonitorService: int _FALSE> = 0;
+
+        <com.android.server.DeviceStorageMonitorService: java.lang.String TAG> = "DeviceStorageMonitorService";
+
+        <com.android.server.DeviceStorageMonitorService: java.lang.String SERVICE> = "devicestoragemonitor";
+
+        <com.android.server.DeviceStorageMonitorService: int MONITOR_INTERVAL> = 1;
+
+        <com.android.server.DeviceStorageMonitorService: int LOW_MEMORY_NOTIFICATION_ID> = 1;
+
+        <com.android.server.DeviceStorageMonitorService: int EVENT_LOG_STORAGE_BELOW_THRESHOLD> = 2744;
+
+        <com.android.server.DeviceStorageMonitorService: int EVENT_LOG_LOW_STORAGE_NOTIFICATION> = 2745;
+
+        <com.android.server.DeviceStorageMonitorService: int EVENT_LOG_FREE_STORAGE_LEFT> = 2746;
+
+        <com.android.server.DeviceStorageMonitorService: int DEVICE_MEMORY_WHAT> = 1;
+
+        <com.android.server.DeviceStorageMonitorService: int DEFAULT_THRESHOLD_PERCENTAGE> = 10;
+
+        <com.android.server.DeviceStorageMonitorService: int DEFAULT_FREE_STORAGE_LOG_INTERVAL_IN_MINUTES> = 720;
+
+        <com.android.server.DeviceStorageMonitorService: long DEFAULT_DISK_FREE_CHANGE_REPORTING_THRESHOLD> = 2097152L;
+
+        <com.android.server.DeviceStorageMonitorService: long DEFAULT_CHECK_INTERVAL> = 60000L;
+
+        <com.android.server.DeviceStorageMonitorService: boolean DEBUG> = 0;
+
+        <com.android.server.DeviceStorageMonitorService: java.lang.String DATA_PATH> = "/data";
+
+        return;
+    }
+}

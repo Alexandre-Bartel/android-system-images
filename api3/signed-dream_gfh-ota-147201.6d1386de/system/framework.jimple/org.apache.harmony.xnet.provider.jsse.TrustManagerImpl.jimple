@@ -1,0 +1,489 @@
+public class org.apache.harmony.xnet.provider.jsse.TrustManagerImpl extends java.lang.Object implements javax.net.ssl.X509TrustManager
+{
+    private java.lang.Exception err;
+    private java.security.cert.CertificateFactory factory;
+    private java.security.cert.PKIXParameters params;
+    private java.security.cert.CertPathValidator validator;
+
+    public void <init>(java.security.KeyStore)
+    {
+        org.apache.harmony.xnet.provider.jsse.TrustManagerImpl $r0;
+        java.security.KeyStore $r1;
+        java.util.HashSet $r2;
+        java.security.cert.CertPathValidator $r3;
+        java.security.cert.CertificateFactory $r4;
+        java.util.Enumeration $r5;
+        boolean $z0;
+        java.lang.Object $r6;
+        java.lang.String $r7;
+        java.security.cert.Certificate $r8;
+        java.security.cert.X509Certificate $r9;
+        java.security.cert.TrustAnchor $r10;
+        java.lang.Exception $r11;
+        java.security.cert.PKIXParameters $r12;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.TrustManagerImpl;
+
+        $r1 := @parameter0: java.security.KeyStore;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.TrustManagerImpl: java.lang.Exception err> = null;
+
+     label1:
+        $r3 = staticinvoke <java.security.cert.CertPathValidator: java.security.cert.CertPathValidator getInstance(java.lang.String)>("PKIX");
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.TrustManagerImpl: java.security.cert.CertPathValidator validator> = $r3;
+
+        $r4 = staticinvoke <java.security.cert.CertificateFactory: java.security.cert.CertificateFactory getInstance(java.lang.String)>("X509");
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.TrustManagerImpl: java.security.cert.CertificateFactory factory> = $r4;
+
+        $r2 = new java.util.HashSet;
+
+        specialinvoke $r2.<java.util.HashSet: void <init>()>();
+
+        $r5 = virtualinvoke $r1.<java.security.KeyStore: java.util.Enumeration aliases()>();
+
+     label2:
+        $z0 = interfaceinvoke $r5.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label5;
+
+        $r6 = interfaceinvoke $r5.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        $r7 = (java.lang.String) $r6;
+
+        $r8 = virtualinvoke $r1.<java.security.KeyStore: java.security.cert.Certificate getCertificate(java.lang.String)>($r7);
+
+        $r9 = (java.security.cert.X509Certificate) $r8;
+
+        if $r9 == null goto label2;
+
+        $r10 = new java.security.cert.TrustAnchor;
+
+        specialinvoke $r10.<java.security.cert.TrustAnchor: void <init>(java.security.cert.X509Certificate,byte[])>($r9, null);
+
+        interfaceinvoke $r2.<java.util.Set: boolean add(java.lang.Object)>($r10);
+
+     label3:
+        goto label2;
+
+     label4:
+        $r11 := @caughtexception;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.TrustManagerImpl: java.lang.Exception err> = $r11;
+
+        return;
+
+     label5:
+        $r12 = new java.security.cert.PKIXParameters;
+
+     label6:
+        specialinvoke $r12.<java.security.cert.PKIXParameters: void <init>(java.util.Set)>($r2);
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.TrustManagerImpl: java.security.cert.PKIXParameters params> = $r12;
+
+        $r12 = $r0.<org.apache.harmony.xnet.provider.jsse.TrustManagerImpl: java.security.cert.PKIXParameters params>;
+
+        virtualinvoke $r12.<java.security.cert.PKIXParameters: void setRevocationEnabled(boolean)>(0);
+
+     label7:
+        return;
+
+        catch java.lang.Exception from label1 to label3 with label4;
+        catch java.lang.Exception from label6 to label7 with label4;
+    }
+
+    private boolean isDirectlyTrustedCert(java.security.cert.X509Certificate[])
+    {
+        org.apache.harmony.xnet.provider.jsse.TrustManagerImpl $r0;
+        java.security.cert.X509Certificate[] $r1;
+        int $i0;
+        java.security.cert.X509Certificate $r2;
+        byte[] $r3, $r9;
+        java.security.cert.PKIXParameters $r4;
+        java.util.Set $r5;
+        java.util.Iterator $r6;
+        boolean $z0;
+        java.lang.Object $r7;
+        java.security.cert.TrustAnchor $r8;
+        java.security.cert.CertificateEncodingException $r10;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.TrustManagerImpl;
+
+        $r1 := @parameter0: java.security.cert.X509Certificate[];
+
+        $i0 = lengthof $r1;
+
+        if $i0 != 1 goto label5;
+
+        $r2 = $r1[0];
+
+     label1:
+        $r3 = virtualinvoke $r2.<java.security.cert.Certificate: byte[] getEncoded()>();
+
+        $r4 = $r0.<org.apache.harmony.xnet.provider.jsse.TrustManagerImpl: java.security.cert.PKIXParameters params>;
+
+        $r5 = virtualinvoke $r4.<java.security.cert.PKIXParameters: java.util.Set getTrustAnchors()>();
+
+        $r6 = interfaceinvoke $r5.<java.util.Set: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label5;
+
+        $r7 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        $r8 = (java.security.cert.TrustAnchor) $r7;
+
+        $r2 = virtualinvoke $r8.<java.security.cert.TrustAnchor: java.security.cert.X509Certificate getTrustedCert()>();
+
+        $r9 = virtualinvoke $r2.<java.security.cert.Certificate: byte[] getEncoded()>();
+
+        $z0 = staticinvoke <java.util.Arrays: boolean equals(byte[],byte[])>($r3, $r9);
+
+     label3:
+        if $z0 == 0 goto label2;
+
+        return 1;
+
+     label4:
+        $r10 := @caughtexception;
+
+     label5:
+        return 0;
+
+        catch java.security.cert.CertificateEncodingException from label1 to label3 with label4;
+    }
+
+    public void checkClientTrusted(java.security.cert.X509Certificate[], java.lang.String) throws java.security.cert.CertificateException
+    {
+        org.apache.harmony.xnet.provider.jsse.TrustManagerImpl $r0;
+        java.security.cert.X509Certificate[] $r1;
+        java.lang.String $r2;
+        int $i0;
+        java.lang.IllegalArgumentException $r3;
+        java.lang.Exception $r4;
+        java.security.cert.CertificateException $r5;
+        boolean $z0;
+        java.security.cert.CertificateFactory $r6;
+        java.util.List $r7;
+        java.security.cert.CertPath $r8;
+        java.security.cert.X509Certificate $r9;
+        byte[] $r10, $r12;
+        java.lang.Object $r11;
+        java.security.InvalidAlgorithmParameterException $r13;
+        java.security.cert.CertPathValidator $r14;
+        java.security.cert.PKIXParameters $r15;
+        java.security.cert.CertPathValidatorException $r16;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.TrustManagerImpl;
+
+        $r1 := @parameter0: java.security.cert.X509Certificate[];
+
+        $r2 := @parameter1: java.lang.String;
+
+        if $r1 == null goto label01;
+
+        $i0 = lengthof $r1;
+
+        if $i0 == 0 goto label01;
+
+        if $r2 == null goto label01;
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        if $i0 != 0 goto label02;
+
+     label01:
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("null or zero-length parameter");
+
+        throw $r3;
+
+     label02:
+        $r4 = $r0.<org.apache.harmony.xnet.provider.jsse.TrustManagerImpl: java.lang.Exception err>;
+
+        if $r4 == null goto label03;
+
+        $r5 = new java.security.cert.CertificateException;
+
+        $r4 = $r0.<org.apache.harmony.xnet.provider.jsse.TrustManagerImpl: java.lang.Exception err>;
+
+        specialinvoke $r5.<java.security.cert.CertificateException: void <init>(java.lang.Throwable)>($r4);
+
+        throw $r5;
+
+     label03:
+        $z0 = specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.TrustManagerImpl: boolean isDirectlyTrustedCert(java.security.cert.X509Certificate[])>($r1);
+
+        if $z0 == 0 goto label04;
+
+        return;
+
+     label04:
+        $r6 = $r0.<org.apache.harmony.xnet.provider.jsse.TrustManagerImpl: java.security.cert.CertificateFactory factory>;
+
+     label05:
+        $r7 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>($r1);
+
+        $r8 = virtualinvoke $r6.<java.security.cert.CertificateFactory: java.security.cert.CertPath generateCertPath(java.util.List)>($r7);
+
+        $r9 = $r1[0];
+
+        $r10 = virtualinvoke $r9.<java.security.cert.Certificate: byte[] getEncoded()>();
+
+        $r7 = virtualinvoke $r8.<java.security.cert.CertPath: java.util.List getCertificates()>();
+
+        $r11 = interfaceinvoke $r7.<java.util.List: java.lang.Object get(int)>(0);
+
+        $r9 = (java.security.cert.X509Certificate) $r11;
+
+        $r12 = virtualinvoke $r9.<java.security.cert.Certificate: byte[] getEncoded()>();
+
+        $z0 = staticinvoke <java.util.Arrays: boolean equals(byte[],byte[])>($r10, $r12);
+
+     label06:
+        if $z0 != 0 goto label10;
+
+     label07:
+        $r5 = new java.security.cert.CertificateException;
+
+        specialinvoke $r5.<java.security.cert.CertificateException: void <init>(java.lang.String)>("Certificate chain error");
+
+     label08:
+        throw $r5;
+
+     label09:
+        $r13 := @caughtexception;
+
+        $r5 = new java.security.cert.CertificateException;
+
+        specialinvoke $r5.<java.security.cert.CertificateException: void <init>(java.lang.Throwable)>($r13);
+
+        throw $r5;
+
+     label10:
+        $r14 = $r0.<org.apache.harmony.xnet.provider.jsse.TrustManagerImpl: java.security.cert.CertPathValidator validator>;
+
+        $r15 = $r0.<org.apache.harmony.xnet.provider.jsse.TrustManagerImpl: java.security.cert.PKIXParameters params>;
+
+     label11:
+        virtualinvoke $r14.<java.security.cert.CertPathValidator: java.security.cert.CertPathValidatorResult validate(java.security.cert.CertPath,java.security.cert.CertPathParameters)>($r8, $r15);
+
+     label12:
+        return;
+
+     label13:
+        $r16 := @caughtexception;
+
+        $r5 = new java.security.cert.CertificateException;
+
+        specialinvoke $r5.<java.security.cert.CertificateException: void <init>(java.lang.Throwable)>($r16);
+
+        throw $r5;
+
+        catch java.security.InvalidAlgorithmParameterException from label05 to label06 with label09;
+        catch java.security.InvalidAlgorithmParameterException from label07 to label08 with label09;
+        catch java.security.cert.CertPathValidatorException from label05 to label06 with label13;
+        catch java.security.cert.CertPathValidatorException from label07 to label08 with label13;
+        catch java.security.InvalidAlgorithmParameterException from label11 to label12 with label09;
+        catch java.security.cert.CertPathValidatorException from label11 to label12 with label13;
+    }
+
+    public void checkServerTrusted(java.security.cert.X509Certificate[], java.lang.String) throws java.security.cert.CertificateException
+    {
+        org.apache.harmony.xnet.provider.jsse.TrustManagerImpl $r0;
+        java.security.cert.X509Certificate[] $r1;
+        java.lang.String $r2;
+        int $i0;
+        java.lang.IllegalArgumentException $r3;
+        java.lang.Exception $r4;
+        java.security.cert.CertificateException $r5;
+        boolean $z0;
+        java.security.cert.CertificateFactory $r6;
+        java.util.List $r7;
+        java.security.cert.CertPath $r8;
+        java.security.cert.X509Certificate $r9;
+        byte[] $r10, $r12;
+        java.lang.Object $r11;
+        java.security.InvalidAlgorithmParameterException $r13;
+        java.security.cert.CertPathValidator $r14;
+        java.security.cert.PKIXParameters $r15;
+        java.security.cert.CertPathValidatorException $r16;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.TrustManagerImpl;
+
+        $r1 := @parameter0: java.security.cert.X509Certificate[];
+
+        $r2 := @parameter1: java.lang.String;
+
+        if $r1 == null goto label01;
+
+        $i0 = lengthof $r1;
+
+        if $i0 == 0 goto label01;
+
+        if $r2 == null goto label01;
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        if $i0 != 0 goto label02;
+
+     label01:
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("null or zero-length parameter");
+
+        throw $r3;
+
+     label02:
+        $r4 = $r0.<org.apache.harmony.xnet.provider.jsse.TrustManagerImpl: java.lang.Exception err>;
+
+        if $r4 == null goto label03;
+
+        $r5 = new java.security.cert.CertificateException;
+
+        $r4 = $r0.<org.apache.harmony.xnet.provider.jsse.TrustManagerImpl: java.lang.Exception err>;
+
+        specialinvoke $r5.<java.security.cert.CertificateException: void <init>(java.lang.Throwable)>($r4);
+
+        throw $r5;
+
+     label03:
+        $z0 = specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.TrustManagerImpl: boolean isDirectlyTrustedCert(java.security.cert.X509Certificate[])>($r1);
+
+        if $z0 == 0 goto label04;
+
+        return;
+
+     label04:
+        $r6 = $r0.<org.apache.harmony.xnet.provider.jsse.TrustManagerImpl: java.security.cert.CertificateFactory factory>;
+
+     label05:
+        $r7 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>($r1);
+
+        $r8 = virtualinvoke $r6.<java.security.cert.CertificateFactory: java.security.cert.CertPath generateCertPath(java.util.List)>($r7);
+
+        $r9 = $r1[0];
+
+        $r10 = virtualinvoke $r9.<java.security.cert.Certificate: byte[] getEncoded()>();
+
+        $r7 = virtualinvoke $r8.<java.security.cert.CertPath: java.util.List getCertificates()>();
+
+        $r11 = interfaceinvoke $r7.<java.util.List: java.lang.Object get(int)>(0);
+
+        $r9 = (java.security.cert.X509Certificate) $r11;
+
+        $r12 = virtualinvoke $r9.<java.security.cert.Certificate: byte[] getEncoded()>();
+
+        $z0 = staticinvoke <java.util.Arrays: boolean equals(byte[],byte[])>($r10, $r12);
+
+     label06:
+        if $z0 != 0 goto label10;
+
+     label07:
+        $r5 = new java.security.cert.CertificateException;
+
+        specialinvoke $r5.<java.security.cert.CertificateException: void <init>(java.lang.String)>("Certificate chain error");
+
+     label08:
+        throw $r5;
+
+     label09:
+        $r13 := @caughtexception;
+
+        $r5 = new java.security.cert.CertificateException;
+
+        specialinvoke $r5.<java.security.cert.CertificateException: void <init>(java.lang.Throwable)>($r13);
+
+        throw $r5;
+
+     label10:
+        $r14 = $r0.<org.apache.harmony.xnet.provider.jsse.TrustManagerImpl: java.security.cert.CertPathValidator validator>;
+
+        $r15 = $r0.<org.apache.harmony.xnet.provider.jsse.TrustManagerImpl: java.security.cert.PKIXParameters params>;
+
+     label11:
+        virtualinvoke $r14.<java.security.cert.CertPathValidator: java.security.cert.CertPathValidatorResult validate(java.security.cert.CertPath,java.security.cert.CertPathParameters)>($r8, $r15);
+
+     label12:
+        return;
+
+     label13:
+        $r16 := @caughtexception;
+
+        $r5 = new java.security.cert.CertificateException;
+
+        specialinvoke $r5.<java.security.cert.CertificateException: void <init>(java.lang.Throwable)>($r16);
+
+        throw $r5;
+
+        catch java.security.InvalidAlgorithmParameterException from label05 to label06 with label09;
+        catch java.security.InvalidAlgorithmParameterException from label07 to label08 with label09;
+        catch java.security.cert.CertPathValidatorException from label05 to label06 with label13;
+        catch java.security.cert.CertPathValidatorException from label07 to label08 with label13;
+        catch java.security.InvalidAlgorithmParameterException from label11 to label12 with label09;
+        catch java.security.cert.CertPathValidatorException from label11 to label12 with label13;
+    }
+
+    public java.security.cert.X509Certificate[] getAcceptedIssuers()
+    {
+        java.security.cert.X509Certificate[] $r0;
+        int $i0, $i1;
+        org.apache.harmony.xnet.provider.jsse.TrustManagerImpl $r1;
+        java.security.cert.PKIXParameters $r2;
+        java.util.Set $r3;
+        java.util.Iterator $r4;
+        boolean $z0;
+        java.lang.Object $r5;
+        java.security.cert.TrustAnchor $r6;
+        java.security.cert.X509Certificate $r7;
+
+        $r1 := @this: org.apache.harmony.xnet.provider.jsse.TrustManagerImpl;
+
+        $r2 = $r1.<org.apache.harmony.xnet.provider.jsse.TrustManagerImpl: java.security.cert.PKIXParameters params>;
+
+        if $r2 != null goto label1;
+
+        $r0 = newarray (java.security.cert.X509Certificate)[0];
+
+        return $r0;
+
+     label1:
+        $r2 = $r1.<org.apache.harmony.xnet.provider.jsse.TrustManagerImpl: java.security.cert.PKIXParameters params>;
+
+        $r3 = virtualinvoke $r2.<java.security.cert.PKIXParameters: java.util.Set getTrustAnchors()>();
+
+        $i0 = interfaceinvoke $r3.<java.util.Set: int size()>();
+
+        $r0 = newarray (java.security.cert.X509Certificate)[$i0];
+
+        $i1 = 0;
+
+        $r4 = interfaceinvoke $r3.<java.util.Set: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        $r6 = (java.security.cert.TrustAnchor) $r5;
+
+        $r7 = virtualinvoke $r6.<java.security.cert.TrustAnchor: java.security.cert.X509Certificate getTrustedCert()>();
+
+        $r0[$i1] = $r7;
+
+        $i1 = $i1 + 1;
+
+        goto label2;
+
+     label3:
+        return $r0;
+    }
+}

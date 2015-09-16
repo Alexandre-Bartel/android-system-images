@@ -1,0 +1,492 @@
+public class org.apache.http.impl.conn.tsccm.RouteSpecificPool extends java.lang.Object
+{
+    protected final java.util.LinkedList freeEntries;
+    private final org.apache.commons.logging.Log log;
+    protected final int maxEntries;
+    protected int numEntries;
+    protected final org.apache.http.conn.routing.HttpRoute route;
+    protected final java.util.Queue waitingThreads;
+
+    public void <init>(org.apache.http.conn.routing.HttpRoute, int)
+    {
+        org.apache.http.impl.conn.tsccm.RouteSpecificPool $r0;
+        org.apache.http.conn.routing.HttpRoute $r1;
+        int $i0;
+        java.lang.Class $r2;
+        org.apache.commons.logging.Log $r3;
+        java.util.LinkedList $r4;
+
+        $r0 := @this: org.apache.http.impl.conn.tsccm.RouteSpecificPool;
+
+        $r1 := @parameter0: org.apache.http.conn.routing.HttpRoute;
+
+        $i0 := @parameter1: int;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r2 = virtualinvoke $r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = staticinvoke <org.apache.commons.logging.LogFactory: org.apache.commons.logging.Log getLog(java.lang.Class)>($r2);
+
+        $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: org.apache.commons.logging.Log log> = $r3;
+
+        $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: org.apache.http.conn.routing.HttpRoute route> = $r1;
+
+        $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: int maxEntries> = $i0;
+
+        $r4 = new java.util.LinkedList;
+
+        specialinvoke $r4.<java.util.LinkedList: void <init>()>();
+
+        $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: java.util.LinkedList freeEntries> = $r4;
+
+        $r4 = new java.util.LinkedList;
+
+        specialinvoke $r4.<java.util.LinkedList: void <init>()>();
+
+        $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: java.util.Queue waitingThreads> = $r4;
+
+        $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: int numEntries> = 0;
+
+        return;
+    }
+
+    public org.apache.http.impl.conn.tsccm.BasicPoolEntry allocEntry(java.lang.Object)
+    {
+        org.apache.http.impl.conn.tsccm.RouteSpecificPool $r0;
+        java.lang.Object $r1, $r6;
+        java.io.IOException $r2;
+        java.util.LinkedList $r3, $r4;
+        boolean $z0;
+        int $i0;
+        java.util.ListIterator $r5;
+        org.apache.http.impl.conn.tsccm.BasicPoolEntry $r7;
+        org.apache.http.conn.OperatedClientConnection $r8;
+        org.apache.commons.logging.Log $r9;
+
+        $r0 := @this: org.apache.http.impl.conn.tsccm.RouteSpecificPool;
+
+        $r1 := @parameter0: java.lang.Object;
+
+        $r3 = $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: java.util.LinkedList freeEntries>;
+
+        $z0 = virtualinvoke $r3.<java.util.AbstractCollection: boolean isEmpty()>();
+
+        if $z0 != 0 goto label2;
+
+        $r3 = $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: java.util.LinkedList freeEntries>;
+
+        $r4 = $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: java.util.LinkedList freeEntries>;
+
+        $i0 = virtualinvoke $r4.<java.util.LinkedList: int size()>();
+
+        $r5 = virtualinvoke $r3.<java.util.LinkedList: java.util.ListIterator listIterator(int)>($i0);
+
+     label1:
+        $z0 = interfaceinvoke $r5.<java.util.ListIterator: boolean hasPrevious()>();
+
+        if $z0 == 0 goto label2;
+
+        $r6 = interfaceinvoke $r5.<java.util.ListIterator: java.lang.Object previous()>();
+
+        $r7 = (org.apache.http.impl.conn.tsccm.BasicPoolEntry) $r6;
+
+        $r6 = virtualinvoke $r7.<org.apache.http.impl.conn.AbstractPoolEntry: java.lang.Object getState()>();
+
+        $z0 = staticinvoke <org.apache.http.util.LangUtils: boolean equals(java.lang.Object,java.lang.Object)>($r1, $r6);
+
+        if $z0 == 0 goto label1;
+
+        interfaceinvoke $r5.<java.util.ListIterator: void remove()>();
+
+        return $r7;
+
+     label2:
+        $r3 = $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: java.util.LinkedList freeEntries>;
+
+        $z0 = virtualinvoke $r3.<java.util.AbstractCollection: boolean isEmpty()>();
+
+        if $z0 != 0 goto label6;
+
+        $r3 = $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: java.util.LinkedList freeEntries>;
+
+        $r1 = virtualinvoke $r3.<java.util.LinkedList: java.lang.Object remove()>();
+
+        $r7 = (org.apache.http.impl.conn.tsccm.BasicPoolEntry) $r1;
+
+        virtualinvoke $r7.<org.apache.http.impl.conn.AbstractPoolEntry: void setState(java.lang.Object)>(null);
+
+        $r8 = virtualinvoke $r7.<org.apache.http.impl.conn.tsccm.BasicPoolEntry: org.apache.http.conn.OperatedClientConnection getConnection()>();
+
+     label3:
+        interfaceinvoke $r8.<org.apache.http.conn.OperatedClientConnection: void close()>();
+
+     label4:
+        return $r7;
+
+     label5:
+        $r2 := @caughtexception;
+
+        $r9 = $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: org.apache.commons.logging.Log log>;
+
+        interfaceinvoke $r9.<org.apache.commons.logging.Log: void debug(java.lang.Object,java.lang.Throwable)>("I/O error closing connection", $r2);
+
+        goto label4;
+
+     label6:
+        return null;
+
+        catch java.io.IOException from label3 to label4 with label5;
+    }
+
+    public void createdEntry(org.apache.http.impl.conn.tsccm.BasicPoolEntry)
+    {
+        org.apache.http.impl.conn.tsccm.RouteSpecificPool $r0;
+        org.apache.http.impl.conn.tsccm.BasicPoolEntry $r1;
+        org.apache.http.conn.routing.HttpRoute $r2, $r3;
+        boolean $z0;
+        java.lang.IllegalArgumentException $r4;
+        java.lang.StringBuilder $r5;
+        java.lang.String $r6;
+        int $i0;
+
+        $r0 := @this: org.apache.http.impl.conn.tsccm.RouteSpecificPool;
+
+        $r1 := @parameter0: org.apache.http.impl.conn.tsccm.BasicPoolEntry;
+
+        $r2 = $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: org.apache.http.conn.routing.HttpRoute route>;
+
+        $r3 = virtualinvoke $r1.<org.apache.http.impl.conn.tsccm.BasicPoolEntry: org.apache.http.conn.routing.HttpRoute getPlannedRoute()>();
+
+        $z0 = virtualinvoke $r2.<org.apache.http.conn.routing.HttpRoute: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 != 0 goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Entry not planned for this pool.\npool: ");
+
+        $r2 = $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: org.apache.http.conn.routing.HttpRoute route>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\nplan: ");
+
+        $r2 = virtualinvoke $r1.<org.apache.http.impl.conn.tsccm.BasicPoolEntry: org.apache.http.conn.routing.HttpRoute getPlannedRoute()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r6);
+
+        throw $r4;
+
+     label1:
+        $i0 = $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: int numEntries>;
+
+        $i0 = $i0 + 1;
+
+        $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: int numEntries> = $i0;
+
+        return;
+    }
+
+    public boolean deleteEntry(org.apache.http.impl.conn.tsccm.BasicPoolEntry)
+    {
+        org.apache.http.impl.conn.tsccm.RouteSpecificPool $r0;
+        org.apache.http.impl.conn.tsccm.BasicPoolEntry $r1;
+        boolean $z0;
+        java.util.LinkedList $r2;
+        int $i0;
+
+        $r0 := @this: org.apache.http.impl.conn.tsccm.RouteSpecificPool;
+
+        $r1 := @parameter0: org.apache.http.impl.conn.tsccm.BasicPoolEntry;
+
+        $r2 = $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: java.util.LinkedList freeEntries>;
+
+        $z0 = virtualinvoke $r2.<java.util.LinkedList: boolean remove(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        $i0 = $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: int numEntries>;
+
+        $i0 = $i0 - 1;
+
+        $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: int numEntries> = $i0;
+
+        return $z0;
+
+     label1:
+        return $z0;
+    }
+
+    public void dropEntry()
+    {
+        org.apache.http.impl.conn.tsccm.RouteSpecificPool $r0;
+        int $i0;
+        java.lang.IllegalStateException $r1;
+
+        $r0 := @this: org.apache.http.impl.conn.tsccm.RouteSpecificPool;
+
+        $i0 = $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: int numEntries>;
+
+        if $i0 >= 1 goto label1;
+
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>("There is no entry that could be dropped.");
+
+        throw $r1;
+
+     label1:
+        $i0 = $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: int numEntries>;
+
+        $i0 = $i0 - 1;
+
+        $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: int numEntries> = $i0;
+
+        return;
+    }
+
+    public void freeEntry(org.apache.http.impl.conn.tsccm.BasicPoolEntry)
+    {
+        org.apache.http.impl.conn.tsccm.RouteSpecificPool $r0;
+        org.apache.http.impl.conn.tsccm.BasicPoolEntry $r1;
+        int $i0, $i1;
+        java.lang.IllegalStateException $r2;
+        java.lang.StringBuilder $r3;
+        org.apache.http.conn.routing.HttpRoute $r4;
+        java.lang.String $r5;
+        java.util.LinkedList $r6;
+
+        $r0 := @this: org.apache.http.impl.conn.tsccm.RouteSpecificPool;
+
+        $r1 := @parameter0: org.apache.http.impl.conn.tsccm.BasicPoolEntry;
+
+        $i0 = $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: int numEntries>;
+
+        if $i0 >= 1 goto label1;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No entry created for this pool. ");
+
+        $r4 = $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: org.apache.http.conn.routing.HttpRoute route>;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r4);
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r5);
+
+        throw $r2;
+
+     label1:
+        $i0 = $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: int numEntries>;
+
+        $r6 = $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: java.util.LinkedList freeEntries>;
+
+        $i1 = virtualinvoke $r6.<java.util.LinkedList: int size()>();
+
+        if $i0 > $i1 goto label2;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No entry allocated from this pool. ");
+
+        $r4 = $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: org.apache.http.conn.routing.HttpRoute route>;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r4);
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r5);
+
+        throw $r2;
+
+     label2:
+        $r6 = $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: java.util.LinkedList freeEntries>;
+
+        virtualinvoke $r6.<java.util.LinkedList: boolean add(java.lang.Object)>($r1);
+
+        return;
+    }
+
+    public int getCapacity()
+    {
+        org.apache.http.impl.conn.tsccm.RouteSpecificPool $r0;
+        int $i0, $i1;
+
+        $r0 := @this: org.apache.http.impl.conn.tsccm.RouteSpecificPool;
+
+        $i1 = $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: int maxEntries>;
+
+        $i0 = $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: int numEntries>;
+
+        $i0 = $i1 - $i0;
+
+        return $i0;
+    }
+
+    public final int getEntryCount()
+    {
+        org.apache.http.impl.conn.tsccm.RouteSpecificPool $r0;
+        int i0;
+
+        $r0 := @this: org.apache.http.impl.conn.tsccm.RouteSpecificPool;
+
+        i0 = $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: int numEntries>;
+
+        return i0;
+    }
+
+    public final int getMaxEntries()
+    {
+        org.apache.http.impl.conn.tsccm.RouteSpecificPool $r0;
+        int i0;
+
+        $r0 := @this: org.apache.http.impl.conn.tsccm.RouteSpecificPool;
+
+        i0 = $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: int maxEntries>;
+
+        return i0;
+    }
+
+    public final org.apache.http.conn.routing.HttpRoute getRoute()
+    {
+        org.apache.http.impl.conn.tsccm.RouteSpecificPool $r0;
+        org.apache.http.conn.routing.HttpRoute r1;
+
+        $r0 := @this: org.apache.http.impl.conn.tsccm.RouteSpecificPool;
+
+        r1 = $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: org.apache.http.conn.routing.HttpRoute route>;
+
+        return r1;
+    }
+
+    public boolean hasThread()
+    {
+        org.apache.http.impl.conn.tsccm.RouteSpecificPool $r0;
+        boolean $z0;
+        java.util.Queue $r1;
+
+        $r0 := @this: org.apache.http.impl.conn.tsccm.RouteSpecificPool;
+
+        $r1 = $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: java.util.Queue waitingThreads>;
+
+        $z0 = interfaceinvoke $r1.<java.util.Queue: boolean isEmpty()>();
+
+        if $z0 != 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    public boolean isUnused()
+    {
+        org.apache.http.impl.conn.tsccm.RouteSpecificPool $r0;
+        boolean $z0;
+        int $i0;
+        java.util.Queue $r1;
+
+        $r0 := @this: org.apache.http.impl.conn.tsccm.RouteSpecificPool;
+
+        $i0 = $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: int numEntries>;
+
+        if $i0 >= 1 goto label1;
+
+        $r1 = $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: java.util.Queue waitingThreads>;
+
+        $z0 = interfaceinvoke $r1.<java.util.Queue: boolean isEmpty()>();
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    public org.apache.http.impl.conn.tsccm.WaitingThread nextThread()
+    {
+        java.util.Queue $r0;
+        java.lang.Object $r1;
+        org.apache.http.impl.conn.tsccm.RouteSpecificPool $r2;
+        org.apache.http.impl.conn.tsccm.WaitingThread $r3;
+
+        $r2 := @this: org.apache.http.impl.conn.tsccm.RouteSpecificPool;
+
+        $r0 = $r2.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: java.util.Queue waitingThreads>;
+
+        $r1 = interfaceinvoke $r0.<java.util.Queue: java.lang.Object peek()>();
+
+        $r3 = (org.apache.http.impl.conn.tsccm.WaitingThread) $r1;
+
+        return $r3;
+    }
+
+    public void queueThread(org.apache.http.impl.conn.tsccm.WaitingThread)
+    {
+        org.apache.http.impl.conn.tsccm.RouteSpecificPool $r0;
+        org.apache.http.impl.conn.tsccm.WaitingThread $r1;
+        java.lang.IllegalArgumentException $r2;
+        java.util.Queue $r3;
+
+        $r0 := @this: org.apache.http.impl.conn.tsccm.RouteSpecificPool;
+
+        $r1 := @parameter0: org.apache.http.impl.conn.tsccm.WaitingThread;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Waiting thread must not be null.");
+
+        throw $r2;
+
+     label1:
+        $r3 = $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: java.util.Queue waitingThreads>;
+
+        interfaceinvoke $r3.<java.util.Queue: boolean add(java.lang.Object)>($r1);
+
+        return;
+    }
+
+    public void removeThread(org.apache.http.impl.conn.tsccm.WaitingThread)
+    {
+        org.apache.http.impl.conn.tsccm.RouteSpecificPool $r0;
+        org.apache.http.impl.conn.tsccm.WaitingThread $r1;
+        java.util.Queue $r2;
+
+        $r0 := @this: org.apache.http.impl.conn.tsccm.RouteSpecificPool;
+
+        $r1 := @parameter0: org.apache.http.impl.conn.tsccm.WaitingThread;
+
+        if $r1 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = $r0.<org.apache.http.impl.conn.tsccm.RouteSpecificPool: java.util.Queue waitingThreads>;
+
+        interfaceinvoke $r2.<java.util.Queue: boolean remove(java.lang.Object)>($r1);
+
+        return;
+    }
+}

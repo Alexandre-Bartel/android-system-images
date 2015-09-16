@@ -1,0 +1,622 @@
+public final class android.content.ContentService extends android.content.ContentServiceNative
+{
+    private static final java.lang.String TAG;
+    private android.content.Context mContext;
+    private boolean mFactoryTest;
+    private final android.content.ContentService$ObserverNode mRootNode;
+    private android.content.SyncManager mSyncManager;
+    private final java.lang.Object mSyncManagerLock;
+
+    void <init>(android.content.Context, boolean)
+    {
+        android.content.ContentService $r0;
+        android.content.Context $r1;
+        boolean $z0;
+        android.content.ContentService$ObserverNode $r2;
+        java.lang.Object $r3;
+
+        $r0 := @this: android.content.ContentService;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $z0 := @parameter1: boolean;
+
+        specialinvoke $r0.<android.content.ContentServiceNative: void <init>()>();
+
+        $r2 = new android.content.ContentService$ObserverNode;
+
+        specialinvoke $r2.<android.content.ContentService$ObserverNode: void <init>(java.lang.String)>("");
+
+        $r0.<android.content.ContentService: android.content.ContentService$ObserverNode mRootNode> = $r2;
+
+        $r0.<android.content.ContentService: android.content.SyncManager mSyncManager> = null;
+
+        $r3 = new java.lang.Object;
+
+        specialinvoke $r3.<java.lang.Object: void <init>()>();
+
+        $r0.<android.content.ContentService: java.lang.Object mSyncManagerLock> = $r3;
+
+        $r0.<android.content.ContentService: android.content.Context mContext> = $r1;
+
+        $r0.<android.content.ContentService: boolean mFactoryTest> = $z0;
+
+        specialinvoke $r0.<android.content.ContentService: android.content.SyncManager getSyncManager()>();
+
+        return;
+    }
+
+    private android.content.SyncManager getSyncManager()
+    {
+        android.content.ContentService $r0;
+        java.lang.Object $r1;
+        boolean $z0;
+        android.content.SyncManager $r2;
+        android.content.Context $r3;
+        android.database.sqlite.SQLiteException $r4;
+        java.lang.Throwable $r5;
+
+        $r0 := @this: android.content.ContentService;
+
+        $r1 = $r0.<android.content.ContentService: java.lang.Object mSyncManagerLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = $r0.<android.content.ContentService: android.content.SyncManager mSyncManager>;
+
+        if $r2 != null goto label4;
+
+        $r2 = new android.content.SyncManager;
+
+        $r3 = $r0.<android.content.ContentService: android.content.Context mContext>;
+
+        $z0 = $r0.<android.content.ContentService: boolean mFactoryTest>;
+
+     label2:
+        specialinvoke $r2.<android.content.SyncManager: void <init>(android.content.Context,boolean)>($r3, $z0);
+
+     label3:
+        $r0.<android.content.ContentService: android.content.SyncManager mSyncManager> = $r2;
+
+     label4:
+        $r2 = $r0.<android.content.ContentService: android.content.SyncManager mSyncManager>;
+
+        exitmonitor $r1;
+
+     label5:
+        return $r2;
+
+     label6:
+        $r4 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("ContentService", "Can\'t create SyncManager", $r4);
+
+        goto label4;
+
+     label7:
+        $r5 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label8:
+        throw $r5;
+
+        catch android.database.sqlite.SQLiteException from label2 to label3 with label6;
+        catch java.lang.Throwable from label1 to label4 with label7;
+        catch java.lang.Throwable from label4 to label5 with label7;
+        catch java.lang.Throwable from label6 to label8 with label7;
+    }
+
+    public static android.content.IContentService main(android.content.Context, boolean)
+    {
+        android.content.Context $r0;
+        boolean $z0;
+        android.content.ContentService $r1;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $z0 := @parameter1: boolean;
+
+        $r1 = new android.content.ContentService;
+
+        specialinvoke $r1.<android.content.ContentService: void <init>(android.content.Context,boolean)>($r0, $z0);
+
+        staticinvoke <android.os.ServiceManager: void addService(java.lang.String,android.os.IBinder)>("content", $r1);
+
+        return $r1;
+    }
+
+    public void cancelSync(android.net.Uri)
+    {
+        android.content.ContentService $r0;
+        android.net.Uri $r1;
+        java.lang.Throwable $r2;
+        long $l0;
+        android.content.SyncManager $r3;
+
+        $r0 := @this: android.content.ContentService;
+
+        $r1 := @parameter0: android.net.Uri;
+
+        $l0 = staticinvoke <android.content.ContentService: long clearCallingIdentity()>();
+
+     label1:
+        $r3 = specialinvoke $r0.<android.content.ContentService: android.content.SyncManager getSyncManager()>();
+
+        if $r3 == null goto label2;
+
+        virtualinvoke $r3.<android.content.SyncManager: void clearScheduledSyncOperations(android.net.Uri)>($r1);
+
+        virtualinvoke $r3.<android.content.SyncManager: void cancelActiveSync(android.net.Uri)>($r1);
+
+     label2:
+        staticinvoke <android.content.ContentService: void restoreCallingIdentity(long)>($l0);
+
+        return;
+
+     label3:
+        $r2 := @caughtexception;
+
+        staticinvoke <android.content.ContentService: void restoreCallingIdentity(long)>($l0);
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    protected void dump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[])
+    {
+        android.content.ContentService $r0;
+        java.io.FileDescriptor $r1;
+        java.io.PrintWriter $r2;
+        java.lang.String[] $r3;
+        long $l0;
+        android.content.Context $r4;
+        android.content.SyncManager $r5;
+        java.lang.Throwable $r6, $r7;
+
+        $r0 := @this: android.content.ContentService;
+
+        $r1 := @parameter0: java.io.FileDescriptor;
+
+        $r2 := @parameter1: java.io.PrintWriter;
+
+        $r3 := @parameter2: java.lang.String[];
+
+        entermonitor $r0;
+
+     label1:
+        $r4 = $r0.<android.content.ContentService: android.content.Context mContext>;
+
+        virtualinvoke $r4.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.DUMP", "caller doesn\'t have the DUMP permission");
+
+        $l0 = staticinvoke <android.content.ContentService: long clearCallingIdentity()>();
+
+     label2:
+        $r5 = $r0.<android.content.ContentService: android.content.SyncManager mSyncManager>;
+
+        if $r5 != null goto label5;
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("No SyncManager created!  (Disk full?)");
+
+     label3:
+        staticinvoke <android.content.ContentService: void restoreCallingIdentity(long)>($l0);
+
+     label4:
+        exitmonitor $r0;
+
+        return;
+
+     label5:
+        $r5 = $r0.<android.content.ContentService: android.content.SyncManager mSyncManager>;
+
+        virtualinvoke $r5.<android.content.SyncManager: void dump(java.io.FileDescriptor,java.io.PrintWriter)>($r1, $r2);
+
+     label6:
+        goto label3;
+
+     label7:
+        $r6 := @caughtexception;
+
+     label8:
+        staticinvoke <android.content.ContentService: void restoreCallingIdentity(long)>($l0);
+
+        throw $r6;
+
+     label9:
+        $r7 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r7;
+
+        catch java.lang.Throwable from label1 to label2 with label9;
+        catch java.lang.Throwable from label2 to label3 with label7;
+        catch java.lang.Throwable from label3 to label4 with label9;
+        catch java.lang.Throwable from label5 to label6 with label7;
+        catch java.lang.Throwable from label8 to label9 with label9;
+    }
+
+    public void notifyChange(android.net.Uri, android.database.IContentObserver, boolean, boolean)
+    {
+        android.content.ContentService $r0;
+        android.net.Uri $r1;
+        android.database.IContentObserver $r2;
+        boolean $z0, $z1, $z2;
+        java.util.ArrayList $r3, $r14;
+        java.lang.StringBuilder $r4;
+        java.lang.String $r5;
+        long $l0;
+        android.content.ContentService$ObserverNode $r6, $r7;
+        int $i1, $i2, $i3, $i4;
+        java.lang.Object $r8;
+        android.content.ContentService$ObserverCall $r9;
+        java.lang.Throwable $r10, $r11, $r17;
+        android.os.RemoteException $r12;
+        android.os.IBinder $r13, $r16;
+        android.content.ContentService$ObserverNode$ObserverEntry $r15;
+        android.content.SyncManager $r18;
+
+        $r0 := @this: android.content.ContentService;
+
+        $r1 := @parameter0: android.net.Uri;
+
+        $r2 := @parameter1: android.database.IContentObserver;
+
+        $z0 := @parameter2: boolean;
+
+        $z1 := @parameter3: boolean;
+
+        $z2 = staticinvoke <android.util.Log: boolean isLoggable(java.lang.String,int)>("ContentService", 2);
+
+        if $z2 == 0 goto label01;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Notifying update of ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" from observer ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", syncToNetwork ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("ContentService", $r5);
+
+     label01:
+        $l0 = staticinvoke <android.content.ContentService: long clearCallingIdentity()>();
+
+     label02:
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>()>();
+
+        $r6 = $r0.<android.content.ContentService: android.content.ContentService$ObserverNode mRootNode>;
+
+        entermonitor $r6;
+
+     label03:
+        $r7 = $r0.<android.content.ContentService: android.content.ContentService$ObserverNode mRootNode>;
+
+        virtualinvoke $r7.<android.content.ContentService$ObserverNode: void collectObservers(android.net.Uri,int,android.database.IContentObserver,boolean,java.util.ArrayList)>($r1, 0, $r2, $z0, $r3);
+
+        exitmonitor $r6;
+
+     label04:
+        $i1 = virtualinvoke $r3.<java.util.ArrayList: int size()>();
+
+     label05:
+        $i2 = 0;
+
+     label06:
+        if $i2 >= $i1 goto label25;
+
+        $r8 = virtualinvoke $r3.<java.util.ArrayList: java.lang.Object get(int)>($i2);
+
+        $r9 = (android.content.ContentService$ObserverCall) $r8;
+
+     label07:
+        $r2 = $r9.<android.content.ContentService$ObserverCall: android.database.IContentObserver mObserver>;
+
+        $z0 = $r9.<android.content.ContentService$ObserverCall: boolean mSelfNotify>;
+
+     label08:
+        interfaceinvoke $r2.<android.database.IContentObserver: void onChange(boolean)>($z0);
+
+        $z0 = staticinvoke <android.util.Log: boolean isLoggable(java.lang.String,int)>("ContentService", 2);
+
+     label09:
+        if $z0 == 0 goto label11;
+
+     label10:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Notified ");
+
+        $r2 = $r9.<android.content.ContentService$ObserverCall: android.database.IContentObserver mObserver>;
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" of ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("update at ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("ContentService", $r5);
+
+     label11:
+        $i2 = $i2 + 1;
+
+        goto label06;
+
+     label12:
+        $r10 := @caughtexception;
+
+     label13:
+        exitmonitor $r6;
+
+     label14:
+        throw $r10;
+
+     label15:
+        $r11 := @caughtexception;
+
+        staticinvoke <android.content.ContentService: void restoreCallingIdentity(long)>($l0);
+
+        throw $r11;
+
+     label16:
+        $r12 := @caughtexception;
+
+     label17:
+        $r6 = $r0.<android.content.ContentService: android.content.ContentService$ObserverNode mRootNode>;
+
+        entermonitor $r6;
+
+     label18:
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("ContentService", "Found dead observer, removing");
+
+        $r2 = $r9.<android.content.ContentService$ObserverCall: android.database.IContentObserver mObserver>;
+
+        $r13 = interfaceinvoke $r2.<android.database.IContentObserver: android.os.IBinder asBinder()>();
+
+        $r7 = $r9.<android.content.ContentService$ObserverCall: android.content.ContentService$ObserverNode mNode>;
+
+        $r14 = staticinvoke <android.content.ContentService$ObserverNode: java.util.ArrayList access$000(android.content.ContentService$ObserverNode)>($r7);
+
+        $i3 = virtualinvoke $r14.<java.util.ArrayList: int size()>();
+
+        $i4 = 0;
+
+     label19:
+        if $i4 >= $i3 goto label21;
+
+        $r8 = virtualinvoke $r14.<java.util.ArrayList: java.lang.Object get(int)>($i4);
+
+        $r15 = (android.content.ContentService$ObserverNode$ObserverEntry) $r8;
+
+        $r2 = $r15.<android.content.ContentService$ObserverNode$ObserverEntry: android.database.IContentObserver observer>;
+
+        $r16 = interfaceinvoke $r2.<android.database.IContentObserver: android.os.IBinder asBinder()>();
+
+        if $r16 != $r13 goto label20;
+
+        virtualinvoke $r14.<java.util.ArrayList: java.lang.Object remove(int)>($i4);
+
+        $i4 = $i4 + -1;
+
+        $i3 = $i3 + -1;
+
+     label20:
+        $i4 = $i4 + 1;
+
+        goto label19;
+
+     label21:
+        exitmonitor $r6;
+
+     label22:
+        goto label11;
+
+     label23:
+        $r17 := @caughtexception;
+
+        exitmonitor $r6;
+
+     label24:
+        throw $r17;
+
+     label25:
+        if $z1 == 0 goto label26;
+
+        $r18 = specialinvoke $r0.<android.content.ContentService: android.content.SyncManager getSyncManager()>();
+
+        if $r18 == null goto label26;
+
+        virtualinvoke $r18.<android.content.SyncManager: void scheduleLocalSync(android.net.Uri)>($r1);
+
+     label26:
+        staticinvoke <android.content.ContentService: void restoreCallingIdentity(long)>($l0);
+
+        return;
+
+        catch java.lang.Throwable from label02 to label03 with label15;
+        catch java.lang.Throwable from label03 to label04 with label12;
+        catch java.lang.Throwable from label04 to label05 with label15;
+        catch java.lang.Throwable from label06 to label07 with label15;
+        catch android.os.RemoteException from label08 to label09 with label16;
+        catch android.os.RemoteException from label10 to label11 with label16;
+        catch java.lang.Throwable from label07 to label11 with label15;
+        catch java.lang.Throwable from label13 to label14 with label12;
+        catch java.lang.Throwable from label14 to label15 with label15;
+        catch java.lang.Throwable from label17 to label18 with label15;
+        catch java.lang.Throwable from label18 to label22 with label23;
+        catch java.lang.Throwable from label23 to label24 with label23;
+        catch java.lang.Throwable from label24 to label26 with label15;
+    }
+
+    public void registerContentObserver(android.net.Uri, boolean, android.database.IContentObserver)
+    {
+        android.content.ContentService $r0;
+        android.net.Uri $r1;
+        boolean $z0;
+        android.database.IContentObserver $r2;
+        java.lang.IllegalArgumentException $r3;
+        android.content.ContentService$ObserverNode $r4, $r5;
+        java.lang.Throwable $r6;
+
+        $r0 := @this: android.content.ContentService;
+
+        $r1 := @parameter0: android.net.Uri;
+
+        $z0 := @parameter1: boolean;
+
+        $r2 := @parameter2: android.database.IContentObserver;
+
+        if $r2 == null goto label1;
+
+        if $r1 != null goto label2;
+
+     label1:
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("You must pass a valid uri and observer");
+
+        throw $r3;
+
+     label2:
+        $r4 = $r0.<android.content.ContentService: android.content.ContentService$ObserverNode mRootNode>;
+
+        entermonitor $r4;
+
+     label3:
+        $r5 = $r0.<android.content.ContentService: android.content.ContentService$ObserverNode mRootNode>;
+
+        virtualinvoke $r5.<android.content.ContentService$ObserverNode: void addObserver(android.net.Uri,android.database.IContentObserver,boolean)>($r1, $r2, $z0);
+
+        exitmonitor $r4;
+
+     label4:
+        return;
+
+     label5:
+        $r6 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label6:
+        throw $r6;
+
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public void startSync(android.net.Uri, android.os.Bundle)
+    {
+        android.content.ContentService $r0;
+        android.net.Uri $r1;
+        android.os.Bundle $r2;
+        java.lang.Throwable $r3;
+        long $l0;
+        android.content.SyncManager $r4;
+
+        $r0 := @this: android.content.ContentService;
+
+        $r1 := @parameter0: android.net.Uri;
+
+        $r2 := @parameter1: android.os.Bundle;
+
+        staticinvoke <android.content.ContentResolver: void validateSyncExtrasBundle(android.os.Bundle)>($r2);
+
+        $l0 = staticinvoke <android.content.ContentService: long clearCallingIdentity()>();
+
+     label1:
+        $r4 = specialinvoke $r0.<android.content.ContentService: android.content.SyncManager getSyncManager()>();
+
+        if $r4 == null goto label2;
+
+        virtualinvoke $r4.<android.content.SyncManager: void startSync(android.net.Uri,android.os.Bundle)>($r1, $r2);
+
+     label2:
+        staticinvoke <android.content.ContentService: void restoreCallingIdentity(long)>($l0);
+
+        return;
+
+     label3:
+        $r3 := @caughtexception;
+
+        staticinvoke <android.content.ContentService: void restoreCallingIdentity(long)>($l0);
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public void unregisterContentObserver(android.database.IContentObserver)
+    {
+        android.content.ContentService $r0;
+        android.database.IContentObserver $r1;
+        java.lang.IllegalArgumentException $r2;
+        android.content.ContentService$ObserverNode $r3, $r4;
+        java.lang.Throwable $r5;
+
+        $r0 := @this: android.content.ContentService;
+
+        $r1 := @parameter0: android.database.IContentObserver;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("You must pass a valid observer");
+
+        throw $r2;
+
+     label1:
+        $r3 = $r0.<android.content.ContentService: android.content.ContentService$ObserverNode mRootNode>;
+
+        entermonitor $r3;
+
+     label2:
+        $r4 = $r0.<android.content.ContentService: android.content.ContentService$ObserverNode mRootNode>;
+
+        virtualinvoke $r4.<android.content.ContentService$ObserverNode: boolean removeObserver(android.database.IContentObserver)>($r1);
+
+        exitmonitor $r3;
+
+     label3:
+        return;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label5:
+        throw $r5;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public static void <clinit>()
+    {
+        <android.content.ContentService: java.lang.String TAG> = "ContentService";
+
+        return;
+    }
+}

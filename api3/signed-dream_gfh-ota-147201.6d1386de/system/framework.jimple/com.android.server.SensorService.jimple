@@ -1,0 +1,367 @@
+class com.android.server.SensorService extends android.hardware.ISensorService$Stub
+{
+    private static final boolean DEBUG;
+    private static final int SENSOR_DISABLE;
+    static final java.lang.String TAG;
+    private static final boolean localLOGV;
+    final com.android.internal.app.IBatteryStats mBatteryStats;
+    java.util.ArrayList mListeners;
+
+    static void <clinit>()
+    {
+        java.lang.String $r0;
+        java.lang.Class $r1;
+
+        <com.android.server.SensorService: int SENSOR_DISABLE> = -1;
+
+        <com.android.server.SensorService: boolean DEBUG> = 0;
+
+        $r1 = class "com/android/server/SensorService";
+
+        $r0 = virtualinvoke $r1.<java.lang.Class: java.lang.String getSimpleName()>();
+
+        <com.android.server.SensorService: java.lang.String TAG> = $r0;
+
+        return;
+    }
+
+    public void <init>(android.content.Context)
+    {
+        com.android.server.SensorService $r0;
+        android.content.Context $r1;
+        com.android.internal.app.IBatteryStats $r2;
+        java.util.ArrayList $r3;
+
+        $r0 := @this: com.android.server.SensorService;
+
+        $r1 := @parameter0: android.content.Context;
+
+        specialinvoke $r0.<android.hardware.ISensorService$Stub: void <init>()>();
+
+        $r2 = staticinvoke <com.android.server.am.BatteryStatsService: com.android.internal.app.IBatteryStats getService()>();
+
+        $r0.<com.android.server.SensorService: com.android.internal.app.IBatteryStats mBatteryStats> = $r2;
+
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>()>();
+
+        $r0.<com.android.server.SensorService: java.util.ArrayList mListeners> = $r3;
+
+        staticinvoke <com.android.server.SensorService: int _sensors_control_init()>();
+
+        return;
+    }
+
+    private static native boolean _sensors_control_activate(int, boolean);
+
+    private static native int _sensors_control_init();
+
+    private static native android.os.ParcelFileDescriptor _sensors_control_open();
+
+    private static native int _sensors_control_set_delay(int);
+
+    private static native int _sensors_control_wake();
+
+    void deactivateIfUnused(int) throws android.os.RemoteException
+    {
+        com.android.server.SensorService $r0;
+        int $i0, $i1, $i2;
+        java.util.ArrayList $r1;
+        java.lang.Object $r2;
+        com.android.server.SensorService$Listener $r3;
+        boolean $z0;
+
+        $r0 := @this: com.android.server.SensorService;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<com.android.server.SensorService: java.util.ArrayList mListeners>;
+
+        $i1 = virtualinvoke $r1.<java.util.ArrayList: int size()>();
+
+        $i2 = 0;
+
+     label1:
+        if $i2 >= $i1 goto label3;
+
+        $r1 = $r0.<com.android.server.SensorService: java.util.ArrayList mListeners>;
+
+        $r2 = virtualinvoke $r1.<java.util.ArrayList: java.lang.Object get(int)>($i2);
+
+        $r3 = (com.android.server.SensorService$Listener) $r2;
+
+        $z0 = virtualinvoke $r3.<com.android.server.SensorService$Listener: boolean hasSensor(int)>($i0);
+
+        if $z0 == 0 goto label2;
+
+        return;
+
+     label2:
+        $i2 = $i2 + 1;
+
+        goto label1;
+
+     label3:
+        staticinvoke <com.android.server.SensorService: boolean _sensors_control_activate(int,boolean)>($i0, 0);
+
+        return;
+    }
+
+    public boolean enableSensor(android.os.IBinder, java.lang.String, int, int) throws android.os.RemoteException
+    {
+        com.android.server.SensorService $r0;
+        android.os.IBinder $r1, $r12;
+        java.lang.String $r2, $r4;
+        int $i0, $i1, $i2, $i4;
+        long $l3;
+        com.android.internal.app.IBatteryStats $r3;
+        java.lang.StringBuilder $r5;
+        java.util.ArrayList $r6, $r8;
+        boolean $z0;
+        com.android.server.SensorService$Listener $r7, $r11;
+        java.util.Iterator $r9;
+        java.lang.Object $r10;
+        java.lang.Throwable $r13;
+
+        $r0 := @this: com.android.server.SensorService;
+
+        $r1 := @parameter0: android.os.IBinder;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $i0 := @parameter2: int;
+
+        $i1 := @parameter3: int;
+
+        $i2 = staticinvoke <android.os.Binder: int getCallingUid()>();
+
+        $l3 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+        if $i1 != -1 goto label02;
+
+        $r3 = $r0.<com.android.server.SensorService: com.android.internal.app.IBatteryStats mBatteryStats>;
+
+        interfaceinvoke $r3.<com.android.internal.app.IBatteryStats: void noteStopSensor(int,int)>($i2, $i0);
+
+     label01:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l3);
+
+        if $r1 != null goto label03;
+
+        $r4 = <com.android.server.SensorService: java.lang.String TAG>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("listener is null (sensor=");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", id=");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r2 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>($r4, $r2);
+
+        return 0;
+
+     label02:
+        $r3 = $r0.<com.android.server.SensorService: com.android.internal.app.IBatteryStats mBatteryStats>;
+
+        interfaceinvoke $r3.<com.android.internal.app.IBatteryStats: void noteStartSensor(int,int)>($i2, $i0);
+
+        goto label01;
+
+     label03:
+        $r6 = $r0.<com.android.server.SensorService: java.util.ArrayList mListeners>;
+
+        entermonitor $r6;
+
+        if $i1 == -1 goto label06;
+
+     label04:
+        $z0 = staticinvoke <com.android.server.SensorService: boolean _sensors_control_activate(int,boolean)>($i0, 1);
+
+        if $z0 != 0 goto label06;
+
+        $r2 = <com.android.server.SensorService: java.lang.String TAG>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("could not enable sensor ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>($r2, $r4);
+
+        exitmonitor $r6;
+
+     label05:
+        return 0;
+
+     label06:
+        $r7 = null;
+
+        $i2 = $i1;
+
+        $r8 = $r0.<com.android.server.SensorService: java.util.ArrayList mListeners>;
+
+        $r9 = virtualinvoke $r8.<java.util.AbstractList: java.util.Iterator iterator()>();
+
+     label07:
+        $z0 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label09;
+
+        $r10 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+        $r11 = (com.android.server.SensorService$Listener) $r10;
+
+        $r12 = $r11.<com.android.server.SensorService$Listener: android.os.IBinder mToken>;
+
+        if $r1 != $r12 goto label08;
+
+        $r7 = $r11;
+
+     label08:
+        $i4 = $r11.<com.android.server.SensorService$Listener: int mDelay>;
+
+        if $i2 <= $i4 goto label07;
+
+        $i2 = $r11.<com.android.server.SensorService$Listener: int mDelay>;
+
+        goto label07;
+
+     label09:
+        if $r7 != null goto label10;
+
+        if $i1 == -1 goto label10;
+
+        $r7 = new com.android.server.SensorService$Listener;
+
+        specialinvoke $r7.<com.android.server.SensorService$Listener: void <init>(com.android.server.SensorService,android.os.IBinder)>($r0, $r1);
+
+        interfaceinvoke $r1.<android.os.IBinder: void linkToDeath(android.os.IBinder$DeathRecipient,int)>($r7, 0);
+
+        $r8 = $r0.<com.android.server.SensorService: java.util.ArrayList mListeners>;
+
+        virtualinvoke $r8.<java.util.ArrayList: boolean add(java.lang.Object)>($r7);
+
+        $r8 = $r0.<com.android.server.SensorService: java.util.ArrayList mListeners>;
+
+        virtualinvoke $r8.<java.lang.Object: void notify()>();
+
+     label10:
+        if $r7 != null goto label12;
+
+        $r4 = <com.android.server.SensorService: java.lang.String TAG>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("listener with binder ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", doesn\'t exist (sensor=");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", id=");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r2 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>($r4, $r2);
+
+        exitmonitor $r6;
+
+     label11:
+        return 0;
+
+     label12:
+        if $i2 < 0 goto label13;
+
+        staticinvoke <com.android.server.SensorService: int _sensors_control_set_delay(int)>($i2);
+
+     label13:
+        if $i1 == -1 goto label17;
+
+        virtualinvoke $r7.<com.android.server.SensorService$Listener: void addSensor(int,int)>($i0, $i1);
+
+     label14:
+        $r8 = $r0.<com.android.server.SensorService: java.util.ArrayList mListeners>;
+
+        $i0 = virtualinvoke $r8.<java.util.ArrayList: int size()>();
+
+        if $i0 != 0 goto label15;
+
+        staticinvoke <com.android.server.SensorService: int _sensors_control_wake()>();
+
+     label15:
+        exitmonitor $r6;
+
+     label16:
+        return 1;
+
+     label17:
+        virtualinvoke $r7.<com.android.server.SensorService$Listener: void removeSensor(int)>($i0);
+
+        virtualinvoke $r0.<com.android.server.SensorService: void deactivateIfUnused(int)>($i0);
+
+        $i0 = $r7.<com.android.server.SensorService$Listener: int mSensors>;
+
+        if $i0 != 0 goto label14;
+
+        $r8 = $r0.<com.android.server.SensorService: java.util.ArrayList mListeners>;
+
+        virtualinvoke $r8.<java.util.ArrayList: boolean remove(java.lang.Object)>($r7);
+
+        interfaceinvoke $r1.<android.os.IBinder: boolean unlinkToDeath(android.os.IBinder$DeathRecipient,int)>($r7, 0);
+
+        $r8 = $r0.<com.android.server.SensorService: java.util.ArrayList mListeners>;
+
+        virtualinvoke $r8.<java.lang.Object: void notify()>();
+
+        goto label14;
+
+     label18:
+        $r13 := @caughtexception;
+
+        exitmonitor $r6;
+
+     label19:
+        throw $r13;
+
+        catch java.lang.Throwable from label04 to label05 with label18;
+        catch java.lang.Throwable from label06 to label11 with label18;
+        catch java.lang.Throwable from label12 to label16 with label18;
+        catch java.lang.Throwable from label17 to label19 with label18;
+    }
+
+    public android.os.ParcelFileDescriptor getDataChanel() throws android.os.RemoteException
+    {
+        com.android.server.SensorService $r0;
+        android.os.ParcelFileDescriptor $r1;
+
+        $r0 := @this: com.android.server.SensorService;
+
+        $r1 = staticinvoke <com.android.server.SensorService: android.os.ParcelFileDescriptor _sensors_control_open()>();
+
+        return $r1;
+    }
+}

@@ -1,0 +1,270 @@
+public class android.webkit.gears.NativeDialog extends java.lang.Object
+{
+    private static final java.lang.String TAG;
+    private static boolean mAsynchronousDialog;
+    private static java.util.concurrent.locks.Condition mDialogFinished;
+    private static java.util.concurrent.locks.Lock mLock;
+    private static java.lang.String mResults;
+    private final java.lang.String DIALOG_CLASS;
+    private final java.lang.String DIALOG_PACKAGE;
+
+    static void <clinit>()
+    {
+        java.util.concurrent.locks.Condition $r0;
+        java.util.concurrent.locks.ReentrantLock $r1;
+        java.util.concurrent.locks.Lock $r2;
+
+        <android.webkit.gears.NativeDialog: java.lang.String TAG> = "Gears-J-NativeDialog";
+
+        $r1 = new java.util.concurrent.locks.ReentrantLock;
+
+        specialinvoke $r1.<java.util.concurrent.locks.ReentrantLock: void <init>()>();
+
+        <android.webkit.gears.NativeDialog: java.util.concurrent.locks.Lock mLock> = $r1;
+
+        $r2 = <android.webkit.gears.NativeDialog: java.util.concurrent.locks.Lock mLock>;
+
+        $r0 = interfaceinvoke $r2.<java.util.concurrent.locks.Lock: java.util.concurrent.locks.Condition newCondition()>();
+
+        <android.webkit.gears.NativeDialog: java.util.concurrent.locks.Condition mDialogFinished> = $r0;
+
+        <android.webkit.gears.NativeDialog: java.lang.String mResults> = null;
+
+        return;
+    }
+
+    public void <init>()
+    {
+        android.webkit.gears.NativeDialog $r0;
+
+        $r0 := @this: android.webkit.gears.NativeDialog;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r0.<android.webkit.gears.NativeDialog: java.lang.String DIALOG_PACKAGE> = "com.android.browser";
+
+        $r0.<android.webkit.gears.NativeDialog: java.lang.String DIALOG_CLASS> = "com.android.browser.GearsNativeDialog";
+
+        return;
+    }
+
+    private static native void closeAsynchronousDialog(java.lang.String);
+
+    public static void closeDialog(java.lang.String)
+    {
+        java.lang.String $r0;
+
+        $r0 := @parameter0: java.lang.String;
+
+        <android.webkit.gears.NativeDialog: java.lang.String mResults> = $r0;
+
+        return;
+    }
+
+    private android.content.Intent createIntent(java.lang.String, java.lang.String)
+    {
+        android.webkit.gears.NativeDialog $r0;
+        java.lang.String $r1, $r2;
+        android.content.Intent $r3;
+
+        $r0 := @this: android.webkit.gears.NativeDialog;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 = new android.content.Intent;
+
+        specialinvoke $r3.<android.content.Intent: void <init>()>();
+
+        virtualinvoke $r3.<android.content.Intent: android.content.Intent setClassName(java.lang.String,java.lang.String)>("com.android.browser", "com.android.browser.GearsNativeDialog");
+
+        virtualinvoke $r3.<android.content.Intent: android.content.Intent addFlags(int)>(268435456);
+
+        virtualinvoke $r3.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("dialogArguments", $r2);
+
+        virtualinvoke $r3.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("dialogType", $r1);
+
+        return $r3;
+    }
+
+    public static void signalFinishedDialog()
+    {
+        boolean $z0;
+        java.util.concurrent.locks.Lock $r0;
+        java.util.concurrent.locks.Condition $r1;
+        java.lang.String $r2;
+
+        $z0 = <android.webkit.gears.NativeDialog: boolean mAsynchronousDialog>;
+
+        if $z0 != 0 goto label1;
+
+        $r0 = <android.webkit.gears.NativeDialog: java.util.concurrent.locks.Lock mLock>;
+
+        interfaceinvoke $r0.<java.util.concurrent.locks.Lock: void lock()>();
+
+        $r1 = <android.webkit.gears.NativeDialog: java.util.concurrent.locks.Condition mDialogFinished>;
+
+        interfaceinvoke $r1.<java.util.concurrent.locks.Condition: void signal()>();
+
+        $r0 = <android.webkit.gears.NativeDialog: java.util.concurrent.locks.Lock mLock>;
+
+        interfaceinvoke $r0.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        return;
+
+     label1:
+        $r2 = <android.webkit.gears.NativeDialog: java.lang.String mResults>;
+
+        staticinvoke <android.webkit.gears.NativeDialog: void closeAsynchronousDialog(java.lang.String)>($r2);
+
+        return;
+    }
+
+    public void showAsyncDialog(android.content.Context, java.lang.String, java.lang.String)
+    {
+        android.webkit.gears.NativeDialog $r0;
+        android.content.Context $r1;
+        java.lang.String $r2, $r3;
+        android.content.Intent $r4;
+
+        $r0 := @this: android.webkit.gears.NativeDialog;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.lang.String;
+
+        <android.webkit.gears.NativeDialog: boolean mAsynchronousDialog> = 1;
+
+        $r4 = specialinvoke $r0.<android.webkit.gears.NativeDialog: android.content.Intent createIntent(java.lang.String,java.lang.String)>($r2, $r3);
+
+        virtualinvoke $r1.<android.content.Context: void startActivity(android.content.Intent)>($r4);
+
+        return;
+    }
+
+    public java.lang.String showDialog(android.content.Context, java.lang.String, java.lang.String)
+    {
+        android.webkit.gears.NativeDialog $r0;
+        android.content.Context $r1;
+        java.lang.String $r2, $r3;
+        java.io.File $r4;
+        java.util.concurrent.locks.Lock $r5;
+        int $i0;
+        android.content.Intent $r6;
+        java.util.concurrent.locks.Condition $r7;
+        java.lang.InterruptedException $r8;
+        java.lang.StringBuilder $r9;
+        android.content.ActivityNotFoundException $r10;
+        java.lang.Throwable $r11;
+
+        $r0 := @this: android.webkit.gears.NativeDialog;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.lang.String;
+
+     label01:
+        <android.webkit.gears.NativeDialog: boolean mAsynchronousDialog> = 0;
+
+        $r5 = <android.webkit.gears.NativeDialog: java.util.concurrent.locks.Lock mLock>;
+
+     label02:
+        interfaceinvoke $r5.<java.util.concurrent.locks.Lock: void lock()>();
+
+        $r4 = new java.io.File;
+
+        specialinvoke $r4.<java.io.File: void <init>(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r4.<java.io.File: java.lang.String getName()>();
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int indexOf(java.lang.String)>(".html");
+
+        $r2 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $r6 = specialinvoke $r0.<android.webkit.gears.NativeDialog: android.content.Intent createIntent(java.lang.String,java.lang.String)>($r2, $r3);
+
+        <android.webkit.gears.NativeDialog: java.lang.String mResults> = null;
+
+        virtualinvoke $r1.<android.content.Context: void startActivity(android.content.Intent)>($r6);
+
+        $r7 = <android.webkit.gears.NativeDialog: java.util.concurrent.locks.Condition mDialogFinished>;
+
+        interfaceinvoke $r7.<java.util.concurrent.locks.Condition: void await()>();
+
+     label03:
+        $r5 = <android.webkit.gears.NativeDialog: java.util.concurrent.locks.Lock mLock>;
+
+        interfaceinvoke $r5.<java.util.concurrent.locks.Lock: void unlock()>();
+
+     label04:
+        $r2 = <android.webkit.gears.NativeDialog: java.lang.String mResults>;
+
+        return $r2;
+
+     label05:
+        $r8 := @caughtexception;
+
+     label06:
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("exception e: ");
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+        $r2 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("Gears-J-NativeDialog", $r2);
+
+     label07:
+        $r5 = <android.webkit.gears.NativeDialog: java.util.concurrent.locks.Lock mLock>;
+
+        interfaceinvoke $r5.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        goto label04;
+
+     label08:
+        $r10 := @caughtexception;
+
+     label09:
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("exception e: ");
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r10);
+
+        $r2 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("Gears-J-NativeDialog", $r2);
+
+     label10:
+        $r5 = <android.webkit.gears.NativeDialog: java.util.concurrent.locks.Lock mLock>;
+
+        interfaceinvoke $r5.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        goto label04;
+
+     label11:
+        $r11 := @caughtexception;
+
+        $r5 = <android.webkit.gears.NativeDialog: java.util.concurrent.locks.Lock mLock>;
+
+        interfaceinvoke $r5.<java.util.concurrent.locks.Lock: void unlock()>();
+
+        throw $r11;
+
+        catch java.lang.InterruptedException from label02 to label03 with label05;
+        catch android.content.ActivityNotFoundException from label02 to label03 with label08;
+        catch java.lang.Throwable from label01 to label03 with label11;
+        catch java.lang.Throwable from label06 to label07 with label11;
+        catch java.lang.Throwable from label09 to label10 with label11;
+    }
+}

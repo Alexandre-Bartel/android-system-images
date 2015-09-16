@@ -1,0 +1,567 @@
+class android.telephony.gsm.SmsMessage$PduParser extends java.lang.Object
+{
+    int cur;
+    int mUserDataSeptetPadding;
+    int mUserDataSize;
+    byte[] pdu;
+    byte[] userData;
+    com.android.internal.telephony.gsm.SmsHeader userDataHeader;
+
+    void <init>(java.lang.String)
+    {
+        android.telephony.gsm.SmsMessage$PduParser $r0;
+        java.lang.String $r1;
+        byte[] $r2;
+
+        $r0 := @this: android.telephony.gsm.SmsMessage$PduParser;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = staticinvoke <com.android.internal.telephony.gsm.SimUtils: byte[] hexStringToBytes(java.lang.String)>($r1);
+
+        specialinvoke $r0.<android.telephony.gsm.SmsMessage$PduParser: void <init>(byte[])>($r2);
+
+        return;
+    }
+
+    void <init>(byte[])
+    {
+        android.telephony.gsm.SmsMessage$PduParser $r0;
+        byte[] $r1;
+
+        $r0 := @this: android.telephony.gsm.SmsMessage$PduParser;
+
+        $r1 := @parameter0: byte[];
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r0.<android.telephony.gsm.SmsMessage$PduParser: byte[] pdu> = $r1;
+
+        $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur> = 0;
+
+        $r0.<android.telephony.gsm.SmsMessage$PduParser: int mUserDataSeptetPadding> = 0;
+
+        return;
+    }
+
+    int constructUserData(boolean, boolean)
+    {
+        android.telephony.gsm.SmsMessage$PduParser $r0;
+        boolean $z0, $z1;
+        int $i0, $i1, $i4, $i6;
+        byte[] $r1, $r3, $r4;
+        short $s2, $s3;
+        com.android.internal.telephony.gsm.SmsHeader $r2;
+        byte $b5;
+
+        $r0 := @this: android.telephony.gsm.SmsMessage$PduParser;
+
+        $z0 := @parameter0: boolean;
+
+        $z1 := @parameter1: boolean;
+
+        $i4 = $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur>;
+
+        $r1 = $r0.<android.telephony.gsm.SmsMessage$PduParser: byte[] pdu>;
+
+        $i0 = $i4 + 1;
+
+        $b5 = $r1[$i4];
+
+        $s3 = $b5 & 255;
+
+        $i4 = 0;
+
+        if $z0 == 0 goto label6;
+
+        $r1 = $r0.<android.telephony.gsm.SmsMessage$PduParser: byte[] pdu>;
+
+        $i4 = $i0 + 1;
+
+        $b5 = $r1[$i0];
+
+        $s2 = $b5 & 255;
+
+        $r1 = newarray (byte)[$s2];
+
+        $r3 = $r0.<android.telephony.gsm.SmsMessage$PduParser: byte[] pdu>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, $i4, $r1, 0, $s2);
+
+        $r2 = staticinvoke <com.android.internal.telephony.gsm.SmsHeader: com.android.internal.telephony.gsm.SmsHeader parse(byte[])>($r1);
+
+        $r0.<android.telephony.gsm.SmsMessage$PduParser: com.android.internal.telephony.gsm.SmsHeader userDataHeader> = $r2;
+
+        $i0 = $i4 + $s2;
+
+        $i4 = $s2 + 1;
+
+        $i1 = $i4 * 8;
+
+        $i4 = $i1 / 7;
+
+        $i6 = $i1 % 7;
+
+        if $i6 <= 0 goto label3;
+
+        $b5 = 1;
+
+     label1:
+        $i4 = $i4 + $b5;
+
+        $i6 = $i4 * 7;
+
+        $i1 = $i6 - $i1;
+
+        $r0.<android.telephony.gsm.SmsMessage$PduParser: int mUserDataSeptetPadding> = $i1;
+
+     label2:
+        $r1 = $r0.<android.telephony.gsm.SmsMessage$PduParser: byte[] pdu>;
+
+        $i1 = lengthof $r1;
+
+        $i1 = $i1 - $i0;
+
+        $r1 = newarray (byte)[$i1];
+
+        $r0.<android.telephony.gsm.SmsMessage$PduParser: byte[] userData> = $r1;
+
+        $r3 = $r0.<android.telephony.gsm.SmsMessage$PduParser: byte[] pdu>;
+
+        $r1 = $r0.<android.telephony.gsm.SmsMessage$PduParser: byte[] userData>;
+
+        $r4 = $r0.<android.telephony.gsm.SmsMessage$PduParser: byte[] userData>;
+
+        $i1 = lengthof $r4;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, $i0, $r1, 0, $i1);
+
+        $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur> = $i0;
+
+        if $z1 == 0 goto label5;
+
+        $i0 = $s3 - $i4;
+
+        if $i0 >= 0 goto label4;
+
+        return 0;
+
+     label3:
+        $b5 = 0;
+
+        goto label1;
+
+     label4:
+        return $i0;
+
+     label5:
+        $r1 = $r0.<android.telephony.gsm.SmsMessage$PduParser: byte[] userData>;
+
+        $i0 = lengthof $r1;
+
+        return $i0;
+
+     label6:
+        goto label2;
+    }
+
+    android.telephony.gsm.SmsAddress getAddress()
+    {
+        android.telephony.gsm.SmsMessage$PduParser $r0;
+        short $s0;
+        int $i1, $i3;
+        android.telephony.gsm.SmsAddress $r1;
+        byte[] $r2;
+        byte $b2;
+
+        $r0 := @this: android.telephony.gsm.SmsMessage$PduParser;
+
+        $r2 = $r0.<android.telephony.gsm.SmsMessage$PduParser: byte[] pdu>;
+
+        $i1 = $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur>;
+
+        $b2 = $r2[$i1];
+
+        $s0 = $b2 & 255;
+
+        $i1 = $s0 + 1;
+
+        $i1 = $i1 / 2;
+
+        $i1 = $i1 + 2;
+
+        $r1 = new android.telephony.gsm.SmsAddress;
+
+        $r2 = $r0.<android.telephony.gsm.SmsMessage$PduParser: byte[] pdu>;
+
+        $i3 = $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur>;
+
+        specialinvoke $r1.<android.telephony.gsm.SmsAddress: void <init>(byte[],int,int)>($r2, $i3, $i1);
+
+        $i3 = $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur>;
+
+        $i1 = $i3 + $i1;
+
+        $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur> = $i1;
+
+        return $r1;
+    }
+
+    int getByte()
+    {
+        android.telephony.gsm.SmsMessage$PduParser $r0;
+        int $i0, $i1;
+        byte[] $r1;
+        byte $b2;
+        short $s3;
+
+        $r0 := @this: android.telephony.gsm.SmsMessage$PduParser;
+
+        $r1 = $r0.<android.telephony.gsm.SmsMessage$PduParser: byte[] pdu>;
+
+        $i0 = $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur>;
+
+        $i1 = $i0 + 1;
+
+        $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur> = $i1;
+
+        $b2 = $r1[$i0];
+
+        $s3 = $b2 & 255;
+
+        return $s3;
+    }
+
+    java.lang.String getSCAddress()
+    {
+        android.telephony.gsm.SmsMessage$PduParser $r0;
+        int $i0, $i1;
+        java.lang.String $r1;
+        byte[] $r2;
+        java.lang.RuntimeException $r3;
+
+        $r0 := @this: android.telephony.gsm.SmsMessage$PduParser;
+
+        $i0 = virtualinvoke $r0.<android.telephony.gsm.SmsMessage$PduParser: int getByte()>();
+
+        if $i0 != 0 goto label2;
+
+        $r1 = null;
+
+     label1:
+        $i1 = $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur>;
+
+        $i0 = $i1 + $i0;
+
+        $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur> = $i0;
+
+        return $r1;
+
+     label2:
+        $r2 = $r0.<android.telephony.gsm.SmsMessage$PduParser: byte[] pdu>;
+
+        $i1 = $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur>;
+
+        $r1 = staticinvoke <android.telephony.PhoneNumberUtils: java.lang.String calledPartyBCDToString(byte[],int,int)>($r2, $i1, $i0);
+
+     label3:
+        goto label1;
+
+     label4:
+        $r3 := @caughtexception;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String,java.lang.Throwable)>("GSM", "invalid SC address: ", $r3);
+
+        $r1 = null;
+
+        goto label1;
+
+        catch java.lang.RuntimeException from label2 to label3 with label4;
+    }
+
+    long getSCTimestampMillis()
+    {
+        android.telephony.gsm.SmsMessage$PduParser $r0;
+        android.text.format.Time $r1;
+        byte $b0, $b9;
+        byte[] $r2;
+        int $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8;
+        long $l10, $l11;
+
+        $r0 := @this: android.telephony.gsm.SmsMessage$PduParser;
+
+        $r2 = $r0.<android.telephony.gsm.SmsMessage$PduParser: byte[] pdu>;
+
+        $i1 = $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur>;
+
+        $i2 = $i1 + 1;
+
+        $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur> = $i2;
+
+        $b0 = $r2[$i1];
+
+        $i1 = staticinvoke <com.android.internal.telephony.gsm.SimUtils: int bcdByteToInt(byte)>($b0);
+
+        $r2 = $r0.<android.telephony.gsm.SmsMessage$PduParser: byte[] pdu>;
+
+        $i2 = $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur>;
+
+        $i3 = $i2 + 1;
+
+        $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur> = $i3;
+
+        $b0 = $r2[$i2];
+
+        $i2 = staticinvoke <com.android.internal.telephony.gsm.SimUtils: int bcdByteToInt(byte)>($b0);
+
+        $r2 = $r0.<android.telephony.gsm.SmsMessage$PduParser: byte[] pdu>;
+
+        $i3 = $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur>;
+
+        $i4 = $i3 + 1;
+
+        $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur> = $i4;
+
+        $b0 = $r2[$i3];
+
+        $i3 = staticinvoke <com.android.internal.telephony.gsm.SimUtils: int bcdByteToInt(byte)>($b0);
+
+        $r2 = $r0.<android.telephony.gsm.SmsMessage$PduParser: byte[] pdu>;
+
+        $i4 = $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur>;
+
+        $i5 = $i4 + 1;
+
+        $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur> = $i5;
+
+        $b0 = $r2[$i4];
+
+        $i4 = staticinvoke <com.android.internal.telephony.gsm.SimUtils: int bcdByteToInt(byte)>($b0);
+
+        $r2 = $r0.<android.telephony.gsm.SmsMessage$PduParser: byte[] pdu>;
+
+        $i5 = $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur>;
+
+        $i6 = $i5 + 1;
+
+        $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur> = $i6;
+
+        $b0 = $r2[$i5];
+
+        $i5 = staticinvoke <com.android.internal.telephony.gsm.SimUtils: int bcdByteToInt(byte)>($b0);
+
+        $r2 = $r0.<android.telephony.gsm.SmsMessage$PduParser: byte[] pdu>;
+
+        $i6 = $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur>;
+
+        $i7 = $i6 + 1;
+
+        $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur> = $i7;
+
+        $b0 = $r2[$i6];
+
+        $i6 = staticinvoke <com.android.internal.telephony.gsm.SimUtils: int bcdByteToInt(byte)>($b0);
+
+        $r2 = $r0.<android.telephony.gsm.SmsMessage$PduParser: byte[] pdu>;
+
+        $i7 = $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur>;
+
+        $i8 = $i7 + 1;
+
+        $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur> = $i8;
+
+        $b0 = $r2[$i7];
+
+        $b9 = $b0 & -9;
+
+        $b9 = (byte) $b9;
+
+        $i8 = staticinvoke <com.android.internal.telephony.gsm.SimUtils: int bcdByteToInt(byte)>($b9);
+
+        $i7 = $i8;
+
+        $b0 = $b0 & 8;
+
+        if $b0 != 0 goto label3;
+
+     label1:
+        $r1 = new android.text.format.Time;
+
+        specialinvoke $r1.<android.text.format.Time: void <init>(java.lang.String)>("UTC");
+
+        if $i1 < 90 goto label4;
+
+        $i1 = $i1 + 1900;
+
+     label2:
+        $r1.<android.text.format.Time: int year> = $i1;
+
+        $i1 = $i2 - 1;
+
+        $r1.<android.text.format.Time: int month> = $i1;
+
+        $r1.<android.text.format.Time: int monthDay> = $i3;
+
+        $r1.<android.text.format.Time: int hour> = $i4;
+
+        $r1.<android.text.format.Time: int minute> = $i5;
+
+        $r1.<android.text.format.Time: int second> = $i6;
+
+        $l10 = virtualinvoke $r1.<android.text.format.Time: long toMillis(boolean)>(1);
+
+        $i1 = $i7 * 15;
+
+        $i1 = $i1 * 60;
+
+        $i1 = $i1 * 1000;
+
+        $l11 = (long) $i1;
+
+        $l10 = $l10 - $l11;
+
+        return $l10;
+
+     label3:
+        $i7 = neg $i8;
+
+        goto label1;
+
+     label4:
+        $i1 = $i1 + 2000;
+
+        goto label2;
+    }
+
+    byte[] getUserData()
+    {
+        android.telephony.gsm.SmsMessage$PduParser $r0;
+        byte[] r1;
+
+        $r0 := @this: android.telephony.gsm.SmsMessage$PduParser;
+
+        r1 = $r0.<android.telephony.gsm.SmsMessage$PduParser: byte[] userData>;
+
+        return r1;
+    }
+
+    java.lang.String getUserDataGSM7Bit(int)
+    {
+        android.telephony.gsm.SmsMessage$PduParser $r0;
+        int $i0, $i1, $i2;
+        java.lang.String $r1;
+        byte[] $r2;
+
+        $r0 := @this: android.telephony.gsm.SmsMessage$PduParser;
+
+        $i0 := @parameter0: int;
+
+        $r2 = $r0.<android.telephony.gsm.SmsMessage$PduParser: byte[] pdu>;
+
+        $i2 = $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur>;
+
+        $i1 = $r0.<android.telephony.gsm.SmsMessage$PduParser: int mUserDataSeptetPadding>;
+
+        $r1 = staticinvoke <com.android.internal.telephony.gsm.GsmAlphabet: java.lang.String gsm7BitPackedToString(byte[],int,int,int)>($r2, $i2, $i0, $i1);
+
+        $i1 = $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur>;
+
+        $i0 = $i0 * 7;
+
+        $i0 = $i0 / 8;
+
+        $i0 = $i1 + $i0;
+
+        $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur> = $i0;
+
+        return $r1;
+    }
+
+    com.android.internal.telephony.gsm.SmsHeader getUserDataHeader()
+    {
+        android.telephony.gsm.SmsMessage$PduParser $r0;
+        com.android.internal.telephony.gsm.SmsHeader r1;
+
+        $r0 := @this: android.telephony.gsm.SmsMessage$PduParser;
+
+        r1 = $r0.<android.telephony.gsm.SmsMessage$PduParser: com.android.internal.telephony.gsm.SmsHeader userDataHeader>;
+
+        return r1;
+    }
+
+    int getUserDataSeptetPadding()
+    {
+        android.telephony.gsm.SmsMessage$PduParser $r0;
+        int i0;
+
+        $r0 := @this: android.telephony.gsm.SmsMessage$PduParser;
+
+        i0 = $r0.<android.telephony.gsm.SmsMessage$PduParser: int mUserDataSeptetPadding>;
+
+        return i0;
+    }
+
+    java.lang.String getUserDataUCS2(int)
+    {
+        android.telephony.gsm.SmsMessage$PduParser $r0;
+        int $i0, $i1;
+        java.lang.String $r1;
+        byte[] $r2;
+        java.io.UnsupportedEncodingException $r3;
+
+        $r0 := @this: android.telephony.gsm.SmsMessage$PduParser;
+
+        $i0 := @parameter0: int;
+
+        $r1 = new java.lang.String;
+
+        $r2 = $r0.<android.telephony.gsm.SmsMessage$PduParser: byte[] pdu>;
+
+        $i1 = $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur>;
+
+     label1:
+        specialinvoke $r1.<java.lang.String: void <init>(byte[],int,int,java.lang.String)>($r2, $i1, $i0, "utf-16");
+
+     label2:
+        $i1 = $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur>;
+
+        $i0 = $i1 + $i0;
+
+        $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur> = $i0;
+
+        return $r1;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r1 = "";
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("GSM", "implausible UnsupportedEncodingException", $r3);
+
+        goto label2;
+
+        catch java.io.UnsupportedEncodingException from label1 to label2 with label3;
+    }
+
+    boolean moreDataPresent()
+    {
+        android.telephony.gsm.SmsMessage$PduParser $r0;
+        int $i0, $i1;
+        byte[] $r1;
+
+        $r0 := @this: android.telephony.gsm.SmsMessage$PduParser;
+
+        $r1 = $r0.<android.telephony.gsm.SmsMessage$PduParser: byte[] pdu>;
+
+        $i1 = lengthof $r1;
+
+        $i0 = $r0.<android.telephony.gsm.SmsMessage$PduParser: int cur>;
+
+        if $i1 <= $i0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+}

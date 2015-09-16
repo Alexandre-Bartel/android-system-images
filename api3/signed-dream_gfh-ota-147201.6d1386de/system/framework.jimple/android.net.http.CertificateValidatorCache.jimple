@@ -1,0 +1,302 @@
+class android.net.http.CertificateValidatorCache extends java.lang.Object
+{
+    private static final long CACHE_ENTRY_LIFETIME;
+    public static long mCost;
+    public static long mSave;
+    private static java.security.cert.CertificateFactory sCertificateFactory;
+    private int mBigScrew;
+    private java.util.HashMap mCacheMap;
+
+    static void <clinit>()
+    {
+        <android.net.http.CertificateValidatorCache: long CACHE_ENTRY_LIFETIME> = 600000L;
+
+        <android.net.http.CertificateValidatorCache: long mSave> = 0L;
+
+        <android.net.http.CertificateValidatorCache: long mCost> = 0L;
+
+        return;
+    }
+
+    public void <init>()
+    {
+        android.net.http.CertificateValidatorCache $r0;
+        java.util.Random $r1;
+        int $i0;
+        java.util.HashMap $r2;
+
+        $r0 := @this: android.net.http.CertificateValidatorCache;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.Random;
+
+        specialinvoke $r1.<java.util.Random: void <init>()>();
+
+        $i0 = virtualinvoke $r1.<java.util.Random: int nextInt()>();
+
+        $r0.<android.net.http.CertificateValidatorCache: int mBigScrew> = $i0;
+
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>()>();
+
+        $r0.<android.net.http.CertificateValidatorCache: java.util.HashMap mCacheMap> = $r2;
+
+        return;
+    }
+
+    public static byte[] secureHash(java.security.cert.Certificate[])
+    {
+        java.security.cert.Certificate[] $r0;
+        android.security.Sha1MessageDigest $r1;
+        long $l0, $l2, $l3;
+        byte[] $r2, $r6;
+        int $i1;
+        java.security.cert.CertificateFactory $r3;
+        java.util.List $r4;
+        java.security.cert.CertPath $r5;
+        java.lang.Throwable $r7;
+        java.security.GeneralSecurityException $r8, $r9;
+
+        $r0 := @parameter0: java.security.cert.Certificate[];
+
+        $r2 = null;
+
+        $l0 = staticinvoke <android.os.SystemClock: long uptimeMillis()>();
+
+        if $r0 == null goto label10;
+
+        $i1 = lengthof $r0;
+
+        if $i1 == 0 goto label10;
+
+        entermonitor class "android/net/http/CertificateValidatorCache";
+
+     label01:
+        $r3 = <android.net.http.CertificateValidatorCache: java.security.cert.CertificateFactory sCertificateFactory>;
+
+     label02:
+        if $r3 != null goto label05;
+
+     label03:
+        $r3 = staticinvoke <java.security.cert.CertificateFactory: java.security.cert.CertificateFactory getInstance(java.lang.String)>("X.509");
+
+     label04:
+        <android.net.http.CertificateValidatorCache: java.security.cert.CertificateFactory sCertificateFactory> = $r3;
+
+     label05:
+        exitmonitor class "android/net/http/CertificateValidatorCache";
+
+     label06:
+        $r3 = <android.net.http.CertificateValidatorCache: java.security.cert.CertificateFactory sCertificateFactory>;
+
+     label07:
+        $r4 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>($r0);
+
+        $r5 = virtualinvoke $r3.<java.security.cert.CertificateFactory: java.security.cert.CertPath generateCertPath(java.util.List)>($r4);
+
+        if $r5 == null goto label10;
+
+        $r6 = virtualinvoke $r5.<java.security.cert.CertPath: byte[] getEncoded()>();
+
+     label08:
+        if $r6 == null goto label10;
+
+     label09:
+        $r1 = new android.security.Sha1MessageDigest;
+
+        specialinvoke $r1.<android.security.Sha1MessageDigest: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<android.security.Sha1MessageDigest: byte[] digest(byte[])>($r6);
+
+     label10:
+        $l2 = staticinvoke <android.os.SystemClock: long uptimeMillis()>();
+
+        $l3 = <android.net.http.CertificateValidatorCache: long mCost>;
+
+        $l0 = $l2 - $l0;
+
+        $l3 = $l3 + $l0;
+
+        <android.net.http.CertificateValidatorCache: long mCost> = $l3;
+
+        return $r2;
+
+     label11:
+        $r7 := @caughtexception;
+
+     label12:
+        exitmonitor class "android/net/http/CertificateValidatorCache";
+
+     label13:
+        throw $r7;
+
+     label14:
+        $r8 := @caughtexception;
+
+        goto label10;
+
+     label15:
+        $r9 := @caughtexception;
+
+        goto label05;
+
+        catch java.lang.Throwable from label01 to label02 with label11;
+        catch java.security.GeneralSecurityException from label03 to label04 with label15;
+        catch java.lang.Throwable from label03 to label05 with label11;
+        catch java.lang.Throwable from label05 to label06 with label11;
+        catch java.security.GeneralSecurityException from label07 to label08 with label14;
+        catch java.security.GeneralSecurityException from label09 to label10 with label14;
+        catch java.lang.Throwable from label12 to label13 with label11;
+        catch java.security.GeneralSecurityException from label13 to label14 with label14;
+    }
+
+    public boolean has(java.lang.String, byte[])
+    {
+        android.net.http.CertificateValidatorCache $r0;
+        java.lang.String $r1;
+        byte[] $r2;
+        java.lang.Integer $r3;
+        int $i0, $i1;
+        java.util.HashMap $r4;
+        java.lang.Object $r5;
+        android.net.http.CertificateValidatorCache$CacheEntry $r6;
+        boolean $z0;
+        long $l2, $l3;
+
+        $r0 := @this: android.net.http.CertificateValidatorCache;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: byte[];
+
+        if $r1 == null goto label2;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 == 0 goto label3;
+
+        if $r2 == null goto label4;
+
+        $i0 = lengthof $r2;
+
+        if $i0 == 0 goto label5;
+
+        $r4 = $r0.<android.net.http.CertificateValidatorCache: java.util.HashMap mCacheMap>;
+
+        $r3 = new java.lang.Integer;
+
+        $i0 = $r0.<android.net.http.CertificateValidatorCache: int mBigScrew>;
+
+        $i1 = virtualinvoke $r1.<java.lang.String: int hashCode()>();
+
+        $i0 = $i0 ^ $i1;
+
+        specialinvoke $r3.<java.lang.Integer: void <init>(int)>($i0);
+
+        $r5 = virtualinvoke $r4.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r3);
+
+        $r6 = (android.net.http.CertificateValidatorCache$CacheEntry) $r5;
+
+        if $r6 == null goto label6;
+
+        $z0 = virtualinvoke $r6.<android.net.http.CertificateValidatorCache$CacheEntry: boolean expired()>();
+
+        if $z0 != 0 goto label1;
+
+        $z0 = virtualinvoke $r6.<android.net.http.CertificateValidatorCache$CacheEntry: boolean has(java.lang.String,byte[])>($r1, $r2);
+
+        if $z0 == 0 goto label7;
+
+        $l2 = <android.net.http.CertificateValidatorCache: long mSave>;
+
+        $l3 = $r6.<android.net.http.CertificateValidatorCache$CacheEntry: long mSave>;
+
+        $l2 = $l2 + $l3;
+
+        <android.net.http.CertificateValidatorCache: long mSave> = $l2;
+
+        return $z0;
+
+     label1:
+        $r4 = $r0.<android.net.http.CertificateValidatorCache: java.util.HashMap mCacheMap>;
+
+        virtualinvoke $r4.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>($r6);
+
+        return 0;
+
+     label2:
+        return 0;
+
+     label3:
+        return 0;
+
+     label4:
+        return 0;
+
+     label5:
+        return 0;
+
+     label6:
+        return 0;
+
+     label7:
+        return $z0;
+    }
+
+    public boolean put(java.lang.String, byte[], long)
+    {
+        android.net.http.CertificateValidatorCache $r0;
+        java.lang.String $r1;
+        byte[] $r2;
+        long $l0;
+        java.util.HashMap $r3;
+        java.lang.Integer $r4;
+        int $i1, $i2;
+        android.net.http.CertificateValidatorCache$CacheEntry $r5;
+
+        $r0 := @this: android.net.http.CertificateValidatorCache;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: byte[];
+
+        $l0 := @parameter2: long;
+
+        if $r1 == null goto label1;
+
+        $i1 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i1 == 0 goto label1;
+
+        if $r2 == null goto label1;
+
+        $i1 = lengthof $r2;
+
+        if $i1 == 0 goto label1;
+
+        $r3 = $r0.<android.net.http.CertificateValidatorCache: java.util.HashMap mCacheMap>;
+
+        $r4 = new java.lang.Integer;
+
+        $i1 = $r0.<android.net.http.CertificateValidatorCache: int mBigScrew>;
+
+        $i2 = virtualinvoke $r1.<java.lang.String: int hashCode()>();
+
+        $i1 = $i1 ^ $i2;
+
+        specialinvoke $r4.<java.lang.Integer: void <init>(int)>($i1);
+
+        $r5 = new android.net.http.CertificateValidatorCache$CacheEntry;
+
+        specialinvoke $r5.<android.net.http.CertificateValidatorCache$CacheEntry: void <init>(android.net.http.CertificateValidatorCache,java.lang.String,byte[],long)>($r0, $r1, $r2, $l0);
+
+        virtualinvoke $r3.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r4, $r5);
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+}

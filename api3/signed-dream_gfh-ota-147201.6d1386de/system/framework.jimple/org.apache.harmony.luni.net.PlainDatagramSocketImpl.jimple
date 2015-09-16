@@ -1,0 +1,1179 @@
+class org.apache.harmony.luni.net.PlainDatagramSocketImpl extends java.net.DatagramSocketImpl
+{
+    static final int FLAG_SHUTDOWN;
+    static final int IP_MULTICAST_ADD;
+    static final int IP_MULTICAST_DROP;
+    static final int IP_MULTICAST_TTL;
+    static final int MULTICAST_IF;
+    static final int MULTICAST_TTL;
+    static final int REUSEADDR_AND_REUSEPORT;
+    private static final int SO_BROADCAST;
+    static final int TCP_NODELAY;
+    private boolean bindToDevice;
+    private java.net.InetAddress connectedAddress;
+    private int connectedPort;
+    private byte[] ipaddress;
+    private volatile boolean isNativeConnected;
+    private org.apache.harmony.luni.platform.INetworkSystem netImpl;
+    public int receiveTimeout;
+    public boolean shutdownInput;
+    public boolean streaming;
+    private int trafficClass;
+    private int ttl;
+
+    public void <init>()
+    {
+        org.apache.harmony.luni.net.PlainDatagramSocketImpl $r0;
+        org.apache.harmony.luni.platform.INetworkSystem $r1;
+        byte[] $r2;
+        java.io.FileDescriptor $r3;
+
+        $r0 := @this: org.apache.harmony.luni.net.PlainDatagramSocketImpl;
+
+        specialinvoke $r0.<java.net.DatagramSocketImpl: void <init>()>();
+
+        $r2 = newarray (byte)[4];
+
+        $r2[0] = 0;
+
+        $r2[1] = 0;
+
+        $r2[2] = 0;
+
+        $r2[3] = 0;
+
+        $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: byte[] ipaddress> = $r2;
+
+        $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: int ttl> = 1;
+
+        $r1 = staticinvoke <org.apache.harmony.luni.platform.Platform: org.apache.harmony.luni.platform.INetworkSystem getNetworkSystem()>();
+
+        $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: org.apache.harmony.luni.platform.INetworkSystem netImpl> = $r1;
+
+        $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: boolean streaming> = 1;
+
+        $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: int connectedPort> = -1;
+
+        $r3 = new java.io.FileDescriptor;
+
+        specialinvoke $r3.<java.io.FileDescriptor: void <init>()>();
+
+        $r0.<java.net.DatagramSocketImpl: java.io.FileDescriptor fd> = $r3;
+
+        return;
+    }
+
+    public void <init>(java.io.FileDescriptor, int)
+    {
+        org.apache.harmony.luni.net.PlainDatagramSocketImpl $r0;
+        java.io.FileDescriptor $r1;
+        int $i0;
+        org.apache.harmony.luni.platform.INetworkSystem $r2;
+        byte[] $r3;
+
+        $r0 := @this: org.apache.harmony.luni.net.PlainDatagramSocketImpl;
+
+        $r1 := @parameter0: java.io.FileDescriptor;
+
+        $i0 := @parameter1: int;
+
+        specialinvoke $r0.<java.net.DatagramSocketImpl: void <init>()>();
+
+        $r3 = newarray (byte)[4];
+
+        $r3[0] = 0;
+
+        $r3[1] = 0;
+
+        $r3[2] = 0;
+
+        $r3[3] = 0;
+
+        $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: byte[] ipaddress> = $r3;
+
+        $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: int ttl> = 1;
+
+        $r2 = staticinvoke <org.apache.harmony.luni.platform.Platform: org.apache.harmony.luni.platform.INetworkSystem getNetworkSystem()>();
+
+        $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: org.apache.harmony.luni.platform.INetworkSystem netImpl> = $r2;
+
+        $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: boolean streaming> = 1;
+
+        $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: int connectedPort> = -1;
+
+        $r0.<java.net.DatagramSocketImpl: java.io.FileDescriptor fd> = $r1;
+
+        $r0.<java.net.DatagramSocketImpl: int localPort> = $i0;
+
+        return;
+    }
+
+    private void updatePacketRecvAddress(java.net.DatagramPacket)
+    {
+        org.apache.harmony.luni.net.PlainDatagramSocketImpl $r0;
+        java.net.DatagramPacket $r1;
+        java.net.InetAddress $r2;
+        int $i0;
+
+        $r0 := @this: org.apache.harmony.luni.net.PlainDatagramSocketImpl;
+
+        $r1 := @parameter0: java.net.DatagramPacket;
+
+        $r2 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: java.net.InetAddress connectedAddress>;
+
+        virtualinvoke $r1.<java.net.DatagramPacket: void setAddress(java.net.InetAddress)>($r2);
+
+        $i0 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: int connectedPort>;
+
+        virtualinvoke $r1.<java.net.DatagramPacket: void setPort(int)>($i0);
+
+        return;
+    }
+
+    public void bind(int, java.net.InetAddress) throws java.net.SocketException
+    {
+        org.apache.harmony.luni.net.PlainDatagramSocketImpl $r0;
+        int $i0;
+        java.net.InetAddress $r1;
+        org.apache.harmony.luni.util.PriviAction $r2;
+        java.lang.Object $r3;
+        java.lang.String $r4;
+        boolean $z0;
+        org.apache.harmony.luni.platform.INetworkSystem $r5;
+        java.io.FileDescriptor $r6;
+        java.lang.Boolean $r7;
+        java.io.IOException $r8;
+
+        $r0 := @this: org.apache.harmony.luni.net.PlainDatagramSocketImpl;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.net.InetAddress;
+
+        $r2 = new org.apache.harmony.luni.util.PriviAction;
+
+        specialinvoke $r2.<org.apache.harmony.luni.util.PriviAction: void <init>(java.lang.String)>("bindToDevice");
+
+        $r3 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r2);
+
+        $r4 = (java.lang.String) $r3;
+
+        if $r4 == null goto label5;
+
+        $r4 = virtualinvoke $r4.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>("true");
+
+        if $z0 == 0 goto label5;
+
+        $z0 = 1;
+
+     label1:
+        $r5 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: org.apache.harmony.luni.platform.INetworkSystem netImpl>;
+
+        $r6 = $r0.<java.net.DatagramSocketImpl: java.io.FileDescriptor fd>;
+
+        $z0 = interfaceinvoke $r5.<org.apache.harmony.luni.platform.INetworkSystem: boolean bind2(java.io.FileDescriptor,int,boolean,java.net.InetAddress)>($r6, $i0, $z0, $r1);
+
+        $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: boolean bindToDevice> = $z0;
+
+        if $i0 == 0 goto label6;
+
+        $r0.<java.net.DatagramSocketImpl: int localPort> = $i0;
+
+     label2:
+        $r7 = <java.lang.Boolean: java.lang.Boolean TRUE>;
+
+     label3:
+        virtualinvoke $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: void setOption(int,java.lang.Object)>(32, $r7);
+
+     label4:
+        return;
+
+     label5:
+        $z0 = 0;
+
+        goto label1;
+
+     label6:
+        $r5 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: org.apache.harmony.luni.platform.INetworkSystem netImpl>;
+
+        $r6 = $r0.<java.net.DatagramSocketImpl: java.io.FileDescriptor fd>;
+
+        $z0 = staticinvoke <org.apache.harmony.luni.net.NetUtil: boolean preferIPv6Addresses()>();
+
+        $i0 = interfaceinvoke $r5.<org.apache.harmony.luni.platform.INetworkSystem: int getSocketLocalPort(java.io.FileDescriptor,boolean)>($r6, $z0);
+
+        $r0.<java.net.DatagramSocketImpl: int localPort> = $i0;
+
+        goto label2;
+
+     label7:
+        $r8 := @caughtexception;
+
+        return;
+
+        catch java.io.IOException from label3 to label4 with label7;
+    }
+
+    public void close()
+    {
+        org.apache.harmony.luni.net.PlainDatagramSocketImpl $r0;
+        java.io.FileDescriptor $r1, $r2;
+        boolean $z0;
+        org.apache.harmony.luni.platform.INetworkSystem $r3;
+        java.lang.Throwable $r4;
+        java.io.IOException $r5;
+
+        $r0 := @this: org.apache.harmony.luni.net.PlainDatagramSocketImpl;
+
+        $r1 = $r0.<java.net.DatagramSocketImpl: java.io.FileDescriptor fd>;
+
+        entermonitor $r1;
+
+     label01:
+        $r2 = $r0.<java.net.DatagramSocketImpl: java.io.FileDescriptor fd>;
+
+        $z0 = virtualinvoke $r2.<java.io.FileDescriptor: boolean valid()>();
+
+     label02:
+        if $z0 == 0 goto label06;
+
+     label03:
+        $r3 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: org.apache.harmony.luni.platform.INetworkSystem netImpl>;
+
+        $r2 = $r0.<java.net.DatagramSocketImpl: java.io.FileDescriptor fd>;
+
+     label04:
+        interfaceinvoke $r3.<org.apache.harmony.luni.platform.INetworkSystem: void socketClose(java.io.FileDescriptor)>($r2);
+
+     label05:
+        $r2 = new java.io.FileDescriptor;
+
+        specialinvoke $r2.<java.io.FileDescriptor: void <init>()>();
+
+        $r0.<java.net.DatagramSocketImpl: java.io.FileDescriptor fd> = $r2;
+
+     label06:
+        exitmonitor $r1;
+
+     label07:
+        return;
+
+     label08:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label09:
+        throw $r4;
+
+     label10:
+        $r5 := @caughtexception;
+
+        goto label05;
+
+        catch java.lang.Throwable from label01 to label02 with label08;
+        catch java.io.IOException from label04 to label05 with label10;
+        catch java.lang.Throwable from label03 to label05 with label08;
+        catch java.lang.Throwable from label05 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    public void connect(java.net.InetAddress, int) throws java.net.SocketException
+    {
+        org.apache.harmony.luni.net.PlainDatagramSocketImpl $r0;
+        java.net.InetAddress $r1, $r5;
+        int $i0, $i1;
+        org.apache.harmony.luni.platform.INetworkSystem $r2;
+        java.io.FileDescriptor $r3;
+        byte[] $r4;
+        java.net.UnknownHostException $r6;
+        java.net.SocketException $r7;
+        java.lang.String $r8;
+
+        $r0 := @this: org.apache.harmony.luni.net.PlainDatagramSocketImpl;
+
+        $r1 := @parameter0: java.net.InetAddress;
+
+        $i0 := @parameter1: int;
+
+        $r2 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: org.apache.harmony.luni.platform.INetworkSystem netImpl>;
+
+        $r3 = $r0.<java.net.DatagramSocketImpl: java.io.FileDescriptor fd>;
+
+        $i1 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: int trafficClass>;
+
+        interfaceinvoke $r2.<org.apache.harmony.luni.platform.INetworkSystem: void connectDatagram(java.io.FileDescriptor,int,int,java.net.InetAddress)>($r3, $i0, $i1, $r1);
+
+     label1:
+        $r4 = virtualinvoke $r1.<java.net.InetAddress: byte[] getAddress()>();
+
+        $r5 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByAddress(byte[])>($r4);
+
+     label2:
+        $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: java.net.InetAddress connectedAddress> = $r5;
+
+        $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: int connectedPort> = $i0;
+
+        $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: boolean isNativeConnected> = 1;
+
+        return;
+
+     label3:
+        $r6 := @caughtexception;
+
+        $r7 = new java.net.SocketException;
+
+        $r8 = virtualinvoke $r1.<java.net.InetAddress: java.lang.String getHostName()>();
+
+        $r8 = staticinvoke <org.apache.harmony.luni.util.Msg: java.lang.String getString(java.lang.String,java.lang.Object)>("K0317", $r8);
+
+        specialinvoke $r7.<java.net.SocketException: void <init>(java.lang.String)>($r8);
+
+        throw $r7;
+
+        catch java.net.UnknownHostException from label1 to label2 with label3;
+    }
+
+    public void create() throws java.net.SocketException
+    {
+        org.apache.harmony.luni.net.PlainDatagramSocketImpl $r0;
+        org.apache.harmony.luni.platform.INetworkSystem $r1;
+        java.io.FileDescriptor $r2;
+        boolean $z0;
+
+        $r0 := @this: org.apache.harmony.luni.net.PlainDatagramSocketImpl;
+
+        $r1 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: org.apache.harmony.luni.platform.INetworkSystem netImpl>;
+
+        $r2 = $r0.<java.net.DatagramSocketImpl: java.io.FileDescriptor fd>;
+
+        $z0 = staticinvoke <org.apache.harmony.luni.net.NetUtil: boolean preferIPv4Stack()>();
+
+        interfaceinvoke $r1.<org.apache.harmony.luni.platform.INetworkSystem: void createDatagramSocket(java.io.FileDescriptor,boolean)>($r2, $z0);
+
+        return;
+    }
+
+    public void disconnect()
+    {
+        org.apache.harmony.luni.net.PlainDatagramSocketImpl $r0;
+        java.io.FileDescriptor $r1;
+        org.apache.harmony.luni.platform.INetworkSystem $r2;
+        java.lang.Exception $r3;
+
+        $r0 := @this: org.apache.harmony.luni.net.PlainDatagramSocketImpl;
+
+     label1:
+        $r2 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: org.apache.harmony.luni.platform.INetworkSystem netImpl>;
+
+        $r1 = $r0.<java.net.DatagramSocketImpl: java.io.FileDescriptor fd>;
+
+        interfaceinvoke $r2.<org.apache.harmony.luni.platform.INetworkSystem: void disconnectDatagram(java.io.FileDescriptor)>($r1);
+
+     label2:
+        $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: int connectedPort> = -1;
+
+        $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: java.net.InetAddress connectedAddress> = null;
+
+        $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: boolean isNativeConnected> = 0;
+
+        return;
+
+     label3:
+        $r3 := @caughtexception;
+
+        goto label2;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    protected void finalize()
+    {
+        org.apache.harmony.luni.net.PlainDatagramSocketImpl $r0;
+
+        $r0 := @this: org.apache.harmony.luni.net.PlainDatagramSocketImpl;
+
+        virtualinvoke $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: void close()>();
+
+        return;
+    }
+
+    public java.lang.Object getOption(int) throws java.net.SocketException
+    {
+        org.apache.harmony.luni.net.PlainDatagramSocketImpl $r0;
+        int $i0;
+        java.io.FileDescriptor $r1;
+        java.lang.Integer $r2;
+        org.apache.harmony.luni.platform.INetworkSystem $r3;
+        java.lang.Object $r4;
+        byte[] $r5;
+        java.net.InetAddress $r6;
+        java.net.UnknownHostException $r7;
+
+        $r0 := @this: org.apache.harmony.luni.net.PlainDatagramSocketImpl;
+
+        $i0 := @parameter0: int;
+
+        if $i0 != 4102 goto label1;
+
+        $i0 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: int receiveTimeout>;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        return $r2;
+
+     label1:
+        if $i0 != 3 goto label2;
+
+        $i0 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: int trafficClass>;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        return $r2;
+
+     label2:
+        $r3 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: org.apache.harmony.luni.platform.INetworkSystem netImpl>;
+
+        $r1 = $r0.<java.net.DatagramSocketImpl: java.io.FileDescriptor fd>;
+
+        $r4 = interfaceinvoke $r3.<org.apache.harmony.luni.platform.INetworkSystem: java.lang.Object getSocketOption(java.io.FileDescriptor,int)>($r1, $i0);
+
+        if $i0 != 16 goto label6;
+
+        $r3 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: org.apache.harmony.luni.platform.INetworkSystem netImpl>;
+
+        $i0 = interfaceinvoke $r3.<org.apache.harmony.luni.platform.INetworkSystem: int getSocketFlags()>();
+
+        $i0 = $i0 & 1;
+
+        if $i0 == 0 goto label6;
+
+        $r5 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: byte[] ipaddress>;
+
+     label3:
+        $r6 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByAddress(byte[])>($r5);
+
+     label4:
+        return $r6;
+
+     label5:
+        $r7 := @caughtexception;
+
+        return null;
+
+     label6:
+        return $r4;
+
+        catch java.net.UnknownHostException from label3 to label4 with label5;
+    }
+
+    public byte getTTL() throws java.io.IOException
+    {
+        org.apache.harmony.luni.net.PlainDatagramSocketImpl $r0;
+        java.lang.Object $r1;
+        java.lang.Byte $r2;
+        byte $b0;
+        org.apache.harmony.luni.platform.INetworkSystem $r3;
+        int $i1;
+
+        $r0 := @this: org.apache.harmony.luni.net.PlainDatagramSocketImpl;
+
+        $r1 = virtualinvoke $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: java.lang.Object getOption(int)>(17);
+
+        $r2 = (java.lang.Byte) $r1;
+
+        $b0 = virtualinvoke $r2.<java.lang.Byte: byte byteValue()>();
+
+        $r3 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: org.apache.harmony.luni.platform.INetworkSystem netImpl>;
+
+        $i1 = interfaceinvoke $r3.<org.apache.harmony.luni.platform.INetworkSystem: int getSocketFlags()>();
+
+        $i1 = $i1 & 2;
+
+        if $i1 == 0 goto label1;
+
+        $i1 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: int ttl>;
+
+        $b0 = (byte) $i1;
+
+        return $b0;
+
+     label1:
+        return $b0;
+    }
+
+    public int getTimeToLive() throws java.io.IOException
+    {
+        org.apache.harmony.luni.net.PlainDatagramSocketImpl $r0;
+        short $s0;
+        java.lang.Object $r1;
+        java.lang.Byte $r2;
+        byte $b1;
+        org.apache.harmony.luni.platform.INetworkSystem $r3;
+        int $i2;
+
+        $r0 := @this: org.apache.harmony.luni.net.PlainDatagramSocketImpl;
+
+        $r1 = virtualinvoke $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: java.lang.Object getOption(int)>(17);
+
+        $r2 = (java.lang.Byte) $r1;
+
+        $b1 = virtualinvoke $r2.<java.lang.Byte: byte byteValue()>();
+
+        $s0 = $b1 & 255;
+
+        $r3 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: org.apache.harmony.luni.platform.INetworkSystem netImpl>;
+
+        $i2 = interfaceinvoke $r3.<org.apache.harmony.luni.platform.INetworkSystem: int getSocketFlags()>();
+
+        $i2 = $i2 & 2;
+
+        if $i2 == 0 goto label1;
+
+        $i2 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: int ttl>;
+
+        return $i2;
+
+     label1:
+        return $s0;
+    }
+
+    public void join(java.net.InetAddress) throws java.io.IOException
+    {
+        org.apache.harmony.luni.net.PlainDatagramSocketImpl $r0;
+        java.net.InetAddress $r1;
+        org.apache.harmony.luni.net.GenericIPMreq $r2;
+
+        $r0 := @this: org.apache.harmony.luni.net.PlainDatagramSocketImpl;
+
+        $r1 := @parameter0: java.net.InetAddress;
+
+        $r2 = new org.apache.harmony.luni.net.GenericIPMreq;
+
+        specialinvoke $r2.<org.apache.harmony.luni.net.GenericIPMreq: void <init>(java.net.InetAddress)>($r1);
+
+        virtualinvoke $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: void setOption(int,java.lang.Object)>(19, $r2);
+
+        return;
+    }
+
+    public void joinGroup(java.net.SocketAddress, java.net.NetworkInterface) throws java.io.IOException
+    {
+        org.apache.harmony.luni.net.PlainDatagramSocketImpl $r0;
+        java.net.NetworkInterface $r1;
+        org.apache.harmony.luni.net.GenericIPMreq $r2;
+        java.net.InetAddress $r3;
+        java.net.SocketAddress $r4;
+        boolean $z0;
+        java.net.InetSocketAddress $r5;
+
+        $r0 := @this: org.apache.harmony.luni.net.PlainDatagramSocketImpl;
+
+        $r4 := @parameter0: java.net.SocketAddress;
+
+        $r1 := @parameter1: java.net.NetworkInterface;
+
+        $z0 = $r4 instanceof java.net.InetSocketAddress;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = (java.net.InetSocketAddress) $r4;
+
+        $r3 = virtualinvoke $r5.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        $r2 = new org.apache.harmony.luni.net.GenericIPMreq;
+
+        specialinvoke $r2.<org.apache.harmony.luni.net.GenericIPMreq: void <init>(java.net.InetAddress,java.net.NetworkInterface)>($r3, $r1);
+
+        virtualinvoke $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: void setOption(int,java.lang.Object)>(19, $r2);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public void leave(java.net.InetAddress) throws java.io.IOException
+    {
+        org.apache.harmony.luni.net.PlainDatagramSocketImpl $r0;
+        java.net.InetAddress $r1;
+        org.apache.harmony.luni.net.GenericIPMreq $r2;
+
+        $r0 := @this: org.apache.harmony.luni.net.PlainDatagramSocketImpl;
+
+        $r1 := @parameter0: java.net.InetAddress;
+
+        $r2 = new org.apache.harmony.luni.net.GenericIPMreq;
+
+        specialinvoke $r2.<org.apache.harmony.luni.net.GenericIPMreq: void <init>(java.net.InetAddress)>($r1);
+
+        virtualinvoke $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: void setOption(int,java.lang.Object)>(20, $r2);
+
+        return;
+    }
+
+    public void leaveGroup(java.net.SocketAddress, java.net.NetworkInterface) throws java.io.IOException
+    {
+        org.apache.harmony.luni.net.PlainDatagramSocketImpl $r0;
+        java.net.NetworkInterface $r1;
+        org.apache.harmony.luni.net.GenericIPMreq $r2;
+        java.net.InetAddress $r3;
+        java.net.SocketAddress $r4;
+        boolean $z0;
+        java.net.InetSocketAddress $r5;
+
+        $r0 := @this: org.apache.harmony.luni.net.PlainDatagramSocketImpl;
+
+        $r4 := @parameter0: java.net.SocketAddress;
+
+        $r1 := @parameter1: java.net.NetworkInterface;
+
+        $z0 = $r4 instanceof java.net.InetSocketAddress;
+
+        if $z0 == 0 goto label1;
+
+        $r5 = (java.net.InetSocketAddress) $r4;
+
+        $r3 = virtualinvoke $r5.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        $r2 = new org.apache.harmony.luni.net.GenericIPMreq;
+
+        specialinvoke $r2.<org.apache.harmony.luni.net.GenericIPMreq: void <init>(java.net.InetAddress,java.net.NetworkInterface)>($r3, $r1);
+
+        virtualinvoke $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: void setOption(int,java.lang.Object)>(20, $r2);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    protected int peek(java.net.InetAddress) throws java.io.IOException
+    {
+        org.apache.harmony.luni.net.PlainDatagramSocketImpl $r0;
+        java.net.InetAddress $r1, $r6;
+        java.net.DatagramPacket $r2;
+        int $i0, $i1, $i2;
+        byte[] $r3;
+        boolean $z0;
+        org.apache.harmony.luni.platform.INetworkSystem $r4;
+        java.io.FileDescriptor $r5;
+
+        $r0 := @this: org.apache.harmony.luni.net.PlainDatagramSocketImpl;
+
+        $r1 := @parameter0: java.net.InetAddress;
+
+        $z0 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: boolean isNativeConnected>;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = newarray (byte)[10];
+
+        $r2 = new java.net.DatagramPacket;
+
+        $i0 = lengthof $r3;
+
+        specialinvoke $r2.<java.net.DatagramPacket: void <init>(byte[],int)>($r3, $i0);
+
+        $r4 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: org.apache.harmony.luni.platform.INetworkSystem netImpl>;
+
+        $r5 = $r0.<java.net.DatagramSocketImpl: java.io.FileDescriptor fd>;
+
+        $r3 = virtualinvoke $r2.<java.net.DatagramPacket: byte[] getData()>();
+
+        $i1 = virtualinvoke $r2.<java.net.DatagramPacket: int getOffset()>();
+
+        $i2 = virtualinvoke $r2.<java.net.DatagramPacket: int getLength()>();
+
+        $i0 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: int receiveTimeout>;
+
+        interfaceinvoke $r4.<org.apache.harmony.luni.platform.INetworkSystem: int recvConnectedDatagram(java.io.FileDescriptor,java.net.DatagramPacket,byte[],int,int,int,boolean)>($r5, $r2, $r3, $i1, $i2, $i0, 1);
+
+        $r4 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: org.apache.harmony.luni.platform.INetworkSystem netImpl>;
+
+        $r6 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: java.net.InetAddress connectedAddress>;
+
+        $r3 = virtualinvoke $r6.<java.net.InetAddress: byte[] getAddress()>();
+
+        interfaceinvoke $r4.<org.apache.harmony.luni.platform.INetworkSystem: void setInetAddress(java.net.InetAddress,byte[])>($r1, $r3);
+
+        $i0 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: int connectedPort>;
+
+        return $i0;
+
+     label1:
+        $r4 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: org.apache.harmony.luni.platform.INetworkSystem netImpl>;
+
+        $r5 = $r0.<java.net.DatagramSocketImpl: java.io.FileDescriptor fd>;
+
+        $i0 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: int receiveTimeout>;
+
+        $i0 = interfaceinvoke $r4.<org.apache.harmony.luni.platform.INetworkSystem: int peekDatagram(java.io.FileDescriptor,java.net.InetAddress,int)>($r5, $r1, $i0);
+
+        return $i0;
+    }
+
+    public int peekData(java.net.DatagramPacket) throws java.io.IOException
+    {
+        org.apache.harmony.luni.net.PlainDatagramSocketImpl $r0;
+        java.net.DatagramPacket $r1;
+        boolean $z0;
+        org.apache.harmony.luni.platform.INetworkSystem $r2;
+        java.io.FileDescriptor $r3;
+        byte[] $r4;
+        int $i0, $i1, $i2;
+        java.io.InterruptedIOException $r5;
+        java.net.SocketTimeoutException $r6;
+        java.lang.String $r7;
+
+        $r0 := @this: org.apache.harmony.luni.net.PlainDatagramSocketImpl;
+
+        $r1 := @parameter0: java.net.DatagramPacket;
+
+        $z0 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: boolean isNativeConnected>;
+
+        if $z0 == 0 goto label3;
+
+        $r2 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: org.apache.harmony.luni.platform.INetworkSystem netImpl>;
+
+        $r3 = $r0.<java.net.DatagramSocketImpl: java.io.FileDescriptor fd>;
+
+     label1:
+        $r4 = virtualinvoke $r1.<java.net.DatagramPacket: byte[] getData()>();
+
+        $i0 = virtualinvoke $r1.<java.net.DatagramPacket: int getOffset()>();
+
+        $i1 = virtualinvoke $r1.<java.net.DatagramPacket: int getLength()>();
+
+        $i2 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: int receiveTimeout>;
+
+        interfaceinvoke $r2.<org.apache.harmony.luni.platform.INetworkSystem: int recvConnectedDatagram(java.io.FileDescriptor,java.net.DatagramPacket,byte[],int,int,int,boolean)>($r3, $r1, $r4, $i0, $i1, $i2, 1);
+
+        specialinvoke $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: void updatePacketRecvAddress(java.net.DatagramPacket)>($r1);
+
+     label2:
+        $i0 = virtualinvoke $r1.<java.net.DatagramPacket: int getPort()>();
+
+        return $i0;
+
+     label3:
+        $r2 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: org.apache.harmony.luni.platform.INetworkSystem netImpl>;
+
+        $r3 = $r0.<java.net.DatagramSocketImpl: java.io.FileDescriptor fd>;
+
+     label4:
+        $r4 = virtualinvoke $r1.<java.net.DatagramPacket: byte[] getData()>();
+
+        $i0 = virtualinvoke $r1.<java.net.DatagramPacket: int getOffset()>();
+
+        $i1 = virtualinvoke $r1.<java.net.DatagramPacket: int getLength()>();
+
+        $i2 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: int receiveTimeout>;
+
+        interfaceinvoke $r2.<org.apache.harmony.luni.platform.INetworkSystem: int receiveDatagram(java.io.FileDescriptor,java.net.DatagramPacket,byte[],int,int,int,boolean)>($r3, $r1, $r4, $i0, $i1, $i2, 1);
+
+     label5:
+        goto label2;
+
+     label6:
+        $r5 := @caughtexception;
+
+        $r6 = new java.net.SocketTimeoutException;
+
+        $r7 = virtualinvoke $r5.<java.lang.Throwable: java.lang.String toString()>();
+
+        specialinvoke $r6.<java.net.SocketTimeoutException: void <init>(java.lang.String)>($r7);
+
+        throw $r6;
+
+        catch java.io.InterruptedIOException from label1 to label2 with label6;
+        catch java.io.InterruptedIOException from label4 to label5 with label6;
+    }
+
+    public void receive(java.net.DatagramPacket) throws java.io.IOException
+    {
+        org.apache.harmony.luni.net.PlainDatagramSocketImpl $r0;
+        java.net.DatagramPacket $r1;
+        boolean $z0;
+        org.apache.harmony.luni.platform.INetworkSystem $r2;
+        java.io.FileDescriptor $r3;
+        byte[] $r4;
+        int $i0, $i1, $i2;
+        java.io.InterruptedIOException $r5;
+        java.net.SocketTimeoutException $r6;
+        java.lang.String $r7;
+
+        $r0 := @this: org.apache.harmony.luni.net.PlainDatagramSocketImpl;
+
+        $r1 := @parameter0: java.net.DatagramPacket;
+
+        $z0 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: boolean isNativeConnected>;
+
+        if $z0 == 0 goto label3;
+
+        $r2 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: org.apache.harmony.luni.platform.INetworkSystem netImpl>;
+
+        $r3 = $r0.<java.net.DatagramSocketImpl: java.io.FileDescriptor fd>;
+
+     label1:
+        $r4 = virtualinvoke $r1.<java.net.DatagramPacket: byte[] getData()>();
+
+        $i0 = virtualinvoke $r1.<java.net.DatagramPacket: int getOffset()>();
+
+        $i1 = virtualinvoke $r1.<java.net.DatagramPacket: int getLength()>();
+
+        $i2 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: int receiveTimeout>;
+
+        interfaceinvoke $r2.<org.apache.harmony.luni.platform.INetworkSystem: int recvConnectedDatagram(java.io.FileDescriptor,java.net.DatagramPacket,byte[],int,int,int,boolean)>($r3, $r1, $r4, $i0, $i1, $i2, 0);
+
+        specialinvoke $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: void updatePacketRecvAddress(java.net.DatagramPacket)>($r1);
+
+     label2:
+        return;
+
+     label3:
+        $r2 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: org.apache.harmony.luni.platform.INetworkSystem netImpl>;
+
+     label4:
+        $r3 = $r0.<java.net.DatagramSocketImpl: java.io.FileDescriptor fd>;
+
+        $r4 = virtualinvoke $r1.<java.net.DatagramPacket: byte[] getData()>();
+
+        $i0 = virtualinvoke $r1.<java.net.DatagramPacket: int getOffset()>();
+
+        $i1 = virtualinvoke $r1.<java.net.DatagramPacket: int getLength()>();
+
+        $i2 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: int receiveTimeout>;
+
+        interfaceinvoke $r2.<org.apache.harmony.luni.platform.INetworkSystem: int receiveDatagram(java.io.FileDescriptor,java.net.DatagramPacket,byte[],int,int,int,boolean)>($r3, $r1, $r4, $i0, $i1, $i2, 0);
+
+     label5:
+        return;
+
+     label6:
+        $r5 := @caughtexception;
+
+        $r6 = new java.net.SocketTimeoutException;
+
+        $r7 = virtualinvoke $r5.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        specialinvoke $r6.<java.net.SocketTimeoutException: void <init>(java.lang.String)>($r7);
+
+        throw $r6;
+
+        catch java.io.InterruptedIOException from label1 to label2 with label6;
+        catch java.io.InterruptedIOException from label4 to label5 with label6;
+    }
+
+    public void send(java.net.DatagramPacket) throws java.io.IOException
+    {
+        org.apache.harmony.luni.net.PlainDatagramSocketImpl $r0;
+        java.net.DatagramPacket $r1;
+        boolean $z0;
+        int $i0, $i1, $i2, $i3;
+        org.apache.harmony.luni.platform.INetworkSystem $r2;
+        java.io.FileDescriptor $r3;
+        byte[] $r4;
+        java.net.InetAddress $r5;
+
+        $r0 := @this: org.apache.harmony.luni.net.PlainDatagramSocketImpl;
+
+        $r1 := @parameter0: java.net.DatagramPacket;
+
+        $z0 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: boolean isNativeConnected>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: org.apache.harmony.luni.platform.INetworkSystem netImpl>;
+
+        $r3 = $r0.<java.net.DatagramSocketImpl: java.io.FileDescriptor fd>;
+
+        $r4 = virtualinvoke $r1.<java.net.DatagramPacket: byte[] getData()>();
+
+        $i0 = virtualinvoke $r1.<java.net.DatagramPacket: int getOffset()>();
+
+        $i1 = virtualinvoke $r1.<java.net.DatagramPacket: int getLength()>();
+
+        $z0 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: boolean bindToDevice>;
+
+        interfaceinvoke $r2.<org.apache.harmony.luni.platform.INetworkSystem: int sendConnectedDatagram(java.io.FileDescriptor,byte[],int,int,boolean)>($r3, $r4, $i0, $i1, $z0);
+
+        return;
+
+     label1:
+        $r2 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: org.apache.harmony.luni.platform.INetworkSystem netImpl>;
+
+        $r3 = $r0.<java.net.DatagramSocketImpl: java.io.FileDescriptor fd>;
+
+        $r4 = virtualinvoke $r1.<java.net.DatagramPacket: byte[] getData()>();
+
+        $i1 = virtualinvoke $r1.<java.net.DatagramPacket: int getOffset()>();
+
+        $i2 = virtualinvoke $r1.<java.net.DatagramPacket: int getLength()>();
+
+        $i3 = virtualinvoke $r1.<java.net.DatagramPacket: int getPort()>();
+
+        $z0 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: boolean bindToDevice>;
+
+        $i0 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: int trafficClass>;
+
+        $r5 = virtualinvoke $r1.<java.net.DatagramPacket: java.net.InetAddress getAddress()>();
+
+        interfaceinvoke $r2.<org.apache.harmony.luni.platform.INetworkSystem: int sendDatagram(java.io.FileDescriptor,byte[],int,int,int,boolean,int,java.net.InetAddress)>($r3, $r4, $i1, $i2, $i3, $z0, $i0, $r5);
+
+        return;
+    }
+
+    public void setOption(int, java.lang.Object) throws java.net.SocketException
+    {
+        org.apache.harmony.luni.net.PlainDatagramSocketImpl $r0;
+        int $i0, $i1, $i2;
+        java.lang.Object $r1;
+        java.lang.Integer $r2;
+        org.apache.harmony.luni.platform.INetworkSystem $r3;
+        java.io.FileDescriptor $r4;
+        java.net.InetAddress $r5, $r8;
+        byte[] $r6;
+        boolean $z0;
+        java.net.SocketException $r7;
+        java.net.UnknownHostException $r9;
+        java.lang.StringBuilder $r10;
+        java.lang.String $r11;
+
+        $r0 := @this: org.apache.harmony.luni.net.PlainDatagramSocketImpl;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.lang.Object;
+
+        if $i0 != 4 goto label01;
+
+        $i0 = 10001;
+
+     label01:
+        if $i0 != 4102 goto label02;
+
+        $r2 = (java.lang.Integer) $r1;
+
+        $i0 = virtualinvoke $r2.<java.lang.Integer: int intValue()>();
+
+        $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: int receiveTimeout> = $i0;
+
+        return;
+
+     label02:
+        $r3 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: org.apache.harmony.luni.platform.INetworkSystem netImpl>;
+
+        $i1 = interfaceinvoke $r3.<org.apache.harmony.luni.platform.INetworkSystem: int getSocketFlags()>();
+
+        $r3 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: org.apache.harmony.luni.platform.INetworkSystem netImpl>;
+
+        $r4 = $r0.<java.net.DatagramSocketImpl: java.io.FileDescriptor fd>;
+
+        $i2 = $i1 << 16;
+
+        $i2 = $i2 | $i0;
+
+     label03:
+        interfaceinvoke $r3.<org.apache.harmony.luni.platform.INetworkSystem: void setSocketOption(java.io.FileDescriptor,int,java.lang.Object)>($r4, $i2, $r1);
+
+     label04:
+        if $i0 != 16 goto label06;
+
+        $i1 = $i1 & 1;
+
+        if $i1 == 0 goto label06;
+
+        $r5 = (java.net.InetAddress) $r1;
+
+        $r6 = virtualinvoke $r5.<java.net.InetAddress: byte[] getAddress()>();
+
+        $i1 = staticinvoke <org.apache.harmony.luni.net.NetUtil: int bytesToInt(byte[],int)>($r6, 0);
+
+        if $i1 == 0 goto label05;
+
+        $z0 = virtualinvoke $r5.<java.net.InetAddress: boolean isLoopbackAddress()>();
+
+        if $z0 == 0 goto label08;
+
+     label05:
+        $r5 = (java.net.InetAddress) $r1;
+
+        $r6 = virtualinvoke $r5.<java.net.InetAddress: byte[] getAddress()>();
+
+        $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: byte[] ipaddress> = $r6;
+
+     label06:
+        if $i0 != 3 goto label12;
+
+        $r2 = (java.lang.Integer) $r1;
+
+        $i0 = virtualinvoke $r2.<java.lang.Integer: int intValue()>();
+
+        $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: int trafficClass> = $i0;
+
+        return;
+
+     label07:
+        $r7 := @caughtexception;
+
+        if $i0 == 3 goto label04;
+
+        throw $r7;
+
+     label08:
+        $r8 = staticinvoke <java.net.InetAddress: java.net.InetAddress getLocalHost()>();
+
+     label09:
+        $z0 = virtualinvoke $r5.<java.net.InetAddress: boolean equals(java.lang.Object)>($r8);
+
+        if $z0 == 0 goto label11;
+
+        $r5 = (java.net.InetAddress) $r1;
+
+        $r6 = virtualinvoke $r5.<java.net.InetAddress: byte[] getAddress()>();
+
+        $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: byte[] ipaddress> = $r6;
+
+        goto label06;
+
+     label10:
+        $r9 := @caughtexception;
+
+        $r7 = new java.net.SocketException;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("getLocalHost(): ");
+
+        $r11 = virtualinvoke $r9.<java.lang.Throwable: java.lang.String toString()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.net.SocketException: void <init>(java.lang.String)>($r11);
+
+        throw $r7;
+
+     label11:
+        $r7 = new java.net.SocketException;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" != getLocalHost(): ");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.net.SocketException: void <init>(java.lang.String)>($r11);
+
+        throw $r7;
+
+     label12:
+        return;
+
+        catch java.net.SocketException from label03 to label04 with label07;
+        catch java.net.UnknownHostException from label08 to label09 with label10;
+    }
+
+    public void setTTL(byte) throws java.io.IOException
+    {
+        org.apache.harmony.luni.net.PlainDatagramSocketImpl $r0;
+        byte $b0;
+        java.lang.Byte $r1;
+        org.apache.harmony.luni.platform.INetworkSystem $r2;
+        int $i1;
+
+        $r0 := @this: org.apache.harmony.luni.net.PlainDatagramSocketImpl;
+
+        $b0 := @parameter0: byte;
+
+        $r1 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>($b0);
+
+        virtualinvoke $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: void setOption(int,java.lang.Object)>(17, $r1);
+
+        $r2 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: org.apache.harmony.luni.platform.INetworkSystem netImpl>;
+
+        $i1 = interfaceinvoke $r2.<org.apache.harmony.luni.platform.INetworkSystem: int getSocketFlags()>();
+
+        $i1 = $i1 & 2;
+
+        if $i1 == 0 goto label1;
+
+        $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: int ttl> = $b0;
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public void setTimeToLive(int) throws java.io.IOException
+    {
+        org.apache.harmony.luni.net.PlainDatagramSocketImpl $r0;
+        int $i0, $i1;
+        byte $b2;
+        java.lang.Byte $r1;
+        org.apache.harmony.luni.platform.INetworkSystem $r2;
+
+        $r0 := @this: org.apache.harmony.luni.net.PlainDatagramSocketImpl;
+
+        $i0 := @parameter0: int;
+
+        $i1 = $i0 & 255;
+
+        $b2 = (byte) $i1;
+
+        $r1 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>($b2);
+
+        virtualinvoke $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: void setOption(int,java.lang.Object)>(17, $r1);
+
+        $r2 = $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: org.apache.harmony.luni.platform.INetworkSystem netImpl>;
+
+        $i1 = interfaceinvoke $r2.<org.apache.harmony.luni.platform.INetworkSystem: int getSocketFlags()>();
+
+        $i1 = $i1 & 2;
+
+        if $i1 == 0 goto label1;
+
+        $r0.<org.apache.harmony.luni.net.PlainDatagramSocketImpl: int ttl> = $i0;
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <org.apache.harmony.luni.net.PlainDatagramSocketImpl: int TCP_NODELAY> = 4;
+
+        <org.apache.harmony.luni.net.PlainDatagramSocketImpl: int SO_BROADCAST> = 32;
+
+        <org.apache.harmony.luni.net.PlainDatagramSocketImpl: int REUSEADDR_AND_REUSEPORT> = 10001;
+
+        <org.apache.harmony.luni.net.PlainDatagramSocketImpl: int MULTICAST_TTL> = 2;
+
+        <org.apache.harmony.luni.net.PlainDatagramSocketImpl: int MULTICAST_IF> = 1;
+
+        <org.apache.harmony.luni.net.PlainDatagramSocketImpl: int IP_MULTICAST_TTL> = 17;
+
+        <org.apache.harmony.luni.net.PlainDatagramSocketImpl: int IP_MULTICAST_DROP> = 20;
+
+        <org.apache.harmony.luni.net.PlainDatagramSocketImpl: int IP_MULTICAST_ADD> = 19;
+
+        <org.apache.harmony.luni.net.PlainDatagramSocketImpl: int FLAG_SHUTDOWN> = 8;
+
+        return;
+    }
+}

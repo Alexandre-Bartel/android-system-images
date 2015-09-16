@@ -1,0 +1,1028 @@
+public abstract class junit.runner.BaseTestRunner extends java.lang.Object implements junit.framework.TestListener
+{
+    public static final java.lang.String SUITE_METHODNAME;
+    private static java.util.Properties fPreferences;
+    static boolean fgFilterStack;
+    static int fgMaxMessageLength;
+    boolean fLoading;
+
+    static void <clinit>()
+    {
+        int $i0;
+
+        <junit.runner.BaseTestRunner: java.lang.String SUITE_METHODNAME> = "suite";
+
+        <junit.runner.BaseTestRunner: int fgMaxMessageLength> = 500;
+
+        <junit.runner.BaseTestRunner: boolean fgFilterStack> = 1;
+
+        $i0 = <junit.runner.BaseTestRunner: int fgMaxMessageLength>;
+
+        $i0 = staticinvoke <junit.runner.BaseTestRunner: int getPreference(java.lang.String,int)>("maxmessage", $i0);
+
+        <junit.runner.BaseTestRunner: int fgMaxMessageLength> = $i0;
+
+        return;
+    }
+
+    public void <init>()
+    {
+        junit.runner.BaseTestRunner $r0;
+
+        $r0 := @this: junit.runner.BaseTestRunner;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r0.<junit.runner.BaseTestRunner: boolean fLoading> = 1;
+
+        return;
+    }
+
+    static boolean filterLine(java.lang.String)
+    {
+        java.lang.String $r0, $r2;
+        java.lang.String[] $r1;
+        int $i0, $i1;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $r1 = newarray (java.lang.String)[8];
+
+        $r1[0] = "junit.framework.TestCase";
+
+        $r1[1] = "junit.framework.TestResult";
+
+        $r1[2] = "junit.framework.TestSuite";
+
+        $r1[3] = "junit.framework.Assert.";
+
+        $r1[4] = "junit.swingui.TestRunner";
+
+        $r1[5] = "junit.awtui.TestRunner";
+
+        $r1[6] = "junit.textui.TestRunner";
+
+        $r1[7] = "java.lang.reflect.Method.invoke(";
+
+        $i1 = 0;
+
+     label1:
+        $i0 = lengthof $r1;
+
+        if $i1 >= $i0 goto label3;
+
+        $r2 = $r1[$i1];
+
+        $i0 = virtualinvoke $r0.<java.lang.String: int indexOf(java.lang.String)>($r2);
+
+        if $i0 <= 0 goto label2;
+
+        return 1;
+
+     label2:
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+
+    public static java.lang.String getFilteredTrace(java.lang.String)
+    {
+        java.lang.String $r0, $r5;
+        java.io.BufferedReader $r1;
+        java.io.PrintWriter $r2;
+        java.io.StringReader $r3;
+        java.io.StringWriter $r4;
+        boolean $z0;
+        java.lang.Exception $r6;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $z0 = staticinvoke <junit.runner.BaseTestRunner: boolean showStackRaw()>();
+
+        if $z0 == 0 goto label1;
+
+        return $r0;
+
+     label1:
+        $r4 = new java.io.StringWriter;
+
+        specialinvoke $r4.<java.io.StringWriter: void <init>()>();
+
+        $r2 = new java.io.PrintWriter;
+
+        specialinvoke $r2.<java.io.PrintWriter: void <init>(java.io.Writer)>($r4);
+
+        $r3 = new java.io.StringReader;
+
+        specialinvoke $r3.<java.io.StringReader: void <init>(java.lang.String)>($r0);
+
+        $r1 = new java.io.BufferedReader;
+
+        specialinvoke $r1.<java.io.BufferedReader: void <init>(java.io.Reader,int)>($r3, 1000);
+
+     label2:
+        $r5 = virtualinvoke $r1.<java.io.BufferedReader: java.lang.String readLine()>();
+
+        if $r5 == null goto label5;
+
+        $z0 = staticinvoke <junit.runner.BaseTestRunner: boolean filterLine(java.lang.String)>($r5);
+
+        if $z0 != 0 goto label2;
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r5);
+
+     label3:
+        goto label2;
+
+     label4:
+        $r6 := @caughtexception;
+
+        return $r0;
+
+     label5:
+        $r0 = virtualinvoke $r4.<java.io.StringWriter: java.lang.String toString()>();
+
+        return $r0;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+    }
+
+    public static java.lang.String getFilteredTrace(java.lang.Throwable)
+    {
+        java.lang.Throwable $r0;
+        java.io.StringWriter $r1;
+        java.io.PrintWriter $r2;
+        java.lang.StringBuffer $r3;
+        java.lang.String $r4;
+
+        $r0 := @parameter0: java.lang.Throwable;
+
+        $r1 = new java.io.StringWriter;
+
+        specialinvoke $r1.<java.io.StringWriter: void <init>()>();
+
+        $r2 = new java.io.PrintWriter;
+
+        specialinvoke $r2.<java.io.PrintWriter: void <init>(java.io.Writer)>($r1);
+
+        virtualinvoke $r0.<java.lang.Throwable: void printStackTrace(java.io.PrintWriter)>($r2);
+
+        $r3 = virtualinvoke $r1.<java.io.StringWriter: java.lang.StringBuffer getBuffer()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        $r4 = staticinvoke <junit.runner.BaseTestRunner: java.lang.String getFilteredTrace(java.lang.String)>($r4);
+
+        return $r4;
+    }
+
+    public static int getPreference(java.lang.String, int)
+    {
+        java.lang.String $r0;
+        int $i0, $i1;
+        java.lang.NumberFormatException $r1;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $r0 = staticinvoke <junit.runner.BaseTestRunner: java.lang.String getPreference(java.lang.String)>($r0);
+
+        $i1 = $i0;
+
+        if $r0 != null goto label1;
+
+        return $i0;
+
+     label1:
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r0);
+
+     label2:
+        $i1 = $i0;
+
+     label3:
+        return $i1;
+
+     label4:
+        $r1 := @caughtexception;
+
+        goto label3;
+
+        catch java.lang.NumberFormatException from label1 to label2 with label4;
+    }
+
+    public static java.lang.String getPreference(java.lang.String)
+    {
+        java.lang.String $r0;
+        java.util.Properties $r1;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <junit.runner.BaseTestRunner: java.util.Properties getPreferences()>();
+
+        $r0 = virtualinvoke $r1.<java.util.Properties: java.lang.String getProperty(java.lang.String)>($r0);
+
+        return $r0;
+    }
+
+    protected static java.util.Properties getPreferences()
+    {
+        java.util.Properties $r0;
+
+        $r0 = <junit.runner.BaseTestRunner: java.util.Properties fPreferences>;
+
+        if $r0 != null goto label1;
+
+        $r0 = new java.util.Properties;
+
+        specialinvoke $r0.<java.util.Properties: void <init>()>();
+
+        <junit.runner.BaseTestRunner: java.util.Properties fPreferences> = $r0;
+
+        $r0 = <junit.runner.BaseTestRunner: java.util.Properties fPreferences>;
+
+        virtualinvoke $r0.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>("loading", "true");
+
+        $r0 = <junit.runner.BaseTestRunner: java.util.Properties fPreferences>;
+
+        virtualinvoke $r0.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>("filterstack", "true");
+
+        staticinvoke <junit.runner.BaseTestRunner: void readPreferences()>();
+
+     label1:
+        $r0 = <junit.runner.BaseTestRunner: java.util.Properties fPreferences>;
+
+        return $r0;
+    }
+
+    private static java.io.File getPreferencesFile()
+    {
+        java.lang.String $r0;
+        java.io.File $r1;
+
+        $r0 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String)>("user.home");
+
+        $r1 = new java.io.File;
+
+        specialinvoke $r1.<java.io.File: void <init>(java.lang.String,java.lang.String)>($r0, "junit.properties");
+
+        return $r1;
+    }
+
+    public static boolean inVAJava()
+    {
+        java.lang.Exception $r0;
+
+     label1:
+        staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String)>("com.ibm.uvm.tools.DebugSupport");
+
+     label2:
+        return 1;
+
+     label3:
+        $r0 := @caughtexception;
+
+        return 0;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+
+    private static void readPreferences()
+    {
+        java.io.FileInputStream $r0, $r1;
+        java.io.File $r2;
+        java.util.Properties $r3, $r4;
+        java.io.IOException $r5, $r6, $r7;
+
+        $r1 = null;
+
+        $r0 = new java.io.FileInputStream;
+
+     label01:
+        $r2 = staticinvoke <junit.runner.BaseTestRunner: java.io.File getPreferencesFile()>();
+
+        specialinvoke $r0.<java.io.FileInputStream: void <init>(java.io.File)>($r2);
+
+     label02:
+        $r3 = new java.util.Properties;
+
+     label03:
+        $r4 = staticinvoke <junit.runner.BaseTestRunner: java.util.Properties getPreferences()>();
+
+        specialinvoke $r3.<java.util.Properties: void <init>(java.util.Properties)>($r4);
+
+        staticinvoke <junit.runner.BaseTestRunner: void setPreferences(java.util.Properties)>($r3);
+
+        $r3 = staticinvoke <junit.runner.BaseTestRunner: java.util.Properties getPreferences()>();
+
+        virtualinvoke $r3.<java.util.Properties: void load(java.io.InputStream)>($r0);
+
+     label04:
+        return;
+
+     label05:
+        $r5 := @caughtexception;
+
+     label06:
+        if $r1 == null goto label11;
+
+     label07:
+        virtualinvoke $r1.<java.io.FileInputStream: void close()>();
+
+     label08:
+        return;
+
+     label09:
+        $r6 := @caughtexception;
+
+        return;
+
+     label10:
+        $r7 := @caughtexception;
+
+        $r1 = $r0;
+
+        goto label06;
+
+     label11:
+        return;
+
+        catch java.io.IOException from label01 to label02 with label05;
+        catch java.io.IOException from label03 to label04 with label10;
+        catch java.io.IOException from label07 to label08 with label09;
+    }
+
+    public static void savePreferences() throws java.io.IOException
+    {
+        java.io.FileOutputStream $r0;
+        java.io.File $r1;
+        java.util.Properties $r2;
+        java.lang.Throwable $r3;
+
+        $r0 = new java.io.FileOutputStream;
+
+        $r1 = staticinvoke <junit.runner.BaseTestRunner: java.io.File getPreferencesFile()>();
+
+        specialinvoke $r0.<java.io.FileOutputStream: void <init>(java.io.File)>($r1);
+
+     label1:
+        $r2 = staticinvoke <junit.runner.BaseTestRunner: java.util.Properties getPreferences()>();
+
+        virtualinvoke $r2.<java.util.Properties: void store(java.io.OutputStream,java.lang.String)>($r0, "");
+
+     label2:
+        virtualinvoke $r0.<java.io.FileOutputStream: void close()>();
+
+        return;
+
+     label3:
+        $r3 := @caughtexception;
+
+        virtualinvoke $r0.<java.io.FileOutputStream: void close()>();
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    protected static void setPreferences(java.util.Properties)
+    {
+        java.util.Properties $r0;
+
+        $r0 := @parameter0: java.util.Properties;
+
+        <junit.runner.BaseTestRunner: java.util.Properties fPreferences> = $r0;
+
+        return;
+    }
+
+    protected static boolean showStackRaw()
+    {
+        java.lang.String $r0;
+        boolean $z0;
+
+        $r0 = staticinvoke <junit.runner.BaseTestRunner: java.lang.String getPreference(java.lang.String)>("filterstack");
+
+        $z0 = virtualinvoke $r0.<java.lang.String: boolean equals(java.lang.Object)>("true");
+
+        if $z0 == 0 goto label1;
+
+        $z0 = <junit.runner.BaseTestRunner: boolean fgFilterStack>;
+
+        if $z0 != 0 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    public static java.lang.String truncate(java.lang.String)
+    {
+        int $i0, $i1;
+        java.lang.String $r0;
+        java.lang.StringBuilder $r1;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $i0 = <junit.runner.BaseTestRunner: int fgMaxMessageLength>;
+
+        if $i0 == -1 goto label1;
+
+        $i0 = virtualinvoke $r0.<java.lang.String: int length()>();
+
+        $i1 = <junit.runner.BaseTestRunner: int fgMaxMessageLength>;
+
+        if $i0 <= $i1 goto label2;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $i0 = <junit.runner.BaseTestRunner: int fgMaxMessageLength>;
+
+        $r0 = virtualinvoke $r0.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r0);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("...");
+
+        $r0 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r0;
+
+     label1:
+        return $r0;
+
+     label2:
+        return $r0;
+    }
+
+    public void addError(junit.framework.Test, java.lang.Throwable)
+    {
+        junit.runner.BaseTestRunner $r0;
+        junit.framework.Test $r1;
+        java.lang.Throwable $r2, $r3;
+
+        $r0 := @this: junit.runner.BaseTestRunner;
+
+        $r1 := @parameter0: junit.framework.Test;
+
+        $r2 := @parameter1: java.lang.Throwable;
+
+        entermonitor $r0;
+
+     label1:
+        virtualinvoke $r0.<junit.runner.BaseTestRunner: void testFailed(int,junit.framework.Test,java.lang.Throwable)>(1, $r1, $r2);
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public void addFailure(junit.framework.Test, junit.framework.AssertionFailedError)
+    {
+        junit.runner.BaseTestRunner $r0;
+        junit.framework.Test $r1;
+        junit.framework.AssertionFailedError $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: junit.runner.BaseTestRunner;
+
+        $r1 := @parameter0: junit.framework.Test;
+
+        $r2 := @parameter1: junit.framework.AssertionFailedError;
+
+        entermonitor $r0;
+
+     label1:
+        virtualinvoke $r0.<junit.runner.BaseTestRunner: void testFailed(int,junit.framework.Test,java.lang.Throwable)>(2, $r1, $r2);
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    protected void clearStatus()
+    {
+        junit.runner.BaseTestRunner $r0;
+
+        $r0 := @this: junit.runner.BaseTestRunner;
+
+        return;
+    }
+
+    public java.lang.String elapsedTimeAsString(long)
+    {
+        junit.runner.BaseTestRunner $r0;
+        long $l0;
+        java.text.NumberFormat $r1;
+        double $d0;
+        java.lang.String $r2;
+
+        $r0 := @this: junit.runner.BaseTestRunner;
+
+        $l0 := @parameter0: long;
+
+        $r1 = staticinvoke <java.text.NumberFormat: java.text.NumberFormat getInstance()>();
+
+        $d0 = (double) $l0;
+
+        $d0 = $d0 / 1000.0;
+
+        $r2 = virtualinvoke $r1.<java.text.NumberFormat: java.lang.String format(double)>($d0);
+
+        return $r2;
+    }
+
+    public void endTest(junit.framework.Test)
+    {
+        junit.runner.BaseTestRunner $r0;
+        junit.framework.Test $r1;
+        java.lang.String $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: junit.runner.BaseTestRunner;
+
+        $r1 := @parameter0: junit.framework.Test;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = virtualinvoke $r1.<java.lang.Object: java.lang.String toString()>();
+
+        virtualinvoke $r0.<junit.runner.BaseTestRunner: void testEnded(java.lang.String)>($r2);
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public java.lang.String extractClassName(java.lang.String)
+    {
+        junit.runner.BaseTestRunner $r0;
+        java.lang.String $r1;
+        boolean $z0;
+        int $i0;
+
+        $r0 := @this: junit.runner.BaseTestRunner;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>("Default package for");
+
+        if $z0 == 0 goto label1;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int lastIndexOf(java.lang.String)>(".");
+
+        $i0 = $i0 + 1;
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int)>($i0);
+
+        return $r1;
+
+     label1:
+        return $r1;
+    }
+
+    public junit.runner.TestSuiteLoader getLoader()
+    {
+        junit.runner.BaseTestRunner $r0;
+        boolean $z0;
+        junit.runner.ReloadingTestSuiteLoader r2;
+        junit.runner.StandardTestSuiteLoader r3;
+
+        $r0 := @this: junit.runner.BaseTestRunner;
+
+        $z0 = virtualinvoke $r0.<junit.runner.BaseTestRunner: boolean useReloadingTestSuiteLoader()>();
+
+        if $z0 == 0 goto label1;
+
+        r2 = new junit.runner.ReloadingTestSuiteLoader;
+
+        specialinvoke r2.<junit.runner.ReloadingTestSuiteLoader: void <init>()>();
+
+        return r2;
+
+     label1:
+        r3 = new junit.runner.StandardTestSuiteLoader;
+
+        specialinvoke r3.<junit.runner.StandardTestSuiteLoader: void <init>()>();
+
+        return r3;
+    }
+
+    public junit.framework.Test getTest(java.lang.String)
+    {
+        junit.runner.BaseTestRunner $r0;
+        java.lang.String $r1, $r7, $r8;
+        int $i0;
+        junit.framework.TestSuite $r2;
+        java.lang.Class $r3;
+        java.lang.Class[] $r4;
+        java.lang.reflect.Method $r5;
+        boolean $z0;
+        java.lang.ClassNotFoundException $r6;
+        java.lang.StringBuilder $r9;
+        java.lang.Exception $r10, $r11;
+        java.lang.Object[] $r12;
+        java.lang.Object $r13;
+        junit.framework.Test $r14;
+        java.lang.reflect.InvocationTargetException $r15;
+        java.lang.Throwable $r16;
+        java.lang.IllegalAccessException $r17;
+
+        $r0 := @this: junit.runner.BaseTestRunner;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 > 0 goto label01;
+
+        virtualinvoke $r0.<junit.runner.BaseTestRunner: void clearStatus()>();
+
+        return null;
+
+     label01:
+        $r3 = virtualinvoke $r0.<junit.runner.BaseTestRunner: java.lang.Class loadSuiteClass(java.lang.String)>($r1);
+
+     label02:
+        $r4 = newarray (java.lang.Class)[0];
+
+        $r5 = virtualinvoke $r3.<java.lang.Class: java.lang.reflect.Method getMethod(java.lang.String,java.lang.Class[])>("suite", $r4);
+
+     label03:
+        $i0 = virtualinvoke $r5.<java.lang.reflect.Method: int getModifiers()>();
+
+        $z0 = staticinvoke <java.lang.reflect.Modifier: boolean isStatic(int)>($i0);
+
+        if $z0 != 0 goto label08;
+
+        virtualinvoke $r0.<junit.runner.BaseTestRunner: void runFailed(java.lang.String)>("Suite() method must be static");
+
+        return null;
+
+     label04:
+        $r6 := @caughtexception;
+
+        $r7 = virtualinvoke $r6.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        $r8 = $r7;
+
+        if $r7 != null goto label05;
+
+        $r8 = $r1;
+
+     label05:
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Class not found \"");
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $r1 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<junit.runner.BaseTestRunner: void runFailed(java.lang.String)>($r1);
+
+        return null;
+
+     label06:
+        $r10 := @caughtexception;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error: ");
+
+        $r1 = virtualinvoke $r10.<java.lang.Throwable: java.lang.String toString()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<junit.runner.BaseTestRunner: void runFailed(java.lang.String)>($r1);
+
+        return null;
+
+     label07:
+        $r11 := @caughtexception;
+
+        virtualinvoke $r0.<junit.runner.BaseTestRunner: void clearStatus()>();
+
+        $r2 = new junit.framework.TestSuite;
+
+        specialinvoke $r2.<junit.framework.TestSuite: void <init>(java.lang.Class)>($r3);
+
+        return $r2;
+
+     label08:
+        $r12 = newarray (java.lang.Object)[0];
+
+     label09:
+        $r13 = virtualinvoke $r5.<java.lang.reflect.Method: java.lang.Object invoke(java.lang.Object,java.lang.Object[])>(null, $r12);
+
+     label10:
+        $r14 = (junit.framework.Test) $r13;
+
+        if $r14 != null goto label13;
+
+        return $r14;
+
+     label11:
+        $r15 := @caughtexception;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed to invoke suite():");
+
+        $r16 = virtualinvoke $r15.<java.lang.reflect.InvocationTargetException: java.lang.Throwable getTargetException()>();
+
+        $r1 = virtualinvoke $r16.<java.lang.Throwable: java.lang.String toString()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<junit.runner.BaseTestRunner: void runFailed(java.lang.String)>($r1);
+
+        return null;
+
+     label12:
+        $r17 := @caughtexception;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed to invoke suite():");
+
+        $r1 = virtualinvoke $r17.<java.lang.Throwable: java.lang.String toString()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<junit.runner.BaseTestRunner: void runFailed(java.lang.String)>($r1);
+
+        return null;
+
+     label13:
+        virtualinvoke $r0.<junit.runner.BaseTestRunner: void clearStatus()>();
+
+        return $r14;
+
+        catch java.lang.ClassNotFoundException from label01 to label02 with label04;
+        catch java.lang.Exception from label01 to label02 with label06;
+        catch java.lang.Exception from label02 to label03 with label07;
+        catch java.lang.reflect.InvocationTargetException from label09 to label10 with label11;
+        catch java.lang.IllegalAccessException from label09 to label10 with label12;
+    }
+
+    protected java.lang.Class loadSuiteClass(java.lang.String) throws java.lang.ClassNotFoundException
+    {
+        junit.runner.BaseTestRunner $r0;
+        java.lang.String $r1;
+        junit.runner.TestSuiteLoader $r2;
+        java.lang.Class $r3;
+
+        $r0 := @this: junit.runner.BaseTestRunner;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = virtualinvoke $r0.<junit.runner.BaseTestRunner: junit.runner.TestSuiteLoader getLoader()>();
+
+        $r3 = interfaceinvoke $r2.<junit.runner.TestSuiteLoader: java.lang.Class load(java.lang.String)>($r1);
+
+        return $r3;
+    }
+
+    protected java.lang.String processArguments(java.lang.String[])
+    {
+        junit.runner.BaseTestRunner $r0;
+        java.lang.String[] $r1;
+        java.lang.String $r2, $r3;
+        int $i0, $i1, $i2;
+        boolean $z0;
+        java.io.PrintStream $r4;
+
+        $r0 := @this: junit.runner.BaseTestRunner;
+
+        $r1 := @parameter0: java.lang.String[];
+
+        $r2 = null;
+
+        $i0 = 0;
+
+     label1:
+        $i1 = lengthof $r1;
+
+        if $i0 >= $i1 goto label8;
+
+        $r3 = $r1[$i0];
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("-noloading");
+
+        if $z0 == 0 goto label3;
+
+        virtualinvoke $r0.<junit.runner.BaseTestRunner: void setLoading(boolean)>(0);
+
+     label2:
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label3:
+        $r3 = $r1[$i0];
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("-nofilterstack");
+
+        if $z0 == 0 goto label4;
+
+        <junit.runner.BaseTestRunner: boolean fgFilterStack> = 0;
+
+        goto label2;
+
+     label4:
+        $r3 = $r1[$i0];
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("-c");
+
+        if $z0 == 0 goto label7;
+
+        $i1 = lengthof $r1;
+
+        $i2 = $i0 + 1;
+
+        if $i1 <= $i2 goto label6;
+
+        $i1 = $i0 + 1;
+
+        $r2 = $r1[$i1];
+
+        $r2 = virtualinvoke $r0.<junit.runner.BaseTestRunner: java.lang.String extractClassName(java.lang.String)>($r2);
+
+     label5:
+        $i0 = $i0 + 1;
+
+        goto label2;
+
+     label6:
+        $r4 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r4.<java.io.PrintStream: void println(java.lang.String)>("Missing Test class name");
+
+        goto label5;
+
+     label7:
+        $r2 = $r1[$i0];
+
+        goto label2;
+
+     label8:
+        return $r2;
+    }
+
+    protected abstract void runFailed(java.lang.String);
+
+    public void setLoading(boolean)
+    {
+        junit.runner.BaseTestRunner $r0;
+        boolean $z0;
+
+        $r0 := @this: junit.runner.BaseTestRunner;
+
+        $z0 := @parameter0: boolean;
+
+        $r0.<junit.runner.BaseTestRunner: boolean fLoading> = $z0;
+
+        return;
+    }
+
+    public void setPreference(java.lang.String, java.lang.String)
+    {
+        junit.runner.BaseTestRunner $r0;
+        java.lang.String $r1, $r2;
+        java.util.Properties $r3;
+
+        $r0 := @this: junit.runner.BaseTestRunner;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 = staticinvoke <junit.runner.BaseTestRunner: java.util.Properties getPreferences()>();
+
+        virtualinvoke $r3.<java.util.Properties: java.lang.Object setProperty(java.lang.String,java.lang.String)>($r1, $r2);
+
+        return;
+    }
+
+    public void startTest(junit.framework.Test)
+    {
+        junit.runner.BaseTestRunner $r0;
+        junit.framework.Test $r1;
+        java.lang.String $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: junit.runner.BaseTestRunner;
+
+        $r1 := @parameter0: junit.framework.Test;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = virtualinvoke $r1.<java.lang.Object: java.lang.String toString()>();
+
+        virtualinvoke $r0.<junit.runner.BaseTestRunner: void testStarted(java.lang.String)>($r2);
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public abstract void testEnded(java.lang.String);
+
+    public abstract void testFailed(int, junit.framework.Test, java.lang.Throwable);
+
+    public abstract void testStarted(java.lang.String);
+
+    protected boolean useReloadingTestSuiteLoader()
+    {
+        junit.runner.BaseTestRunner $r0;
+        java.lang.String $r1;
+        boolean $z0;
+
+        $r0 := @this: junit.runner.BaseTestRunner;
+
+        $r1 = staticinvoke <junit.runner.BaseTestRunner: java.lang.String getPreference(java.lang.String)>("loading");
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("true");
+
+        if $z0 == 0 goto label1;
+
+        $z0 = staticinvoke <junit.runner.BaseTestRunner: boolean inVAJava()>();
+
+        if $z0 != 0 goto label1;
+
+        $z0 = $r0.<junit.runner.BaseTestRunner: boolean fLoading>;
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+}

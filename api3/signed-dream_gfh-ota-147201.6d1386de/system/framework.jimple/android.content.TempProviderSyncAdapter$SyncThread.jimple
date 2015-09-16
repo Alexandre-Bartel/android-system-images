@@ -1,0 +1,1439 @@
+class android.content.TempProviderSyncAdapter$SyncThread extends java.lang.Thread
+{
+    private final java.lang.String mAccount;
+    private final android.os.Bundle mExtras;
+    private long mInitialRxBytes;
+    private long mInitialTxBytes;
+    private volatile boolean mIsCanceled;
+    private final android.content.SyncResult mResult;
+    private final android.content.SyncContext mSyncContext;
+    final android.content.TempProviderSyncAdapter this$0;
+
+    void <init>(android.content.TempProviderSyncAdapter, android.content.SyncContext, java.lang.String, android.os.Bundle)
+    {
+        android.content.TempProviderSyncAdapter$SyncThread $r0;
+        android.content.TempProviderSyncAdapter $r1;
+        android.content.SyncContext $r2;
+        java.lang.String $r3;
+        android.os.Bundle $r4;
+        android.content.SyncResult $r5;
+
+        $r0 := @this: android.content.TempProviderSyncAdapter$SyncThread;
+
+        $r1 := @parameter0: android.content.TempProviderSyncAdapter;
+
+        $r2 := @parameter1: android.content.SyncContext;
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r4 := @parameter3: android.os.Bundle;
+
+        $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0> = $r1;
+
+        specialinvoke $r0.<java.lang.Thread: void <init>(java.lang.String)>("SyncThread");
+
+        $r0.<android.content.TempProviderSyncAdapter$SyncThread: boolean mIsCanceled> = 0;
+
+        $r0.<android.content.TempProviderSyncAdapter$SyncThread: java.lang.String mAccount> = $r3;
+
+        $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.os.Bundle mExtras> = $r4;
+
+        $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncContext mSyncContext> = $r2;
+
+        $r5 = new android.content.SyncResult;
+
+        specialinvoke $r5.<android.content.SyncResult: void <init>()>();
+
+        $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult> = $r5;
+
+        return;
+    }
+
+    private void runSyncLoop(android.content.SyncContext, java.lang.String, android.os.Bundle)
+    {
+        android.content.TempProviderSyncAdapter$SyncThread $r0;
+        android.content.SyncContext $r1;
+        java.lang.String $r2, $r17;
+        android.os.Bundle $r3;
+        long $l0, $l3, $l4;
+        android.content.TempProviderSyncResult $r4, $r12;
+        android.util.TimingLogger $r5;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        android.content.SyncableContentProvider $r6, $r10, $r16;
+        int $i1, $i2;
+        java.lang.StringBuilder $r7;
+        java.lang.Class $r8;
+        android.content.TempProviderSyncAdapter $r9;
+        android.content.SyncResult $r11;
+        java.lang.Object $r13;
+        android.content.TempProviderSyncAdapter$SyncData $r14, $r15;
+        java.lang.Throwable $r18;
+        android.content.SyncStats $r19;
+        byte $b5;
+
+        $r0 := @this: android.content.TempProviderSyncAdapter$SyncThread;
+
+        $r1 := @parameter0: android.content.SyncContext;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: android.os.Bundle;
+
+        $r5 = new android.util.TimingLogger;
+
+        specialinvoke $r5.<android.util.TimingLogger: void <init>(java.lang.String,java.lang.String)>("SyncProfiling", "sync");
+
+        virtualinvoke $r5.<android.util.TimingLogger: void addSplit(java.lang.String)>("start");
+
+        $z0 = 0;
+
+        $z1 = virtualinvoke $r3.<android.os.Bundle: boolean getBoolean(java.lang.String,boolean)>("deletions_override", 0);
+
+        $z2 = virtualinvoke $r3.<android.os.Bundle: boolean getBoolean(java.lang.String,boolean)>("discard_deletions", 0);
+
+        $z3 = virtualinvoke $r3.<android.os.Bundle: boolean getBoolean(java.lang.String,boolean)>("upload", 0);
+
+        $r6 = null;
+
+        $r4 = new android.content.TempProviderSyncResult;
+
+        specialinvoke $r4.<android.content.TempProviderSyncResult: void <init>()>();
+
+        if $z3 != 0 goto label05;
+
+        $i1 = 0;
+
+     label01:
+        $z3 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: boolean mIsCanceled>;
+
+     label02:
+        if $z3 != 0 goto label80;
+
+        $i2 = $i1 + 1;
+
+        if $i1 != 20 goto label19;
+
+     label03:
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("runSyncLoop: Hit max loop count while getting server diffs ");
+
+        $r8 = virtualinvoke $r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r2 = virtualinvoke $r8.<java.lang.Class: java.lang.String getName()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("Sync", $r2);
+
+     label04:
+        $z0 = 1;
+
+     label05:
+        $i1 = 0;
+
+        $r9 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $z3 = virtualinvoke $r9.<android.content.TempProviderSyncAdapter: boolean isReadOnly()>();
+
+     label06:
+        $l3 = 0L;
+
+     label07:
+        if $r6 == null goto label09;
+
+        virtualinvoke $r6.<android.content.SyncableContentProvider: void close()>();
+
+     label08:
+        $r6 = null;
+
+     label09:
+        if $z2 == 0 goto label10;
+
+        $r9 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $r10 = staticinvoke <android.content.TempProviderSyncAdapter: android.content.SyncableContentProvider access$200(android.content.TempProviderSyncAdapter)>($r9);
+
+        $r10 = virtualinvoke $r10.<android.content.SyncableContentProvider: android.content.SyncableContentProvider getTemporaryInstance()>();
+
+        $r6 = $r10;
+
+        $r9 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        virtualinvoke $r9.<android.content.TempProviderSyncAdapter: void initTempProvider(android.content.SyncableContentProvider)>($r10);
+
+        $r9 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        virtualinvoke $r9.<android.content.TempProviderSyncAdapter: void writeSyncData(android.content.TempProviderSyncAdapter$SyncData,android.content.SyncableContentProvider)>(null, $r10);
+
+     label10:
+        $z4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: boolean mIsCanceled>;
+
+        if $z4 != 0 goto label60;
+
+        $r10 = $r4.<android.content.TempProviderSyncResult: android.content.SyncableContentProvider tempContentProvider>;
+
+        if $r10 == null goto label11;
+
+        $r10 = $r4.<android.content.TempProviderSyncResult: android.content.SyncableContentProvider tempContentProvider>;
+
+        virtualinvoke $r10.<android.content.SyncableContentProvider: void close()>();
+
+        $r4.<android.content.TempProviderSyncResult: android.content.SyncableContentProvider tempContentProvider> = null;
+
+     label11:
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        virtualinvoke $r11.<android.content.SyncResult: void clear()>();
+
+        $r9 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $r10 = staticinvoke <android.content.TempProviderSyncAdapter: android.content.SyncableContentProvider access$200(android.content.TempProviderSyncAdapter)>($r9);
+
+     label12:
+        if $z3 == 0 goto label54;
+
+     label13:
+        $r12 = null;
+
+     label14:
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        virtualinvoke $r10.<android.content.SyncableContentProvider: void merge(android.content.SyncContext,android.content.SyncableContentProvider,android.content.TempProviderSyncResult,android.content.SyncResult)>($r1, $r6, $r12, $r11);
+
+        $z4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: boolean mIsCanceled>;
+
+     label15:
+        if $z4 == 0 goto label56;
+
+        if $z2 == 0 goto label16;
+
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        $r11.<android.content.SyncResult: boolean fullSyncRequested> = 1;
+
+     label16:
+        if $r6 == null goto label17;
+
+        virtualinvoke $r6.<android.content.SyncableContentProvider: void close()>();
+
+     label17:
+        $r6 = $r4.<android.content.TempProviderSyncResult: android.content.SyncableContentProvider tempContentProvider>;
+
+        if $r6 == null goto label18;
+
+        $r6 = $r4.<android.content.TempProviderSyncResult: android.content.SyncableContentProvider tempContentProvider>;
+
+        virtualinvoke $r6.<android.content.SyncableContentProvider: void close()>();
+
+     label18:
+        virtualinvoke $r5.<android.util.TimingLogger: void addSplit(java.lang.String)>("stop");
+
+        virtualinvoke $r5.<android.util.TimingLogger: void dumpToLog()>();
+
+        return;
+
+     label19:
+        if $r6 == null goto label21;
+
+     label20:
+        virtualinvoke $r6.<android.content.SyncableContentProvider: void close()>();
+
+     label21:
+        $r9 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $r10 = staticinvoke <android.content.TempProviderSyncAdapter: android.content.SyncableContentProvider access$200(android.content.TempProviderSyncAdapter)>($r9);
+
+        $r10 = virtualinvoke $r10.<android.content.SyncableContentProvider: android.content.SyncableContentProvider getTemporaryInstance()>();
+
+        $r6 = $r10;
+
+        $r9 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        virtualinvoke $r9.<android.content.TempProviderSyncAdapter: void initTempProvider(android.content.SyncableContentProvider)>($r10);
+
+        $r9 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $r13 = virtualinvoke $r9.<android.content.TempProviderSyncAdapter: java.lang.Object createSyncInfo()>();
+
+        $r9 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $r14 = virtualinvoke $r9.<android.content.TempProviderSyncAdapter: android.content.TempProviderSyncAdapter$SyncData readSyncData(android.content.SyncableContentProvider)>($r10);
+
+     label22:
+        $r15 = $r14;
+
+     label23:
+        if $r14 != null goto label24;
+
+        $r9 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $r16 = staticinvoke <android.content.TempProviderSyncAdapter: android.content.SyncableContentProvider access$200(android.content.TempProviderSyncAdapter)>($r9);
+
+        virtualinvoke $r16.<android.content.SyncableContentProvider: void wipeAccount(java.lang.String)>($r2);
+
+        $r9 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $r15 = virtualinvoke $r9.<android.content.TempProviderSyncAdapter: android.content.TempProviderSyncAdapter$SyncData newSyncData()>();
+
+     label24:
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        virtualinvoke $r11.<android.content.SyncResult: void clear()>();
+
+        $z3 = staticinvoke <android.util.Log: boolean isLoggable(java.lang.String,int)>("Sync", 2);
+
+        if $z3 == 0 goto label25;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("runSyncLoop: running getServerDiffs using syncData ");
+
+        $r17 = virtualinvoke $r15.<java.lang.Object: java.lang.String toString()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r17 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("Sync", $r17);
+
+     label25:
+        $r9 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        virtualinvoke $r9.<android.content.TempProviderSyncAdapter: void getServerDiffs(android.content.SyncContext,android.content.TempProviderSyncAdapter$SyncData,android.content.SyncableContentProvider,android.os.Bundle,java.lang.Object,android.content.SyncResult)>($r1, $r15, $r10, $r3, $r13, $r11);
+
+        $z3 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: boolean mIsCanceled>;
+
+     label26:
+        if $z3 == 0 goto label30;
+
+        if $z2 == 0 goto label27;
+
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        $r11.<android.content.SyncResult: boolean fullSyncRequested> = 1;
+
+     label27:
+        if $r10 == null goto label28;
+
+        virtualinvoke $r10.<android.content.SyncableContentProvider: void close()>();
+
+     label28:
+        $r6 = $r4.<android.content.TempProviderSyncResult: android.content.SyncableContentProvider tempContentProvider>;
+
+        if $r6 == null goto label29;
+
+        $r6 = $r4.<android.content.TempProviderSyncResult: android.content.SyncableContentProvider tempContentProvider>;
+
+        virtualinvoke $r6.<android.content.SyncableContentProvider: void close()>();
+
+     label29:
+        virtualinvoke $r5.<android.util.TimingLogger: void addSplit(java.lang.String)>("stop");
+
+        virtualinvoke $r5.<android.util.TimingLogger: void dumpToLog()>();
+
+        return;
+
+     label30:
+        $z3 = staticinvoke <android.util.Log: boolean isLoggable(java.lang.String,int)>("Sync", 2);
+
+        if $z3 == 0 goto label31;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("runSyncLoop: result: ");
+
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r11);
+
+        $r17 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("Sync", $r17);
+
+     label31:
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        $z3 = virtualinvoke $r11.<android.content.SyncResult: boolean hasError()>();
+
+     label32:
+        if $z3 == 0 goto label36;
+
+        if $z2 == 0 goto label33;
+
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        $r11.<android.content.SyncResult: boolean fullSyncRequested> = 1;
+
+     label33:
+        if $r10 == null goto label34;
+
+        virtualinvoke $r10.<android.content.SyncableContentProvider: void close()>();
+
+     label34:
+        $r6 = $r4.<android.content.TempProviderSyncResult: android.content.SyncableContentProvider tempContentProvider>;
+
+        if $r6 == null goto label35;
+
+        $r6 = $r4.<android.content.TempProviderSyncResult: android.content.SyncableContentProvider tempContentProvider>;
+
+        virtualinvoke $r6.<android.content.SyncableContentProvider: void close()>();
+
+     label35:
+        virtualinvoke $r5.<android.util.TimingLogger: void addSplit(java.lang.String)>("stop");
+
+        virtualinvoke $r5.<android.util.TimingLogger: void dumpToLog()>();
+
+        return;
+
+     label36:
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        $z3 = $r11.<android.content.SyncResult: boolean partialSyncUnavailable>;
+
+        if $z3 == 0 goto label38;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Sync", "partialSyncUnavailable is set, setting ignoreSyncData and retrying");
+
+        $r9 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $r10 = staticinvoke <android.content.TempProviderSyncAdapter: android.content.SyncableContentProvider access$200(android.content.TempProviderSyncAdapter)>($r9);
+
+        virtualinvoke $r10.<android.content.SyncableContentProvider: void wipeAccount(java.lang.String)>($r2);
+
+     label37:
+        $i1 = $i2;
+
+        goto label01;
+
+     label38:
+        $r9 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        virtualinvoke $r9.<android.content.TempProviderSyncAdapter: void writeSyncData(android.content.TempProviderSyncAdapter$SyncData,android.content.SyncableContentProvider)>($r15, $r10);
+
+        $z3 = staticinvoke <android.util.Log: boolean isLoggable(java.lang.String,int)>("Sync", 2);
+
+        if $z3 == 0 goto label39;
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("Sync", "runSyncLoop: running merge");
+
+     label39:
+        $r9 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $r16 = staticinvoke <android.content.TempProviderSyncAdapter: android.content.SyncableContentProvider access$200(android.content.TempProviderSyncAdapter)>($r9);
+
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        virtualinvoke $r16.<android.content.SyncableContentProvider: void merge(android.content.SyncContext,android.content.SyncableContentProvider,android.content.TempProviderSyncResult,android.content.SyncResult)>($r1, $r10, null, $r11);
+
+        $z3 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: boolean mIsCanceled>;
+
+     label40:
+        if $z3 == 0 goto label44;
+
+        if $z2 == 0 goto label41;
+
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        $r11.<android.content.SyncResult: boolean fullSyncRequested> = 1;
+
+     label41:
+        if $r10 == null goto label42;
+
+        virtualinvoke $r10.<android.content.SyncableContentProvider: void close()>();
+
+     label42:
+        $r6 = $r4.<android.content.TempProviderSyncResult: android.content.SyncableContentProvider tempContentProvider>;
+
+        if $r6 == null goto label43;
+
+        $r6 = $r4.<android.content.TempProviderSyncResult: android.content.SyncableContentProvider tempContentProvider>;
+
+        virtualinvoke $r6.<android.content.SyncableContentProvider: void close()>();
+
+     label43:
+        virtualinvoke $r5.<android.util.TimingLogger: void addSplit(java.lang.String)>("stop");
+
+        virtualinvoke $r5.<android.util.TimingLogger: void dumpToLog()>();
+
+        return;
+
+     label44:
+        $z3 = staticinvoke <android.util.Log: boolean isLoggable(java.lang.String,int)>("Sync", 2);
+
+        if $z3 == 0 goto label45;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("runSyncLoop: result: ");
+
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r11);
+
+        $r17 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("Sync", $r17);
+
+     label45:
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        $z3 = $r11.<android.content.SyncResult: boolean moreRecordsToGet>;
+
+        if $z3 != 0 goto label52;
+
+        $z3 = staticinvoke <android.util.Log: boolean isLoggable(java.lang.String,int)>("Sync", 2);
+
+        if $z3 == 0 goto label05;
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("Sync", "runSyncLoop: fetched all data, moving on");
+
+     label46:
+        goto label05;
+
+     label47:
+        $r18 := @caughtexception;
+
+     label48:
+        if $z2 == 0 goto label49;
+
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        $r11.<android.content.SyncResult: boolean fullSyncRequested> = 1;
+
+     label49:
+        if $r6 == null goto label50;
+
+        virtualinvoke $r6.<android.content.SyncableContentProvider: void close()>();
+
+     label50:
+        $r6 = $r4.<android.content.TempProviderSyncResult: android.content.SyncableContentProvider tempContentProvider>;
+
+        if $r6 == null goto label51;
+
+        $r6 = $r4.<android.content.TempProviderSyncResult: android.content.SyncableContentProvider tempContentProvider>;
+
+        virtualinvoke $r6.<android.content.SyncableContentProvider: void close()>();
+
+     label51:
+        virtualinvoke $r5.<android.util.TimingLogger: void addSplit(java.lang.String)>("stop");
+
+        virtualinvoke $r5.<android.util.TimingLogger: void dumpToLog()>();
+
+        throw $r18;
+
+     label52:
+        $z3 = staticinvoke <android.util.Log: boolean isLoggable(java.lang.String,int)>("Sync", 2);
+
+        if $z3 == 0 goto label53;
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("Sync", "runSyncLoop: more data to fetch, looping");
+
+     label53:
+        $i1 = $i2;
+
+        goto label01;
+
+     label54:
+        $r12 = $r4;
+
+     label55:
+        goto label14;
+
+     label56:
+        $z4 = staticinvoke <android.util.Log: boolean isLoggable(java.lang.String,int)>("Sync", 2);
+
+        if $z4 == 0 goto label57;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("runSyncLoop: result: ");
+
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r11);
+
+        $r2 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("Sync", $r2);
+
+     label57:
+        if $z3 == 0 goto label65;
+
+     label58:
+        $r10 = null;
+
+     label59:
+        if $r10 != null goto label67;
+
+     label60:
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        $z1 = $r11.<android.content.SyncResult: boolean tooManyRetries>;
+
+        $z0 = $z1 | $z0;
+
+        $r11.<android.content.SyncResult: boolean tooManyRetries> = $z0;
+
+        $z0 = staticinvoke <android.util.Log: boolean isLoggable(java.lang.String,int)>("Sync", 2);
+
+        if $z0 == 0 goto label61;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("runSyncLoop: final result: ");
+
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r11);
+
+        $r2 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("Sync", $r2);
+
+     label61:
+        if $z2 == 0 goto label62;
+
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        $r11.<android.content.SyncResult: boolean fullSyncRequested> = 1;
+
+     label62:
+        if $r6 == null goto label63;
+
+        virtualinvoke $r6.<android.content.SyncableContentProvider: void close()>();
+
+     label63:
+        $r6 = $r4.<android.content.TempProviderSyncResult: android.content.SyncableContentProvider tempContentProvider>;
+
+        if $r6 == null goto label64;
+
+        $r6 = $r4.<android.content.TempProviderSyncResult: android.content.SyncableContentProvider tempContentProvider>;
+
+        virtualinvoke $r6.<android.content.SyncableContentProvider: void close()>();
+
+     label64:
+        virtualinvoke $r5.<android.util.TimingLogger: void addSplit(java.lang.String)>("stop");
+
+        virtualinvoke $r5.<android.util.TimingLogger: void dumpToLog()>();
+
+        return;
+
+     label65:
+        $r10 = $r4.<android.content.TempProviderSyncResult: android.content.SyncableContentProvider tempContentProvider>;
+
+     label66:
+        goto label59;
+
+     label67:
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        $r19 = $r11.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l0 = $r19.<android.content.SyncStats: long numUpdates>;
+
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        $r19 = $r11.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l4 = $r19.<android.content.SyncStats: long numDeletes>;
+
+        $l0 = $l0 + $l4;
+
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        $r19 = $r11.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l4 = $r19.<android.content.SyncStats: long numInserts>;
+
+     label68:
+        $l0 = $l0 + $l4;
+
+        $b5 = $l0 cmp $l3;
+
+        if $b5 >= 0 goto label79;
+
+        $i2 = 0;
+
+     label69:
+        $l3 = $l0;
+
+        $i1 = $i2 + 1;
+
+     label70:
+        if $i2 < 10 goto label71;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("runSyncLoop: Hit max loop count while syncing ");
+
+        $r8 = virtualinvoke $r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r2 = virtualinvoke $r8.<java.lang.Class: java.lang.String getName()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("Sync", $r2);
+
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        $r11.<android.content.SyncResult: boolean tooManyRetries> = 1;
+
+        goto label60;
+
+     label71:
+        if $z1 != 0 goto label73;
+
+     label72:
+        if $z2 != 0 goto label73;
+
+        $r9 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        $r19 = $r11.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $z4 = virtualinvoke $r9.<android.content.TempProviderSyncAdapter: boolean hasTooManyDeletions(android.content.SyncStats)>($r19);
+
+        if $z4 == 0 goto label73;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("runSyncLoop: Too many deletions were found in provider ");
+
+        $r8 = virtualinvoke $r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r2 = virtualinvoke $r8.<java.lang.Class: java.lang.String getName()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", not doing any more updates");
+
+        $r2 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Sync", $r2);
+
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        $r19 = $r11.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $l3 = $r19.<android.content.SyncStats: long numDeletes>;
+
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        $r19 = $r11.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        virtualinvoke $r19.<android.content.SyncStats: void clear()>();
+
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        $r11.<android.content.SyncResult: boolean tooManyDeletions> = 1;
+
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        $r19 = $r11.<android.content.SyncResult: android.content.SyncStats stats>;
+
+        $r19.<android.content.SyncStats: long numDeletes> = $l3;
+
+        goto label60;
+
+     label73:
+        if $r6 == null goto label74;
+
+        virtualinvoke $r6.<android.content.SyncableContentProvider: void close()>();
+
+     label74:
+        $r16 = virtualinvoke $r10.<android.content.SyncableContentProvider: android.content.SyncableContentProvider getTemporaryInstance()>();
+
+        $r6 = $r16;
+
+        $r9 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        virtualinvoke $r9.<android.content.TempProviderSyncAdapter: void initTempProvider(android.content.SyncableContentProvider)>($r16);
+
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        virtualinvoke $r11.<android.content.SyncResult: void clear()>();
+
+        $r9 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        virtualinvoke $r9.<android.content.TempProviderSyncAdapter: void sendClientDiffs(android.content.SyncContext,android.content.SyncableContentProvider,android.content.SyncableContentProvider,android.content.SyncResult,boolean)>($r1, $r10, $r16, $r11, $z2);
+
+        $z4 = staticinvoke <android.util.Log: boolean isLoggable(java.lang.String,int)>("Sync", 2);
+
+        if $z4 == 0 goto label75;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("runSyncLoop: result: ");
+
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r11);
+
+        $r2 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("Sync", $r2);
+
+     label75:
+        $r11 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        $z4 = virtualinvoke $r11.<android.content.SyncResult: boolean madeSomeProgress()>();
+
+        if $z4 != 0 goto label76;
+
+        $z1 = staticinvoke <android.util.Log: boolean isLoggable(java.lang.String,int)>("Sync", 2);
+
+        if $z1 == 0 goto label60;
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("Sync", "runSyncLoop: No data from client diffs merge");
+
+        goto label60;
+
+     label76:
+        $z4 = staticinvoke <android.util.Log: boolean isLoggable(java.lang.String,int)>("Sync", 2);
+
+        if $z4 == 0 goto label10;
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("Sync", "runSyncLoop: made some progress, looping");
+
+     label77:
+        goto label10;
+
+     label78:
+        $r18 := @caughtexception;
+
+        goto label48;
+
+     label79:
+        $i2 = $i1;
+
+        goto label69;
+
+     label80:
+        goto label05;
+
+        catch java.lang.Throwable from label01 to label02 with label78;
+        catch java.lang.Throwable from label03 to label04 with label47;
+        catch java.lang.Throwable from label05 to label06 with label47;
+        catch java.lang.Throwable from label07 to label08 with label47;
+        catch java.lang.Throwable from label09 to label12 with label47;
+        catch java.lang.Throwable from label13 to label15 with label47;
+        catch java.lang.Throwable from label20 to label22 with label47;
+        catch java.lang.Throwable from label23 to label26 with label47;
+        catch java.lang.Throwable from label30 to label32 with label47;
+        catch java.lang.Throwable from label36 to label37 with label47;
+        catch java.lang.Throwable from label38 to label40 with label47;
+        catch java.lang.Throwable from label44 to label46 with label47;
+        catch java.lang.Throwable from label52 to label53 with label47;
+        catch java.lang.Throwable from label55 to label58 with label47;
+        catch java.lang.Throwable from label59 to label61 with label47;
+        catch java.lang.Throwable from label65 to label66 with label47;
+        catch java.lang.Throwable from label67 to label68 with label47;
+        catch java.lang.Throwable from label70 to label71 with label47;
+        catch java.lang.Throwable from label72 to label77 with label47;
+    }
+
+    private void sync(android.content.SyncContext, java.lang.String, android.os.Bundle)
+    {
+        android.content.TempProviderSyncAdapter$SyncThread $r0;
+        android.content.SyncContext $r1;
+        java.lang.String $r2, $r5, $r8;
+        android.os.Bundle $r3;
+        android.content.TempProviderSyncAdapter $r4;
+        boolean $z0;
+        android.content.SyncableContentProvider $r6;
+        android.content.SyncResult $r7;
+        java.lang.StringBuilder $r9;
+        long $l0;
+        java.lang.Throwable $r10, $r11;
+
+        $r0 := @this: android.content.TempProviderSyncAdapter$SyncThread;
+
+        $r1 := @parameter0: android.content.SyncContext;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: android.os.Bundle;
+
+        $r0.<android.content.TempProviderSyncAdapter$SyncThread: boolean mIsCanceled> = 0;
+
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        staticinvoke <android.content.TempProviderSyncAdapter: boolean access$102(android.content.TempProviderSyncAdapter,boolean)>($r4, 0);
+
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        staticinvoke <android.content.TempProviderSyncAdapter: boolean access$002(android.content.TempProviderSyncAdapter,boolean)>($r4, 0);
+
+        $z0 = virtualinvoke $r3.<android.os.Bundle: boolean getBoolean(java.lang.String,boolean)>("force", 0);
+
+     label01:
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $r6 = staticinvoke <android.content.TempProviderSyncAdapter: android.content.SyncableContentProvider access$200(android.content.TempProviderSyncAdapter)>($r4);
+
+        virtualinvoke $r6.<android.content.SyncableContentProvider: void onSyncStart(android.content.SyncContext,java.lang.String)>($r1, $r2);
+
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        staticinvoke <android.content.TempProviderSyncAdapter: boolean access$102(android.content.TempProviderSyncAdapter,boolean)>($r4, 1);
+
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $r7 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        virtualinvoke $r4.<android.content.TempProviderSyncAdapter: void onSyncStarting(android.content.SyncContext,java.lang.String,boolean,android.content.SyncResult)>($r1, $r2, $z0, $r7);
+
+        $r7 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        $z0 = virtualinvoke $r7.<android.content.SyncResult: boolean hasError()>();
+
+        if $z0 == 0 goto label05;
+
+     label02:
+        $r5 = "SyncAdapter failed while trying to start sync";
+
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $z0 = staticinvoke <android.content.TempProviderSyncAdapter: boolean access$000(android.content.TempProviderSyncAdapter)>($r4);
+
+        if $z0 == 0 goto label03;
+
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        staticinvoke <android.content.TempProviderSyncAdapter: boolean access$002(android.content.TempProviderSyncAdapter,boolean)>($r4, 0);
+
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        virtualinvoke $r4.<android.content.TempProviderSyncAdapter: void onSyncEnding(android.content.SyncContext,boolean)>($r1, 0);
+
+     label03:
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $z0 = staticinvoke <android.content.TempProviderSyncAdapter: boolean access$100(android.content.TempProviderSyncAdapter)>($r4);
+
+        if $z0 == 0 goto label04;
+
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        staticinvoke <android.content.TempProviderSyncAdapter: boolean access$102(android.content.TempProviderSyncAdapter,boolean)>($r4, 0);
+
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $r6 = staticinvoke <android.content.TempProviderSyncAdapter: android.content.SyncableContentProvider access$200(android.content.TempProviderSyncAdapter)>($r4);
+
+        virtualinvoke $r6.<android.content.SyncableContentProvider: void onSyncStop(android.content.SyncContext,boolean)>($r1, 0);
+
+     label04:
+        $z0 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: boolean mIsCanceled>;
+
+        if $z0 != 0 goto label32;
+
+        virtualinvoke $r1.<android.content.SyncContext: void setStatusText(java.lang.String)>($r5);
+
+        return;
+
+     label05:
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        staticinvoke <android.content.TempProviderSyncAdapter: boolean access$002(android.content.TempProviderSyncAdapter,boolean)>($r4, 1);
+
+        $z0 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: boolean mIsCanceled>;
+
+     label06:
+        if $z0 == 0 goto label09;
+
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $z0 = staticinvoke <android.content.TempProviderSyncAdapter: boolean access$000(android.content.TempProviderSyncAdapter)>($r4);
+
+        if $z0 == 0 goto label07;
+
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        staticinvoke <android.content.TempProviderSyncAdapter: boolean access$002(android.content.TempProviderSyncAdapter,boolean)>($r4, 0);
+
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        virtualinvoke $r4.<android.content.TempProviderSyncAdapter: void onSyncEnding(android.content.SyncContext,boolean)>($r1, 0);
+
+     label07:
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $z0 = staticinvoke <android.content.TempProviderSyncAdapter: boolean access$100(android.content.TempProviderSyncAdapter)>($r4);
+
+        if $z0 == 0 goto label08;
+
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        staticinvoke <android.content.TempProviderSyncAdapter: boolean access$102(android.content.TempProviderSyncAdapter,boolean)>($r4, 0);
+
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $r6 = staticinvoke <android.content.TempProviderSyncAdapter: android.content.SyncableContentProvider access$200(android.content.TempProviderSyncAdapter)>($r4);
+
+        virtualinvoke $r6.<android.content.SyncableContentProvider: void onSyncStop(android.content.SyncContext,boolean)>($r1, 0);
+
+     label08:
+        $z0 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: boolean mIsCanceled>;
+
+        if $z0 != 0 goto label33;
+
+        goto label34;
+
+     label09:
+        $r8 = staticinvoke <android.os.SystemProperties: java.lang.String get(java.lang.String)>("SyncTracing");
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r8);
+
+     label10:
+        if $z0 != 0 goto label23;
+
+        $z0 = 1;
+
+     label11:
+        if $z0 == 0 goto label13;
+
+     label12:
+        staticinvoke <java.lang.System: void gc()>();
+
+        staticinvoke <java.lang.System: void gc()>();
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("synctrace.");
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r8 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.os.Debug: void startMethodTracing(java.lang.String)>($r8);
+
+     label13:
+        specialinvoke $r0.<android.content.TempProviderSyncAdapter$SyncThread: void runSyncLoop(android.content.SyncContext,java.lang.String,android.os.Bundle)>($r1, $r2, $r3);
+
+     label14:
+        if $z0 == 0 goto label16;
+
+     label15:
+        staticinvoke <android.os.Debug: void stopMethodTracing()>();
+
+     label16:
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $r7 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        $z0 = virtualinvoke $r7.<android.content.SyncResult: boolean hasError()>();
+
+     label17:
+        if $z0 != 0 goto label31;
+
+     label18:
+        $z0 = 1;
+
+     label19:
+        virtualinvoke $r4.<android.content.TempProviderSyncAdapter: void onSyncEnding(android.content.SyncContext,boolean)>($r1, $z0);
+
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        staticinvoke <android.content.TempProviderSyncAdapter: boolean access$002(android.content.TempProviderSyncAdapter,boolean)>($r4, 0);
+
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $r6 = staticinvoke <android.content.TempProviderSyncAdapter: android.content.SyncableContentProvider access$200(android.content.TempProviderSyncAdapter)>($r4);
+
+        virtualinvoke $r6.<android.content.SyncableContentProvider: void onSyncStop(android.content.SyncContext,boolean)>($r1, 1);
+
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        staticinvoke <android.content.TempProviderSyncAdapter: boolean access$102(android.content.TempProviderSyncAdapter,boolean)>($r4, 0);
+
+     label20:
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $z0 = staticinvoke <android.content.TempProviderSyncAdapter: boolean access$000(android.content.TempProviderSyncAdapter)>($r4);
+
+        if $z0 == 0 goto label21;
+
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        staticinvoke <android.content.TempProviderSyncAdapter: boolean access$002(android.content.TempProviderSyncAdapter,boolean)>($r4, 0);
+
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        virtualinvoke $r4.<android.content.TempProviderSyncAdapter: void onSyncEnding(android.content.SyncContext,boolean)>($r1, 0);
+
+     label21:
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $z0 = staticinvoke <android.content.TempProviderSyncAdapter: boolean access$100(android.content.TempProviderSyncAdapter)>($r4);
+
+        if $z0 == 0 goto label22;
+
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        staticinvoke <android.content.TempProviderSyncAdapter: boolean access$102(android.content.TempProviderSyncAdapter,boolean)>($r4, 0);
+
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $r6 = staticinvoke <android.content.TempProviderSyncAdapter: android.content.SyncableContentProvider access$200(android.content.TempProviderSyncAdapter)>($r4);
+
+        virtualinvoke $r6.<android.content.SyncableContentProvider: void onSyncStop(android.content.SyncContext,boolean)>($r1, 0);
+
+     label22:
+        $z0 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: boolean mIsCanceled>;
+
+        if $z0 != 0 goto label35;
+
+        goto label36;
+
+     label23:
+        $z0 = 0;
+
+        goto label11;
+
+     label24:
+        $r10 := @caughtexception;
+
+        if $z0 == 0 goto label26;
+
+     label25:
+        staticinvoke <android.os.Debug: void stopMethodTracing()>();
+
+     label26:
+        throw $r10;
+
+     label27:
+        $r11 := @caughtexception;
+
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $z0 = staticinvoke <android.content.TempProviderSyncAdapter: boolean access$000(android.content.TempProviderSyncAdapter)>($r4);
+
+        if $z0 == 0 goto label28;
+
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        staticinvoke <android.content.TempProviderSyncAdapter: boolean access$002(android.content.TempProviderSyncAdapter,boolean)>($r4, 0);
+
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        virtualinvoke $r4.<android.content.TempProviderSyncAdapter: void onSyncEnding(android.content.SyncContext,boolean)>($r1, 0);
+
+     label28:
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $z0 = staticinvoke <android.content.TempProviderSyncAdapter: boolean access$100(android.content.TempProviderSyncAdapter)>($r4);
+
+        if $z0 == 0 goto label29;
+
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        staticinvoke <android.content.TempProviderSyncAdapter: boolean access$102(android.content.TempProviderSyncAdapter,boolean)>($r4, 0);
+
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $r6 = staticinvoke <android.content.TempProviderSyncAdapter: android.content.SyncableContentProvider access$200(android.content.TempProviderSyncAdapter)>($r4);
+
+        virtualinvoke $r6.<android.content.SyncableContentProvider: void onSyncStop(android.content.SyncContext,boolean)>($r1, 0);
+
+     label29:
+        $z0 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: boolean mIsCanceled>;
+
+        if $z0 != 0 goto label30;
+
+        goto label30;
+
+     label30:
+        throw $r11;
+
+     label31:
+        $z0 = 0;
+
+        goto label19;
+
+     label32:
+        return;
+
+     label33:
+        return;
+
+     label34:
+        return;
+
+     label35:
+        return;
+
+     label36:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label27;
+        catch java.lang.Throwable from label05 to label06 with label27;
+        catch java.lang.Throwable from label09 to label10 with label27;
+        catch java.lang.Throwable from label12 to label14 with label24;
+        catch java.lang.Throwable from label15 to label17 with label27;
+        catch java.lang.Throwable from label18 to label20 with label27;
+        catch java.lang.Throwable from label25 to label27 with label27;
+    }
+
+    void cancelSync()
+    {
+        android.content.TempProviderSyncAdapter$SyncThread $r0;
+        android.content.SyncResult $r1;
+        long $l0, $l2, $l3;
+        android.content.TempProviderSyncAdapter $r2;
+        boolean $z0;
+        android.content.SyncableContentProvider $r3;
+        int $i1;
+
+        $r0 := @this: android.content.TempProviderSyncAdapter$SyncThread;
+
+        $r0.<android.content.TempProviderSyncAdapter$SyncThread: boolean mIsCanceled> = 1;
+
+        $r2 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $z0 = staticinvoke <android.content.TempProviderSyncAdapter: boolean access$000(android.content.TempProviderSyncAdapter)>($r2);
+
+        if $z0 == 0 goto label1;
+
+        $r2 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        virtualinvoke $r2.<android.content.TempProviderSyncAdapter: void onSyncCanceled()>();
+
+     label1:
+        $r2 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $z0 = staticinvoke <android.content.TempProviderSyncAdapter: boolean access$100(android.content.TempProviderSyncAdapter)>($r2);
+
+        if $z0 == 0 goto label2;
+
+        $r2 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $r3 = staticinvoke <android.content.TempProviderSyncAdapter: android.content.SyncableContentProvider access$200(android.content.TempProviderSyncAdapter)>($r2);
+
+        virtualinvoke $r3.<android.content.SyncableContentProvider: void onSyncCanceled()>();
+
+     label2:
+        $i1 = staticinvoke <android.os.Process: int myUid()>();
+
+        $r2 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $l2 = staticinvoke <android.os.NetStat: long getUidTxBytes(int)>($i1);
+
+        $l0 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: long mInitialTxBytes>;
+
+        $l2 = $l2 - $l0;
+
+        $l3 = staticinvoke <android.os.NetStat: long getUidRxBytes(int)>($i1);
+
+        $l0 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: long mInitialRxBytes>;
+
+        $l0 = $l3 - $l0;
+
+        $r1 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        virtualinvoke $r2.<android.content.TempProviderSyncAdapter: void logSyncDetails(long,long,android.content.SyncResult)>($l2, $l0, $r1);
+
+        return;
+    }
+
+    public void run()
+    {
+        android.content.TempProviderSyncAdapter$SyncThread $r0;
+        android.os.Bundle $r1;
+        long $l0, $l2, $l3;
+        int $i1;
+        android.content.SyncContext $r2;
+        java.lang.String $r3;
+        android.content.TempProviderSyncAdapter $r4;
+        boolean $z0;
+        android.content.SyncResult $r5;
+        android.database.SQLException $r6;
+        java.lang.Throwable $r7;
+
+        $r0 := @this: android.content.TempProviderSyncAdapter$SyncThread;
+
+        $i1 = staticinvoke <android.os.Process: int myTid()>();
+
+        staticinvoke <android.os.Process: void setThreadPriority(int,int)>($i1, 10);
+
+        $i1 = staticinvoke <android.os.Process: int myUid()>();
+
+        $l2 = staticinvoke <android.os.NetStat: long getUidTxBytes(int)>($i1);
+
+        $r0.<android.content.TempProviderSyncAdapter$SyncThread: long mInitialTxBytes> = $l2;
+
+        $l2 = staticinvoke <android.os.NetStat: long getUidRxBytes(int)>($i1);
+
+        $r0.<android.content.TempProviderSyncAdapter$SyncThread: long mInitialRxBytes> = $l2;
+
+     label01:
+        $r2 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncContext mSyncContext>;
+
+        $r3 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: java.lang.String mAccount>;
+
+        $r1 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.os.Bundle mExtras>;
+
+     label02:
+        specialinvoke $r0.<android.content.TempProviderSyncAdapter$SyncThread: void sync(android.content.SyncContext,java.lang.String,android.os.Bundle)>($r2, $r3, $r1);
+
+     label03:
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        staticinvoke <android.content.TempProviderSyncAdapter: android.content.TempProviderSyncAdapter$SyncThread access$302(android.content.TempProviderSyncAdapter,android.content.TempProviderSyncAdapter$SyncThread)>($r4, null);
+
+        $z0 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: boolean mIsCanceled>;
+
+        if $z0 != 0 goto label09;
+
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $l2 = staticinvoke <android.os.NetStat: long getUidTxBytes(int)>($i1);
+
+        $l0 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: long mInitialTxBytes>;
+
+        $l2 = $l2 - $l0;
+
+        $l0 = staticinvoke <android.os.NetStat: long getUidRxBytes(int)>($i1);
+
+        $l3 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: long mInitialRxBytes>;
+
+        $l0 = $l0 - $l3;
+
+        $r5 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        virtualinvoke $r4.<android.content.TempProviderSyncAdapter: void logSyncDetails(long,long,android.content.SyncResult)>($l2, $l0, $r5);
+
+        $r2 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncContext mSyncContext>;
+
+        $r5 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        virtualinvoke $r2.<android.content.SyncContext: void onFinished(android.content.SyncResult)>($r5);
+
+        return;
+
+     label04:
+        $r6 := @caughtexception;
+
+     label05:
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("Sync", "Sync failed", $r6);
+
+        $r5 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        $r5.<android.content.SyncResult: boolean databaseError> = 1;
+
+     label06:
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        staticinvoke <android.content.TempProviderSyncAdapter: android.content.TempProviderSyncAdapter$SyncThread access$302(android.content.TempProviderSyncAdapter,android.content.TempProviderSyncAdapter$SyncThread)>($r4, null);
+
+        $z0 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: boolean mIsCanceled>;
+
+        if $z0 != 0 goto label10;
+
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $l2 = staticinvoke <android.os.NetStat: long getUidTxBytes(int)>($i1);
+
+        $l0 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: long mInitialTxBytes>;
+
+        $l2 = $l2 - $l0;
+
+        $l0 = staticinvoke <android.os.NetStat: long getUidRxBytes(int)>($i1);
+
+        $l3 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: long mInitialRxBytes>;
+
+        $l0 = $l0 - $l3;
+
+        $r5 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        virtualinvoke $r4.<android.content.TempProviderSyncAdapter: void logSyncDetails(long,long,android.content.SyncResult)>($l2, $l0, $r5);
+
+        $r2 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncContext mSyncContext>;
+
+        $r5 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        virtualinvoke $r2.<android.content.SyncContext: void onFinished(android.content.SyncResult)>($r5);
+
+        return;
+
+     label07:
+        $r7 := @caughtexception;
+
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        staticinvoke <android.content.TempProviderSyncAdapter: android.content.TempProviderSyncAdapter$SyncThread access$302(android.content.TempProviderSyncAdapter,android.content.TempProviderSyncAdapter$SyncThread)>($r4, null);
+
+        $z0 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: boolean mIsCanceled>;
+
+        if $z0 != 0 goto label08;
+
+        $r4 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.TempProviderSyncAdapter this$0>;
+
+        $l2 = staticinvoke <android.os.NetStat: long getUidTxBytes(int)>($i1);
+
+        $l0 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: long mInitialTxBytes>;
+
+        $l2 = $l2 - $l0;
+
+        $l3 = staticinvoke <android.os.NetStat: long getUidRxBytes(int)>($i1);
+
+        $l0 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: long mInitialRxBytes>;
+
+        $l0 = $l3 - $l0;
+
+        $r5 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        virtualinvoke $r4.<android.content.TempProviderSyncAdapter: void logSyncDetails(long,long,android.content.SyncResult)>($l2, $l0, $r5);
+
+        $r2 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncContext mSyncContext>;
+
+        $r5 = $r0.<android.content.TempProviderSyncAdapter$SyncThread: android.content.SyncResult mResult>;
+
+        virtualinvoke $r2.<android.content.SyncContext: void onFinished(android.content.SyncResult)>($r5);
+
+     label08:
+        throw $r7;
+
+     label09:
+        return;
+
+     label10:
+        return;
+
+        catch android.database.SQLException from label02 to label03 with label04;
+        catch java.lang.Throwable from label01 to label03 with label07;
+        catch java.lang.Throwable from label05 to label06 with label07;
+    }
+}

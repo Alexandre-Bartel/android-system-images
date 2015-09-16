@@ -1,0 +1,2984 @@
+final class android.webkit.WebViewCore extends java.lang.Object
+{
+    static final boolean DEBUG;
+    static final java.lang.String[] HandlerDebugString;
+    private static final java.lang.String LOGTAG;
+    static final boolean LOGV_ENABLED;
+    static final int SCROLL_BITS;
+    static final java.lang.String THREAD_NAME;
+    static final int ZOOM_BITS;
+    private static android.os.Handler sWebCoreHandler;
+    private android.webkit.BrowserFrame mBrowserFrame;
+    private final android.webkit.CallbackProxy mCallbackProxy;
+    private final android.content.Context mContext;
+    private int mCurrentViewHeight;
+    private int mCurrentViewWidth;
+    private boolean mDrawIsPaused;
+    private boolean mDrawIsScheduled;
+    boolean mEndScaleZoom;
+    private final android.webkit.WebViewCore$EventHub mEventHub;
+    private int mNativeClass;
+    private int mRestoredScale;
+    private int mRestoredX;
+    private int mRestoredY;
+    final android.graphics.DrawFilter mScrollFilter;
+    private final android.webkit.WebSettings mSettings;
+    private boolean mSplitPictureIsScheduled;
+    private int mViewportHeight;
+    private int mViewportInitialScale;
+    private int mViewportMaximumScale;
+    private int mViewportMinimumScale;
+    private boolean mViewportUserScalable;
+    private int mViewportWidth;
+    private android.webkit.WebView mWebView;
+    private int mWebkitScrollX;
+    private int mWebkitScrollY;
+    final android.graphics.DrawFilter mZoomFilter;
+
+    static void <clinit>()
+    {
+        java.lang.String[] $r0;
+
+        <android.webkit.WebViewCore: int ZOOM_BITS> = 134;
+
+        <android.webkit.WebViewCore: java.lang.String THREAD_NAME> = "WebViewCoreThread";
+
+        <android.webkit.WebViewCore: int SCROLL_BITS> = 6;
+
+        <android.webkit.WebViewCore: boolean LOGV_ENABLED> = 0;
+
+        <android.webkit.WebViewCore: java.lang.String LOGTAG> = "webcore";
+
+        <android.webkit.WebViewCore: boolean DEBUG> = 0;
+
+        staticinvoke <java.lang.System: void loadLibrary(java.lang.String)>("webcore");
+
+        $r0 = newarray (java.lang.String)[42];
+
+        $r0[0] = "LOAD_URL";
+
+        $r0[1] = "STOP_LOADING";
+
+        $r0[2] = "RELOAD";
+
+        $r0[3] = "KEY_DOWN";
+
+        $r0[4] = "KEY_UP";
+
+        $r0[5] = "VIEW_SIZE_CHANGED";
+
+        $r0[6] = "GO_BACK_FORWARD";
+
+        $r0[7] = "SET_SCROLL_OFFSET";
+
+        $r0[8] = "RESTORE_STATE";
+
+        $r0[9] = "PAUSE_TIMERS";
+
+        $r0[10] = "RESUME_TIMERS";
+
+        $r0[11] = "CLEAR_CACHE";
+
+        $r0[12] = "CLEAR_HISTORY";
+
+        $r0[13] = "SET_SELECTION";
+
+        $r0[14] = "REPLACE_TEXT";
+
+        $r0[15] = "PASS_TO_JS";
+
+        $r0[16] = "SET_GLOBAL_BOUNDS";
+
+        $r0[17] = "UPDATE_CACHE_AND_TEXT_ENTRY";
+
+        $r0[18] = "CLICK";
+
+        $r0[19] = "SET_NETWORK_STATE";
+
+        $r0[20] = "DOC_HAS_IMAGES";
+
+        $r0[21] = "SET_SNAP_ANCHOR";
+
+        $r0[22] = "DELETE_SELECTION";
+
+        $r0[23] = "LISTBOX_CHOICES";
+
+        $r0[24] = "SINGLE_LISTBOX_CHOICE";
+
+        $r0[25] = "125";
+
+        $r0[26] = "SET_BACKGROUND_COLOR";
+
+        $r0[27] = "UNBLOCK_FOCUS";
+
+        $r0[28] = "SAVE_DOCUMENT_STATE";
+
+        $r0[29] = "GET_SELECTION";
+
+        $r0[30] = "WEBKIT_DRAW";
+
+        $r0[31] = "SYNC_SCROLL";
+
+        $r0[32] = "REFRESH_PLUGINS";
+
+        $r0[33] = "SPLIT_PICTURE_SET";
+
+        $r0[34] = "CLEAR_CONTENT";
+
+        $r0[35] = "SET_FINAL_FOCUS";
+
+        $r0[36] = "SET_KIT_FOCUS";
+
+        $r0[37] = "REQUEST_FOCUS_HREF";
+
+        $r0[38] = "ADD_JS_INTERFACE";
+
+        $r0[39] = "LOAD_DATA";
+
+        $r0[40] = "TOUCH_UP";
+
+        $r0[41] = "TOUCH_EVENT";
+
+        <android.webkit.WebViewCore: java.lang.String[] HandlerDebugString> = $r0;
+
+        return;
+    }
+
+    public void <init>(android.content.Context, android.webkit.WebView, android.webkit.CallbackProxy)
+    {
+        android.webkit.WebViewCore $r0;
+        android.content.Context $r1;
+        android.webkit.WebView $r2;
+        android.webkit.CallbackProxy $r3;
+        java.lang.Thread $r4;
+        android.graphics.PaintFlagsDrawFilter $r5;
+        android.os.Handler $r6;
+        android.webkit.WebViewCore$WebCoreThread $r7;
+        java.lang.Class $r8;
+        android.webkit.WebViewCore$EventHub $r9;
+        android.webkit.WebSettings $r10;
+        android.os.Message $r11;
+        java.lang.InterruptedException $r12;
+        java.lang.String $r13;
+        java.lang.Throwable $r14;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: android.webkit.WebView;
+
+        $r3 := @parameter2: android.webkit.CallbackProxy;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r0.<android.webkit.WebViewCore: int mViewportWidth> = -1;
+
+        $r0.<android.webkit.WebViewCore: int mViewportHeight> = -1;
+
+        $r0.<android.webkit.WebViewCore: int mViewportInitialScale> = 0;
+
+        $r0.<android.webkit.WebViewCore: int mViewportMinimumScale> = 0;
+
+        $r0.<android.webkit.WebViewCore: int mViewportMaximumScale> = 0;
+
+        $r0.<android.webkit.WebViewCore: boolean mViewportUserScalable> = 1;
+
+        $r0.<android.webkit.WebViewCore: int mRestoredScale> = 100;
+
+        $r0.<android.webkit.WebViewCore: int mRestoredX> = 0;
+
+        $r0.<android.webkit.WebViewCore: int mRestoredY> = 0;
+
+        $r0.<android.webkit.WebViewCore: int mWebkitScrollX> = 0;
+
+        $r0.<android.webkit.WebViewCore: int mWebkitScrollY> = 0;
+
+        $r0.<android.webkit.WebViewCore: int mCurrentViewWidth> = 0;
+
+        $r0.<android.webkit.WebViewCore: int mCurrentViewHeight> = 0;
+
+        $r0.<android.webkit.WebViewCore: boolean mEndScaleZoom> = 0;
+
+        $r5 = new android.graphics.PaintFlagsDrawFilter;
+
+        specialinvoke $r5.<android.graphics.PaintFlagsDrawFilter: void <init>(int,int)>(134, 64);
+
+        $r0.<android.webkit.WebViewCore: android.graphics.DrawFilter mZoomFilter> = $r5;
+
+        $r5 = new android.graphics.PaintFlagsDrawFilter;
+
+        specialinvoke $r5.<android.graphics.PaintFlagsDrawFilter: void <init>(int,int)>(6, 0);
+
+        $r0.<android.webkit.WebViewCore: android.graphics.DrawFilter mScrollFilter> = $r5;
+
+        $r0.<android.webkit.WebViewCore: android.webkit.CallbackProxy mCallbackProxy> = $r3;
+
+        $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView> = $r2;
+
+        $r0.<android.webkit.WebViewCore: android.content.Context mContext> = $r1;
+
+        entermonitor class "android/webkit/WebViewCore";
+
+     label1:
+        $r6 = <android.webkit.WebViewCore: android.os.Handler sWebCoreHandler>;
+
+        if $r6 != null goto label4;
+
+        $r4 = new java.lang.Thread;
+
+        $r7 = new android.webkit.WebViewCore$WebCoreThread;
+
+        specialinvoke $r7.<android.webkit.WebViewCore$WebCoreThread: void <init>(android.webkit.WebViewCore$1)>(null);
+
+        specialinvoke $r4.<java.lang.Thread: void <init>(java.lang.Runnable)>($r7);
+
+        virtualinvoke $r4.<java.lang.Thread: void setName(java.lang.String)>("WebViewCoreThread");
+
+        virtualinvoke $r4.<java.lang.Thread: void start()>();
+
+     label2:
+        $r8 = class "android/webkit/WebViewCore";
+
+     label3:
+        virtualinvoke $r8.<java.lang.Object: void wait()>();
+
+     label4:
+        exitmonitor class "android/webkit/WebViewCore";
+
+     label5:
+        $r9 = new android.webkit.WebViewCore$EventHub;
+
+        specialinvoke $r9.<android.webkit.WebViewCore$EventHub: void <init>(android.webkit.WebViewCore,android.webkit.WebViewCore$1)>($r0, null);
+
+        $r0.<android.webkit.WebViewCore: android.webkit.WebViewCore$EventHub mEventHub> = $r9;
+
+        $r10 = new android.webkit.WebSettings;
+
+        $r1 = $r0.<android.webkit.WebViewCore: android.content.Context mContext>;
+
+        specialinvoke $r10.<android.webkit.WebSettings: void <init>(android.content.Context)>($r1);
+
+        $r0.<android.webkit.WebViewCore: android.webkit.WebSettings mSettings> = $r10;
+
+        staticinvoke <android.webkit.WebIconDatabase: android.webkit.WebIconDatabase getInstance()>();
+
+        $r6 = <android.webkit.WebViewCore: android.os.Handler sWebCoreHandler>;
+
+        $r11 = virtualinvoke $r6.<android.os.Handler: android.os.Message obtainMessage(int,java.lang.Object)>(0, $r0);
+
+        $r6 = <android.webkit.WebViewCore: android.os.Handler sWebCoreHandler>;
+
+        virtualinvoke $r6.<android.os.Handler: boolean sendMessage(android.os.Message)>($r11);
+
+        return;
+
+     label6:
+        $r12 := @caughtexception;
+
+     label7:
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("webcore", "Caught exception while waiting for thread creation.");
+
+        $r13 = staticinvoke <android.util.Log: java.lang.String getStackTraceString(java.lang.Throwable)>($r12);
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("webcore", $r13);
+
+        goto label4;
+
+     label8:
+        $r14 := @caughtexception;
+
+        exitmonitor class "android/webkit/WebViewCore";
+
+     label9:
+        throw $r14;
+
+        catch java.lang.Throwable from label1 to label2 with label8;
+        catch java.lang.InterruptedException from label3 to label4 with label6;
+        catch java.lang.Throwable from label2 to label4 with label8;
+        catch java.lang.Throwable from label4 to label5 with label8;
+        catch java.lang.Throwable from label7 to label9 with label8;
+    }
+
+    static void access$1000(android.webkit.WebViewCore, java.lang.String)
+    {
+        android.webkit.WebViewCore $r0;
+        java.lang.String $r1;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $r1 := @parameter1: java.lang.String;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void nativeRegisterURLSchemeAsLocal(java.lang.String)>($r1);
+
+        return;
+    }
+
+    static void access$1100(android.webkit.WebViewCore, android.view.KeyEvent, boolean)
+    {
+        android.webkit.WebViewCore $r0;
+        android.view.KeyEvent $r1;
+        boolean $z0;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $r1 := @parameter1: android.view.KeyEvent;
+
+        $z0 := @parameter2: boolean;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void key(android.view.KeyEvent,boolean)>($r1, $z0);
+
+        return;
+    }
+
+    static boolean access$1200(android.webkit.WebViewCore)
+    {
+        android.webkit.WebViewCore $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $z0 = specialinvoke $r0.<android.webkit.WebViewCore: boolean nativeClick()>();
+
+        return $z0;
+    }
+
+    static void access$1300(android.webkit.WebViewCore, int, int, float)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0, $i1;
+        float $f0;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $f0 := @parameter3: float;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void viewSizeChanged(int,int,float)>($i0, $i1, $f0);
+
+        return;
+    }
+
+    static void access$1400(android.webkit.WebViewCore, int, int)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0, $i1;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void nativeSetScrollOffset(int,int)>($i0, $i1);
+
+        return;
+    }
+
+    static void access$1500(android.webkit.WebViewCore, int, int, int, int)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0, $i1, $i2, $i3;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        $i3 := @parameter4: int;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void nativeSetGlobalBounds(int,int,int,int)>($i0, $i1, $i2, $i3);
+
+        return;
+    }
+
+    static void access$1600(android.webkit.WebViewCore, int)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $i0 := @parameter1: int;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void restoreState(int)>($i0);
+
+        return;
+    }
+
+    static android.webkit.CallbackProxy access$1900(android.webkit.WebViewCore)
+    {
+        android.webkit.WebViewCore $r0;
+        android.webkit.CallbackProxy r1;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        r1 = $r0.<android.webkit.WebViewCore: android.webkit.CallbackProxy mCallbackProxy>;
+
+        return r1;
+    }
+
+    static void access$2000(android.webkit.WebViewCore, int, int, int, int, int, int, java.lang.String, int, int)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7;
+        java.lang.String $r1;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        $i3 := @parameter4: int;
+
+        $i4 := @parameter5: int;
+
+        $i5 := @parameter6: int;
+
+        $r1 := @parameter7: java.lang.String;
+
+        $i6 := @parameter8: int;
+
+        $i7 := @parameter9: int;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void nativeReplaceTextfieldText(int,int,int,int,int,int,java.lang.String,int,int)>($i0, $i1, $i2, $i3, $i4, $i5, $r1, $i6, $i7);
+
+        return;
+    }
+
+    static void access$2100(android.webkit.WebViewCore, int, int, int, int, int, java.lang.String, int, int, boolean, boolean, boolean, boolean)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6;
+        java.lang.String $r1;
+        boolean $z0, $z1, $z2, $z3;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        $i3 := @parameter4: int;
+
+        $i4 := @parameter5: int;
+
+        $r1 := @parameter6: java.lang.String;
+
+        $i5 := @parameter7: int;
+
+        $i6 := @parameter8: int;
+
+        $z0 := @parameter9: boolean;
+
+        $z1 := @parameter10: boolean;
+
+        $z2 := @parameter11: boolean;
+
+        $z3 := @parameter12: boolean;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void passToJs(int,int,int,int,int,java.lang.String,int,int,boolean,boolean,boolean,boolean)>($i0, $i1, $i2, $i3, $i4, $r1, $i5, $i6, $z0, $z1, $z2, $z3);
+
+        return;
+    }
+
+    static void access$2200(android.webkit.WebViewCore, int)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $i0 := @parameter1: int;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void nativeSaveDocumentState(int)>($i0);
+
+        return;
+    }
+
+    static android.content.Context access$2300(android.webkit.WebViewCore)
+    {
+        android.webkit.WebViewCore $r0;
+        android.content.Context r1;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        r1 = $r0.<android.webkit.WebViewCore: android.content.Context mContext>;
+
+        return r1;
+    }
+
+    static void access$2400(android.webkit.WebViewCore, int, int, int, int, int, int, int, boolean, boolean)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6;
+        boolean $z0, $z1;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        $i3 := @parameter4: int;
+
+        $i4 := @parameter5: int;
+
+        $i5 := @parameter6: int;
+
+        $i6 := @parameter7: int;
+
+        $z0 := @parameter8: boolean;
+
+        $z1 := @parameter9: boolean;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void nativeTouchUp(int,int,int,int,int,int,int,boolean,boolean)>($i0, $i1, $i2, $i3, $i4, $i5, $i6, $z0, $z1);
+
+        return;
+    }
+
+    static android.webkit.WebView access$2500(android.webkit.WebViewCore)
+    {
+        android.webkit.WebViewCore $r0;
+        android.webkit.WebView r1;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        r1 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        return r1;
+    }
+
+    static boolean access$2600(android.webkit.WebViewCore, int, int, int)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0, $i1, $i2;
+        boolean $z0;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        $z0 = specialinvoke $r0.<android.webkit.WebViewCore: boolean nativeHandleTouchEvent(int,int,int)>($i0, $i1, $i2);
+
+        return $z0;
+    }
+
+    static void access$2700(android.webkit.WebViewCore, int, int, int, int, boolean)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0, $i1, $i2, $i3;
+        boolean $z0;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        $i3 := @parameter4: int;
+
+        $z0 := @parameter5: boolean;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void nativeSetFinalFocus(int,int,int,int,boolean)>($i0, $i1, $i2, $i3, $z0);
+
+        return;
+    }
+
+    static void access$2800(android.webkit.WebViewCore)
+    {
+        android.webkit.WebViewCore $r0;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void nativeUnblockFocus()>();
+
+        return;
+    }
+
+    static void access$2900(android.webkit.WebViewCore, int, int, int, int, int, int, boolean)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        boolean $z0;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        $i3 := @parameter4: int;
+
+        $i4 := @parameter5: int;
+
+        $i5 := @parameter6: int;
+
+        $z0 := @parameter7: boolean;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void nativeSetKitFocus(int,int,int,int,int,int,boolean)>($i0, $i1, $i2, $i3, $i4, $i5, $z0);
+
+        return;
+    }
+
+    static android.os.Handler access$300()
+    {
+        android.os.Handler r0;
+
+        r0 = <android.webkit.WebViewCore: android.os.Handler sWebCoreHandler>;
+
+        return r0;
+    }
+
+    static java.lang.String access$3000(android.webkit.WebViewCore, int, int)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0, $i1;
+        java.lang.String $r1;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $r1 = specialinvoke $r0.<android.webkit.WebViewCore: java.lang.String nativeRetrieveHref(int,int)>($i0, $i1);
+
+        return $r1;
+    }
+
+    static android.os.Handler access$302(android.os.Handler)
+    {
+        android.os.Handler $r0;
+
+        $r0 := @parameter0: android.os.Handler;
+
+        <android.webkit.WebViewCore: android.os.Handler sWebCoreHandler> = $r0;
+
+        return $r0;
+    }
+
+    static void access$3100(android.webkit.WebViewCore)
+    {
+        android.webkit.WebViewCore $r0;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void nativeUpdateFrameCache()>();
+
+        return;
+    }
+
+    static void access$3200(android.webkit.WebViewCore)
+    {
+        android.webkit.WebViewCore $r0;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void sendUpdateTextEntry()>();
+
+        return;
+    }
+
+    static void access$3300(android.webkit.WebViewCore, int, int)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0, $i1;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void nativeSetSnapAnchor(int,int)>($i0, $i1);
+
+        return;
+    }
+
+    static void access$3400(android.webkit.WebViewCore, int, int, int, int, int, int)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        $i3 := @parameter4: int;
+
+        $i4 := @parameter5: int;
+
+        $i5 := @parameter6: int;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void nativeDeleteSelection(int,int,int,int,int,int)>($i0, $i1, $i2, $i3, $i4, $i5);
+
+        return;
+    }
+
+    static void access$3500(android.webkit.WebViewCore, int, int, int, int, int, int)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        $i3 := @parameter4: int;
+
+        $i4 := @parameter5: int;
+
+        $i5 := @parameter6: int;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void nativeSetSelection(int,int,int,int,int,int)>($i0, $i1, $i2, $i3, $i4, $i5);
+
+        return;
+    }
+
+    static void access$3600(android.webkit.WebViewCore, boolean[], int)
+    {
+        android.webkit.WebViewCore $r0;
+        boolean[] $r1;
+        int $i0;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $r1 := @parameter1: boolean[];
+
+        $i0 := @parameter2: int;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void nativeSendListBoxChoices(boolean[],int)>($r1, $i0);
+
+        return;
+    }
+
+    static void access$3700(android.webkit.WebViewCore, int)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $i0 := @parameter1: int;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void nativeSendListBoxChoice(int)>($i0);
+
+        return;
+    }
+
+    static void access$3800(android.webkit.WebViewCore, int)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $i0 := @parameter1: int;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void nativeSetBackgroundColor(int)>($i0);
+
+        return;
+    }
+
+    static java.lang.String access$3900(android.webkit.WebViewCore, android.graphics.Region)
+    {
+        android.webkit.WebViewCore $r0;
+        android.graphics.Region $r1;
+        java.lang.String $r2;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $r1 := @parameter1: android.graphics.Region;
+
+        $r2 = specialinvoke $r0.<android.webkit.WebViewCore: java.lang.String nativeGetSelection(android.graphics.Region)>($r1);
+
+        return $r2;
+    }
+
+    static void access$400(android.webkit.WebViewCore)
+    {
+        android.webkit.WebViewCore $r0;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void initialize()>();
+
+        return;
+    }
+
+    static void access$4000(android.webkit.WebViewCore, boolean)
+    {
+        android.webkit.WebViewCore $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $z0 := @parameter1: boolean;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void nativeDumpDomTree(boolean)>($z0);
+
+        return;
+    }
+
+    static void access$4100(android.webkit.WebViewCore, boolean)
+    {
+        android.webkit.WebViewCore $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $z0 := @parameter1: boolean;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void nativeDumpRenderTree(boolean)>($z0);
+
+        return;
+    }
+
+    static void access$4200(android.webkit.WebViewCore)
+    {
+        android.webkit.WebViewCore $r0;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void nativeDumpNavTree()>();
+
+        return;
+    }
+
+    static int access$4302(android.webkit.WebViewCore, int)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $i0 := @parameter1: int;
+
+        $r0.<android.webkit.WebViewCore: int mWebkitScrollX> = $i0;
+
+        return $i0;
+    }
+
+    static int access$4402(android.webkit.WebViewCore, int)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $i0 := @parameter1: int;
+
+        $r0.<android.webkit.WebViewCore: int mWebkitScrollY> = $i0;
+
+        return $i0;
+    }
+
+    static void access$4500(android.webkit.WebViewCore, boolean)
+    {
+        android.webkit.WebViewCore $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $z0 := @parameter1: boolean;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void nativeRefreshPlugins(boolean)>($z0);
+
+        return;
+    }
+
+    static void access$4600(android.webkit.WebViewCore)
+    {
+        android.webkit.WebViewCore $r0;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void nativeSplitContent()>();
+
+        return;
+    }
+
+    static boolean access$4702(android.webkit.WebViewCore, boolean)
+    {
+        android.webkit.WebViewCore $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $z0 := @parameter1: boolean;
+
+        $r0.<android.webkit.WebViewCore: boolean mSplitPictureIsScheduled> = $z0;
+
+        return $z0;
+    }
+
+    static void access$4800(android.webkit.WebViewCore)
+    {
+        android.webkit.WebViewCore $r0;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void nativeClearContent()>();
+
+        return;
+    }
+
+    static boolean access$4902(android.webkit.WebViewCore, boolean)
+    {
+        android.webkit.WebViewCore $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $z0 := @parameter1: boolean;
+
+        $r0.<android.webkit.WebViewCore: boolean mDrawIsScheduled> = $z0;
+
+        return $z0;
+    }
+
+    static void access$600(android.webkit.WebViewCore)
+    {
+        android.webkit.WebViewCore $r0;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void webkitDraw()>();
+
+        return;
+    }
+
+    static android.webkit.BrowserFrame access$700(android.webkit.WebViewCore)
+    {
+        android.webkit.WebViewCore $r0;
+        android.webkit.BrowserFrame r1;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        r1 = $r0.<android.webkit.WebViewCore: android.webkit.BrowserFrame mBrowserFrame>;
+
+        return r1;
+    }
+
+    static android.webkit.BrowserFrame access$702(android.webkit.WebViewCore, android.webkit.BrowserFrame)
+    {
+        android.webkit.WebViewCore $r0;
+        android.webkit.BrowserFrame $r1;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $r1 := @parameter1: android.webkit.BrowserFrame;
+
+        $r0.<android.webkit.WebViewCore: android.webkit.BrowserFrame mBrowserFrame> = $r1;
+
+        return $r1;
+    }
+
+    static int access$802(android.webkit.WebViewCore, int)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $i0 := @parameter1: int;
+
+        $r0.<android.webkit.WebViewCore: int mNativeClass> = $i0;
+
+        return $i0;
+    }
+
+    static void access$900(android.webkit.WebViewCore, java.lang.String)
+    {
+        android.webkit.WebViewCore $r0;
+        java.lang.String $r1;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $r1 := @parameter1: java.lang.String;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void loadUrl(java.lang.String)>($r1);
+
+        return;
+    }
+
+    private void contentScrollBy(int, int, boolean)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0, $i1;
+        boolean $z0, $z1;
+        java.lang.Boolean $r1;
+        android.webkit.BrowserFrame $r2;
+        android.webkit.WebView $r3;
+        android.os.Handler $r4;
+        android.os.Message $r5;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $z0 := @parameter2: boolean;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.BrowserFrame mBrowserFrame>;
+
+        $z1 = virtualinvoke $r2.<android.webkit.BrowserFrame: boolean firstLayoutDone()>();
+
+        if $z1 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r3 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        if $r3 == null goto label2;
+
+        $r3 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        $r4 = $r3.<android.webkit.WebView: android.os.Handler mPrivateHandler>;
+
+        $r1 = new java.lang.Boolean;
+
+        specialinvoke $r1.<java.lang.Boolean: void <init>(boolean)>($z0);
+
+        $r5 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int,int,int,java.lang.Object)>($r4, 11, $i0, $i1, $r1);
+
+        virtualinvoke $r5.<android.os.Message: void sendToTarget()>();
+
+        return;
+
+     label2:
+        return;
+    }
+
+    private void contentScrollTo(int, int)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0, $i1;
+        android.webkit.BrowserFrame $r1;
+        boolean $z0;
+        android.webkit.WebView $r2;
+        android.os.Handler $r3;
+        android.os.Message $r4;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 = $r0.<android.webkit.WebViewCore: android.webkit.BrowserFrame mBrowserFrame>;
+
+        $z0 = virtualinvoke $r1.<android.webkit.BrowserFrame: boolean firstLayoutDone()>();
+
+        if $z0 != 0 goto label1;
+
+        $r0.<android.webkit.WebViewCore: int mRestoredX> = $i0;
+
+        $r0.<android.webkit.WebViewCore: int mRestoredY> = $i1;
+
+        return;
+
+     label1:
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        if $r2 == null goto label2;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        $r3 = $r2.<android.webkit.WebView: android.os.Handler mPrivateHandler>;
+
+        $r4 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int,int,int)>($r3, 10, $i0, $i1);
+
+        virtualinvoke $r4.<android.os.Message: void sendToTarget()>();
+
+        return;
+
+     label2:
+        return;
+    }
+
+    private void contentSpawnScrollTo(int, int)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0, $i1;
+        android.webkit.BrowserFrame $r1;
+        boolean $z0;
+        android.webkit.WebView $r2;
+        android.os.Handler $r3;
+        android.os.Message $r4;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 = $r0.<android.webkit.WebViewCore: android.webkit.BrowserFrame mBrowserFrame>;
+
+        $z0 = virtualinvoke $r1.<android.webkit.BrowserFrame: boolean firstLayoutDone()>();
+
+        if $z0 != 0 goto label1;
+
+        $r0.<android.webkit.WebViewCore: int mRestoredX> = $i0;
+
+        $r0.<android.webkit.WebViewCore: int mRestoredY> = $i1;
+
+        return;
+
+     label1:
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        if $r2 == null goto label2;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        $r3 = $r2.<android.webkit.WebView: android.os.Handler mPrivateHandler>;
+
+        $r4 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int,int,int)>($r3, 12, $i0, $i1);
+
+        virtualinvoke $r4.<android.os.Message: void sendToTarget()>();
+
+        return;
+
+     label2:
+        return;
+    }
+
+    private void didFirstLayout()
+    {
+        android.webkit.WebViewCore $r0;
+        java.util.HashMap $r1;
+        android.webkit.WebView $r2;
+        boolean $z0;
+        android.webkit.WebViewCore$EventHub $r3;
+        int $i0, $i1;
+        java.lang.Float $r4;
+        android.os.Message $r5;
+        android.webkit.BrowserFrame $r6;
+        java.lang.Integer $r7;
+        android.os.Handler $r8;
+        java.lang.Throwable $r9;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        if $r2 == null goto label01;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        $z0 = $r2.<android.webkit.WebView: boolean mHeightCanMeasure>;
+
+        if $z0 == 0 goto label01;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        $r2.<android.webkit.WebView: int mLastHeightSent> = 0;
+
+        $r3 = $r0.<android.webkit.WebViewCore: android.webkit.WebViewCore$EventHub mEventHub>;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        $i0 = $r2.<android.webkit.WebView: int mLastWidthSent>;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        $i1 = $r2.<android.webkit.WebView: int mLastHeightSent>;
+
+        $r4 = staticinvoke <java.lang.Float: java.lang.Float valueOf(float)>(-1.0F);
+
+        $r5 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int,int,int,java.lang.Object)>(null, 105, $i0, $i1, $r4);
+
+        staticinvoke <android.webkit.WebViewCore$EventHub: void access$5000(android.webkit.WebViewCore$EventHub,android.os.Message)>($r3, $r5);
+
+     label01:
+        $r6 = $r0.<android.webkit.WebViewCore: android.webkit.BrowserFrame mBrowserFrame>;
+
+        virtualinvoke $r6.<android.webkit.BrowserFrame: void didFirstLayout()>();
+
+        $r0.<android.webkit.WebViewCore: int mWebkitScrollY> = 0;
+
+        $r0.<android.webkit.WebViewCore: int mWebkitScrollX> = 0;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void setViewportSettingsFromNative()>();
+
+        $i0 = $r0.<android.webkit.WebViewCore: int mViewportWidth>;
+
+        if $i0 != 0 goto label03;
+
+        $i0 = $r0.<android.webkit.WebViewCore: int mViewportInitialScale>;
+
+        if $i0 != 0 goto label02;
+
+        $r0.<android.webkit.WebViewCore: int mViewportInitialScale> = 100;
+
+     label02:
+        $i0 = $r0.<android.webkit.WebViewCore: int mViewportMinimumScale>;
+
+        if $i0 != 0 goto label03;
+
+        $r0.<android.webkit.WebViewCore: int mViewportMinimumScale> = 100;
+
+     label03:
+        $z0 = $r0.<android.webkit.WebViewCore: boolean mViewportUserScalable>;
+
+        if $z0 != 0 goto label04;
+
+        $r0.<android.webkit.WebViewCore: int mViewportInitialScale> = 100;
+
+        $r0.<android.webkit.WebViewCore: int mViewportMinimumScale> = 100;
+
+        $r0.<android.webkit.WebViewCore: int mViewportMaximumScale> = 100;
+
+     label04:
+        $i0 = $r0.<android.webkit.WebViewCore: int mViewportMinimumScale>;
+
+        $i1 = $r0.<android.webkit.WebViewCore: int mViewportInitialScale>;
+
+        if $i0 <= $i1 goto label05;
+
+        $i0 = $r0.<android.webkit.WebViewCore: int mViewportInitialScale>;
+
+        if $i0 != 0 goto label12;
+
+        $i0 = $r0.<android.webkit.WebViewCore: int mViewportMinimumScale>;
+
+        $r0.<android.webkit.WebViewCore: int mViewportInitialScale> = $i0;
+
+     label05:
+        $i0 = $r0.<android.webkit.WebViewCore: int mViewportMaximumScale>;
+
+        if $i0 <= 0 goto label06;
+
+        $i0 = $r0.<android.webkit.WebViewCore: int mViewportMaximumScale>;
+
+        $i1 = $r0.<android.webkit.WebViewCore: int mViewportInitialScale>;
+
+        if $i0 >= $i1 goto label13;
+
+        $i0 = $r0.<android.webkit.WebViewCore: int mViewportInitialScale>;
+
+        $r0.<android.webkit.WebViewCore: int mViewportMaximumScale> = $i0;
+
+     label06:
+        $i0 = $r0.<android.webkit.WebViewCore: int mViewportWidth>;
+
+        if $i0 >= 0 goto label07;
+
+        $i0 = $r0.<android.webkit.WebViewCore: int mViewportInitialScale>;
+
+        if $i0 != 100 goto label07;
+
+        $r0.<android.webkit.WebViewCore: int mViewportWidth> = 0;
+
+     label07:
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        if $r2 == null goto label18;
+
+        $r1 = new java.util.HashMap;
+
+        specialinvoke $r1.<java.util.HashMap: void <init>()>();
+
+        $i0 = $r0.<android.webkit.WebViewCore: int mViewportMinimumScale>;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        virtualinvoke $r1.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("minScale", $r7);
+
+        $i0 = $r0.<android.webkit.WebViewCore: int mViewportMaximumScale>;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        virtualinvoke $r1.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("maxScale", $r7);
+
+        $i0 = $r0.<android.webkit.WebViewCore: int mRestoredScale>;
+
+        if $i0 <= 0 goto label14;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        $r8 = $r2.<android.webkit.WebView: android.os.Handler mPrivateHandler>;
+
+        $i0 = $r0.<android.webkit.WebViewCore: int mRestoredScale>;
+
+        $r5 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int,int,int,java.lang.Object)>($r8, 18, $i0, 0, $r1);
+
+        virtualinvoke $r5.<android.os.Message: void sendToTarget()>();
+
+        $r0.<android.webkit.WebViewCore: int mRestoredScale> = 0;
+
+     label08:
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        $r8 = $r2.<android.webkit.WebView: android.os.Handler mPrivateHandler>;
+
+        $i0 = $r0.<android.webkit.WebViewCore: int mRestoredX>;
+
+        $i1 = $r0.<android.webkit.WebViewCore: int mRestoredY>;
+
+        $r5 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int,int,int)>($r8, 10, $i0, $i1);
+
+        virtualinvoke $r5.<android.os.Message: void sendToTarget()>();
+
+        $r0.<android.webkit.WebViewCore: int mRestoredY> = 0;
+
+        $r0.<android.webkit.WebViewCore: int mRestoredX> = 0;
+
+        $i0 = $r0.<android.webkit.WebViewCore: int mCurrentViewWidth>;
+
+        if $i0 == 0 goto label19;
+
+        entermonitor $r0;
+
+     label09:
+        $z0 = $r0.<android.webkit.WebViewCore: boolean mDrawIsScheduled>;
+
+        if $z0 == 0 goto label10;
+
+        $r3 = $r0.<android.webkit.WebViewCore: android.webkit.WebViewCore$EventHub mEventHub>;
+
+        staticinvoke <android.webkit.WebViewCore$EventHub: void access$5200(android.webkit.WebViewCore$EventHub,int)>($r3, 130);
+
+     label10:
+        $r0.<android.webkit.WebViewCore: boolean mDrawIsScheduled> = 1;
+
+        $r3 = $r0.<android.webkit.WebViewCore: android.webkit.WebViewCore$EventHub mEventHub>;
+
+        $r5 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int)>(null, 130);
+
+        staticinvoke <android.webkit.WebViewCore$EventHub: void access$5400(android.webkit.WebViewCore$EventHub,android.os.Message)>($r3, $r5);
+
+        exitmonitor $r0;
+
+     label11:
+        return;
+
+     label12:
+        $i0 = $r0.<android.webkit.WebViewCore: int mViewportInitialScale>;
+
+        $r0.<android.webkit.WebViewCore: int mViewportMinimumScale> = $i0;
+
+        goto label05;
+
+     label13:
+        $i0 = $r0.<android.webkit.WebViewCore: int mViewportInitialScale>;
+
+        if $i0 != 0 goto label06;
+
+        $i0 = $r0.<android.webkit.WebViewCore: int mViewportMaximumScale>;
+
+        $r0.<android.webkit.WebViewCore: int mViewportInitialScale> = $i0;
+
+        goto label06;
+
+     label14:
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        $r8 = $r2.<android.webkit.WebView: android.os.Handler mPrivateHandler>;
+
+        $i0 = $r0.<android.webkit.WebViewCore: int mViewportInitialScale>;
+
+        $i1 = $r0.<android.webkit.WebViewCore: int mViewportWidth>;
+
+        $r5 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int,int,int,java.lang.Object)>($r8, 18, $i0, $i1, $r1);
+
+        virtualinvoke $r5.<android.os.Message: void sendToTarget()>();
+
+        goto label08;
+
+     label15:
+        $r9 := @caughtexception;
+
+     label16:
+        exitmonitor $r0;
+
+     label17:
+        throw $r9;
+
+     label18:
+        return;
+
+     label19:
+        return;
+
+        catch java.lang.Throwable from label09 to label11 with label15;
+        catch java.lang.Throwable from label16 to label17 with label15;
+    }
+
+    static void endCacheTransaction()
+    {
+        android.os.Handler $r0, $r2;
+        android.os.Message $r1;
+
+        $r0 = <android.webkit.WebViewCore: android.os.Handler sWebCoreHandler>;
+
+        $r2 = <android.webkit.WebViewCore: android.os.Handler sWebCoreHandler>;
+
+        $r1 = virtualinvoke $r2.<android.os.Handler: android.os.Message obtainMessage(int)>(4);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r1);
+
+        return;
+    }
+
+    private void initialize()
+    {
+        android.webkit.WebViewCore $r0;
+        android.webkit.BrowserFrame $r1;
+        android.content.Context $r2;
+        android.webkit.CallbackProxy $r3;
+        android.webkit.WebSettings $r4;
+        android.webkit.WebIconDatabase $r5;
+        android.webkit.WebViewCore$EventHub $r6;
+        android.webkit.WebView $r7;
+        android.os.Handler $r8;
+        int $i0;
+        android.os.Message $r9;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $r1 = new android.webkit.BrowserFrame;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.content.Context mContext>;
+
+        $r3 = $r0.<android.webkit.WebViewCore: android.webkit.CallbackProxy mCallbackProxy>;
+
+        $r4 = $r0.<android.webkit.WebViewCore: android.webkit.WebSettings mSettings>;
+
+        specialinvoke $r1.<android.webkit.BrowserFrame: void <init>(android.content.Context,android.webkit.WebViewCore,android.webkit.CallbackProxy,android.webkit.WebSettings)>($r2, $r0, $r3, $r4);
+
+        $r0.<android.webkit.WebViewCore: android.webkit.BrowserFrame mBrowserFrame> = $r1;
+
+        $r4 = $r0.<android.webkit.WebViewCore: android.webkit.WebSettings mSettings>;
+
+        $r1 = $r0.<android.webkit.WebViewCore: android.webkit.BrowserFrame mBrowserFrame>;
+
+        virtualinvoke $r4.<android.webkit.WebSettings: void syncSettingsAndCreateHandler(android.webkit.BrowserFrame)>($r1);
+
+        $r5 = staticinvoke <android.webkit.WebIconDatabase: android.webkit.WebIconDatabase getInstance()>();
+
+        virtualinvoke $r5.<android.webkit.WebIconDatabase: void createHandler()>();
+
+        $r6 = $r0.<android.webkit.WebViewCore: android.webkit.WebViewCore$EventHub mEventHub>;
+
+        staticinvoke <android.webkit.WebViewCore$EventHub: void access$200(android.webkit.WebViewCore$EventHub)>($r6);
+
+        $r7 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        if $r7 == null goto label1;
+
+        $r7 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        $r8 = $r7.<android.webkit.WebView: android.os.Handler mPrivateHandler>;
+
+        $i0 = $r0.<android.webkit.WebViewCore: int mNativeClass>;
+
+        $r9 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int,int,int)>($r8, 16, $i0, 0);
+
+        virtualinvoke $r9.<android.os.Message: void sendToTarget()>();
+
+        return;
+
+     label1:
+        return;
+    }
+
+    private void key(android.view.KeyEvent, boolean)
+    {
+        android.webkit.WebViewCore $r0;
+        android.view.KeyEvent $r1;
+        boolean $z0, $z1, $z2;
+        int $i0, $i1, $i2;
+        android.webkit.CallbackProxy $r2;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $r1 := @parameter0: android.view.KeyEvent;
+
+        $z0 := @parameter1: boolean;
+
+        $i0 = virtualinvoke $r1.<android.view.KeyEvent: int getKeyCode()>();
+
+        $i1 = virtualinvoke $r1.<android.view.KeyEvent: int getUnicodeChar()>();
+
+        $i2 = virtualinvoke $r1.<android.view.KeyEvent: int getRepeatCount()>();
+
+        $z1 = virtualinvoke $r1.<android.view.KeyEvent: boolean isShiftPressed()>();
+
+        $z2 = virtualinvoke $r1.<android.view.KeyEvent: boolean isAltPressed()>();
+
+        $z0 = specialinvoke $r0.<android.webkit.WebViewCore: boolean nativeKey(int,int,int,boolean,boolean,boolean)>($i0, $i1, $i2, $z1, $z2, $z0);
+
+        if $z0 != 0 goto label1;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.CallbackProxy mCallbackProxy>;
+
+        virtualinvoke $r2.<android.webkit.CallbackProxy: void onUnhandledKeyEvent(android.view.KeyEvent)>($r1);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    private void loadUrl(java.lang.String)
+    {
+        android.webkit.WebViewCore $r0;
+        java.lang.String $r1;
+        android.webkit.BrowserFrame $r2;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.BrowserFrame mBrowserFrame>;
+
+        virtualinvoke $r2.<android.webkit.BrowserFrame: void loadUrl(java.lang.String)>($r1);
+
+        return;
+    }
+
+    private native void nativeClearContent();
+
+    private native boolean nativeClick();
+
+    private native void nativeCopyContentToPicture(android.graphics.Picture);
+
+    private native void nativeDeleteSelection(int, int, int, int, int, int);
+
+    private native boolean nativeDrawContent(android.graphics.Canvas, int);
+
+    private native void nativeDumpDomTree(boolean);
+
+    private native void nativeDumpNavTree();
+
+    private native void nativeDumpRenderTree(boolean);
+
+    static native java.lang.String nativeFindAddress(java.lang.String);
+
+    private native int nativeGetContentMinPrefWidth();
+
+    private native java.lang.String nativeGetSelection(android.graphics.Region);
+
+    private native boolean nativeHandleTouchEvent(int, int, int);
+
+    private native boolean nativeKey(int, int, int, boolean, boolean, boolean);
+
+    private native boolean nativeRecordContent(android.graphics.Region, android.graphics.Point);
+
+    private native void nativeRefreshPlugins(boolean);
+
+    private native void nativeRegisterURLSchemeAsLocal(java.lang.String);
+
+    private native void nativeReplaceTextfieldText(int, int, int, int, int, int, java.lang.String, int, int);
+
+    private native java.lang.String nativeRetrieveHref(int, int);
+
+    private native void nativeSaveDocumentState(int);
+
+    private native void nativeSendListBoxChoice(int);
+
+    private native void nativeSendListBoxChoices(boolean[], int);
+
+    private native void nativeSetBackgroundColor(int);
+
+    private native void nativeSetFinalFocus(int, int, int, int, boolean);
+
+    private native void nativeSetGlobalBounds(int, int, int, int);
+
+    private native void nativeSetKitFocus(int, int, int, int, int, int, boolean);
+
+    private native void nativeSetScrollOffset(int, int);
+
+    private native void nativeSetSelection(int, int, int, int, int, int);
+
+    private native void nativeSetSize(int, int, int, float, int, int);
+
+    private native void nativeSetSnapAnchor(int, int);
+
+    private native void nativeSnapToAnchor();
+
+    private native void nativeSplitContent();
+
+    private native void nativeTouchUp(int, int, int, int, int, int, int, boolean, boolean);
+
+    private native void nativeUnblockFocus();
+
+    private native void nativeUpdateFrameCache();
+
+    private void needTouchEvents(boolean)
+    {
+        android.webkit.WebViewCore $r0;
+        boolean $z0;
+        android.os.Message $r1;
+        android.webkit.WebView $r2;
+        android.os.Handler $r3;
+        byte $b0;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $z0 := @parameter0: boolean;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        if $r2 == null goto label3;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        $r3 = $r2.<android.webkit.WebView: android.os.Handler mPrivateHandler>;
+
+        if $z0 == 0 goto label2;
+
+        $b0 = 1;
+
+     label1:
+        $r1 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int,int,int)>($r3, 25, $b0, 0);
+
+        virtualinvoke $r1.<android.os.Message: void sendToTarget()>();
+
+        return;
+
+     label2:
+        $b0 = 0;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    private native void passToJs(int, int, int, int, int, java.lang.String, int, int, boolean, boolean, boolean, boolean);
+
+    public static void pauseTimers()
+    {
+        android.webkit.JWebCoreJavaBridge $r0;
+        java.lang.IllegalStateException $r1;
+
+        $r0 = <android.webkit.BrowserFrame: android.webkit.JWebCoreJavaBridge sJavaBridge>;
+
+        if $r0 != null goto label1;
+
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>("No WebView has been created in this process!");
+
+        throw $r1;
+
+     label1:
+        $r0 = <android.webkit.BrowserFrame: android.webkit.JWebCoreJavaBridge sJavaBridge>;
+
+        virtualinvoke $r0.<android.webkit.JWebCoreJavaBridge: void pause()>();
+
+        return;
+    }
+
+    static void pauseUpdate(android.webkit.WebViewCore)
+    {
+        android.webkit.WebViewCore $r0;
+        android.os.Message $r1;
+        android.os.Handler $r2, $r3;
+        android.webkit.WebViewCore$EventHub $r4;
+        java.lang.Throwable $r5;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $r2 = <android.webkit.WebViewCore: android.os.Handler sWebCoreHandler>;
+
+        virtualinvoke $r2.<android.os.Handler: void removeMessages(int)>(1);
+
+        $r2 = <android.webkit.WebViewCore: android.os.Handler sWebCoreHandler>;
+
+        virtualinvoke $r2.<android.os.Handler: void removeMessages(int)>(2);
+
+        $r2 = <android.webkit.WebViewCore: android.os.Handler sWebCoreHandler>;
+
+        $r3 = <android.webkit.WebViewCore: android.os.Handler sWebCoreHandler>;
+
+        $r1 = virtualinvoke $r3.<android.os.Handler: android.os.Message obtainMessage(int)>(1);
+
+        virtualinvoke $r2.<android.os.Handler: boolean sendMessageAtFrontOfQueue(android.os.Message)>($r1);
+
+        if $r0 == null goto label5;
+
+        entermonitor $r0;
+
+     label1:
+        $r0.<android.webkit.WebViewCore: boolean mDrawIsPaused> = 1;
+
+        $r4 = $r0.<android.webkit.WebViewCore: android.webkit.WebViewCore$EventHub mEventHub>;
+
+        staticinvoke <android.webkit.WebViewCore$EventHub: void access$5200(android.webkit.WebViewCore$EventHub,int)>($r4, 130);
+
+        exitmonitor $r0;
+
+     label2:
+        return;
+
+     label3:
+        $r5 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label4:
+        throw $r5;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private void requestListBox(java.lang.String[], boolean[], int)
+    {
+        android.webkit.WebViewCore $r0;
+        java.lang.String[] $r1;
+        boolean[] $r2;
+        int $i0;
+        android.webkit.WebView $r3;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $r1 := @parameter0: java.lang.String[];
+
+        $r2 := @parameter1: boolean[];
+
+        $i0 := @parameter2: int;
+
+        $r3 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        if $r3 == null goto label1;
+
+        $r3 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        virtualinvoke $r3.<android.webkit.WebView: void requestListBox(java.lang.String[],boolean[],int)>($r1, $r2, $i0);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    private void requestListBox(java.lang.String[], boolean[], int[])
+    {
+        android.webkit.WebViewCore $r0;
+        java.lang.String[] $r1;
+        boolean[] $r2;
+        int[] $r3;
+        android.webkit.WebView $r4;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $r1 := @parameter0: java.lang.String[];
+
+        $r2 := @parameter1: boolean[];
+
+        $r3 := @parameter2: int[];
+
+        $r4 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        if $r4 == null goto label1;
+
+        $r4 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        virtualinvoke $r4.<android.webkit.WebView: void requestListBox(java.lang.String[],boolean[],int[])>($r1, $r2, $r3);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    private void restoreScale(int)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0;
+        boolean $z0;
+        android.webkit.BrowserFrame $r1;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<android.webkit.WebViewCore: android.webkit.BrowserFrame mBrowserFrame>;
+
+        $z0 = virtualinvoke $r1.<android.webkit.BrowserFrame: boolean firstLayoutDone()>();
+
+        if $z0 != 0 goto label1;
+
+        $r0.<android.webkit.WebViewCore: int mRestoredScale> = $i0;
+
+        return;
+
+     label1:
+        return;
+    }
+
+    private void restoreState(int)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0, $i1, $i2, $i3;
+        android.webkit.CallbackProxy $r1;
+        android.webkit.WebBackForwardList $r2;
+        android.webkit.WebHistoryItem $r3;
+        android.webkit.BrowserFrame $r4;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<android.webkit.WebViewCore: android.webkit.CallbackProxy mCallbackProxy>;
+
+        $r2 = virtualinvoke $r1.<android.webkit.CallbackProxy: android.webkit.WebBackForwardList getBackForwardList()>();
+
+        $i1 = virtualinvoke $r2.<android.webkit.WebBackForwardList: int getSize()>();
+
+        $i2 = 0;
+
+     label1:
+        if $i2 >= $i1 goto label2;
+
+        $r3 = virtualinvoke $r2.<android.webkit.WebBackForwardList: android.webkit.WebHistoryItem getItemAtIndex(int)>($i2);
+
+        $r4 = $r0.<android.webkit.WebViewCore: android.webkit.BrowserFrame mBrowserFrame>;
+
+        $i3 = $r4.<android.webkit.BrowserFrame: int mNativeFrame>;
+
+        virtualinvoke $r3.<android.webkit.WebHistoryItem: void inflate(int)>($i3);
+
+        $i2 = $i2 + 1;
+
+        goto label1;
+
+     label2:
+        $r4 = $r0.<android.webkit.WebViewCore: android.webkit.BrowserFrame mBrowserFrame>;
+
+        $r4.<android.webkit.BrowserFrame: boolean mLoadInitFromJava> = 1;
+
+        $r4 = $r0.<android.webkit.WebViewCore: android.webkit.BrowserFrame mBrowserFrame>;
+
+        $i1 = $r4.<android.webkit.BrowserFrame: int mNativeFrame>;
+
+        staticinvoke <android.webkit.WebBackForwardList: void restoreIndex(int,int)>($i1, $i0);
+
+        $r4 = $r0.<android.webkit.WebViewCore: android.webkit.BrowserFrame mBrowserFrame>;
+
+        $r4.<android.webkit.BrowserFrame: boolean mLoadInitFromJava> = 0;
+
+        return;
+    }
+
+    public static void resumeTimers()
+    {
+        android.webkit.JWebCoreJavaBridge $r0;
+        java.lang.IllegalStateException $r1;
+
+        $r0 = <android.webkit.BrowserFrame: android.webkit.JWebCoreJavaBridge sJavaBridge>;
+
+        if $r0 != null goto label1;
+
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>("No WebView has been created in this process!");
+
+        throw $r1;
+
+     label1:
+        $r0 = <android.webkit.BrowserFrame: android.webkit.JWebCoreJavaBridge sJavaBridge>;
+
+        virtualinvoke $r0.<android.webkit.JWebCoreJavaBridge: void resume()>();
+
+        return;
+    }
+
+    static void resumeUpdate(android.webkit.WebViewCore)
+    {
+        android.webkit.WebViewCore $r0;
+        android.os.Message $r1;
+        android.os.Handler $r2, $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @parameter0: android.webkit.WebViewCore;
+
+        $r2 = <android.webkit.WebViewCore: android.os.Handler sWebCoreHandler>;
+
+        virtualinvoke $r2.<android.os.Handler: void removeMessages(int)>(1);
+
+        $r2 = <android.webkit.WebViewCore: android.os.Handler sWebCoreHandler>;
+
+        virtualinvoke $r2.<android.os.Handler: void removeMessages(int)>(2);
+
+        $r2 = <android.webkit.WebViewCore: android.os.Handler sWebCoreHandler>;
+
+        $r3 = <android.webkit.WebViewCore: android.os.Handler sWebCoreHandler>;
+
+        $r1 = virtualinvoke $r3.<android.os.Handler: android.os.Message obtainMessage(int)>(2);
+
+        virtualinvoke $r2.<android.os.Handler: boolean sendMessageAtFrontOfQueue(android.os.Message)>($r1);
+
+        if $r0 == null goto label5;
+
+        entermonitor $r0;
+
+     label1:
+        $r0.<android.webkit.WebViewCore: boolean mDrawIsScheduled> = 0;
+
+        $r0.<android.webkit.WebViewCore: boolean mDrawIsPaused> = 0;
+
+        virtualinvoke $r0.<android.webkit.WebViewCore: void contentDraw()>();
+
+        exitmonitor $r0;
+
+     label2:
+        return;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label4:
+        throw $r4;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    private void sendMarkNodeInvalid(int)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0;
+        android.os.Message $r1;
+        android.webkit.WebView $r2;
+        android.os.Handler $r3;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $i0 := @parameter0: int;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        if $r2 == null goto label1;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        $r3 = $r2.<android.webkit.WebView: android.os.Handler mPrivateHandler>;
+
+        $r1 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int,int,int)>($r3, 21, $i0, 0);
+
+        virtualinvoke $r1.<android.os.Message: void sendToTarget()>();
+
+        return;
+
+     label1:
+        return;
+    }
+
+    private void sendNotifyFocusSet()
+    {
+        android.webkit.WebViewCore $r0;
+        android.os.Message $r1;
+        android.webkit.WebView $r2;
+        android.os.Handler $r3;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        if $r2 == null goto label1;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        $r3 = $r2.<android.webkit.WebView: android.os.Handler mPrivateHandler>;
+
+        $r1 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int)>($r3, 20);
+
+        virtualinvoke $r1.<android.os.Message: void sendToTarget()>();
+
+        return;
+
+     label1:
+        return;
+    }
+
+    private void sendNotifyProgressFinished()
+    {
+        android.webkit.WebViewCore $r0;
+        android.os.Message $r1;
+        android.os.Handler $r2, $r3;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void sendUpdateTextEntry()>();
+
+        $r2 = <android.webkit.WebViewCore: android.os.Handler sWebCoreHandler>;
+
+        virtualinvoke $r2.<android.os.Handler: void removeMessages(int)>(3);
+
+        $r2 = <android.webkit.WebViewCore: android.os.Handler sWebCoreHandler>;
+
+        $r3 = <android.webkit.WebViewCore: android.os.Handler sWebCoreHandler>;
+
+        $r1 = virtualinvoke $r3.<android.os.Handler: android.os.Message obtainMessage(int)>(3);
+
+        virtualinvoke $r2.<android.os.Handler: boolean sendMessage(android.os.Message)>($r1);
+
+        virtualinvoke $r0.<android.webkit.WebViewCore: void contentDraw()>();
+
+        return;
+    }
+
+    private void sendRecomputeFocus()
+    {
+        android.webkit.WebViewCore $r0;
+        android.os.Message $r1;
+        android.webkit.WebView $r2;
+        android.os.Handler $r3;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        if $r2 == null goto label1;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        $r3 = $r2.<android.webkit.WebView: android.os.Handler mPrivateHandler>;
+
+        $r1 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int)>($r3, 19);
+
+        virtualinvoke $r1.<android.os.Message: void sendToTarget()>();
+
+        return;
+
+     label1:
+        return;
+    }
+
+    private void sendUpdateTextEntry()
+    {
+        android.webkit.WebViewCore $r0;
+        android.os.Message $r1;
+        android.webkit.WebView $r2;
+        android.os.Handler $r3;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        if $r2 == null goto label1;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        $r3 = $r2.<android.webkit.WebView: android.os.Handler mPrivateHandler>;
+
+        $r1 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int)>($r3, 15);
+
+        virtualinvoke $r1.<android.os.Message: void sendToTarget()>();
+
+        return;
+
+     label1:
+        return;
+    }
+
+    private void sendViewInvalidate(int, int, int, int)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0, $i1, $i2, $i3;
+        android.graphics.Rect $r1;
+        android.os.Message $r2;
+        android.webkit.WebView $r3;
+        android.os.Handler $r4;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i2 := @parameter2: int;
+
+        $i3 := @parameter3: int;
+
+        $r3 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        if $r3 == null goto label1;
+
+        $r3 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        $r4 = $r3.<android.webkit.WebView: android.os.Handler mPrivateHandler>;
+
+        $r1 = new android.graphics.Rect;
+
+        specialinvoke $r1.<android.graphics.Rect: void <init>(int,int,int,int)>($i0, $i1, $i2, $i3);
+
+        $r2 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int,java.lang.Object)>($r4, 26, $r1);
+
+        virtualinvoke $r2.<android.os.Message: void sendToTarget()>();
+
+        return;
+
+     label1:
+        return;
+    }
+
+    private native void setViewportSettingsFromNative();
+
+    static void startCacheTransaction()
+    {
+        android.os.Handler $r0, $r2;
+        android.os.Message $r1;
+
+        $r0 = <android.webkit.WebViewCore: android.os.Handler sWebCoreHandler>;
+
+        $r2 = <android.webkit.WebViewCore: android.os.Handler sWebCoreHandler>;
+
+        $r1 = virtualinvoke $r2.<android.os.Handler: android.os.Message obtainMessage(int)>(5);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r1);
+
+        return;
+    }
+
+    private void updateTextfield(int, boolean, java.lang.String, int)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0, $i1;
+        boolean $z0;
+        java.lang.String $r1;
+        android.webkit.WebView $r2;
+        android.os.Handler $r3;
+        android.os.Message $r4;
+        android.os.Bundle $r5;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $i0 := @parameter0: int;
+
+        $z0 := @parameter1: boolean;
+
+        $r1 := @parameter2: java.lang.String;
+
+        $i1 := @parameter3: int;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        if $r2 == null goto label1;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        $r3 = $r2.<android.webkit.WebView: android.os.Handler mPrivateHandler>;
+
+        $r4 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int,int,int,java.lang.Object)>($r3, 17, $i0, $i1, $r1);
+
+        $r5 = virtualinvoke $r4.<android.os.Message: android.os.Bundle getData()>();
+
+        virtualinvoke $r5.<android.os.Bundle: void putBoolean(java.lang.String,boolean)>("password", $z0);
+
+        virtualinvoke $r4.<android.os.Message: void sendToTarget()>();
+
+        return;
+
+     label1:
+        return;
+    }
+
+    private void viewSizeChanged(int, int, float)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0, $i1, $i2, $i3;
+        float $f0, $f1, $f2;
+        android.webkit.WebSettings $r1;
+        boolean $z0;
+        android.webkit.WebSettings$LayoutAlgorithm $r2, $r3;
+        android.webkit.WebViewCore$EventHub $r4;
+        android.os.Message $r5;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $f0 := @parameter2: float;
+
+        if $i0 != 0 goto label1;
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("webcore", "skip viewSizeChanged as w is 0");
+
+        return;
+
+     label1:
+        $r1 = $r0.<android.webkit.WebViewCore: android.webkit.WebSettings mSettings>;
+
+        $z0 = virtualinvoke $r1.<android.webkit.WebSettings: boolean getUseWideViewPort()>();
+
+        if $z0 == 0 goto label8;
+
+        $i2 = $r0.<android.webkit.WebViewCore: int mViewportWidth>;
+
+        if $i0 < $i2 goto label2;
+
+        $i2 = $r0.<android.webkit.WebViewCore: int mViewportWidth>;
+
+        if $i2 != -1 goto label8;
+
+     label2:
+        $i2 = $r0.<android.webkit.WebViewCore: int mViewportWidth>;
+
+        $i3 = $r0.<android.webkit.WebViewCore: int mViewportWidth>;
+
+        if $i3 != -1 goto label3;
+
+        $r1 = $r0.<android.webkit.WebViewCore: android.webkit.WebSettings mSettings>;
+
+        $r2 = virtualinvoke $r1.<android.webkit.WebSettings: android.webkit.WebSettings$LayoutAlgorithm getLayoutAlgorithm()>();
+
+        $r3 = <android.webkit.WebSettings$LayoutAlgorithm: android.webkit.WebSettings$LayoutAlgorithm NORMAL>;
+
+        if $r2 != $r3 goto label7;
+
+        $i2 = 1008;
+
+     label3:
+        $f1 = (float) $i2;
+
+        $f2 = (float) $i1;
+
+        $f1 = $f1 * $f2;
+
+        $f2 = (float) $i0;
+
+        $f1 = $f1 / $f2;
+
+        $i3 = staticinvoke <java.lang.Math: int round(float)>($f1);
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void nativeSetSize(int,int,int,float,int,int)>($i2, $i3, $i0, $f0, $i0, $i1);
+
+     label4:
+        $i2 = $r0.<android.webkit.WebViewCore: int mCurrentViewWidth>;
+
+        if $i2 != 0 goto label9;
+
+        $z0 = 1;
+
+     label5:
+        $r0.<android.webkit.WebViewCore: int mCurrentViewWidth> = $i0;
+
+        $r0.<android.webkit.WebViewCore: int mCurrentViewHeight> = $i1;
+
+        if $z0 == 0 goto label6;
+
+        virtualinvoke $r0.<android.webkit.WebViewCore: void contentDraw()>();
+
+     label6:
+        $r4 = $r0.<android.webkit.WebViewCore: android.webkit.WebViewCore$EventHub mEventHub>;
+
+        $r5 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int)>(null, 117);
+
+        staticinvoke <android.webkit.WebViewCore$EventHub: void access$5000(android.webkit.WebViewCore$EventHub,android.os.Message)>($r4, $r5);
+
+        return;
+
+     label7:
+        $i2 = specialinvoke $r0.<android.webkit.WebViewCore: int nativeGetContentMinPrefWidth()>();
+
+        $i2 = staticinvoke <java.lang.Math: int max(int,int)>($i0, $i2);
+
+        goto label3;
+
+     label8:
+        specialinvoke $r0.<android.webkit.WebViewCore: void nativeSetSize(int,int,int,float,int,int)>($i0, $i1, $i0, $f0, $i0, $i1);
+
+        goto label4;
+
+     label9:
+        $z0 = 0;
+
+        goto label5;
+    }
+
+    private void webkitDraw()
+    {
+        android.webkit.WebViewCore $r0;
+        android.webkit.WebViewCore$DrawData $r1;
+        int $i0, $i1;
+        android.graphics.Region $r2;
+        android.graphics.Point $r3;
+        boolean $z0;
+        android.webkit.WebView $r4;
+        android.os.Handler $r5;
+        android.os.Message $r6;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $r0.<android.webkit.WebViewCore: boolean mDrawIsScheduled> = 0;
+
+        $r1 = new android.webkit.WebViewCore$DrawData;
+
+        specialinvoke $r1.<android.webkit.WebViewCore$DrawData: void <init>(android.webkit.WebViewCore)>($r0);
+
+        $r2 = $r1.<android.webkit.WebViewCore$DrawData: android.graphics.Region mInvalRegion>;
+
+        $r3 = $r1.<android.webkit.WebViewCore$DrawData: android.graphics.Point mWidthHeight>;
+
+        $z0 = specialinvoke $r0.<android.webkit.WebViewCore: boolean nativeRecordContent(android.graphics.Region,android.graphics.Point)>($r2, $r3);
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r4 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        if $r4 == null goto label4;
+
+        $r3 = new android.graphics.Point;
+
+        $i0 = $r0.<android.webkit.WebViewCore: int mCurrentViewWidth>;
+
+        $i1 = $r0.<android.webkit.WebViewCore: int mCurrentViewHeight>;
+
+        specialinvoke $r3.<android.graphics.Point: void <init>(int,int)>($i0, $i1);
+
+        $r1.<android.webkit.WebViewCore$DrawData: android.graphics.Point mViewPoint> = $r3;
+
+        $r4 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        $r5 = $r4.<android.webkit.WebView: android.os.Handler mPrivateHandler>;
+
+        $r6 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int,java.lang.Object)>($r5, 14, $r1);
+
+        virtualinvoke $r6.<android.os.Message: void sendToTarget()>();
+
+        $i0 = $r0.<android.webkit.WebViewCore: int mWebkitScrollX>;
+
+        if $i0 != 0 goto label2;
+
+        $i0 = $r0.<android.webkit.WebViewCore: int mWebkitScrollY>;
+
+        if $i0 == 0 goto label3;
+
+     label2:
+        $r4 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        $r5 = $r4.<android.webkit.WebView: android.os.Handler mPrivateHandler>;
+
+        $i1 = $r0.<android.webkit.WebViewCore: int mWebkitScrollX>;
+
+        $i0 = $r0.<android.webkit.WebViewCore: int mWebkitScrollY>;
+
+        $r6 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int,int,int)>($r5, 13, $i1, $i0);
+
+        virtualinvoke $r6.<android.os.Message: void sendToTarget()>();
+
+        $r0.<android.webkit.WebViewCore: int mWebkitScrollY> = 0;
+
+        $r0.<android.webkit.WebViewCore: int mWebkitScrollX> = 0;
+
+     label3:
+        specialinvoke $r0.<android.webkit.WebViewCore: void nativeSnapToAnchor()>();
+
+        return;
+
+     label4:
+        return;
+    }
+
+    void contentDraw()
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0;
+        android.webkit.BrowserFrame $r1;
+        boolean $z0;
+        java.lang.Throwable $r2;
+        android.webkit.WebViewCore$EventHub $r3;
+        android.os.Message $r4;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $i0 = $r0.<android.webkit.WebViewCore: int mCurrentViewWidth>;
+
+        if $i0 == 0 goto label9;
+
+        $r1 = $r0.<android.webkit.WebViewCore: android.webkit.BrowserFrame mBrowserFrame>;
+
+        $z0 = virtualinvoke $r1.<android.webkit.BrowserFrame: boolean firstLayoutDone()>();
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        entermonitor $r0;
+
+     label2:
+        $z0 = $r0.<android.webkit.WebViewCore: boolean mDrawIsPaused>;
+
+        if $z0 != 0 goto label3;
+
+        $z0 = $r0.<android.webkit.WebViewCore: boolean mDrawIsScheduled>;
+
+        if $z0 == 0 goto label7;
+
+     label3:
+        exitmonitor $r0;
+
+     label4:
+        return;
+
+     label5:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label6:
+        throw $r2;
+
+     label7:
+        $r0.<android.webkit.WebViewCore: boolean mDrawIsScheduled> = 1;
+
+        $r3 = $r0.<android.webkit.WebViewCore: android.webkit.WebViewCore$EventHub mEventHub>;
+
+        $r4 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int)>(null, 130);
+
+        staticinvoke <android.webkit.WebViewCore$EventHub: void access$5000(android.webkit.WebViewCore$EventHub,android.os.Message)>($r3, $r4);
+
+        exitmonitor $r0;
+
+     label8:
+        return;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label2 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+        catch java.lang.Throwable from label7 to label8 with label5;
+    }
+
+    android.graphics.Picture copyContentPicture()
+    {
+        android.webkit.WebViewCore $r0;
+        android.graphics.Picture $r1;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $r1 = new android.graphics.Picture;
+
+        specialinvoke $r1.<android.graphics.Picture: void <init>()>();
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void nativeCopyContentToPicture(android.graphics.Picture)>($r1);
+
+        return $r1;
+    }
+
+    void destroy()
+    {
+        android.webkit.WebViewCore $r0;
+        android.webkit.WebViewCore$EventHub $r1, $r3;
+        android.os.Message $r2;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $r1 = $r0.<android.webkit.WebViewCore: android.webkit.WebViewCore$EventHub mEventHub>;
+
+        entermonitor $r1;
+
+     label1:
+        $r3 = $r0.<android.webkit.WebViewCore: android.webkit.WebViewCore$EventHub mEventHub>;
+
+        staticinvoke <android.webkit.WebViewCore$EventHub: void access$5300(android.webkit.WebViewCore$EventHub)>($r3);
+
+        $r3 = $r0.<android.webkit.WebViewCore: android.webkit.WebViewCore$EventHub mEventHub>;
+
+        $r2 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int)>(null, 200);
+
+        staticinvoke <android.webkit.WebViewCore$EventHub: void access$5400(android.webkit.WebViewCore$EventHub,android.os.Message)>($r3, $r2);
+
+        $r3 = $r0.<android.webkit.WebViewCore: android.webkit.WebViewCore$EventHub mEventHub>;
+
+        staticinvoke <android.webkit.WebViewCore$EventHub: void access$5500(android.webkit.WebViewCore$EventHub)>($r3);
+
+        $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView> = null;
+
+        exitmonitor $r1;
+
+     label2:
+        return;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    void drawContentPicture(android.graphics.Canvas, int, boolean, boolean)
+    {
+        android.webkit.WebViewCore $r0;
+        android.graphics.Canvas $r1;
+        int $i0;
+        boolean $z0, $z1;
+        android.graphics.DrawFilter $r2;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $r1 := @parameter0: android.graphics.Canvas;
+
+        $i0 := @parameter1: int;
+
+        $z0 := @parameter2: boolean;
+
+        $z1 := @parameter3: boolean;
+
+        $r2 = null;
+
+        if $z0 == 0 goto label2;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.graphics.DrawFilter mZoomFilter>;
+
+     label1:
+        virtualinvoke $r1.<android.graphics.Canvas: void setDrawFilter(android.graphics.DrawFilter)>($r2);
+
+        $z0 = specialinvoke $r0.<android.webkit.WebViewCore: boolean nativeDrawContent(android.graphics.Canvas,int)>($r1, $i0);
+
+        virtualinvoke $r1.<android.graphics.Canvas: void setDrawFilter(android.graphics.DrawFilter)>(null);
+
+        if $z0 == 0 goto label3;
+
+        $z0 = $r0.<android.webkit.WebViewCore: boolean mSplitPictureIsScheduled>;
+
+        if $z0 != 0 goto label4;
+
+        $r0.<android.webkit.WebViewCore: boolean mSplitPictureIsScheduled> = 1;
+
+        virtualinvoke $r0.<android.webkit.WebViewCore: void sendMessage(int)>(133);
+
+        return;
+
+     label2:
+        if $z1 == 0 goto label1;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.graphics.DrawFilter mScrollFilter>;
+
+        goto label1;
+
+     label3:
+        return;
+
+     label4:
+        return;
+    }
+
+    android.webkit.BrowserFrame getBrowserFrame()
+    {
+        android.webkit.WebViewCore $r0;
+        android.webkit.BrowserFrame r1;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        r1 = $r0.<android.webkit.WebViewCore: android.webkit.BrowserFrame mBrowserFrame>;
+
+        return r1;
+    }
+
+    public android.webkit.WebSettings getSettings()
+    {
+        android.webkit.WebViewCore $r0;
+        android.webkit.WebSettings r1;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        r1 = $r0.<android.webkit.WebViewCore: android.webkit.WebSettings mSettings>;
+
+        return r1;
+    }
+
+    android.webkit.WebView getWebView()
+    {
+        android.webkit.WebViewCore $r0;
+        android.webkit.WebView r1;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        r1 = $r0.<android.webkit.WebViewCore: android.webkit.WebView mWebView>;
+
+        return r1;
+    }
+
+    void initializeSubwindow()
+    {
+        android.webkit.WebViewCore $r0;
+        android.os.Handler $r1;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        specialinvoke $r0.<android.webkit.WebViewCore: void initialize()>();
+
+        $r1 = <android.webkit.WebViewCore: android.os.Handler sWebCoreHandler>;
+
+        virtualinvoke $r1.<android.os.Handler: void removeMessages(int,java.lang.Object)>(0, $r0);
+
+        return;
+    }
+
+    protected void jsAlert(java.lang.String, java.lang.String)
+    {
+        android.webkit.WebViewCore $r0;
+        java.lang.String $r1, $r2;
+        android.webkit.CallbackProxy $r3;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 = $r0.<android.webkit.WebViewCore: android.webkit.CallbackProxy mCallbackProxy>;
+
+        virtualinvoke $r3.<android.webkit.CallbackProxy: void onJsAlert(java.lang.String,java.lang.String)>($r1, $r2);
+
+        return;
+    }
+
+    protected boolean jsConfirm(java.lang.String, java.lang.String)
+    {
+        android.webkit.WebViewCore $r0;
+        java.lang.String $r1, $r2;
+        boolean $z0;
+        android.webkit.CallbackProxy $r3;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 = $r0.<android.webkit.WebViewCore: android.webkit.CallbackProxy mCallbackProxy>;
+
+        $z0 = virtualinvoke $r3.<android.webkit.CallbackProxy: boolean onJsConfirm(java.lang.String,java.lang.String)>($r1, $r2);
+
+        return $z0;
+    }
+
+    protected java.lang.String jsPrompt(java.lang.String, java.lang.String, java.lang.String)
+    {
+        android.webkit.WebViewCore $r0;
+        java.lang.String $r1, $r2, $r3;
+        android.webkit.CallbackProxy $r4;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r4 = $r0.<android.webkit.WebViewCore: android.webkit.CallbackProxy mCallbackProxy>;
+
+        $r1 = virtualinvoke $r4.<android.webkit.CallbackProxy: java.lang.String onJsPrompt(java.lang.String,java.lang.String,java.lang.String)>($r1, $r2, $r3);
+
+        return $r1;
+    }
+
+    protected boolean jsUnload(java.lang.String, java.lang.String)
+    {
+        android.webkit.WebViewCore $r0;
+        java.lang.String $r1, $r2;
+        boolean $z0;
+        android.webkit.CallbackProxy $r3;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 = $r0.<android.webkit.WebViewCore: android.webkit.CallbackProxy mCallbackProxy>;
+
+        $z0 = virtualinvoke $r3.<android.webkit.CallbackProxy: boolean onJsBeforeUnload(java.lang.String,java.lang.String)>($r1, $r2);
+
+        return $z0;
+    }
+
+    void removeMessages()
+    {
+        android.webkit.WebViewCore $r0;
+        android.webkit.WebViewCore$EventHub $r1;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $r1 = $r0.<android.webkit.WebViewCore: android.webkit.WebViewCore$EventHub mEventHub>;
+
+        staticinvoke <android.webkit.WebViewCore$EventHub: void access$5300(android.webkit.WebViewCore$EventHub)>($r1);
+
+        return;
+    }
+
+    void removeMessages(int)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0;
+        android.webkit.WebViewCore$EventHub $r1;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<android.webkit.WebViewCore: android.webkit.WebViewCore$EventHub mEventHub>;
+
+        staticinvoke <android.webkit.WebViewCore$EventHub: void access$5200(android.webkit.WebViewCore$EventHub,int)>($r1, $i0);
+
+        return;
+    }
+
+    void sendMessage(int)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0;
+        android.webkit.WebViewCore$EventHub $r1;
+        android.os.Message $r2;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<android.webkit.WebViewCore: android.webkit.WebViewCore$EventHub mEventHub>;
+
+        $r2 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int)>(null, $i0);
+
+        staticinvoke <android.webkit.WebViewCore$EventHub: void access$5000(android.webkit.WebViewCore$EventHub,android.os.Message)>($r1, $r2);
+
+        return;
+    }
+
+    void sendMessage(int, int)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0, $i1;
+        android.webkit.WebViewCore$EventHub $r1;
+        android.os.Message $r2;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 = $r0.<android.webkit.WebViewCore: android.webkit.WebViewCore$EventHub mEventHub>;
+
+        $r2 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int,int,int)>(null, $i0, $i1, 0);
+
+        staticinvoke <android.webkit.WebViewCore$EventHub: void access$5000(android.webkit.WebViewCore$EventHub,android.os.Message)>($r1, $r2);
+
+        return;
+    }
+
+    void sendMessage(int, int, int)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0, $i1, $i2;
+        android.webkit.WebViewCore$EventHub $r1;
+        android.os.Message $r2;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i2 := @parameter2: int;
+
+        $r1 = $r0.<android.webkit.WebViewCore: android.webkit.WebViewCore$EventHub mEventHub>;
+
+        $r2 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int,int,int)>(null, $i0, $i1, $i2);
+
+        staticinvoke <android.webkit.WebViewCore$EventHub: void access$5000(android.webkit.WebViewCore$EventHub,android.os.Message)>($r1, $r2);
+
+        return;
+    }
+
+    void sendMessage(int, int, int, java.lang.Object)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0, $i1, $i2;
+        java.lang.Object $r1;
+        android.webkit.WebViewCore$EventHub $r2;
+        android.os.Message $r3;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i2 := @parameter2: int;
+
+        $r1 := @parameter3: java.lang.Object;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.WebViewCore$EventHub mEventHub>;
+
+        $r3 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int,int,int,java.lang.Object)>(null, $i0, $i1, $i2, $r1);
+
+        staticinvoke <android.webkit.WebViewCore$EventHub: void access$5000(android.webkit.WebViewCore$EventHub,android.os.Message)>($r2, $r3);
+
+        return;
+    }
+
+    void sendMessage(int, int, java.lang.Object)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0, $i1;
+        java.lang.Object $r1;
+        android.webkit.WebViewCore$EventHub $r2;
+        android.os.Message $r3;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 := @parameter2: java.lang.Object;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.WebViewCore$EventHub mEventHub>;
+
+        $r3 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int,int,int,java.lang.Object)>(null, $i0, $i1, 0, $r1);
+
+        staticinvoke <android.webkit.WebViewCore$EventHub: void access$5000(android.webkit.WebViewCore$EventHub,android.os.Message)>($r2, $r3);
+
+        return;
+    }
+
+    void sendMessage(int, java.lang.Object)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0;
+        java.lang.Object $r1;
+        android.webkit.WebViewCore$EventHub $r2;
+        android.os.Message $r3;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.lang.Object;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.WebViewCore$EventHub mEventHub>;
+
+        $r3 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int,java.lang.Object)>(null, $i0, $r1);
+
+        staticinvoke <android.webkit.WebViewCore$EventHub: void access$5000(android.webkit.WebViewCore$EventHub,android.os.Message)>($r2, $r3);
+
+        return;
+    }
+
+    void sendMessage(android.os.Message)
+    {
+        android.webkit.WebViewCore $r0;
+        android.os.Message $r1;
+        android.webkit.WebViewCore$EventHub $r2;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $r1 := @parameter0: android.os.Message;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.WebViewCore$EventHub mEventHub>;
+
+        staticinvoke <android.webkit.WebViewCore$EventHub: void access$5000(android.webkit.WebViewCore$EventHub,android.os.Message)>($r2, $r1);
+
+        return;
+    }
+
+    void sendMessageDelayed(int, java.lang.Object, long)
+    {
+        android.webkit.WebViewCore $r0;
+        int $i0;
+        java.lang.Object $r1;
+        long $l1;
+        android.webkit.WebViewCore$EventHub $r2;
+        android.os.Message $r3;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.lang.Object;
+
+        $l1 := @parameter2: long;
+
+        $r2 = $r0.<android.webkit.WebViewCore: android.webkit.WebViewCore$EventHub mEventHub>;
+
+        $r3 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int,java.lang.Object)>(null, $i0, $r1);
+
+        staticinvoke <android.webkit.WebViewCore$EventHub: void access$5100(android.webkit.WebViewCore$EventHub,android.os.Message,long)>($r2, $r3, $l1);
+
+        return;
+    }
+
+    void stopLoading()
+    {
+        android.webkit.WebViewCore $r0;
+        android.webkit.BrowserFrame $r1;
+
+        $r0 := @this: android.webkit.WebViewCore;
+
+        $r1 = $r0.<android.webkit.WebViewCore: android.webkit.BrowserFrame mBrowserFrame>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<android.webkit.WebViewCore: android.webkit.BrowserFrame mBrowserFrame>;
+
+        virtualinvoke $r1.<android.webkit.BrowserFrame: void stopLoading()>();
+
+        return;
+
+     label1:
+        return;
+    }
+}

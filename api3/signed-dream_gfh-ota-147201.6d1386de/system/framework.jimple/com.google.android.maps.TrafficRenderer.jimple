@@ -1,0 +1,471 @@
+class com.google.android.maps.TrafficRenderer extends com.google.googlenav.ui.GmmTileOverlayRendererImpl
+{
+    private static final int GREEN;
+    private static final int NONE;
+    private static final int NO_DATA;
+    private static final int RED;
+    private static final int RED_OUTLINE;
+    private static final int ROAD_BACKGROUND;
+    private static final int YELLOW;
+    private static final int YELLOW_OUTLINE;
+
+    public void <init>(com.google.googlenav.map.TrafficService)
+    {
+        com.google.android.maps.TrafficRenderer $r0;
+        com.google.googlenav.map.TrafficService $r1;
+
+        $r0 := @this: com.google.android.maps.TrafficRenderer;
+
+        $r1 := @parameter0: com.google.googlenav.map.TrafficService;
+
+        specialinvoke $r0.<com.google.googlenav.ui.GmmTileOverlayRendererImpl: void <init>()>();
+
+        virtualinvoke $r0.<com.google.googlenav.ui.GmmTileOverlayRendererImpl: void setTrafficService(com.google.googlenav.map.TrafficService)>($r1);
+
+        return;
+    }
+
+    private static void addPathPoint(android.graphics.Path, com.google.googlenav.map.TrafficReading, com.google.map.Zoom, int, int, boolean)
+    {
+        android.graphics.Path $r0;
+        boolean $z0;
+        com.google.googlenav.map.TrafficReading $r1;
+        com.google.map.Zoom $r2;
+        int $i0, $i1;
+        float $f0, $f1;
+        byte $b2;
+        double $d0, $d1, $d2;
+
+        $r0 := @parameter0: android.graphics.Path;
+
+        $r1 := @parameter1: com.google.googlenav.map.TrafficReading;
+
+        $r2 := @parameter2: com.google.map.Zoom;
+
+        $i0 := @parameter3: int;
+
+        $i1 := @parameter4: int;
+
+        $z0 := @parameter5: boolean;
+
+        $i0 = virtualinvoke $r1.<com.google.googlenav.map.TrafficReading: int getXOffset()>();
+
+        $f0 = (float) $i0;
+
+        $i0 = virtualinvoke $r1.<com.google.googlenav.map.TrafficReading: int getYOffset()>();
+
+        $f1 = (float) $i0;
+
+        $i0 = virtualinvoke $r2.<com.google.map.Zoom: int getZoomLevel()>();
+
+        if $i0 <= 10 goto label2;
+
+        $b2 = 5;
+
+     label1:
+        $d0 = (double) $f0;
+
+        $d1 = (double) $b2;
+
+        $i0 = virtualinvoke $r1.<com.google.googlenav.map.TrafficReading: int getAzi()>();
+
+        $d2 = (double) $i0;
+
+        $d2 = $d2 * 3.141592653589793;
+
+        $d2 = $d2 / 180.0;
+
+        $d2 = staticinvoke <java.lang.Math: double cos(double)>($d2);
+
+        $d1 = $d1 * $d2;
+
+        $d1 = $d1 / 2.0;
+
+        $d0 = $d0 + $d1;
+
+        $f0 = (float) $d0;
+
+        $d0 = (double) $f1;
+
+        $d1 = (double) $b2;
+
+        $i0 = virtualinvoke $r1.<com.google.googlenav.map.TrafficReading: int getAzi()>();
+
+        $d2 = (double) $i0;
+
+        $d2 = $d2 * 3.141592653589793;
+
+        $d2 = $d2 / 180.0;
+
+        $d2 = staticinvoke <java.lang.Math: double sin(double)>($d2);
+
+        $d1 = $d2 * $d1;
+
+        $d1 = $d1 / 2.0;
+
+        $d0 = $d1 + $d0;
+
+        $f1 = (float) $d0;
+
+        if $z0 == 0 goto label3;
+
+        virtualinvoke $r0.<android.graphics.Path: void lineTo(float,float)>($f0, $f1);
+
+        return;
+
+     label2:
+        $b2 = 4;
+
+        goto label1;
+
+     label3:
+        virtualinvoke $r0.<android.graphics.Path: void moveTo(float,float)>($f0, $f1);
+
+        return;
+    }
+
+    private void drawTraffic(android.graphics.Canvas, com.google.googlenav.map.TrafficTile)
+    {
+        com.google.android.maps.TrafficRenderer $r0;
+        android.graphics.Canvas $r1;
+        com.google.googlenav.map.TrafficTile $r2;
+        android.graphics.Paint $r3;
+        com.google.googlenav.map.TrafficReading $r4, $r12;
+        com.google.googlenav.map.Tile $r5;
+        int $i0, $i1, $i2, $i5, $i6, $i7;
+        com.google.map.Zoom $r6;
+        byte $b3, $b4;
+        android.graphics.Paint$Join $r7;
+        android.graphics.Paint$Style $r8;
+        com.google.googlenav.map.TrafficReading[][] $r9;
+        com.google.googlenav.map.TrafficReading[] $r10;
+        android.graphics.Path $r11;
+        boolean $z0;
+
+        $r0 := @this: com.google.android.maps.TrafficRenderer;
+
+        $r1 := @parameter0: android.graphics.Canvas;
+
+        $r2 := @parameter1: com.google.googlenav.map.TrafficTile;
+
+        $r5 = virtualinvoke $r2.<com.google.googlenav.map.TrafficTile: com.google.googlenav.map.Tile getLocation()>();
+
+        $i0 = virtualinvoke $r5.<com.google.googlenav.map.Tile: int getXPixelTopLeft()>();
+
+        $i1 = virtualinvoke $r5.<com.google.googlenav.map.Tile: int getYPixelTopLeft()>();
+
+        $r6 = virtualinvoke $r5.<com.google.googlenav.map.Tile: com.google.map.Zoom getZoom()>();
+
+        $i2 = virtualinvoke $r6.<com.google.map.Zoom: int getZoomLevel()>();
+
+        if $i2 <= 13 goto label03;
+
+        $b3 = 9;
+
+     label01:
+        if $i2 <= 13 goto label06;
+
+        $b4 = 4;
+
+     label02:
+        $r3 = new android.graphics.Paint;
+
+        specialinvoke $r3.<android.graphics.Paint: void <init>()>();
+
+        virtualinvoke $r3.<android.graphics.Paint: void setAntiAlias(boolean)>(1);
+
+        $r7 = <android.graphics.Paint$Join: android.graphics.Paint$Join ROUND>;
+
+        virtualinvoke $r3.<android.graphics.Paint: void setStrokeJoin(android.graphics.Paint$Join)>($r7);
+
+        $r8 = <android.graphics.Paint$Style: android.graphics.Paint$Style STROKE>;
+
+        virtualinvoke $r3.<android.graphics.Paint: void setStyle(android.graphics.Paint$Style)>($r8);
+
+        $r9 = virtualinvoke $r2.<com.google.googlenav.map.TrafficTile: com.google.googlenav.map.TrafficReading[][] getReadings()>();
+
+        $i2 = lengthof $r9;
+
+        if $i2 == 0 goto label16;
+
+        $r10 = $r9[0];
+
+        $i2 = lengthof $r10;
+
+        if $i2 != 0 goto label08;
+
+        return;
+
+     label03:
+        if $i2 <= 11 goto label04;
+
+        $b3 = 8;
+
+        goto label01;
+
+     label04:
+        if $i2 <= 9 goto label05;
+
+        $b3 = 6;
+
+        goto label01;
+
+     label05:
+        $b3 = 5;
+
+        goto label01;
+
+     label06:
+        if $i2 <= 11 goto label07;
+
+        $b4 = 3;
+
+        goto label02;
+
+     label07:
+        $b4 = 2;
+
+        goto label02;
+
+     label08:
+        $r11 = new android.graphics.Path;
+
+        specialinvoke $r11.<android.graphics.Path: void <init>()>();
+
+        $r10 = $r9[0];
+
+        $r12 = $r10[0];
+
+        $i2 = specialinvoke $r0.<com.google.android.maps.TrafficRenderer: int getColor(com.google.googlenav.map.TrafficReading)>($r12);
+
+        $i5 = 0;
+
+     label09:
+        $i6 = lengthof $r9;
+
+        if $i5 >= $i6 goto label15;
+
+        $i6 = 0;
+
+     label10:
+        $r10 = $r9[$i5];
+
+        $i7 = lengthof $r10;
+
+        if $i6 >= $i7 goto label14;
+
+        $r10 = $r9[$i5];
+
+        $r4 = $r10[$i6];
+
+        $i7 = specialinvoke $r0.<com.google.android.maps.TrafficRenderer: int getColor(com.google.googlenav.map.TrafficReading)>($r4);
+
+        if $i7 == $i2 goto label11;
+
+        staticinvoke <com.google.android.maps.TrafficRenderer: void paintPath(android.graphics.Path,android.graphics.Canvas,android.graphics.Paint,int,int,int)>($r11, $r1, $r3, $i2, $b3, $b4);
+
+        $r11 = new android.graphics.Path;
+
+        specialinvoke $r11.<android.graphics.Path: void <init>()>();
+
+        staticinvoke <com.google.android.maps.TrafficRenderer: void addPathPoint(android.graphics.Path,com.google.googlenav.map.TrafficReading,com.google.map.Zoom,int,int,boolean)>($r11, $r12, $r6, $i0, $i1, 0);
+
+        $i2 = $i7;
+
+     label11:
+        $z0 = virtualinvoke $r4.<com.google.googlenav.map.TrafficReading: boolean isDiscontinuity()>();
+
+        if $z0 != 0 goto label13;
+
+        if $i6 == 0 goto label13;
+
+        $z0 = 1;
+
+     label12:
+        staticinvoke <com.google.android.maps.TrafficRenderer: void addPathPoint(android.graphics.Path,com.google.googlenav.map.TrafficReading,com.google.map.Zoom,int,int,boolean)>($r11, $r4, $r6, $i0, $i1, $z0);
+
+        $r12 = $r4;
+
+        $i6 = $i6 + 1;
+
+        goto label10;
+
+     label13:
+        $z0 = 0;
+
+        goto label12;
+
+     label14:
+        $i5 = $i5 + 1;
+
+        goto label09;
+
+     label15:
+        staticinvoke <com.google.android.maps.TrafficRenderer: void paintPath(android.graphics.Path,android.graphics.Canvas,android.graphics.Paint,int,int,int)>($r11, $r1, $r3, $i2, $b3, $b4);
+
+        return;
+
+     label16:
+        return;
+    }
+
+    private int getColor(com.google.googlenav.map.TrafficReading)
+    {
+        com.google.android.maps.TrafficRenderer $r0;
+        com.google.googlenav.map.TrafficReading $r1;
+        boolean $z0;
+        int $i0;
+
+        $r0 := @this: com.google.android.maps.TrafficRenderer;
+
+        $r1 := @parameter0: com.google.googlenav.map.TrafficReading;
+
+        $z0 = virtualinvoke $r1.<com.google.googlenav.map.TrafficReading: boolean isDiscontinuity()>();
+
+        if $z0 == 0 goto label1;
+
+        return 16777215;
+
+     label1:
+        $z0 = virtualinvoke $r1.<com.google.googlenav.map.TrafficReading: boolean hasData()>();
+
+        if $z0 != 0 goto label2;
+
+        return -1328426543;
+
+     label2:
+        $i0 = virtualinvoke $r1.<com.google.googlenav.map.TrafficReading: int getSpeed()>();
+
+        if $i0 >= 25 goto label3;
+
+        return -1734803456;
+
+     label3:
+        $i0 = virtualinvoke $r1.<com.google.googlenav.map.TrafficReading: int getSpeed()>();
+
+        if $i0 >= 50 goto label4;
+
+        return -1325407232;
+
+     label4:
+        return -1342129152;
+    }
+
+    private static void paintPath(android.graphics.Path, android.graphics.Canvas, android.graphics.Paint, int, int, int)
+    {
+        android.graphics.Path $r0;
+        android.graphics.Canvas $r1;
+        android.graphics.Paint $r2;
+        int $i0, $i1, $i2;
+        float $f0;
+
+        $r0 := @parameter0: android.graphics.Path;
+
+        $r1 := @parameter1: android.graphics.Canvas;
+
+        $r2 := @parameter2: android.graphics.Paint;
+
+        $i0 := @parameter3: int;
+
+        $i1 := @parameter4: int;
+
+        $i2 := @parameter5: int;
+
+        virtualinvoke $r2.<android.graphics.Paint: void setColor(int)>(-2130706433);
+
+        $f0 = (float) $i1;
+
+        virtualinvoke $r2.<android.graphics.Paint: void setStrokeWidth(float)>($f0);
+
+        virtualinvoke $r1.<android.graphics.Canvas: void drawPath(android.graphics.Path,android.graphics.Paint)>($r0, $r2);
+
+        virtualinvoke $r2.<android.graphics.Paint: void setColor(int)>($i0);
+
+        $f0 = (float) $i2;
+
+        virtualinvoke $r2.<android.graphics.Paint: void setStrokeWidth(float)>($f0);
+
+        virtualinvoke $r1.<android.graphics.Canvas: void drawPath(android.graphics.Path,android.graphics.Paint)>($r0, $r2);
+
+        return;
+    }
+
+    public com.google.common.graphics.GoogleImage generateNewTileImage(com.google.googlenav.map.MapTile, com.google.googlenav.map.TrafficTile)
+    {
+        com.google.android.maps.TrafficRenderer $r0;
+        com.google.googlenav.map.MapTile $r1;
+        com.google.googlenav.map.TrafficTile $r2;
+        android.graphics.Canvas $r3;
+        com.google.common.graphics.GoogleImage $r4;
+        com.google.common.graphics.android.AndroidImage $r5;
+        android.graphics.Bitmap$Config $r6;
+        android.graphics.Bitmap $r7, $r8;
+
+        $r0 := @this: com.google.android.maps.TrafficRenderer;
+
+        $r1 := @parameter0: com.google.googlenav.map.MapTile;
+
+        $r2 := @parameter1: com.google.googlenav.map.TrafficTile;
+
+        if $r2 != null goto label1;
+
+        $r4 = virtualinvoke $r1.<com.google.googlenav.map.MapTile: com.google.common.graphics.GoogleImage getImage()>();
+
+        return $r4;
+
+     label1:
+        $r6 = <android.graphics.Bitmap$Config: android.graphics.Bitmap$Config RGB_565>;
+
+        $r7 = staticinvoke <android.graphics.Bitmap: android.graphics.Bitmap createBitmap(int,int,android.graphics.Bitmap$Config)>(128, 128, $r6);
+
+        $r3 = new android.graphics.Canvas;
+
+        specialinvoke $r3.<android.graphics.Canvas: void <init>(android.graphics.Bitmap)>($r7);
+
+        $r4 = virtualinvoke $r1.<com.google.googlenav.map.MapTile: com.google.common.graphics.GoogleImage getImage()>();
+
+        $r5 = (com.google.common.graphics.android.AndroidImage) $r4;
+
+        $r8 = virtualinvoke $r5.<com.google.common.graphics.android.AndroidImage: android.graphics.Bitmap getBitmap()>();
+
+        virtualinvoke $r3.<android.graphics.Canvas: void drawBitmap(android.graphics.Bitmap,float,float,android.graphics.Paint)>($r8, 0.0F, 0.0F, null);
+
+        specialinvoke $r0.<com.google.android.maps.TrafficRenderer: void drawTraffic(android.graphics.Canvas,com.google.googlenav.map.TrafficTile)>($r3, $r2);
+
+        $r5 = new com.google.common.graphics.android.AndroidImage;
+
+        specialinvoke $r5.<com.google.common.graphics.android.AndroidImage: void <init>(android.graphics.Bitmap)>($r7);
+
+        return $r5;
+    }
+
+    protected boolean isFast()
+    {
+        com.google.android.maps.TrafficRenderer $r0;
+
+        $r0 := @this: com.google.android.maps.TrafficRenderer;
+
+        return 1;
+    }
+
+    public static void <clinit>()
+    {
+        <com.google.android.maps.TrafficRenderer: int YELLOW_OUTLINE> = -1325417984;
+
+        <com.google.android.maps.TrafficRenderer: int YELLOW> = -1325407232;
+
+        <com.google.android.maps.TrafficRenderer: int ROAD_BACKGROUND> = -2130706433;
+
+        <com.google.android.maps.TrafficRenderer: int RED_OUTLINE> = -800587776;
+
+        <com.google.android.maps.TrafficRenderer: int RED> = -1734803456;
+
+        <com.google.android.maps.TrafficRenderer: int NO_DATA> = -1328426543;
+
+        <com.google.android.maps.TrafficRenderer: int NONE> = 16777215;
+
+        <com.google.android.maps.TrafficRenderer: int GREEN> = -1342129152;
+
+        return;
+    }
+}

@@ -1,0 +1,2429 @@
+public class com.google.android.maps.MapView extends android.view.ViewGroup
+{
+    private static final java.lang.String KEY_CENTER_LATITUDE;
+    private static final java.lang.String KEY_CENTER_LONGITUDE;
+    private static final java.lang.String KEY_ZOOM_DISPLAYED;
+    private static final java.lang.String KEY_ZOOM_LEVEL;
+    private static final java.lang.String LOG_TAG;
+    private static final int MAX_FLING_DISTANCE;
+    private static final long ZOOM_CONTROLS_TIMEOUT;
+    private boolean mBuiltInZoomControlsEnabled;
+    private com.google.android.maps.MapController mController;
+    private com.google.android.maps.PixelConverter mConverter;
+    private final com.google.common.graphics.android.AndroidGraphics mDrawer;
+    private android.view.GestureDetector mGestureDetector;
+    private final android.graphics.drawable.Drawable mGoogleLogo;
+    private final int mGoogleLogoHeight;
+    private final int mGoogleLogoWidth;
+    private android.os.Handler mHandler;
+    final java.lang.String mKey;
+    private int mLastFlingX;
+    private int mLastFlingY;
+    private com.google.googlenav.map.Map mMap;
+    private com.google.android.maps.OverlayBundle mOverlayBundle;
+    private com.google.android.maps.AndroidTileOverlayRenderer mOverlayRenderer;
+    final com.google.android.maps.MapView$Repainter mRepainter;
+    private android.graphics.drawable.Drawable mReticle;
+    private com.google.android.maps.MapView$ReticleDrawMode mReticleDrawMode;
+    private final android.widget.Scroller mScroller;
+    private com.google.android.maps.TrackballGestureDetector mTrackballGestureDetector;
+    private android.widget.ZoomButtonsController mZoomButtonsController;
+    private java.lang.Runnable mZoomControlRunnable;
+    private android.widget.ZoomControls mZoomControls;
+    private com.google.android.maps.ZoomHelper mZoomHelper;
+
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        java.lang.StringBuilder $r1;
+        java.lang.String $r2;
+        long $l0;
+
+        <com.google.android.maps.MapView: int MAX_FLING_DISTANCE> = 800;
+
+        <com.google.android.maps.MapView: java.lang.String LOG_TAG> = "MapView";
+
+        $r0 = class "com/google/android/maps/MapView";
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r0.<java.lang.Class: java.lang.String getName()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".zoomDisplayed");
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        <com.google.android.maps.MapView: java.lang.String KEY_ZOOM_DISPLAYED> = $r2;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r0.<java.lang.Class: java.lang.String getName()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".centerLatitude");
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        <com.google.android.maps.MapView: java.lang.String KEY_CENTER_LATITUDE> = $r2;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r0.<java.lang.Class: java.lang.String getName()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".centerLongitude");
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        <com.google.android.maps.MapView: java.lang.String KEY_CENTER_LONGITUDE> = $r2;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r0.<java.lang.Class: java.lang.String getName()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".zoomLevel");
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        <com.google.android.maps.MapView: java.lang.String KEY_ZOOM_LEVEL> = $r2;
+
+        $l0 = staticinvoke <android.view.ViewConfiguration: long getZoomControlsTimeout()>();
+
+        <com.google.android.maps.MapView: long ZOOM_CONTROLS_TIMEOUT> = $l0;
+
+        return;
+    }
+
+    public void <init>(android.content.Context, android.util.AttributeSet)
+    {
+        com.google.android.maps.MapView $r0;
+        android.content.Context $r1;
+        android.util.AttributeSet $r2;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: android.util.AttributeSet;
+
+        specialinvoke $r0.<com.google.android.maps.MapView: void <init>(android.content.Context,android.util.AttributeSet,int)>($r1, $r2, 16842890);
+
+        return;
+    }
+
+    public void <init>(android.content.Context, android.util.AttributeSet, int)
+    {
+        com.google.android.maps.MapView $r0;
+        android.content.Context $r1;
+        android.util.AttributeSet $r2;
+        int $i0;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: android.util.AttributeSet;
+
+        $i0 := @parameter2: int;
+
+        specialinvoke $r0.<com.google.android.maps.MapView: void <init>(android.content.Context,android.util.AttributeSet,int,java.lang.String)>($r1, $r2, $i0, null);
+
+        return;
+    }
+
+    private void <init>(android.content.Context, android.util.AttributeSet, int, java.lang.String)
+    {
+        com.google.android.maps.MapView $r0;
+        android.content.Context $r1;
+        android.util.AttributeSet $r2;
+        int $i0;
+        java.lang.String $r3;
+        com.google.common.graphics.android.AndroidGraphics $r4;
+        com.google.android.maps.MapView$Repainter $r5;
+        int[] $r6;
+        android.content.res.TypedArray $r7;
+        java.lang.IllegalArgumentException $r8;
+        boolean $z0;
+        com.google.android.maps.MapActivity $r9;
+        android.widget.Scroller $r10;
+        android.content.res.Resources $r11;
+        android.graphics.drawable.Drawable $r12;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: android.util.AttributeSet;
+
+        $i0 := @parameter2: int;
+
+        $r3 := @parameter3: java.lang.String;
+
+        specialinvoke $r0.<android.view.ViewGroup: void <init>(android.content.Context,android.util.AttributeSet,int)>($r1, $r2, $i0);
+
+        $r4 = new com.google.common.graphics.android.AndroidGraphics;
+
+        specialinvoke $r4.<com.google.common.graphics.android.AndroidGraphics: void <init>(android.graphics.Canvas)>(null);
+
+        $r0.<com.google.android.maps.MapView: com.google.common.graphics.android.AndroidGraphics mDrawer> = $r4;
+
+        $r0.<com.google.android.maps.MapView: com.google.android.maps.OverlayBundle mOverlayBundle> = null;
+
+        $r0.<com.google.android.maps.MapView: android.graphics.drawable.Drawable mReticle> = null;
+
+        $r5 = new com.google.android.maps.MapView$Repainter;
+
+        specialinvoke $r5.<com.google.android.maps.MapView$Repainter: void <init>(com.google.android.maps.MapView)>($r0);
+
+        $r0.<com.google.android.maps.MapView: com.google.android.maps.MapView$Repainter mRepainter> = $r5;
+
+        if $r3 != null goto label2;
+
+        $r6 = <com.android.internal.R$styleable: int[] MapView>;
+
+        $r7 = virtualinvoke $r1.<android.content.Context: android.content.res.TypedArray obtainStyledAttributes(android.util.AttributeSet,int[])>($r2, $r6);
+
+        $r3 = virtualinvoke $r7.<android.content.res.TypedArray: java.lang.String getString(int)>(0);
+
+        $r0.<com.google.android.maps.MapView: java.lang.String mKey> = $r3;
+
+        virtualinvoke $r7.<android.content.res.TypedArray: void recycle()>();
+
+     label1:
+        $r3 = $r0.<com.google.android.maps.MapView: java.lang.String mKey>;
+
+        if $r3 != null goto label3;
+
+        $r8 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r8.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("You need to specify an API Key for each MapView.  See the MapView documentation for details.");
+
+        throw $r8;
+
+     label2:
+        $r0.<com.google.android.maps.MapView: java.lang.String mKey> = $r3;
+
+        goto label1;
+
+     label3:
+        virtualinvoke $r0.<android.view.View: void setWillNotDraw(boolean)>(0);
+
+        $z0 = $r1 instanceof com.google.android.maps.MapActivity;
+
+        if $z0 == 0 goto label4;
+
+        $r9 = (com.google.android.maps.MapActivity) $r1;
+
+        virtualinvoke $r9.<com.google.android.maps.MapActivity: void setupMapView(com.google.android.maps.MapView)>($r0);
+
+        $r10 = new android.widget.Scroller;
+
+        specialinvoke $r10.<android.widget.Scroller: void <init>(android.content.Context)>($r1);
+
+        $r0.<com.google.android.maps.MapView: android.widget.Scroller mScroller> = $r10;
+
+        $r11 = virtualinvoke $r1.<android.content.Context: android.content.res.Resources getResources()>();
+
+        $r12 = virtualinvoke $r11.<android.content.res.Resources: android.graphics.drawable.Drawable getDrawable(int)>(17301936);
+
+        $r0.<com.google.android.maps.MapView: android.graphics.drawable.Drawable mGoogleLogo> = $r12;
+
+        $r12 = $r0.<com.google.android.maps.MapView: android.graphics.drawable.Drawable mGoogleLogo>;
+
+        $i0 = virtualinvoke $r12.<android.graphics.drawable.Drawable: int getIntrinsicWidth()>();
+
+        $r0.<com.google.android.maps.MapView: int mGoogleLogoWidth> = $i0;
+
+        $r12 = $r0.<com.google.android.maps.MapView: android.graphics.drawable.Drawable mGoogleLogo>;
+
+        $i0 = virtualinvoke $r12.<android.graphics.drawable.Drawable: int getIntrinsicHeight()>();
+
+        $r0.<com.google.android.maps.MapView: int mGoogleLogoHeight> = $i0;
+
+        return;
+
+     label4:
+        $r8 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r8.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("MapViews can only be created inside instances of MapActivity.");
+
+        throw $r8;
+    }
+
+    public void <init>(android.content.Context, java.lang.String)
+    {
+        com.google.android.maps.MapView $r0;
+        android.content.Context $r1;
+        java.lang.String $r2;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: java.lang.String;
+
+        specialinvoke $r0.<com.google.android.maps.MapView: void <init>(android.content.Context,android.util.AttributeSet,int,java.lang.String)>($r1, null, 16842890, $r2);
+
+        return;
+    }
+
+    static android.widget.Scroller access$000(com.google.android.maps.MapView)
+    {
+        com.google.android.maps.MapView $r0;
+        android.widget.Scroller r1;
+
+        $r0 := @parameter0: com.google.android.maps.MapView;
+
+        r1 = $r0.<com.google.android.maps.MapView: android.widget.Scroller mScroller>;
+
+        return r1;
+    }
+
+    static com.google.android.maps.MapController access$100(com.google.android.maps.MapView)
+    {
+        com.google.android.maps.MapView $r0;
+        com.google.android.maps.MapController r1;
+
+        $r0 := @parameter0: com.google.android.maps.MapView;
+
+        r1 = $r0.<com.google.android.maps.MapView: com.google.android.maps.MapController mController>;
+
+        return r1;
+    }
+
+    static void access$1000(com.google.android.maps.MapView)
+    {
+        com.google.android.maps.MapView $r0;
+
+        $r0 := @parameter0: com.google.android.maps.MapView;
+
+        specialinvoke $r0.<com.google.android.maps.MapView: void updateZoomControls()>();
+
+        return;
+    }
+
+    static com.google.android.maps.PixelConverter access$200(com.google.android.maps.MapView)
+    {
+        com.google.android.maps.MapView $r0;
+        com.google.android.maps.PixelConverter r1;
+
+        $r0 := @parameter0: com.google.android.maps.MapView;
+
+        r1 = $r0.<com.google.android.maps.MapView: com.google.android.maps.PixelConverter mConverter>;
+
+        return r1;
+    }
+
+    static com.google.android.maps.OverlayBundle access$300(com.google.android.maps.MapView)
+    {
+        com.google.android.maps.MapView $r0;
+        com.google.android.maps.OverlayBundle r1;
+
+        $r0 := @parameter0: com.google.android.maps.MapView;
+
+        r1 = $r0.<com.google.android.maps.MapView: com.google.android.maps.OverlayBundle mOverlayBundle>;
+
+        return r1;
+    }
+
+    static int access$400(com.google.android.maps.MapView)
+    {
+        com.google.android.maps.MapView $r0;
+        int i0;
+
+        $r0 := @parameter0: com.google.android.maps.MapView;
+
+        i0 = $r0.<com.google.android.maps.MapView: int mLastFlingX>;
+
+        return i0;
+    }
+
+    static int access$402(com.google.android.maps.MapView, int)
+    {
+        com.google.android.maps.MapView $r0;
+        int $i0;
+
+        $r0 := @parameter0: com.google.android.maps.MapView;
+
+        $i0 := @parameter1: int;
+
+        $r0.<com.google.android.maps.MapView: int mLastFlingX> = $i0;
+
+        return $i0;
+    }
+
+    static int access$502(com.google.android.maps.MapView, int)
+    {
+        com.google.android.maps.MapView $r0;
+        int $i0;
+
+        $r0 := @parameter0: com.google.android.maps.MapView;
+
+        $i0 := @parameter1: int;
+
+        $r0.<com.google.android.maps.MapView: int mLastFlingY> = $i0;
+
+        return $i0;
+    }
+
+    static android.widget.ZoomControls access$600(com.google.android.maps.MapView)
+    {
+        com.google.android.maps.MapView $r0;
+        android.widget.ZoomControls r1;
+
+        $r0 := @parameter0: com.google.android.maps.MapView;
+
+        r1 = $r0.<com.google.android.maps.MapView: android.widget.ZoomControls mZoomControls>;
+
+        return r1;
+    }
+
+    static java.lang.Runnable access$700(com.google.android.maps.MapView)
+    {
+        com.google.android.maps.MapView $r0;
+        java.lang.Runnable r1;
+
+        $r0 := @parameter0: com.google.android.maps.MapView;
+
+        r1 = $r0.<com.google.android.maps.MapView: java.lang.Runnable mZoomControlRunnable>;
+
+        return r1;
+    }
+
+    static android.os.Handler access$800(com.google.android.maps.MapView)
+    {
+        com.google.android.maps.MapView $r0;
+        android.os.Handler r1;
+
+        $r0 := @parameter0: com.google.android.maps.MapView;
+
+        r1 = $r0.<com.google.android.maps.MapView: android.os.Handler mHandler>;
+
+        return r1;
+    }
+
+    static long access$900()
+    {
+        long l0;
+
+        l0 = <com.google.android.maps.MapView: long ZOOM_CONTROLS_TIMEOUT>;
+
+        return l0;
+    }
+
+    private boolean canZoomIn()
+    {
+        com.google.android.maps.MapView $r0;
+        com.google.googlenav.map.Map $r1;
+        com.google.map.Zoom $r2;
+        int $i0, $i1;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 = $r0.<com.google.android.maps.MapView: com.google.googlenav.map.Map mMap>;
+
+        $r2 = virtualinvoke $r1.<com.google.googlenav.map.Map: com.google.map.Zoom getZoom()>();
+
+        $i0 = virtualinvoke $r2.<com.google.map.Zoom: int getZoomLevel()>();
+
+        $i1 = virtualinvoke $r0.<com.google.android.maps.MapView: int getMaxZoomLevel()>();
+
+        if $i0 >= $i1 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    private boolean canZoomOut()
+    {
+        com.google.android.maps.MapView $r0;
+        com.google.googlenav.map.Map $r1;
+        com.google.map.Zoom $r2;
+        int $i0;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 = $r0.<com.google.android.maps.MapView: com.google.googlenav.map.Map mMap>;
+
+        $r2 = virtualinvoke $r1.<com.google.googlenav.map.Map: com.google.map.Zoom getZoom()>();
+
+        $i0 = virtualinvoke $r2.<com.google.map.Zoom: int getZoomLevel()>();
+
+        if $i0 <= 1 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    private android.widget.ZoomButtonsController createZoomButtonsController()
+    {
+        com.google.android.maps.MapView $r0;
+        android.widget.ZoomButtonsController $r1;
+        com.google.android.maps.MapView$5 $r2;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 = new android.widget.ZoomButtonsController;
+
+        specialinvoke $r1.<android.widget.ZoomButtonsController: void <init>(android.view.View)>($r0);
+
+        virtualinvoke $r1.<android.widget.ZoomButtonsController: void setZoomSpeed(long)>(2000L);
+
+        $r2 = new com.google.android.maps.MapView$5;
+
+        specialinvoke $r2.<com.google.android.maps.MapView$5: void <init>(com.google.android.maps.MapView,android.widget.ZoomButtonsController)>($r0, $r1);
+
+        virtualinvoke $r1.<android.widget.ZoomButtonsController: void setOnZoomListener(android.widget.ZoomButtonsController$OnZoomListener)>($r2);
+
+        return $r1;
+    }
+
+    private android.widget.ZoomControls createZoomControls()
+    {
+        com.google.android.maps.MapView $r0;
+        android.widget.ZoomControls $r1;
+        android.content.Context $r2;
+        com.google.android.maps.MapView$3 $r3;
+        com.google.android.maps.MapView$4 $r4;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 = new android.widget.ZoomControls;
+
+        $r2 = $r0.<android.view.View: android.content.Context mContext>;
+
+        specialinvoke $r1.<android.widget.ZoomControls: void <init>(android.content.Context)>($r2);
+
+        virtualinvoke $r1.<android.widget.ZoomControls: void setZoomSpeed(long)>(2000L);
+
+        $r3 = new com.google.android.maps.MapView$3;
+
+        specialinvoke $r3.<com.google.android.maps.MapView$3: void <init>(com.google.android.maps.MapView)>($r0);
+
+        virtualinvoke $r1.<android.widget.ZoomControls: void setOnZoomInClickListener(android.view.View$OnClickListener)>($r3);
+
+        $r4 = new com.google.android.maps.MapView$4;
+
+        specialinvoke $r4.<com.google.android.maps.MapView$4: void <init>(com.google.android.maps.MapView)>($r0);
+
+        virtualinvoke $r1.<android.widget.ZoomControls: void setOnZoomOutClickListener(android.view.View$OnClickListener)>($r4);
+
+        return $r1;
+    }
+
+    private boolean isLocationDisplayed()
+    {
+        boolean $z0;
+        com.google.android.maps.MapView $r0;
+        android.content.Context $r1;
+        com.google.android.maps.MapActivity $r2;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 = $r0.<android.view.View: android.content.Context mContext>;
+
+        $z0 = $r1 instanceof com.google.android.maps.MapActivity;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = $r0.<android.view.View: android.content.Context mContext>;
+
+        $r2 = (com.google.android.maps.MapActivity) $r1;
+
+        $z0 = virtualinvoke $r2.<com.google.android.maps.MapActivity: boolean isLocationDisplayed()>();
+
+        return $z0;
+
+     label1:
+        return 0;
+    }
+
+    private boolean isRouteDisplayed()
+    {
+        boolean $z0;
+        com.google.android.maps.MapView $r0;
+        android.content.Context $r1;
+        com.google.android.maps.MapActivity $r2;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 = $r0.<android.view.View: android.content.Context mContext>;
+
+        $z0 = $r1 instanceof com.google.android.maps.MapActivity;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = $r0.<android.view.View: android.content.Context mContext>;
+
+        $r2 = (com.google.android.maps.MapActivity) $r1;
+
+        $z0 = virtualinvoke $r2.<com.google.android.maps.MapActivity: boolean isRouteDisplayed()>();
+
+        return $z0;
+
+     label1:
+        return 0;
+    }
+
+    private void updateZoomControls()
+    {
+        com.google.android.maps.MapView $r0;
+        android.widget.ZoomControls $r1;
+        boolean $z0;
+        android.widget.ZoomButtonsController $r2;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 = $r0.<com.google.android.maps.MapView: android.widget.ZoomControls mZoomControls>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<com.google.android.maps.MapView: android.widget.ZoomControls mZoomControls>;
+
+        $z0 = specialinvoke $r0.<com.google.android.maps.MapView: boolean canZoomIn()>();
+
+        virtualinvoke $r1.<android.widget.ZoomControls: void setIsZoomInEnabled(boolean)>($z0);
+
+        $r1 = $r0.<com.google.android.maps.MapView: android.widget.ZoomControls mZoomControls>;
+
+        $z0 = specialinvoke $r0.<com.google.android.maps.MapView: boolean canZoomOut()>();
+
+        virtualinvoke $r1.<android.widget.ZoomControls: void setIsZoomOutEnabled(boolean)>($z0);
+
+     label1:
+        $r2 = $r0.<com.google.android.maps.MapView: android.widget.ZoomButtonsController mZoomButtonsController>;
+
+        if $r2 == null goto label2;
+
+        $r2 = $r0.<com.google.android.maps.MapView: android.widget.ZoomButtonsController mZoomButtonsController>;
+
+        $z0 = specialinvoke $r0.<com.google.android.maps.MapView: boolean canZoomIn()>();
+
+        virtualinvoke $r2.<android.widget.ZoomButtonsController: void setZoomInEnabled(boolean)>($z0);
+
+        $r2 = $r0.<com.google.android.maps.MapView: android.widget.ZoomButtonsController mZoomButtonsController>;
+
+        $z0 = specialinvoke $r0.<com.google.android.maps.MapView: boolean canZoomOut()>();
+
+        virtualinvoke $r2.<android.widget.ZoomButtonsController: void setZoomOutEnabled(boolean)>($z0);
+
+        return;
+
+     label2:
+        return;
+    }
+
+    public boolean canCoverCenter()
+    {
+        com.google.android.maps.MapView $r0;
+        com.google.googlenav.map.Map $r1, $r2;
+        com.google.map.MapPoint $r3;
+        boolean $z0;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 = $r0.<com.google.android.maps.MapView: com.google.googlenav.map.Map mMap>;
+
+        $r2 = $r0.<com.google.android.maps.MapView: com.google.googlenav.map.Map mMap>;
+
+        $r3 = virtualinvoke $r2.<com.google.googlenav.map.Map: com.google.map.MapPoint getCenterPoint()>();
+
+        $z0 = virtualinvoke $r1.<com.google.googlenav.map.Map: boolean canCover(com.google.map.MapPoint,boolean)>($r3, 1);
+
+        return $z0;
+    }
+
+    protected boolean checkLayoutParams(android.view.ViewGroup$LayoutParams)
+    {
+        com.google.android.maps.MapView $r0;
+        android.view.ViewGroup$LayoutParams $r1;
+        boolean $z0;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 := @parameter0: android.view.ViewGroup$LayoutParams;
+
+        $z0 = $r1 instanceof com.google.android.maps.MapView$LayoutParams;
+
+        return $z0;
+    }
+
+    public void computeScroll()
+    {
+        com.google.android.maps.MapView $r0;
+        int $i0, $i1, $i2;
+        android.widget.Scroller $r1;
+        boolean $z0;
+        com.google.android.maps.MapController $r2;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 = $r0.<com.google.android.maps.MapView: android.widget.Scroller mScroller>;
+
+        $z0 = virtualinvoke $r1.<android.widget.Scroller: boolean computeScrollOffset()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = $r0.<com.google.android.maps.MapView: android.widget.Scroller mScroller>;
+
+        $i0 = virtualinvoke $r1.<android.widget.Scroller: int getCurrX()>();
+
+        $i1 = $r0.<com.google.android.maps.MapView: int mLastFlingX>;
+
+        $i0 = $i0 - $i1;
+
+        $r1 = $r0.<com.google.android.maps.MapView: android.widget.Scroller mScroller>;
+
+        $i1 = virtualinvoke $r1.<android.widget.Scroller: int getCurrY()>();
+
+        $i2 = $r0.<com.google.android.maps.MapView: int mLastFlingY>;
+
+        $i1 = $i1 - $i2;
+
+        $r1 = $r0.<com.google.android.maps.MapView: android.widget.Scroller mScroller>;
+
+        $i2 = virtualinvoke $r1.<android.widget.Scroller: int getCurrX()>();
+
+        $r0.<com.google.android.maps.MapView: int mLastFlingX> = $i2;
+
+        $r1 = $r0.<com.google.android.maps.MapView: android.widget.Scroller mScroller>;
+
+        $i2 = virtualinvoke $r1.<android.widget.Scroller: int getCurrY()>();
+
+        $r0.<com.google.android.maps.MapView: int mLastFlingY> = $i2;
+
+        $r2 = $r0.<com.google.android.maps.MapView: com.google.android.maps.MapController mController>;
+
+        virtualinvoke $r2.<com.google.android.maps.MapController: void scrollBy(int,int)>($i0, $i1);
+
+        virtualinvoke $r0.<android.view.View: void postInvalidate()>();
+
+        return;
+
+     label1:
+        specialinvoke $r0.<android.view.View: void computeScroll()>();
+
+        return;
+    }
+
+    public void displayZoomControls(boolean)
+    {
+        com.google.android.maps.MapView $r0;
+        boolean $z0, $z1;
+        long $l0;
+        android.widget.ZoomButtonsController $r1;
+        android.widget.ZoomControls $r2;
+        int $i1;
+        android.os.Handler $r3;
+        java.lang.Runnable $r4;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $z0 := @parameter0: boolean;
+
+        $z1 = $r0.<com.google.android.maps.MapView: boolean mBuiltInZoomControlsEnabled>;
+
+        if $z1 == 0 goto label1;
+
+        $r1 = $r0.<com.google.android.maps.MapView: android.widget.ZoomButtonsController mZoomButtonsController>;
+
+        if $r1 == null goto label4;
+
+        $r1 = $r0.<com.google.android.maps.MapView: android.widget.ZoomButtonsController mZoomButtonsController>;
+
+        $z1 = virtualinvoke $r1.<android.widget.ZoomButtonsController: boolean isVisible()>();
+
+        if $z1 != 0 goto label5;
+
+        $r1 = $r0.<com.google.android.maps.MapView: android.widget.ZoomButtonsController mZoomButtonsController>;
+
+        virtualinvoke $r1.<android.widget.ZoomButtonsController: void setFocusable(boolean)>($z0);
+
+        $r1 = $r0.<com.google.android.maps.MapView: android.widget.ZoomButtonsController mZoomButtonsController>;
+
+        virtualinvoke $r1.<android.widget.ZoomButtonsController: void setVisible(boolean)>(1);
+
+        return;
+
+     label1:
+        $r2 = $r0.<com.google.android.maps.MapView: android.widget.ZoomControls mZoomControls>;
+
+        if $r2 == null goto label6;
+
+        $r2 = $r0.<com.google.android.maps.MapView: android.widget.ZoomControls mZoomControls>;
+
+        $i1 = virtualinvoke $r2.<android.view.View: int getVisibility()>();
+
+        if $i1 != 8 goto label2;
+
+        $r2 = $r0.<com.google.android.maps.MapView: android.widget.ZoomControls mZoomControls>;
+
+        virtualinvoke $r2.<android.widget.ZoomControls: void show()>();
+
+     label2:
+        if $z0 == 0 goto label3;
+
+        $r2 = $r0.<com.google.android.maps.MapView: android.widget.ZoomControls mZoomControls>;
+
+        virtualinvoke $r2.<android.view.View: boolean requestFocus()>();
+
+     label3:
+        $r3 = $r0.<com.google.android.maps.MapView: android.os.Handler mHandler>;
+
+        $r4 = $r0.<com.google.android.maps.MapView: java.lang.Runnable mZoomControlRunnable>;
+
+        virtualinvoke $r3.<android.os.Handler: void removeCallbacks(java.lang.Runnable)>($r4);
+
+        $r3 = $r0.<com.google.android.maps.MapView: android.os.Handler mHandler>;
+
+        $r4 = $r0.<com.google.android.maps.MapView: java.lang.Runnable mZoomControlRunnable>;
+
+        $l0 = <com.google.android.maps.MapView: long ZOOM_CONTROLS_TIMEOUT>;
+
+        virtualinvoke $r3.<android.os.Handler: boolean postDelayed(java.lang.Runnable,long)>($r4, $l0);
+
+        return;
+
+     label4:
+        return;
+
+     label5:
+        return;
+
+     label6:
+        return;
+    }
+
+    boolean doZoom(boolean)
+    {
+        com.google.android.maps.MapView $r0;
+        boolean $z0;
+        int $i0, $i1;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $z0 := @parameter0: boolean;
+
+        $i0 = $r0.<android.view.View: int mMeasuredWidth>;
+
+        $i0 = $i0 / 2;
+
+        $i1 = $r0.<android.view.View: int mMeasuredHeight>;
+
+        $i1 = $i1 / 2;
+
+        $z0 = virtualinvoke $r0.<com.google.android.maps.MapView: boolean doZoom(boolean,int,int)>($z0, $i0, $i1);
+
+        return $z0;
+    }
+
+    boolean doZoom(boolean, int, int)
+    {
+        com.google.android.maps.MapView $r0;
+        boolean $z0, $z1, $z2;
+        int $i0, $i1;
+        com.google.android.maps.ZoomHelper $r1;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $z0 := @parameter0: boolean;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $z1 = 0;
+
+        if $z0 == 0 goto label3;
+
+        $z2 = specialinvoke $r0.<com.google.android.maps.MapView: boolean canZoomIn()>();
+
+        if $z2 == 0 goto label2;
+
+     label1:
+        $r1 = $r0.<com.google.android.maps.MapView: com.google.android.maps.ZoomHelper mZoomHelper>;
+
+        virtualinvoke $r1.<com.google.android.maps.ZoomHelper: boolean doZoom(boolean,boolean,int,int)>($z0, 1, $i0, $i1);
+
+        $z1 = 1;
+
+     label2:
+        specialinvoke $r0.<com.google.android.maps.MapView: void updateZoomControls()>();
+
+        virtualinvoke $r0.<com.google.android.maps.MapView: void displayZoomControls(boolean)>(0);
+
+        return $z1;
+
+     label3:
+        $z2 = specialinvoke $r0.<com.google.android.maps.MapView: boolean canZoomOut()>();
+
+        if $z2 == 0 goto label2;
+
+        goto label1;
+    }
+
+    boolean drawMap(android.graphics.Canvas, boolean)
+    {
+        com.google.android.maps.MapView $r0;
+        android.graphics.Canvas $r1;
+        boolean $z0, $z1, $z2;
+        com.google.common.graphics.android.AndroidGraphics $r2;
+        com.google.googlenav.map.Map $r3;
+        java.lang.IllegalStateException $r4;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 := @parameter0: android.graphics.Canvas;
+
+        $z0 := @parameter1: boolean;
+
+        $r2 = $r0.<com.google.android.maps.MapView: com.google.common.graphics.android.AndroidGraphics mDrawer>;
+
+        virtualinvoke $r2.<com.google.common.graphics.android.AndroidGraphics: void setCanvas(android.graphics.Canvas)>($r1);
+
+        $r3 = $r0.<com.google.android.maps.MapView: com.google.googlenav.map.Map mMap>;
+
+        $r2 = $r0.<com.google.android.maps.MapView: com.google.common.graphics.android.AndroidGraphics mDrawer>;
+
+     label1:
+        $z1 = specialinvoke $r0.<com.google.android.maps.MapView: boolean isLocationDisplayed()>();
+
+        $z2 = specialinvoke $r0.<com.google.android.maps.MapView: boolean isRouteDisplayed()>();
+
+        $z0 = virtualinvoke $r3.<com.google.googlenav.map.Map: boolean drawMap(com.google.common.graphics.GoogleGraphics,boolean,boolean,boolean,boolean)>($r2, $z0, $z1, $z2, 1);
+
+     label2:
+        return $z0;
+
+     label3:
+        $r4 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("MapView", "IllegalStateException on drawMap. Wiping cache.", $r4);
+
+        $r3 = $r0.<com.google.android.maps.MapView: com.google.googlenav.map.Map mMap>;
+
+        virtualinvoke $r3.<com.google.googlenav.map.Map: void eraseAll()>();
+
+        return 1;
+
+        catch java.lang.IllegalStateException from label1 to label2 with label3;
+    }
+
+    protected volatile android.view.ViewGroup$LayoutParams generateDefaultLayoutParams()
+    {
+        com.google.android.maps.MapView $r0;
+        com.google.android.maps.MapView$LayoutParams $r1;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 = virtualinvoke $r0.<com.google.android.maps.MapView: com.google.android.maps.MapView$LayoutParams generateDefaultLayoutParams()>();
+
+        return $r1;
+    }
+
+    protected com.google.android.maps.MapView$LayoutParams generateDefaultLayoutParams()
+    {
+        com.google.android.maps.MapView $r0;
+        com.google.android.maps.MapView$LayoutParams $r1;
+        com.google.android.maps.GeoPoint $r2;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 = new com.google.android.maps.MapView$LayoutParams;
+
+        $r2 = new com.google.android.maps.GeoPoint;
+
+        specialinvoke $r2.<com.google.android.maps.GeoPoint: void <init>(int,int)>(0, 0);
+
+        specialinvoke $r1.<com.google.android.maps.MapView$LayoutParams: void <init>(int,int,com.google.android.maps.GeoPoint,int)>(-2, -2, $r2, 17);
+
+        return $r1;
+    }
+
+    public android.view.ViewGroup$LayoutParams generateLayoutParams(android.util.AttributeSet)
+    {
+        com.google.android.maps.MapView $r0;
+        android.util.AttributeSet $r1;
+        com.google.android.maps.MapView$LayoutParams $r2;
+        android.content.Context $r3;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 := @parameter0: android.util.AttributeSet;
+
+        $r2 = new com.google.android.maps.MapView$LayoutParams;
+
+        $r3 = virtualinvoke $r0.<android.view.View: android.content.Context getContext()>();
+
+        specialinvoke $r2.<com.google.android.maps.MapView$LayoutParams: void <init>(android.content.Context,android.util.AttributeSet)>($r3, $r1);
+
+        return $r2;
+    }
+
+    protected android.view.ViewGroup$LayoutParams generateLayoutParams(android.view.ViewGroup$LayoutParams)
+    {
+        com.google.android.maps.MapView $r0;
+        android.view.ViewGroup$LayoutParams $r1;
+        com.google.android.maps.MapView$LayoutParams $r2;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 := @parameter0: android.view.ViewGroup$LayoutParams;
+
+        $r2 = new com.google.android.maps.MapView$LayoutParams;
+
+        specialinvoke $r2.<com.google.android.maps.MapView$LayoutParams: void <init>(android.view.ViewGroup$LayoutParams)>($r1);
+
+        return $r2;
+    }
+
+    public com.google.android.maps.MapController getController()
+    {
+        com.google.android.maps.MapView $r0;
+        com.google.android.maps.MapController r1;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        r1 = $r0.<com.google.android.maps.MapView: com.google.android.maps.MapController mController>;
+
+        return r1;
+    }
+
+    public int getLatitudeSpan()
+    {
+        com.google.android.maps.MapView $r0;
+        int $i0;
+        com.google.googlenav.map.Map $r1;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 = $r0.<com.google.android.maps.MapView: com.google.googlenav.map.Map mMap>;
+
+        $i0 = virtualinvoke $r1.<com.google.googlenav.map.Map: int getLatitudeSpan()>();
+
+        return $i0;
+    }
+
+    public int getLongitudeSpan()
+    {
+        com.google.android.maps.MapView $r0;
+        com.google.googlenav.map.Map $r1;
+        com.google.map.MapState $r2;
+        com.google.map.MapPoint $r3, $r5;
+        com.google.map.Zoom $r4;
+        int $i0, $i2;
+        byte $b1;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 = $r0.<com.google.android.maps.MapView: com.google.googlenav.map.Map mMap>;
+
+        $r2 = virtualinvoke $r1.<com.google.googlenav.map.Map: com.google.map.MapState getMapState()>();
+
+        $r3 = virtualinvoke $r2.<com.google.map.MapState: com.google.map.MapPoint getCenterPoint()>();
+
+        $r4 = virtualinvoke $r2.<com.google.map.MapState: com.google.map.Zoom getZoom()>();
+
+        $r1 = $r0.<com.google.android.maps.MapView: com.google.googlenav.map.Map mMap>;
+
+        $i0 = virtualinvoke $r1.<com.google.googlenav.map.Map: int getWidth()>();
+
+        $i0 = $i0 / 2;
+
+        $b1 = 0;
+
+        $i2 = virtualinvoke $r4.<com.google.map.Zoom: int getZoomLevel()>();
+
+        if $i2 != 1 goto label1;
+
+        $b1 = 2;
+
+        $i0 = $i0 >> 2;
+
+     label1:
+        $i2 = neg $i0;
+
+        $r5 = virtualinvoke $r3.<com.google.map.MapPoint: com.google.map.MapPoint pixelOffset(int,int,com.google.map.Zoom)>($i2, 0, $r4);
+
+        $r3 = virtualinvoke $r3.<com.google.map.MapPoint: com.google.map.MapPoint pixelOffset(int,int,com.google.map.Zoom)>($i0, 0, $r4);
+
+        $i0 = virtualinvoke $r3.<com.google.map.MapPoint: int getLongitude()>();
+
+        $i2 = virtualinvoke $r5.<com.google.map.MapPoint: int getLongitude()>();
+
+        $i0 = $i0 - $i2;
+
+        if $i0 > 0 goto label2;
+
+        $i0 = $i0 + 360000000;
+
+     label2:
+        $i0 = $i0 << $b1;
+
+        return $i0;
+    }
+
+    public com.google.android.maps.GeoPoint getMapCenter()
+    {
+        com.google.android.maps.MapView $r0;
+        com.google.android.maps.GeoPoint $r1;
+        com.google.map.MapPoint $r2;
+        com.google.googlenav.map.Map $r3;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 = new com.google.android.maps.GeoPoint;
+
+        $r3 = $r0.<com.google.android.maps.MapView: com.google.googlenav.map.Map mMap>;
+
+        $r2 = virtualinvoke $r3.<com.google.googlenav.map.Map: com.google.map.MapPoint getCenterPoint()>();
+
+        specialinvoke $r1.<com.google.android.maps.GeoPoint: void <init>(com.google.map.MapPoint)>($r2);
+
+        return $r1;
+    }
+
+    public int getMaxZoomLevel()
+    {
+        com.google.android.maps.MapView $r0;
+        com.google.googlenav.map.Map $r1, $r2;
+        com.google.map.MapPoint $r3;
+        int $i0;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 = $r0.<com.google.android.maps.MapView: com.google.googlenav.map.Map mMap>;
+
+        $r2 = $r0.<com.google.android.maps.MapView: com.google.googlenav.map.Map mMap>;
+
+        $r3 = virtualinvoke $r2.<com.google.googlenav.map.Map: com.google.map.MapPoint getCenterPoint()>();
+
+        $i0 = virtualinvoke $r1.<com.google.googlenav.map.Map: int getMaxMapZoomForPoint(com.google.map.MapPoint)>($r3);
+
+        return $i0;
+    }
+
+    public final java.util.List getOverlays()
+    {
+        com.google.android.maps.MapView $r0;
+        java.util.List $r1;
+        com.google.android.maps.OverlayBundle $r2;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r2 = $r0.<com.google.android.maps.MapView: com.google.android.maps.OverlayBundle mOverlayBundle>;
+
+        $r1 = virtualinvoke $r2.<com.google.android.maps.OverlayBundle: java.util.List getOverlays()>();
+
+        return $r1;
+    }
+
+    public com.google.android.maps.Projection getProjection()
+    {
+        com.google.android.maps.MapView $r0;
+        com.google.android.maps.PixelConverter r1;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        r1 = $r0.<com.google.android.maps.MapView: com.google.android.maps.PixelConverter mConverter>;
+
+        return r1;
+    }
+
+    com.google.map.Zoom getZoom()
+    {
+        com.google.android.maps.MapView $r0;
+        com.google.map.Zoom $r1;
+        com.google.googlenav.map.Map $r2;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r2 = $r0.<com.google.android.maps.MapView: com.google.googlenav.map.Map mMap>;
+
+        $r1 = virtualinvoke $r2.<com.google.googlenav.map.Map: com.google.map.Zoom getZoom()>();
+
+        return $r1;
+    }
+
+    public android.widget.ZoomButtonsController getZoomButtonsController()
+    {
+        com.google.android.maps.MapView $r0;
+        android.widget.ZoomButtonsController r1;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        r1 = $r0.<com.google.android.maps.MapView: android.widget.ZoomButtonsController mZoomButtonsController>;
+
+        return r1;
+    }
+
+    public android.view.View getZoomControls()
+    {
+        com.google.android.maps.MapView $r0;
+        android.widget.ZoomControls $r1;
+        com.google.android.maps.MapView$2 $r2;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 = $r0.<com.google.android.maps.MapView: android.widget.ZoomControls mZoomControls>;
+
+        if $r1 != null goto label1;
+
+        $r1 = specialinvoke $r0.<com.google.android.maps.MapView: android.widget.ZoomControls createZoomControls()>();
+
+        $r0.<com.google.android.maps.MapView: android.widget.ZoomControls mZoomControls> = $r1;
+
+        $r1 = $r0.<com.google.android.maps.MapView: android.widget.ZoomControls mZoomControls>;
+
+        virtualinvoke $r1.<android.view.View: void setVisibility(int)>(8);
+
+        $r2 = new com.google.android.maps.MapView$2;
+
+        specialinvoke $r2.<com.google.android.maps.MapView$2: void <init>(com.google.android.maps.MapView)>($r0);
+
+        $r0.<com.google.android.maps.MapView: java.lang.Runnable mZoomControlRunnable> = $r2;
+
+     label1:
+        $r1 = $r0.<com.google.android.maps.MapView: android.widget.ZoomControls mZoomControls>;
+
+        return $r1;
+    }
+
+    public int getZoomLevel()
+    {
+        com.google.android.maps.MapView $r0;
+        com.google.googlenav.map.Map $r1;
+        com.google.map.Zoom $r2;
+        int $i0;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 = $r0.<com.google.android.maps.MapView: com.google.googlenav.map.Map mMap>;
+
+        $r2 = virtualinvoke $r1.<com.google.googlenav.map.Map: com.google.map.Zoom getZoom()>();
+
+        $i0 = virtualinvoke $r2.<com.google.map.Zoom: int getZoomLevel()>();
+
+        return $i0;
+    }
+
+    public boolean isSatellite()
+    {
+        com.google.android.maps.MapView $r0;
+        boolean $z0;
+        com.google.googlenav.map.Map $r1;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 = $r0.<com.google.android.maps.MapView: com.google.googlenav.map.Map mMap>;
+
+        $z0 = virtualinvoke $r1.<com.google.googlenav.map.Map: boolean isSatellite()>();
+
+        return $z0;
+    }
+
+    public boolean isStreetView()
+    {
+        com.google.android.maps.MapView $r0;
+        boolean $z0;
+        com.google.android.maps.AndroidTileOverlayRenderer $r1;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 = $r0.<com.google.android.maps.MapView: com.google.android.maps.AndroidTileOverlayRenderer mOverlayRenderer>;
+
+        $z0 = virtualinvoke $r1.<com.google.android.maps.AndroidTileOverlayRenderer: boolean isShowStreetView()>();
+
+        return $z0;
+    }
+
+    public boolean isTraffic()
+    {
+        com.google.android.maps.MapView $r0;
+        boolean $z0;
+        com.google.android.maps.AndroidTileOverlayRenderer $r1;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 = $r0.<com.google.android.maps.MapView: com.google.android.maps.AndroidTileOverlayRenderer mOverlayRenderer>;
+
+        $z0 = virtualinvoke $r1.<com.google.android.maps.AndroidTileOverlayRenderer: boolean isShowTraffic()>();
+
+        return $z0;
+    }
+
+    protected void onDetachedFromWindow()
+    {
+        com.google.android.maps.MapView $r0;
+        android.widget.ZoomButtonsController $r1;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        specialinvoke $r0.<android.view.View: void onDetachedFromWindow()>();
+
+        $r1 = $r0.<com.google.android.maps.MapView: android.widget.ZoomButtonsController mZoomButtonsController>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<com.google.android.maps.MapView: android.widget.ZoomButtonsController mZoomButtonsController>;
+
+        virtualinvoke $r1.<android.widget.ZoomButtonsController: void setVisible(boolean)>(0);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    protected final void onDraw(android.graphics.Canvas)
+    {
+        com.google.android.maps.MapView $r0;
+        android.graphics.Canvas $r1;
+        com.google.android.maps.MapController $r2;
+        boolean $z0, $z1, $z2;
+        long $l0;
+        com.google.android.maps.ZoomHelper $r3;
+        com.google.android.maps.MapView$ReticleDrawMode $r4, $r5;
+        android.graphics.drawable.Drawable $r6;
+        com.google.android.maps.OverlayBundle $r7;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 := @parameter0: android.graphics.Canvas;
+
+        $r2 = $r0.<com.google.android.maps.MapView: com.google.android.maps.MapController mController>;
+
+        $z0 = virtualinvoke $r2.<com.google.android.maps.MapController: boolean isDirty()>();
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke $r0.<com.google.android.maps.MapView: void onLayout(boolean,int,int,int,int)>(1, 0, 0, 0, 0);
+
+     label1:
+        $z0 = 0;
+
+        $l0 = virtualinvoke $r0.<android.view.View: long getDrawingTime()>();
+
+        $z1 = 1;
+
+        $r3 = $r0.<com.google.android.maps.MapView: com.google.android.maps.ZoomHelper mZoomHelper>;
+
+        $z2 = virtualinvoke $r3.<com.google.android.maps.ZoomHelper: boolean shouldDrawMap(long)>($l0);
+
+        if $z2 == 0 goto label3;
+
+        $z0 = virtualinvoke $r0.<com.google.android.maps.MapView: boolean drawMap(android.graphics.Canvas,boolean)>($r1, $z1);
+
+        if $z0 != 0 goto label6;
+
+        $z0 = 1;
+
+     label2:
+        $z0 = 0 | $z0;
+
+     label3:
+        $r4 = $r0.<com.google.android.maps.MapView: com.google.android.maps.MapView$ReticleDrawMode mReticleDrawMode>;
+
+        $r5 = <com.google.android.maps.MapView$ReticleDrawMode: com.google.android.maps.MapView$ReticleDrawMode DRAW_RETICLE_UNDER>;
+
+        if $r4 != $r5 goto label4;
+
+        $z1 = virtualinvoke $r0.<android.view.View: boolean isInTouchMode()>();
+
+        if $z1 != 0 goto label4;
+
+        $r6 = $r0.<com.google.android.maps.MapView: android.graphics.drawable.Drawable mReticle>;
+
+        virtualinvoke $r6.<android.graphics.drawable.Drawable: void draw(android.graphics.Canvas)>($r1);
+
+     label4:
+        $r3 = $r0.<com.google.android.maps.MapView: com.google.android.maps.ZoomHelper mZoomHelper>;
+
+        $z1 = virtualinvoke $r3.<com.google.android.maps.ZoomHelper: boolean onDraw(android.graphics.Canvas,com.google.android.maps.MapView,long)>($r1, $r0, $l0);
+
+        $z0 = $z0 | $z1;
+
+        $r7 = $r0.<com.google.android.maps.MapView: com.google.android.maps.OverlayBundle mOverlayBundle>;
+
+        $z1 = virtualinvoke $r7.<com.google.android.maps.OverlayBundle: boolean draw(android.graphics.Canvas,com.google.android.maps.MapView,long)>($r1, $r0, $l0);
+
+        $z0 = $z0 | $z1;
+
+        $r4 = $r0.<com.google.android.maps.MapView: com.google.android.maps.MapView$ReticleDrawMode mReticleDrawMode>;
+
+        $r5 = <com.google.android.maps.MapView$ReticleDrawMode: com.google.android.maps.MapView$ReticleDrawMode DRAW_RETICLE_OVER>;
+
+        if $r4 != $r5 goto label5;
+
+        $z1 = virtualinvoke $r0.<android.view.View: boolean isInTouchMode()>();
+
+        if $z1 != 0 goto label5;
+
+        $r6 = $r0.<com.google.android.maps.MapView: android.graphics.drawable.Drawable mReticle>;
+
+        virtualinvoke $r6.<android.graphics.drawable.Drawable: void draw(android.graphics.Canvas)>($r1);
+
+     label5:
+        $r6 = $r0.<com.google.android.maps.MapView: android.graphics.drawable.Drawable mGoogleLogo>;
+
+        virtualinvoke $r6.<android.graphics.drawable.Drawable: void draw(android.graphics.Canvas)>($r1);
+
+        $r2 = $r0.<com.google.android.maps.MapView: com.google.android.maps.MapController mController>;
+
+        $z1 = virtualinvoke $r2.<com.google.android.maps.MapController: boolean stepAnimation(long)>($l0);
+
+        $z0 = $z0 | $z1;
+
+        if $z0 == 0 goto label7;
+
+        virtualinvoke $r0.<android.view.View: void requestLayout()>();
+
+        virtualinvoke $r0.<android.view.View: void invalidate()>();
+
+        return;
+
+     label6:
+        $z0 = 0;
+
+        goto label2;
+
+     label7:
+        return;
+    }
+
+    public void onFocusChanged(boolean, int, android.graphics.Rect)
+    {
+        com.google.android.maps.MapView $r0;
+        boolean $z0;
+        int $i0;
+        android.graphics.Rect $r1;
+        com.google.android.maps.MapController $r2;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $z0 := @parameter0: boolean;
+
+        $i0 := @parameter1: int;
+
+        $r1 := @parameter2: android.graphics.Rect;
+
+        if $z0 != 0 goto label1;
+
+        $r2 = $r0.<com.google.android.maps.MapView: com.google.android.maps.MapController mController>;
+
+        virtualinvoke $r2.<com.google.android.maps.MapController: void stopPanning()>();
+
+     label1:
+        specialinvoke $r0.<android.view.View: void onWindowFocusChanged(boolean)>($z0);
+
+        return;
+    }
+
+    public boolean onKeyDown(int, android.view.KeyEvent)
+    {
+        com.google.android.maps.MapView $r0;
+        int $i0;
+        android.view.KeyEvent $r1;
+        com.google.android.maps.OverlayBundle $r2;
+        boolean $z0;
+        com.google.android.maps.MapController $r3;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: android.view.KeyEvent;
+
+        $r2 = $r0.<com.google.android.maps.MapView: com.google.android.maps.OverlayBundle mOverlayBundle>;
+
+        $z0 = virtualinvoke $r2.<com.google.android.maps.OverlayBundle: boolean onKeyDown(int,android.view.KeyEvent,com.google.android.maps.MapView)>($i0, $r1, $r0);
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        $r3 = $r0.<com.google.android.maps.MapView: com.google.android.maps.MapController mController>;
+
+        $z0 = virtualinvoke $r3.<com.google.android.maps.MapController: boolean onKey(android.view.View,int,android.view.KeyEvent)>($r0, $i0, $r1);
+
+        if $z0 == 0 goto label2;
+
+        return 1;
+
+     label2:
+        $z0 = specialinvoke $r0.<android.view.View: boolean onKeyDown(int,android.view.KeyEvent)>($i0, $r1);
+
+        return $z0;
+    }
+
+    public boolean onKeyUp(int, android.view.KeyEvent)
+    {
+        com.google.android.maps.MapView $r0;
+        int $i0;
+        android.view.KeyEvent $r1;
+        com.google.android.maps.OverlayBundle $r2;
+        boolean $z0;
+        com.google.android.maps.MapController $r3;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: android.view.KeyEvent;
+
+        $r2 = $r0.<com.google.android.maps.MapView: com.google.android.maps.OverlayBundle mOverlayBundle>;
+
+        $z0 = virtualinvoke $r2.<com.google.android.maps.OverlayBundle: boolean onKeyUp(int,android.view.KeyEvent,com.google.android.maps.MapView)>($i0, $r1, $r0);
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        $r3 = $r0.<com.google.android.maps.MapView: com.google.android.maps.MapController mController>;
+
+        $z0 = virtualinvoke $r3.<com.google.android.maps.MapController: boolean onKey(android.view.View,int,android.view.KeyEvent)>($r0, $i0, $r1);
+
+        if $z0 == 0 goto label2;
+
+        return 1;
+
+     label2:
+        $z0 = specialinvoke $r0.<android.view.View: boolean onKeyUp(int,android.view.KeyEvent)>($i0, $r1);
+
+        return $z0;
+    }
+
+    protected void onLayout(boolean, int, int, int, int)
+    {
+        com.google.android.maps.MapView $r0;
+        boolean $z0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7;
+        android.graphics.Point $r1;
+        android.view.View $r2;
+        android.view.ViewGroup$LayoutParams $r3;
+        com.google.android.maps.MapView$LayoutParams $r4;
+        com.google.android.maps.PixelConverter $r5;
+        com.google.android.maps.GeoPoint $r6;
+        com.google.android.maps.MapController $r7;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $z0 := @parameter0: boolean;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        $i3 := @parameter4: int;
+
+        specialinvoke $r0.<com.google.android.maps.MapView: void updateZoomControls()>();
+
+        $i0 = virtualinvoke $r0.<android.view.ViewGroup: int getChildCount()>();
+
+        $r1 = new android.graphics.Point;
+
+        specialinvoke $r1.<android.graphics.Point: void <init>()>();
+
+        $i1 = 0;
+
+     label01:
+        if $i1 >= $i0 goto label11;
+
+        $r2 = virtualinvoke $r0.<android.view.ViewGroup: android.view.View getChildAt(int)>($i1);
+
+        $i2 = virtualinvoke $r2.<android.view.View: int getVisibility()>();
+
+        if $i2 == 8 goto label05;
+
+        $r3 = virtualinvoke $r2.<android.view.View: android.view.ViewGroup$LayoutParams getLayoutParams()>();
+
+        $r4 = (com.google.android.maps.MapView$LayoutParams) $r3;
+
+        $i2 = $r4.<com.google.android.maps.MapView$LayoutParams: int mode>;
+
+        if $i2 != 0 goto label06;
+
+        $r5 = $r0.<com.google.android.maps.MapView: com.google.android.maps.PixelConverter mConverter>;
+
+        $r6 = $r4.<com.google.android.maps.MapView$LayoutParams: com.google.android.maps.GeoPoint point>;
+
+        virtualinvoke $r5.<com.google.android.maps.PixelConverter: android.graphics.Point toPixels(com.google.android.maps.GeoPoint,android.graphics.Point)>($r6, $r1);
+
+        $i2 = $r1.<android.graphics.Point: int x>;
+
+        $i3 = $r4.<com.google.android.maps.MapView$LayoutParams: int x>;
+
+        $i2 = $i2 + $i3;
+
+        $r1.<android.graphics.Point: int x> = $i2;
+
+        $i2 = $r1.<android.graphics.Point: int y>;
+
+        $i3 = $r4.<com.google.android.maps.MapView$LayoutParams: int y>;
+
+        $i2 = $i2 + $i3;
+
+        $r1.<android.graphics.Point: int y> = $i2;
+
+     label02:
+        $i3 = virtualinvoke $r2.<android.view.View: int getMeasuredWidth()>();
+
+        $i2 = virtualinvoke $r2.<android.view.View: int getMeasuredHeight()>();
+
+        $i5 = $r1.<android.graphics.Point: int x>;
+
+        $i6 = $r1.<android.graphics.Point: int y>;
+
+        $i4 = $r4.<com.google.android.maps.MapView$LayoutParams: int alignment>;
+
+        $i7 = $i4 & 7;
+
+        lookupswitch($i7)
+        {
+            case 1: goto label07;
+            case 2: goto label03;
+            case 3: goto label03;
+            case 4: goto label03;
+            case 5: goto label08;
+            default: goto label03;
+        };
+
+     label03:
+        $i4 = $i4 & 112;
+
+        lookupswitch($i4)
+        {
+            case 16: goto label09;
+            case 48: goto label04;
+            case 80: goto label10;
+            default: goto label04;
+        };
+
+     label04:
+        $i4 = $r0.<android.view.View: int mPaddingLeft>;
+
+        $i5 = $i4 + $i5;
+
+        $i4 = $r0.<android.view.View: int mPaddingTop>;
+
+        $i6 = $i4 + $i6;
+
+        $i3 = $i5 + $i3;
+
+        $i2 = $i6 + $i2;
+
+        virtualinvoke $r2.<android.view.View: void layout(int,int,int,int)>($i5, $i6, $i3, $i2);
+
+     label05:
+        $i1 = $i1 + 1;
+
+        goto label01;
+
+     label06:
+        $i2 = $r4.<com.google.android.maps.MapView$LayoutParams: int x>;
+
+        $r1.<android.graphics.Point: int x> = $i2;
+
+        $i2 = $r4.<com.google.android.maps.MapView$LayoutParams: int y>;
+
+        $r1.<android.graphics.Point: int y> = $i2;
+
+        goto label02;
+
+     label07:
+        $i7 = $i3 / 2;
+
+        $i5 = $i5 - $i7;
+
+        goto label03;
+
+     label08:
+        $i7 = $i3 - 1;
+
+        $i5 = $i5 - $i7;
+
+        goto label03;
+
+     label09:
+        $i4 = $i2 / 2;
+
+        $i6 = $i6 - $i4;
+
+        goto label04;
+
+     label10:
+        $i4 = $i2 - 1;
+
+        $i6 = $i6 - $i4;
+
+        goto label04;
+
+     label11:
+        $r7 = $r0.<com.google.android.maps.MapView: com.google.android.maps.MapController mController>;
+
+        virtualinvoke $r7.<com.google.android.maps.MapController: void clean()>();
+
+        return;
+    }
+
+    protected final void onMeasure(int, int)
+    {
+        com.google.android.maps.MapView $r0;
+        int $i0, $i1, $i2, $i3;
+        android.content.Context $r1;
+        java.lang.Object $r2;
+        android.view.WindowManager $r3;
+        android.view.Display $r4;
+        android.graphics.drawable.Drawable $r5;
+        com.google.googlenav.map.Map $r6;
+        com.google.android.maps.MapController $r7;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        specialinvoke $r0.<android.view.View: void onMeasure(int,int)>($i0, $i1);
+
+        virtualinvoke $r0.<android.view.ViewGroup: void measureChildren(int,int)>($i0, $i1);
+
+        $i2 = $r0.<android.view.View: int mMeasuredWidth>;
+
+        $i3 = $r0.<android.view.View: int mMeasuredHeight>;
+
+        if $i2 == 0 goto label1;
+
+        if $i3 != 0 goto label3;
+
+     label1:
+        $r1 = $r0.<android.view.View: android.content.Context mContext>;
+
+        $r2 = virtualinvoke $r1.<android.content.Context: java.lang.Object getSystemService(java.lang.String)>("window");
+
+        $r3 = (android.view.WindowManager) $r2;
+
+        $r4 = interfaceinvoke $r3.<android.view.WindowManager: android.view.Display getDefaultDisplay()>();
+
+        if $i2 != 0 goto label2;
+
+        $i2 = virtualinvoke $r4.<android.view.Display: int getWidth()>();
+
+     label2:
+        if $i3 != 0 goto label3;
+
+        $i3 = virtualinvoke $r4.<android.view.Display: int getHeight()>();
+
+     label3:
+        $i0 = staticinvoke <com.google.android.maps.MapView: int resolveSize(int,int)>($i2, $i0);
+
+        $i1 = staticinvoke <com.google.android.maps.MapView: int resolveSize(int,int)>($i3, $i1);
+
+        virtualinvoke $r0.<android.view.View: void setMeasuredDimension(int,int)>($i0, $i1);
+
+        $r5 = $r0.<com.google.android.maps.MapView: android.graphics.drawable.Drawable mGoogleLogo>;
+
+        $i0 = $r0.<android.view.View: int mMeasuredHeight>;
+
+        $i1 = $r0.<com.google.android.maps.MapView: int mGoogleLogoHeight>;
+
+        $i0 = $i0 - $i1;
+
+        $i0 = $i0 - 10;
+
+        $i1 = $r0.<com.google.android.maps.MapView: int mGoogleLogoWidth>;
+
+        $i1 = $i1 + 10;
+
+        $i3 = $r0.<android.view.View: int mMeasuredHeight>;
+
+        $i3 = $i3 - 10;
+
+        virtualinvoke $r5.<android.graphics.drawable.Drawable: void setBounds(int,int,int,int)>(10, $i0, $i1, $i3);
+
+        $r6 = $r0.<com.google.android.maps.MapView: com.google.googlenav.map.Map mMap>;
+
+        $i0 = $r0.<android.view.View: int mMeasuredWidth>;
+
+        $i1 = $r0.<android.view.View: int mMeasuredHeight>;
+
+        virtualinvoke $r6.<com.google.googlenav.map.Map: void resize(int,int)>($i0, $i1);
+
+        $r7 = $r0.<com.google.android.maps.MapView: com.google.android.maps.MapController mController>;
+
+        virtualinvoke $r7.<com.google.android.maps.MapController: void onMeasure()>();
+
+        return;
+    }
+
+    public void onRestoreInstanceState(android.os.Bundle)
+    {
+        com.google.android.maps.MapView $r0;
+        android.os.Bundle $r1;
+        com.google.android.maps.GeoPoint $r2;
+        com.google.android.maps.MapController $r3;
+        java.lang.String $r4;
+        int $i0, $i1;
+        boolean $z0;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 := @parameter0: android.os.Bundle;
+
+        if $r1 != null goto label1;
+
+        return;
+
+     label1:
+        $r3 = $r0.<com.google.android.maps.MapView: com.google.android.maps.MapController mController>;
+
+        if $r3 == null goto label3;
+
+        $r4 = <com.google.android.maps.MapView: java.lang.String KEY_CENTER_LATITUDE>;
+
+        $i0 = virtualinvoke $r1.<android.os.Bundle: int getInt(java.lang.String,int)>($r4, 2147483647);
+
+        $r4 = <com.google.android.maps.MapView: java.lang.String KEY_CENTER_LONGITUDE>;
+
+        $i1 = virtualinvoke $r1.<android.os.Bundle: int getInt(java.lang.String,int)>($r4, 2147483647);
+
+        if $i0 == 2147483647 goto label2;
+
+        if $i1 == 2147483647 goto label2;
+
+        $r3 = $r0.<com.google.android.maps.MapView: com.google.android.maps.MapController mController>;
+
+        $r2 = new com.google.android.maps.GeoPoint;
+
+        specialinvoke $r2.<com.google.android.maps.GeoPoint: void <init>(int,int)>($i0, $i1);
+
+        virtualinvoke $r3.<com.google.android.maps.MapController: void setCenter(com.google.android.maps.GeoPoint)>($r2);
+
+     label2:
+        $r4 = <com.google.android.maps.MapView: java.lang.String KEY_ZOOM_LEVEL>;
+
+        $i0 = virtualinvoke $r1.<android.os.Bundle: int getInt(java.lang.String,int)>($r4, 2147483647);
+
+        if $i0 == 2147483647 goto label3;
+
+        $r3 = $r0.<com.google.android.maps.MapView: com.google.android.maps.MapController mController>;
+
+        virtualinvoke $r3.<com.google.android.maps.MapController: int setZoom(int)>($i0);
+
+     label3:
+        $r4 = <com.google.android.maps.MapView: java.lang.String KEY_ZOOM_DISPLAYED>;
+
+        $i0 = virtualinvoke $r1.<android.os.Bundle: int getInt(java.lang.String,int)>($r4, 0);
+
+        if $i0 == 0 goto label5;
+
+        $z0 = 1;
+
+     label4:
+        if $z0 == 0 goto label6;
+
+        virtualinvoke $r0.<com.google.android.maps.MapView: void displayZoomControls(boolean)>(0);
+
+        return;
+
+     label5:
+        $z0 = 0;
+
+        goto label4;
+
+     label6:
+        return;
+    }
+
+    public void onSaveInstanceState(android.os.Bundle)
+    {
+        com.google.android.maps.MapView $r0;
+        android.os.Bundle $r1;
+        java.lang.String $r2;
+        com.google.googlenav.map.Map $r3;
+        com.google.map.MapPoint $r4;
+        int $i0;
+        android.widget.ZoomButtonsController $r5;
+        boolean $z0;
+        android.widget.ZoomControls $r6;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 := @parameter0: android.os.Bundle;
+
+        $r2 = <com.google.android.maps.MapView: java.lang.String KEY_CENTER_LATITUDE>;
+
+        $r3 = $r0.<com.google.android.maps.MapView: com.google.googlenav.map.Map mMap>;
+
+        $r4 = virtualinvoke $r3.<com.google.googlenav.map.Map: com.google.map.MapPoint getCenterPoint()>();
+
+        $i0 = virtualinvoke $r4.<com.google.map.MapPoint: int getLatitude()>();
+
+        virtualinvoke $r1.<android.os.Bundle: void putInt(java.lang.String,int)>($r2, $i0);
+
+        $r2 = <com.google.android.maps.MapView: java.lang.String KEY_CENTER_LONGITUDE>;
+
+        $r3 = $r0.<com.google.android.maps.MapView: com.google.googlenav.map.Map mMap>;
+
+        $r4 = virtualinvoke $r3.<com.google.googlenav.map.Map: com.google.map.MapPoint getCenterPoint()>();
+
+        $i0 = virtualinvoke $r4.<com.google.map.MapPoint: int getLongitude()>();
+
+        virtualinvoke $r1.<android.os.Bundle: void putInt(java.lang.String,int)>($r2, $i0);
+
+        $r2 = <com.google.android.maps.MapView: java.lang.String KEY_ZOOM_LEVEL>;
+
+        $i0 = virtualinvoke $r0.<com.google.android.maps.MapView: int getZoomLevel()>();
+
+        virtualinvoke $r1.<android.os.Bundle: void putInt(java.lang.String,int)>($r2, $i0);
+
+        $r5 = $r0.<com.google.android.maps.MapView: android.widget.ZoomButtonsController mZoomButtonsController>;
+
+        if $r5 == null goto label1;
+
+        $r5 = $r0.<com.google.android.maps.MapView: android.widget.ZoomButtonsController mZoomButtonsController>;
+
+        $z0 = virtualinvoke $r5.<android.widget.ZoomButtonsController: boolean isVisible()>();
+
+        if $z0 != 0 goto label2;
+
+     label1:
+        $r6 = $r0.<com.google.android.maps.MapView: android.widget.ZoomControls mZoomControls>;
+
+        if $r6 == null goto label3;
+
+        $r6 = $r0.<com.google.android.maps.MapView: android.widget.ZoomControls mZoomControls>;
+
+        $i0 = virtualinvoke $r6.<android.view.View: int getVisibility()>();
+
+        if $i0 != 0 goto label3;
+
+     label2:
+        $r2 = <com.google.android.maps.MapView: java.lang.String KEY_ZOOM_DISPLAYED>;
+
+        virtualinvoke $r1.<android.os.Bundle: void putInt(java.lang.String,int)>($r2, 1);
+
+        return;
+
+     label3:
+        $r2 = <com.google.android.maps.MapView: java.lang.String KEY_ZOOM_DISPLAYED>;
+
+        virtualinvoke $r1.<android.os.Bundle: void putInt(java.lang.String,int)>($r2, 0);
+
+        return;
+    }
+
+    protected void onSizeChanged(int, int, int, int)
+    {
+        com.google.android.maps.MapView $r0;
+        int $i0, $i1, $i2, $i3;
+        com.google.googlenav.map.Map $r1;
+        android.graphics.drawable.Drawable $r2;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i2 := @parameter2: int;
+
+        $i3 := @parameter3: int;
+
+        $r1 = $r0.<com.google.android.maps.MapView: com.google.googlenav.map.Map mMap>;
+
+        virtualinvoke $r1.<com.google.googlenav.map.Map: void resize(int,int)>($i0, $i1);
+
+        $r2 = $r0.<com.google.android.maps.MapView: android.graphics.drawable.Drawable mReticle>;
+
+        if $r2 == null goto label1;
+
+        $i0 = $i0 / 2;
+
+        $r2 = $r0.<com.google.android.maps.MapView: android.graphics.drawable.Drawable mReticle>;
+
+        $i2 = virtualinvoke $r2.<android.graphics.drawable.Drawable: int getIntrinsicWidth()>();
+
+        $i2 = $i2 / 2;
+
+        $i0 = $i0 - $i2;
+
+        $i1 = $i1 / 2;
+
+        $r2 = $r0.<com.google.android.maps.MapView: android.graphics.drawable.Drawable mReticle>;
+
+        $i2 = virtualinvoke $r2.<android.graphics.drawable.Drawable: int getIntrinsicHeight()>();
+
+        $i2 = $i2 / 2;
+
+        $i1 = $i1 - $i2;
+
+        $r2 = $r0.<com.google.android.maps.MapView: android.graphics.drawable.Drawable mReticle>;
+
+        $i2 = virtualinvoke $r2.<android.graphics.drawable.Drawable: int getIntrinsicWidth()>();
+
+        $i2 = $i0 + $i2;
+
+        $r2 = $r0.<com.google.android.maps.MapView: android.graphics.drawable.Drawable mReticle>;
+
+        $i3 = virtualinvoke $r2.<android.graphics.drawable.Drawable: int getIntrinsicHeight()>();
+
+        $i3 = $i1 + $i3;
+
+        $r2 = $r0.<com.google.android.maps.MapView: android.graphics.drawable.Drawable mReticle>;
+
+        virtualinvoke $r2.<android.graphics.drawable.Drawable: void setBounds(int,int,int,int)>($i0, $i1, $i2, $i3);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public boolean onTouchEvent(android.view.MotionEvent)
+    {
+        com.google.android.maps.MapView $r0;
+        android.view.MotionEvent $r1;
+        boolean $z0;
+        com.google.android.maps.OverlayBundle $r2;
+        android.view.GestureDetector $r3;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 := @parameter0: android.view.MotionEvent;
+
+        $z0 = virtualinvoke $r0.<android.view.View: boolean isEnabled()>();
+
+        if $z0 == 0 goto label1;
+
+        $z0 = virtualinvoke $r0.<android.view.View: boolean isClickable()>();
+
+        if $z0 != 0 goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        virtualinvoke $r0.<android.view.View: void postInvalidate()>();
+
+        $r2 = $r0.<com.google.android.maps.MapView: com.google.android.maps.OverlayBundle mOverlayBundle>;
+
+        $z0 = virtualinvoke $r2.<com.google.android.maps.OverlayBundle: boolean onTouchEvent(android.view.MotionEvent,com.google.android.maps.MapView)>($r1, $r0);
+
+        if $z0 == 0 goto label3;
+
+        return 1;
+
+     label3:
+        $r3 = $r0.<com.google.android.maps.MapView: android.view.GestureDetector mGestureDetector>;
+
+        virtualinvoke $r3.<android.view.GestureDetector: boolean onTouchEvent(android.view.MotionEvent)>($r1);
+
+        return 1;
+    }
+
+    public boolean onTrackballEvent(android.view.MotionEvent)
+    {
+        com.google.android.maps.MapView $r0;
+        android.view.MotionEvent $r1;
+        com.google.android.maps.OverlayBundle $r2;
+        boolean $z0;
+        com.google.android.maps.TrackballGestureDetector $r3;
+        com.google.android.maps.MapController $r4;
+        float $f0;
+        int $i0, $i1;
+        com.google.android.maps.GeoPoint $r5;
+        com.google.googlenav.map.Map $r6;
+        com.google.map.MapPoint $r7;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 := @parameter0: android.view.MotionEvent;
+
+        virtualinvoke $r0.<android.view.View: void postInvalidate()>();
+
+        $r2 = $r0.<com.google.android.maps.MapView: com.google.android.maps.OverlayBundle mOverlayBundle>;
+
+        $z0 = virtualinvoke $r2.<com.google.android.maps.OverlayBundle: boolean onTrackballEvent(android.view.MotionEvent,com.google.android.maps.MapView)>($r1, $r0);
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        $r3 = $r0.<com.google.android.maps.MapView: com.google.android.maps.TrackballGestureDetector mTrackballGestureDetector>;
+
+        virtualinvoke $r3.<com.google.android.maps.TrackballGestureDetector: void analyze(android.view.MotionEvent)>($r1);
+
+        $r3 = $r0.<com.google.android.maps.MapView: com.google.android.maps.TrackballGestureDetector mTrackballGestureDetector>;
+
+        $z0 = virtualinvoke $r3.<com.google.android.maps.TrackballGestureDetector: boolean isScroll()>();
+
+        if $z0 == 0 goto label3;
+
+        $r4 = $r0.<com.google.android.maps.MapView: com.google.android.maps.MapController mController>;
+
+        $f0 = virtualinvoke $r1.<android.view.MotionEvent: float getX()>();
+
+        $f0 = $f0 * 10.0F;
+
+        $i0 = (int) $f0;
+
+        $f0 = virtualinvoke $r1.<android.view.MotionEvent: float getY()>();
+
+        $f0 = $f0 * 10.0F;
+
+        $i1 = (int) $f0;
+
+        virtualinvoke $r4.<com.google.android.maps.MapController: void scrollByTrackball(int,int)>($i0, $i1);
+
+     label2:
+        return 0;
+
+     label3:
+        $r3 = $r0.<com.google.android.maps.MapView: com.google.android.maps.TrackballGestureDetector mTrackballGestureDetector>;
+
+        $z0 = virtualinvoke $r3.<com.google.android.maps.TrackballGestureDetector: boolean isTap()>();
+
+        if $z0 == 0 goto label2;
+
+        $r2 = $r0.<com.google.android.maps.MapView: com.google.android.maps.OverlayBundle mOverlayBundle>;
+
+        $r5 = new com.google.android.maps.GeoPoint;
+
+        $r6 = $r0.<com.google.android.maps.MapView: com.google.googlenav.map.Map mMap>;
+
+        $r7 = virtualinvoke $r6.<com.google.googlenav.map.Map: com.google.map.MapPoint getCenterPoint()>();
+
+        specialinvoke $r5.<com.google.android.maps.GeoPoint: void <init>(com.google.map.MapPoint)>($r7);
+
+        virtualinvoke $r2.<com.google.android.maps.OverlayBundle: boolean onTap(com.google.android.maps.GeoPoint,com.google.android.maps.MapView)>($r5, $r0);
+
+        goto label2;
+    }
+
+    public void onWindowFocusChanged(boolean)
+    {
+        com.google.android.maps.MapView $r0;
+        boolean $z0;
+        com.google.android.maps.MapController $r1;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $z0 := @parameter0: boolean;
+
+        if $z0 != 0 goto label1;
+
+        $r1 = $r0.<com.google.android.maps.MapView: com.google.android.maps.MapController mController>;
+
+        virtualinvoke $r1.<com.google.android.maps.MapController: void stopPanning()>();
+
+     label1:
+        specialinvoke $r0.<android.view.View: void onWindowFocusChanged(boolean)>($z0);
+
+        return;
+    }
+
+    public void preLoad()
+    {
+        com.google.android.maps.MapView $r0;
+        com.google.googlenav.map.Map $r1, $r3;
+        com.google.map.MapPoint $r2;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 = $r0.<com.google.android.maps.MapView: com.google.googlenav.map.Map mMap>;
+
+        $r3 = $r0.<com.google.android.maps.MapView: com.google.googlenav.map.Map mMap>;
+
+        $r2 = virtualinvoke $r3.<com.google.googlenav.map.Map: com.google.map.MapPoint getCenterPoint()>();
+
+        virtualinvoke $r1.<com.google.googlenav.map.Map: void preLoad(com.google.map.MapPoint)>($r2);
+
+        return;
+    }
+
+    public void setBuiltInZoomControls(boolean)
+    {
+        com.google.android.maps.MapView $r0;
+        boolean $z0;
+        android.widget.ZoomButtonsController $r1;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $z0 := @parameter0: boolean;
+
+        $r0.<com.google.android.maps.MapView: boolean mBuiltInZoomControlsEnabled> = $z0;
+
+        $r1 = $r0.<com.google.android.maps.MapView: android.widget.ZoomButtonsController mZoomButtonsController>;
+
+        if $r1 != null goto label1;
+
+        $r1 = specialinvoke $r0.<com.google.android.maps.MapView: android.widget.ZoomButtonsController createZoomButtonsController()>();
+
+        $r0.<com.google.android.maps.MapView: android.widget.ZoomButtonsController mZoomButtonsController> = $r1;
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public void setReticleDrawMode(com.google.android.maps.MapView$ReticleDrawMode)
+    {
+        com.google.android.maps.MapView $r0;
+        com.google.android.maps.MapView$ReticleDrawMode $r1;
+        java.lang.NullPointerException $r2;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 := @parameter0: com.google.android.maps.MapView$ReticleDrawMode;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.NullPointerException;
+
+        specialinvoke $r2.<java.lang.NullPointerException: void <init>(java.lang.String)>("The ReticleDrawMode cannot be null");
+
+        throw $r2;
+
+     label1:
+        $r0.<com.google.android.maps.MapView: com.google.android.maps.MapView$ReticleDrawMode mReticleDrawMode> = $r1;
+
+        return;
+    }
+
+    public void setSatellite(boolean)
+    {
+        com.google.android.maps.MapView $r0;
+        boolean $z0, $z1;
+        com.google.googlenav.map.Map $r1, $r2;
+        com.google.map.MapPoint $r3;
+        int $i0, $i1;
+        com.google.map.Zoom $r4;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $z0 := @parameter0: boolean;
+
+        $z1 = virtualinvoke $r0.<com.google.android.maps.MapView: boolean isSatellite()>();
+
+        if $z1 == $z0 goto label2;
+
+        $r1 = $r0.<com.google.android.maps.MapView: com.google.googlenav.map.Map mMap>;
+
+        virtualinvoke $r1.<com.google.googlenav.map.Map: void toggleSatellite()>();
+
+        $r1 = $r0.<com.google.android.maps.MapView: com.google.googlenav.map.Map mMap>;
+
+        $r2 = $r0.<com.google.android.maps.MapView: com.google.googlenav.map.Map mMap>;
+
+        $r3 = virtualinvoke $r2.<com.google.googlenav.map.Map: com.google.map.MapPoint getCenterPoint()>();
+
+        $i0 = virtualinvoke $r1.<com.google.googlenav.map.Map: int getMaxMapZoomForPoint(com.google.map.MapPoint)>($r3);
+
+        $r1 = $r0.<com.google.android.maps.MapView: com.google.googlenav.map.Map mMap>;
+
+        $r4 = virtualinvoke $r1.<com.google.googlenav.map.Map: com.google.map.Zoom getZoom()>();
+
+        $i1 = virtualinvoke $r4.<com.google.map.Zoom: int getZoomLevel()>();
+
+        if $i1 <= $i0 goto label1;
+
+        $r1 = $r0.<com.google.android.maps.MapView: com.google.googlenav.map.Map mMap>;
+
+        $r4 = staticinvoke <com.google.map.Zoom: com.google.map.Zoom getZoom(int)>($i0);
+
+        virtualinvoke $r1.<com.google.googlenav.map.Map: void setZoom(com.google.map.Zoom)>($r4);
+
+     label1:
+        specialinvoke $r0.<com.google.android.maps.MapView: void updateZoomControls()>();
+
+        virtualinvoke $r0.<android.view.View: void postInvalidate()>();
+
+        return;
+
+     label2:
+        return;
+    }
+
+    public void setStreetView(boolean)
+    {
+        com.google.android.maps.MapView $r0;
+        boolean $z0;
+        com.google.android.maps.AndroidTileOverlayRenderer $r1;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 = $r0.<com.google.android.maps.MapView: com.google.android.maps.AndroidTileOverlayRenderer mOverlayRenderer>;
+
+        virtualinvoke $r1.<com.google.android.maps.AndroidTileOverlayRenderer: void setShowStreetView(boolean)>($z0);
+
+        virtualinvoke $r0.<android.view.View: void postInvalidate()>();
+
+        return;
+    }
+
+    public void setTraffic(boolean)
+    {
+        com.google.android.maps.MapView $r0;
+        boolean $z0;
+        com.google.android.maps.AndroidTileOverlayRenderer $r1;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 = $r0.<com.google.android.maps.MapView: com.google.android.maps.AndroidTileOverlayRenderer mOverlayRenderer>;
+
+        virtualinvoke $r1.<com.google.android.maps.AndroidTileOverlayRenderer: void setShowTraffic(boolean)>($z0);
+
+        virtualinvoke $r0.<android.view.View: void postInvalidate()>();
+
+        return;
+    }
+
+    void setup(com.google.googlenav.map.Map, com.google.googlenav.map.TrafficService, com.google.common.DataRequestDispatcher)
+    {
+        com.google.android.maps.MapView $r0;
+        com.google.googlenav.map.Map $r1, $r6;
+        com.google.googlenav.map.TrafficService $r2;
+        com.google.common.DataRequestDispatcher $r3;
+        com.google.android.maps.MapView$1 $r4;
+        com.google.android.maps.PixelConverter $r5;
+        com.google.android.maps.MapView$Repainter $r7;
+        com.google.android.maps.OverlayBundle $r8;
+        com.google.android.maps.MapController $r9;
+        com.google.android.maps.ZoomHelper $r10;
+        android.content.Context $r11;
+        android.content.res.Resources $r12;
+        android.graphics.drawable.Drawable $r13;
+        com.google.android.maps.MapView$ReticleDrawMode $r14;
+        com.google.android.maps.AndroidTileOverlayRenderer $r15;
+        android.os.Handler $r16;
+        android.view.GestureDetector $r17;
+        com.google.android.maps.TrackballGestureDetector $r18;
+
+        $r0 := @this: com.google.android.maps.MapView;
+
+        $r1 := @parameter0: com.google.googlenav.map.Map;
+
+        $r2 := @parameter1: com.google.googlenav.map.TrafficService;
+
+        $r3 := @parameter2: com.google.common.DataRequestDispatcher;
+
+        $r0.<com.google.android.maps.MapView: com.google.googlenav.map.Map mMap> = $r1;
+
+        $r5 = new com.google.android.maps.PixelConverter;
+
+        specialinvoke $r5.<com.google.android.maps.PixelConverter: void <init>(com.google.googlenav.map.Map)>($r1);
+
+        $r0.<com.google.android.maps.MapView: com.google.android.maps.PixelConverter mConverter> = $r5;
+
+        $r6 = $r0.<com.google.android.maps.MapView: com.google.googlenav.map.Map mMap>;
+
+        $r7 = $r0.<com.google.android.maps.MapView: com.google.android.maps.MapView$Repainter mRepainter>;
+
+        virtualinvoke $r6.<com.google.googlenav.map.Map: void setRepaintListener(com.google.common.ui.RepaintListener)>($r7);
+
+        $r8 = new com.google.android.maps.OverlayBundle;
+
+        specialinvoke $r8.<com.google.android.maps.OverlayBundle: void <init>()>();
+
+        $r0.<com.google.android.maps.MapView: com.google.android.maps.OverlayBundle mOverlayBundle> = $r8;
+
+        $r9 = new com.google.android.maps.MapController;
+
+        $r6 = $r0.<com.google.android.maps.MapView: com.google.googlenav.map.Map mMap>;
+
+        specialinvoke $r9.<com.google.android.maps.MapController: void <init>(com.google.googlenav.map.Map,com.google.android.maps.MapView)>($r6, $r0);
+
+        $r0.<com.google.android.maps.MapView: com.google.android.maps.MapController mController> = $r9;
+
+        $r10 = new com.google.android.maps.ZoomHelper;
+
+        $r9 = $r0.<com.google.android.maps.MapView: com.google.android.maps.MapController mController>;
+
+        specialinvoke $r10.<com.google.android.maps.ZoomHelper: void <init>(com.google.android.maps.MapView,com.google.android.maps.MapController)>($r0, $r9);
+
+        $r0.<com.google.android.maps.MapView: com.google.android.maps.ZoomHelper mZoomHelper> = $r10;
+
+        $r11 = $r0.<android.view.View: android.content.Context mContext>;
+
+        $r12 = virtualinvoke $r11.<android.content.Context: android.content.res.Resources getResources()>();
+
+        $r13 = virtualinvoke $r12.<android.content.res.Resources: android.graphics.drawable.Drawable getDrawable(int)>(17301998);
+
+        $r0.<com.google.android.maps.MapView: android.graphics.drawable.Drawable mReticle> = $r13;
+
+        $r14 = <com.google.android.maps.MapView$ReticleDrawMode: com.google.android.maps.MapView$ReticleDrawMode DRAW_RETICLE_OVER>;
+
+        $r0.<com.google.android.maps.MapView: com.google.android.maps.MapView$ReticleDrawMode mReticleDrawMode> = $r14;
+
+        $r15 = new com.google.android.maps.AndroidTileOverlayRenderer;
+
+        specialinvoke $r15.<com.google.android.maps.AndroidTileOverlayRenderer: void <init>(com.google.googlenav.map.TrafficService,com.google.common.DataRequestDispatcher)>($r2, $r3);
+
+        $r0.<com.google.android.maps.MapView: com.google.android.maps.AndroidTileOverlayRenderer mOverlayRenderer> = $r15;
+
+        $r15 = $r0.<com.google.android.maps.MapView: com.google.android.maps.AndroidTileOverlayRenderer mOverlayRenderer>;
+
+        virtualinvoke $r1.<com.google.googlenav.map.Map: void setTileOverlayRenderer(com.google.googlenav.map.TileOverlayRenderer)>($r15);
+
+        $r16 = new android.os.Handler;
+
+        specialinvoke $r16.<android.os.Handler: void <init>()>();
+
+        $r0.<com.google.android.maps.MapView: android.os.Handler mHandler> = $r16;
+
+        $r17 = new android.view.GestureDetector;
+
+        $r11 = virtualinvoke $r0.<android.view.View: android.content.Context getContext()>();
+
+        $r4 = new com.google.android.maps.MapView$1;
+
+        specialinvoke $r4.<com.google.android.maps.MapView$1: void <init>(com.google.android.maps.MapView)>($r0);
+
+        specialinvoke $r17.<android.view.GestureDetector: void <init>(android.content.Context,android.view.GestureDetector$OnGestureListener)>($r11, $r4);
+
+        $r0.<com.google.android.maps.MapView: android.view.GestureDetector mGestureDetector> = $r17;
+
+        $r17 = $r0.<com.google.android.maps.MapView: android.view.GestureDetector mGestureDetector>;
+
+        virtualinvoke $r17.<android.view.GestureDetector: void setIsLongpressEnabled(boolean)>(0);
+
+        $r18 = new com.google.android.maps.TrackballGestureDetector;
+
+        $r16 = $r0.<com.google.android.maps.MapView: android.os.Handler mHandler>;
+
+        specialinvoke $r18.<com.google.android.maps.TrackballGestureDetector: void <init>(android.os.Handler)>($r16);
+
+        $r0.<com.google.android.maps.MapView: com.google.android.maps.TrackballGestureDetector mTrackballGestureDetector> = $r18;
+
+        return;
+    }
+}

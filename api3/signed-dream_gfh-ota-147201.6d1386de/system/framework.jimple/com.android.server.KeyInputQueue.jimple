@@ -1,0 +1,1501 @@
+public abstract class com.android.server.KeyInputQueue extends java.lang.Object
+{
+    public static final int FILTER_ABORT;
+    public static final int FILTER_KEEP;
+    public static final int FILTER_REMOVE;
+    static final int[] KEY_180_MAP;
+    static final int[] KEY_270_MAP;
+    static final int[] KEY_90_MAP;
+    static final java.lang.String TAG;
+    com.android.server.KeyInputQueue$QueuedEvent mCache;
+    int mCacheCount;
+    android.util.SparseArray mDevices;
+    android.view.Display mDisplay;
+    final com.android.server.KeyInputQueue$QueuedEvent mFirst;
+    int mGlobalMetaState;
+    boolean mHaveGlobalMetaState;
+    int[] mKeyRotationMap;
+    final com.android.server.KeyInputQueue$QueuedEvent mLast;
+    int mOrientation;
+    java.lang.Thread mThread;
+    android.os.PowerManager$WakeLock mWakeLock;
+
+    static void <clinit>()
+    {
+        int[] $r0;
+
+        <com.android.server.KeyInputQueue: java.lang.String TAG> = "KeyInputQueue";
+
+        <com.android.server.KeyInputQueue: int FILTER_REMOVE> = 0;
+
+        <com.android.server.KeyInputQueue: int FILTER_KEEP> = 1;
+
+        <com.android.server.KeyInputQueue: int FILTER_ABORT> = -1;
+
+        $r0 = newarray (int)[8];
+
+        $r0[0] = 20;
+
+        $r0[1] = 22;
+
+        $r0[2] = 22;
+
+        $r0[3] = 19;
+
+        $r0[4] = 19;
+
+        $r0[5] = 21;
+
+        $r0[6] = 21;
+
+        $r0[7] = 20;
+
+        <com.android.server.KeyInputQueue: int[] KEY_90_MAP> = $r0;
+
+        $r0 = newarray (int)[8];
+
+        $r0[0] = 20;
+
+        $r0[1] = 19;
+
+        $r0[2] = 22;
+
+        $r0[3] = 21;
+
+        $r0[4] = 19;
+
+        $r0[5] = 20;
+
+        $r0[6] = 21;
+
+        $r0[7] = 22;
+
+        <com.android.server.KeyInputQueue: int[] KEY_180_MAP> = $r0;
+
+        $r0 = newarray (int)[8];
+
+        $r0[0] = 20;
+
+        $r0[1] = 21;
+
+        $r0[2] = 21;
+
+        $r0[3] = 19;
+
+        $r0[4] = 19;
+
+        $r0[5] = 22;
+
+        $r0[6] = 22;
+
+        $r0[7] = 20;
+
+        <com.android.server.KeyInputQueue: int[] KEY_270_MAP> = $r0;
+
+        return;
+    }
+
+    void <init>(android.content.Context)
+    {
+        com.android.server.KeyInputQueue $r0;
+        android.content.Context $r1;
+        android.util.SparseArray $r2;
+        com.android.server.KeyInputQueue$1 $r3;
+        java.lang.Object $r4;
+        android.os.PowerManager $r5;
+        android.os.PowerManager$WakeLock $r6;
+        com.android.server.KeyInputQueue$QueuedEvent $r7, $r8;
+        java.lang.Thread $r9;
+
+        $r0 := @this: com.android.server.KeyInputQueue;
+
+        $r1 := @parameter0: android.content.Context;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r2 = new android.util.SparseArray;
+
+        specialinvoke $r2.<android.util.SparseArray: void <init>()>();
+
+        $r0.<com.android.server.KeyInputQueue: android.util.SparseArray mDevices> = $r2;
+
+        $r0.<com.android.server.KeyInputQueue: int mGlobalMetaState> = 0;
+
+        $r0.<com.android.server.KeyInputQueue: boolean mHaveGlobalMetaState> = 0;
+
+        $r0.<com.android.server.KeyInputQueue: android.view.Display mDisplay> = null;
+
+        $r0.<com.android.server.KeyInputQueue: int mOrientation> = 0;
+
+        $r0.<com.android.server.KeyInputQueue: int[] mKeyRotationMap> = null;
+
+        $r3 = new com.android.server.KeyInputQueue$1;
+
+        specialinvoke $r3.<com.android.server.KeyInputQueue$1: void <init>(com.android.server.KeyInputQueue,java.lang.String)>($r0, "InputDeviceReader");
+
+        $r0.<com.android.server.KeyInputQueue: java.lang.Thread mThread> = $r3;
+
+        $r4 = virtualinvoke $r1.<android.content.Context: java.lang.Object getSystemService(java.lang.String)>("power");
+
+        $r5 = (android.os.PowerManager) $r4;
+
+        $r6 = virtualinvoke $r5.<android.os.PowerManager: android.os.PowerManager$WakeLock newWakeLock(int,java.lang.String)>(1, "KeyInputQueue");
+
+        $r0.<com.android.server.KeyInputQueue: android.os.PowerManager$WakeLock mWakeLock> = $r6;
+
+        $r6 = $r0.<com.android.server.KeyInputQueue: android.os.PowerManager$WakeLock mWakeLock>;
+
+        virtualinvoke $r6.<android.os.PowerManager$WakeLock: void setReferenceCounted(boolean)>(0);
+
+        $r7 = new com.android.server.KeyInputQueue$QueuedEvent;
+
+        specialinvoke $r7.<com.android.server.KeyInputQueue$QueuedEvent: void <init>()>();
+
+        $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mFirst> = $r7;
+
+        $r7 = new com.android.server.KeyInputQueue$QueuedEvent;
+
+        specialinvoke $r7.<com.android.server.KeyInputQueue$QueuedEvent: void <init>()>();
+
+        $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mLast> = $r7;
+
+        $r7 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mFirst>;
+
+        $r8 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mLast>;
+
+        $r7.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.KeyInputQueue$QueuedEvent next> = $r8;
+
+        $r7 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mLast>;
+
+        $r8 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mFirst>;
+
+        $r7.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.KeyInputQueue$QueuedEvent prev> = $r8;
+
+        $r9 = $r0.<com.android.server.KeyInputQueue: java.lang.Thread mThread>;
+
+        virtualinvoke $r9.<java.lang.Thread: void start()>();
+
+        return;
+    }
+
+    static boolean access$000(android.view.RawInputEvent)
+    {
+        android.view.RawInputEvent $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: android.view.RawInputEvent;
+
+        $z0 = staticinvoke <com.android.server.KeyInputQueue: boolean readEvent(android.view.RawInputEvent)>($r0);
+
+        return $z0;
+    }
+
+    static com.android.server.InputDevice access$100(com.android.server.KeyInputQueue, int)
+    {
+        com.android.server.KeyInputQueue $r0;
+        int $i0;
+        com.android.server.InputDevice $r1;
+
+        $r0 := @parameter0: com.android.server.KeyInputQueue;
+
+        $i0 := @parameter1: int;
+
+        $r1 = specialinvoke $r0.<com.android.server.KeyInputQueue: com.android.server.InputDevice newInputDevice(int)>($i0);
+
+        return $r1;
+    }
+
+    static int access$200(int, boolean, int)
+    {
+        int $i0, $i1;
+        boolean $z0;
+
+        $i0 := @parameter0: int;
+
+        $z0 := @parameter1: boolean;
+
+        $i1 := @parameter2: int;
+
+        $i0 = staticinvoke <com.android.server.KeyInputQueue: int makeMetaState(int,boolean,int)>($i0, $z0, $i1);
+
+        return $i0;
+    }
+
+    static void access$300(com.android.server.KeyInputQueue, com.android.server.InputDevice, long, int, int, java.lang.Object)
+    {
+        com.android.server.KeyInputQueue $r0;
+        com.android.server.InputDevice $r1;
+        long $l0;
+        int $i1, $i2;
+        java.lang.Object $r2;
+
+        $r0 := @parameter0: com.android.server.KeyInputQueue;
+
+        $r1 := @parameter1: com.android.server.InputDevice;
+
+        $l0 := @parameter2: long;
+
+        $i1 := @parameter3: int;
+
+        $i2 := @parameter4: int;
+
+        $r2 := @parameter5: java.lang.Object;
+
+        specialinvoke $r0.<com.android.server.KeyInputQueue: void addLocked(com.android.server.InputDevice,long,int,int,java.lang.Object)>($r1, $l0, $i1, $i2, $r2);
+
+        return;
+    }
+
+    static int access$400(com.android.server.KeyInputQueue, int)
+    {
+        com.android.server.KeyInputQueue $r0;
+        int $i0;
+
+        $r0 := @parameter0: com.android.server.KeyInputQueue;
+
+        $i0 := @parameter1: int;
+
+        $i0 = specialinvoke $r0.<com.android.server.KeyInputQueue: int rotateKeyCodeLocked(int)>($i0);
+
+        return $i0;
+    }
+
+    static void access$500(com.android.server.KeyInputQueue)
+    {
+        com.android.server.KeyInputQueue $r0;
+
+        $r0 := @parameter0: com.android.server.KeyInputQueue;
+
+        specialinvoke $r0.<com.android.server.KeyInputQueue: void computeGlobalMetaStateLocked()>();
+
+        return;
+    }
+
+    private void addLocked(com.android.server.InputDevice, long, int, int, java.lang.Object)
+    {
+        com.android.server.KeyInputQueue $r0;
+        com.android.server.InputDevice $r1;
+        long $l0, $l3;
+        int $i1, $i2;
+        java.lang.Object $r2;
+        com.android.server.KeyInputQueue$QueuedEvent $r3, $r4, $r5;
+        boolean $z0;
+        byte $b4;
+        android.os.PowerManager$WakeLock $r6;
+
+        $r0 := @this: com.android.server.KeyInputQueue;
+
+        $r1 := @parameter0: com.android.server.InputDevice;
+
+        $l0 := @parameter1: long;
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        $r2 := @parameter4: java.lang.Object;
+
+        $r3 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mFirst>;
+
+        $r4 = $r3.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.KeyInputQueue$QueuedEvent next>;
+
+        $r3 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mLast>;
+
+        if $r4 != $r3 goto label3;
+
+        $z0 = 1;
+
+     label1:
+        $r3 = specialinvoke $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent obtainLocked(com.android.server.InputDevice,long,int,int,java.lang.Object)>($r1, $l0, $i1, $i2, $r2);
+
+        $r4 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mLast>;
+
+        $r4 = $r4.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.KeyInputQueue$QueuedEvent prev>;
+
+     label2:
+        $r5 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mFirst>;
+
+        if $r4 == $r5 goto label4;
+
+        $l3 = $r3.<com.android.server.KeyInputQueue$QueuedEvent: long when>;
+
+        $l0 = $r4.<com.android.server.KeyInputQueue$QueuedEvent: long when>;
+
+        $b4 = $l3 cmp $l0;
+
+        if $b4 >= 0 goto label4;
+
+        $r4 = $r4.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.KeyInputQueue$QueuedEvent prev>;
+
+        goto label2;
+
+     label3:
+        $z0 = 0;
+
+        goto label1;
+
+     label4:
+        $r5 = $r4.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.KeyInputQueue$QueuedEvent next>;
+
+        $r3.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.KeyInputQueue$QueuedEvent next> = $r5;
+
+        $r3.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.KeyInputQueue$QueuedEvent prev> = $r4;
+
+        $r4.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.KeyInputQueue$QueuedEvent next> = $r3;
+
+        $r4 = $r3.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.KeyInputQueue$QueuedEvent next>;
+
+        $r4.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.KeyInputQueue$QueuedEvent prev> = $r3;
+
+        $r3.<com.android.server.KeyInputQueue$QueuedEvent: boolean inQueue> = 1;
+
+        if $z0 == 0 goto label5;
+
+        $r3 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mFirst>;
+
+        virtualinvoke $r3.<java.lang.Object: void notify()>();
+
+        $r6 = $r0.<com.android.server.KeyInputQueue: android.os.PowerManager$WakeLock mWakeLock>;
+
+        virtualinvoke $r6.<android.os.PowerManager$WakeLock: void acquire()>();
+
+        return;
+
+     label5:
+        return;
+    }
+
+    private void computeGlobalMetaStateLocked()
+    {
+        com.android.server.KeyInputQueue $r0;
+        int $i0, $i1, $i2;
+        android.util.SparseArray $r1;
+        java.lang.Object $r2;
+        com.android.server.InputDevice $r3;
+
+        $r0 := @this: com.android.server.KeyInputQueue;
+
+        $r1 = $r0.<com.android.server.KeyInputQueue: android.util.SparseArray mDevices>;
+
+        $i1 = virtualinvoke $r1.<android.util.SparseArray: int size()>();
+
+        $r0.<com.android.server.KeyInputQueue: int mGlobalMetaState> = 0;
+
+     label1:
+        $i1 = $i1 + -1;
+
+        if $i1 < 0 goto label2;
+
+        $i0 = $r0.<com.android.server.KeyInputQueue: int mGlobalMetaState>;
+
+        $r1 = $r0.<com.android.server.KeyInputQueue: android.util.SparseArray mDevices>;
+
+        $r2 = virtualinvoke $r1.<android.util.SparseArray: java.lang.Object valueAt(int)>($i1);
+
+        $r3 = (com.android.server.InputDevice) $r2;
+
+        $i2 = $r3.<com.android.server.InputDevice: int mMetaKeysState>;
+
+        $i0 = $i2 | $i0;
+
+        $r0.<com.android.server.KeyInputQueue: int mGlobalMetaState> = $i0;
+
+        goto label1;
+
+     label2:
+        $r0.<com.android.server.KeyInputQueue: boolean mHaveGlobalMetaState> = 1;
+
+        return;
+    }
+
+    public static native boolean getAbsoluteInfo(int, int, com.android.server.InputDevice$AbsoluteInfo);
+
+    public static native int getDeviceClasses(int);
+
+    public static native java.lang.String getDeviceName(int);
+
+    private com.android.server.InputDevice getInputDeviceLocked(int)
+    {
+        int $i0;
+        android.util.SparseArray $r0;
+        java.lang.Object $r1;
+        com.android.server.KeyInputQueue $r2;
+        com.android.server.InputDevice $r3;
+
+        $r2 := @this: com.android.server.KeyInputQueue;
+
+        $i0 := @parameter0: int;
+
+        $r0 = $r2.<com.android.server.KeyInputQueue: android.util.SparseArray mDevices>;
+
+        $r1 = virtualinvoke $r0.<android.util.SparseArray: java.lang.Object get(int)>($i0);
+
+        $r3 = (com.android.server.InputDevice) $r1;
+
+        return $r3;
+    }
+
+    public static native int getKeycodeState(int);
+
+    public static native int getKeycodeState(int, int);
+
+    public static native int getScancodeState(int);
+
+    public static native int getScancodeState(int, int);
+
+    public static native int getSwitchState(int);
+
+    public static native int getSwitchState(int, int);
+
+    public static native boolean hasKeys(int[], boolean[]);
+
+    private com.android.server.InputDevice$AbsoluteInfo loadAbsoluteInfo(int, int, java.lang.String)
+    {
+        com.android.server.KeyInputQueue $r0;
+        int $i0, $i1;
+        java.lang.String $r1;
+        com.android.server.InputDevice$AbsoluteInfo $r2;
+        boolean $z0;
+        java.lang.StringBuilder $r3;
+
+        $r0 := @this: com.android.server.KeyInputQueue;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 := @parameter2: java.lang.String;
+
+        $r2 = new com.android.server.InputDevice$AbsoluteInfo;
+
+        specialinvoke $r2.<com.android.server.InputDevice$AbsoluteInfo: void <init>()>();
+
+        $z0 = staticinvoke <com.android.server.KeyInputQueue: boolean getAbsoluteInfo(int,int,com.android.server.InputDevice$AbsoluteInfo)>($i0, $i1, $r2);
+
+        if $z0 == 0 goto label1;
+
+        $i0 = $r2.<com.android.server.InputDevice$AbsoluteInfo: int minValue>;
+
+        $i1 = $r2.<com.android.server.InputDevice$AbsoluteInfo: int maxValue>;
+
+        if $i0 == $i1 goto label1;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": min=");
+
+        $i0 = $r2.<com.android.server.InputDevice$AbsoluteInfo: int minValue>;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" max=");
+
+        $i0 = $r2.<com.android.server.InputDevice$AbsoluteInfo: int maxValue>;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" flat=");
+
+        $i0 = $r2.<com.android.server.InputDevice$AbsoluteInfo: int flat>;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" fuzz=");
+
+        $i0 = $r2.<com.android.server.InputDevice$AbsoluteInfo: int fuzz>;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("KeyInputQueue", $r1);
+
+        $i0 = $r2.<com.android.server.InputDevice$AbsoluteInfo: int maxValue>;
+
+        $i1 = $r2.<com.android.server.InputDevice$AbsoluteInfo: int minValue>;
+
+        $i0 = $i0 - $i1;
+
+        $r2.<com.android.server.InputDevice$AbsoluteInfo: int range> = $i0;
+
+        return $r2;
+
+     label1:
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": unknown values");
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("KeyInputQueue", $r1);
+
+        return null;
+    }
+
+    private static final int makeMetaState(int, boolean, int)
+    {
+        int $i0, $i1;
+        boolean $z0;
+        short $s2;
+
+        $i0 := @parameter0: int;
+
+        $z0 := @parameter1: boolean;
+
+        $i1 := @parameter2: int;
+
+        lookupswitch($i0)
+        {
+            case 57: goto label02;
+            case 58: goto label07;
+            case 59: goto label08;
+            case 60: goto label09;
+            case 61: goto label01;
+            case 62: goto label01;
+            case 63: goto label10;
+            default: goto label01;
+        };
+
+     label01:
+        return $i1;
+
+     label02:
+        $s2 = 16;
+
+     label03:
+        if $z0 == 0 goto label11;
+
+        $i0 = $i1 | $s2;
+
+     label04:
+        $i0 = $i0 & -4;
+
+        $i1 = $i0 & 48;
+
+        if $i1 == 0 goto label05;
+
+        $i0 = $i0 | 2;
+
+     label05:
+        $i1 = $i0 & 192;
+
+        if $i1 == 0 goto label06;
+
+        $i0 = $i0 | 1;
+
+     label06:
+        return $i0;
+
+     label07:
+        $s2 = 32;
+
+        goto label03;
+
+     label08:
+        $s2 = 64;
+
+        goto label03;
+
+     label09:
+        $s2 = 128;
+
+        goto label03;
+
+     label10:
+        $s2 = 4;
+
+        goto label03;
+
+     label11:
+        $s2 = $s2 ^ -1;
+
+        $i0 = $s2 & $i1;
+
+        goto label04;
+    }
+
+    private com.android.server.InputDevice newInputDevice(int)
+    {
+        com.android.server.KeyInputQueue $r0;
+        int $i0, $i1, $i2;
+        java.lang.String $r1, $r3;
+        java.lang.StringBuilder $r2;
+        com.android.server.InputDevice$AbsoluteInfo $r4, $r5, $r6, $r7;
+        com.android.server.InputDevice $r8;
+
+        $r0 := @this: com.android.server.KeyInputQueue;
+
+        $i0 := @parameter0: int;
+
+        $i1 = staticinvoke <com.android.server.KeyInputQueue: int getDeviceClasses(int)>($i0);
+
+        $r1 = staticinvoke <com.android.server.KeyInputQueue: java.lang.String getDeviceName(int)>($i0);
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Device added: id=0x");
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i0);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", name=");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", classes=");
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i1);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("KeyInputQueue", $r3);
+
+        $i2 = $i1 & 4;
+
+        if $i2 == 0 goto label2;
+
+        $r4 = specialinvoke $r0.<com.android.server.KeyInputQueue: com.android.server.InputDevice$AbsoluteInfo loadAbsoluteInfo(int,int,java.lang.String)>($i0, 0, "X");
+
+        $r5 = specialinvoke $r0.<com.android.server.KeyInputQueue: com.android.server.InputDevice$AbsoluteInfo loadAbsoluteInfo(int,int,java.lang.String)>($i0, 1, "Y");
+
+        $r6 = specialinvoke $r0.<com.android.server.KeyInputQueue: com.android.server.InputDevice$AbsoluteInfo loadAbsoluteInfo(int,int,java.lang.String)>($i0, 24, "Pressure");
+
+        $r7 = specialinvoke $r0.<com.android.server.KeyInputQueue: com.android.server.InputDevice$AbsoluteInfo loadAbsoluteInfo(int,int,java.lang.String)>($i0, 28, "Size");
+
+     label1:
+        $r8 = new com.android.server.InputDevice;
+
+        specialinvoke $r8.<com.android.server.InputDevice: void <init>(int,int,java.lang.String,com.android.server.InputDevice$AbsoluteInfo,com.android.server.InputDevice$AbsoluteInfo,com.android.server.InputDevice$AbsoluteInfo,com.android.server.InputDevice$AbsoluteInfo)>($i0, $i1, $r1, $r4, $r5, $r6, $r7);
+
+        return $r8;
+
+     label2:
+        $r4 = null;
+
+        $r5 = null;
+
+        $r6 = null;
+
+        $r7 = null;
+
+        goto label1;
+    }
+
+    public static android.view.KeyEvent newKeyEvent(com.android.server.InputDevice, long, long, boolean, int, int, int, int)
+    {
+        long $l0, $l1;
+        int $i2, $i3, $i4, $i5, $i7, $i8;
+        android.view.KeyEvent $r0;
+        com.android.server.InputDevice $r1;
+        boolean $z0;
+        byte $b6;
+
+        $r1 := @parameter0: com.android.server.InputDevice;
+
+        $l0 := @parameter1: long;
+
+        $l1 := @parameter2: long;
+
+        $z0 := @parameter3: boolean;
+
+        $i2 := @parameter4: int;
+
+        $i3 := @parameter5: int;
+
+        $i4 := @parameter6: int;
+
+        $i5 := @parameter7: int;
+
+        $r0 = new android.view.KeyEvent;
+
+        if $z0 == 0 goto label4;
+
+        $b6 = 0;
+
+     label1:
+        if $r1 == null goto label5;
+
+        $i7 = $r1.<com.android.server.InputDevice: int mMetaKeysState>;
+
+     label2:
+        if $r1 == null goto label6;
+
+        $i8 = $r1.<com.android.server.InputDevice: int id>;
+
+     label3:
+        $i5 = $i5 | 8;
+
+        specialinvoke $r0.<android.view.KeyEvent: void <init>(long,long,int,int,int,int,int,int,int)>($l0, $l1, $b6, $i2, $i3, $i7, $i8, $i4, $i5);
+
+        return $r0;
+
+     label4:
+        $b6 = 1;
+
+        goto label1;
+
+     label5:
+        $i7 = 0;
+
+        goto label2;
+
+     label6:
+        $i8 = -1;
+
+        goto label3;
+    }
+
+    private com.android.server.KeyInputQueue$QueuedEvent obtainLocked(com.android.server.InputDevice, long, int, int, java.lang.Object)
+    {
+        com.android.server.KeyInputQueue $r0;
+        com.android.server.InputDevice $r1;
+        long $l0;
+        int $i1, $i2, $i3;
+        java.lang.Object $r2;
+        com.android.server.KeyInputQueue$QueuedEvent $r3, $r4;
+
+        $r0 := @this: com.android.server.KeyInputQueue;
+
+        $r1 := @parameter0: com.android.server.InputDevice;
+
+        $l0 := @parameter1: long;
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        $r2 := @parameter4: java.lang.Object;
+
+        $i3 = $r0.<com.android.server.KeyInputQueue: int mCacheCount>;
+
+        if $i3 != 0 goto label2;
+
+        $r3 = new com.android.server.KeyInputQueue$QueuedEvent;
+
+        specialinvoke $r3.<com.android.server.KeyInputQueue$QueuedEvent: void <init>()>();
+
+     label1:
+        $r3.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.InputDevice inputDevice> = $r1;
+
+        $r3.<com.android.server.KeyInputQueue$QueuedEvent: long when> = $l0;
+
+        $r3.<com.android.server.KeyInputQueue$QueuedEvent: int flags> = $i1;
+
+        $r3.<com.android.server.KeyInputQueue$QueuedEvent: int classType> = $i2;
+
+        $r3.<com.android.server.KeyInputQueue$QueuedEvent: java.lang.Object event> = $r2;
+
+        return $r3;
+
+     label2:
+        $r3 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mCache>;
+
+        $r3.<com.android.server.KeyInputQueue$QueuedEvent: boolean inQueue> = 0;
+
+        $r4 = $r3.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.KeyInputQueue$QueuedEvent next>;
+
+        $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mCache> = $r4;
+
+        $i3 = $r0.<com.android.server.KeyInputQueue: int mCacheCount>;
+
+        $i3 = $i3 - 1;
+
+        $r0.<com.android.server.KeyInputQueue: int mCacheCount> = $i3;
+
+        goto label1;
+    }
+
+    private static native boolean readEvent(android.view.RawInputEvent);
+
+    private void recycleLocked(com.android.server.KeyInputQueue$QueuedEvent)
+    {
+        com.android.server.KeyInputQueue $r0;
+        com.android.server.KeyInputQueue$QueuedEvent $r1, $r3;
+        boolean $z0;
+        java.lang.RuntimeException $r2;
+        int $i0;
+
+        $r0 := @this: com.android.server.KeyInputQueue;
+
+        $r1 := @parameter0: com.android.server.KeyInputQueue$QueuedEvent;
+
+        $z0 = $r1.<com.android.server.KeyInputQueue$QueuedEvent: boolean inQueue>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = new java.lang.RuntimeException;
+
+        specialinvoke $r2.<java.lang.RuntimeException: void <init>(java.lang.String)>("Event already in queue!");
+
+        throw $r2;
+
+     label1:
+        $i0 = $r0.<com.android.server.KeyInputQueue: int mCacheCount>;
+
+        if $i0 >= 10 goto label2;
+
+        $i0 = $r0.<com.android.server.KeyInputQueue: int mCacheCount>;
+
+        $i0 = $i0 + 1;
+
+        $r0.<com.android.server.KeyInputQueue: int mCacheCount> = $i0;
+
+        $r3 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mCache>;
+
+        $r1.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.KeyInputQueue$QueuedEvent next> = $r3;
+
+        $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mCache> = $r1;
+
+        $r1.<com.android.server.KeyInputQueue$QueuedEvent: boolean inQueue> = 1;
+
+        return;
+
+     label2:
+        return;
+    }
+
+    private int rotateKeyCodeLocked(int)
+    {
+        com.android.server.KeyInputQueue $r0;
+        int $i0, $i1, $i2, $i3;
+        int[] $r1;
+
+        $r0 := @this: com.android.server.KeyInputQueue;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<com.android.server.KeyInputQueue: int[] mKeyRotationMap>;
+
+        if $r1 == null goto label3;
+
+        $i1 = lengthof $r1;
+
+        $i2 = 0;
+
+     label1:
+        if $i2 >= $i1 goto label3;
+
+        $i3 = $r1[$i2];
+
+        if $i3 != $i0 goto label2;
+
+        $i0 = $i2 + 1;
+
+        $i0 = $r1[$i0];
+
+        return $i0;
+
+     label2:
+        $i2 = $i2 + 2;
+
+        goto label1;
+
+     label3:
+        return $i0;
+    }
+
+    void filterQueue(com.android.server.KeyInputQueue$FilterCallback)
+    {
+        com.android.server.KeyInputQueue $r0;
+        com.android.server.KeyInputQueue$FilterCallback $r1;
+        com.android.server.KeyInputQueue$QueuedEvent $r2, $r3, $r4, $r5;
+        int $i0;
+        java.lang.Throwable $r6;
+
+        $r0 := @this: com.android.server.KeyInputQueue;
+
+        $r1 := @parameter0: com.android.server.KeyInputQueue$FilterCallback;
+
+        $r2 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mFirst>;
+
+        entermonitor $r2;
+
+     label01:
+        $r3 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mLast>;
+
+        $r3 = $r3.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.KeyInputQueue$QueuedEvent prev>;
+
+     label02:
+        $r4 = $r3.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.KeyInputQueue$QueuedEvent prev>;
+
+        if $r4 == null goto label09;
+
+        $i0 = interfaceinvoke $r1.<com.android.server.KeyInputQueue$FilterCallback: int filterEvent(com.android.server.KeyInputQueue$QueuedEvent)>($r3);
+
+        lookupswitch($i0)
+        {
+            case -1: goto label07;
+            case 0: goto label04;
+            default: goto label03;
+        };
+
+     label03:
+        $r3 = $r3.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.KeyInputQueue$QueuedEvent prev>;
+
+        goto label02;
+
+     label04:
+        $r4 = $r3.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.KeyInputQueue$QueuedEvent prev>;
+
+        $r5 = $r3.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.KeyInputQueue$QueuedEvent next>;
+
+        $r4.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.KeyInputQueue$QueuedEvent next> = $r5;
+
+        $r4 = $r3.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.KeyInputQueue$QueuedEvent next>;
+
+        $r5 = $r3.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.KeyInputQueue$QueuedEvent prev>;
+
+        $r4.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.KeyInputQueue$QueuedEvent prev> = $r5;
+
+        goto label03;
+
+     label05:
+        $r6 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label06:
+        throw $r6;
+
+     label07:
+        exitmonitor $r2;
+
+     label08:
+        return;
+
+     label09:
+        exitmonitor $r2;
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label01 to label06 with label05;
+        catch java.lang.Throwable from label07 to label08 with label05;
+        catch java.lang.Throwable from label09 to label10 with label05;
+    }
+
+    com.android.server.KeyInputQueue$QueuedEvent getEvent(long)
+    {
+        com.android.server.KeyInputQueue $r0;
+        long $l0, $l1, $l2, $l4;
+        com.android.server.KeyInputQueue$QueuedEvent $r1, $r2, $r3, $r5;
+        byte $b3;
+        android.os.PowerManager$WakeLock $r4;
+        java.lang.Throwable $r6;
+        java.lang.InterruptedException $r7;
+
+        $r0 := @this: com.android.server.KeyInputQueue;
+
+        $l0 := @parameter0: long;
+
+        $l1 = staticinvoke <android.os.SystemClock: long uptimeMillis()>();
+
+        $l2 = $l1;
+
+        $l0 = $l1 + $l0;
+
+        $r2 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mFirst>;
+
+        entermonitor $r2;
+
+     label01:
+        $r1 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mFirst>;
+
+        $r1 = $r1.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.KeyInputQueue$QueuedEvent next>;
+
+        $r3 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mLast>;
+
+     label02:
+        if $r1 != $r3 goto label08;
+
+        $b3 = $l0 cmp $l1;
+
+        if $b3 <= 0 goto label08;
+
+     label03:
+        $r4 = $r0.<com.android.server.KeyInputQueue: android.os.PowerManager$WakeLock mWakeLock>;
+
+     label04:
+        virtualinvoke $r4.<android.os.PowerManager$WakeLock: void release()>();
+
+     label05:
+        $r1 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mFirst>;
+
+     label06:
+        $l1 = $l0 - $l1;
+
+        virtualinvoke $r1.<java.lang.Object: void wait(long)>($l1);
+
+     label07:
+        $l4 = staticinvoke <android.os.SystemClock: long uptimeMillis()>();
+
+        $l1 = $l4;
+
+        $b3 = $l2 cmp $l4;
+
+        if $b3 <= 0 goto label01;
+
+        $l2 = $l4;
+
+        goto label01;
+
+     label08:
+        $r1 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mFirst>;
+
+        $r1 = $r1.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.KeyInputQueue$QueuedEvent next>;
+
+        $r3 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mLast>;
+
+        if $r1 != $r3 goto label10;
+
+        exitmonitor $r2;
+
+     label09:
+        return null;
+
+     label10:
+        $r1 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mFirst>;
+
+        $r1 = $r1.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.KeyInputQueue$QueuedEvent next>;
+
+        $r3 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mFirst>;
+
+        $r5 = $r1.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.KeyInputQueue$QueuedEvent next>;
+
+        $r3.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.KeyInputQueue$QueuedEvent next> = $r5;
+
+        $r3 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mFirst>;
+
+        $r3 = $r3.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.KeyInputQueue$QueuedEvent next>;
+
+        $r5 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mFirst>;
+
+        $r3.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.KeyInputQueue$QueuedEvent prev> = $r5;
+
+        $r1.<com.android.server.KeyInputQueue$QueuedEvent: boolean inQueue> = 0;
+
+        exitmonitor $r2;
+
+     label11:
+        return $r1;
+
+     label12:
+        $r6 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label13:
+        throw $r6;
+
+     label14:
+        $r7 := @caughtexception;
+
+        goto label07;
+
+        catch java.lang.Throwable from label01 to label02 with label12;
+        catch java.lang.InterruptedException from label04 to label05 with label14;
+        catch java.lang.InterruptedException from label06 to label07 with label14;
+        catch java.lang.Throwable from label03 to label07 with label12;
+        catch java.lang.Throwable from label07 to label09 with label12;
+        catch java.lang.Throwable from label10 to label11 with label12;
+        catch java.lang.Throwable from label12 to label13 with label12;
+    }
+
+    public void getInputConfiguration(android.content.res.Configuration)
+    {
+        com.android.server.KeyInputQueue $r0;
+        android.content.res.Configuration $r1;
+        com.android.server.KeyInputQueue$QueuedEvent $r2;
+        android.util.SparseArray $r3;
+        int $i0, $i1, $i2;
+        java.lang.Object $r4;
+        com.android.server.InputDevice $r5;
+        java.lang.Throwable $r6;
+
+        $r0 := @this: com.android.server.KeyInputQueue;
+
+        $r1 := @parameter0: android.content.res.Configuration;
+
+        $r2 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mFirst>;
+
+        entermonitor $r2;
+
+     label1:
+        $r1.<android.content.res.Configuration: int touchscreen> = 1;
+
+        $r1.<android.content.res.Configuration: int keyboard> = 1;
+
+        $r1.<android.content.res.Configuration: int navigation> = 1;
+
+        $r3 = $r0.<com.android.server.KeyInputQueue: android.util.SparseArray mDevices>;
+
+        $i0 = virtualinvoke $r3.<android.util.SparseArray: int size()>();
+
+        $i1 = 0;
+
+     label2:
+        if $i1 >= $i0 goto label6;
+
+        $r3 = $r0.<com.android.server.KeyInputQueue: android.util.SparseArray mDevices>;
+
+        $r4 = virtualinvoke $r3.<android.util.SparseArray: java.lang.Object valueAt(int)>($i1);
+
+        $r5 = (com.android.server.InputDevice) $r4;
+
+        if $r5 == null goto label5;
+
+        $i2 = $r5.<com.android.server.InputDevice: int classes>;
+
+        $i2 = $i2 & 4;
+
+        if $i2 == 0 goto label3;
+
+        $r1.<android.content.res.Configuration: int touchscreen> = 3;
+
+     label3:
+        $i2 = $r5.<com.android.server.InputDevice: int classes>;
+
+        $i2 = $i2 & 2;
+
+        if $i2 == 0 goto label4;
+
+        $r1.<android.content.res.Configuration: int keyboard> = 2;
+
+     label4:
+        $i2 = $r5.<com.android.server.InputDevice: int classes>;
+
+        $i2 = $i2 & 8;
+
+        if $i2 == 0 goto label5;
+
+        $r1.<android.content.res.Configuration: int navigation> = 3;
+
+     label5:
+        $i1 = $i1 + 1;
+
+        goto label2;
+
+     label6:
+        exitmonitor $r2;
+
+     label7:
+        return;
+
+     label8:
+        $r6 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label9:
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label7 with label8;
+        catch java.lang.Throwable from label8 to label9 with label8;
+    }
+
+    com.android.server.InputDevice getInputDevice(int)
+    {
+        com.android.server.KeyInputQueue $r0;
+        int $i0;
+        com.android.server.KeyInputQueue$QueuedEvent $r1;
+        com.android.server.InputDevice $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: com.android.server.KeyInputQueue;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mFirst>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = specialinvoke $r0.<com.android.server.KeyInputQueue: com.android.server.InputDevice getInputDeviceLocked(int)>($i0);
+
+        exitmonitor $r1;
+
+     label2:
+        return $r2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    boolean hasEvents()
+    {
+        com.android.server.KeyInputQueue $r0;
+        com.android.server.KeyInputQueue$QueuedEvent $r1, $r2, $r3;
+        boolean $z0;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: com.android.server.KeyInputQueue;
+
+        $r1 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mFirst>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mFirst>;
+
+        $r3 = $r2.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.KeyInputQueue$QueuedEvent next>;
+
+        $r2 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mLast>;
+
+        if $r3 == $r2 goto label4;
+
+        $z0 = 1;
+
+     label2:
+        exitmonitor $r1;
+
+     label3:
+        return $z0;
+
+     label4:
+        $z0 = 0;
+
+        goto label2;
+
+     label5:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label3 with label5;
+        catch java.lang.Throwable from label4 to label6 with label5;
+    }
+
+    abstract boolean preprocessEvent(com.android.server.InputDevice, android.view.RawInputEvent);
+
+    void recycleEvent(com.android.server.KeyInputQueue$QueuedEvent)
+    {
+        com.android.server.KeyInputQueue $r0;
+        com.android.server.KeyInputQueue$QueuedEvent $r1, $r2;
+        java.lang.Object $r3;
+        com.android.server.InputDevice $r4;
+        com.android.server.InputDevice$MotionState $r5;
+        android.view.MotionEvent $r6;
+        java.lang.Throwable $r7;
+
+        $r0 := @this: com.android.server.KeyInputQueue;
+
+        $r1 := @parameter0: com.android.server.KeyInputQueue$QueuedEvent;
+
+        $r2 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mFirst>;
+
+        entermonitor $r2;
+
+     label1:
+        $r3 = $r1.<com.android.server.KeyInputQueue$QueuedEvent: java.lang.Object event>;
+
+        $r4 = $r1.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.InputDevice inputDevice>;
+
+        $r5 = $r4.<com.android.server.InputDevice: com.android.server.InputDevice$MotionState mAbs>;
+
+        $r6 = $r5.<com.android.server.InputDevice$MotionState: android.view.MotionEvent currentMove>;
+
+        if $r3 != $r6 goto label2;
+
+        $r4 = $r1.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.InputDevice inputDevice>;
+
+        $r5 = $r4.<com.android.server.InputDevice: com.android.server.InputDevice$MotionState mAbs>;
+
+        $r5.<com.android.server.InputDevice$MotionState: android.view.MotionEvent currentMove> = null;
+
+     label2:
+        $r3 = $r1.<com.android.server.KeyInputQueue$QueuedEvent: java.lang.Object event>;
+
+        $r4 = $r1.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.InputDevice inputDevice>;
+
+        $r5 = $r4.<com.android.server.InputDevice: com.android.server.InputDevice$MotionState mRel>;
+
+        $r6 = $r5.<com.android.server.InputDevice$MotionState: android.view.MotionEvent currentMove>;
+
+        if $r3 != $r6 goto label3;
+
+        $r4 = $r1.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.InputDevice inputDevice>;
+
+        $r5 = $r4.<com.android.server.InputDevice: com.android.server.InputDevice$MotionState mRel>;
+
+        $r5.<com.android.server.InputDevice$MotionState: android.view.MotionEvent currentMove> = null;
+
+        $r4 = $r1.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.InputDevice inputDevice>;
+
+        $r5 = $r4.<com.android.server.InputDevice: com.android.server.InputDevice$MotionState mRel>;
+
+        $r5.<com.android.server.InputDevice$MotionState: int x> = 0;
+
+        $r4 = $r1.<com.android.server.KeyInputQueue$QueuedEvent: com.android.server.InputDevice inputDevice>;
+
+        $r5 = $r4.<com.android.server.InputDevice: com.android.server.InputDevice$MotionState mRel>;
+
+        $r5.<com.android.server.InputDevice$MotionState: int y> = 0;
+
+     label3:
+        specialinvoke $r0.<com.android.server.KeyInputQueue: void recycleLocked(com.android.server.KeyInputQueue$QueuedEvent)>($r1);
+
+        exitmonitor $r2;
+
+     label4:
+        return;
+
+     label5:
+        $r7 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label6:
+        throw $r7;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public int rotateKeyCode(int)
+    {
+        com.android.server.KeyInputQueue $r0;
+        int $i0;
+        com.android.server.KeyInputQueue$QueuedEvent $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: com.android.server.KeyInputQueue;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mFirst>;
+
+        entermonitor $r1;
+
+     label1:
+        $i0 = specialinvoke $r0.<com.android.server.KeyInputQueue: int rotateKeyCodeLocked(int)>($i0);
+
+        exitmonitor $r1;
+
+     label2:
+        return $i0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void setDisplay(android.view.Display)
+    {
+        com.android.server.KeyInputQueue $r0;
+        android.view.Display $r1;
+
+        $r0 := @this: com.android.server.KeyInputQueue;
+
+        $r1 := @parameter0: android.view.Display;
+
+        $r0.<com.android.server.KeyInputQueue: android.view.Display mDisplay> = $r1;
+
+        return;
+    }
+
+    public void setOrientation(int)
+    {
+        com.android.server.KeyInputQueue $r0;
+        int $i0;
+        com.android.server.KeyInputQueue$QueuedEvent $r1;
+        int[] $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: com.android.server.KeyInputQueue;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<com.android.server.KeyInputQueue: com.android.server.KeyInputQueue$QueuedEvent mFirst>;
+
+        entermonitor $r1;
+
+     label01:
+        $r0.<com.android.server.KeyInputQueue: int mOrientation> = $i0;
+
+        lookupswitch($i0)
+        {
+            case 1: goto label05;
+            case 2: goto label08;
+            case 3: goto label09;
+            default: goto label02;
+        };
+
+     label02:
+        $r0.<com.android.server.KeyInputQueue: int[] mKeyRotationMap> = null;
+
+     label03:
+        exitmonitor $r1;
+
+     label04:
+        return;
+
+     label05:
+        $r2 = <com.android.server.KeyInputQueue: int[] KEY_90_MAP>;
+
+        $r0.<com.android.server.KeyInputQueue: int[] mKeyRotationMap> = $r2;
+
+        goto label03;
+
+     label06:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label07:
+        throw $r3;
+
+     label08:
+        $r2 = <com.android.server.KeyInputQueue: int[] KEY_180_MAP>;
+
+        $r0.<com.android.server.KeyInputQueue: int[] mKeyRotationMap> = $r2;
+
+        goto label03;
+
+     label09:
+        $r2 = <com.android.server.KeyInputQueue: int[] KEY_270_MAP>;
+
+        $r0.<com.android.server.KeyInputQueue: int[] mKeyRotationMap> = $r2;
+
+     label10:
+        goto label03;
+
+        catch java.lang.Throwable from label01 to label04 with label06;
+        catch java.lang.Throwable from label05 to label07 with label06;
+        catch java.lang.Throwable from label08 to label10 with label06;
+    }
+}

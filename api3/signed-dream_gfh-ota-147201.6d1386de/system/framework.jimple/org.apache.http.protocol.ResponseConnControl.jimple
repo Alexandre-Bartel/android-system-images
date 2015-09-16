@@ -1,0 +1,134 @@
+public class org.apache.http.protocol.ResponseConnControl extends java.lang.Object implements org.apache.http.HttpResponseInterceptor
+{
+
+    public void <init>()
+    {
+        org.apache.http.protocol.ResponseConnControl $r0;
+
+        $r0 := @this: org.apache.http.protocol.ResponseConnControl;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public void process(org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext) throws org.apache.http.HttpException, java.io.IOException
+    {
+        org.apache.http.protocol.ResponseConnControl $r0;
+        org.apache.http.HttpResponse $r1;
+        org.apache.http.protocol.HttpContext $r2;
+        java.lang.IllegalArgumentException $r3;
+        org.apache.http.StatusLine $r4;
+        int $i0;
+        org.apache.http.HttpEntity $r5;
+        org.apache.http.ProtocolVersion $r6;
+        long $l1;
+        byte $b2;
+        boolean $z0;
+        org.apache.http.HttpVersion $r7;
+        java.lang.Object $r8;
+        org.apache.http.HttpRequest $r9;
+        org.apache.http.Header $r10;
+        java.lang.String $r11;
+
+        $r0 := @this: org.apache.http.protocol.ResponseConnControl;
+
+        $r1 := @parameter0: org.apache.http.HttpResponse;
+
+        $r2 := @parameter1: org.apache.http.protocol.HttpContext;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("HTTP response may not be null");
+
+        throw $r3;
+
+     label1:
+        if $r2 != null goto label2;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("HTTP context may not be null");
+
+        throw $r3;
+
+     label2:
+        $r4 = interfaceinvoke $r1.<org.apache.http.HttpResponse: org.apache.http.StatusLine getStatusLine()>();
+
+        $i0 = interfaceinvoke $r4.<org.apache.http.StatusLine: int getStatusCode()>();
+
+        if $i0 == 400 goto label3;
+
+        if $i0 == 408 goto label3;
+
+        if $i0 == 411 goto label3;
+
+        if $i0 == 413 goto label3;
+
+        if $i0 == 414 goto label3;
+
+        if $i0 == 503 goto label3;
+
+        if $i0 != 501 goto label4;
+
+     label3:
+        interfaceinvoke $r1.<org.apache.http.HttpResponse: void setHeader(java.lang.String,java.lang.String)>("Connection", "Close");
+
+        return;
+
+     label4:
+        $r5 = interfaceinvoke $r1.<org.apache.http.HttpResponse: org.apache.http.HttpEntity getEntity()>();
+
+        if $r5 == null goto label6;
+
+        $r4 = interfaceinvoke $r1.<org.apache.http.HttpResponse: org.apache.http.StatusLine getStatusLine()>();
+
+        $r6 = interfaceinvoke $r4.<org.apache.http.StatusLine: org.apache.http.ProtocolVersion getProtocolVersion()>();
+
+        $l1 = interfaceinvoke $r5.<org.apache.http.HttpEntity: long getContentLength()>();
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 >= 0 goto label6;
+
+        $z0 = interfaceinvoke $r5.<org.apache.http.HttpEntity: boolean isChunked()>();
+
+        if $z0 == 0 goto label5;
+
+        $r7 = <org.apache.http.HttpVersion: org.apache.http.HttpVersion HTTP_1_0>;
+
+        $z0 = virtualinvoke $r6.<org.apache.http.ProtocolVersion: boolean lessEquals(org.apache.http.ProtocolVersion)>($r7);
+
+        if $z0 == 0 goto label6;
+
+     label5:
+        interfaceinvoke $r1.<org.apache.http.HttpResponse: void setHeader(java.lang.String,java.lang.String)>("Connection", "Close");
+
+        return;
+
+     label6:
+        $r8 = interfaceinvoke $r2.<org.apache.http.protocol.HttpContext: java.lang.Object getAttribute(java.lang.String)>("http.request");
+
+        $r9 = (org.apache.http.HttpRequest) $r8;
+
+        if $r9 == null goto label7;
+
+        $r10 = interfaceinvoke $r9.<org.apache.http.HttpRequest: org.apache.http.Header getFirstHeader(java.lang.String)>("Connection");
+
+        if $r10 == null goto label8;
+
+        $r11 = interfaceinvoke $r10.<org.apache.http.Header: java.lang.String getValue()>();
+
+        interfaceinvoke $r1.<org.apache.http.HttpResponse: void setHeader(java.lang.String,java.lang.String)>("Connection", $r11);
+
+        return;
+
+     label7:
+        return;
+
+     label8:
+        return;
+    }
+}

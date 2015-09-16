@@ -1,0 +1,197 @@
+class android.hardware.SensorManager$SensorThread$SensorThreadRunnable extends java.lang.Object implements java.lang.Runnable
+{
+    private android.os.ParcelFileDescriptor mSensorDataFd;
+    final android.hardware.SensorManager$SensorThread this$0;
+
+    void <init>(android.hardware.SensorManager$SensorThread, android.os.ParcelFileDescriptor)
+    {
+        android.hardware.SensorManager$SensorThread$SensorThreadRunnable $r0;
+        android.hardware.SensorManager$SensorThread $r1;
+        android.os.ParcelFileDescriptor $r2;
+
+        $r0 := @this: android.hardware.SensorManager$SensorThread$SensorThreadRunnable;
+
+        $r1 := @parameter0: android.hardware.SensorManager$SensorThread;
+
+        $r2 := @parameter1: android.os.ParcelFileDescriptor;
+
+        $r0.<android.hardware.SensorManager$SensorThread$SensorThreadRunnable: android.hardware.SensorManager$SensorThread this$0> = $r1;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r0.<android.hardware.SensorManager$SensorThread$SensorThreadRunnable: android.os.ParcelFileDescriptor mSensorDataFd> = $r2;
+
+        return;
+    }
+
+    public void run()
+    {
+        android.hardware.SensorManager$SensorThread$SensorThreadRunnable $r0;
+        int $i0, $i1, $i2;
+        int[] $r1;
+        long[] $r2;
+        float[] $r3;
+        android.os.ParcelFileDescriptor $r4;
+        java.util.ArrayList $r5, $r9;
+        android.hardware.SensorManager$SensorThread $r6;
+        java.lang.Throwable $r7, $r10;
+        java.io.FileDescriptor $r8;
+        boolean $z0;
+        java.io.IOException $r11;
+        android.util.SparseArray $r12;
+        java.lang.Object $r13;
+        android.hardware.Sensor $r14;
+        android.hardware.SensorManager$ListenerDelegate $r15;
+
+        $r0 := @this: android.hardware.SensorManager$SensorThread$SensorThreadRunnable;
+
+        $r3 = newarray (float)[3];
+
+        $r1 = newarray (int)[1];
+
+        $r2 = newarray (long)[1];
+
+        staticinvoke <android.os.Process: void setThreadPriority(int)>(-4);
+
+        $r4 = $r0.<android.hardware.SensorManager$SensorThread$SensorThreadRunnable: android.os.ParcelFileDescriptor mSensorDataFd>;
+
+        if $r4 != null goto label05;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("SensorManager", "mSensorDataFd == NULL, exiting");
+
+        $r5 = <android.hardware.SensorManager: java.util.ArrayList sListeners>;
+
+        entermonitor $r5;
+
+     label01:
+        $r6 = $r0.<android.hardware.SensorManager$SensorThread$SensorThreadRunnable: android.hardware.SensorManager$SensorThread this$0>;
+
+        $r6.<android.hardware.SensorManager$SensorThread: java.lang.Thread mThread> = null;
+
+        exitmonitor $r5;
+
+     label02:
+        return;
+
+     label03:
+        $r7 := @caughtexception;
+
+        exitmonitor $r5;
+
+     label04:
+        throw $r7;
+
+     label05:
+        $r4 = $r0.<android.hardware.SensorManager$SensorThread$SensorThreadRunnable: android.os.ParcelFileDescriptor mSensorDataFd>;
+
+        $r8 = virtualinvoke $r4.<android.os.ParcelFileDescriptor: java.io.FileDescriptor getFileDescriptor()>();
+
+        staticinvoke <android.hardware.SensorManager: int sensors_data_open(java.io.FileDescriptor)>($r8);
+
+        $r4 = $r0.<android.hardware.SensorManager$SensorThread$SensorThreadRunnable: android.os.ParcelFileDescriptor mSensorDataFd>;
+
+     label06:
+        virtualinvoke $r4.<android.os.ParcelFileDescriptor: void close()>();
+
+     label07:
+        $r0.<android.hardware.SensorManager$SensorThread$SensorThreadRunnable: android.os.ParcelFileDescriptor mSensorDataFd> = null;
+
+     label08:
+        $i1 = staticinvoke <android.hardware.SensorManager: int sensors_data_poll(float[],int[],long[])>($r3, $r1, $r2);
+
+        $i0 = $r1[0];
+
+        $r5 = <android.hardware.SensorManager: java.util.ArrayList sListeners>;
+
+        entermonitor $r5;
+
+        if $i1 == -1 goto label10;
+
+     label09:
+        $r9 = <android.hardware.SensorManager: java.util.ArrayList sListeners>;
+
+        $z0 = virtualinvoke $r9.<java.util.ArrayList: boolean isEmpty()>();
+
+        if $z0 == 0 goto label16;
+
+     label10:
+        if $i1 != -1 goto label11;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("SensorManager", "_sensors_data_poll() failed, we bail out.");
+
+     label11:
+        staticinvoke <android.hardware.SensorManager: int sensors_data_close()>();
+
+        $r6 = $r0.<android.hardware.SensorManager$SensorThread$SensorThreadRunnable: android.hardware.SensorManager$SensorThread this$0>;
+
+        $r6.<android.hardware.SensorManager$SensorThread: java.lang.Thread mThread> = null;
+
+        exitmonitor $r5;
+
+     label12:
+        return;
+
+     label13:
+        $r10 := @caughtexception;
+
+        exitmonitor $r5;
+
+     label14:
+        throw $r10;
+
+     label15:
+        $r11 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("SensorManager", "IOException: ", $r11);
+
+        goto label07;
+
+     label16:
+        $r12 = <android.hardware.SensorManager: android.util.SparseArray sHandleToSensor>;
+
+        $r13 = virtualinvoke $r12.<android.util.SparseArray: java.lang.Object get(int)>($i1);
+
+        $r14 = (android.hardware.Sensor) $r13;
+
+        if $r14 == null goto label19;
+
+        $r9 = <android.hardware.SensorManager: java.util.ArrayList sListeners>;
+
+        $i1 = virtualinvoke $r9.<java.util.ArrayList: int size()>();
+
+        $i2 = 0;
+
+     label17:
+        if $i2 >= $i1 goto label19;
+
+        $r9 = <android.hardware.SensorManager: java.util.ArrayList sListeners>;
+
+        $r13 = virtualinvoke $r9.<java.util.ArrayList: java.lang.Object get(int)>($i2);
+
+        $r15 = (android.hardware.SensorManager$ListenerDelegate) $r13;
+
+        $z0 = virtualinvoke $r15.<android.hardware.SensorManager$ListenerDelegate: boolean hasSensor(android.hardware.Sensor)>($r14);
+
+        if $z0 == 0 goto label18;
+
+        virtualinvoke $r15.<android.hardware.SensorManager$ListenerDelegate: void onSensorChangedLocked(android.hardware.Sensor,float[],long[],int)>($r14, $r3, $r2, $i0);
+
+     label18:
+        $i2 = $i2 + 1;
+
+        goto label17;
+
+     label19:
+        exitmonitor $r5;
+
+     label20:
+        goto label08;
+
+        catch java.lang.Throwable from label01 to label02 with label03;
+        catch java.lang.Throwable from label03 to label04 with label03;
+        catch java.io.IOException from label06 to label07 with label15;
+        catch java.lang.Throwable from label09 to label12 with label13;
+        catch java.lang.Throwable from label13 to label14 with label13;
+        catch java.lang.Throwable from label16 to label20 with label13;
+    }
+}

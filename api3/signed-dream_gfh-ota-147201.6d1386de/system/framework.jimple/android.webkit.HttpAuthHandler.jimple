@@ -1,0 +1,343 @@
+public class android.webkit.HttpAuthHandler extends android.os.Handler
+{
+    private static final java.lang.String LOGTAG;
+    private final int AUTH_CANCEL;
+    private final int AUTH_PROCEED;
+    private java.util.LinkedList mLoaderQueue;
+    private android.webkit.Network mNetwork;
+
+    void <init>(android.webkit.Network)
+    {
+        android.webkit.HttpAuthHandler $r0;
+        android.webkit.Network $r1;
+        java.util.LinkedList $r2;
+
+        $r0 := @this: android.webkit.HttpAuthHandler;
+
+        $r1 := @parameter0: android.webkit.Network;
+
+        specialinvoke $r0.<android.os.Handler: void <init>()>();
+
+        $r0.<android.webkit.HttpAuthHandler: int AUTH_PROCEED> = 100;
+
+        $r0.<android.webkit.HttpAuthHandler: int AUTH_CANCEL> = 200;
+
+        $r0.<android.webkit.HttpAuthHandler: android.webkit.Network mNetwork> = $r1;
+
+        $r2 = new java.util.LinkedList;
+
+        specialinvoke $r2.<java.util.LinkedList: void <init>()>();
+
+        $r0.<android.webkit.HttpAuthHandler: java.util.LinkedList mLoaderQueue> = $r2;
+
+        return;
+    }
+
+    private void processNextLoader()
+    {
+        android.webkit.HttpAuthHandler $r0;
+        java.util.LinkedList $r1, $r2;
+        java.lang.Object $r3;
+        android.webkit.LoadListener $r4;
+        android.webkit.BrowserFrame $r5;
+        android.webkit.CallbackProxy $r6;
+        boolean $z0;
+        android.webkit.Network $r7;
+        java.lang.String $r8, $r9;
+        java.lang.Throwable $r10;
+
+        $r0 := @this: android.webkit.HttpAuthHandler;
+
+        $r1 = $r0.<android.webkit.HttpAuthHandler: java.util.LinkedList mLoaderQueue>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = $r0.<android.webkit.HttpAuthHandler: java.util.LinkedList mLoaderQueue>;
+
+        $r3 = virtualinvoke $r2.<java.util.LinkedList: java.lang.Object peek()>();
+
+        $r4 = (android.webkit.LoadListener) $r3;
+
+        exitmonitor $r1;
+
+     label2:
+        if $r4 == null goto label8;
+
+        $r5 = virtualinvoke $r4.<android.webkit.LoadListener: android.webkit.BrowserFrame getFrame()>();
+
+        $r6 = virtualinvoke $r5.<android.webkit.BrowserFrame: android.webkit.CallbackProxy getCallbackProxy()>();
+
+        $z0 = virtualinvoke $r4.<android.webkit.LoadListener: boolean proxyAuthenticate()>();
+
+        if $z0 == 0 goto label7;
+
+        $r7 = $r0.<android.webkit.HttpAuthHandler: android.webkit.Network mNetwork>;
+
+        $r8 = virtualinvoke $r7.<android.webkit.Network: java.lang.String getProxyHostname()>();
+
+     label3:
+        $r9 = virtualinvoke $r4.<android.webkit.LoadListener: java.lang.String realm()>();
+
+        virtualinvoke $r6.<android.webkit.CallbackProxy: void onReceivedHttpAuthRequest(android.webkit.HttpAuthHandler,java.lang.String,java.lang.String)>($r0, $r8, $r9);
+
+        return;
+
+     label4:
+        $r10 := @caughtexception;
+
+     label5:
+        exitmonitor $r1;
+
+     label6:
+        throw $r10;
+
+     label7:
+        $r8 = virtualinvoke $r4.<android.webkit.LoadListener: java.lang.String host()>();
+
+        goto label3;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label4;
+        catch java.lang.Throwable from label5 to label6 with label4;
+    }
+
+    public void cancel()
+    {
+        android.webkit.HttpAuthHandler $r0;
+        android.os.Message $r1;
+
+        $r0 := @this: android.webkit.HttpAuthHandler;
+
+        $r1 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(200);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r1);
+
+        return;
+    }
+
+    void handleAuthRequest(android.webkit.LoadListener)
+    {
+        android.webkit.HttpAuthHandler $r0;
+        android.webkit.LoadListener $r1;
+        java.util.LinkedList $r2, $r3;
+        int $i0;
+        boolean $z0;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: android.webkit.HttpAuthHandler;
+
+        $r1 := @parameter0: android.webkit.LoadListener;
+
+        $r2 = $r0.<android.webkit.HttpAuthHandler: java.util.LinkedList mLoaderQueue>;
+
+        entermonitor $r2;
+
+     label1:
+        $r3 = $r0.<android.webkit.HttpAuthHandler: java.util.LinkedList mLoaderQueue>;
+
+        virtualinvoke $r3.<java.util.LinkedList: boolean offer(java.lang.Object)>($r1);
+
+        $r3 = $r0.<android.webkit.HttpAuthHandler: java.util.LinkedList mLoaderQueue>;
+
+        $i0 = virtualinvoke $r3.<java.util.LinkedList: int size()>();
+
+        if $i0 != 1 goto label4;
+
+        $z0 = 1;
+
+     label2:
+        exitmonitor $r2;
+
+     label3:
+        if $z0 == 0 goto label8;
+
+        specialinvoke $r0.<android.webkit.HttpAuthHandler: void processNextLoader()>();
+
+        return;
+
+     label4:
+        $z0 = 0;
+
+        goto label2;
+
+     label5:
+        $r4 := @caughtexception;
+
+     label6:
+        exitmonitor $r2;
+
+     label7:
+        throw $r4;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label5;
+        catch java.lang.Throwable from label6 to label7 with label5;
+    }
+
+    public void handleMessage(android.os.Message)
+    {
+        android.webkit.HttpAuthHandler $r0;
+        android.os.Message $r1;
+        java.util.LinkedList $r2, $r3;
+        java.lang.Object $r4;
+        android.webkit.LoadListener $r5;
+        int $i0;
+        java.lang.Throwable $r6;
+        android.os.Bundle $r7;
+        java.lang.String $r8, $r9;
+
+        $r0 := @this: android.webkit.HttpAuthHandler;
+
+        $r1 := @parameter0: android.os.Message;
+
+        $r2 = $r0.<android.webkit.HttpAuthHandler: java.util.LinkedList mLoaderQueue>;
+
+        entermonitor $r2;
+
+     label1:
+        $r3 = $r0.<android.webkit.HttpAuthHandler: java.util.LinkedList mLoaderQueue>;
+
+        $r4 = virtualinvoke $r3.<java.util.LinkedList: java.lang.Object poll()>();
+
+        $r5 = (android.webkit.LoadListener) $r4;
+
+        exitmonitor $r2;
+
+     label2:
+        $i0 = $r1.<android.os.Message: int what>;
+
+        lookupswitch($i0)
+        {
+            case 100: goto label7;
+            case 200: goto label8;
+            default: goto label3;
+        };
+
+     label3:
+        specialinvoke $r0.<android.webkit.HttpAuthHandler: void processNextLoader()>();
+
+        return;
+
+     label4:
+        $r6 := @caughtexception;
+
+     label5:
+        exitmonitor $r2;
+
+     label6:
+        throw $r6;
+
+     label7:
+        $r7 = virtualinvoke $r1.<android.os.Message: android.os.Bundle getData()>();
+
+        $r8 = virtualinvoke $r7.<android.os.Bundle: java.lang.String getString(java.lang.String)>("username");
+
+        $r7 = virtualinvoke $r1.<android.os.Message: android.os.Bundle getData()>();
+
+        $r9 = virtualinvoke $r7.<android.os.Bundle: java.lang.String getString(java.lang.String)>("password");
+
+        virtualinvoke $r5.<android.webkit.LoadListener: void handleAuthResponse(java.lang.String,java.lang.String)>($r8, $r9);
+
+        goto label3;
+
+     label8:
+        virtualinvoke $r5.<android.webkit.LoadListener: void handleAuthResponse(java.lang.String,java.lang.String)>(null, null);
+
+        goto label3;
+
+        catch java.lang.Throwable from label1 to label2 with label4;
+        catch java.lang.Throwable from label5 to label6 with label4;
+    }
+
+    public void proceed(java.lang.String, java.lang.String)
+    {
+        android.webkit.HttpAuthHandler $r0;
+        java.lang.String $r1, $r2;
+        android.os.Message $r3;
+        android.os.Bundle $r4;
+
+        $r0 := @this: android.webkit.HttpAuthHandler;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(100);
+
+        $r4 = virtualinvoke $r3.<android.os.Message: android.os.Bundle getData()>();
+
+        virtualinvoke $r4.<android.os.Bundle: void putString(java.lang.String,java.lang.String)>("username", $r1);
+
+        $r4 = virtualinvoke $r3.<android.os.Message: android.os.Bundle getData()>();
+
+        virtualinvoke $r4.<android.os.Bundle: void putString(java.lang.String,java.lang.String)>("password", $r2);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r3);
+
+        return;
+    }
+
+    public boolean useHttpAuthUsernamePassword()
+    {
+        android.webkit.HttpAuthHandler $r0;
+        java.util.LinkedList $r1, $r2;
+        java.lang.Object $r3;
+        android.webkit.LoadListener $r4;
+        boolean $z0;
+        java.lang.Throwable $r5;
+
+        $r0 := @this: android.webkit.HttpAuthHandler;
+
+        $r1 = $r0.<android.webkit.HttpAuthHandler: java.util.LinkedList mLoaderQueue>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = $r0.<android.webkit.HttpAuthHandler: java.util.LinkedList mLoaderQueue>;
+
+        $r3 = virtualinvoke $r2.<java.util.LinkedList: java.lang.Object peek()>();
+
+        $r4 = (android.webkit.LoadListener) $r3;
+
+        exitmonitor $r1;
+
+     label2:
+        if $r4 == null goto label7;
+
+        $z0 = virtualinvoke $r4.<android.webkit.LoadListener: boolean authCredentialsInvalid()>();
+
+        if $z0 != 0 goto label6;
+
+        return 1;
+
+     label3:
+        $r5 := @caughtexception;
+
+     label4:
+        exitmonitor $r1;
+
+     label5:
+        throw $r5;
+
+     label6:
+        return 0;
+
+     label7:
+        return 0;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label4 to label5 with label3;
+    }
+
+    public static void <clinit>()
+    {
+        <android.webkit.HttpAuthHandler: java.lang.String LOGTAG> = "network";
+
+        return;
+    }
+}

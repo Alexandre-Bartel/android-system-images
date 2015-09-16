@@ -1,0 +1,1307 @@
+public class com.android.internal.location.NmeaParser extends java.lang.Object
+{
+    private static final float KNOTS_TO_METERS_PER_SECOND;
+    private static final java.lang.String TAG;
+    private static final java.util.TimeZone sUtcTimeZone;
+    private double mAltitude;
+    private long mBaseTime;
+    private float mBearing;
+    private int mDay;
+    private android.os.Bundle mExtras;
+    private boolean mHasAltitude;
+    private boolean mHasBearing;
+    private boolean mHasSpeed;
+    private double mLatitude;
+    private android.location.Location mLocation;
+    private double mLongitude;
+    private int mMonth;
+    private final java.lang.String mName;
+    private boolean mNewWaypoint;
+    private float mSpeed;
+    private long mTime;
+    private int mYear;
+
+    static void <clinit>()
+    {
+        java.util.TimeZone $r0;
+
+        <com.android.internal.location.NmeaParser: java.lang.String TAG> = "NmeaParser";
+
+        <com.android.internal.location.NmeaParser: float KNOTS_TO_METERS_PER_SECOND> = 0.5144445F;
+
+        $r0 = staticinvoke <java.util.TimeZone: java.util.TimeZone getTimeZone(java.lang.String)>("UTC");
+
+        <com.android.internal.location.NmeaParser: java.util.TimeZone sUtcTimeZone> = $r0;
+
+        return;
+    }
+
+    public void <init>(java.lang.String)
+    {
+        com.android.internal.location.NmeaParser $r0;
+        java.lang.String $r1;
+
+        $r0 := @this: com.android.internal.location.NmeaParser;
+
+        $r1 := @parameter0: java.lang.String;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r0.<com.android.internal.location.NmeaParser: int mYear> = -1;
+
+        $r0.<com.android.internal.location.NmeaParser: long mTime> = -1L;
+
+        $r0.<com.android.internal.location.NmeaParser: boolean mNewWaypoint> = 0;
+
+        $r0.<com.android.internal.location.NmeaParser: android.location.Location mLocation> = null;
+
+        $r0.<com.android.internal.location.NmeaParser: java.lang.String mName> = $r1;
+
+        return;
+    }
+
+    private double convertFromHHMM(java.lang.String)
+    {
+        com.android.internal.location.NmeaParser $r0;
+        java.lang.String $r1;
+        double $d0, $d1;
+        int $i0, $i1;
+
+        $r0 := @this: com.android.internal.location.NmeaParser;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $d0 = staticinvoke <java.lang.Double: double parseDouble(java.lang.String)>($r1);
+
+        $d1 = staticinvoke <java.lang.Math: double floor(double)>($d0);
+
+        $i0 = (int) $d1;
+
+        $i0 = $i0 / 100;
+
+        $i1 = $i0 * 100;
+
+        $d1 = (double) $i1;
+
+        $d1 = $d0 - $d1;
+
+        $d0 = (double) $i0;
+
+        $d1 = $d1 / 60.0;
+
+        $d0 = $d0 + $d1;
+
+        return $d0;
+    }
+
+    private boolean updateAltitude(java.lang.String)
+    {
+        com.android.internal.location.NmeaParser $r0;
+        java.lang.String $r1;
+        java.lang.NumberFormatException $r2;
+        int $i0;
+        double $d0;
+        java.lang.StringBuilder $r3;
+
+        $r0 := @this: com.android.internal.location.NmeaParser;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $d0 = staticinvoke <java.lang.Double: double parseDouble(java.lang.String)>($r1);
+
+     label2:
+        $r0.<com.android.internal.location.NmeaParser: boolean mHasAltitude> = 1;
+
+        $r0.<com.android.internal.location.NmeaParser: double mAltitude> = $d0;
+
+        return 1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exception parsing altitude ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("NmeaParser", $r1, $r2);
+
+        return 0;
+
+        catch java.lang.NumberFormatException from label1 to label2 with label3;
+    }
+
+    private boolean updateBearing(java.lang.String)
+    {
+        com.android.internal.location.NmeaParser $r0;
+        java.lang.String $r1;
+        java.lang.NumberFormatException $r2;
+        float $f0;
+        java.lang.StringBuilder $r3;
+
+        $r0 := @this: com.android.internal.location.NmeaParser;
+
+        $r1 := @parameter0: java.lang.String;
+
+     label1:
+        $f0 = staticinvoke <java.lang.Float: float parseFloat(java.lang.String)>($r1);
+
+     label2:
+        $r0.<com.android.internal.location.NmeaParser: boolean mHasBearing> = 1;
+
+        $r0.<com.android.internal.location.NmeaParser: float mBearing> = $f0;
+
+        return 1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exception parsing bearing ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("NmeaParser", $r1, $r2);
+
+        return 0;
+
+        catch java.lang.NumberFormatException from label1 to label2 with label3;
+    }
+
+    private boolean updateDate(java.lang.String)
+    {
+        com.android.internal.location.NmeaParser $r0;
+        java.lang.String $r1, $r2;
+        int $i0, $i1, $i2;
+        java.lang.NumberFormatException $r3;
+        java.lang.StringBuilder $r4;
+
+        $r0 := @this: com.android.internal.location.NmeaParser;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i1 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i1 == 6 goto label1;
+
+        return 0;
+
+     label1:
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(0, 2);
+
+        $i1 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(2, 4);
+
+        $i2 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(4, 6);
+
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r2);
+
+     label2:
+        $i0 = $i0 + 2000;
+
+        $r0.<com.android.internal.location.NmeaParser: int mYear> = $i0;
+
+        $r0.<com.android.internal.location.NmeaParser: int mMonth> = $i2;
+
+        $r0.<com.android.internal.location.NmeaParser: int mDay> = $i1;
+
+        return 1;
+
+     label3:
+        $r3 := @caughtexception;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error parsing date ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("NmeaParser", $r1);
+
+        return 0;
+
+        catch java.lang.NumberFormatException from label1 to label2 with label3;
+    }
+
+    private boolean updateDoubleExtra(java.lang.String, java.lang.String)
+    {
+        com.android.internal.location.NmeaParser $r0;
+        java.lang.String $r1, $r2;
+        java.lang.NumberFormatException $r3;
+        double $d0;
+        android.os.Bundle $r4;
+        java.lang.StringBuilder $r5;
+
+        $r0 := @this: com.android.internal.location.NmeaParser;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+     label1:
+        $d0 = staticinvoke <java.lang.Double: double parseDouble(java.lang.String)>($r2);
+
+     label2:
+        $r4 = $r0.<com.android.internal.location.NmeaParser: android.os.Bundle mExtras>;
+
+        if $r4 != null goto label3;
+
+        $r4 = new android.os.Bundle;
+
+        specialinvoke $r4.<android.os.Bundle: void <init>()>();
+
+        $r0.<com.android.internal.location.NmeaParser: android.os.Bundle mExtras> = $r4;
+
+     label3:
+        $r4 = $r0.<com.android.internal.location.NmeaParser: android.os.Bundle mExtras>;
+
+        virtualinvoke $r4.<android.os.Bundle: void putDouble(java.lang.String,double)>($r1, $d0);
+
+        return 1;
+
+     label4:
+        $r3 := @caughtexception;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exception parsing double ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("NmeaParser", $r1, $r3);
+
+        return 0;
+
+        catch java.lang.NumberFormatException from label1 to label2 with label4;
+    }
+
+    private boolean updateFloatExtra(java.lang.String, java.lang.String)
+    {
+        com.android.internal.location.NmeaParser $r0;
+        java.lang.String $r1, $r2;
+        java.lang.NumberFormatException $r3;
+        float $f0;
+        android.os.Bundle $r4;
+        java.lang.StringBuilder $r5;
+
+        $r0 := @this: com.android.internal.location.NmeaParser;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+     label1:
+        $f0 = staticinvoke <java.lang.Float: float parseFloat(java.lang.String)>($r2);
+
+     label2:
+        $r4 = $r0.<com.android.internal.location.NmeaParser: android.os.Bundle mExtras>;
+
+        if $r4 != null goto label3;
+
+        $r4 = new android.os.Bundle;
+
+        specialinvoke $r4.<android.os.Bundle: void <init>()>();
+
+        $r0.<com.android.internal.location.NmeaParser: android.os.Bundle mExtras> = $r4;
+
+     label3:
+        $r4 = $r0.<com.android.internal.location.NmeaParser: android.os.Bundle mExtras>;
+
+        virtualinvoke $r4.<android.os.Bundle: void putFloat(java.lang.String,float)>($r1, $f0);
+
+        return 1;
+
+     label4:
+        $r3 := @caughtexception;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exception parsing float ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("NmeaParser", $r1, $r3);
+
+        return 0;
+
+        catch java.lang.NumberFormatException from label1 to label2 with label4;
+    }
+
+    private boolean updateIntExtra(java.lang.String, java.lang.String)
+    {
+        com.android.internal.location.NmeaParser $r0;
+        java.lang.String $r1, $r2;
+        java.lang.NumberFormatException $r3;
+        int $i0;
+        android.os.Bundle $r4;
+        java.lang.StringBuilder $r5;
+
+        $r0 := @this: com.android.internal.location.NmeaParser;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+     label1:
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r2);
+
+     label2:
+        $r4 = $r0.<com.android.internal.location.NmeaParser: android.os.Bundle mExtras>;
+
+        if $r4 != null goto label3;
+
+        $r4 = new android.os.Bundle;
+
+        specialinvoke $r4.<android.os.Bundle: void <init>()>();
+
+        $r0.<com.android.internal.location.NmeaParser: android.os.Bundle mExtras> = $r4;
+
+     label3:
+        $r4 = $r0.<com.android.internal.location.NmeaParser: android.os.Bundle mExtras>;
+
+        virtualinvoke $r4.<android.os.Bundle: void putInt(java.lang.String,int)>($r1, $i0);
+
+        return 1;
+
+     label4:
+        $r3 := @caughtexception;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exception parsing int ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("NmeaParser", $r1, $r3);
+
+        return 0;
+
+        catch java.lang.NumberFormatException from label1 to label2 with label4;
+    }
+
+    private boolean updateLatLon(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+    {
+        com.android.internal.location.NmeaParser $r0;
+        java.lang.String $r1, $r2, $r3, $r4;
+        int $i0;
+        double $d0, $d1, $d2;
+        char $c1;
+        java.lang.NumberFormatException $r5, $r7;
+        java.lang.StringBuilder $r6;
+
+        $r0 := @this: com.android.internal.location.NmeaParser;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r4 := @parameter3: java.lang.String;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 == 0 goto label1;
+
+        $i0 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        if $i0 != 0 goto label2;
+
+     label1:
+        return 0;
+
+     label2:
+        $d0 = specialinvoke $r0.<com.android.internal.location.NmeaParser: double convertFromHHMM(java.lang.String)>($r1);
+
+        $d1 = $d0;
+
+        $c1 = virtualinvoke $r2.<java.lang.String: char charAt(int)>(0);
+
+     label3:
+        if $c1 != 83 goto label4;
+
+        $d1 = neg $d0;
+
+     label4:
+        $d0 = specialinvoke $r0.<com.android.internal.location.NmeaParser: double convertFromHHMM(java.lang.String)>($r3);
+
+        $d2 = $d0;
+
+        $c1 = virtualinvoke $r4.<java.lang.String: char charAt(int)>(0);
+
+     label5:
+        if $c1 != 87 goto label6;
+
+        $d2 = neg $d0;
+
+     label6:
+        $r0.<com.android.internal.location.NmeaParser: double mLatitude> = $d1;
+
+        $r0.<com.android.internal.location.NmeaParser: double mLongitude> = $d2;
+
+        return 1;
+
+     label7:
+        $r5 := @caughtexception;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exception parsing lat/long: ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r5);
+
+        $r1 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("NmeaParser", $r1, $r5);
+
+        return 0;
+
+     label8:
+        $r7 := @caughtexception;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exception parsing lat/long: ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r7);
+
+        $r1 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("NmeaParser", $r1, $r7);
+
+        return 0;
+
+        catch java.lang.NumberFormatException from label2 to label3 with label7;
+        catch java.lang.NumberFormatException from label4 to label5 with label8;
+    }
+
+    private boolean updateSpeed(java.lang.String)
+    {
+        com.android.internal.location.NmeaParser $r0;
+        java.lang.String $r1;
+        java.lang.NumberFormatException $r2;
+        float $f0;
+        java.lang.StringBuilder $r3;
+
+        $r0 := @this: com.android.internal.location.NmeaParser;
+
+        $r1 := @parameter0: java.lang.String;
+
+     label1:
+        $f0 = staticinvoke <java.lang.Float: float parseFloat(java.lang.String)>($r1);
+
+     label2:
+        $f0 = $f0 * 0.5144445F;
+
+        $r0.<com.android.internal.location.NmeaParser: boolean mHasSpeed> = 1;
+
+        $r0.<com.android.internal.location.NmeaParser: float mSpeed> = $f0;
+
+        return 1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Exception parsing speed ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("NmeaParser", $r1, $r2);
+
+        return 0;
+
+        catch java.lang.NumberFormatException from label1 to label2 with label3;
+    }
+
+    private boolean updateTime(java.lang.String)
+    {
+        com.android.internal.location.NmeaParser $r0;
+        java.lang.String $r1, $r3;
+        java.util.GregorianCalendar $r2;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6;
+        float $f0, $f1;
+        java.util.TimeZone $r4;
+        long $l7, $l8;
+        byte $b9;
+        android.location.Location $r5;
+        double $d0;
+        boolean $z0;
+        android.os.Bundle $r6;
+        java.lang.NumberFormatException $r7;
+        java.lang.StringBuilder $r8;
+
+        $r0 := @this: com.android.internal.location.NmeaParser;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i2 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i2 >= 6 goto label1;
+
+        return 0;
+
+     label1:
+        $i2 = $r0.<com.android.internal.location.NmeaParser: int mYear>;
+
+        if $i2 != -1 goto label2;
+
+        $r0.<com.android.internal.location.NmeaParser: double mLatitude> = 0.0;
+
+        $r0.<com.android.internal.location.NmeaParser: double mLongitude> = 0.0;
+
+        $r0.<com.android.internal.location.NmeaParser: boolean mHasAltitude> = 0;
+
+        $r0.<com.android.internal.location.NmeaParser: boolean mHasBearing> = 0;
+
+        $r0.<com.android.internal.location.NmeaParser: boolean mHasSpeed> = 0;
+
+        $r0.<com.android.internal.location.NmeaParser: android.os.Bundle mExtras> = null;
+
+        return 0;
+
+     label2:
+        $r3 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(0, 2);
+
+        $i2 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(2, 4);
+
+        $i3 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r3);
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        $r3 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(4, $i0);
+
+        $f0 = staticinvoke <java.lang.Float: float parseFloat(java.lang.String)>($r3);
+
+     label3:
+        $i0 = (int) $f0;
+
+        $f1 = (float) $i0;
+
+        $f0 = $f0 - $f1;
+
+        $f0 = $f0 * 1000.0F;
+
+        $i1 = (int) $f0;
+
+        $r2 = new java.util.GregorianCalendar;
+
+        $r4 = <com.android.internal.location.NmeaParser: java.util.TimeZone sUtcTimeZone>;
+
+        specialinvoke $r2.<java.util.GregorianCalendar: void <init>(java.util.TimeZone)>($r4);
+
+        $i4 = $r0.<com.android.internal.location.NmeaParser: int mYear>;
+
+        $i5 = $r0.<com.android.internal.location.NmeaParser: int mMonth>;
+
+        $i6 = $r0.<com.android.internal.location.NmeaParser: int mDay>;
+
+        virtualinvoke $r2.<java.util.Calendar: void set(int,int,int,int,int,int)>($i4, $i5, $i6, $i2, $i3, $i0);
+
+        $l7 = virtualinvoke $r2.<java.util.Calendar: long getTimeInMillis()>();
+
+        $l8 = (long) $i1;
+
+        $l7 = $l7 + $l8;
+
+        $l8 = $r0.<com.android.internal.location.NmeaParser: long mTime>;
+
+        $b9 = $l8 cmp -1L;
+
+        if $b9 != 0 goto label4;
+
+        $r0.<com.android.internal.location.NmeaParser: long mTime> = 0L;
+
+        $r0.<com.android.internal.location.NmeaParser: long mBaseTime> = $l7;
+
+     label4:
+        $l8 = $r0.<com.android.internal.location.NmeaParser: long mBaseTime>;
+
+        $l7 = $l7 - $l8;
+
+        $l8 = $r0.<com.android.internal.location.NmeaParser: long mTime>;
+
+        $b9 = $l7 cmp $l8;
+
+        if $b9 == 0 goto label8;
+
+        $r0.<com.android.internal.location.NmeaParser: boolean mNewWaypoint> = 1;
+
+        $r5 = new android.location.Location;
+
+        $r1 = $r0.<com.android.internal.location.NmeaParser: java.lang.String mName>;
+
+        specialinvoke $r5.<android.location.Location: void <init>(java.lang.String)>($r1);
+
+        $r0.<com.android.internal.location.NmeaParser: android.location.Location mLocation> = $r5;
+
+        $r5 = $r0.<com.android.internal.location.NmeaParser: android.location.Location mLocation>;
+
+        $l8 = $r0.<com.android.internal.location.NmeaParser: long mTime>;
+
+        virtualinvoke $r5.<android.location.Location: void setTime(long)>($l8);
+
+        $r5 = $r0.<com.android.internal.location.NmeaParser: android.location.Location mLocation>;
+
+        $d0 = $r0.<com.android.internal.location.NmeaParser: double mLatitude>;
+
+        virtualinvoke $r5.<android.location.Location: void setLatitude(double)>($d0);
+
+        $r5 = $r0.<com.android.internal.location.NmeaParser: android.location.Location mLocation>;
+
+        $d0 = $r0.<com.android.internal.location.NmeaParser: double mLongitude>;
+
+        virtualinvoke $r5.<android.location.Location: void setLongitude(double)>($d0);
+
+        $z0 = $r0.<com.android.internal.location.NmeaParser: boolean mHasAltitude>;
+
+        if $z0 == 0 goto label5;
+
+        $r5 = $r0.<com.android.internal.location.NmeaParser: android.location.Location mLocation>;
+
+        $d0 = $r0.<com.android.internal.location.NmeaParser: double mAltitude>;
+
+        virtualinvoke $r5.<android.location.Location: void setAltitude(double)>($d0);
+
+     label5:
+        $z0 = $r0.<com.android.internal.location.NmeaParser: boolean mHasBearing>;
+
+        if $z0 == 0 goto label6;
+
+        $r5 = $r0.<com.android.internal.location.NmeaParser: android.location.Location mLocation>;
+
+        $f0 = $r0.<com.android.internal.location.NmeaParser: float mBearing>;
+
+        virtualinvoke $r5.<android.location.Location: void setBearing(float)>($f0);
+
+     label6:
+        $z0 = $r0.<com.android.internal.location.NmeaParser: boolean mHasSpeed>;
+
+        if $z0 == 0 goto label7;
+
+        $r5 = $r0.<com.android.internal.location.NmeaParser: android.location.Location mLocation>;
+
+        $f0 = $r0.<com.android.internal.location.NmeaParser: float mSpeed>;
+
+        virtualinvoke $r5.<android.location.Location: void setSpeed(float)>($f0);
+
+     label7:
+        $r5 = $r0.<com.android.internal.location.NmeaParser: android.location.Location mLocation>;
+
+        $r6 = $r0.<com.android.internal.location.NmeaParser: android.os.Bundle mExtras>;
+
+        virtualinvoke $r5.<android.location.Location: void setExtras(android.os.Bundle)>($r6);
+
+        $r0.<com.android.internal.location.NmeaParser: android.os.Bundle mExtras> = null;
+
+        $r0.<com.android.internal.location.NmeaParser: long mTime> = $l7;
+
+        $r0.<com.android.internal.location.NmeaParser: boolean mHasAltitude> = 0;
+
+        $r0.<com.android.internal.location.NmeaParser: boolean mHasBearing> = 0;
+
+        $r0.<com.android.internal.location.NmeaParser: boolean mHasSpeed> = 0;
+
+     label8:
+        return 1;
+
+     label9:
+        $r7 := @caughtexception;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error parsing timestamp ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("NmeaParser", $r1);
+
+        return 0;
+
+        catch java.lang.NumberFormatException from label2 to label3 with label9;
+    }
+
+    private boolean updateTime(java.lang.String, java.lang.String)
+    {
+        com.android.internal.location.NmeaParser $r0;
+        java.lang.String $r1, $r2;
+        boolean $z0;
+
+        $r0 := @this: com.android.internal.location.NmeaParser;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $z0 = specialinvoke $r0.<com.android.internal.location.NmeaParser: boolean updateDate(java.lang.String)>($r2);
+
+        if $z0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $z0 = specialinvoke $r0.<com.android.internal.location.NmeaParser: boolean updateTime(java.lang.String)>($r1);
+
+        return $z0;
+    }
+
+    public android.location.Location getLocation()
+    {
+        com.android.internal.location.NmeaParser $r0;
+        android.location.Location r1;
+
+        $r0 := @this: com.android.internal.location.NmeaParser;
+
+        r1 = $r0.<com.android.internal.location.NmeaParser: android.location.Location mLocation>;
+
+        return r1;
+    }
+
+    public boolean parseSentence(java.lang.String)
+    {
+        com.android.internal.location.NmeaParser $r0;
+        java.lang.String $r1, $r2, $r3, $r4, $r5, $r6, $r7, $r8, $r9, $r11;
+        int $i0, $i1, $i3, $i4;
+        char $c2;
+        java.lang.String[] $r10;
+        boolean $z0;
+        java.lang.ArrayIndexOutOfBoundsException $r12, $r14;
+        java.lang.StringBuilder $r13;
+
+        $r0 := @this: com.android.internal.location.NmeaParser;
+
+        $r3 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        if $i0 >= 9 goto label01;
+
+        return 0;
+
+     label01:
+        $i1 = $i0 - 3;
+
+        $c2 = virtualinvoke $r3.<java.lang.String: char charAt(int)>($i1);
+
+        if $c2 != 42 goto label02;
+
+        $i0 = $i0 - 3;
+
+        $r3 = virtualinvoke $r3.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+     label02:
+        $r10 = virtualinvoke $r3.<java.lang.String: java.lang.String[] split(java.lang.String)>(",");
+
+        $r4 = $r10[0];
+
+        $r4 = virtualinvoke $r4.<java.lang.String: java.lang.String substring(int,int)>(3, 6);
+
+     label03:
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>("GGA");
+
+     label04:
+        if $z0 == 0 goto label31;
+
+        $i0 = 1 + 1;
+
+     label05:
+        $r3 = $r10[1];
+
+     label06:
+        $i1 = $i0 + 1;
+
+     label07:
+        $r4 = $r10[$i0];
+
+     label08:
+        $i0 = $i1 + 1;
+
+     label09:
+        $r8 = $r10[$i1];
+
+     label10:
+        $i1 = $i0 + 1;
+
+     label11:
+        $r9 = $r10[$i0];
+
+     label12:
+        $i0 = $i1 + 1;
+
+     label13:
+        $r11 = $r10[$i1];
+
+     label14:
+        $i1 = $i0 + 1;
+
+     label15:
+        $r1 = $r10[$i0];
+
+     label16:
+        $i0 = $i1 + 1;
+
+     label17:
+        $r7 = $r10[$i1];
+
+     label18:
+        $i1 = $i0 + 1;
+
+     label19:
+        $r5 = $r10[$i0];
+
+     label20:
+        $i0 = $i1 + 1;
+
+     label21:
+        $r1 = $r10[$i1];
+
+     label22:
+        $i1 = $i0 + 1;
+
+     label23:
+        $r2 = $r10[$i0];
+
+     label24:
+        $i0 = $i1 + 1;
+
+     label25:
+        $r2 = $r10[$i1];
+
+     label26:
+        $i1 = $i0 + 1;
+
+     label27:
+        $r2 = $r10[$i0];
+
+     label28:
+        $r2 = $r10[$i1];
+
+        specialinvoke $r0.<com.android.internal.location.NmeaParser: boolean updateTime(java.lang.String)>($r3);
+
+        specialinvoke $r0.<com.android.internal.location.NmeaParser: boolean updateLatLon(java.lang.String,java.lang.String,java.lang.String,java.lang.String)>($r4, $r8, $r9, $r11);
+
+        specialinvoke $r0.<com.android.internal.location.NmeaParser: boolean updateAltitude(java.lang.String)>($r1);
+
+        specialinvoke $r0.<com.android.internal.location.NmeaParser: boolean updateIntExtra(java.lang.String,java.lang.String)>("numSatellites", $r7);
+
+        specialinvoke $r0.<com.android.internal.location.NmeaParser: boolean updateFloatExtra(java.lang.String,java.lang.String)>("hdop", $r5);
+
+     label29:
+        $z0 = $r0.<com.android.internal.location.NmeaParser: boolean mNewWaypoint>;
+
+        if $z0 == 0 goto label30;
+
+        $r0.<com.android.internal.location.NmeaParser: boolean mNewWaypoint> = 0;
+
+        return 1;
+
+     label30:
+        return 0;
+
+     label31:
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>("GSA");
+
+     label32:
+        if $z0 == 0 goto label48;
+
+        $i0 = 1 + 1;
+
+     label33:
+        $r3 = $r10[1];
+
+     label34:
+        $i1 = $i0 + 1;
+
+     label35:
+        $r3 = $r10[$i0];
+
+     label36:
+        $i0 = 0;
+
+     label37:
+        if $i0 >= 12 goto label40;
+
+     label38:
+        $i3 = $i1 + 1;
+
+        $r3 = $r10[$i1];
+
+     label39:
+        $i0 = $i0 + 1;
+
+        $i1 = $i3;
+
+        goto label37;
+
+     label40:
+        $i3 = $i1 + 1;
+
+        $r4 = $r10[$i1];
+
+     label41:
+        $i0 = $i3 + 1;
+
+     label42:
+        $r3 = $r10[$i3];
+
+     label43:
+        $r8 = $r10[$i0];
+
+        specialinvoke $r0.<com.android.internal.location.NmeaParser: boolean updateFloatExtra(java.lang.String,java.lang.String)>("pdop", $r4);
+
+        specialinvoke $r0.<com.android.internal.location.NmeaParser: boolean updateFloatExtra(java.lang.String,java.lang.String)>("hdop", $r3);
+
+        specialinvoke $r0.<com.android.internal.location.NmeaParser: boolean updateFloatExtra(java.lang.String,java.lang.String)>("vdop", $r8);
+
+     label44:
+        goto label30;
+
+     label45:
+        $r12 := @caughtexception;
+
+     label46:
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("NmeaParser", "AIOOBE", $r12);
+
+        $i0 = 0;
+
+     label47:
+        $i1 = lengthof $r10;
+
+        if $i0 >= $i1 goto label30;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Got token #");
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" = ");
+
+        $r3 = $r10[$i0];
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("NmeaParser", $r3);
+
+        $i0 = $i0 + 1;
+
+        goto label47;
+
+     label48:
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>("GSV");
+
+     label49:
+        if $z0 == 0 goto label67;
+
+        $i0 = 1 + 1;
+
+     label50:
+        $r3 = $r10[1];
+
+     label51:
+        $i1 = $i0 + 1;
+
+     label52:
+        $r3 = $r10[$i0];
+
+     label53:
+        $i0 = $i1 + 1;
+
+     label54:
+        $r3 = $r10[$i1];
+
+     label55:
+        $i1 = 0;
+
+     label56:
+        if $i1 >= 4 goto label66;
+
+        $i3 = $i0 + 2;
+
+        $i4 = lengthof $r10;
+
+        if $i3 >= $i4 goto label95;
+
+        $i3 = $i0 + 1;
+
+     label57:
+        $r3 = $r10[$i0];
+
+     label58:
+        $i0 = $i3 + 1;
+
+     label59:
+        $r3 = $r10[$i3];
+
+     label60:
+        $i3 = $i0 + 1;
+
+     label61:
+        $r3 = $r10[$i0];
+
+     label62:
+        $i0 = lengthof $r10;
+
+        if $i3 >= $i0 goto label65;
+
+     label63:
+        $r3 = $r10[$i3];
+
+     label64:
+        $i3 = $i3 + 1;
+
+     label65:
+        $i1 = $i1 + 1;
+
+        $i0 = $i3;
+
+        goto label56;
+
+     label66:
+        goto label30;
+
+     label67:
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>("RMC");
+
+     label68:
+        if $z0 == 0 goto label92;
+
+        $i0 = 1 + 1;
+
+     label69:
+        $r11 = $r10[1];
+
+     label70:
+        $i1 = $i0 + 1;
+
+     label71:
+        $r4 = $r10[$i0];
+
+     label72:
+        $i0 = $i1 + 1;
+
+     label73:
+        $r1 = $r10[$i1];
+
+     label74:
+        $i1 = $i0 + 1;
+
+     label75:
+        $r5 = $r10[$i0];
+
+     label76:
+        $i0 = $i1 + 1;
+
+     label77:
+        $r7 = $r10[$i1];
+
+     label78:
+        $i1 = $i0 + 1;
+
+     label79:
+        $r2 = $r10[$i0];
+
+     label80:
+        $i0 = $i1 + 1;
+
+     label81:
+        $r8 = $r10[$i1];
+
+     label82:
+        $i1 = $i0 + 1;
+
+     label83:
+        $r3 = $r10[$i0];
+
+     label84:
+        $i0 = $i1 + 1;
+
+     label85:
+        $r9 = $r10[$i1];
+
+     label86:
+        $i1 = $i0 + 1;
+
+     label87:
+        $r6 = $r10[$i0];
+
+     label88:
+        $i0 = $i1 + 1;
+
+     label89:
+        $r6 = $r10[$i1];
+
+     label90:
+        $r6 = $r10[$i0];
+
+        $c2 = virtualinvoke $r4.<java.lang.String: char charAt(int)>(0);
+
+        if $c2 != 65 goto label91;
+
+        specialinvoke $r0.<com.android.internal.location.NmeaParser: boolean updateTime(java.lang.String,java.lang.String)>($r11, $r9);
+
+        specialinvoke $r0.<com.android.internal.location.NmeaParser: boolean updateLatLon(java.lang.String,java.lang.String,java.lang.String,java.lang.String)>($r1, $r5, $r7, $r2);
+
+        specialinvoke $r0.<com.android.internal.location.NmeaParser: boolean updateBearing(java.lang.String)>($r3);
+
+        specialinvoke $r0.<com.android.internal.location.NmeaParser: boolean updateSpeed(java.lang.String)>($r8);
+
+     label91:
+        $z0 = $r0.<com.android.internal.location.NmeaParser: boolean mNewWaypoint>;
+
+        if $z0 == 0 goto label30;
+
+        return 1;
+
+     label92:
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown sentence: ");
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("NmeaParser", $r3);
+
+     label93:
+        goto label30;
+
+     label94:
+        $r14 := @caughtexception;
+
+        $r12 = $r14;
+
+        goto label46;
+
+     label95:
+        $i3 = $i0;
+
+        goto label65;
+
+        catch java.lang.ArrayIndexOutOfBoundsException from label03 to label04 with label45;
+        catch java.lang.ArrayIndexOutOfBoundsException from label05 to label06 with label94;
+        catch java.lang.ArrayIndexOutOfBoundsException from label07 to label08 with label45;
+        catch java.lang.ArrayIndexOutOfBoundsException from label09 to label10 with label94;
+        catch java.lang.ArrayIndexOutOfBoundsException from label11 to label12 with label45;
+        catch java.lang.ArrayIndexOutOfBoundsException from label13 to label14 with label94;
+        catch java.lang.ArrayIndexOutOfBoundsException from label15 to label16 with label45;
+        catch java.lang.ArrayIndexOutOfBoundsException from label17 to label18 with label94;
+        catch java.lang.ArrayIndexOutOfBoundsException from label19 to label20 with label45;
+        catch java.lang.ArrayIndexOutOfBoundsException from label21 to label22 with label94;
+        catch java.lang.ArrayIndexOutOfBoundsException from label23 to label24 with label45;
+        catch java.lang.ArrayIndexOutOfBoundsException from label25 to label26 with label94;
+        catch java.lang.ArrayIndexOutOfBoundsException from label27 to label28 with label45;
+        catch java.lang.ArrayIndexOutOfBoundsException from label28 to label29 with label94;
+        catch java.lang.ArrayIndexOutOfBoundsException from label31 to label32 with label45;
+        catch java.lang.ArrayIndexOutOfBoundsException from label33 to label34 with label94;
+        catch java.lang.ArrayIndexOutOfBoundsException from label35 to label36 with label45;
+        catch java.lang.ArrayIndexOutOfBoundsException from label38 to label39 with label45;
+        catch java.lang.ArrayIndexOutOfBoundsException from label40 to label41 with label45;
+        catch java.lang.ArrayIndexOutOfBoundsException from label42 to label43 with label94;
+        catch java.lang.ArrayIndexOutOfBoundsException from label43 to label44 with label45;
+        catch java.lang.ArrayIndexOutOfBoundsException from label48 to label49 with label45;
+        catch java.lang.ArrayIndexOutOfBoundsException from label50 to label51 with label94;
+        catch java.lang.ArrayIndexOutOfBoundsException from label52 to label53 with label45;
+        catch java.lang.ArrayIndexOutOfBoundsException from label54 to label55 with label94;
+        catch java.lang.ArrayIndexOutOfBoundsException from label57 to label58 with label45;
+        catch java.lang.ArrayIndexOutOfBoundsException from label59 to label60 with label94;
+        catch java.lang.ArrayIndexOutOfBoundsException from label61 to label62 with label45;
+        catch java.lang.ArrayIndexOutOfBoundsException from label63 to label64 with label94;
+        catch java.lang.ArrayIndexOutOfBoundsException from label67 to label68 with label45;
+        catch java.lang.ArrayIndexOutOfBoundsException from label69 to label70 with label94;
+        catch java.lang.ArrayIndexOutOfBoundsException from label71 to label72 with label45;
+        catch java.lang.ArrayIndexOutOfBoundsException from label73 to label74 with label94;
+        catch java.lang.ArrayIndexOutOfBoundsException from label75 to label76 with label45;
+        catch java.lang.ArrayIndexOutOfBoundsException from label77 to label78 with label94;
+        catch java.lang.ArrayIndexOutOfBoundsException from label79 to label80 with label45;
+        catch java.lang.ArrayIndexOutOfBoundsException from label81 to label82 with label94;
+        catch java.lang.ArrayIndexOutOfBoundsException from label83 to label84 with label45;
+        catch java.lang.ArrayIndexOutOfBoundsException from label85 to label86 with label94;
+        catch java.lang.ArrayIndexOutOfBoundsException from label87 to label88 with label45;
+        catch java.lang.ArrayIndexOutOfBoundsException from label89 to label90 with label94;
+        catch java.lang.ArrayIndexOutOfBoundsException from label90 to label91 with label45;
+        catch java.lang.ArrayIndexOutOfBoundsException from label92 to label93 with label45;
+    }
+}

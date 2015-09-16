@@ -1,0 +1,188 @@
+public final class android.provider.Telephony$Threads extends java.lang.Object implements android.provider.Telephony$ThreadsColumns
+{
+    public static final int BROADCAST_THREAD;
+    public static final int COMMON_THREAD;
+    public static final android.net.Uri CONTENT_URI;
+    private static final java.lang.String[] ID_PROJECTION;
+    public static final android.net.Uri OBSOLETE_THREADS_URI;
+    private static final java.lang.String STANDARD_ENCODING;
+    private static final android.net.Uri THREAD_ID_CONTENT_URI;
+
+    static void <clinit>()
+    {
+        java.lang.String[] $r0;
+        android.net.Uri $r1;
+
+        <android.provider.Telephony$Threads: java.lang.String STANDARD_ENCODING> = "UTF-8";
+
+        <android.provider.Telephony$Threads: int COMMON_THREAD> = 0;
+
+        <android.provider.Telephony$Threads: int BROADCAST_THREAD> = 1;
+
+        $r0 = newarray (java.lang.String)[1];
+
+        $r0[0] = "_id";
+
+        <android.provider.Telephony$Threads: java.lang.String[] ID_PROJECTION> = $r0;
+
+        $r1 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>("content://mms-sms/threadID");
+
+        <android.provider.Telephony$Threads: android.net.Uri THREAD_ID_CONTENT_URI> = $r1;
+
+        $r1 = <android.provider.Telephony$MmsSms: android.net.Uri CONTENT_URI>;
+
+        $r1 = staticinvoke <android.net.Uri: android.net.Uri withAppendedPath(android.net.Uri,java.lang.String)>($r1, "conversations");
+
+        <android.provider.Telephony$Threads: android.net.Uri CONTENT_URI> = $r1;
+
+        $r1 = <android.provider.Telephony$Threads: android.net.Uri CONTENT_URI>;
+
+        $r1 = staticinvoke <android.net.Uri: android.net.Uri withAppendedPath(android.net.Uri,java.lang.String)>($r1, "obsolete");
+
+        <android.provider.Telephony$Threads: android.net.Uri OBSOLETE_THREADS_URI> = $r1;
+
+        return;
+    }
+
+    private void <init>()
+    {
+        android.provider.Telephony$Threads $r0;
+
+        $r0 := @this: android.provider.Telephony$Threads;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static long getOrCreateThreadId(android.content.Context, java.lang.String)
+    {
+        android.content.Context $r0;
+        java.lang.String $r1;
+        java.util.HashSet $r2;
+        long $l0;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $r2 = new java.util.HashSet;
+
+        specialinvoke $r2.<java.util.HashSet: void <init>()>();
+
+        interfaceinvoke $r2.<java.util.Set: boolean add(java.lang.Object)>($r1);
+
+        $l0 = staticinvoke <android.provider.Telephony$Threads: long getOrCreateThreadId(android.content.Context,java.util.Set)>($r0, $r2);
+
+        return $l0;
+    }
+
+    public static long getOrCreateThreadId(android.content.Context, java.util.Set)
+    {
+        android.content.Context $r0;
+        java.util.Set $r1;
+        java.lang.String[] $r2;
+        android.net.Uri $r3;
+        android.net.Uri$Builder $r4;
+        java.util.Iterator $r5;
+        boolean $z0;
+        java.lang.Object $r6;
+        java.lang.String $r7;
+        android.content.ContentResolver $r8;
+        android.database.Cursor $r9;
+        long $l0;
+        java.lang.StringBuilder $r10;
+        java.lang.IllegalArgumentException $r11;
+        java.lang.Throwable $r12;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 := @parameter1: java.util.Set;
+
+        $r3 = <android.provider.Telephony$Threads: android.net.Uri THREAD_ID_CONTENT_URI>;
+
+        $r4 = virtualinvoke $r3.<android.net.Uri: android.net.Uri$Builder buildUpon()>();
+
+        $r5 = interfaceinvoke $r1.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        $r7 = (java.lang.String) $r6;
+
+        $z0 = staticinvoke <android.provider.Telephony$Mms: boolean isEmailAddress(java.lang.String)>($r7);
+
+        if $z0 == 0 goto label2;
+
+        $r7 = staticinvoke <android.provider.Telephony$Mms: java.lang.String extractAddrSpec(java.lang.String)>($r7);
+
+     label2:
+        virtualinvoke $r4.<android.net.Uri$Builder: android.net.Uri$Builder appendQueryParameter(java.lang.String,java.lang.String)>("recipient", $r7);
+
+        goto label1;
+
+     label3:
+        $r3 = virtualinvoke $r4.<android.net.Uri$Builder: android.net.Uri build()>();
+
+        $r8 = virtualinvoke $r0.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r2 = <android.provider.Telephony$Threads: java.lang.String[] ID_PROJECTION>;
+
+        $r9 = staticinvoke <com.google.android.mms.util.SqliteWrapper: android.database.Cursor query(android.content.Context,android.content.ContentResolver,android.net.Uri,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String)>($r0, $r8, $r3, $r2, null, null, null);
+
+        if $r9 == null goto label8;
+
+     label4:
+        $z0 = interfaceinvoke $r9.<android.database.Cursor: boolean moveToFirst()>();
+
+        if $z0 == 0 goto label6;
+
+        $l0 = interfaceinvoke $r9.<android.database.Cursor: long getLong(int)>(0);
+
+     label5:
+        interfaceinvoke $r9.<android.database.Cursor: void close()>();
+
+        return $l0;
+
+     label6:
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("Telephony", "getOrCreateThreadId returned no rows!");
+
+     label7:
+        interfaceinvoke $r9.<android.database.Cursor: void close()>();
+
+     label8:
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("getOrCreateThreadId failed with uri ");
+
+        $r7 = virtualinvoke $r3.<android.net.Uri: java.lang.String toString()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r7 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("Telephony", $r7);
+
+        $r11 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r11.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Unable to find or allocate a thread ID.");
+
+        throw $r11;
+
+     label9:
+        $r12 := @caughtexception;
+
+        interfaceinvoke $r9.<android.database.Cursor: void close()>();
+
+        throw $r12;
+
+        catch java.lang.Throwable from label4 to label5 with label9;
+        catch java.lang.Throwable from label6 to label7 with label9;
+    }
+}

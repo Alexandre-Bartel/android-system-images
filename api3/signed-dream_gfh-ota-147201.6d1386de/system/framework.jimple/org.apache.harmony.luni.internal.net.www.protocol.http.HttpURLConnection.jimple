@@ -1,0 +1,2861 @@
+public class org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection extends java.net.HttpURLConnection
+{
+    private static final java.lang.String GET;
+    private static final java.lang.String HEAD;
+    private static final java.lang.String POST;
+    private static final java.lang.String PUT;
+    private static org.apache.harmony.luni.internal.net.www.protocol.http.Header defaultReqHeader;
+    private java.io.OutputStream cacheOut;
+    private java.net.CacheRequest cacheRequest;
+    private java.net.CacheResponse cacheResponse;
+    protected org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnection connection;
+    private final int defaultPort;
+    private boolean hasTriedCache;
+    private java.net.InetAddress hostAddress;
+    private java.lang.String hostName;
+    private int hostPort;
+    private int httpVersion;
+    private java.io.InputStream is;
+    private org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream os;
+    private java.net.Proxy proxy;
+    private java.lang.String proxyName;
+    private org.apache.harmony.luni.internal.net.www.protocol.http.Header reqHeader;
+    private org.apache.harmony.luni.internal.net.www.protocol.http.Header resHeader;
+    private java.net.ResponseCache responseCache;
+    boolean sendChunked;
+    private boolean sentRequest;
+    private java.io.OutputStream socketOut;
+    private java.io.InputStream uis;
+    private java.net.URI uri;
+
+    static void <clinit>()
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.Header $r0;
+
+        <org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.lang.String PUT> = "PUT";
+
+        <org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.lang.String POST> = "POST";
+
+        <org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.lang.String HEAD> = "HEAD";
+
+        <org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.lang.String GET> = "GET";
+
+        $r0 = new org.apache.harmony.luni.internal.net.www.protocol.http.Header;
+
+        specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: void <init>()>();
+
+        <org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header defaultReqHeader> = $r0;
+
+        return;
+    }
+
+    protected void <init>(java.net.URL)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        java.net.URL $r1;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $r1 := @parameter0: java.net.URL;
+
+        specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: void <init>(java.net.URL,int)>($r1, 80);
+
+        return;
+    }
+
+    protected void <init>(java.net.URL, int)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        java.net.URL $r1;
+        int $i0;
+        org.apache.harmony.luni.internal.net.www.protocol.http.Header $r2;
+        java.lang.Object $r3;
+        java.net.URI $r4;
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$1 $r5;
+        java.net.ResponseCache $r6;
+        java.net.URISyntaxException $r7;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $r1 := @parameter0: java.net.URL;
+
+        $i0 := @parameter1: int;
+
+        specialinvoke $r0.<java.net.HttpURLConnection: void <init>(java.net.URL)>($r1);
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: int httpVersion> = 1;
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: int hostPort> = -1;
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: int defaultPort> = $i0;
+
+        $r2 = <org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header defaultReqHeader>;
+
+        $r3 = virtualinvoke $r2.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: java.lang.Object clone()>();
+
+        $r2 = (org.apache.harmony.luni.internal.net.www.protocol.http.Header) $r3;
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header reqHeader> = $r2;
+
+     label1:
+        $r4 = virtualinvoke $r1.<java.net.URL: java.net.URI toURI()>();
+
+     label2:
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.URI uri> = $r4;
+
+     label3:
+        $r5 = new org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$1;
+
+        specialinvoke $r5.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$1: void <init>(org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection)>($r0);
+
+        $r3 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r5);
+
+        $r6 = (java.net.ResponseCache) $r3;
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.ResponseCache responseCache> = $r6;
+
+        return;
+
+     label4:
+        $r7 := @caughtexception;
+
+        goto label3;
+
+        catch java.net.URISyntaxException from label1 to label2 with label4;
+    }
+
+    protected void <init>(java.net.URL, int, java.net.Proxy)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        java.net.URL $r1;
+        int $i0;
+        java.net.Proxy $r2;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $r1 := @parameter0: java.net.URL;
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: java.net.Proxy;
+
+        specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: void <init>(java.net.URL,int)>($r1, $i0);
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.Proxy proxy> = $r2;
+
+        return;
+    }
+
+    static java.io.InputStream access$000(org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        java.io.InputStream r1;
+
+        $r0 := @parameter0: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        r1 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.io.InputStream is>;
+
+        return r1;
+    }
+
+    static boolean access$100(org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        boolean z0;
+
+        $r0 := @parameter0: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        z0 = $r0.<java.net.URLConnection: boolean useCaches>;
+
+        return z0;
+    }
+
+    static boolean access$1000(org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        boolean z0;
+
+        $r0 := @parameter0: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        z0 = $r0.<java.net.URLConnection: boolean useCaches>;
+
+        return z0;
+    }
+
+    static boolean access$1100(org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        boolean z0;
+
+        $r0 := @parameter0: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        z0 = $r0.<java.net.URLConnection: boolean useCaches>;
+
+        return z0;
+    }
+
+    static boolean access$1200(org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        boolean z0;
+
+        $r0 := @parameter0: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        z0 = $r0.<java.net.URLConnection: boolean useCaches>;
+
+        return z0;
+    }
+
+    static boolean access$1300(org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        boolean z0;
+
+        $r0 := @parameter0: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        z0 = $r0.<java.net.URLConnection: boolean useCaches>;
+
+        return z0;
+    }
+
+    static int access$1400(org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        int i0;
+
+        $r0 := @parameter0: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        i0 = $r0.<java.net.HttpURLConnection: int chunkLength>;
+
+        return i0;
+    }
+
+    static int access$1500(org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        int i0;
+
+        $r0 := @parameter0: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        i0 = $r0.<java.net.HttpURLConnection: int chunkLength>;
+
+        return i0;
+    }
+
+    static java.io.OutputStream access$1600(org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        java.io.OutputStream r1;
+
+        $r0 := @parameter0: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        r1 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.io.OutputStream socketOut>;
+
+        return r1;
+    }
+
+    static java.io.OutputStream access$200(org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        java.io.OutputStream r1;
+
+        $r0 := @parameter0: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        r1 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.io.OutputStream cacheOut>;
+
+        return r1;
+    }
+
+    static boolean access$300(org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        boolean z0;
+
+        $r0 := @parameter0: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        z0 = $r0.<java.net.URLConnection: boolean useCaches>;
+
+        return z0;
+    }
+
+    static boolean access$400(org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        boolean z0;
+
+        $r0 := @parameter0: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        z0 = $r0.<java.net.URLConnection: boolean useCaches>;
+
+        return z0;
+    }
+
+    static boolean access$500(org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        boolean z0;
+
+        $r0 := @parameter0: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        z0 = $r0.<java.net.URLConnection: boolean useCaches>;
+
+        return z0;
+    }
+
+    static java.net.CacheRequest access$600(org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        java.net.CacheRequest r1;
+
+        $r0 := @parameter0: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        r1 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.CacheRequest cacheRequest>;
+
+        return r1;
+    }
+
+    static void access$700(org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection, boolean)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $z0 := @parameter1: boolean;
+
+        specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: void disconnect(boolean)>($z0);
+
+        return;
+    }
+
+    static boolean access$800(org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        boolean z0;
+
+        $r0 := @parameter0: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        z0 = $r0.<java.net.URLConnection: boolean useCaches>;
+
+        return z0;
+    }
+
+    static boolean access$900(org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        boolean z0;
+
+        $r0 := @parameter0: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        z0 = $r0.<java.net.URLConnection: boolean useCaches>;
+
+        return z0;
+    }
+
+    private byte[] createRequest() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        java.lang.StringBuilder $r1;
+        java.lang.String $r2, $r6;
+        int $i0, $i1;
+        org.apache.harmony.luni.internal.net.www.protocol.http.Header $r3;
+        java.net.URL $r4;
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream $r5;
+        boolean $z0, $z1;
+        byte[] $r7;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>(int)>(256);
+
+        $r2 = $r0.<java.net.HttpURLConnection: java.lang.String method>;
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(32);
+
+        $r2 = virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.lang.String requestString()>();
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(32);
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("HTTP/1.");
+
+        $i0 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: int httpVersion>;
+
+        if $i0 != 0 goto label15;
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("0\r\n");
+
+     label01:
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header reqHeader>;
+
+        $r2 = virtualinvoke $r3.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: java.lang.String get(java.lang.String)>("User-Agent");
+
+        if $r2 != null goto label03;
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("User-Agent: ");
+
+        $r2 = specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.lang.String getSystemProperty(java.lang.String)>("http.agent");
+
+        if $r2 != null goto label16;
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Java");
+
+        $r2 = specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.lang.String getSystemProperty(java.lang.String)>("java.version");
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+     label02:
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+     label03:
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header reqHeader>;
+
+        $r2 = virtualinvoke $r3.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: java.lang.String get(java.lang.String)>("Host");
+
+        if $r2 != null goto label05;
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Host: ");
+
+        $r4 = $r0.<java.net.URLConnection: java.net.URL url>;
+
+        $r2 = virtualinvoke $r4.<java.net.URL: java.lang.String getHost()>();
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r4 = $r0.<java.net.URLConnection: java.net.URL url>;
+
+        $i0 = virtualinvoke $r4.<java.net.URL: int getPort()>();
+
+        if $i0 <= 0 goto label04;
+
+        $i1 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: int defaultPort>;
+
+        if $i0 == $i1 goto label04;
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(58);
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>($i0);
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+     label04:
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+     label05:
+        $i0 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: int httpVersion>;
+
+        if $i0 <= 0 goto label06;
+
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header reqHeader>;
+
+        $r2 = virtualinvoke $r3.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: java.lang.String get(java.lang.String)>("Connection");
+
+        if $r2 != null goto label06;
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Connection: Keep-Alive\r\n");
+
+     label06:
+        $r5 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream os>;
+
+        if $r5 == null goto label08;
+
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header reqHeader>;
+
+        $r2 = virtualinvoke $r3.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: java.lang.String get(java.lang.String)>("Content-Type");
+
+        if $r2 != null goto label07;
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Content-Type: application/x-www-form-urlencoded\r\n");
+
+     label07:
+        $r5 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream os>;
+
+        $z0 = virtualinvoke $r5.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream: boolean isCached()>();
+
+        if $z0 == 0 goto label17;
+
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header reqHeader>;
+
+        $r2 = virtualinvoke $r3.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: java.lang.String get(java.lang.String)>("Content-Length");
+
+        if $r2 != null goto label08;
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Content-Length: ");
+
+        $r5 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream os>;
+
+        $i0 = virtualinvoke $r5.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream: int size()>();
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>($i0);
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+     label08:
+        $z0 = 0;
+
+        $i0 = 0;
+
+     label09:
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header reqHeader>;
+
+        $i1 = virtualinvoke $r3.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: int length()>();
+
+        if $i0 >= $i1 goto label20;
+
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header reqHeader>;
+
+        $r2 = virtualinvoke $r3.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: java.lang.String getKey(int)>($i0);
+
+        if $r2 == null goto label14;
+
+        $r6 = virtualinvoke $r2.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $r5 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream os>;
+
+        if $r5 == null goto label10;
+
+        $r5 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream os>;
+
+        $z1 = virtualinvoke $r5.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream: boolean isChunked()>();
+
+        if $z1 == 0 goto label11;
+
+     label10:
+        $z1 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>("transfer-encoding");
+
+        if $z1 != 0 goto label14;
+
+        $z1 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>("content-length");
+
+        if $z1 != 0 goto label14;
+
+     label11:
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $z1 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>("content-length");
+
+        if $z1 == 0 goto label19;
+
+        $z0 = 1;
+
+        $i1 = $r0.<java.net.HttpURLConnection: int fixedContentLength>;
+
+        if $i1 < 0 goto label18;
+
+        $i1 = $r0.<java.net.HttpURLConnection: int fixedContentLength>;
+
+        $r2 = staticinvoke <java.lang.String: java.lang.String valueOf(int)>($i1);
+
+     label12:
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+     label13:
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+     label14:
+        $i0 = $i0 + 1;
+
+        goto label09;
+
+     label15:
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("1\r\n");
+
+        goto label01;
+
+     label16:
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        goto label02;
+
+     label17:
+        $r5 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream os>;
+
+        $z0 = virtualinvoke $r5.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream: boolean isChunked()>();
+
+        if $z0 == 0 goto label08;
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Transfer-Encoding: chunked\r\n");
+
+        goto label08;
+
+     label18:
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header reqHeader>;
+
+        $r2 = virtualinvoke $r3.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: java.lang.String get(int)>($i0);
+
+        goto label12;
+
+     label19:
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header reqHeader>;
+
+        $r2 = virtualinvoke $r3.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: java.lang.String get(int)>($i0);
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        goto label13;
+
+     label20:
+        $i0 = $r0.<java.net.HttpURLConnection: int fixedContentLength>;
+
+        if $i0 < 0 goto label21;
+
+        if $z0 != 0 goto label21;
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("content-length: ");
+
+        $i0 = $r0.<java.net.HttpURLConnection: int fixedContentLength>;
+
+        $r2 = staticinvoke <java.lang.String: java.lang.String valueOf(int)>($i0);
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+     label21:
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r7 = virtualinvoke $r2.<java.lang.String: byte[] getBytes(java.lang.String)>("ISO8859_1");
+
+        return $r7;
+    }
+
+    private void disconnect(boolean)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        boolean $z0;
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnection $r1;
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnectionManager $r2;
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $z0 := @parameter0: boolean;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnection connection>;
+
+        if $r1 == null goto label4;
+
+        if $z0 != 0 goto label2;
+
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream os>;
+
+        if $r3 == null goto label6;
+
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream os>;
+
+        $z0 = $r3.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream: boolean closed>;
+
+        if $z0 != 0 goto label6;
+
+     label2:
+        $r1 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnection connection>;
+
+        virtualinvoke $r1.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnection: void closeSocketAndStreams()>();
+
+     label3:
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnection connection> = null;
+
+     label4:
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.io.InputStream is> = null;
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream os> = null;
+
+     label5:
+        exitmonitor $r0;
+
+        return;
+
+     label6:
+        $r2 = staticinvoke <org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnectionManager: org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnectionManager getDefault()>();
+
+        $r1 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnection connection>;
+
+        virtualinvoke $r2.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnectionManager: void returnConnectionToPool(org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnection)>($r1);
+
+     label7:
+        goto label3;
+
+     label8:
+        $r4 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label5 with label8;
+        catch java.lang.Throwable from label6 to label7 with label8;
+    }
+
+    private java.lang.String getAuthorizationCredentials(java.lang.String) throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        java.lang.String $r1, $r2, $r3;
+        int $i0, $i1;
+        java.net.InetAddress $r4;
+        java.net.URL $r5;
+        java.net.PasswordAuthentication $r6;
+        java.lang.StringBuilder $r7;
+        char[] $r8;
+        byte[] $r9;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int indexOf(java.lang.String)>(" ");
+
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int indexOf(java.lang.String)>("realm=\"");
+
+        $i0 = $i0 + 7;
+
+        $r3 = null;
+
+        if $i0 == -1 goto label1;
+
+        $i1 = virtualinvoke $r1.<java.lang.String: int indexOf(int,int)>(34, $i0);
+
+        if $i1 == -1 goto label1;
+
+        $r3 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>($i0, $i1);
+
+     label1:
+        $r4 = specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.InetAddress getHostAddress()>();
+
+        $i0 = specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: int getHostPort()>();
+
+        $r5 = $r0.<java.net.URLConnection: java.net.URL url>;
+
+        $r1 = virtualinvoke $r5.<java.net.URL: java.lang.String getProtocol()>();
+
+        $r6 = staticinvoke <java.net.Authenticator: java.net.PasswordAuthentication requestPasswordAuthentication(java.net.InetAddress,int,java.lang.String,java.lang.String,java.lang.String)>($r4, $i0, $r1, $r3, $r2);
+
+        if $r6 != null goto label2;
+
+        return null;
+
+     label2:
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r6.<java.net.PasswordAuthentication: java.lang.String getUserName()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r1 = new java.lang.String;
+
+        $r8 = virtualinvoke $r6.<java.net.PasswordAuthentication: char[] getPassword()>();
+
+        specialinvoke $r1.<java.lang.String: void <init>(char[])>($r8);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r9 = virtualinvoke $r1.<java.lang.String: byte[] getBytes(java.lang.String)>("ISO8859_1");
+
+        $r1 = staticinvoke <org.apache.harmony.luni.util.Base64: java.lang.String encode(byte[],java.lang.String)>($r9, "ISO8859_1");
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r1;
+    }
+
+    private java.io.InputStream getContentStream() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        java.io.InputStream $r1;
+        org.apache.harmony.luni.internal.net.www.protocol.http.Header $r2;
+        java.lang.String $r3;
+        boolean $z0;
+        int $i0;
+        java.lang.NumberFormatException $r4;
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$ChunkedInputStream r5;
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$LimitedInputStream r6;
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$LocalCloseInputStream r7;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $r1 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.io.InputStream uis>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.io.InputStream uis>;
+
+        return $r1;
+
+     label1:
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header resHeader>;
+
+        $r3 = virtualinvoke $r2.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: java.lang.String get(java.lang.String)>("Transfer-Encoding");
+
+        if $r3 == null goto label2;
+
+        $r3 = virtualinvoke $r3.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("chunked");
+
+        if $z0 == 0 goto label2;
+
+        r5 = new org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$ChunkedInputStream;
+
+        $r1 = r5;
+
+        specialinvoke r5.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$ChunkedInputStream: void <init>(org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection)>($r0);
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.io.InputStream uis> = $r1;
+
+        return $r1;
+
+     label2:
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header resHeader>;
+
+        $r3 = virtualinvoke $r2.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: java.lang.String get(java.lang.String)>("Content-Length");
+
+        if $r3 == null goto label8;
+
+     label3:
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r3);
+
+     label4:
+        r6 = new org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$LimitedInputStream;
+
+     label5:
+        $r1 = r6;
+
+        specialinvoke r6.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$LimitedInputStream: void <init>(org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection,int)>($r0, $i0);
+
+     label6:
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.io.InputStream uis> = $r1;
+
+        return $r1;
+
+     label7:
+        $r4 := @caughtexception;
+
+     label8:
+        r7 = new org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$LocalCloseInputStream;
+
+        $r1 = r7;
+
+        specialinvoke r7.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$LocalCloseInputStream: void <init>(org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection)>($r0);
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.io.InputStream uis> = $r1;
+
+        return $r1;
+
+        catch java.lang.NumberFormatException from label3 to label4 with label7;
+        catch java.lang.NumberFormatException from label5 to label6 with label7;
+    }
+
+    public static java.lang.String getDefaultRequestProperty(java.lang.String)
+    {
+        java.lang.String $r0;
+        org.apache.harmony.luni.internal.net.www.protocol.http.Header $r1;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $r1 = <org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header defaultReqHeader>;
+
+        $r0 = virtualinvoke $r1.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: java.lang.String get(java.lang.String)>($r0);
+
+        return $r0;
+    }
+
+    private boolean getFromCache() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        java.net.URI $r1;
+        java.lang.String $r2;
+        boolean $z0;
+        java.net.ResponseCache $r3;
+        org.apache.harmony.luni.internal.net.www.protocol.http.Header $r4;
+        java.util.Map $r5;
+        java.net.CacheResponse $r6;
+        java.io.InputStream $r7;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $z0 = $r0.<java.net.URLConnection: boolean useCaches>;
+
+        if $z0 == 0 goto label3;
+
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.ResponseCache responseCache>;
+
+        if $r3 == null goto label3;
+
+        $z0 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: boolean hasTriedCache>;
+
+        if $z0 != 0 goto label3;
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: boolean hasTriedCache> = 1;
+
+        $r4 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header resHeader>;
+
+        if $r4 != null goto label1;
+
+        $r4 = new org.apache.harmony.luni.internal.net.www.protocol.http.Header;
+
+        specialinvoke $r4.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: void <init>()>();
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header resHeader> = $r4;
+
+     label1:
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.ResponseCache responseCache>;
+
+        $r1 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.URI uri>;
+
+        $r2 = $r0.<java.net.HttpURLConnection: java.lang.String method>;
+
+        $r4 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header resHeader>;
+
+        $r5 = virtualinvoke $r4.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: java.util.Map getFieldMap()>();
+
+        $r6 = virtualinvoke $r3.<java.net.ResponseCache: java.net.CacheResponse get(java.net.URI,java.lang.String,java.util.Map)>($r1, $r2, $r5);
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.CacheResponse cacheResponse> = $r6;
+
+        $r6 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.CacheResponse cacheResponse>;
+
+        if $r6 == null goto label3;
+
+        $r6 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.CacheResponse cacheResponse>;
+
+        $r5 = virtualinvoke $r6.<java.net.CacheResponse: java.util.Map getHeaders()>();
+
+        if $r5 == null goto label2;
+
+        $r4 = new org.apache.harmony.luni.internal.net.www.protocol.http.Header;
+
+        specialinvoke $r4.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: void <init>(java.util.Map)>($r5);
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header resHeader> = $r4;
+
+     label2:
+        $r6 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.CacheResponse cacheResponse>;
+
+        $r7 = virtualinvoke $r6.<java.net.CacheResponse: java.io.InputStream getBody()>();
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.io.InputStream is> = $r7;
+
+        $r7 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.io.InputStream is>;
+
+        if $r7 == null goto label3;
+
+        return 1;
+
+     label3:
+        $z0 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: boolean hasTriedCache>;
+
+        if $z0 == 0 goto label4;
+
+        $r7 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.io.InputStream is>;
+
+        if $r7 == null goto label4;
+
+        return 1;
+
+     label4:
+        return 0;
+    }
+
+    private java.net.InetAddress getHostAddress() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        java.net.Proxy$Type $r1, $r4;
+        java.net.InetAddress $r2;
+        java.net.Proxy $r3;
+        java.net.SocketAddress $r5;
+        java.net.InetSocketAddress $r6;
+        java.net.URL $r7;
+        java.lang.String $r8;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.InetAddress hostAddress>;
+
+        if $r2 != null goto label1;
+
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.Proxy proxy>;
+
+        if $r3 == null goto label2;
+
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.Proxy proxy>;
+
+        $r4 = virtualinvoke $r3.<java.net.Proxy: java.net.Proxy$Type type()>();
+
+        $r1 = <java.net.Proxy$Type: java.net.Proxy$Type DIRECT>;
+
+        if $r4 == $r1 goto label2;
+
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.Proxy proxy>;
+
+        $r5 = virtualinvoke $r3.<java.net.Proxy: java.net.SocketAddress address()>();
+
+        $r6 = (java.net.InetSocketAddress) $r5;
+
+        $r2 = virtualinvoke $r6.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.InetAddress hostAddress> = $r2;
+
+     label1:
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.InetAddress hostAddress>;
+
+        return $r2;
+
+     label2:
+        $r7 = $r0.<java.net.URLConnection: java.net.URL url>;
+
+        $r8 = virtualinvoke $r7.<java.net.URL: java.lang.String getHost()>();
+
+        $r2 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByName(java.lang.String)>($r8);
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.InetAddress hostAddress> = $r2;
+
+        goto label1;
+    }
+
+    private java.lang.String getHostName()
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        java.lang.String $r1;
+        java.net.Proxy $r2;
+        java.net.SocketAddress $r3;
+        java.net.InetSocketAddress $r4;
+        java.net.URL $r5;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $r1 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.lang.String hostName>;
+
+        if $r1 != null goto label1;
+
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.Proxy proxy>;
+
+        if $r2 == null goto label2;
+
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.Proxy proxy>;
+
+        $r3 = virtualinvoke $r2.<java.net.Proxy: java.net.SocketAddress address()>();
+
+        $r4 = (java.net.InetSocketAddress) $r3;
+
+        $r1 = virtualinvoke $r4.<java.net.InetSocketAddress: java.lang.String getHostName()>();
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.lang.String hostName> = $r1;
+
+     label1:
+        $r1 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.lang.String hostName>;
+
+        return $r1;
+
+     label2:
+        $r5 = $r0.<java.net.URLConnection: java.net.URL url>;
+
+        $r1 = virtualinvoke $r5.<java.net.URL: java.lang.String getHost()>();
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.lang.String hostName> = $r1;
+
+        goto label1;
+    }
+
+    private int getHostPort()
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        int $i0;
+        java.net.Proxy $r1;
+        java.net.SocketAddress $r2;
+        java.net.InetSocketAddress $r3;
+        java.net.URL $r4;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $i0 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: int hostPort>;
+
+        if $i0 >= 0 goto label2;
+
+        $r1 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.Proxy proxy>;
+
+        if $r1 == null goto label3;
+
+        $r1 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.Proxy proxy>;
+
+        $r2 = virtualinvoke $r1.<java.net.Proxy: java.net.SocketAddress address()>();
+
+        $r3 = (java.net.InetSocketAddress) $r2;
+
+        $i0 = virtualinvoke $r3.<java.net.InetSocketAddress: int getPort()>();
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: int hostPort> = $i0;
+
+     label1:
+        $i0 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: int hostPort>;
+
+        if $i0 >= 0 goto label2;
+
+        $i0 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: int defaultPort>;
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: int hostPort> = $i0;
+
+     label2:
+        $i0 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: int hostPort>;
+
+        return $i0;
+
+     label3:
+        $r4 = $r0.<java.net.URLConnection: java.net.URL url>;
+
+        $i0 = virtualinvoke $r4.<java.net.URL: int getPort()>();
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: int hostPort> = $i0;
+
+        goto label1;
+    }
+
+    private java.lang.String getSystemProperty(java.lang.String)
+    {
+        java.lang.String $r0;
+        org.apache.harmony.luni.util.PriviAction $r1;
+        java.lang.Object $r2;
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r3;
+
+        $r3 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $r1 = new org.apache.harmony.luni.util.PriviAction;
+
+        specialinvoke $r1.<org.apache.harmony.luni.util.PriviAction: void <init>(java.lang.String)>($r0);
+
+        $r2 = staticinvoke <java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>($r1);
+
+        $r0 = (java.lang.String) $r2;
+
+        return $r0;
+    }
+
+    private void putToCache() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        java.net.URI $r1;
+        boolean $z0;
+        java.net.ResponseCache $r2;
+        java.net.CacheRequest $r3;
+        java.io.OutputStream $r4;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $z0 = $r0.<java.net.URLConnection: boolean useCaches>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.ResponseCache responseCache>;
+
+        if $r2 == null goto label2;
+
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.ResponseCache responseCache>;
+
+        $r1 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.URI uri>;
+
+        $r3 = virtualinvoke $r2.<java.net.ResponseCache: java.net.CacheRequest put(java.net.URI,java.net.URLConnection)>($r1, $r0);
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.CacheRequest cacheRequest> = $r3;
+
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.CacheRequest cacheRequest>;
+
+        if $r3 == null goto label3;
+
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.CacheRequest cacheRequest>;
+
+        $r4 = virtualinvoke $r3.<java.net.CacheRequest: java.io.OutputStream getBody()>();
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.io.OutputStream cacheOut> = $r4;
+
+        return;
+
+     label1:
+        return;
+
+     label2:
+        return;
+
+     label3:
+        return;
+    }
+
+    private boolean sendRequest() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        byte[] $r1;
+        boolean $z0;
+        java.net.CacheResponse $r2;
+        java.io.OutputStream $r3;
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream $r4;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $r1 = specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: byte[] createRequest()>();
+
+        $z0 = $r0.<java.net.URLConnection: boolean connected>;
+
+        if $z0 != 0 goto label1;
+
+        virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: void connect()>();
+
+     label1:
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.CacheResponse cacheResponse>;
+
+        if $r2 == null goto label2;
+
+        return 1;
+
+     label2:
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.io.OutputStream socketOut>;
+
+        virtualinvoke $r3.<java.io.OutputStream: void write(byte[])>($r1);
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: boolean sentRequest> = 1;
+
+        $r4 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream os>;
+
+        if $r4 == null goto label3;
+
+        $r4 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream os>;
+
+        $z0 = virtualinvoke $r4.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream: boolean isCached()>();
+
+        if $z0 == 0 goto label3;
+
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.io.OutputStream socketOut>;
+
+        $r4 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream os>;
+
+        $r1 = virtualinvoke $r4.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream: byte[] toByteArray()>();
+
+        virtualinvoke $r3.<java.io.OutputStream: void write(byte[])>($r1);
+
+     label3:
+        $r4 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream os>;
+
+        if $r4 == null goto label4;
+
+        $r4 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream os>;
+
+        $z0 = virtualinvoke $r4.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream: boolean isCached()>();
+
+        if $z0 == 0 goto label5;
+
+     label4:
+        virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: void readServerResponse()>();
+
+        return 1;
+
+     label5:
+        return 0;
+    }
+
+    public static void setDefaultRequestProperty(java.lang.String, java.lang.String)
+    {
+        java.lang.String $r0, $r1;
+        org.apache.harmony.luni.internal.net.www.protocol.http.Header $r2;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $r2 = <org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header defaultReqHeader>;
+
+        virtualinvoke $r2.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: void add(java.lang.String,java.lang.String)>($r0, $r1);
+
+        return;
+    }
+
+    private void setProxy(java.lang.String)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        java.lang.String $r1, $r2;
+        int $i0;
+        java.lang.IllegalArgumentException $r3;
+        java.lang.NumberFormatException $r4;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int indexOf(int)>(58);
+
+        if $i0 != -1 goto label1;
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.lang.String proxyName> = $r1;
+
+        $i0 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: int defaultPort>;
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: int hostPort> = $i0;
+
+        return;
+
+     label1:
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.lang.String proxyName> = $r2;
+
+        $i0 = $i0 + 1;
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int)>($i0);
+
+     label2:
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r1);
+
+     label3:
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: int hostPort> = $i0;
+
+        $i0 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: int hostPort>;
+
+        if $i0 < 0 goto label4;
+
+        $i0 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: int hostPort>;
+
+        if $i0 <= 65535 goto label6;
+
+     label4:
+        $r3 = new java.lang.IllegalArgumentException;
+
+        $r1 = staticinvoke <org.apache.harmony.luni.util.Msg: java.lang.String getString(java.lang.String)>("K00b0");
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r1);
+
+        throw $r3;
+
+     label5:
+        $r4 := @caughtexception;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        $r1 = staticinvoke <org.apache.harmony.luni.util.Msg: java.lang.String getString(java.lang.String,java.lang.Object)>("K00af", $r1);
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r1);
+
+        throw $r3;
+
+     label6:
+        return;
+
+        catch java.lang.NumberFormatException from label2 to label3 with label5;
+    }
+
+    public void addRequestProperty(java.lang.String, java.lang.String)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        java.lang.String $r1, $r2;
+        boolean $z0;
+        java.lang.IllegalAccessError $r3;
+        java.lang.NullPointerException $r4;
+        org.apache.harmony.luni.internal.net.www.protocol.http.Header $r5;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $z0 = $r0.<java.net.URLConnection: boolean connected>;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = new java.lang.IllegalAccessError;
+
+        $r1 = staticinvoke <org.apache.harmony.luni.util.Msg: java.lang.String getString(java.lang.String)>("K0092");
+
+        specialinvoke $r3.<java.lang.IllegalAccessError: void <init>(java.lang.String)>($r1);
+
+        throw $r3;
+
+     label1:
+        if $r1 != null goto label2;
+
+        $r4 = new java.lang.NullPointerException;
+
+        specialinvoke $r4.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r4;
+
+     label2:
+        $r5 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header reqHeader>;
+
+        virtualinvoke $r5.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: void add(java.lang.String,java.lang.String)>($r1, $r2);
+
+        return;
+    }
+
+    public void connect() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        boolean $z0;
+        java.net.URI $r1;
+        java.net.URL $r2;
+        java.lang.String $r3, $r4;
+        int $i0;
+        java.net.Proxy $r5;
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnection $r6;
+        java.net.URISyntaxException $r7;
+        java.io.IOException $r8;
+        java.net.ProxySelector $r9;
+        java.util.List $r10;
+        java.util.Iterator $r11;
+        java.lang.Object $r12;
+        java.net.Proxy$Type $r13, $r14;
+        java.net.SocketAddress $r15;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $z0 = $r0.<java.net.URLConnection: boolean connected>;
+
+        if $z0 == 0 goto label01;
+
+        return;
+
+     label01:
+        $z0 = specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: boolean getFromCache()>();
+
+        if $z0 != 0 goto label12;
+
+        $r1 = new java.net.URI;
+
+        $r2 = $r0.<java.net.URLConnection: java.net.URL url>;
+
+     label02:
+        $r3 = virtualinvoke $r2.<java.net.URL: java.lang.String getProtocol()>();
+
+        $r2 = $r0.<java.net.URLConnection: java.net.URL url>;
+
+        $r4 = virtualinvoke $r2.<java.net.URL: java.lang.String getHost()>();
+
+        $r2 = $r0.<java.net.URLConnection: java.net.URL url>;
+
+        $i0 = virtualinvoke $r2.<java.net.URL: int getPort()>();
+
+        specialinvoke $r1.<java.net.URI: void <init>(java.lang.String,java.lang.String,java.lang.String,int,java.lang.String,java.lang.String,java.lang.String)>($r3, null, $r4, $i0, null, null, null);
+
+     label03:
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.URI uri> = $r1;
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnection connection> = null;
+
+        $r5 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.Proxy proxy>;
+
+        if $r5 == null goto label07;
+
+        $r5 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.Proxy proxy>;
+
+        $r6 = virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnection getHTTPConnection(java.net.Proxy)>($r5);
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnection connection> = $r6;
+
+     label04:
+        $r6 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnection connection>;
+
+        if $r6 != null goto label05;
+
+        $r6 = virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnection getHTTPConnection(java.net.Proxy)>(null);
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnection connection> = $r6;
+
+     label05:
+        $r6 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnection connection>;
+
+        $i0 = virtualinvoke $r0.<java.net.URLConnection: int getReadTimeout()>();
+
+        virtualinvoke $r6.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnection: void setSoTimeout(int)>($i0);
+
+        $r6 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnection connection>;
+
+        virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: void setUpTransportIO(org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnection)>($r6);
+
+        $r0.<java.net.URLConnection: boolean connected> = 1;
+
+        return;
+
+     label06:
+        $r7 := @caughtexception;
+
+        $r8 = new java.io.IOException;
+
+        $r3 = virtualinvoke $r7.<java.net.URISyntaxException: java.lang.String getMessage()>();
+
+        specialinvoke $r8.<java.io.IOException: void <init>(java.lang.String)>($r3);
+
+        throw $r8;
+
+     label07:
+        $r9 = staticinvoke <java.net.ProxySelector: java.net.ProxySelector getDefault()>();
+
+        $r1 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.URI uri>;
+
+        $r10 = virtualinvoke $r9.<java.net.ProxySelector: java.util.List select(java.net.URI)>($r1);
+
+        if $r10 == null goto label04;
+
+        $r11 = interfaceinvoke $r10.<java.util.List: java.util.Iterator iterator()>();
+
+     label08:
+        $z0 = interfaceinvoke $r11.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label04;
+
+        $r12 = interfaceinvoke $r11.<java.util.Iterator: java.lang.Object next()>();
+
+        $r5 = (java.net.Proxy) $r12;
+
+        $r13 = virtualinvoke $r5.<java.net.Proxy: java.net.Proxy$Type type()>();
+
+        $r14 = <java.net.Proxy$Type: java.net.Proxy$Type DIRECT>;
+
+        if $r13 == $r14 goto label08;
+
+     label09:
+        $r6 = virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnection getHTTPConnection(java.net.Proxy)>($r5);
+
+     label10:
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnection connection> = $r6;
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.Proxy proxy> = $r5;
+
+        goto label04;
+
+     label11:
+        $r8 := @caughtexception;
+
+        $r1 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.URI uri>;
+
+        $r15 = virtualinvoke $r5.<java.net.Proxy: java.net.SocketAddress address()>();
+
+        virtualinvoke $r9.<java.net.ProxySelector: void connectFailed(java.net.URI,java.net.SocketAddress,java.io.IOException)>($r1, $r15, $r8);
+
+        goto label08;
+
+     label12:
+        return;
+
+        catch java.net.URISyntaxException from label02 to label03 with label06;
+        catch java.io.IOException from label09 to label10 with label11;
+    }
+
+    public void disconnect()
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: void disconnect(boolean)>(1);
+
+        return;
+    }
+
+    protected void doRequest() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        boolean $z0;
+        org.apache.harmony.luni.internal.net.www.protocol.http.Header $r1;
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream $r2;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $z0 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: boolean sentRequest>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header resHeader>;
+
+        if $r1 != null goto label2;
+
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream os>;
+
+        if $r2 == null goto label3;
+
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream os>;
+
+        virtualinvoke $r2.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream: void close()>();
+
+        virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: void readServerResponse()>();
+
+        specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.io.InputStream getContentStream()>();
+
+        return;
+
+     label1:
+        virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: void doRequestInternal()>();
+
+        return;
+
+     label2:
+        return;
+
+     label3:
+        return;
+    }
+
+    void doRequestInternal() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        int $i0, $i1;
+        boolean $z0;
+        java.io.IOException $r1;
+        java.lang.String $r2, $r8;
+        org.apache.harmony.luni.internal.net.www.protocol.http.Header $r3;
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream $r4;
+        java.net.ProtocolException $r5;
+        java.lang.StringBuilder $r6;
+        java.net.URL $r7, $r9;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $i0 = 0;
+
+     label01:
+        $z0 = specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: boolean sendRequest()>();
+
+        if $z0 != 0 goto label02;
+
+        return;
+
+     label02:
+        $i1 = $r0.<java.net.HttpURLConnection: int responseCode>;
+
+        if $i1 != 407 goto label07;
+
+        $z0 = virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: boolean usingProxy()>();
+
+        if $z0 != 0 goto label03;
+
+        $r1 = new java.io.IOException;
+
+        $r2 = staticinvoke <org.apache.harmony.luni.util.Msg: java.lang.String getString(java.lang.String)>("KA017");
+
+        specialinvoke $r1.<java.io.IOException: void <init>(java.lang.String)>($r2);
+
+        throw $r1;
+
+     label03:
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header resHeader>;
+
+        $r2 = virtualinvoke $r3.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: java.lang.String get(java.lang.String)>("Proxy-Authenticate");
+
+        if $r2 != null goto label04;
+
+        $r1 = new java.io.IOException;
+
+        $r2 = staticinvoke <org.apache.harmony.luni.util.Msg: java.lang.String getString(java.lang.String)>("KA016");
+
+        specialinvoke $r1.<java.io.IOException: void <init>(java.lang.String)>($r2);
+
+        throw $r1;
+
+     label04:
+        virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: void endRequest()>();
+
+        virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: void disconnect()>();
+
+        $r0.<java.net.URLConnection: boolean connected> = 0;
+
+        $r2 = specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.lang.String getAuthorizationCredentials(java.lang.String)>($r2);
+
+        if $r2 != null goto label06;
+
+     label05:
+        specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.io.InputStream getContentStream()>();
+
+        return;
+
+     label06:
+        virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: void setRequestProperty(java.lang.String,java.lang.String)>("Proxy-Authorization", $r2);
+
+        goto label01;
+
+     label07:
+        $i1 = $r0.<java.net.HttpURLConnection: int responseCode>;
+
+        if $i1 != 401 goto label09;
+
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header resHeader>;
+
+        $r2 = virtualinvoke $r3.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: java.lang.String get(java.lang.String)>("WWW-Authenticate");
+
+        if $r2 != null goto label08;
+
+        $r1 = new java.io.IOException;
+
+        $r2 = staticinvoke <org.apache.harmony.luni.util.Msg: java.lang.String getString(java.lang.String)>("KA018");
+
+        specialinvoke $r1.<java.io.IOException: void <init>(java.lang.String)>($r2);
+
+        throw $r1;
+
+     label08:
+        virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: void endRequest()>();
+
+        virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: void disconnect()>();
+
+        $r0.<java.net.URLConnection: boolean connected> = 0;
+
+        $r2 = specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.lang.String getAuthorizationCredentials(java.lang.String)>($r2);
+
+        if $r2 == null goto label05;
+
+        virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: void setRequestProperty(java.lang.String,java.lang.String)>("Authorization", $r2);
+
+        goto label01;
+
+     label09:
+        $z0 = virtualinvoke $r0.<java.net.HttpURLConnection: boolean getInstanceFollowRedirects()>();
+
+        if $z0 == 0 goto label05;
+
+        $i1 = $r0.<java.net.HttpURLConnection: int responseCode>;
+
+        if $i1 == 300 goto label10;
+
+        $i1 = $r0.<java.net.HttpURLConnection: int responseCode>;
+
+        if $i1 == 301 goto label10;
+
+        $i1 = $r0.<java.net.HttpURLConnection: int responseCode>;
+
+        if $i1 == 302 goto label10;
+
+        $i1 = $r0.<java.net.HttpURLConnection: int responseCode>;
+
+        if $i1 == 303 goto label10;
+
+        $i1 = $r0.<java.net.HttpURLConnection: int responseCode>;
+
+        if $i1 != 305 goto label05;
+
+     label10:
+        $r4 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream os>;
+
+        if $r4 != null goto label05;
+
+        $i0 = $i0 + 1;
+
+        if $i0 <= 4 goto label11;
+
+        $r5 = new java.net.ProtocolException;
+
+        $r2 = staticinvoke <org.apache.harmony.luni.util.Msg: java.lang.String getString(java.lang.String)>("K0093");
+
+        specialinvoke $r5.<java.net.ProtocolException: void <init>(java.lang.String)>($r2);
+
+        throw $r5;
+
+     label11:
+        $r2 = virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.lang.String getHeaderField(java.lang.String)>("Location");
+
+        if $r2 == null goto label05;
+
+        $i1 = $r0.<java.net.HttpURLConnection: int responseCode>;
+
+        if $i1 != 305 goto label15;
+
+        $i1 = 0;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = $r0.<java.net.URLConnection: java.net.URL url>;
+
+        $r8 = virtualinvoke $r7.<java.net.URL: java.lang.String getProtocol()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(58);
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean startsWith(java.lang.String)>($r8);
+
+        if $z0 == 0 goto label12;
+
+        $r7 = $r0.<java.net.URLConnection: java.net.URL url>;
+
+        $r8 = virtualinvoke $r7.<java.net.URL: java.lang.String getProtocol()>();
+
+        $i1 = virtualinvoke $r8.<java.lang.String: int length()>();
+
+        $i1 = $i1 + 1;
+
+     label12:
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean startsWith(java.lang.String,int)>("//", $i1);
+
+        if $z0 == 0 goto label13;
+
+        $i1 = $i1 + 2;
+
+     label13:
+        $r2 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int)>($i1);
+
+        specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: void setProxy(java.lang.String)>($r2);
+
+     label14:
+        virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: void endRequest()>();
+
+        virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: void disconnect()>();
+
+        $r0.<java.net.URLConnection: boolean connected> = 0;
+
+        goto label01;
+
+     label15:
+        $r7 = new java.net.URL;
+
+        $r9 = $r0.<java.net.URLConnection: java.net.URL url>;
+
+        specialinvoke $r7.<java.net.URL: void <init>(java.net.URL,java.lang.String)>($r9, $r2);
+
+        $r0.<java.net.URLConnection: java.net.URL url> = $r7;
+
+        $r7 = $r0.<java.net.URLConnection: java.net.URL url>;
+
+        $r2 = virtualinvoke $r7.<java.net.URL: java.lang.String getHost()>();
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.lang.String hostName> = $r2;
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: int hostPort> = -1;
+
+        goto label14;
+    }
+
+    protected void endRequest() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream $r1;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $r1 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream os>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream os>;
+
+        virtualinvoke $r1.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream: void close()>();
+
+     label1:
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: boolean sentRequest> = 0;
+
+        return;
+    }
+
+    public java.io.InputStream getErrorStream()
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        boolean $z0;
+        java.lang.String $r1;
+        int $i0;
+        java.io.InputStream r2;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $z0 = $r0.<java.net.URLConnection: boolean connected>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = $r0.<java.net.HttpURLConnection: java.lang.String method>;
+
+        if $r1 == "HEAD" goto label1;
+
+        $i0 = $r0.<java.net.HttpURLConnection: int responseCode>;
+
+        if $i0 < 400 goto label1;
+
+        r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.io.InputStream uis>;
+
+        return r2;
+
+     label1:
+        return null;
+    }
+
+    protected org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnection getHTTPConnection(java.net.Proxy) throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        java.net.Proxy $r1;
+        java.net.Proxy$Type $r2, $r3;
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnectionManager $r4;
+        java.net.URI $r5;
+        int $i0;
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnection $r6;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $r1 := @parameter0: java.net.Proxy;
+
+        if $r1 == null goto label1;
+
+        $r2 = virtualinvoke $r1.<java.net.Proxy: java.net.Proxy$Type type()>();
+
+        $r3 = <java.net.Proxy$Type: java.net.Proxy$Type DIRECT>;
+
+        if $r2 != $r3 goto label2;
+
+     label1:
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.Proxy proxy> = null;
+
+        $r4 = staticinvoke <org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnectionManager: org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnectionManager getDefault()>();
+
+        $r5 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.URI uri>;
+
+        $i0 = virtualinvoke $r0.<java.net.URLConnection: int getConnectTimeout()>();
+
+        $r6 = virtualinvoke $r4.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnectionManager: org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnection getConnection(java.net.URI,int)>($r5, $i0);
+
+        return $r6;
+
+     label2:
+        $r4 = staticinvoke <org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnectionManager: org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnectionManager getDefault()>();
+
+        $r5 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.URI uri>;
+
+        $i0 = virtualinvoke $r0.<java.net.URLConnection: int getConnectTimeout()>();
+
+        $r6 = virtualinvoke $r4.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnectionManager: org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnection getConnection(java.net.URI,java.net.Proxy,int)>($r5, $r1, $i0);
+
+        return $r6;
+    }
+
+    public java.lang.String getHeaderField(int)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        int $i0;
+        java.lang.String $r1;
+        org.apache.harmony.luni.internal.net.www.protocol.http.Header $r2;
+        java.io.IOException $r3;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $i0 := @parameter0: int;
+
+     label1:
+        virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.io.InputStream getInputStream()>();
+
+     label2:
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header resHeader>;
+
+        if $r2 != null goto label3;
+
+        return null;
+
+     label3:
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header resHeader>;
+
+        $r1 = virtualinvoke $r2.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: java.lang.String get(int)>($i0);
+
+        return $r1;
+
+     label4:
+        $r3 := @caughtexception;
+
+        goto label2;
+
+        catch java.io.IOException from label1 to label2 with label4;
+    }
+
+    public java.lang.String getHeaderField(java.lang.String)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        java.lang.String $r1;
+        org.apache.harmony.luni.internal.net.www.protocol.http.Header $r2;
+        java.io.IOException $r3;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $r1 := @parameter0: java.lang.String;
+
+     label1:
+        virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.io.InputStream getInputStream()>();
+
+     label2:
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header resHeader>;
+
+        if $r2 != null goto label3;
+
+        return null;
+
+     label3:
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header resHeader>;
+
+        $r1 = virtualinvoke $r2.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: java.lang.String get(java.lang.String)>($r1);
+
+        return $r1;
+
+     label4:
+        $r3 := @caughtexception;
+
+        goto label2;
+
+        catch java.io.IOException from label1 to label2 with label4;
+    }
+
+    public java.lang.String getHeaderFieldKey(int)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        int $i0;
+        java.lang.String $r1;
+        org.apache.harmony.luni.internal.net.www.protocol.http.Header $r2;
+        java.io.IOException $r3;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $i0 := @parameter0: int;
+
+     label1:
+        virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.io.InputStream getInputStream()>();
+
+     label2:
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header resHeader>;
+
+        if $r2 != null goto label3;
+
+        return null;
+
+     label3:
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header resHeader>;
+
+        $r1 = virtualinvoke $r2.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: java.lang.String getKey(int)>($i0);
+
+        return $r1;
+
+     label4:
+        $r3 := @caughtexception;
+
+        goto label2;
+
+        catch java.io.IOException from label1 to label2 with label4;
+    }
+
+    public java.util.Map getHeaderFields()
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        java.util.Map $r1;
+        org.apache.harmony.luni.internal.net.www.protocol.http.Header $r2;
+        java.io.IOException $r3;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+     label1:
+        virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.io.InputStream getInputStream()>();
+
+     label2:
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header resHeader>;
+
+        if $r2 != null goto label3;
+
+        return null;
+
+     label3:
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header resHeader>;
+
+        $r1 = virtualinvoke $r2.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: java.util.Map getFieldMap()>();
+
+        return $r1;
+
+     label4:
+        $r3 := @caughtexception;
+
+        goto label2;
+
+        catch java.io.IOException from label1 to label2 with label4;
+    }
+
+    public java.io.InputStream getInputStream() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        boolean $z0;
+        java.net.ProtocolException $r1;
+        java.lang.String $r2;
+        int $i0;
+        java.io.FileNotFoundException $r3;
+        java.net.URL $r4;
+        java.io.InputStream r5;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $z0 = $r0.<java.net.URLConnection: boolean doInput>;
+
+        if $z0 != 0 goto label1;
+
+        $r1 = new java.net.ProtocolException;
+
+        $r2 = staticinvoke <org.apache.harmony.luni.util.Msg: java.lang.String getString(java.lang.String)>("K008d");
+
+        specialinvoke $r1.<java.net.ProtocolException: void <init>(java.lang.String)>($r2);
+
+        throw $r1;
+
+     label1:
+        virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: void connect()>();
+
+        virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: void doRequest()>();
+
+        $i0 = $r0.<java.net.HttpURLConnection: int responseCode>;
+
+        if $i0 < 400 goto label2;
+
+        $r3 = new java.io.FileNotFoundException;
+
+        $r4 = $r0.<java.net.URLConnection: java.net.URL url>;
+
+        $r2 = virtualinvoke $r4.<java.net.URL: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.io.FileNotFoundException: void <init>(java.lang.String)>($r2);
+
+        throw $r3;
+
+     label2:
+        r5 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.io.InputStream uis>;
+
+        return r5;
+    }
+
+    public java.io.OutputStream getOutputStream() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        boolean $z0;
+        java.net.ProtocolException $r1;
+        java.lang.String $r2, $r5;
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream $r3;
+        int $i0, $i1;
+        org.apache.harmony.luni.internal.net.www.protocol.http.Header $r4;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $z0 = $r0.<java.net.URLConnection: boolean doOutput>;
+
+        if $z0 != 0 goto label01;
+
+        $r1 = new java.net.ProtocolException;
+
+        $r2 = staticinvoke <org.apache.harmony.luni.util.Msg: java.lang.String getString(java.lang.String)>("K008e");
+
+        specialinvoke $r1.<java.net.ProtocolException: void <init>(java.lang.String)>($r2);
+
+        throw $r1;
+
+     label01:
+        $z0 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: boolean sentRequest>;
+
+        if $z0 == 0 goto label02;
+
+        $r1 = new java.net.ProtocolException;
+
+        $r2 = staticinvoke <org.apache.harmony.luni.util.Msg: java.lang.String getString(java.lang.String)>("K0090");
+
+        specialinvoke $r1.<java.net.ProtocolException: void <init>(java.lang.String)>($r2);
+
+        throw $r1;
+
+     label02:
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream os>;
+
+        if $r3 == null goto label03;
+
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream os>;
+
+        return $r3;
+
+     label03:
+        $r2 = $r0.<java.net.HttpURLConnection: java.lang.String method>;
+
+        if $r2 != "GET" goto label04;
+
+        $r0.<java.net.HttpURLConnection: java.lang.String method> = "POST";
+
+     label04:
+        $r2 = $r0.<java.net.HttpURLConnection: java.lang.String method>;
+
+        if $r2 == "PUT" goto label05;
+
+        $r2 = $r0.<java.net.HttpURLConnection: java.lang.String method>;
+
+        if $r2 == "POST" goto label05;
+
+        $r1 = new java.net.ProtocolException;
+
+        $r2 = $r0.<java.net.HttpURLConnection: java.lang.String method>;
+
+        $r2 = staticinvoke <org.apache.harmony.luni.util.Msg: java.lang.String getString(java.lang.String,java.lang.Object)>("K008f", $r2);
+
+        specialinvoke $r1.<java.net.ProtocolException: void <init>(java.lang.String)>($r2);
+
+        throw $r1;
+
+     label05:
+        $i0 = -1;
+
+        $r4 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header reqHeader>;
+
+        $r2 = virtualinvoke $r4.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: java.lang.String get(java.lang.String)>("Content-Length");
+
+        if $r2 == null goto label06;
+
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r2);
+
+     label06:
+        $r4 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header reqHeader>;
+
+        $r2 = virtualinvoke $r4.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: java.lang.String get(java.lang.String)>("Transfer-Encoding");
+
+        $i1 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: int httpVersion>;
+
+        if $i1 <= 0 goto label07;
+
+        if $r2 == null goto label07;
+
+        $r2 = virtualinvoke $r2.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $r5 = "chunked";
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 == 0 goto label07;
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: boolean sendChunked> = 1;
+
+        $i0 = -1;
+
+     label07:
+        $i1 = $r0.<java.net.HttpURLConnection: int chunkLength>;
+
+        if $i1 <= 0 goto label08;
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: boolean sendChunked> = 1;
+
+        $i0 = -1;
+
+     label08:
+        $i1 = $r0.<java.net.HttpURLConnection: int fixedContentLength>;
+
+        if $i1 < 0 goto label09;
+
+        $i0 = $r0.<java.net.HttpURLConnection: int fixedContentLength>;
+
+     label09:
+        $i1 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: int httpVersion>;
+
+        if $i1 <= 0 goto label10;
+
+        $z0 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: boolean sendChunked>;
+
+        if $z0 != 0 goto label11;
+
+     label10:
+        if $i0 < 0 goto label12;
+
+     label11:
+        $r3 = new org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream;
+
+        specialinvoke $r3.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream: void <init>(org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection,int)>($r0, $i0);
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream os> = $r3;
+
+        virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: void doRequest()>();
+
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream os>;
+
+        return $r3;
+
+     label12:
+        $z0 = $r0.<java.net.URLConnection: boolean connected>;
+
+        if $z0 != 0 goto label13;
+
+        virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: void connect()>();
+
+     label13:
+        $r3 = new org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream;
+
+        specialinvoke $r3.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream: void <init>(org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection)>($r0);
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$HttpOutputStream os> = $r3;
+
+        return $r3;
+    }
+
+    public java.security.Permission getPermission() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        java.net.SocketPermission $r1;
+        java.lang.StringBuilder $r2;
+        java.lang.String $r3;
+        int $i0;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $r1 = new java.net.SocketPermission;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.lang.String getHostName()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $i0 = specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: int getHostPort()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.net.SocketPermission: void <init>(java.lang.String,java.lang.String)>($r3, "connect, resolve");
+
+        return $r1;
+    }
+
+    public java.util.Map getRequestProperties()
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        boolean $z0;
+        java.lang.IllegalStateException $r1;
+        java.lang.String $r2;
+        org.apache.harmony.luni.internal.net.www.protocol.http.Header $r3;
+        java.util.Map $r4;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $z0 = $r0.<java.net.URLConnection: boolean connected>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = new java.lang.IllegalStateException;
+
+        $r2 = staticinvoke <org.apache.harmony.luni.util.Msg: java.lang.String getString(java.lang.String)>("K0091");
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r2);
+
+        throw $r1;
+
+     label1:
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header reqHeader>;
+
+        $r4 = virtualinvoke $r3.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: java.util.Map getFieldMap()>();
+
+        return $r4;
+    }
+
+    public java.lang.String getRequestProperty(java.lang.String)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        java.lang.String $r1;
+        org.apache.harmony.luni.internal.net.www.protocol.http.Header $r2;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $r1 := @parameter0: java.lang.String;
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header reqHeader>;
+
+        $r1 = virtualinvoke $r2.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: java.lang.String get(java.lang.String)>($r1);
+
+        return $r1;
+    }
+
+    public int getResponseCode() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        int $i0, $i1, $i3;
+        org.apache.harmony.luni.internal.net.www.protocol.http.Header $r1;
+        java.lang.String $r2, $r3;
+        boolean $z0;
+        char $c2;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: void connect()>();
+
+        virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: void doRequest()>();
+
+        $i1 = $r0.<java.net.HttpURLConnection: int responseCode>;
+
+        if $i1 == -1 goto label1;
+
+        $i1 = $r0.<java.net.HttpURLConnection: int responseCode>;
+
+        return $i1;
+
+     label1:
+        $r1 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header resHeader>;
+
+        $r2 = virtualinvoke $r1.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: java.lang.String getStatusLine()>();
+
+        if $r2 == null goto label2;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean startsWith(java.lang.String)>("HTTP/");
+
+        if $z0 != 0 goto label3;
+
+     label2:
+        return -1;
+
+     label3:
+        $r2 = virtualinvoke $r2.<java.lang.String: java.lang.String trim()>();
+
+        $i1 = virtualinvoke $r2.<java.lang.String: int indexOf(java.lang.String)>(" ");
+
+        $i0 = $i1 + 1;
+
+        if $i0 != 0 goto label4;
+
+        return -1;
+
+     label4:
+        $i1 = $i0 - 2;
+
+        $c2 = virtualinvoke $r2.<java.lang.String: char charAt(int)>($i1);
+
+        if $c2 == 49 goto label5;
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: int httpVersion> = 0;
+
+     label5:
+        $i1 = $i0 + 3;
+
+        $i3 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        if $i1 <= $i3 goto label6;
+
+        $i1 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+     label6:
+        $r3 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int,int)>($i0, $i1);
+
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r3);
+
+        $r0.<java.net.HttpURLConnection: int responseCode> = $i0;
+
+        $i0 = $i1 + 1;
+
+        $i3 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        if $i0 > $i3 goto label7;
+
+        $i1 = $i1 + 1;
+
+        $r2 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int)>($i1);
+
+        $r0.<java.net.HttpURLConnection: java.lang.String responseMessage> = $r2;
+
+     label7:
+        $i1 = $r0.<java.net.HttpURLConnection: int responseCode>;
+
+        return $i1;
+    }
+
+    void readHeaders() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        java.lang.String $r1, $r3;
+        int $i0;
+        org.apache.harmony.luni.internal.net.www.protocol.http.Header $r2;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+     label1:
+        $r1 = virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.lang.String readln()>();
+
+        if $r1 == null goto label3;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 <= 1 goto label4;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int indexOf(java.lang.String)>(":");
+
+        if $i0 >= 0 goto label2;
+
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header resHeader>;
+
+        $r3 = virtualinvoke $r1.<java.lang.String: java.lang.String trim()>();
+
+        virtualinvoke $r2.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: void add(java.lang.String,java.lang.String)>("", $r3);
+
+        goto label1;
+
+     label2:
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header resHeader>;
+
+        $r3 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $i0 = $i0 + 1;
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int)>($i0);
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String trim()>();
+
+        virtualinvoke $r2.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: void add(java.lang.String,java.lang.String)>($r3, $r1);
+
+        goto label1;
+
+     label3:
+        return;
+
+     label4:
+        return;
+    }
+
+    void readServerResponse() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        java.io.OutputStream $r1;
+        org.apache.harmony.luni.internal.net.www.protocol.http.Header $r2;
+        java.lang.String $r3;
+        int $i0;
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$LimitedInputStream $r4;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $r1 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.io.OutputStream socketOut>;
+
+        virtualinvoke $r1.<java.io.OutputStream: void flush()>();
+
+     label1:
+        $r0.<java.net.HttpURLConnection: int responseCode> = -1;
+
+        $r0.<java.net.HttpURLConnection: java.lang.String responseMessage> = null;
+
+        $r2 = new org.apache.harmony.luni.internal.net.www.protocol.http.Header;
+
+        specialinvoke $r2.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: void <init>()>();
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header resHeader> = $r2;
+
+        $r3 = virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.lang.String readln()>();
+
+        if $r3 == null goto label2;
+
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header resHeader>;
+
+        $r3 = virtualinvoke $r3.<java.lang.String: java.lang.String trim()>();
+
+        virtualinvoke $r2.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: void setStatusLine(java.lang.String)>($r3);
+
+        virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: void readHeaders()>();
+
+     label2:
+        $i0 = virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: int getResponseCode()>();
+
+        if $i0 == 100 goto label1;
+
+        $r3 = $r0.<java.net.HttpURLConnection: java.lang.String method>;
+
+        if $r3 == "HEAD" goto label4;
+
+        $i0 = $r0.<java.net.HttpURLConnection: int responseCode>;
+
+        if $i0 < 100 goto label3;
+
+        $i0 = $r0.<java.net.HttpURLConnection: int responseCode>;
+
+        if $i0 < 200 goto label4;
+
+     label3:
+        $i0 = $r0.<java.net.HttpURLConnection: int responseCode>;
+
+        if $i0 == 204 goto label4;
+
+        $i0 = $r0.<java.net.HttpURLConnection: int responseCode>;
+
+        if $i0 != 304 goto label5;
+
+     label4:
+        virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: void disconnect()>();
+
+        $r4 = new org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$LimitedInputStream;
+
+        specialinvoke $r4.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection$LimitedInputStream: void <init>(org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection,int)>($r0, 0);
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.io.InputStream uis> = $r4;
+
+     label5:
+        specialinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: void putToCache()>();
+
+        return;
+    }
+
+    java.lang.String readln() throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        java.lang.StringBuffer $r1;
+        boolean $z0;
+        java.io.InputStream $r2;
+        int $i0, $i1;
+        java.lang.String $r3;
+        char $c2;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $z0 = 0;
+
+        $r1 = new java.lang.StringBuffer;
+
+        specialinvoke $r1.<java.lang.StringBuffer: void <init>(int)>(80);
+
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.io.InputStream is>;
+
+        $i0 = virtualinvoke $r2.<java.io.InputStream: int read()>();
+
+        $i1 = $i0;
+
+        if $i0 >= 0 goto label1;
+
+        return null;
+
+     label1:
+        if $i1 == 10 goto label4;
+
+        if $z0 == 0 goto label2;
+
+        virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>(13);
+
+        $z0 = 0;
+
+     label2:
+        if $i1 != 13 goto label5;
+
+        $z0 = 1;
+
+     label3:
+        $r2 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.io.InputStream is>;
+
+        $i0 = virtualinvoke $r2.<java.io.InputStream: int read()>();
+
+        $i1 = $i0;
+
+        if $i0 >= 0 goto label1;
+
+     label4:
+        $r3 = virtualinvoke $r1.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r3;
+
+     label5:
+        $c2 = (char) $i1;
+
+        virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c2);
+
+        goto label3;
+    }
+
+    protected java.lang.String requestString()
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        boolean $z0;
+        java.lang.String $r1, $r3;
+        java.net.URL $r2;
+        int $i0;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $z0 = virtualinvoke $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: boolean usingProxy()>();
+
+        if $z0 != 0 goto label1;
+
+        $r1 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.lang.String proxyName>;
+
+        if $r1 == null goto label2;
+
+     label1:
+        $r2 = $r0.<java.net.URLConnection: java.net.URL url>;
+
+        $r1 = virtualinvoke $r2.<java.net.URL: java.lang.String toString()>();
+
+        return $r1;
+
+     label2:
+        $r2 = $r0.<java.net.URLConnection: java.net.URL url>;
+
+        $r1 = virtualinvoke $r2.<java.net.URL: java.lang.String getFile()>();
+
+        $r3 = $r1;
+
+        if $r1 == null goto label3;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 != 0 goto label4;
+
+     label3:
+        $r3 = "/";
+
+     label4:
+        return $r3;
+    }
+
+    public void setIfModifiedSince(long)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        long $l0;
+        java.text.SimpleDateFormat $r1;
+        java.util.Locale $r2;
+        java.util.TimeZone $r3;
+        java.util.Date $r4;
+        java.lang.String $r5;
+        org.apache.harmony.luni.internal.net.www.protocol.http.Header $r6;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $l0 := @parameter0: long;
+
+        specialinvoke $r0.<java.net.URLConnection: void setIfModifiedSince(long)>($l0);
+
+        $r1 = new java.text.SimpleDateFormat;
+
+        $r2 = <java.util.Locale: java.util.Locale US>;
+
+        specialinvoke $r1.<java.text.SimpleDateFormat: void <init>(java.lang.String,java.util.Locale)>("E, dd MMM yyyy HH:mm:ss \'GMT\'", $r2);
+
+        $r3 = staticinvoke <java.util.TimeZone: java.util.TimeZone getTimeZone(java.lang.String)>("GMT");
+
+        virtualinvoke $r1.<java.text.DateFormat: void setTimeZone(java.util.TimeZone)>($r3);
+
+        $r4 = new java.util.Date;
+
+        specialinvoke $r4.<java.util.Date: void <init>(long)>($l0);
+
+        $r5 = virtualinvoke $r1.<java.text.DateFormat: java.lang.String format(java.util.Date)>($r4);
+
+        $r6 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header reqHeader>;
+
+        virtualinvoke $r6.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: void add(java.lang.String,java.lang.String)>("If-Modified-Since", $r5);
+
+        return;
+    }
+
+    public void setRequestProperty(java.lang.String, java.lang.String)
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        java.lang.String $r1, $r2;
+        boolean $z0;
+        java.lang.IllegalStateException $r3;
+        java.lang.NullPointerException $r4;
+        org.apache.harmony.luni.internal.net.www.protocol.http.Header $r5;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $z0 = $r0.<java.net.URLConnection: boolean connected>;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        $r1 = staticinvoke <org.apache.harmony.luni.util.Msg: java.lang.String getString(java.lang.String)>("K0092");
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r1);
+
+        throw $r3;
+
+     label1:
+        if $r1 != null goto label2;
+
+        $r4 = new java.lang.NullPointerException;
+
+        specialinvoke $r4.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r4;
+
+     label2:
+        $r5 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: org.apache.harmony.luni.internal.net.www.protocol.http.Header reqHeader>;
+
+        virtualinvoke $r5.<org.apache.harmony.luni.internal.net.www.protocol.http.Header: void set(java.lang.String,java.lang.String)>($r1, $r2);
+
+        return;
+    }
+
+    protected void setUpTransportIO(org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnection) throws java.io.IOException
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnection $r1;
+        java.io.OutputStream $r2;
+        java.io.InputStream $r3;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $r1 := @parameter0: org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnection;
+
+        $r2 = virtualinvoke $r1.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnection: java.io.OutputStream getOutputStream()>();
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.io.OutputStream socketOut> = $r2;
+
+        $r3 = virtualinvoke $r1.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpConnection: java.io.InputStream getInputStream()>();
+
+        $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.io.InputStream is> = $r3;
+
+        return;
+    }
+
+    public boolean usingProxy()
+    {
+        org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection $r0;
+        java.net.Proxy$Type $r1, $r2;
+        java.net.Proxy $r3;
+
+        $r0 := @this: org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection;
+
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.Proxy proxy>;
+
+        if $r3 == null goto label1;
+
+        $r3 = $r0.<org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection: java.net.Proxy proxy>;
+
+        $r2 = virtualinvoke $r3.<java.net.Proxy: java.net.Proxy$Type type()>();
+
+        $r1 = <java.net.Proxy$Type: java.net.Proxy$Type DIRECT>;
+
+        if $r2 == $r1 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+}

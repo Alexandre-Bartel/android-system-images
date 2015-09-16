@@ -1,0 +1,816 @@
+public class android.database.DatabaseUtils$InsertHelper extends java.lang.Object
+{
+    public static final int TABLE_INFO_PRAGMA_COLUMNNAME_INDEX;
+    public static final int TABLE_INFO_PRAGMA_DEFAULT_INDEX;
+    private java.util.HashMap mColumns;
+    private final android.database.sqlite.SQLiteDatabase mDb;
+    private java.lang.String mInsertSQL;
+    private android.database.sqlite.SQLiteStatement mInsertStatement;
+    private android.database.sqlite.SQLiteStatement mPreparedStatement;
+    private android.database.sqlite.SQLiteStatement mReplaceStatement;
+    private final java.lang.String mTableName;
+
+    public void <init>(android.database.sqlite.SQLiteDatabase, java.lang.String)
+    {
+        android.database.DatabaseUtils$InsertHelper $r0;
+        android.database.sqlite.SQLiteDatabase $r1;
+        java.lang.String $r2;
+
+        $r0 := @this: android.database.DatabaseUtils$InsertHelper;
+
+        $r1 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        $r2 := @parameter1: java.lang.String;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r0.<android.database.DatabaseUtils$InsertHelper: java.lang.String mInsertSQL> = null;
+
+        $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mInsertStatement> = null;
+
+        $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mReplaceStatement> = null;
+
+        $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mPreparedStatement> = null;
+
+        $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteDatabase mDb> = $r1;
+
+        $r0.<android.database.DatabaseUtils$InsertHelper: java.lang.String mTableName> = $r2;
+
+        return;
+    }
+
+    private void buildSQL() throws android.database.SQLException
+    {
+        android.database.DatabaseUtils$InsertHelper $r0;
+        java.lang.StringBuilder $r1, $r2, $r6;
+        java.lang.String $r3, $r9;
+        int $i0, $i1;
+        android.database.Cursor $r4, $r7;
+        android.database.sqlite.SQLiteDatabase $r5;
+        java.util.HashMap $r8;
+        boolean $z0;
+        java.lang.Integer $r10;
+        java.lang.Throwable $r11;
+
+        $r0 := @this: android.database.DatabaseUtils$InsertHelper;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>(int)>(128);
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("INSERT INTO ");
+
+        $r3 = $r0.<android.database.DatabaseUtils$InsertHelper: java.lang.String mTableName>;
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" (");
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>(int)>(128);
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("VALUES (");
+
+        $i0 = 1;
+
+        $r4 = null;
+
+     label01:
+        $r5 = $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteDatabase mDb>;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PRAGMA table_info(");
+
+        $r3 = $r0.<android.database.DatabaseUtils$InsertHelper: java.lang.String mTableName>;
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r3 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r7 = virtualinvoke $r5.<android.database.sqlite.SQLiteDatabase: android.database.Cursor rawQuery(java.lang.String,java.lang.String[])>($r3, null);
+
+        $r4 = $r7;
+
+        $r8 = new java.util.HashMap;
+
+        $i1 = interfaceinvoke $r7.<android.database.Cursor: int getCount()>();
+
+        specialinvoke $r8.<java.util.HashMap: void <init>(int)>($i1);
+
+        $r0.<android.database.DatabaseUtils$InsertHelper: java.util.HashMap mColumns> = $r8;
+
+     label02:
+        $z0 = interfaceinvoke $r7.<android.database.Cursor: boolean moveToNext()>();
+
+        if $z0 == 0 goto label19;
+
+        $r3 = interfaceinvoke $r7.<android.database.Cursor: java.lang.String getString(int)>(1);
+
+        $r9 = interfaceinvoke $r7.<android.database.Cursor: java.lang.String getString(int)>(4);
+
+        $r8 = $r0.<android.database.DatabaseUtils$InsertHelper: java.util.HashMap mColumns>;
+
+        $r10 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        virtualinvoke $r8.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, $r10);
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        if $r9 != null goto label12;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("?");
+
+     label03:
+        $i1 = interfaceinvoke $r7.<android.database.Cursor: int getCount()>();
+
+     label04:
+        if $i0 != $i1 goto label16;
+
+     label05:
+        $r3 = ") ";
+
+     label06:
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $i1 = interfaceinvoke $r7.<android.database.Cursor: int getCount()>();
+
+     label07:
+        if $i0 != $i1 goto label18;
+
+     label08:
+        $r3 = ");";
+
+     label09:
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+     label10:
+        $i0 = $i0 + 1;
+
+     label11:
+        goto label02;
+
+     label12:
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("COALESCE(?, ");
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+     label13:
+        goto label03;
+
+     label14:
+        $r11 := @caughtexception;
+
+        if $r4 == null goto label15;
+
+        interfaceinvoke $r4.<android.database.Cursor: void close()>();
+
+     label15:
+        throw $r11;
+
+     label16:
+        $r3 = ", ";
+
+     label17:
+        goto label06;
+
+     label18:
+        $r3 = ", ";
+
+        goto label09;
+
+     label19:
+        if $r7 == null goto label20;
+
+        interfaceinvoke $r7.<android.database.Cursor: void close()>();
+
+     label20:
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.CharSequence)>($r2);
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r0.<android.database.DatabaseUtils$InsertHelper: java.lang.String mInsertSQL> = $r3;
+
+        return;
+
+        catch java.lang.Throwable from label01 to label04 with label14;
+        catch java.lang.Throwable from label05 to label07 with label14;
+        catch java.lang.Throwable from label08 to label10 with label14;
+        catch java.lang.Throwable from label11 to label13 with label14;
+        catch java.lang.Throwable from label17 to label18 with label14;
+    }
+
+    private android.database.sqlite.SQLiteStatement getStatement(boolean) throws android.database.SQLException
+    {
+        android.database.DatabaseUtils$InsertHelper $r0;
+        boolean $z0;
+        android.database.sqlite.SQLiteStatement $r1;
+        java.lang.String $r2;
+        java.lang.StringBuilder $r3;
+        android.database.sqlite.SQLiteDatabase $r4;
+
+        $r0 := @this: android.database.DatabaseUtils$InsertHelper;
+
+        $z0 := @parameter0: boolean;
+
+        if $z0 == 0 goto label3;
+
+        $r1 = $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mReplaceStatement>;
+
+        if $r1 != null goto label2;
+
+        $r2 = $r0.<android.database.DatabaseUtils$InsertHelper: java.lang.String mInsertSQL>;
+
+        if $r2 != null goto label1;
+
+        specialinvoke $r0.<android.database.DatabaseUtils$InsertHelper: void buildSQL()>();
+
+     label1:
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("INSERT OR REPLACE");
+
+        $r2 = $r0.<android.database.DatabaseUtils$InsertHelper: java.lang.String mInsertSQL>;
+
+        $r2 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int)>(6);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r4 = $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteDatabase mDb>;
+
+        $r1 = virtualinvoke $r4.<android.database.sqlite.SQLiteDatabase: android.database.sqlite.SQLiteStatement compileStatement(java.lang.String)>($r2);
+
+        $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mReplaceStatement> = $r1;
+
+     label2:
+        $r1 = $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mReplaceStatement>;
+
+        return $r1;
+
+     label3:
+        $r1 = $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mInsertStatement>;
+
+        if $r1 != null goto label5;
+
+        $r2 = $r0.<android.database.DatabaseUtils$InsertHelper: java.lang.String mInsertSQL>;
+
+        if $r2 != null goto label4;
+
+        specialinvoke $r0.<android.database.DatabaseUtils$InsertHelper: void buildSQL()>();
+
+     label4:
+        $r4 = $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteDatabase mDb>;
+
+        $r2 = $r0.<android.database.DatabaseUtils$InsertHelper: java.lang.String mInsertSQL>;
+
+        $r1 = virtualinvoke $r4.<android.database.sqlite.SQLiteDatabase: android.database.sqlite.SQLiteStatement compileStatement(java.lang.String)>($r2);
+
+        $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mInsertStatement> = $r1;
+
+     label5:
+        $r1 = $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mInsertStatement>;
+
+        return $r1;
+    }
+
+    private long insertInternal(android.content.ContentValues, boolean)
+    {
+        android.database.DatabaseUtils$InsertHelper $r0;
+        android.content.ContentValues $r1;
+        boolean $z0;
+        android.database.sqlite.SQLiteStatement $r2;
+        java.util.Set $r3;
+        java.util.Iterator $r4;
+        java.lang.Object $r5;
+        java.util.Map$Entry $r6;
+        java.lang.String $r7;
+        int $i0;
+        android.database.SQLException $r8;
+        java.lang.StringBuilder $r9;
+        long $l1;
+        java.lang.Throwable $r10;
+
+        $r0 := @this: android.database.DatabaseUtils$InsertHelper;
+
+        $r1 := @parameter0: android.content.ContentValues;
+
+        $z0 := @parameter1: boolean;
+
+        entermonitor $r0;
+
+     label01:
+        $r2 = specialinvoke $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement getStatement(boolean)>($z0);
+
+        virtualinvoke $r2.<android.database.sqlite.SQLiteProgram: void clearBindings()>();
+
+        $r3 = virtualinvoke $r1.<android.content.ContentValues: java.util.Set valueSet()>();
+
+        $r4 = interfaceinvoke $r3.<java.util.Set: java.util.Iterator iterator()>();
+
+     label02:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label08;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        $r6 = (java.util.Map$Entry) $r5;
+
+        $r5 = interfaceinvoke $r6.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r7 = (java.lang.String) $r5;
+
+        $i0 = virtualinvoke $r0.<android.database.DatabaseUtils$InsertHelper: int getColumnIndex(java.lang.String)>($r7);
+
+        $r5 = interfaceinvoke $r6.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        staticinvoke <android.database.DatabaseUtils: void bindObjectToProgram(android.database.sqlite.SQLiteProgram,int,java.lang.Object)>($r2, $i0, $r5);
+
+     label03:
+        goto label02;
+
+     label04:
+        $r8 := @caughtexception;
+
+     label05:
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error inserting ");
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" into table  ");
+
+        $r7 = $r0.<android.database.DatabaseUtils$InsertHelper: java.lang.String mTableName>;
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r7 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("DatabaseUtils", $r7, $r8);
+
+     label06:
+        $l1 = -1L;
+
+     label07:
+        exitmonitor $r0;
+
+        return $l1;
+
+     label08:
+        $l1 = virtualinvoke $r2.<android.database.sqlite.SQLiteStatement: long executeInsert()>();
+
+     label09:
+        goto label07;
+
+     label10:
+        $r10 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r10;
+
+        catch android.database.SQLException from label01 to label03 with label04;
+        catch java.lang.Throwable from label01 to label03 with label10;
+        catch java.lang.Throwable from label05 to label06 with label10;
+        catch android.database.SQLException from label08 to label09 with label04;
+        catch java.lang.Throwable from label08 to label09 with label10;
+    }
+
+    public void bind(int, double)
+    {
+        android.database.DatabaseUtils$InsertHelper $r0;
+        int $i0;
+        double $d0;
+        android.database.sqlite.SQLiteStatement $r1;
+
+        $r0 := @this: android.database.DatabaseUtils$InsertHelper;
+
+        $i0 := @parameter0: int;
+
+        $d0 := @parameter1: double;
+
+        $r1 = $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mPreparedStatement>;
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteProgram: void bindDouble(int,double)>($i0, $d0);
+
+        return;
+    }
+
+    public void bind(int, float)
+    {
+        android.database.DatabaseUtils$InsertHelper $r0;
+        int $i0;
+        float $f0;
+        android.database.sqlite.SQLiteStatement $r1;
+        double $d0;
+
+        $r0 := @this: android.database.DatabaseUtils$InsertHelper;
+
+        $i0 := @parameter0: int;
+
+        $f0 := @parameter1: float;
+
+        $r1 = $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mPreparedStatement>;
+
+        $d0 = (double) $f0;
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteProgram: void bindDouble(int,double)>($i0, $d0);
+
+        return;
+    }
+
+    public void bind(int, int)
+    {
+        android.database.DatabaseUtils$InsertHelper $r0;
+        int $i0, $i1;
+        android.database.sqlite.SQLiteStatement $r1;
+        long $l2;
+
+        $r0 := @this: android.database.DatabaseUtils$InsertHelper;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 = $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mPreparedStatement>;
+
+        $l2 = (long) $i1;
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteProgram: void bindLong(int,long)>($i0, $l2);
+
+        return;
+    }
+
+    public void bind(int, long)
+    {
+        android.database.DatabaseUtils$InsertHelper $r0;
+        int $i0;
+        long $l1;
+        android.database.sqlite.SQLiteStatement $r1;
+
+        $r0 := @this: android.database.DatabaseUtils$InsertHelper;
+
+        $i0 := @parameter0: int;
+
+        $l1 := @parameter1: long;
+
+        $r1 = $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mPreparedStatement>;
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteProgram: void bindLong(int,long)>($i0, $l1);
+
+        return;
+    }
+
+    public void bind(int, java.lang.String)
+    {
+        android.database.DatabaseUtils$InsertHelper $r0;
+        int $i0;
+        java.lang.String $r1;
+        android.database.sqlite.SQLiteStatement $r2;
+
+        $r0 := @this: android.database.DatabaseUtils$InsertHelper;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.lang.String;
+
+        if $r1 != null goto label1;
+
+        $r2 = $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mPreparedStatement>;
+
+        virtualinvoke $r2.<android.database.sqlite.SQLiteProgram: void bindNull(int)>($i0);
+
+        return;
+
+     label1:
+        $r2 = $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mPreparedStatement>;
+
+        virtualinvoke $r2.<android.database.sqlite.SQLiteProgram: void bindString(int,java.lang.String)>($i0, $r1);
+
+        return;
+    }
+
+    public void bind(int, boolean)
+    {
+        android.database.DatabaseUtils$InsertHelper $r0;
+        int $i0;
+        boolean $z0;
+        android.database.sqlite.SQLiteStatement $r1;
+        long $l1;
+
+        $r0 := @this: android.database.DatabaseUtils$InsertHelper;
+
+        $i0 := @parameter0: int;
+
+        $z0 := @parameter1: boolean;
+
+        $r1 = $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mPreparedStatement>;
+
+        if $z0 == 0 goto label2;
+
+        $l1 = 1L;
+
+     label1:
+        virtualinvoke $r1.<android.database.sqlite.SQLiteProgram: void bindLong(int,long)>($i0, $l1);
+
+        return;
+
+     label2:
+        $l1 = 0L;
+
+        goto label1;
+    }
+
+    public void bind(int, byte[])
+    {
+        android.database.DatabaseUtils$InsertHelper $r0;
+        int $i0;
+        byte[] $r1;
+        android.database.sqlite.SQLiteStatement $r2;
+
+        $r0 := @this: android.database.DatabaseUtils$InsertHelper;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: byte[];
+
+        if $r1 != null goto label1;
+
+        $r2 = $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mPreparedStatement>;
+
+        virtualinvoke $r2.<android.database.sqlite.SQLiteProgram: void bindNull(int)>($i0);
+
+        return;
+
+     label1:
+        $r2 = $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mPreparedStatement>;
+
+        virtualinvoke $r2.<android.database.sqlite.SQLiteProgram: void bindBlob(int,byte[])>($i0, $r1);
+
+        return;
+    }
+
+    public void bindNull(int)
+    {
+        android.database.DatabaseUtils$InsertHelper $r0;
+        int $i0;
+        android.database.sqlite.SQLiteStatement $r1;
+
+        $r0 := @this: android.database.DatabaseUtils$InsertHelper;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mPreparedStatement>;
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteProgram: void bindNull(int)>($i0);
+
+        return;
+    }
+
+    public void close()
+    {
+        android.database.DatabaseUtils$InsertHelper $r0;
+        android.database.sqlite.SQLiteStatement $r1;
+
+        $r0 := @this: android.database.DatabaseUtils$InsertHelper;
+
+        $r1 = $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mInsertStatement>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mInsertStatement>;
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteProgram: void close()>();
+
+        $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mInsertStatement> = null;
+
+     label1:
+        $r1 = $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mReplaceStatement>;
+
+        if $r1 == null goto label2;
+
+        $r1 = $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mReplaceStatement>;
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteProgram: void close()>();
+
+        $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mReplaceStatement> = null;
+
+     label2:
+        $r0.<android.database.DatabaseUtils$InsertHelper: java.lang.String mInsertSQL> = null;
+
+        $r0.<android.database.DatabaseUtils$InsertHelper: java.util.HashMap mColumns> = null;
+
+        return;
+    }
+
+    public long execute()
+    {
+        android.database.DatabaseUtils$InsertHelper $r0;
+        android.database.sqlite.SQLiteStatement $r1;
+        java.lang.IllegalStateException $r2;
+        long $l0;
+        android.database.SQLException $r3;
+        java.lang.StringBuilder $r4;
+        java.lang.String $r5;
+        java.lang.Throwable $r6;
+
+        $r0 := @this: android.database.DatabaseUtils$InsertHelper;
+
+        $r1 = $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mPreparedStatement>;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("you must prepare this inserter before calling execute");
+
+        throw $r2;
+
+     label1:
+        $r1 = $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mPreparedStatement>;
+
+     label2:
+        $l0 = virtualinvoke $r1.<android.database.sqlite.SQLiteStatement: long executeInsert()>();
+
+     label3:
+        $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mPreparedStatement> = null;
+
+        return $l0;
+
+     label4:
+        $r3 := @caughtexception;
+
+     label5:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error executing InsertHelper with table ");
+
+        $r5 = $r0.<android.database.DatabaseUtils$InsertHelper: java.lang.String mTableName>;
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("DatabaseUtils", $r5, $r3);
+
+     label6:
+        $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mPreparedStatement> = null;
+
+        return -1L;
+
+     label7:
+        $r6 := @caughtexception;
+
+        $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mPreparedStatement> = null;
+
+        throw $r6;
+
+        catch android.database.SQLException from label2 to label3 with label4;
+        catch java.lang.Throwable from label1 to label3 with label7;
+        catch java.lang.Throwable from label5 to label6 with label7;
+    }
+
+    public int getColumnIndex(java.lang.String)
+    {
+        android.database.DatabaseUtils$InsertHelper $r0;
+        java.lang.String $r1;
+        java.util.HashMap $r2;
+        java.lang.Object $r3;
+        java.lang.Integer $r4;
+        java.lang.IllegalArgumentException $r5;
+        java.lang.StringBuilder $r6;
+        int $i0;
+
+        $r0 := @this: android.database.DatabaseUtils$InsertHelper;
+
+        $r1 := @parameter0: java.lang.String;
+
+        specialinvoke $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement getStatement(boolean)>(0);
+
+        $r2 = $r0.<android.database.DatabaseUtils$InsertHelper: java.util.HashMap mColumns>;
+
+        $r3 = virtualinvoke $r2.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r4 = (java.lang.Integer) $r3;
+
+        if $r4 != null goto label1;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("column \'");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' is invalid");
+
+        $r1 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r1);
+
+        throw $r5;
+
+     label1:
+        $i0 = virtualinvoke $r4.<java.lang.Integer: int intValue()>();
+
+        return $i0;
+    }
+
+    public long insert(android.content.ContentValues)
+    {
+        android.database.DatabaseUtils$InsertHelper $r0;
+        android.content.ContentValues $r1;
+        long $l0;
+
+        $r0 := @this: android.database.DatabaseUtils$InsertHelper;
+
+        $r1 := @parameter0: android.content.ContentValues;
+
+        $l0 = specialinvoke $r0.<android.database.DatabaseUtils$InsertHelper: long insertInternal(android.content.ContentValues,boolean)>($r1, 0);
+
+        return $l0;
+    }
+
+    public void prepareForInsert()
+    {
+        android.database.DatabaseUtils$InsertHelper $r0;
+        android.database.sqlite.SQLiteStatement $r1;
+
+        $r0 := @this: android.database.DatabaseUtils$InsertHelper;
+
+        $r1 = specialinvoke $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement getStatement(boolean)>(0);
+
+        $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mPreparedStatement> = $r1;
+
+        $r1 = $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mPreparedStatement>;
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteProgram: void clearBindings()>();
+
+        return;
+    }
+
+    public void prepareForReplace()
+    {
+        android.database.DatabaseUtils$InsertHelper $r0;
+        android.database.sqlite.SQLiteStatement $r1;
+
+        $r0 := @this: android.database.DatabaseUtils$InsertHelper;
+
+        $r1 = specialinvoke $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement getStatement(boolean)>(1);
+
+        $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mPreparedStatement> = $r1;
+
+        $r1 = $r0.<android.database.DatabaseUtils$InsertHelper: android.database.sqlite.SQLiteStatement mPreparedStatement>;
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteProgram: void clearBindings()>();
+
+        return;
+    }
+
+    public long replace(android.content.ContentValues)
+    {
+        android.database.DatabaseUtils$InsertHelper $r0;
+        android.content.ContentValues $r1;
+        long $l0;
+
+        $r0 := @this: android.database.DatabaseUtils$InsertHelper;
+
+        $r1 := @parameter0: android.content.ContentValues;
+
+        $l0 = specialinvoke $r0.<android.database.DatabaseUtils$InsertHelper: long insertInternal(android.content.ContentValues,boolean)>($r1, 1);
+
+        return $l0;
+    }
+
+    public static void <clinit>()
+    {
+        <android.database.DatabaseUtils$InsertHelper: int TABLE_INFO_PRAGMA_DEFAULT_INDEX> = 4;
+
+        <android.database.DatabaseUtils$InsertHelper: int TABLE_INFO_PRAGMA_COLUMNNAME_INDEX> = 1;
+
+        return;
+    }
+}

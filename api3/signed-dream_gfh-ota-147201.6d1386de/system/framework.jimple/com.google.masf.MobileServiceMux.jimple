@@ -1,0 +1,2085 @@
+public class com.google.masf.MobileServiceMux extends com.google.common.io.BaseHttpConnectionFactory
+{
+    public static final java.lang.String CONTENT_LOCATION;
+    public static final java.lang.String CONTENT_TYPE;
+    private static final long DEFAULT_HARD_DELAY;
+    private static final long DEFAULT_SOFT_DELAY;
+    private static final int MAX_CONNECTIONS;
+    public static final int MAX_REQUEST_LENGTH;
+    private static final int NUM_WORKER_THREADS;
+    private static final int RESPONSE_CACHE_SIZE;
+    public static final int STATUS_CODE_SUBREQUEST_TIMED_OUT;
+    public static final java.lang.String STATUS_HEADER;
+    static com.google.masf.MobileServiceMux mux;
+    private static int workerTimeout;
+    com.google.common.async.AsyncHttpRequestFactory asyncFactory;
+    int bytesReceived;
+    int bytesSent;
+    com.google.common.io.HttpConnectionFactory connectionFactory;
+    com.google.common.task.TimerTask flushTask;
+    long hardDeadline;
+    final long hardDelay;
+    com.google.masf.protocol.HeaderRequest headerRequest;
+    java.util.Vector listeners;
+    java.lang.Object mutex;
+    long nextFlush;
+    int requestId;
+    java.util.Vector requestQueue;
+    boolean requireEndToEndSecure;
+    private com.google.masf.OneTimeCache responseCache;
+    com.google.masf.services.resume.ResumeService resumeService;
+    java.lang.String serverAddress;
+    final long softDelay;
+    com.google.common.task.TaskRunner taskRunner;
+
+    static void <clinit>()
+    {
+        <com.google.masf.MobileServiceMux: java.lang.String STATUS_HEADER> = "X-Masf-Response-Code";
+
+        <com.google.masf.MobileServiceMux: int STATUS_CODE_SUBREQUEST_TIMED_OUT> = 550;
+
+        <com.google.masf.MobileServiceMux: int RESPONSE_CACHE_SIZE> = 8;
+
+        <com.google.masf.MobileServiceMux: int NUM_WORKER_THREADS> = 1;
+
+        <com.google.masf.MobileServiceMux: int MAX_REQUEST_LENGTH> = 32768;
+
+        <com.google.masf.MobileServiceMux: int MAX_CONNECTIONS> = 3;
+
+        <com.google.masf.MobileServiceMux: long DEFAULT_SOFT_DELAY> = 10L;
+
+        <com.google.masf.MobileServiceMux: long DEFAULT_HARD_DELAY> = 100L;
+
+        <com.google.masf.MobileServiceMux: java.lang.String CONTENT_TYPE> = "application/binary";
+
+        <com.google.masf.MobileServiceMux: java.lang.String CONTENT_LOCATION> = "Content-Location";
+
+        <com.google.masf.MobileServiceMux: int workerTimeout> = 20000;
+
+        return;
+    }
+
+    protected void <init>(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+    {
+        com.google.masf.MobileServiceMux $r0;
+        java.lang.String $r1, $r2, $r3, $r4, $r5;
+        java.util.Vector $r6;
+        java.lang.Object $r7;
+        com.google.masf.protocol.HeaderRequest $r8;
+        com.google.common.lang.ThreadFactory $r9;
+        com.google.common.task.TaskRunner $r10;
+        com.google.common.Config $r11;
+        com.google.common.io.HttpConnectionFactory $r12;
+        com.google.common.async.AsyncHttpRequestFactory $r13;
+        com.google.masf.services.resume.WindowResumeService $r14;
+        com.google.masf.OneTimeCache $r15;
+        com.google.common.task.TimerTask $r16;
+        com.google.masf.MobileServiceMux$1 $r17;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r4 := @parameter3: java.lang.String;
+
+        $r5 := @parameter4: java.lang.String;
+
+        specialinvoke $r0.<com.google.common.io.BaseHttpConnectionFactory: void <init>()>();
+
+        $r6 = new java.util.Vector;
+
+        specialinvoke $r6.<java.util.Vector: void <init>()>();
+
+        $r0.<com.google.masf.MobileServiceMux: java.util.Vector listeners> = $r6;
+
+        $r6 = new java.util.Vector;
+
+        specialinvoke $r6.<java.util.Vector: void <init>()>();
+
+        $r0.<com.google.masf.MobileServiceMux: java.util.Vector requestQueue> = $r6;
+
+        $r7 = new java.lang.Object;
+
+        specialinvoke $r7.<java.lang.Object: void <init>()>();
+
+        $r0.<com.google.masf.MobileServiceMux: java.lang.Object mutex> = $r7;
+
+        $r0.<com.google.masf.MobileServiceMux: int requestId> = 0;
+
+        $r0.<com.google.masf.MobileServiceMux: int bytesSent> = 0;
+
+        $r0.<com.google.masf.MobileServiceMux: int bytesReceived> = 0;
+
+        $r0.<com.google.masf.MobileServiceMux: long softDelay> = 10L;
+
+        $r0.<com.google.masf.MobileServiceMux: long hardDelay> = 100L;
+
+        $r0.<com.google.masf.MobileServiceMux: boolean requireEndToEndSecure> = 0;
+
+        $r8 = new com.google.masf.protocol.HeaderRequest;
+
+        specialinvoke $r8.<com.google.masf.protocol.HeaderRequest: void <init>(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)>($r2, $r3, $r4, $r5, "g");
+
+        $r0.<com.google.masf.MobileServiceMux: com.google.masf.protocol.HeaderRequest headerRequest> = $r8;
+
+        $r9 = new com.google.common.lang.ThreadFactory;
+
+        specialinvoke $r9.<com.google.common.lang.ThreadFactory: void <init>()>();
+
+        $r10 = new com.google.common.task.TaskRunner;
+
+        specialinvoke $r10.<com.google.common.task.TaskRunner: void <init>(com.google.common.lang.ThreadFactory,java.lang.String,int)>($r9, "MobileServiceMux TaskRunner", 1);
+
+        $r0.<com.google.masf.MobileServiceMux: com.google.common.task.TaskRunner taskRunner> = $r10;
+
+        $r10 = $r0.<com.google.masf.MobileServiceMux: com.google.common.task.TaskRunner taskRunner>;
+
+        virtualinvoke $r10.<com.google.common.task.TaskRunner: void start()>();
+
+        $r11 = staticinvoke <com.google.common.Config: com.google.common.Config getInstance()>();
+
+        $r12 = virtualinvoke $r11.<com.google.common.Config: com.google.common.io.HttpConnectionFactory getConnectionFactory()>();
+
+        $r0.<com.google.masf.MobileServiceMux: com.google.common.io.HttpConnectionFactory connectionFactory> = $r12;
+
+        $r0.<com.google.masf.MobileServiceMux: java.lang.String serverAddress> = $r1;
+
+        $r13 = new com.google.common.async.AsyncHttpRequestFactory;
+
+        $r10 = $r0.<com.google.masf.MobileServiceMux: com.google.common.task.TaskRunner taskRunner>;
+
+        $r12 = $r0.<com.google.masf.MobileServiceMux: com.google.common.io.HttpConnectionFactory connectionFactory>;
+
+        specialinvoke $r13.<com.google.common.async.AsyncHttpRequestFactory: void <init>(com.google.common.task.TaskRunner,com.google.common.lang.ThreadFactory,com.google.common.io.HttpConnectionFactory,java.lang.String,int)>($r10, $r9, $r12, "MobileServiceMux AsyncHttpRequestFactory", 3);
+
+        $r0.<com.google.masf.MobileServiceMux: com.google.common.async.AsyncHttpRequestFactory asyncFactory> = $r13;
+
+        $r13 = $r0.<com.google.masf.MobileServiceMux: com.google.common.async.AsyncHttpRequestFactory asyncFactory>;
+
+        virtualinvoke $r13.<com.google.common.async.AsyncHttpRequestFactory: void start()>();
+
+        $r14 = new com.google.masf.services.resume.WindowResumeService;
+
+        $r10 = $r0.<com.google.masf.MobileServiceMux: com.google.common.task.TaskRunner taskRunner>;
+
+        $r8 = $r0.<com.google.masf.MobileServiceMux: com.google.masf.protocol.HeaderRequest headerRequest>;
+
+        specialinvoke $r14.<com.google.masf.services.resume.WindowResumeService: void <init>(com.google.masf.MobileServiceMux,com.google.common.task.TaskRunner,com.google.masf.protocol.HeaderRequest)>($r0, $r10, $r8);
+
+        $r0.<com.google.masf.MobileServiceMux: com.google.masf.services.resume.ResumeService resumeService> = $r14;
+
+        $r15 = new com.google.masf.OneTimeCache;
+
+        specialinvoke $r15.<com.google.masf.OneTimeCache: void <init>(int)>(8);
+
+        $r0.<com.google.masf.MobileServiceMux: com.google.masf.OneTimeCache responseCache> = $r15;
+
+        $r16 = new com.google.common.task.TimerTask;
+
+        $r10 = $r0.<com.google.masf.MobileServiceMux: com.google.common.task.TaskRunner taskRunner>;
+
+        $r17 = new com.google.masf.MobileServiceMux$1;
+
+        specialinvoke $r17.<com.google.masf.MobileServiceMux$1: void <init>(com.google.masf.MobileServiceMux)>($r0);
+
+        specialinvoke $r16.<com.google.common.task.TimerTask: void <init>(com.google.common.task.TaskRunner,java.lang.Runnable)>($r10, $r17);
+
+        $r0.<com.google.masf.MobileServiceMux: com.google.common.task.TimerTask flushTask> = $r16;
+
+        return;
+    }
+
+    static void access$000(com.google.masf.MobileServiceMux)
+    {
+        com.google.masf.MobileServiceMux $r0;
+
+        $r0 := @parameter0: com.google.masf.MobileServiceMux;
+
+        specialinvoke $r0.<com.google.masf.MobileServiceMux: void processRequests()>();
+
+        return;
+    }
+
+    static void access$100(com.google.masf.MobileServiceMux, java.lang.Object[], java.lang.Exception)
+    {
+        com.google.masf.MobileServiceMux $r0;
+        java.lang.Object[] $r1;
+        java.lang.Exception $r2;
+
+        $r0 := @parameter0: com.google.masf.MobileServiceMux;
+
+        $r1 := @parameter1: java.lang.Object[];
+
+        $r2 := @parameter2: java.lang.Exception;
+
+        specialinvoke $r0.<com.google.masf.MobileServiceMux: void errorRequests(java.lang.Object[],java.lang.Exception)>($r1, $r2);
+
+        return;
+    }
+
+    static void access$200(com.google.masf.MobileServiceMux, com.google.common.async.AsyncHttpRequest, java.lang.Object[])
+    {
+        com.google.masf.MobileServiceMux $r0;
+        com.google.common.async.AsyncHttpRequest $r1;
+        java.lang.Object[] $r2;
+
+        $r0 := @parameter0: com.google.masf.MobileServiceMux;
+
+        $r1 := @parameter1: com.google.common.async.AsyncHttpRequest;
+
+        $r2 := @parameter2: java.lang.Object[];
+
+        specialinvoke $r0.<com.google.masf.MobileServiceMux: void handleResponses(com.google.common.async.AsyncHttpRequest,java.lang.Object[])>($r1, $r2);
+
+        return;
+    }
+
+    static void access$300(com.google.masf.MobileServiceMux, java.lang.Object[])
+    {
+        com.google.masf.MobileServiceMux $r0;
+        java.lang.Object[] $r1;
+
+        $r0 := @parameter0: com.google.masf.MobileServiceMux;
+
+        $r1 := @parameter1: java.lang.Object[];
+
+        specialinvoke $r0.<com.google.masf.MobileServiceMux: void disposeRequests(java.lang.Object[])>($r1);
+
+        return;
+    }
+
+    public static void deInitialize()
+    {
+        com.google.masf.MobileServiceMux $r0;
+        com.google.common.async.AsyncHttpRequestFactory $r1;
+        com.google.common.task.TaskRunner $r2;
+
+        $r0 = <com.google.masf.MobileServiceMux: com.google.masf.MobileServiceMux mux>;
+
+        if $r0 == null goto label3;
+
+        $r0 = <com.google.masf.MobileServiceMux: com.google.masf.MobileServiceMux mux>;
+
+        $r1 = $r0.<com.google.masf.MobileServiceMux: com.google.common.async.AsyncHttpRequestFactory asyncFactory>;
+
+        if $r1 == null goto label1;
+
+        $r0 = <com.google.masf.MobileServiceMux: com.google.masf.MobileServiceMux mux>;
+
+        $r1 = $r0.<com.google.masf.MobileServiceMux: com.google.common.async.AsyncHttpRequestFactory asyncFactory>;
+
+        virtualinvoke $r1.<com.google.common.async.AsyncHttpRequestFactory: void stop()>();
+
+     label1:
+        $r0 = <com.google.masf.MobileServiceMux: com.google.masf.MobileServiceMux mux>;
+
+        $r2 = $r0.<com.google.masf.MobileServiceMux: com.google.common.task.TaskRunner taskRunner>;
+
+        if $r2 == null goto label2;
+
+        $r0 = <com.google.masf.MobileServiceMux: com.google.masf.MobileServiceMux mux>;
+
+        $r2 = $r0.<com.google.masf.MobileServiceMux: com.google.common.task.TaskRunner taskRunner>;
+
+        virtualinvoke $r2.<com.google.common.task.TaskRunner: void stop()>();
+
+     label2:
+        <com.google.masf.MobileServiceMux: com.google.masf.MobileServiceMux mux> = null;
+
+        return;
+
+     label3:
+        return;
+    }
+
+    private void disposeRequests(java.lang.Object[])
+    {
+        java.lang.Object[] $r0;
+        int $i0, $i1;
+        com.google.masf.MobileServiceMux $r1;
+        java.lang.Object $r2;
+        com.google.masf.protocol.Request $r3;
+
+        $r1 := @this: com.google.masf.MobileServiceMux;
+
+        $r0 := @parameter0: java.lang.Object[];
+
+        $i1 = 0;
+
+     label1:
+        $i0 = lengthof $r0;
+
+        if $i1 >= $i0 goto label3;
+
+        $r2 = $r0[$i1];
+
+        $r3 = (com.google.masf.protocol.Request) $r2;
+
+        if $r3 == null goto label2;
+
+        virtualinvoke $r3.<com.google.masf.protocol.Request: void dispose()>();
+
+     label2:
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    private void errorRequests(java.lang.Object[], java.lang.Exception)
+    {
+        java.lang.Object[] $r0;
+        java.lang.Exception $r1;
+        com.google.masf.protocol.Request$Listener $r2;
+        com.google.masf.MobileServiceMux $r3;
+        int $i0, $i1;
+        java.lang.Object $r4;
+        com.google.masf.protocol.Request $r5;
+
+        $r3 := @this: com.google.masf.MobileServiceMux;
+
+        $r0 := @parameter0: java.lang.Object[];
+
+        $r1 := @parameter1: java.lang.Exception;
+
+        $i0 = 0;
+
+     label1:
+        $i1 = lengthof $r0;
+
+        if $i0 >= $i1 goto label2;
+
+        $r4 = $r0[$i0];
+
+        $r5 = (com.google.masf.protocol.Request) $r4;
+
+        $r2 = virtualinvoke $r5.<com.google.masf.protocol.Request: com.google.masf.protocol.Request$Listener getListener()>();
+
+        interfaceinvoke $r2.<com.google.masf.protocol.Request$Listener: void requestFailed(com.google.masf.protocol.Request,java.lang.Exception)>($r5, $r1);
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    private com.google.masf.MobileServiceMux$Listener[] getListeners()
+    {
+        com.google.masf.MobileServiceMux $r0;
+        java.util.Vector $r1, $r2;
+        int $i0;
+        com.google.masf.MobileServiceMux$Listener[] $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $r1 = $r0.<com.google.masf.MobileServiceMux: java.util.Vector listeners>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = $r0.<com.google.masf.MobileServiceMux: java.util.Vector listeners>;
+
+        $i0 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        $r3 = newarray (com.google.masf.MobileServiceMux$Listener)[$i0];
+
+        $r2 = $r0.<com.google.masf.MobileServiceMux: java.util.Vector listeners>;
+
+        virtualinvoke $r2.<java.util.Vector: void copyInto(java.lang.Object[])>($r3);
+
+        exitmonitor $r1;
+
+     label2:
+        return $r3;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public static com.google.masf.MobileServiceMux getSingleton()
+    {
+        com.google.masf.MobileServiceMux r0;
+
+        r0 = <com.google.masf.MobileServiceMux: com.google.masf.MobileServiceMux mux>;
+
+        return r0;
+    }
+
+    private void handleResponse(com.google.masf.protocol.Request, com.google.masf.protocol.Response)
+    {
+        com.google.masf.MobileServiceMux $r0;
+        com.google.masf.protocol.Request $r1;
+        com.google.masf.protocol.Response $r2;
+        com.google.masf.protocol.Request$Listener $r3;
+        java.lang.RuntimeException $r4;
+        java.lang.Throwable $r5;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $r1 := @parameter0: com.google.masf.protocol.Request;
+
+        $r2 := @parameter1: com.google.masf.protocol.Response;
+
+     label1:
+        $r3 = virtualinvoke $r1.<com.google.masf.protocol.Request: com.google.masf.protocol.Request$Listener getListener()>();
+
+        interfaceinvoke $r3.<com.google.masf.protocol.Request$Listener: void requestCompleted(com.google.masf.protocol.Request,com.google.masf.protocol.Response)>($r1, $r2);
+
+        specialinvoke $r0.<com.google.masf.MobileServiceMux: void notifyRequestComplete(com.google.masf.protocol.Request)>($r1);
+
+     label2:
+        virtualinvoke $r2.<com.google.masf.protocol.Response: void bufferAndDetach()>();
+
+        return;
+
+     label3:
+        $r4 := @caughtexception;
+
+     label4:
+        virtualinvoke $r4.<java.lang.Throwable: void printStackTrace()>();
+
+     label5:
+        virtualinvoke $r2.<com.google.masf.protocol.Response: void bufferAndDetach()>();
+
+        return;
+
+     label6:
+        $r5 := @caughtexception;
+
+        virtualinvoke $r2.<com.google.masf.protocol.Response: void bufferAndDetach()>();
+
+        throw $r5;
+
+        catch java.lang.RuntimeException from label1 to label2 with label3;
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+    }
+
+    private void handleResponses(com.google.common.async.AsyncHttpRequest, java.lang.Object[])
+    {
+        com.google.masf.MobileServiceMux $r0;
+        com.google.common.async.AsyncHttpRequest $r1;
+        java.lang.Object[] $r2;
+        com.google.masf.protocol.ProtocolReader $r3;
+        int $i0, $i3, $i4, $i5;
+        java.lang.String $r4;
+        boolean $z0;
+        java.lang.Exception $r5;
+        com.google.masf.ConnectionException $r6;
+        com.google.common.io.HttpConnectionFactory $r7;
+        java.io.IOException $r8, $r19;
+        long $l1, $l2;
+        java.io.DataInputStream $r9;
+        com.google.masf.protocol.Response $r10;
+        java.lang.Object $r11;
+        com.google.masf.protocol.Request $r12;
+        com.google.masf.protocol.SimpleRequest $r13;
+        com.google.masf.protocol.MultipartResponse $r14;
+        byte[] $r15;
+        java.io.InputStream $r16;
+        java.lang.RuntimeException $r17;
+        java.lang.Throwable $r18;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $r1 := @parameter0: com.google.common.async.AsyncHttpRequest;
+
+        $r2 := @parameter1: java.lang.Object[];
+
+        $i0 = interfaceinvoke $r1.<com.google.common.async.AsyncHttpRequest: int getResponseCode()>();
+
+        $r4 = interfaceinvoke $r1.<com.google.common.async.AsyncHttpRequest: java.lang.String getResponseType()>();
+
+        $z0 = interfaceinvoke $r1.<com.google.common.async.AsyncHttpRequest: boolean hasException()>();
+
+        if $z0 == 0 goto label04;
+
+        $r5 = interfaceinvoke $r1.<com.google.common.async.AsyncHttpRequest: java.lang.Exception getException()>();
+
+        $z0 = $r5 instanceof java.io.IOException;
+
+        if $z0 == 0 goto label02;
+
+        $r4 = virtualinvoke $r5.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        if $r4 == null goto label01;
+
+        $r4 = virtualinvoke $r5.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean endsWith(java.lang.String)>("-3");
+
+        if $z0 == 0 goto label01;
+
+        specialinvoke $r0.<com.google.masf.MobileServiceMux: void notifyConnectionDisallowed(java.lang.Object[])>($r2);
+
+        return;
+
+     label01:
+        specialinvoke $r0.<com.google.masf.MobileServiceMux: void requeueRequests(java.lang.Object[],java.lang.Exception)>($r2, $r5);
+
+        return;
+
+     label02:
+        $z0 = $r5 instanceof java.lang.SecurityException;
+
+        if $z0 == 0 goto label03;
+
+        specialinvoke $r0.<com.google.masf.MobileServiceMux: void notifyConnectionDisallowed(java.lang.Object[])>($r2);
+
+        return;
+
+     label03:
+        specialinvoke $r0.<com.google.masf.MobileServiceMux: void requeueRequests(java.lang.Object[],java.lang.Exception)>($r2, $r5);
+
+        return;
+
+     label04:
+        if $i0 != 502 goto label05;
+
+        $r6 = new com.google.masf.ConnectionException;
+
+        specialinvoke $r6.<com.google.masf.ConnectionException: void <init>(int)>($i0);
+
+        specialinvoke $r0.<com.google.masf.MobileServiceMux: void requeueRequests(java.lang.Object[],java.lang.Exception)>($r2, $r6);
+
+        return;
+
+     label05:
+        if $i0 == 200 goto label06;
+
+        $r6 = new com.google.masf.ConnectionException;
+
+        specialinvoke $r6.<com.google.masf.ConnectionException: void <init>(int)>($i0);
+
+        specialinvoke $r0.<com.google.masf.MobileServiceMux: void errorRequests(java.lang.Object[],java.lang.Exception)>($r2, $r6);
+
+        specialinvoke $r0.<com.google.masf.MobileServiceMux: void notifyNetworkError(int)>(2);
+
+        $r7 = $r0.<com.google.masf.MobileServiceMux: com.google.common.io.HttpConnectionFactory connectionFactory>;
+
+        interfaceinvoke $r7.<com.google.common.io.HttpConnectionFactory: void notifyFailure()>();
+
+        return;
+
+     label06:
+        if $r4 == null goto label07;
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>("application/binary");
+
+        if $z0 != 0 goto label08;
+
+     label07:
+        $r8 = new java.io.IOException;
+
+        specialinvoke $r8.<java.io.IOException: void <init>(java.lang.String)>("Bad content-type");
+
+        specialinvoke $r0.<com.google.masf.MobileServiceMux: void requeueRequests(java.lang.Object[],java.lang.Exception)>($r2, $r8);
+
+        return;
+
+     label08:
+        $r7 = $r0.<com.google.masf.MobileServiceMux: com.google.common.io.HttpConnectionFactory connectionFactory>;
+
+        interfaceinvoke $r7.<com.google.common.io.HttpConnectionFactory: boolean registerNetworkSuccess(boolean)>(1);
+
+     label09:
+        $i0 = $r0.<com.google.masf.MobileServiceMux: int bytesReceived>;
+
+        $l1 = (long) $i0;
+
+     label10:
+        $l2 = interfaceinvoke $r1.<com.google.common.async.AsyncHttpRequest: long getResponseLength()>();
+
+     label11:
+        $l1 = $l1 + $l2;
+
+     label12:
+        $i0 = (int) $l1;
+
+     label13:
+        $r0.<com.google.masf.MobileServiceMux: int bytesReceived> = $i0;
+
+        $r9 = interfaceinvoke $r1.<com.google.common.async.AsyncHttpRequest: java.io.DataInputStream getResponseStream()>();
+
+        $r3 = new com.google.masf.protocol.ProtocolReader;
+
+        specialinvoke $r3.<com.google.masf.protocol.ProtocolReader: void <init>(java.io.DataInputStream)>($r9);
+
+     label14:
+        $i0 = 0;
+
+     label15:
+        $i3 = lengthof $r2;
+
+     label16:
+        if $i0 >= $i3 goto label42;
+
+        $r10 = virtualinvoke $r3.<com.google.masf.protocol.ProtocolReader: com.google.masf.protocol.Response getNextResponse()>();
+
+        if $r10 == null goto label42;
+
+     label17:
+        $i3 = 0;
+
+     label18:
+        $i4 = lengthof $r2;
+
+        if $i3 >= $i4 goto label47;
+
+     label19:
+        $r11 = $r2[$i3];
+
+        $r12 = (com.google.masf.protocol.Request) $r11;
+
+     label20:
+        if $r12 == null goto label29;
+
+        $i4 = virtualinvoke $r12.<com.google.masf.protocol.Block: int getId()>();
+
+        $i5 = virtualinvoke $r10.<com.google.masf.protocol.Block: int getId()>();
+
+     label21:
+        if $i4 != $i5 goto label29;
+
+        $r2[$i3] = null;
+
+     label22:
+        if $r12 == null goto label36;
+
+     label23:
+        $z0 = $r10 instanceof com.google.masf.protocol.MultipartResponse;
+
+        if $z0 == 0 goto label46;
+
+        $z0 = $r12 instanceof com.google.masf.protocol.SimpleRequest;
+
+     label24:
+        if $z0 == 0 goto label46;
+
+        $r13 = (com.google.masf.protocol.SimpleRequest) $r12;
+
+     label25:
+        $r14 = (com.google.masf.protocol.MultipartResponse) $r10;
+
+        $r10 = specialinvoke $r0.<com.google.masf.MobileServiceMux: com.google.masf.protocol.Response removeExtraResponses(com.google.masf.protocol.SimpleRequest,com.google.masf.protocol.MultipartResponse)>($r13, $r14);
+
+     label26:
+        $i3 = virtualinvoke $r10.<com.google.masf.protocol.Response: int getStatusCode()>();
+
+        if $i3 != 550 goto label31;
+
+        virtualinvoke $r10.<com.google.masf.protocol.Response: void bufferAndDetach()>();
+
+        $r6 = new com.google.masf.ConnectionException;
+
+        specialinvoke $r6.<com.google.masf.ConnectionException: void <init>(int)>($i3);
+
+        specialinvoke $r0.<com.google.masf.MobileServiceMux: void requeueRequest(com.google.masf.protocol.Request,java.lang.Exception)>($r12, $r6);
+
+     label27:
+        $i0 = $i0 + 1;
+
+     label28:
+        goto label15;
+
+     label29:
+        $i3 = $i3 + 1;
+
+     label30:
+        goto label18;
+
+     label31:
+        specialinvoke $r0.<com.google.masf.MobileServiceMux: void handleResponse(com.google.masf.protocol.Request,com.google.masf.protocol.Response)>($r12, $r10);
+
+     label32:
+        goto label27;
+
+     label33:
+        $r8 := @caughtexception;
+
+     label34:
+        virtualinvoke $r8.<java.lang.Throwable: void printStackTrace()>();
+
+     label35:
+        $r8 = new java.io.IOException;
+
+        specialinvoke $r8.<java.io.IOException: void <init>(java.lang.String)>("Request didn\'t complete");
+
+        specialinvoke $r0.<com.google.masf.MobileServiceMux: void requeueRequests(java.lang.Object[],java.lang.Exception)>($r2, $r8);
+
+        return;
+
+     label36:
+        $i3 = virtualinvoke $r10.<com.google.masf.protocol.Response: int getStreamLength()>();
+
+        $r15 = newarray (byte)[$i3];
+
+        $r16 = virtualinvoke $r10.<com.google.masf.protocol.Response: java.io.InputStream getInputStream()>();
+
+        virtualinvoke $r16.<java.io.InputStream: int read(byte[])>($r15);
+
+     label37:
+        virtualinvoke $r10.<com.google.masf.protocol.Response: void bufferAndDetach()>();
+
+     label38:
+        goto label27;
+
+     label39:
+        $r17 := @caughtexception;
+
+     label40:
+        virtualinvoke $r17.<java.lang.Throwable: void printStackTrace()>();
+
+     label41:
+        $r8 = new java.io.IOException;
+
+        specialinvoke $r8.<java.io.IOException: void <init>(java.lang.String)>("Request didn\'t complete");
+
+        specialinvoke $r0.<com.google.masf.MobileServiceMux: void requeueRequests(java.lang.Object[],java.lang.Exception)>($r2, $r8);
+
+        return;
+
+     label42:
+        virtualinvoke $r3.<com.google.masf.protocol.ProtocolReader: void close()>();
+
+     label43:
+        $r8 = new java.io.IOException;
+
+        specialinvoke $r8.<java.io.IOException: void <init>(java.lang.String)>("Request didn\'t complete");
+
+        specialinvoke $r0.<com.google.masf.MobileServiceMux: void requeueRequests(java.lang.Object[],java.lang.Exception)>($r2, $r8);
+
+        return;
+
+     label44:
+        $r18 := @caughtexception;
+
+        $r8 = new java.io.IOException;
+
+        specialinvoke $r8.<java.io.IOException: void <init>(java.lang.String)>("Request didn\'t complete");
+
+        specialinvoke $r0.<com.google.masf.MobileServiceMux: void requeueRequests(java.lang.Object[],java.lang.Exception)>($r2, $r8);
+
+        throw $r18;
+
+     label45:
+        $r19 := @caughtexception;
+
+        goto label37;
+
+     label46:
+        goto label26;
+
+     label47:
+        $r12 = null;
+
+        goto label22;
+
+        catch java.io.IOException from label10 to label11 with label33;
+        catch java.io.IOException from label13 to label14 with label33;
+        catch java.io.IOException from label16 to label17 with label33;
+        catch java.io.IOException from label20 to label21 with label33;
+        catch java.io.IOException from label25 to label27 with label33;
+        catch java.io.IOException from label31 to label32 with label33;
+        catch java.lang.RuntimeException from label09 to label11 with label39;
+        catch java.lang.RuntimeException from label12 to label22 with label39;
+        catch java.lang.RuntimeException from label22 to label23 with label39;
+        catch java.lang.RuntimeException from label24 to label27 with label39;
+        catch java.lang.RuntimeException from label28 to label29 with label39;
+        catch java.lang.RuntimeException from label30 to label32 with label39;
+        catch java.lang.Throwable from label09 to label14 with label44;
+        catch java.lang.Throwable from label16 to label17 with label44;
+        catch java.lang.Throwable from label19 to label21 with label44;
+        catch java.lang.Throwable from label22 to label27 with label44;
+        catch java.lang.Throwable from label31 to label32 with label44;
+        catch java.lang.Throwable from label34 to label35 with label44;
+        catch java.io.IOException from label36 to label37 with label45;
+        catch java.lang.RuntimeException from label36 to label37 with label39;
+        catch java.lang.Throwable from label36 to label37 with label44;
+        catch java.io.IOException from label37 to label38 with label33;
+        catch java.lang.RuntimeException from label37 to label38 with label39;
+        catch java.lang.Throwable from label37 to label38 with label44;
+        catch java.lang.Throwable from label40 to label41 with label44;
+        catch java.io.IOException from label42 to label43 with label33;
+        catch java.lang.RuntimeException from label42 to label43 with label39;
+        catch java.lang.Throwable from label42 to label43 with label44;
+    }
+
+    public static void initialize(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+    {
+        java.lang.String $r0, $r1, $r2, $r3, $r4;
+        com.google.masf.MobileServiceMux $r5;
+        java.lang.Throwable $r6;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $r2 := @parameter2: java.lang.String;
+
+        $r3 := @parameter3: java.lang.String;
+
+        $r4 := @parameter4: java.lang.String;
+
+        entermonitor class "com/google/masf/MobileServiceMux";
+
+     label1:
+        $r5 = <com.google.masf.MobileServiceMux: com.google.masf.MobileServiceMux mux>;
+
+        if $r5 != null goto label2;
+
+        $r5 = new com.google.masf.MobileServiceMux;
+
+        specialinvoke $r5.<com.google.masf.MobileServiceMux: void <init>(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)>($r0, $r1, $r2, $r3, $r4);
+
+        <com.google.masf.MobileServiceMux: com.google.masf.MobileServiceMux mux> = $r5;
+
+     label2:
+        exitmonitor class "com/google/masf/MobileServiceMux";
+
+        return;
+
+     label3:
+        $r6 := @caughtexception;
+
+        exitmonitor class "com/google/masf/MobileServiceMux";
+
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public static void initialize(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, int)
+    {
+        java.lang.String $r0, $r1, $r2, $r3, $r4;
+        int $i0;
+        java.lang.Throwable $r5;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $r2 := @parameter2: java.lang.String;
+
+        $r3 := @parameter3: java.lang.String;
+
+        $r4 := @parameter4: java.lang.String;
+
+        $i0 := @parameter5: int;
+
+        entermonitor class "com/google/masf/MobileServiceMux";
+
+     label1:
+        <com.google.masf.MobileServiceMux: int workerTimeout> = $i0;
+
+        staticinvoke <com.google.masf.MobileServiceMux: void initialize(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)>($r0, $r1, $r2, $r3, $r4);
+
+     label2:
+        exitmonitor class "com/google/masf/MobileServiceMux";
+
+        return;
+
+     label3:
+        $r5 := @caughtexception;
+
+        exitmonitor class "com/google/masf/MobileServiceMux";
+
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    private int nextRequestId()
+    {
+        com.google.masf.MobileServiceMux $r0;
+        int $i0, $i1;
+        java.lang.Throwable $r1;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        entermonitor $r0;
+
+     label1:
+        $i1 = $r0.<com.google.masf.MobileServiceMux: int requestId>;
+
+        $i0 = $i1 + 1;
+
+        $r0.<com.google.masf.MobileServiceMux: int requestId> = $i0;
+
+     label2:
+        exitmonitor $r0;
+
+        return $i1;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    private void notifyConnectionDisallowed(java.lang.Object[])
+    {
+        com.google.masf.MobileServiceMux $r0;
+        java.lang.Object[] $r1;
+        java.lang.SecurityException $r2;
+        com.google.common.io.HttpConnectionFactory $r3;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $r1 := @parameter0: java.lang.Object[];
+
+        $r2 = new java.lang.SecurityException;
+
+        specialinvoke $r2.<java.lang.SecurityException: void <init>(java.lang.String)>("Connection disallowed");
+
+        specialinvoke $r0.<com.google.masf.MobileServiceMux: void errorRequests(java.lang.Object[],java.lang.Exception)>($r1, $r2);
+
+        specialinvoke $r0.<com.google.masf.MobileServiceMux: void notifyNetworkError(int)>(0);
+
+        $r3 = $r0.<com.google.masf.MobileServiceMux: com.google.common.io.HttpConnectionFactory connectionFactory>;
+
+        interfaceinvoke $r3.<com.google.common.io.HttpConnectionFactory: void notifyFailure()>();
+
+        return;
+    }
+
+    private void notifyNetworkError(int)
+    {
+        com.google.masf.MobileServiceMux $r0;
+        int $i0, $i1, $i2;
+        com.google.masf.MobileServiceMux$Listener[] $r1;
+        com.google.masf.MobileServiceMux$Listener $r2;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $i0 := @parameter0: int;
+
+        $r1 = specialinvoke $r0.<com.google.masf.MobileServiceMux: com.google.masf.MobileServiceMux$Listener[] getListeners()>();
+
+        $i1 = 0;
+
+     label1:
+        $i2 = lengthof $r1;
+
+        if $i1 >= $i2 goto label2;
+
+        $r2 = $r1[$i1];
+
+        interfaceinvoke $r2.<com.google.masf.MobileServiceMux$Listener: void onNetworkError(int)>($i0);
+
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    private void notifyRequestComplete(com.google.masf.protocol.Request)
+    {
+        com.google.masf.MobileServiceMux $r0;
+        com.google.masf.protocol.Request $r1;
+        com.google.masf.MobileServiceMux$Listener[] $r2;
+        int $i0, $i1;
+        com.google.masf.MobileServiceMux$Listener $r3;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $r1 := @parameter0: com.google.masf.protocol.Request;
+
+        $r2 = specialinvoke $r0.<com.google.masf.MobileServiceMux: com.google.masf.MobileServiceMux$Listener[] getListeners()>();
+
+        $i0 = 0;
+
+     label1:
+        $i1 = lengthof $r2;
+
+        if $i0 >= $i1 goto label2;
+
+        $r3 = $r2[$i0];
+
+        interfaceinvoke $r3.<com.google.masf.MobileServiceMux$Listener: void onRequestComplete(com.google.masf.protocol.Request)>($r1);
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    private void processRequests()
+    {
+        com.google.masf.MobileServiceMux $r0;
+        java.lang.Object $r1;
+        int $i0;
+        java.util.Vector $r2;
+        com.google.masf.protocol.Request[] $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $r1 = $r0.<com.google.masf.MobileServiceMux: java.lang.Object mutex>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = $r0.<com.google.masf.MobileServiceMux: java.util.Vector requestQueue>;
+
+        $i0 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        $r3 = newarray (com.google.masf.protocol.Request)[$i0];
+
+        $r2 = $r0.<com.google.masf.MobileServiceMux: java.util.Vector requestQueue>;
+
+        virtualinvoke $r2.<java.util.Vector: void copyInto(java.lang.Object[])>($r3);
+
+        $r2 = $r0.<com.google.masf.MobileServiceMux: java.util.Vector requestQueue>;
+
+        virtualinvoke $r2.<java.util.Vector: void removeAllElements()>();
+
+        $r0.<com.google.masf.MobileServiceMux: long nextFlush> = 0L;
+
+        $r0.<com.google.masf.MobileServiceMux: long hardDeadline> = 0L;
+
+        exitmonitor $r1;
+
+     label2:
+        specialinvoke $r0.<com.google.masf.MobileServiceMux: void processRequests(com.google.masf.protocol.Request[])>($r3);
+
+        return;
+
+     label3:
+        $r4 := @caughtexception;
+
+     label4:
+        exitmonitor $r1;
+
+     label5:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label4 to label5 with label3;
+    }
+
+    private void processRequests(com.google.masf.protocol.Request[])
+    {
+        com.google.masf.MobileServiceMux $r0;
+        com.google.masf.protocol.Request[] $r1;
+        java.util.Vector $r2;
+        com.google.masf.OneTimeCache $r3;
+        com.google.masf.protocol.HeaderRequest $r4;
+        int $i0, $i1, $i2;
+        com.google.masf.protocol.Request $r5;
+        boolean $z0;
+        com.google.masf.protocol.SimpleRequest $r6;
+        java.lang.String $r7;
+        java.lang.Object $r8, $r9;
+        com.google.masf.protocol.Response $r10;
+        java.lang.Throwable $r11;
+        java.io.IOException $r12;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $r1 := @parameter0: com.google.masf.protocol.Request[];
+
+        $r2 = new java.util.Vector;
+
+     label01:
+        specialinvoke $r2.<java.util.Vector: void <init>()>();
+
+        $r4 = $r0.<com.google.masf.MobileServiceMux: com.google.masf.protocol.HeaderRequest headerRequest>;
+
+        $i0 = virtualinvoke $r4.<com.google.masf.protocol.HeaderRequest: int getStreamLength()>();
+
+     label02:
+        $i1 = 0;
+
+     label03:
+        $i2 = lengthof $r1;
+
+     label04:
+        if $i1 >= $i2 goto label21;
+
+     label05:
+        $r5 = $r1[$i1];
+
+        $z0 = $r5 instanceof com.google.masf.protocol.SimpleRequest;
+
+     label06:
+        if $z0 == 0 goto label16;
+
+        $r6 = (com.google.masf.protocol.SimpleRequest) $r5;
+
+        $r7 = virtualinvoke $r6.<com.google.masf.protocol.SimpleRequest: java.lang.String getServiceUri()>();
+
+     label07:
+        if $r7 == null goto label16;
+
+        $r8 = $r0.<com.google.masf.MobileServiceMux: java.lang.Object mutex>;
+
+        entermonitor $r8;
+
+     label08:
+        $r3 = $r0.<com.google.masf.MobileServiceMux: com.google.masf.OneTimeCache responseCache>;
+
+        $r9 = virtualinvoke $r3.<com.google.masf.OneTimeCache: java.lang.Object get(java.lang.Object)>($r7);
+
+        exitmonitor $r8;
+
+     label09:
+        if $r9 == null goto label16;
+
+        $r1[$i1] = null;
+
+        $r10 = (com.google.masf.protocol.Response) $r9;
+
+     label10:
+        specialinvoke $r0.<com.google.masf.MobileServiceMux: void handleResponse(com.google.masf.protocol.Request,com.google.masf.protocol.Response)>($r5, $r10);
+
+     label11:
+        $i1 = $i1 + 1;
+
+        goto label03;
+
+     label12:
+        $r11 := @caughtexception;
+
+     label13:
+        exitmonitor $r8;
+
+     label14:
+        throw $r11;
+
+     label15:
+        $r12 := @caughtexception;
+
+        specialinvoke $r0.<com.google.masf.MobileServiceMux: void requeueRequests(java.lang.Object[],java.lang.Exception)>($r1, $r12);
+
+        return;
+
+     label16:
+        $i2 = specialinvoke $r0.<com.google.masf.MobileServiceMux: int nextRequestId()>();
+
+        virtualinvoke $r5.<com.google.masf.protocol.Block: void setId(int)>($i2);
+
+        $i2 = virtualinvoke $r5.<com.google.masf.protocol.Request: int getStreamLength()>();
+
+     label17:
+        $i2 = $i2 + $i0;
+
+     label18:
+        if $i2 <= 32768 goto label23;
+
+        specialinvoke $r0.<com.google.masf.MobileServiceMux: void sendRequests(java.util.Vector)>($r2);
+
+        $r4 = $r0.<com.google.masf.MobileServiceMux: com.google.masf.protocol.HeaderRequest headerRequest>;
+
+        $i0 = virtualinvoke $r4.<com.google.masf.protocol.HeaderRequest: int getStreamLength()>();
+
+        virtualinvoke $r2.<java.util.Vector: void removeAllElements()>();
+
+     label19:
+        $r1[$i1] = null;
+
+        virtualinvoke $r2.<java.util.Vector: void addElement(java.lang.Object)>($r5);
+
+        $i2 = virtualinvoke $r5.<com.google.masf.protocol.Request: int getStreamLength()>();
+
+     label20:
+        $i0 = $i0 + $i2;
+
+        goto label11;
+
+     label21:
+        $i1 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        if $i1 <= 0 goto label24;
+
+        specialinvoke $r0.<com.google.masf.MobileServiceMux: void sendRequests(java.util.Vector)>($r2);
+
+     label22:
+        return;
+
+     label23:
+        goto label19;
+
+     label24:
+        return;
+
+        catch java.io.IOException from label01 to label02 with label15;
+        catch java.io.IOException from label04 to label05 with label15;
+        catch java.io.IOException from label06 to label07 with label15;
+        catch java.lang.Throwable from label08 to label09 with label12;
+        catch java.io.IOException from label10 to label11 with label15;
+        catch java.lang.Throwable from label13 to label14 with label12;
+        catch java.io.IOException from label14 to label15 with label15;
+        catch java.io.IOException from label16 to label17 with label15;
+        catch java.io.IOException from label18 to label20 with label15;
+        catch java.io.IOException from label21 to label22 with label15;
+    }
+
+    private com.google.masf.protocol.Response removeExtraResponses(com.google.masf.protocol.SimpleRequest, com.google.masf.protocol.MultipartResponse)
+    {
+        com.google.masf.MobileServiceMux $r0;
+        com.google.masf.protocol.SimpleRequest $r1;
+        com.google.masf.protocol.MultipartResponse $r2;
+        com.google.masf.protocol.MultipartResponseBuilder $r3, $r11;
+        com.google.masf.protocol.BodyPart $r4;
+        java.lang.String $r5, $r10, $r12;
+        int $i0, $i1, $i2;
+        java.util.Hashtable $r6, $r8;
+        com.google.masf.protocol.BodyPart[] $r7;
+        java.lang.Object $r9, $r14, $r15;
+        boolean $z0;
+        java.util.Enumeration $r13;
+        com.google.masf.OneTimeCache $r16;
+        java.lang.Throwable $r17;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $r1 := @parameter0: com.google.masf.protocol.SimpleRequest;
+
+        $r2 := @parameter1: com.google.masf.protocol.MultipartResponse;
+
+        $r5 = virtualinvoke $r1.<com.google.masf.protocol.SimpleRequest: java.lang.String getServiceUri()>();
+
+        $r3 = new com.google.masf.protocol.MultipartResponseBuilder;
+
+        $i0 = virtualinvoke $r2.<com.google.masf.protocol.Block: int getId()>();
+
+        $i1 = virtualinvoke $r2.<com.google.masf.protocol.Response: int getStatusCode()>();
+
+        $r4 = virtualinvoke $r2.<com.google.masf.protocol.MultipartResponse: com.google.masf.protocol.BodyPart getRoot()>();
+
+        specialinvoke $r3.<com.google.masf.protocol.MultipartResponseBuilder: void <init>(int,int,com.google.masf.protocol.BodyPart)>($i0, $i1, $r4);
+
+        $r6 = new java.util.Hashtable;
+
+        specialinvoke $r6.<java.util.Hashtable: void <init>()>();
+
+        $r7 = virtualinvoke $r2.<com.google.masf.protocol.MultipartResponse: com.google.masf.protocol.BodyPart[] getBodyParts()>();
+
+        $i0 = 0;
+
+     label01:
+        $i1 = lengthof $r7;
+
+        if $i0 >= $i1 goto label05;
+
+        $r4 = $r7[$i0];
+
+        $r8 = virtualinvoke $r4.<com.google.masf.protocol.BodyPart: java.util.Hashtable getProperties()>();
+
+        $r9 = virtualinvoke $r8.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>("Content-Location");
+
+        $r10 = (java.lang.String) $r9;
+
+        if $r10 == null goto label04;
+
+        $z0 = virtualinvoke $r10.<java.lang.String: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 != 0 goto label04;
+
+        $r9 = virtualinvoke $r6.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r10);
+
+        $r11 = (com.google.masf.protocol.MultipartResponseBuilder) $r9;
+
+        if $r11 != null goto label03;
+
+        $r8 = virtualinvoke $r4.<com.google.masf.protocol.BodyPart: java.util.Hashtable getProperties()>();
+
+        $r9 = virtualinvoke $r8.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>("X-Masf-Response-Code");
+
+        $r12 = (java.lang.String) $r9;
+
+        $r11 = new com.google.masf.protocol.MultipartResponseBuilder;
+
+        $i1 = virtualinvoke $r2.<com.google.masf.protocol.Block: int getId()>();
+
+        $i2 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r12);
+
+        specialinvoke $r11.<com.google.masf.protocol.MultipartResponseBuilder: void <init>(int,int,com.google.masf.protocol.BodyPart)>($i1, $i2, $r4);
+
+        virtualinvoke $r6.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r10, $r11);
+
+     label02:
+        $i0 = $i0 + 1;
+
+        goto label01;
+
+     label03:
+        virtualinvoke $r11.<com.google.masf.protocol.MultipartResponseBuilder: void addBodyPart(com.google.masf.protocol.BodyPart)>($r4);
+
+        goto label02;
+
+     label04:
+        virtualinvoke $r3.<com.google.masf.protocol.MultipartResponseBuilder: void addBodyPart(com.google.masf.protocol.BodyPart)>($r4);
+
+        goto label02;
+
+     label05:
+        $r13 = virtualinvoke $r6.<java.util.Hashtable: java.util.Enumeration keys()>();
+
+        $r9 = $r0.<com.google.masf.MobileServiceMux: java.lang.Object mutex>;
+
+        entermonitor $r9;
+
+     label06:
+        $z0 = interfaceinvoke $r13.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label09;
+
+        $r14 = interfaceinvoke $r13.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        $r15 = virtualinvoke $r6.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r14);
+
+        $r11 = (com.google.masf.protocol.MultipartResponseBuilder) $r15;
+
+        $r16 = $r0.<com.google.masf.MobileServiceMux: com.google.masf.OneTimeCache responseCache>;
+
+        $r2 = virtualinvoke $r11.<com.google.masf.protocol.MultipartResponseBuilder: com.google.masf.protocol.MultipartResponse toMultipartResponse()>();
+
+        virtualinvoke $r16.<com.google.masf.OneTimeCache: void put(java.lang.Object,java.lang.Object)>($r14, $r2);
+
+        goto label06;
+
+     label07:
+        $r17 := @caughtexception;
+
+        exitmonitor $r9;
+
+     label08:
+        throw $r17;
+
+     label09:
+        exitmonitor $r9;
+
+     label10:
+        $r2 = virtualinvoke $r3.<com.google.masf.protocol.MultipartResponseBuilder: com.google.masf.protocol.MultipartResponse toMultipartResponse()>();
+
+        return $r2;
+
+        catch java.lang.Throwable from label06 to label08 with label07;
+        catch java.lang.Throwable from label09 to label10 with label07;
+    }
+
+    private void requeueRequest(com.google.masf.protocol.Request, java.lang.Exception)
+    {
+        com.google.masf.MobileServiceMux $r0;
+        com.google.masf.protocol.Request $r1;
+        java.lang.Exception $r2;
+        boolean $z0;
+        long $l0;
+        com.google.masf.protocol.Request$Listener $r3;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $r1 := @parameter0: com.google.masf.protocol.Request;
+
+        $r2 := @parameter1: java.lang.Exception;
+
+        $z0 = virtualinvoke $r1.<com.google.masf.protocol.Request: boolean shouldRetry()>();
+
+        if $z0 == 0 goto label1;
+
+        $l0 = virtualinvoke $r1.<com.google.masf.protocol.Request: long getRetryTimeout()>();
+
+        virtualinvoke $r0.<com.google.masf.MobileServiceMux: void submitRequest(com.google.masf.protocol.Request,long,boolean)>($r1, $l0, 1);
+
+        return;
+
+     label1:
+        $r3 = virtualinvoke $r1.<com.google.masf.protocol.Request: com.google.masf.protocol.Request$Listener getListener()>();
+
+        interfaceinvoke $r3.<com.google.masf.protocol.Request$Listener: void requestFailed(com.google.masf.protocol.Request,java.lang.Exception)>($r1, $r2);
+
+        return;
+    }
+
+    private void requeueRequests(java.lang.Object[], java.lang.Exception)
+    {
+        com.google.masf.MobileServiceMux $r0;
+        java.lang.Object[] $r1;
+        java.lang.Exception $r2;
+        int $i0, $i1;
+        java.lang.Object $r3;
+        com.google.masf.protocol.Request $r4;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $r1 := @parameter0: java.lang.Object[];
+
+        $r2 := @parameter1: java.lang.Exception;
+
+        $i0 = 0;
+
+     label1:
+        $i1 = lengthof $r1;
+
+        if $i0 >= $i1 goto label3;
+
+        $r3 = $r1[$i0];
+
+        $r4 = (com.google.masf.protocol.Request) $r3;
+
+        if $r4 == null goto label2;
+
+        specialinvoke $r0.<com.google.masf.MobileServiceMux: void requeueRequest(com.google.masf.protocol.Request,java.lang.Exception)>($r4, $r2);
+
+     label2:
+        $r1[$i0] = null;
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    private void scheduleFlush()
+    {
+        com.google.masf.MobileServiceMux $r0;
+        long $l0, $l1, $l2;
+        byte $b3;
+        com.google.common.task.TimerTask $r1;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l0 = 10L + $l1;
+
+        $l2 = $r0.<com.google.masf.MobileServiceMux: long nextFlush>;
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 != 0 goto label1;
+
+        $l1 = $l1 + 100L;
+
+        $r0.<com.google.masf.MobileServiceMux: long hardDeadline> = $l1;
+
+        $r0.<com.google.masf.MobileServiceMux: long nextFlush> = $l0;
+
+        $r1 = $r0.<com.google.masf.MobileServiceMux: com.google.common.task.TimerTask flushTask>;
+
+        $l0 = $r0.<com.google.masf.MobileServiceMux: long nextFlush>;
+
+        virtualinvoke $r1.<com.google.common.task.TimerTask: void setDeadline(long)>($l0);
+
+        $r1 = $r0.<com.google.masf.MobileServiceMux: com.google.common.task.TimerTask flushTask>;
+
+        virtualinvoke $r1.<com.google.common.task.TimerTask: void schedule()>();
+
+        return;
+
+     label1:
+        $l1 = $r0.<com.google.masf.MobileServiceMux: long hardDeadline>;
+
+        $b3 = $l0 cmp $l1;
+
+        if $b3 >= 0 goto label2;
+
+        $r0.<com.google.masf.MobileServiceMux: long nextFlush> = $l0;
+
+        return;
+
+     label2:
+        $l0 = $r0.<com.google.masf.MobileServiceMux: long nextFlush>;
+
+        $l1 = $r0.<com.google.masf.MobileServiceMux: long hardDeadline>;
+
+        $b3 = $l0 cmp $l1;
+
+        if $b3 >= 0 goto label3;
+
+        $l0 = $r0.<com.google.masf.MobileServiceMux: long hardDeadline>;
+
+        $r0.<com.google.masf.MobileServiceMux: long nextFlush> = $l0;
+
+        return;
+
+     label3:
+        return;
+    }
+
+    private void sendRequests(java.util.Vector) throws java.io.IOException
+    {
+        com.google.masf.MobileServiceMux $r0;
+        java.util.Vector $r1;
+        int $i0, $i1;
+        java.io.InputStream[] $r2;
+        com.google.masf.protocol.Request[] $r3;
+        com.google.masf.protocol.Request $r4;
+        java.io.InputStream $r5;
+        com.google.common.async.AsyncHttpRequestFactory $r6;
+        java.lang.String $r7;
+        com.google.common.async.AsyncHttpRequest $r8;
+        com.google.common.io.SequenceInputStream $r9, $r11;
+        com.google.masf.protocol.HeaderRequest $r10;
+        long $l2;
+        com.google.common.task.Task $r12;
+        com.google.common.task.TaskRunner $r13;
+        com.google.masf.MobileServiceMux$3 $r14;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $r1 := @parameter0: java.util.Vector;
+
+        $i0 = virtualinvoke $r1.<java.util.Vector: int size()>();
+
+        $r2 = newarray (java.io.InputStream)[$i0];
+
+        $i0 = virtualinvoke $r1.<java.util.Vector: int size()>();
+
+        $r3 = newarray (com.google.masf.protocol.Request)[$i0];
+
+        virtualinvoke $r1.<java.util.Vector: void copyInto(java.lang.Object[])>($r3);
+
+        $i0 = 0;
+
+     label1:
+        $i1 = lengthof $r3;
+
+        if $i0 >= $i1 goto label2;
+
+        $r4 = $r3[$i0];
+
+        $r5 = virtualinvoke $r4.<com.google.masf.protocol.Request: java.io.InputStream getInputStream()>();
+
+        $r2[$i0] = $r5;
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label2:
+        $r6 = $r0.<com.google.masf.MobileServiceMux: com.google.common.async.AsyncHttpRequestFactory asyncFactory>;
+
+        $r7 = $r0.<com.google.masf.MobileServiceMux: java.lang.String serverAddress>;
+
+        $r8 = virtualinvoke $r6.<com.google.common.async.AsyncHttpRequestFactory: com.google.common.async.AsyncHttpRequest createAsyncHttpRequest(java.lang.String)>($r7);
+
+        interfaceinvoke $r8.<com.google.common.async.AsyncHttpRequest: void setMethod(java.lang.String)>("POST");
+
+        $r9 = new com.google.common.io.SequenceInputStream;
+
+        $r10 = $r0.<com.google.masf.MobileServiceMux: com.google.masf.protocol.HeaderRequest headerRequest>;
+
+        $r5 = virtualinvoke $r10.<com.google.masf.protocol.HeaderRequest: java.io.InputStream getInputStream()>();
+
+        $r11 = new com.google.common.io.SequenceInputStream;
+
+        specialinvoke $r11.<com.google.common.io.SequenceInputStream: void <init>(java.io.InputStream[])>($r2);
+
+        specialinvoke $r9.<com.google.common.io.SequenceInputStream: void <init>(java.io.InputStream,java.io.InputStream)>($r5, $r11);
+
+        $i0 = virtualinvoke $r9.<com.google.common.io.SequenceInputStream: int available()>();
+
+        interfaceinvoke $r8.<com.google.common.async.AsyncHttpRequest: void setPayload(java.io.InputStream)>($r9);
+
+        $i1 = <com.google.masf.MobileServiceMux: int workerTimeout>;
+
+        $l2 = (long) $i1;
+
+        interfaceinvoke $r8.<com.google.common.async.AsyncHttpRequest: void setWatchdogDelay(long)>($l2);
+
+        $r12 = new com.google.common.task.Task;
+
+        $r13 = $r0.<com.google.masf.MobileServiceMux: com.google.common.task.TaskRunner taskRunner>;
+
+        $r14 = new com.google.masf.MobileServiceMux$3;
+
+        specialinvoke $r14.<com.google.masf.MobileServiceMux$3: void <init>(com.google.masf.MobileServiceMux,com.google.common.async.AsyncHttpRequest,com.google.masf.protocol.Request[],int)>($r0, $r8, $r3, $i0);
+
+        specialinvoke $r12.<com.google.common.task.Task: void <init>(com.google.common.task.TaskRunner,java.lang.Runnable)>($r13, $r14);
+
+        interfaceinvoke $r8.<com.google.common.async.AsyncHttpRequest: void submit(com.google.common.task.AbstractTask)>($r12);
+
+        return;
+    }
+
+    public void addListener(com.google.masf.MobileServiceMux$Listener)
+    {
+        com.google.masf.MobileServiceMux $r0;
+        com.google.masf.MobileServiceMux$Listener $r1;
+        java.util.Vector $r2, $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $r1 := @parameter0: com.google.masf.MobileServiceMux$Listener;
+
+        $r2 = $r0.<com.google.masf.MobileServiceMux: java.util.Vector listeners>;
+
+        entermonitor $r2;
+
+     label1:
+        $r3 = $r0.<com.google.masf.MobileServiceMux: java.util.Vector listeners>;
+
+        virtualinvoke $r3.<java.util.Vector: void addElement(java.lang.Object)>($r1);
+
+        exitmonitor $r2;
+
+     label2:
+        return;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label4:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void cancelResumableRequest(com.google.masf.services.resume.ResumableRequest)
+    {
+        com.google.masf.MobileServiceMux $r0;
+        com.google.masf.services.resume.ResumableRequest $r1;
+        com.google.masf.services.resume.ResumeService $r2;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $r1 := @parameter0: com.google.masf.services.resume.ResumableRequest;
+
+        $r2 = $r0.<com.google.masf.MobileServiceMux: com.google.masf.services.resume.ResumeService resumeService>;
+
+        virtualinvoke $r2.<com.google.masf.services.resume.ResumeService: void cancelRequest(com.google.masf.services.resume.ResumableRequest)>($r1);
+
+        return;
+    }
+
+    public com.google.common.io.GoogleHttpConnection createConnection(java.lang.String, boolean) throws java.lang.SecurityException
+    {
+        com.google.masf.MobileServiceMux $r0;
+        java.lang.String $r1;
+        boolean $z0;
+        com.google.masf.MultiplexedHttpConnection $r2;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $z0 := @parameter1: boolean;
+
+        $r2 = new com.google.masf.MultiplexedHttpConnection;
+
+        specialinvoke $r2.<com.google.masf.MultiplexedHttpConnection: void <init>(java.lang.String,boolean)>($r1, $z0);
+
+        return $r2;
+    }
+
+    public void disposeResumableRequest(com.google.masf.services.resume.ResumableRequest)
+    {
+        com.google.masf.MobileServiceMux $r0;
+        com.google.masf.services.resume.ResumableRequest $r1;
+        com.google.masf.services.resume.ResumeService $r2;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $r1 := @parameter0: com.google.masf.services.resume.ResumableRequest;
+
+        $r2 = $r0.<com.google.masf.MobileServiceMux: com.google.masf.services.resume.ResumeService resumeService>;
+
+        virtualinvoke $r2.<com.google.masf.services.resume.ResumeService: void disposeRequest(com.google.masf.services.resume.ResumableRequest)>($r1);
+
+        return;
+    }
+
+    public void flushRequests()
+    {
+        com.google.masf.MobileServiceMux $r0;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        specialinvoke $r0.<com.google.masf.MobileServiceMux: void processRequests()>();
+
+        return;
+    }
+
+    public int getBytesReceived()
+    {
+        com.google.masf.MobileServiceMux $r0;
+        int i0;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        i0 = $r0.<com.google.masf.MobileServiceMux: int bytesReceived>;
+
+        return i0;
+    }
+
+    public int getBytesSent()
+    {
+        com.google.masf.MobileServiceMux $r0;
+        int i0;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        i0 = $r0.<com.google.masf.MobileServiceMux: int bytesSent>;
+
+        return i0;
+    }
+
+    public boolean getNetworkWorkedThisSession()
+    {
+        com.google.masf.MobileServiceMux $r0;
+        boolean $z0;
+        com.google.common.io.HttpConnectionFactory $r1;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $r1 = $r0.<com.google.masf.MobileServiceMux: com.google.common.io.HttpConnectionFactory connectionFactory>;
+
+        $z0 = interfaceinvoke $r1.<com.google.common.io.HttpConnectionFactory: boolean getNetworkWorkedThisSession()>();
+
+        return $z0;
+    }
+
+    public int getResumableChunkSize()
+    {
+        com.google.masf.MobileServiceMux $r0;
+        int $i0;
+        com.google.masf.services.resume.ResumeService $r1;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $r1 = $r0.<com.google.masf.MobileServiceMux: com.google.masf.services.resume.ResumeService resumeService>;
+
+        $i0 = virtualinvoke $r1.<com.google.masf.services.resume.ResumeService: int getChunkSize()>();
+
+        return $i0;
+    }
+
+    public boolean isEndToEndSecure()
+    {
+        com.google.masf.MobileServiceMux $r0;
+        boolean $z0;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $z0 = virtualinvoke $r0.<com.google.masf.MobileServiceMux: boolean isHttps()>();
+
+        if $z0 == 0 goto label1;
+
+        $z0 = $r0.<com.google.masf.MobileServiceMux: boolean requireEndToEndSecure>;
+
+        return $z0;
+
+     label1:
+        return 0;
+    }
+
+    public boolean isHttps()
+    {
+        com.google.masf.MobileServiceMux $r0;
+        boolean $z0;
+        java.lang.String $r1;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $r1 = $r0.<com.google.masf.MobileServiceMux: java.lang.String serverAddress>;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>("https:/");
+
+        return $z0;
+    }
+
+    public int isNetworkAvailable()
+    {
+        com.google.masf.MobileServiceMux $r0;
+        int $i0;
+        com.google.common.io.HttpConnectionFactory $r1;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $r1 = $r0.<com.google.masf.MobileServiceMux: com.google.common.io.HttpConnectionFactory connectionFactory>;
+
+        $i0 = interfaceinvoke $r1.<com.google.common.io.HttpConnectionFactory: int isNetworkAvailable()>();
+
+        return $i0;
+    }
+
+    public int peekRequestId()
+    {
+        com.google.masf.MobileServiceMux $r0;
+        java.lang.Throwable $r1;
+        int i0;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        entermonitor $r0;
+
+     label1:
+        i0 = $r0.<com.google.masf.MobileServiceMux: int requestId>;
+
+     label2:
+        exitmonitor $r0;
+
+        return i0;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public void removeListener(com.google.masf.MobileServiceMux$Listener)
+    {
+        com.google.masf.MobileServiceMux $r0;
+        com.google.masf.MobileServiceMux$Listener $r1;
+        java.util.Vector $r2, $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $r1 := @parameter0: com.google.masf.MobileServiceMux$Listener;
+
+        $r2 = $r0.<com.google.masf.MobileServiceMux: java.util.Vector listeners>;
+
+        entermonitor $r2;
+
+     label1:
+        $r3 = $r0.<com.google.masf.MobileServiceMux: java.util.Vector listeners>;
+
+        virtualinvoke $r3.<java.util.Vector: boolean removeElement(java.lang.Object)>($r1);
+
+        exitmonitor $r2;
+
+     label2:
+        return;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label4:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void requireEndToEndSecure(boolean) throws java.io.IOException
+    {
+        com.google.masf.MobileServiceMux $r0;
+        boolean $z0, $z1;
+        java.io.IOException $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $z0 := @parameter0: boolean;
+
+        entermonitor $r0;
+
+        if $z0 == 0 goto label3;
+
+     label1:
+        $z1 = virtualinvoke $r0.<com.google.masf.MobileServiceMux: boolean isHttps()>();
+
+        if $z1 != 0 goto label3;
+
+        $r1 = new java.io.IOException;
+
+        specialinvoke $r1.<java.io.IOException: void <init>(java.lang.String)>("End to end secure not possible: not https");
+
+        throw $r1;
+
+     label2:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r2;
+
+     label3:
+        $r0.<com.google.masf.MobileServiceMux: boolean requireEndToEndSecure> = $z0;
+
+     label4:
+        exitmonitor $r0;
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label2;
+        catch java.lang.Throwable from label3 to label4 with label2;
+    }
+
+    public void setResumableChunkSize(int)
+    {
+        com.google.masf.MobileServiceMux $r0;
+        int $i0;
+        com.google.masf.services.resume.ResumeService $r1;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<com.google.masf.MobileServiceMux: com.google.masf.services.resume.ResumeService resumeService>;
+
+        virtualinvoke $r1.<com.google.masf.services.resume.ResumeService: void setChunkSize(int)>($i0);
+
+        return;
+    }
+
+    public void submitRequest(com.google.masf.protocol.Request)
+    {
+        com.google.masf.MobileServiceMux $r0;
+        com.google.masf.protocol.Request $r1;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $r1 := @parameter0: com.google.masf.protocol.Request;
+
+        virtualinvoke $r0.<com.google.masf.MobileServiceMux: void submitRequest(com.google.masf.protocol.Request,boolean)>($r1, 1);
+
+        return;
+    }
+
+    public void submitRequest(com.google.masf.protocol.Request, long)
+    {
+        com.google.masf.MobileServiceMux $r0;
+        com.google.masf.protocol.Request $r1;
+        long $l0;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $r1 := @parameter0: com.google.masf.protocol.Request;
+
+        $l0 := @parameter1: long;
+
+        virtualinvoke $r0.<com.google.masf.MobileServiceMux: void submitRequest(com.google.masf.protocol.Request,long,boolean)>($r1, $l0, 1);
+
+        return;
+    }
+
+    public void submitRequest(com.google.masf.protocol.Request, long, boolean)
+    {
+        com.google.masf.MobileServiceMux $r0;
+        com.google.masf.protocol.Request $r1;
+        long $l0;
+        boolean $z0;
+        com.google.masf.MobileServiceMux$2 $r2;
+        com.google.common.task.TimerTask $r3;
+        com.google.common.task.TaskRunner $r4;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $r1 := @parameter0: com.google.masf.protocol.Request;
+
+        $l0 := @parameter1: long;
+
+        $z0 := @parameter2: boolean;
+
+        $r2 = new com.google.masf.MobileServiceMux$2;
+
+        specialinvoke $r2.<com.google.masf.MobileServiceMux$2: void <init>(com.google.masf.MobileServiceMux,com.google.masf.protocol.Request,boolean)>($r0, $r1, $z0);
+
+        $r3 = new com.google.common.task.TimerTask;
+
+        $r4 = $r0.<com.google.masf.MobileServiceMux: com.google.common.task.TaskRunner taskRunner>;
+
+        specialinvoke $r3.<com.google.common.task.TimerTask: void <init>(com.google.common.task.TaskRunner,java.lang.Runnable)>($r4, $r2);
+
+        virtualinvoke $r3.<com.google.common.task.TimerTask: void setDelay(long)>($l0);
+
+        virtualinvoke $r3.<com.google.common.task.TimerTask: void schedule()>();
+
+        return;
+    }
+
+    public void submitRequest(com.google.masf.protocol.Request, boolean)
+    {
+        com.google.masf.MobileServiceMux $r0;
+        com.google.masf.protocol.Request $r1;
+        boolean $z0;
+        java.lang.Object $r2;
+        java.util.Vector $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $r1 := @parameter0: com.google.masf.protocol.Request;
+
+        $z0 := @parameter1: boolean;
+
+        $r2 = $r0.<com.google.masf.MobileServiceMux: java.lang.Object mutex>;
+
+        entermonitor $r2;
+
+     label1:
+        $r3 = $r0.<com.google.masf.MobileServiceMux: java.util.Vector requestQueue>;
+
+        virtualinvoke $r3.<java.util.Vector: void addElement(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label2;
+
+        specialinvoke $r0.<com.google.masf.MobileServiceMux: void scheduleFlush()>();
+
+     label2:
+        exitmonitor $r2;
+
+     label3:
+        return;
+
+     label4:
+        $r4 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label5:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public void submitResumableRequest(com.google.masf.services.resume.ResumableRequest)
+    {
+        com.google.masf.MobileServiceMux $r0;
+        com.google.masf.services.resume.ResumableRequest $r1;
+        com.google.masf.services.resume.ResumeService $r2;
+
+        $r0 := @this: com.google.masf.MobileServiceMux;
+
+        $r1 := @parameter0: com.google.masf.services.resume.ResumableRequest;
+
+        $r2 = $r0.<com.google.masf.MobileServiceMux: com.google.masf.services.resume.ResumeService resumeService>;
+
+        virtualinvoke $r2.<com.google.masf.services.resume.ResumeService: void submitRequest(com.google.masf.services.resume.ResumableRequest)>($r1);
+
+        return;
+    }
+}

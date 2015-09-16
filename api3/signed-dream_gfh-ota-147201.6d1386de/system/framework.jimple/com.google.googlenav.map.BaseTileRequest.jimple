@@ -1,0 +1,407 @@
+public abstract class com.google.googlenav.map.BaseTileRequest extends java.lang.Object implements com.google.common.DataRequest
+{
+    public static final int TILE3_REQUEST_ID;
+    static final int TILE_OK;
+    protected final long createTime;
+    private final int requestType;
+    private int writeLatency;
+
+    protected void <init>(int)
+    {
+        com.google.googlenav.map.BaseTileRequest $r0;
+        int $i0;
+        long $l1;
+
+        $r0 := @this: com.google.googlenav.map.BaseTileRequest;
+
+        $i0 := @parameter0: int;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r0.<com.google.googlenav.map.BaseTileRequest: long createTime> = $l1;
+
+        $r0.<com.google.googlenav.map.BaseTileRequest: int requestType> = $i0;
+
+        return;
+    }
+
+    private static java.lang.String formatTileTypesForLog(int)
+    {
+        int $i0, $i1;
+        java.lang.String $r0;
+        java.util.Vector $r1;
+
+        $i0 := @parameter0: int;
+
+        $r1 = new java.util.Vector;
+
+        specialinvoke $r1.<java.util.Vector: void <init>()>();
+
+        $i1 = $i0 & 4;
+
+        if $i1 == 0 goto label1;
+
+        virtualinvoke $r1.<java.util.Vector: void addElement(java.lang.Object)>("m");
+
+     label1:
+        $i1 = $i0 & 8;
+
+        if $i1 == 0 goto label2;
+
+        virtualinvoke $r1.<java.util.Vector: void addElement(java.lang.Object)>("s");
+
+     label2:
+        $i1 = $i0 & 64;
+
+        if $i1 == 0 goto label3;
+
+        virtualinvoke $r1.<java.util.Vector: void addElement(java.lang.Object)>("h");
+
+     label3:
+        $i1 = $i0 & 16;
+
+        if $i1 != 0 goto label4;
+
+        $i0 = $i0 & 128;
+
+        if $i0 == 0 goto label5;
+
+     label4:
+        virtualinvoke $r1.<java.util.Vector: void addElement(java.lang.Object)>("t");
+
+     label5:
+        $r0 = staticinvoke <com.google.common.util.text.TextUtil: java.lang.String join(java.util.Vector,java.lang.String)>($r1, ",");
+
+        return $r0;
+    }
+
+    private byte[] readImageData(java.io.DataInput) throws java.io.IOException
+    {
+        com.google.googlenav.map.BaseTileRequest $r0;
+        java.io.DataInput $r1;
+        byte[] $r2;
+        int $i0;
+
+        $r0 := @this: com.google.googlenav.map.BaseTileRequest;
+
+        $r1 := @parameter0: java.io.DataInput;
+
+        $i0 = interfaceinvoke $r1.<java.io.DataInput: int readUnsignedShort()>();
+
+        $r2 = newarray (byte)[$i0];
+
+        $i0 = $i0 / 6;
+
+        $i0 = $i0 + 10;
+
+        staticinvoke <com.google.common.StaticUtil: void simulateLatency(java.lang.String,int)>("MAP", $i0);
+
+        interfaceinvoke $r1.<java.io.DataInput: void readFully(byte[])>($r2);
+
+        return $r2;
+    }
+
+    public int getRequestType()
+    {
+        com.google.googlenav.map.BaseTileRequest $r0;
+        int i0;
+
+        $r0 := @this: com.google.googlenav.map.BaseTileRequest;
+
+        i0 = $r0.<com.google.googlenav.map.BaseTileRequest: int requestType>;
+
+        return i0;
+    }
+
+    protected abstract void handleEndOfResponse(int);
+
+    public boolean isForeground()
+    {
+        com.google.googlenav.map.BaseTileRequest $r0;
+
+        $r0 := @this: com.google.googlenav.map.BaseTileRequest;
+
+        return 1;
+    }
+
+    public boolean isSubmission()
+    {
+        com.google.googlenav.map.BaseTileRequest $r0;
+
+        $r0 := @this: com.google.googlenav.map.BaseTileRequest;
+
+        return 0;
+    }
+
+    protected abstract boolean processDownloadedTile(int, com.google.googlenav.map.Tile, byte[]) throws java.io.IOException;
+
+    public boolean readResponseData(java.io.DataInput) throws java.io.IOException
+    {
+        com.google.googlenav.map.BaseTileRequest $r0;
+        java.io.DataInput $r1;
+        int $i0, $i3, $i4, $i5, $i6, $i7;
+        long $l1, $l2;
+        java.lang.StringBuilder $r2;
+        java.lang.String $r3, $r8, $r9;
+        java.io.IOException $r4;
+        java.lang.Throwable $r5;
+        com.google.googlenav.map.Tile $r6;
+        byte[] $r7;
+        boolean $z0;
+        byte $b8;
+
+        $r0 := @this: com.google.googlenav.map.BaseTileRequest;
+
+        $r1 := @parameter0: java.io.DataInput;
+
+        $i0 = 0;
+
+     label01:
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l2 = $r0.<com.google.googlenav.map.BaseTileRequest: long createTime>;
+
+        $l1 = $l1 - $l2;
+
+        $i3 = (int) $l1;
+
+        $i4 = interfaceinvoke $r1.<java.io.DataInput: int readUnsignedShort()>();
+
+        virtualinvoke $r0.<com.google.googlenav.map.BaseTileRequest: void setTileEdition(int)>($i4);
+
+        $i4 = $r0.<com.google.googlenav.map.BaseTileRequest: int requestType>;
+
+        if $i4 != 26 goto label18;
+
+        $i4 = interfaceinvoke $r1.<java.io.DataInput: int readUnsignedByte()>();
+
+        if $i4 == 0 goto label04;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Server returned response code ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.google.common.Log: void log(java.lang.String)>($r3);
+
+        $r4 = new java.io.IOException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Server returned: ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.io.IOException: void <init>(java.lang.String)>($r3);
+
+        throw $r4;
+
+     label02:
+        $r5 := @caughtexception;
+
+        $i3 = 0;
+
+     label03:
+        virtualinvoke $r0.<com.google.googlenav.map.BaseTileRequest: void handleEndOfResponse(int)>($i3);
+
+        throw $r5;
+
+     label04:
+        $i4 = interfaceinvoke $r1.<java.io.DataInput: int readUnsignedShort()>();
+
+     label05:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("TileCount=");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i4);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.google.common.Log: void log(java.lang.String,java.lang.String)>("MAP", $r3);
+
+     label06:
+        $i5 = 0;
+
+        $i6 = 0;
+
+     label07:
+        if $i6 >= $i4 goto label09;
+
+     label08:
+        staticinvoke <com.google.common.Log: void startTimer(java.lang.String)>("TileDownload");
+
+        $r6 = staticinvoke <com.google.googlenav.map.Tile: com.google.googlenav.map.Tile read(java.io.DataInput)>($r1);
+
+        $r7 = specialinvoke $r0.<com.google.googlenav.map.BaseTileRequest: byte[] readImageData(java.io.DataInput)>($r1);
+
+        $z0 = virtualinvoke $r0.<com.google.googlenav.map.BaseTileRequest: boolean processDownloadedTile(int,com.google.googlenav.map.Tile,byte[])>($i6, $r6, $r7);
+
+        if $z0 == 0 goto label14;
+
+     label09:
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l2 = $r0.<com.google.googlenav.map.BaseTileRequest: long createTime>;
+
+        $l1 = $l1 - $l2;
+
+        $i7 = (int) $l1;
+
+        $z0 = virtualinvoke $r0.<com.google.googlenav.map.BaseTileRequest: boolean isForeground()>();
+
+     label10:
+        if $z0 != 0 goto label16;
+
+        $r8 = "t-pc";
+
+     label11:
+        $r3 = "pc";
+
+     label12:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i7);
+
+        $r9 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.google.common.Log: boolean addEvent(short,java.lang.String,java.lang.String)>(22, $r8, $r9);
+
+        $r8 = staticinvoke <com.google.googlenav.map.BaseTileRequest: java.lang.String formatTileTypesForLog(int)>($i5);
+
+        $i5 = $r0.<com.google.googlenav.map.BaseTileRequest: int writeLatency>;
+
+        staticinvoke <com.google.googlenav.GmmLogger: void logTimingTileLatency(java.lang.String,int,int,int,int,int,java.lang.String)>($r8, $i5, $i3, $i7, $i4, $i0, $r3);
+
+     label13:
+        virtualinvoke $r0.<com.google.googlenav.map.BaseTileRequest: void handleEndOfResponse(int)>($i6);
+
+        return 1;
+
+     label14:
+        $i7 = lengthof $r7;
+
+        $i0 = $i7 + $i0;
+
+        $b8 = virtualinvoke $r6.<com.google.googlenav.map.Tile: byte getFlags()>();
+
+     label15:
+        $i7 = 1 << $b8;
+
+        $i5 = $i5 | $i7;
+
+        $i6 = $i6 + 1;
+
+        goto label07;
+
+     label16:
+        $r8 = "t";
+
+        $r3 = null;
+
+        goto label12;
+
+     label17:
+        $r5 := @caughtexception;
+
+        $i3 = $i6;
+
+        goto label03;
+
+     label18:
+        $i4 = 0;
+
+        goto label05;
+
+        catch java.lang.Throwable from label01 to label02 with label02;
+        catch java.lang.Throwable from label04 to label06 with label02;
+        catch java.lang.Throwable from label08 to label10 with label17;
+        catch java.lang.Throwable from label11 to label13 with label17;
+        catch java.lang.Throwable from label14 to label15 with label17;
+    }
+
+    protected abstract void setTileEdition(int);
+
+    protected void writeRequestForTiles(com.google.googlenav.map.Tile[], java.io.DataOutput) throws java.io.IOException
+    {
+        com.google.googlenav.map.BaseTileRequest $r0;
+        com.google.googlenav.map.Tile[] $r1;
+        java.io.DataOutput $r2;
+        long $l0, $l1;
+        int $i2, $i3;
+        com.google.googlenav.map.Tile $r3;
+
+        $r0 := @this: com.google.googlenav.map.BaseTileRequest;
+
+        $r1 := @parameter0: com.google.googlenav.map.Tile[];
+
+        $r2 := @parameter1: java.io.DataOutput;
+
+        $i2 = $r0.<com.google.googlenav.map.BaseTileRequest: int requestType>;
+
+        if $i2 != 26 goto label1;
+
+        $i2 = lengthof $r1;
+
+        interfaceinvoke $r2.<java.io.DataOutput: void writeShort(int)>($i2);
+
+        interfaceinvoke $r2.<java.io.DataOutput: void writeShort(int)>(1);
+
+        interfaceinvoke $r2.<java.io.DataOutput: void writeShort(int)>(128);
+
+        interfaceinvoke $r2.<java.io.DataOutput: void writeLong(long)>(175L);
+
+     label1:
+        $i2 = 0;
+
+     label2:
+        $i3 = lengthof $r1;
+
+        if $i2 >= $i3 goto label3;
+
+        $r3 = $r1[$i2];
+
+        virtualinvoke $r3.<com.google.googlenav.map.Tile: void write(java.io.DataOutput)>($r2);
+
+        $i2 = $i2 + 1;
+
+        goto label2;
+
+     label3:
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l0 = $r0.<com.google.googlenav.map.BaseTileRequest: long createTime>;
+
+        $l0 = $l1 - $l0;
+
+        $i2 = (int) $l0;
+
+        $r0.<com.google.googlenav.map.BaseTileRequest: int writeLatency> = $i2;
+
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <com.google.googlenav.map.BaseTileRequest: int TILE3_REQUEST_ID> = 26;
+
+        return;
+    }
+}

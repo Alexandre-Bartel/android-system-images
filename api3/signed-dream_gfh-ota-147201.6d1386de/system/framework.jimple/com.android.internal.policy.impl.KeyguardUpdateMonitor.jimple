@@ -1,0 +1,1126 @@
+public class com.android.internal.policy.impl.KeyguardUpdateMonitor extends java.lang.Object
+{
+    private static final boolean DEBUG;
+    private static final int LOW_BATTERY_THRESHOLD;
+    private static final int MSG_BATTERY_UPDATE;
+    private static final int MSG_CARRIER_INFO_UPDATE;
+    private static final int MSG_CONFIGURATION_CHANGED;
+    private static final int MSG_SIM_STATE_CHANGE;
+    private static final int MSG_TIME_UPDATE;
+    private static final java.lang.String TAG;
+    private int mBatteryLevel;
+    private java.util.ArrayList mConfigurationChangeCallbacks;
+    private android.database.ContentObserver mContentObserver;
+    private final android.content.Context mContext;
+    private boolean mDevicePluggedIn;
+    private boolean mDeviceProvisioned;
+    private int mFailedAttempts;
+    private android.os.Handler mHandler;
+    private boolean mInPortrait;
+    private java.util.ArrayList mInfoCallbacks;
+    private boolean mKeyboardOpen;
+    private com.android.internal.telephony.SimCard$State mSimState;
+    private java.util.ArrayList mSimStateCallbacks;
+    private java.lang.CharSequence mTelephonyPlmn;
+    private java.lang.CharSequence mTelephonySpn;
+
+    public void <init>(android.content.Context)
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        android.content.Context $r1, $r7;
+        android.content.IntentFilter $r2;
+        android.database.ContentObserver $r3;
+        com.android.internal.telephony.SimCard$State $r4;
+        java.util.ArrayList $r5;
+        com.android.internal.policy.impl.KeyguardUpdateMonitor$1 $r6;
+        android.content.ContentResolver $r8;
+        int $i0;
+        boolean $z0;
+        com.android.internal.policy.impl.KeyguardUpdateMonitor$2 $r9;
+        android.os.Handler $r10;
+        android.net.Uri $r11;
+        java.lang.CharSequence $r12;
+        com.android.internal.policy.impl.KeyguardUpdateMonitor$3 $r13;
+
+        $r0 := @this: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        $r1 := @parameter0: android.content.Context;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r4 = <com.android.internal.telephony.SimCard$State: com.android.internal.telephony.SimCard$State READY>;
+
+        $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: com.android.internal.telephony.SimCard$State mSimState> = $r4;
+
+        $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: int mFailedAttempts> = 0;
+
+        $r5 = staticinvoke <com.google.android.collect.Lists: java.util.ArrayList newArrayList()>();
+
+        $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.util.ArrayList mConfigurationChangeCallbacks> = $r5;
+
+        $r5 = staticinvoke <com.google.android.collect.Lists: java.util.ArrayList newArrayList()>();
+
+        $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.util.ArrayList mInfoCallbacks> = $r5;
+
+        $r5 = staticinvoke <com.google.android.collect.Lists: java.util.ArrayList newArrayList()>();
+
+        $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.util.ArrayList mSimStateCallbacks> = $r5;
+
+        $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: android.content.Context mContext> = $r1;
+
+        $r6 = new com.android.internal.policy.impl.KeyguardUpdateMonitor$1;
+
+        specialinvoke $r6.<com.android.internal.policy.impl.KeyguardUpdateMonitor$1: void <init>(com.android.internal.policy.impl.KeyguardUpdateMonitor)>($r0);
+
+        $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: android.os.Handler mHandler> = $r6;
+
+        $r7 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: android.content.Context mContext>;
+
+        $r8 = virtualinvoke $r7.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $i0 = staticinvoke <android.provider.Settings$Secure: int getInt(android.content.ContentResolver,java.lang.String,int)>($r8, "device_provisioned", 0);
+
+        if $i0 == 0 goto label4;
+
+        $z0 = 1;
+
+     label1:
+        $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: boolean mDeviceProvisioned> = $z0;
+
+        $z0 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: boolean mDeviceProvisioned>;
+
+        if $z0 != 0 goto label3;
+
+        $r9 = new com.android.internal.policy.impl.KeyguardUpdateMonitor$2;
+
+        $r10 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: android.os.Handler mHandler>;
+
+        specialinvoke $r9.<com.android.internal.policy.impl.KeyguardUpdateMonitor$2: void <init>(com.android.internal.policy.impl.KeyguardUpdateMonitor,android.os.Handler)>($r0, $r10);
+
+        $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: android.database.ContentObserver mContentObserver> = $r9;
+
+        $r7 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: android.content.Context mContext>;
+
+        $r8 = virtualinvoke $r7.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r11 = staticinvoke <android.provider.Settings$Secure: android.net.Uri getUriFor(java.lang.String)>("device_provisioned");
+
+        $r3 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: android.database.ContentObserver mContentObserver>;
+
+        virtualinvoke $r8.<android.content.ContentResolver: void registerContentObserver(android.net.Uri,boolean,android.database.ContentObserver)>($r11, 0, $r3);
+
+        $r7 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: android.content.Context mContext>;
+
+        $r8 = virtualinvoke $r7.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $i0 = staticinvoke <android.provider.Settings$Secure: int getInt(android.content.ContentResolver,java.lang.String,int)>($r8, "device_provisioned", 0);
+
+        if $i0 == 0 goto label5;
+
+        $z0 = 1;
+
+     label2:
+        $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: boolean mDeviceProvisioned> = $z0;
+
+     label3:
+        $z0 = virtualinvoke $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: boolean queryInPortrait()>();
+
+        $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: boolean mInPortrait> = $z0;
+
+        $z0 = virtualinvoke $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: boolean queryKeyboardOpen()>();
+
+        $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: boolean mKeyboardOpen> = $z0;
+
+        $r4 = <com.android.internal.telephony.SimCard$State: com.android.internal.telephony.SimCard$State READY>;
+
+        $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: com.android.internal.telephony.SimCard$State mSimState> = $r4;
+
+        $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: boolean mDevicePluggedIn> = 1;
+
+        $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: int mBatteryLevel> = 100;
+
+        $r12 = specialinvoke $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.lang.CharSequence getDefaultPlmn()>();
+
+        $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.lang.CharSequence mTelephonyPlmn> = $r12;
+
+        $r2 = new android.content.IntentFilter;
+
+        specialinvoke $r2.<android.content.IntentFilter: void <init>()>();
+
+        virtualinvoke $r2.<android.content.IntentFilter: void addAction(java.lang.String)>("android.intent.action.CONFIGURATION_CHANGED");
+
+        virtualinvoke $r2.<android.content.IntentFilter: void addAction(java.lang.String)>("android.intent.action.TIME_TICK");
+
+        virtualinvoke $r2.<android.content.IntentFilter: void addAction(java.lang.String)>("android.intent.action.TIME_SET");
+
+        virtualinvoke $r2.<android.content.IntentFilter: void addAction(java.lang.String)>("android.intent.action.BATTERY_CHANGED");
+
+        virtualinvoke $r2.<android.content.IntentFilter: void addAction(java.lang.String)>("android.intent.action.TIMEZONE_CHANGED");
+
+        virtualinvoke $r2.<android.content.IntentFilter: void addAction(java.lang.String)>("android.intent.action.SIM_STATE_CHANGED");
+
+        virtualinvoke $r2.<android.content.IntentFilter: void addAction(java.lang.String)>("android.provider.Telephony.SPN_STRINGS_UPDATED");
+
+        $r13 = new com.android.internal.policy.impl.KeyguardUpdateMonitor$3;
+
+        specialinvoke $r13.<com.android.internal.policy.impl.KeyguardUpdateMonitor$3: void <init>(com.android.internal.policy.impl.KeyguardUpdateMonitor)>($r0);
+
+        virtualinvoke $r1.<android.content.Context: android.content.Intent registerReceiver(android.content.BroadcastReceiver,android.content.IntentFilter)>($r13, $r2);
+
+        return;
+
+     label4:
+        $z0 = 0;
+
+        goto label1;
+
+     label5:
+        $z0 = 0;
+
+        goto label2;
+    }
+
+    static void access$000(com.android.internal.policy.impl.KeyguardUpdateMonitor)
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+
+        $r0 := @parameter0: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        specialinvoke $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: void handleConfigurationChange()>();
+
+        return;
+    }
+
+    static void access$100(com.android.internal.policy.impl.KeyguardUpdateMonitor)
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+
+        $r0 := @parameter0: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        specialinvoke $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: void handleTimeUpdate()>();
+
+        return;
+    }
+
+    static java.lang.CharSequence access$1000(com.android.internal.policy.impl.KeyguardUpdateMonitor, android.content.Intent)
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        android.content.Intent $r1;
+        java.lang.CharSequence $r2;
+
+        $r0 := @parameter0: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        $r1 := @parameter1: android.content.Intent;
+
+        $r2 = specialinvoke $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.lang.CharSequence getTelephonyPlmnFrom(android.content.Intent)>($r1);
+
+        return $r2;
+    }
+
+    static java.lang.CharSequence access$1102(com.android.internal.policy.impl.KeyguardUpdateMonitor, java.lang.CharSequence)
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        java.lang.CharSequence $r1;
+
+        $r0 := @parameter0: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        $r1 := @parameter1: java.lang.CharSequence;
+
+        $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.lang.CharSequence mTelephonySpn> = $r1;
+
+        return $r1;
+    }
+
+    static java.lang.CharSequence access$1200(com.android.internal.policy.impl.KeyguardUpdateMonitor, android.content.Intent)
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        android.content.Intent $r1;
+        java.lang.CharSequence $r2;
+
+        $r0 := @parameter0: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        $r1 := @parameter1: android.content.Intent;
+
+        $r2 = specialinvoke $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.lang.CharSequence getTelephonySpnFrom(android.content.Intent)>($r1);
+
+        return $r2;
+    }
+
+    static void access$200(com.android.internal.policy.impl.KeyguardUpdateMonitor, int, int)
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        int $i0, $i1;
+
+        $r0 := @parameter0: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        specialinvoke $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: void handleBatteryUpdate(int,int)>($i0, $i1);
+
+        return;
+    }
+
+    static void access$300(com.android.internal.policy.impl.KeyguardUpdateMonitor)
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+
+        $r0 := @parameter0: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        specialinvoke $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: void handleCarrierInfoUpdate()>();
+
+        return;
+    }
+
+    static void access$400(com.android.internal.policy.impl.KeyguardUpdateMonitor, com.android.internal.policy.impl.KeyguardUpdateMonitor$SimArgs)
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        com.android.internal.policy.impl.KeyguardUpdateMonitor$SimArgs $r1;
+
+        $r0 := @parameter0: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        $r1 := @parameter1: com.android.internal.policy.impl.KeyguardUpdateMonitor$SimArgs;
+
+        specialinvoke $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: void handleSimStateChange(com.android.internal.policy.impl.KeyguardUpdateMonitor$SimArgs)>($r1);
+
+        return;
+    }
+
+    static boolean access$500(com.android.internal.policy.impl.KeyguardUpdateMonitor)
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        boolean z0;
+
+        $r0 := @parameter0: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        z0 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: boolean mDeviceProvisioned>;
+
+        return z0;
+    }
+
+    static boolean access$502(com.android.internal.policy.impl.KeyguardUpdateMonitor, boolean)
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        $z0 := @parameter1: boolean;
+
+        $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: boolean mDeviceProvisioned> = $z0;
+
+        return $z0;
+    }
+
+    static android.content.Context access$600(com.android.internal.policy.impl.KeyguardUpdateMonitor)
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        android.content.Context r1;
+
+        $r0 := @parameter0: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        r1 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: android.content.Context mContext>;
+
+        return r1;
+    }
+
+    static android.database.ContentObserver access$700(com.android.internal.policy.impl.KeyguardUpdateMonitor)
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        android.database.ContentObserver r1;
+
+        $r0 := @parameter0: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        r1 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: android.database.ContentObserver mContentObserver>;
+
+        return r1;
+    }
+
+    static android.database.ContentObserver access$702(com.android.internal.policy.impl.KeyguardUpdateMonitor, android.database.ContentObserver)
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        android.database.ContentObserver $r1;
+
+        $r0 := @parameter0: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        $r1 := @parameter1: android.database.ContentObserver;
+
+        $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: android.database.ContentObserver mContentObserver> = $r1;
+
+        return $r1;
+    }
+
+    static android.os.Handler access$800(com.android.internal.policy.impl.KeyguardUpdateMonitor)
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        android.os.Handler r1;
+
+        $r0 := @parameter0: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        r1 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: android.os.Handler mHandler>;
+
+        return r1;
+    }
+
+    static java.lang.CharSequence access$902(com.android.internal.policy.impl.KeyguardUpdateMonitor, java.lang.CharSequence)
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        java.lang.CharSequence $r1;
+
+        $r0 := @parameter0: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        $r1 := @parameter1: java.lang.CharSequence;
+
+        $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.lang.CharSequence mTelephonyPlmn> = $r1;
+
+        return $r1;
+    }
+
+    private java.lang.CharSequence getDefaultPlmn()
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        android.content.Context $r1;
+        android.content.res.Resources $r2;
+        java.lang.CharSequence $r3;
+
+        $r0 := @this: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        $r1 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: android.content.Context mContext>;
+
+        $r2 = virtualinvoke $r1.<android.content.Context: android.content.res.Resources getResources()>();
+
+        $r3 = virtualinvoke $r2.<android.content.res.Resources: java.lang.CharSequence getText(int)>(17039707);
+
+        return $r3;
+    }
+
+    private java.lang.CharSequence getTelephonyPlmnFrom(android.content.Intent)
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        android.content.Intent $r1;
+        boolean $z0;
+        java.lang.String $r2;
+        java.lang.CharSequence $r3;
+
+        $r0 := @this: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $z0 = virtualinvoke $r1.<android.content.Intent: boolean getBooleanExtra(java.lang.String,boolean)>("showPlmn", 0);
+
+        if $z0 == 0 goto label2;
+
+        $r2 = virtualinvoke $r1.<android.content.Intent: java.lang.String getStringExtra(java.lang.String)>("plmn");
+
+        if $r2 == null goto label1;
+
+        return $r2;
+
+     label1:
+        $r3 = specialinvoke $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.lang.CharSequence getDefaultPlmn()>();
+
+        return $r3;
+
+     label2:
+        return null;
+    }
+
+    private java.lang.CharSequence getTelephonySpnFrom(android.content.Intent)
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        android.content.Intent $r1;
+        boolean $z0;
+        java.lang.String $r2;
+
+        $r0 := @this: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $z0 = virtualinvoke $r1.<android.content.Intent: boolean getBooleanExtra(java.lang.String,boolean)>("showSpn", 0);
+
+        if $z0 == 0 goto label1;
+
+        $r2 = virtualinvoke $r1.<android.content.Intent: java.lang.String getStringExtra(java.lang.String)>("spn");
+
+        if $r2 == null goto label1;
+
+        return $r2;
+
+     label1:
+        return null;
+    }
+
+    private void handleBatteryUpdate(int, int)
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        int $i0, $i1, $i2, $i3;
+        boolean $z0, $z1;
+        java.util.ArrayList $r1;
+        java.lang.Object $r2;
+        com.android.internal.policy.impl.KeyguardUpdateMonitor$InfoCallback $r3;
+        android.content.Context $r4;
+
+        $r0 := @this: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $z0 = specialinvoke $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: boolean isPluggedIn(int)>($i0);
+
+        $z1 = specialinvoke $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: boolean isBatteryUpdateInteresting(boolean,int)>($z0, $i1);
+
+        if $z1 == 0 goto label2;
+
+        $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: int mBatteryLevel> = $i1;
+
+        $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: boolean mDevicePluggedIn> = $z0;
+
+        $i2 = 0;
+
+     label1:
+        $r1 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.util.ArrayList mInfoCallbacks>;
+
+        $i3 = virtualinvoke $r1.<java.util.ArrayList: int size()>();
+
+        if $i2 >= $i3 goto label2;
+
+        $r1 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.util.ArrayList mInfoCallbacks>;
+
+        $r2 = virtualinvoke $r1.<java.util.ArrayList: java.lang.Object get(int)>($i2);
+
+        $r3 = (com.android.internal.policy.impl.KeyguardUpdateMonitor$InfoCallback) $r2;
+
+        $z1 = virtualinvoke $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: boolean shouldShowBatteryInfo()>();
+
+        interfaceinvoke $r3.<com.android.internal.policy.impl.KeyguardUpdateMonitor$InfoCallback: void onRefreshBatteryInfo(boolean,boolean,int)>($z1, $z0, $i1);
+
+        $i2 = $i2 + 1;
+
+        goto label1;
+
+     label2:
+        if $i1 != 0 goto label3;
+
+        if $i0 == 2 goto label4;
+
+        if $i0 == 1 goto label5;
+
+        $r4 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: android.content.Context mContext>;
+
+        staticinvoke <com.android.internal.policy.impl.ShutdownThread: void shutdownAfterDisablingRadio(android.content.Context,boolean)>($r4, 0);
+
+        return;
+
+     label3:
+        return;
+
+     label4:
+        return;
+
+     label5:
+        return;
+    }
+
+    private void handleCarrierInfoUpdate()
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        java.lang.CharSequence $r1, $r2;
+        int $i0, $i1;
+        java.util.ArrayList $r3;
+        java.lang.Object $r4;
+        com.android.internal.policy.impl.KeyguardUpdateMonitor$InfoCallback $r5;
+
+        $r0 := @this: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        $i0 = 0;
+
+     label1:
+        $r3 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.util.ArrayList mInfoCallbacks>;
+
+        $i1 = virtualinvoke $r3.<java.util.ArrayList: int size()>();
+
+        if $i0 >= $i1 goto label2;
+
+        $r3 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.util.ArrayList mInfoCallbacks>;
+
+        $r4 = virtualinvoke $r3.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r5 = (com.android.internal.policy.impl.KeyguardUpdateMonitor$InfoCallback) $r4;
+
+        $r1 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.lang.CharSequence mTelephonyPlmn>;
+
+        $r2 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.lang.CharSequence mTelephonySpn>;
+
+        interfaceinvoke $r5.<com.android.internal.policy.impl.KeyguardUpdateMonitor$InfoCallback: void onRefreshCarrierInfo(java.lang.CharSequence,java.lang.CharSequence)>($r1, $r2);
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    private void handleConfigurationChange()
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        boolean $z0, $z1;
+        int $i0, $i1;
+        java.util.ArrayList $r1;
+        java.lang.Object $r2;
+        com.android.internal.policy.impl.KeyguardUpdateMonitor$ConfigurationChangeCallback $r3;
+
+        $r0 := @this: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        $z0 = virtualinvoke $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: boolean queryInPortrait()>();
+
+        $z1 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: boolean mInPortrait>;
+
+        if $z1 == $z0 goto label2;
+
+        $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: boolean mInPortrait> = $z0;
+
+        $i0 = 0;
+
+     label1:
+        $r1 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.util.ArrayList mConfigurationChangeCallbacks>;
+
+        $i1 = virtualinvoke $r1.<java.util.ArrayList: int size()>();
+
+        if $i0 >= $i1 goto label2;
+
+        $r1 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.util.ArrayList mConfigurationChangeCallbacks>;
+
+        $r2 = virtualinvoke $r1.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r3 = (com.android.internal.policy.impl.KeyguardUpdateMonitor$ConfigurationChangeCallback) $r2;
+
+        interfaceinvoke $r3.<com.android.internal.policy.impl.KeyguardUpdateMonitor$ConfigurationChangeCallback: void onOrientationChange(boolean)>($z0);
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label2:
+        $z0 = virtualinvoke $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: boolean queryKeyboardOpen()>();
+
+        $z1 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: boolean mKeyboardOpen>;
+
+        if $z1 == $z0 goto label4;
+
+        $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: boolean mKeyboardOpen> = $z0;
+
+        $i0 = 0;
+
+     label3:
+        $r1 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.util.ArrayList mConfigurationChangeCallbacks>;
+
+        $i1 = virtualinvoke $r1.<java.util.ArrayList: int size()>();
+
+        if $i0 >= $i1 goto label5;
+
+        $r1 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.util.ArrayList mConfigurationChangeCallbacks>;
+
+        $r2 = virtualinvoke $r1.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r3 = (com.android.internal.policy.impl.KeyguardUpdateMonitor$ConfigurationChangeCallback) $r2;
+
+        interfaceinvoke $r3.<com.android.internal.policy.impl.KeyguardUpdateMonitor$ConfigurationChangeCallback: void onKeyboardChange(boolean)>($z0);
+
+        $i0 = $i0 + 1;
+
+        goto label3;
+
+     label4:
+        return;
+
+     label5:
+        return;
+    }
+
+    private void handleSimStateChange(com.android.internal.policy.impl.KeyguardUpdateMonitor$SimArgs)
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        com.android.internal.policy.impl.KeyguardUpdateMonitor$SimArgs $r1;
+        com.android.internal.telephony.SimCard$State $r2, $r3;
+        int $i0, $i1;
+        java.util.ArrayList $r4;
+        java.lang.Object $r5;
+        com.android.internal.policy.impl.KeyguardUpdateMonitor$SimStateCallback $r6;
+
+        $r0 := @this: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        $r1 := @parameter0: com.android.internal.policy.impl.KeyguardUpdateMonitor$SimArgs;
+
+        $r2 = $r1.<com.android.internal.policy.impl.KeyguardUpdateMonitor$SimArgs: com.android.internal.telephony.SimCard$State simState>;
+
+        $r3 = <com.android.internal.telephony.SimCard$State: com.android.internal.telephony.SimCard$State UNKNOWN>;
+
+        if $r2 == $r3 goto label2;
+
+        $r3 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: com.android.internal.telephony.SimCard$State mSimState>;
+
+        if $r2 == $r3 goto label3;
+
+        $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: com.android.internal.telephony.SimCard$State mSimState> = $r2;
+
+        $i0 = 0;
+
+     label1:
+        $r4 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.util.ArrayList mSimStateCallbacks>;
+
+        $i1 = virtualinvoke $r4.<java.util.ArrayList: int size()>();
+
+        if $i0 >= $i1 goto label4;
+
+        $r4 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.util.ArrayList mSimStateCallbacks>;
+
+        $r5 = virtualinvoke $r4.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r6 = (com.android.internal.policy.impl.KeyguardUpdateMonitor$SimStateCallback) $r5;
+
+        interfaceinvoke $r6.<com.android.internal.policy.impl.KeyguardUpdateMonitor$SimStateCallback: void onSimStateChanged(com.android.internal.telephony.SimCard$State)>($r2);
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+
+     label3:
+        return;
+
+     label4:
+        return;
+    }
+
+    private void handleTimeUpdate()
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        int $i0, $i1;
+        java.util.ArrayList $r1;
+        java.lang.Object $r2;
+        com.android.internal.policy.impl.KeyguardUpdateMonitor$InfoCallback $r3;
+
+        $r0 := @this: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        $i0 = 0;
+
+     label1:
+        $r1 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.util.ArrayList mInfoCallbacks>;
+
+        $i1 = virtualinvoke $r1.<java.util.ArrayList: int size()>();
+
+        if $i0 >= $i1 goto label2;
+
+        $r1 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.util.ArrayList mInfoCallbacks>;
+
+        $r2 = virtualinvoke $r1.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r3 = (com.android.internal.policy.impl.KeyguardUpdateMonitor$InfoCallback) $r2;
+
+        interfaceinvoke $r3.<com.android.internal.policy.impl.KeyguardUpdateMonitor$InfoCallback: void onTimeChanged()>();
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    private boolean isBatteryUpdateInteresting(boolean, int)
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        boolean $z0, $z1;
+        int $i0, $i1;
+
+        $r0 := @this: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        $z0 := @parameter0: boolean;
+
+        $i0 := @parameter1: int;
+
+        $z1 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: boolean mDevicePluggedIn>;
+
+        if $z1 == $z0 goto label1;
+
+        return 1;
+
+     label1:
+        if $z0 == 0 goto label2;
+
+        $i1 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: int mBatteryLevel>;
+
+        if $i1 == $i0 goto label2;
+
+        return 1;
+
+     label2:
+        if $z0 != 0 goto label4;
+
+        if $i0 >= 20 goto label3;
+
+        $i1 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: int mBatteryLevel>;
+
+        if $i1 < 20 goto label3;
+
+        return 1;
+
+     label3:
+        $i1 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: int mBatteryLevel>;
+
+        if $i1 >= 20 goto label4;
+
+        if $i0 < 20 goto label4;
+
+        return 1;
+
+     label4:
+        return 0;
+    }
+
+    private boolean isPluggedIn(int)
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        int $i0;
+
+        $r0 := @this: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        $i0 := @parameter0: int;
+
+        if $i0 == 2 goto label1;
+
+        if $i0 != 5 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    public void clearFailedAttempts()
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+
+        $r0 := @this: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: int mFailedAttempts> = 0;
+
+        return;
+    }
+
+    public int getBatteryLevel()
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        int i0;
+
+        $r0 := @this: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        i0 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: int mBatteryLevel>;
+
+        return i0;
+    }
+
+    public int getFailedAttempts()
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        int i0;
+
+        $r0 := @this: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        i0 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: int mFailedAttempts>;
+
+        return i0;
+    }
+
+    public com.android.internal.telephony.SimCard$State getSimState()
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        com.android.internal.telephony.SimCard$State r1;
+
+        $r0 := @this: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        r1 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: com.android.internal.telephony.SimCard$State mSimState>;
+
+        return r1;
+    }
+
+    public java.lang.CharSequence getTelephonyPlmn()
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        java.lang.CharSequence r1;
+
+        $r0 := @this: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        r1 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.lang.CharSequence mTelephonyPlmn>;
+
+        return r1;
+    }
+
+    public java.lang.CharSequence getTelephonySpn()
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        java.lang.CharSequence r1;
+
+        $r0 := @this: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        r1 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.lang.CharSequence mTelephonySpn>;
+
+        return r1;
+    }
+
+    public boolean isDevicePluggedIn()
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        boolean z0;
+
+        $r0 := @this: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        z0 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: boolean mDevicePluggedIn>;
+
+        return z0;
+    }
+
+    public boolean isDeviceProvisioned()
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        boolean z0;
+
+        $r0 := @this: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        z0 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: boolean mDeviceProvisioned>;
+
+        return z0;
+    }
+
+    public boolean isInPortrait()
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        boolean z0;
+
+        $r0 := @this: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        z0 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: boolean mInPortrait>;
+
+        return z0;
+    }
+
+    public boolean isKeyboardOpen()
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        boolean z0;
+
+        $r0 := @this: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        z0 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: boolean mKeyboardOpen>;
+
+        return z0;
+    }
+
+    boolean queryInPortrait()
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        android.content.Context $r1;
+        android.content.res.Resources $r2;
+        android.content.res.Configuration $r3;
+        int $i0;
+
+        $r0 := @this: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        $r1 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: android.content.Context mContext>;
+
+        $r2 = virtualinvoke $r1.<android.content.Context: android.content.res.Resources getResources()>();
+
+        $r3 = virtualinvoke $r2.<android.content.res.Resources: android.content.res.Configuration getConfiguration()>();
+
+        $i0 = $r3.<android.content.res.Configuration: int orientation>;
+
+        if $i0 != 1 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    boolean queryKeyboardOpen()
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        android.content.Context $r1;
+        android.content.res.Resources $r2;
+        android.content.res.Configuration $r3;
+        int $i0;
+
+        $r0 := @this: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        $r1 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: android.content.Context mContext>;
+
+        $r2 = virtualinvoke $r1.<android.content.Context: android.content.res.Resources getResources()>();
+
+        $r3 = virtualinvoke $r2.<android.content.res.Resources: android.content.res.Configuration getConfiguration()>();
+
+        $i0 = $r3.<android.content.res.Configuration: int hardKeyboardHidden>;
+
+        if $i0 != 1 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    public void registerConfigurationChangeCallback(com.android.internal.policy.impl.KeyguardUpdateMonitor$ConfigurationChangeCallback)
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        com.android.internal.policy.impl.KeyguardUpdateMonitor$ConfigurationChangeCallback $r1;
+        java.util.ArrayList $r2;
+
+        $r0 := @this: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        $r1 := @parameter0: com.android.internal.policy.impl.KeyguardUpdateMonitor$ConfigurationChangeCallback;
+
+        $r2 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.util.ArrayList mConfigurationChangeCallbacks>;
+
+        virtualinvoke $r2.<java.util.ArrayList: boolean add(java.lang.Object)>($r1);
+
+        return;
+    }
+
+    public void registerInfoCallback(com.android.internal.policy.impl.KeyguardUpdateMonitor$InfoCallback)
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        com.android.internal.policy.impl.KeyguardUpdateMonitor$InfoCallback $r1;
+        java.util.ArrayList $r2;
+
+        $r0 := @this: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        $r1 := @parameter0: com.android.internal.policy.impl.KeyguardUpdateMonitor$InfoCallback;
+
+        $r2 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.util.ArrayList mInfoCallbacks>;
+
+        virtualinvoke $r2.<java.util.ArrayList: boolean add(java.lang.Object)>($r1);
+
+        return;
+    }
+
+    public void registerSimStateCallback(com.android.internal.policy.impl.KeyguardUpdateMonitor$SimStateCallback)
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        com.android.internal.policy.impl.KeyguardUpdateMonitor$SimStateCallback $r1;
+        java.util.ArrayList $r2;
+
+        $r0 := @this: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        $r1 := @parameter0: com.android.internal.policy.impl.KeyguardUpdateMonitor$SimStateCallback;
+
+        $r2 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.util.ArrayList mSimStateCallbacks>;
+
+        virtualinvoke $r2.<java.util.ArrayList: boolean add(java.lang.Object)>($r1);
+
+        return;
+    }
+
+    public void removeCallback(java.lang.Object)
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        java.lang.Object $r1;
+        java.util.ArrayList $r2;
+
+        $r0 := @this: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        $r1 := @parameter0: java.lang.Object;
+
+        $r2 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.util.ArrayList mConfigurationChangeCallbacks>;
+
+        virtualinvoke $r2.<java.util.ArrayList: boolean remove(java.lang.Object)>($r1);
+
+        $r2 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.util.ArrayList mInfoCallbacks>;
+
+        virtualinvoke $r2.<java.util.ArrayList: boolean remove(java.lang.Object)>($r1);
+
+        $r2 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: java.util.ArrayList mSimStateCallbacks>;
+
+        virtualinvoke $r2.<java.util.ArrayList: boolean remove(java.lang.Object)>($r1);
+
+        return;
+    }
+
+    public void reportFailedAttempt()
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        int $i0;
+
+        $r0 := @this: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        $i0 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: int mFailedAttempts>;
+
+        $i0 = $i0 + 1;
+
+        $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: int mFailedAttempts> = $i0;
+
+        return;
+    }
+
+    public void reportSimPinUnlocked()
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        com.android.internal.telephony.SimCard$State $r1;
+
+        $r0 := @this: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        $r1 = <com.android.internal.telephony.SimCard$State: com.android.internal.telephony.SimCard$State READY>;
+
+        $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: com.android.internal.telephony.SimCard$State mSimState> = $r1;
+
+        return;
+    }
+
+    public boolean shouldShowBatteryInfo()
+    {
+        com.android.internal.policy.impl.KeyguardUpdateMonitor $r0;
+        boolean $z0;
+        int $i0;
+
+        $r0 := @this: com.android.internal.policy.impl.KeyguardUpdateMonitor;
+
+        $z0 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: boolean mDevicePluggedIn>;
+
+        if $z0 != 0 goto label1;
+
+        $i0 = $r0.<com.android.internal.policy.impl.KeyguardUpdateMonitor: int mBatteryLevel>;
+
+        if $i0 >= 20 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    public static void <clinit>()
+    {
+        <com.android.internal.policy.impl.KeyguardUpdateMonitor: java.lang.String TAG> = "KeyguardUpdateMonitor";
+
+        <com.android.internal.policy.impl.KeyguardUpdateMonitor: int MSG_TIME_UPDATE> = 301;
+
+        <com.android.internal.policy.impl.KeyguardUpdateMonitor: int MSG_SIM_STATE_CHANGE> = 304;
+
+        <com.android.internal.policy.impl.KeyguardUpdateMonitor: int MSG_CONFIGURATION_CHANGED> = 300;
+
+        <com.android.internal.policy.impl.KeyguardUpdateMonitor: int MSG_CARRIER_INFO_UPDATE> = 303;
+
+        <com.android.internal.policy.impl.KeyguardUpdateMonitor: int MSG_BATTERY_UPDATE> = 302;
+
+        <com.android.internal.policy.impl.KeyguardUpdateMonitor: int LOW_BATTERY_THRESHOLD> = 20;
+
+        <com.android.internal.policy.impl.KeyguardUpdateMonitor: boolean DEBUG> = 0;
+
+        return;
+    }
+}

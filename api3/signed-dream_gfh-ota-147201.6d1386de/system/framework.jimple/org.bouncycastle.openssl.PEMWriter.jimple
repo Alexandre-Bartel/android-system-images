@@ -1,0 +1,640 @@
+public class org.bouncycastle.openssl.PEMWriter extends java.io.BufferedWriter
+{
+
+    public void <init>(java.io.Writer)
+    {
+        org.bouncycastle.openssl.PEMWriter $r0;
+        java.io.Writer $r1;
+
+        $r0 := @this: org.bouncycastle.openssl.PEMWriter;
+
+        $r1 := @parameter0: java.io.Writer;
+
+        specialinvoke $r0.<java.io.BufferedWriter: void <init>(java.io.Writer)>($r1);
+
+        return;
+    }
+
+    private void writeEncoded(byte[]) throws java.io.IOException
+    {
+        org.bouncycastle.openssl.PEMWriter $r0;
+        char[] $r1;
+        int $i0, $i1, $i2, $i3;
+        byte[] $r2;
+        byte $b4;
+        char $c5;
+
+        $r0 := @this: org.bouncycastle.openssl.PEMWriter;
+
+        $r2 := @parameter0: byte[];
+
+        $r1 = newarray (char)[64];
+
+        $r2 = staticinvoke <org.bouncycastle.util.encoders.Base64: byte[] encode(byte[])>($r2);
+
+        $i1 = 0;
+
+     label1:
+        $i2 = lengthof $r2;
+
+        if $i1 >= $i2 goto label5;
+
+        $i2 = 0;
+
+     label2:
+        $i0 = lengthof $r1;
+
+        if $i2 == $i0 goto label3;
+
+        $i3 = $i1 + $i2;
+
+        $i0 = lengthof $r2;
+
+        if $i3 < $i0 goto label4;
+
+     label3:
+        virtualinvoke $r0.<java.io.BufferedWriter: void write(char[],int,int)>($r1, 0, $i2);
+
+        virtualinvoke $r0.<java.io.BufferedWriter: void newLine()>();
+
+        $i2 = lengthof $r1;
+
+        $i1 = $i1 + $i2;
+
+        goto label1;
+
+     label4:
+        $i0 = $i1 + $i2;
+
+        $b4 = $r2[$i0];
+
+        $c5 = (char) $b4;
+
+        $r1[$i2] = $c5;
+
+        $i2 = $i2 + 1;
+
+        goto label2;
+
+     label5:
+        return;
+    }
+
+    private void writeHexEncoded(byte[]) throws java.io.IOException
+    {
+        org.bouncycastle.openssl.PEMWriter $r0;
+        byte[] $r1;
+        int $i0, $i1;
+        byte $b2;
+        char $c3;
+
+        $r0 := @this: org.bouncycastle.openssl.PEMWriter;
+
+        $r1 := @parameter0: byte[];
+
+        $r1 = staticinvoke <org.bouncycastle.util.encoders.Hex: byte[] encode(byte[])>($r1);
+
+        $i0 = 0;
+
+     label1:
+        $i1 = lengthof $r1;
+
+        if $i0 == $i1 goto label2;
+
+        $b2 = $r1[$i0];
+
+        $c3 = (char) $b2;
+
+        virtualinvoke $r0.<java.io.BufferedWriter: void write(int)>($c3);
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    public void writeObject(java.lang.Object) throws java.io.IOException
+    {
+        org.bouncycastle.openssl.PEMWriter $r0;
+        org.bouncycastle.asn1.ASN1OutputStream $r1;
+        java.io.ByteArrayInputStream $r2;
+        java.io.ByteArrayOutputStream $r3;
+        org.bouncycastle.asn1.pkcs.PrivateKeyInfo $r4;
+        org.bouncycastle.asn1.ASN1EncodableVector $r5;
+        java.lang.Object $r6;
+        boolean $z0;
+        java.lang.String $r7, $r11;
+        java.security.cert.X509Certificate $r8;
+        byte[] $r9;
+        java.lang.StringBuilder $r10;
+        java.security.cert.CertificateEncodingException $r12;
+        java.io.IOException $r13;
+        java.security.cert.X509CRL $r14;
+        java.security.cert.CRLException $r15;
+        java.security.KeyPair $r16;
+        java.security.PrivateKey $r17;
+        java.security.Key $r18;
+        org.bouncycastle.asn1.ASN1InputStream $r19;
+        org.bouncycastle.asn1.DERObject $r20;
+        org.bouncycastle.asn1.ASN1Sequence $r21;
+        org.bouncycastle.asn1.x509.AlgorithmIdentifier $r22;
+        org.bouncycastle.asn1.DEREncodable $r23;
+        org.bouncycastle.asn1.x509.DSAParameter $r24;
+        org.bouncycastle.asn1.DERInteger $r25;
+        java.math.BigInteger $r26, $r28, $r29;
+        java.security.interfaces.DSAPrivateKey $r27;
+        org.bouncycastle.asn1.DERSequence $r30;
+        java.security.PublicKey $r31;
+        org.bouncycastle.x509.X509V2AttributeCertificate $r32;
+        org.bouncycastle.jce.PKCS10CertificationRequest $r33;
+        org.bouncycastle.asn1.cms.ContentInfo $r34;
+
+        $r0 := @this: org.bouncycastle.openssl.PEMWriter;
+
+        $r6 := @parameter0: java.lang.Object;
+
+        $z0 = $r6 instanceof java.security.cert.X509Certificate;
+
+        if $z0 == 0 goto label04;
+
+        $r7 = "CERTIFICATE";
+
+        $r8 = (java.security.cert.X509Certificate) $r6;
+
+     label01:
+        $r9 = virtualinvoke $r8.<java.security.cert.Certificate: byte[] getEncoded()>();
+
+     label02:
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("-----BEGIN ");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("-----");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<java.io.Writer: void write(java.lang.String)>($r11);
+
+        virtualinvoke $r0.<java.io.BufferedWriter: void newLine()>();
+
+        specialinvoke $r0.<org.bouncycastle.openssl.PEMWriter: void writeEncoded(byte[])>($r9);
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("-----END ");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("-----");
+
+        $r7 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<java.io.Writer: void write(java.lang.String)>($r7);
+
+        virtualinvoke $r0.<java.io.BufferedWriter: void newLine()>();
+
+        return;
+
+     label03:
+        $r12 := @caughtexception;
+
+        $r13 = new java.io.IOException;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot encode object: ");
+
+        $r7 = virtualinvoke $r12.<java.lang.Throwable: java.lang.String toString()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r7 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r13.<java.io.IOException: void <init>(java.lang.String)>($r7);
+
+        throw $r13;
+
+     label04:
+        $z0 = $r6 instanceof java.security.cert.X509CRL;
+
+        if $z0 == 0 goto label08;
+
+        $r7 = "X509 CRL";
+
+        $r14 = (java.security.cert.X509CRL) $r6;
+
+     label05:
+        $r9 = virtualinvoke $r14.<java.security.cert.X509CRL: byte[] getEncoded()>();
+
+     label06:
+        goto label02;
+
+     label07:
+        $r15 := @caughtexception;
+
+        $r13 = new java.io.IOException;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot encode object: ");
+
+        $r7 = virtualinvoke $r15.<java.lang.Throwable: java.lang.String toString()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r7 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r13.<java.io.IOException: void <init>(java.lang.String)>($r7);
+
+        throw $r13;
+
+     label08:
+        $z0 = $r6 instanceof java.security.KeyPair;
+
+        if $z0 == 0 goto label09;
+
+        $r16 = (java.security.KeyPair) $r6;
+
+        $r17 = virtualinvoke $r16.<java.security.KeyPair: java.security.PrivateKey getPrivate()>();
+
+        virtualinvoke $r0.<org.bouncycastle.openssl.PEMWriter: void writeObject(java.lang.Object)>($r17);
+
+        return;
+
+     label09:
+        $z0 = $r6 instanceof java.security.PrivateKey;
+
+        if $z0 == 0 goto label13;
+
+        $r2 = new java.io.ByteArrayInputStream;
+
+        $r18 = (java.security.Key) $r6;
+
+        $r9 = interfaceinvoke $r18.<java.security.Key: byte[] getEncoded()>();
+
+        specialinvoke $r2.<java.io.ByteArrayInputStream: void <init>(byte[])>($r9);
+
+        $r19 = new org.bouncycastle.asn1.ASN1InputStream;
+
+        specialinvoke $r19.<org.bouncycastle.asn1.ASN1InputStream: void <init>(java.io.InputStream)>($r2);
+
+        $r4 = new org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+
+        $r20 = virtualinvoke $r19.<org.bouncycastle.asn1.ASN1InputStream: org.bouncycastle.asn1.DERObject readObject()>();
+
+        $r21 = (org.bouncycastle.asn1.ASN1Sequence) $r20;
+
+        specialinvoke $r4.<org.bouncycastle.asn1.pkcs.PrivateKeyInfo: void <init>(org.bouncycastle.asn1.ASN1Sequence)>($r21);
+
+        $r3 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r3.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        $r1 = new org.bouncycastle.asn1.ASN1OutputStream;
+
+        specialinvoke $r1.<org.bouncycastle.asn1.ASN1OutputStream: void <init>(java.io.OutputStream)>($r3);
+
+        $z0 = $r6 instanceof java.security.interfaces.RSAPrivateKey;
+
+        if $z0 == 0 goto label11;
+
+        $r7 = "RSA PRIVATE KEY";
+
+        $r20 = virtualinvoke $r4.<org.bouncycastle.asn1.pkcs.PrivateKeyInfo: org.bouncycastle.asn1.DERObject getPrivateKey()>();
+
+        virtualinvoke $r1.<org.bouncycastle.asn1.ASN1OutputStream: void writeObject(java.lang.Object)>($r20);
+
+     label10:
+        $r9 = virtualinvoke $r3.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        goto label02;
+
+     label11:
+        $z0 = $r6 instanceof java.security.interfaces.DSAPrivateKey;
+
+        if $z0 == 0 goto label12;
+
+        $r7 = "DSA PRIVATE KEY";
+
+        $r22 = virtualinvoke $r4.<org.bouncycastle.asn1.pkcs.PrivateKeyInfo: org.bouncycastle.asn1.x509.AlgorithmIdentifier getAlgorithmId()>();
+
+        $r23 = virtualinvoke $r22.<org.bouncycastle.asn1.x509.AlgorithmIdentifier: org.bouncycastle.asn1.DEREncodable getParameters()>();
+
+        $r24 = staticinvoke <org.bouncycastle.asn1.x509.DSAParameter: org.bouncycastle.asn1.x509.DSAParameter getInstance(java.lang.Object)>($r23);
+
+        $r5 = new org.bouncycastle.asn1.ASN1EncodableVector;
+
+        specialinvoke $r5.<org.bouncycastle.asn1.ASN1EncodableVector: void <init>()>();
+
+        $r25 = new org.bouncycastle.asn1.DERInteger;
+
+        specialinvoke $r25.<org.bouncycastle.asn1.DERInteger: void <init>(int)>(0);
+
+        virtualinvoke $r5.<org.bouncycastle.asn1.DEREncodableVector: void add(org.bouncycastle.asn1.DEREncodable)>($r25);
+
+        $r25 = new org.bouncycastle.asn1.DERInteger;
+
+        $r26 = virtualinvoke $r24.<org.bouncycastle.asn1.x509.DSAParameter: java.math.BigInteger getP()>();
+
+        specialinvoke $r25.<org.bouncycastle.asn1.DERInteger: void <init>(java.math.BigInteger)>($r26);
+
+        virtualinvoke $r5.<org.bouncycastle.asn1.DEREncodableVector: void add(org.bouncycastle.asn1.DEREncodable)>($r25);
+
+        $r25 = new org.bouncycastle.asn1.DERInteger;
+
+        $r26 = virtualinvoke $r24.<org.bouncycastle.asn1.x509.DSAParameter: java.math.BigInteger getQ()>();
+
+        specialinvoke $r25.<org.bouncycastle.asn1.DERInteger: void <init>(java.math.BigInteger)>($r26);
+
+        virtualinvoke $r5.<org.bouncycastle.asn1.DEREncodableVector: void add(org.bouncycastle.asn1.DEREncodable)>($r25);
+
+        $r25 = new org.bouncycastle.asn1.DERInteger;
+
+        $r26 = virtualinvoke $r24.<org.bouncycastle.asn1.x509.DSAParameter: java.math.BigInteger getG()>();
+
+        specialinvoke $r25.<org.bouncycastle.asn1.DERInteger: void <init>(java.math.BigInteger)>($r26);
+
+        virtualinvoke $r5.<org.bouncycastle.asn1.DEREncodableVector: void add(org.bouncycastle.asn1.DEREncodable)>($r25);
+
+        $r27 = (java.security.interfaces.DSAPrivateKey) $r6;
+
+        $r26 = interfaceinvoke $r27.<java.security.interfaces.DSAPrivateKey: java.math.BigInteger getX()>();
+
+        $r28 = virtualinvoke $r24.<org.bouncycastle.asn1.x509.DSAParameter: java.math.BigInteger getG()>();
+
+        $r29 = virtualinvoke $r24.<org.bouncycastle.asn1.x509.DSAParameter: java.math.BigInteger getP()>();
+
+        $r28 = virtualinvoke $r28.<java.math.BigInteger: java.math.BigInteger modPow(java.math.BigInteger,java.math.BigInteger)>($r26, $r29);
+
+        $r25 = new org.bouncycastle.asn1.DERInteger;
+
+        specialinvoke $r25.<org.bouncycastle.asn1.DERInteger: void <init>(java.math.BigInteger)>($r28);
+
+        virtualinvoke $r5.<org.bouncycastle.asn1.DEREncodableVector: void add(org.bouncycastle.asn1.DEREncodable)>($r25);
+
+        $r25 = new org.bouncycastle.asn1.DERInteger;
+
+        specialinvoke $r25.<org.bouncycastle.asn1.DERInteger: void <init>(java.math.BigInteger)>($r26);
+
+        virtualinvoke $r5.<org.bouncycastle.asn1.DEREncodableVector: void add(org.bouncycastle.asn1.DEREncodable)>($r25);
+
+        $r30 = new org.bouncycastle.asn1.DERSequence;
+
+        specialinvoke $r30.<org.bouncycastle.asn1.DERSequence: void <init>(org.bouncycastle.asn1.DEREncodableVector)>($r5);
+
+        virtualinvoke $r1.<org.bouncycastle.asn1.ASN1OutputStream: void writeObject(java.lang.Object)>($r30);
+
+        goto label10;
+
+     label12:
+        $r13 = new java.io.IOException;
+
+        specialinvoke $r13.<java.io.IOException: void <init>(java.lang.String)>("Cannot identify private key");
+
+        throw $r13;
+
+     label13:
+        $z0 = $r6 instanceof java.security.PublicKey;
+
+        if $z0 == 0 goto label14;
+
+        $r7 = "PUBLIC KEY";
+
+        $r31 = (java.security.PublicKey) $r6;
+
+        $r9 = interfaceinvoke $r31.<java.security.PublicKey: byte[] getEncoded()>();
+
+        goto label02;
+
+     label14:
+        $z0 = $r6 instanceof org.bouncycastle.x509.X509AttributeCertificate;
+
+        if $z0 == 0 goto label15;
+
+        $r7 = "ATTRIBUTE CERTIFICATE";
+
+        $r32 = (org.bouncycastle.x509.X509V2AttributeCertificate) $r6;
+
+        $r9 = virtualinvoke $r32.<org.bouncycastle.x509.X509V2AttributeCertificate: byte[] getEncoded()>();
+
+        goto label02;
+
+     label15:
+        $z0 = $r6 instanceof org.bouncycastle.jce.PKCS10CertificationRequest;
+
+        if $z0 == 0 goto label16;
+
+        $r7 = "CERTIFICATE REQUEST";
+
+        $r33 = (org.bouncycastle.jce.PKCS10CertificationRequest) $r6;
+
+        $r9 = virtualinvoke $r33.<org.bouncycastle.jce.PKCS10CertificationRequest: byte[] getEncoded()>();
+
+        goto label02;
+
+     label16:
+        $z0 = $r6 instanceof org.bouncycastle.asn1.cms.ContentInfo;
+
+        if $z0 == 0 goto label17;
+
+        $r7 = "PKCS7";
+
+        $r34 = (org.bouncycastle.asn1.cms.ContentInfo) $r6;
+
+        $r9 = virtualinvoke $r34.<org.bouncycastle.asn1.ASN1Encodable: byte[] getEncoded()>();
+
+        goto label02;
+
+     label17:
+        $r13 = new java.io.IOException;
+
+        specialinvoke $r13.<java.io.IOException: void <init>(java.lang.String)>("unknown object passed - can\'t encode.");
+
+        throw $r13;
+
+        catch java.security.cert.CertificateEncodingException from label01 to label02 with label03;
+        catch java.security.cert.CRLException from label05 to label06 with label07;
+    }
+
+    public void writeObject(java.lang.Object, java.lang.String, char[], java.security.SecureRandom) throws java.io.IOException
+    {
+        org.bouncycastle.openssl.PEMWriter $r0;
+        java.lang.Object $r1;
+        java.lang.String $r2;
+        java.security.SecureRandom $r3;
+        org.bouncycastle.asn1.pkcs.RSAPrivateKeyStructure $r4;
+        org.bouncycastle.asn1.ASN1OutputStream $r5;
+        java.io.ByteArrayOutputStream $r6;
+        org.bouncycastle.crypto.generators.OpenSSLPBEParametersGenerator $r7;
+        char[] $r8;
+        byte[] $r9, $r10;
+        boolean $z0;
+        javax.crypto.spec.SecretKeySpec $r11;
+        int $i0;
+        org.bouncycastle.crypto.CipherParameters $r12;
+        org.bouncycastle.crypto.params.KeyParameter $r13;
+        java.security.interfaces.RSAPrivateCrtKey $r14;
+        java.math.BigInteger $r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22;
+        javax.crypto.Cipher $r23;
+        javax.crypto.spec.IvParameterSpec $r24;
+        java.io.IOException $r25;
+        java.lang.Exception $r26;
+        java.lang.StringBuilder $r27;
+
+        $r0 := @this: org.bouncycastle.openssl.PEMWriter;
+
+        $r1 := @parameter0: java.lang.Object;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r8 := @parameter2: char[];
+
+        $r3 := @parameter3: java.security.SecureRandom;
+
+        $r9 = newarray (byte)[8];
+
+        virtualinvoke $r3.<java.security.SecureRandom: void nextBytes(byte[])>($r9);
+
+        $r7 = new org.bouncycastle.crypto.generators.OpenSSLPBEParametersGenerator;
+
+        specialinvoke $r7.<org.bouncycastle.crypto.generators.OpenSSLPBEParametersGenerator: void <init>()>();
+
+        $r10 = staticinvoke <org.bouncycastle.crypto.PBEParametersGenerator: byte[] PKCS5PasswordToBytes(char[])>($r8);
+
+        virtualinvoke $r7.<org.bouncycastle.crypto.generators.OpenSSLPBEParametersGenerator: void init(byte[],byte[])>($r10, $r9);
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("DESEDE");
+
+        if $z0 == 0 goto label3;
+
+        $r11 = new javax.crypto.spec.SecretKeySpec;
+
+        $i0 = 24 * 8;
+
+        $r12 = virtualinvoke $r7.<org.bouncycastle.crypto.generators.OpenSSLPBEParametersGenerator: org.bouncycastle.crypto.CipherParameters generateDerivedParameters(int)>($i0);
+
+        $r13 = (org.bouncycastle.crypto.params.KeyParameter) $r12;
+
+        $r10 = virtualinvoke $r13.<org.bouncycastle.crypto.params.KeyParameter: byte[] getKey()>();
+
+        specialinvoke $r11.<javax.crypto.spec.SecretKeySpec: void <init>(byte[],java.lang.String)>($r10, $r2);
+
+        $r10 = null;
+
+        $z0 = $r1 instanceof java.security.interfaces.RSAPrivateCrtKey;
+
+        if $z0 == 0 goto label1;
+
+        $r14 = (java.security.interfaces.RSAPrivateCrtKey) $r1;
+
+        $r4 = new org.bouncycastle.asn1.pkcs.RSAPrivateKeyStructure;
+
+        $r15 = interfaceinvoke $r14.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getModulus()>();
+
+        $r16 = interfaceinvoke $r14.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getPublicExponent()>();
+
+        $r17 = interfaceinvoke $r14.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getPrivateExponent()>();
+
+        $r18 = interfaceinvoke $r14.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getPrimeP()>();
+
+        $r19 = interfaceinvoke $r14.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getPrimeQ()>();
+
+        $r20 = interfaceinvoke $r14.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getPrimeExponentP()>();
+
+        $r21 = interfaceinvoke $r14.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getPrimeExponentQ()>();
+
+        $r22 = interfaceinvoke $r14.<java.security.interfaces.RSAPrivateCrtKey: java.math.BigInteger getCrtCoefficient()>();
+
+        specialinvoke $r4.<org.bouncycastle.asn1.pkcs.RSAPrivateKeyStructure: void <init>(java.math.BigInteger,java.math.BigInteger,java.math.BigInteger,java.math.BigInteger,java.math.BigInteger,java.math.BigInteger,java.math.BigInteger,java.math.BigInteger)>($r15, $r16, $r17, $r18, $r19, $r20, $r21, $r22);
+
+        $r6 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r6.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        $r5 = new org.bouncycastle.asn1.ASN1OutputStream;
+
+        specialinvoke $r5.<org.bouncycastle.asn1.ASN1OutputStream: void <init>(java.io.OutputStream)>($r6);
+
+        virtualinvoke $r5.<org.bouncycastle.asn1.ASN1OutputStream: void writeObject(java.lang.Object)>($r4);
+
+        virtualinvoke $r5.<java.io.FilterOutputStream: void close()>();
+
+        $r10 = virtualinvoke $r6.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+     label1:
+        $r23 = staticinvoke <javax.crypto.Cipher: javax.crypto.Cipher getInstance(java.lang.String,java.lang.String)>("DESede/CBC/PKCS5Padding", "BC");
+
+        $r24 = new javax.crypto.spec.IvParameterSpec;
+
+        specialinvoke $r24.<javax.crypto.spec.IvParameterSpec: void <init>(byte[])>($r9);
+
+        virtualinvoke $r23.<javax.crypto.Cipher: void init(int,java.security.Key,java.security.spec.AlgorithmParameterSpec)>(1, $r11, $r24);
+
+        $r10 = virtualinvoke $r23.<javax.crypto.Cipher: byte[] doFinal(byte[])>($r10);
+
+     label2:
+        virtualinvoke $r0.<java.io.Writer: void write(java.lang.String)>("-----BEGIN RSA PRIVATE KEY-----");
+
+        virtualinvoke $r0.<java.io.BufferedWriter: void newLine()>();
+
+        virtualinvoke $r0.<java.io.Writer: void write(java.lang.String)>("Proc-Type: 4,ENCRYPTED");
+
+        virtualinvoke $r0.<java.io.BufferedWriter: void newLine()>();
+
+        virtualinvoke $r0.<java.io.Writer: void write(java.lang.String)>("DEK-Info: DES-EDE3-CBC,");
+
+        specialinvoke $r0.<org.bouncycastle.openssl.PEMWriter: void writeHexEncoded(byte[])>($r9);
+
+        virtualinvoke $r0.<java.io.BufferedWriter: void newLine()>();
+
+        virtualinvoke $r0.<java.io.BufferedWriter: void newLine()>();
+
+        specialinvoke $r0.<org.bouncycastle.openssl.PEMWriter: void writeEncoded(byte[])>($r10);
+
+        virtualinvoke $r0.<java.io.Writer: void write(java.lang.String)>("-----END RSA PRIVATE KEY-----");
+
+        return;
+
+     label3:
+        $r25 = new java.io.IOException;
+
+        specialinvoke $r25.<java.io.IOException: void <init>(java.lang.String)>("unknown algorithm in writeObject");
+
+        throw $r25;
+
+     label4:
+        $r26 := @caughtexception;
+
+        $r25 = new java.io.IOException;
+
+        $r27 = new java.lang.StringBuilder;
+
+        specialinvoke $r27.<java.lang.StringBuilder: void <init>()>();
+
+        $r27 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("exception using cipher: ");
+
+        $r2 = virtualinvoke $r26.<java.lang.Throwable: java.lang.String toString()>();
+
+        $r27 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r27.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r25.<java.io.IOException: void <init>(java.lang.String)>($r2);
+
+        throw $r25;
+
+        catch java.lang.Exception from label1 to label2 with label4;
+    }
+}

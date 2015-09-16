@@ -1,0 +1,617 @@
+public abstract class android.net.NetworkStateTracker extends android.os.Handler
+{
+    private static boolean DBG;
+    public static final int EVENT_CONFIGURATION_CHANGED;
+    public static final int EVENT_NETWORK_SUBTYPE_CHANGED;
+    public static final int EVENT_NOTIFICATION_CHANGED;
+    public static final int EVENT_ROAMING_CHANGED;
+    public static final int EVENT_SCAN_RESULTS_AVAILABLE;
+    public static final int EVENT_STATE_CHANGED;
+    private static final java.lang.String TAG;
+    protected android.content.Context mContext;
+    protected android.net.NetworkInfo mNetworkInfo;
+    protected android.os.Handler mTarget;
+    private boolean mTeardownRequested;
+
+    static void <clinit>()
+    {
+        <android.net.NetworkStateTracker: java.lang.String TAG> = "NetworkStateTracker";
+
+        <android.net.NetworkStateTracker: int EVENT_STATE_CHANGED> = 1;
+
+        <android.net.NetworkStateTracker: int EVENT_SCAN_RESULTS_AVAILABLE> = 2;
+
+        <android.net.NetworkStateTracker: int EVENT_ROAMING_CHANGED> = 5;
+
+        <android.net.NetworkStateTracker: int EVENT_NOTIFICATION_CHANGED> = 3;
+
+        <android.net.NetworkStateTracker: int EVENT_NETWORK_SUBTYPE_CHANGED> = 6;
+
+        <android.net.NetworkStateTracker: int EVENT_CONFIGURATION_CHANGED> = 4;
+
+        <android.net.NetworkStateTracker: boolean DBG> = 0;
+
+        return;
+    }
+
+    public void <init>(android.content.Context, android.os.Handler, int, int, java.lang.String, java.lang.String)
+    {
+        android.net.NetworkStateTracker $r0;
+        android.content.Context $r1;
+        android.os.Handler $r2;
+        int $i0, $i1;
+        java.lang.String $r3, $r4;
+        android.net.NetworkInfo $r5;
+
+        $r0 := @this: android.net.NetworkStateTracker;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: android.os.Handler;
+
+        $i0 := @parameter2: int;
+
+        $i1 := @parameter3: int;
+
+        $r3 := @parameter4: java.lang.String;
+
+        $r4 := @parameter5: java.lang.String;
+
+        specialinvoke $r0.<android.os.Handler: void <init>()>();
+
+        $r0.<android.net.NetworkStateTracker: android.content.Context mContext> = $r1;
+
+        $r0.<android.net.NetworkStateTracker: android.os.Handler mTarget> = $r2;
+
+        $r0.<android.net.NetworkStateTracker: boolean mTeardownRequested> = 0;
+
+        $r5 = new android.net.NetworkInfo;
+
+        specialinvoke $r5.<android.net.NetworkInfo: void <init>(int,int,java.lang.String,java.lang.String)>($i0, $i1, $r3, $r4);
+
+        $r0.<android.net.NetworkStateTracker: android.net.NetworkInfo mNetworkInfo> = $r5;
+
+        return;
+    }
+
+    protected static java.lang.String[] getNameServerList(java.lang.String[])
+    {
+        java.lang.String[] $r0, $r1;
+        int $i0, $i1, $i2;
+        java.lang.String $r2;
+        boolean $z0;
+
+        $r0 := @parameter0: java.lang.String[];
+
+        $i1 = lengthof $r0;
+
+        $r1 = newarray (java.lang.String)[$i1];
+
+        $i1 = 0;
+
+        $i2 = 0;
+
+     label1:
+        $i0 = lengthof $r0;
+
+        if $i1 >= $i0 goto label3;
+
+        $r2 = $r0[$i1];
+
+        $r2 = staticinvoke <android.os.SystemProperties: java.lang.String get(java.lang.String)>($r2);
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r2);
+
+        if $z0 != 0 goto label2;
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean equals(java.lang.CharSequence,java.lang.CharSequence)>($r2, "0.0.0.0");
+
+        if $z0 != 0 goto label2;
+
+        $r1[$i2] = $r2;
+
+        $i2 = $i2 + 1;
+
+     label2:
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label3:
+        return $r1;
+    }
+
+    private void setBufferSize(java.lang.String)
+    {
+        android.net.NetworkStateTracker $r0;
+        java.lang.String $r1;
+        java.lang.String[] $r2;
+        int $i0;
+        java.lang.StringBuilder $r3;
+        java.io.IOException $r4;
+
+        $r0 := @this: android.net.NetworkStateTracker;
+
+        $r1 := @parameter0: java.lang.String;
+
+     label1:
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String[] split(java.lang.String)>(",");
+
+     label2:
+        $i0 = lengthof $r2;
+
+        if $i0 != 6 goto label5;
+
+     label3:
+        $r1 = $r2[0];
+
+        specialinvoke $r0.<android.net.NetworkStateTracker: void stringToFile(java.lang.String,java.lang.String)>("/sys/kernel/ipv4/tcp_rmem_min", $r1);
+
+        $r1 = $r2[1];
+
+        specialinvoke $r0.<android.net.NetworkStateTracker: void stringToFile(java.lang.String,java.lang.String)>("/sys/kernel/ipv4/tcp_rmem_def", $r1);
+
+        $r1 = $r2[2];
+
+        specialinvoke $r0.<android.net.NetworkStateTracker: void stringToFile(java.lang.String,java.lang.String)>("/sys/kernel/ipv4/tcp_rmem_max", $r1);
+
+        $r1 = $r2[3];
+
+        specialinvoke $r0.<android.net.NetworkStateTracker: void stringToFile(java.lang.String,java.lang.String)>("/sys/kernel/ipv4/tcp_wmem_min", $r1);
+
+        $r1 = $r2[4];
+
+        specialinvoke $r0.<android.net.NetworkStateTracker: void stringToFile(java.lang.String,java.lang.String)>("/sys/kernel/ipv4/tcp_wmem_def", $r1);
+
+        $r1 = $r2[5];
+
+        specialinvoke $r0.<android.net.NetworkStateTracker: void stringToFile(java.lang.String,java.lang.String)>("/sys/kernel/ipv4/tcp_wmem_max", $r1);
+
+     label4:
+        return;
+
+     label5:
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid buffersize string: ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("NetworkStateTracker", $r1);
+
+     label6:
+        return;
+
+     label7:
+        $r4 := @caughtexception;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Can\'t set tcp buffer sizes:");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r4);
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("NetworkStateTracker", $r1);
+
+        return;
+
+        catch java.io.IOException from label1 to label2 with label7;
+        catch java.io.IOException from label3 to label4 with label7;
+        catch java.io.IOException from label5 to label6 with label7;
+    }
+
+    private void stringToFile(java.lang.String, java.lang.String) throws java.io.IOException
+    {
+        android.net.NetworkStateTracker $r0;
+        java.lang.String $r1, $r2;
+        java.io.FileWriter $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: android.net.NetworkStateTracker;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 = new java.io.FileWriter;
+
+        specialinvoke $r3.<java.io.FileWriter: void <init>(java.lang.String)>($r1);
+
+     label1:
+        virtualinvoke $r3.<java.io.Writer: void write(java.lang.String)>($r2);
+
+     label2:
+        virtualinvoke $r3.<java.io.OutputStreamWriter: void close()>();
+
+        return;
+
+     label3:
+        $r4 := @caughtexception;
+
+        virtualinvoke $r3.<java.io.OutputStreamWriter: void close()>();
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public abstract java.lang.String[] getNameServers();
+
+    public android.net.NetworkInfo getNetworkInfo()
+    {
+        android.net.NetworkStateTracker $r0;
+        android.net.NetworkInfo r1;
+
+        $r0 := @this: android.net.NetworkStateTracker;
+
+        r1 = $r0.<android.net.NetworkStateTracker: android.net.NetworkInfo mNetworkInfo>;
+
+        return r1;
+    }
+
+    public abstract java.lang.String getTcpBufferSizesPropName();
+
+    public void interpretScanResultsAvailable()
+    {
+        android.net.NetworkStateTracker $r0;
+
+        $r0 := @this: android.net.NetworkStateTracker;
+
+        return;
+    }
+
+    public abstract boolean isAvailable();
+
+    public boolean isTeardownRequested()
+    {
+        android.net.NetworkStateTracker $r0;
+        boolean z0;
+
+        $r0 := @this: android.net.NetworkStateTracker;
+
+        z0 = $r0.<android.net.NetworkStateTracker: boolean mTeardownRequested>;
+
+        return z0;
+    }
+
+    public abstract boolean reconnect();
+
+    public void releaseWakeLock()
+    {
+        android.net.NetworkStateTracker $r0;
+
+        $r0 := @this: android.net.NetworkStateTracker;
+
+        return;
+    }
+
+    public boolean requestRouteToHost(int)
+    {
+        android.net.NetworkStateTracker $r0;
+        int $i0;
+
+        $r0 := @this: android.net.NetworkStateTracker;
+
+        $i0 := @parameter0: int;
+
+        return 0;
+    }
+
+    protected void sendScanResultsAvailable()
+    {
+        android.net.NetworkStateTracker $r0;
+        android.os.Handler $r1;
+        android.net.NetworkInfo $r2;
+        android.os.Message $r3;
+
+        $r0 := @this: android.net.NetworkStateTracker;
+
+        $r1 = $r0.<android.net.NetworkStateTracker: android.os.Handler mTarget>;
+
+        $r2 = $r0.<android.net.NetworkStateTracker: android.net.NetworkInfo mNetworkInfo>;
+
+        $r3 = virtualinvoke $r1.<android.os.Handler: android.os.Message obtainMessage(int,java.lang.Object)>(2, $r2);
+
+        virtualinvoke $r3.<android.os.Message: void sendToTarget()>();
+
+        return;
+    }
+
+    public void setDetailedState(android.net.NetworkInfo$DetailedState)
+    {
+        android.net.NetworkStateTracker $r0;
+        android.net.NetworkInfo$DetailedState $r1;
+
+        $r0 := @this: android.net.NetworkStateTracker;
+
+        $r1 := @parameter0: android.net.NetworkInfo$DetailedState;
+
+        virtualinvoke $r0.<android.net.NetworkStateTracker: void setDetailedState(android.net.NetworkInfo$DetailedState,java.lang.String,java.lang.String)>($r1, null, null);
+
+        return;
+    }
+
+    public void setDetailedState(android.net.NetworkInfo$DetailedState, java.lang.String, java.lang.String)
+    {
+        android.net.NetworkStateTracker $r0;
+        android.net.NetworkInfo$DetailedState $r1, $r5;
+        java.lang.String $r2, $r3, $r8;
+        android.net.NetworkInfo $r4;
+        android.net.NetworkInfo$State $r6, $r7;
+        boolean $z0;
+        android.os.Handler $r9;
+        android.os.Message $r10;
+
+        $r0 := @this: android.net.NetworkStateTracker;
+
+        $r1 := @parameter0: android.net.NetworkInfo$DetailedState;
+
+        $r3 := @parameter1: java.lang.String;
+
+        $r2 := @parameter2: java.lang.String;
+
+        $r4 = $r0.<android.net.NetworkStateTracker: android.net.NetworkInfo mNetworkInfo>;
+
+        $r5 = virtualinvoke $r4.<android.net.NetworkInfo: android.net.NetworkInfo$DetailedState getDetailedState()>();
+
+        if $r1 == $r5 goto label4;
+
+        $r4 = $r0.<android.net.NetworkStateTracker: android.net.NetworkInfo mNetworkInfo>;
+
+        $r6 = virtualinvoke $r4.<android.net.NetworkInfo: android.net.NetworkInfo$State getState()>();
+
+        $r7 = <android.net.NetworkInfo$State: android.net.NetworkInfo$State CONNECTING>;
+
+        if $r6 != $r7 goto label3;
+
+        $z0 = 1;
+
+     label1:
+        $r4 = $r0.<android.net.NetworkStateTracker: android.net.NetworkInfo mNetworkInfo>;
+
+        $r8 = virtualinvoke $r4.<android.net.NetworkInfo: java.lang.String getReason()>();
+
+        if $z0 == 0 goto label2;
+
+        $r5 = <android.net.NetworkInfo$DetailedState: android.net.NetworkInfo$DetailedState CONNECTED>;
+
+        if $r1 != $r5 goto label2;
+
+        if $r3 != null goto label2;
+
+        if $r8 == null goto label2;
+
+        $r3 = $r8;
+
+     label2:
+        $r4 = $r0.<android.net.NetworkStateTracker: android.net.NetworkInfo mNetworkInfo>;
+
+        virtualinvoke $r4.<android.net.NetworkInfo: void setDetailedState(android.net.NetworkInfo$DetailedState,java.lang.String,java.lang.String)>($r1, $r3, $r2);
+
+        $r9 = $r0.<android.net.NetworkStateTracker: android.os.Handler mTarget>;
+
+        $r4 = $r0.<android.net.NetworkStateTracker: android.net.NetworkInfo mNetworkInfo>;
+
+        $r10 = virtualinvoke $r9.<android.os.Handler: android.os.Message obtainMessage(int,java.lang.Object)>(1, $r4);
+
+        virtualinvoke $r10.<android.os.Message: void sendToTarget()>();
+
+        return;
+
+     label3:
+        $z0 = 0;
+
+        goto label1;
+
+     label4:
+        return;
+    }
+
+    protected void setDetailedStateInternal(android.net.NetworkInfo$DetailedState)
+    {
+        android.net.NetworkStateTracker $r0;
+        android.net.NetworkInfo$DetailedState $r1;
+        android.net.NetworkInfo $r2;
+
+        $r0 := @this: android.net.NetworkStateTracker;
+
+        $r1 := @parameter0: android.net.NetworkInfo$DetailedState;
+
+        $r2 = $r0.<android.net.NetworkStateTracker: android.net.NetworkInfo mNetworkInfo>;
+
+        virtualinvoke $r2.<android.net.NetworkInfo: void setDetailedState(android.net.NetworkInfo$DetailedState,java.lang.String,java.lang.String)>($r1, null, null);
+
+        return;
+    }
+
+    public abstract boolean setRadio(boolean);
+
+    protected void setRoamingStatus(boolean)
+    {
+        android.net.NetworkStateTracker $r0;
+        boolean $z0, $z1;
+        android.net.NetworkInfo $r1;
+        android.os.Handler $r2;
+        android.os.Message $r3;
+
+        $r0 := @this: android.net.NetworkStateTracker;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 = $r0.<android.net.NetworkStateTracker: android.net.NetworkInfo mNetworkInfo>;
+
+        $z1 = virtualinvoke $r1.<android.net.NetworkInfo: boolean isRoaming()>();
+
+        if $z0 == $z1 goto label1;
+
+        $r1 = $r0.<android.net.NetworkStateTracker: android.net.NetworkInfo mNetworkInfo>;
+
+        virtualinvoke $r1.<android.net.NetworkInfo: void setRoaming(boolean)>($z0);
+
+        $r2 = $r0.<android.net.NetworkStateTracker: android.os.Handler mTarget>;
+
+        $r1 = $r0.<android.net.NetworkStateTracker: android.net.NetworkInfo mNetworkInfo>;
+
+        $r3 = virtualinvoke $r2.<android.os.Handler: android.os.Message obtainMessage(int,java.lang.Object)>(5, $r1);
+
+        virtualinvoke $r3.<android.os.Message: void sendToTarget()>();
+
+        return;
+
+     label1:
+        return;
+    }
+
+    protected void setSubtype(int, java.lang.String)
+    {
+        android.net.NetworkStateTracker $r0;
+        int $i0, $i1;
+        java.lang.String $r1;
+        android.net.NetworkInfo $r2;
+        boolean $z0;
+        android.os.Handler $r3;
+        android.os.Message $r4;
+
+        $r0 := @this: android.net.NetworkStateTracker;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $r2 = $r0.<android.net.NetworkStateTracker: android.net.NetworkInfo mNetworkInfo>;
+
+        $z0 = virtualinvoke $r2.<android.net.NetworkInfo: boolean isConnected()>();
+
+        if $z0 == 0 goto label1;
+
+        $r2 = $r0.<android.net.NetworkStateTracker: android.net.NetworkInfo mNetworkInfo>;
+
+        $i1 = virtualinvoke $r2.<android.net.NetworkInfo: int getSubtype()>();
+
+        if $i0 == $i1 goto label2;
+
+        $r2 = $r0.<android.net.NetworkStateTracker: android.net.NetworkInfo mNetworkInfo>;
+
+        virtualinvoke $r2.<android.net.NetworkInfo: void setSubtype(int,java.lang.String)>($i0, $r1);
+
+        $r3 = $r0.<android.net.NetworkStateTracker: android.os.Handler mTarget>;
+
+        $r2 = $r0.<android.net.NetworkStateTracker: android.net.NetworkInfo mNetworkInfo>;
+
+        $r4 = virtualinvoke $r3.<android.os.Handler: android.os.Message obtainMessage(int,int,int,java.lang.Object)>(6, $i1, 0, $r2);
+
+        virtualinvoke $r4.<android.os.Message: void sendToTarget()>();
+
+        return;
+
+     label1:
+        return;
+
+     label2:
+        return;
+    }
+
+    public void setTeardownRequested(boolean)
+    {
+        android.net.NetworkStateTracker $r0;
+        boolean $z0;
+
+        $r0 := @this: android.net.NetworkStateTracker;
+
+        $z0 := @parameter0: boolean;
+
+        $r0.<android.net.NetworkStateTracker: boolean mTeardownRequested> = $z0;
+
+        return;
+    }
+
+    public abstract void startMonitoring();
+
+    public abstract int startUsingNetworkFeature(java.lang.String, int, int);
+
+    public abstract int stopUsingNetworkFeature(java.lang.String, int, int);
+
+    public abstract boolean teardown();
+
+    public void updateNetworkSettings()
+    {
+        android.net.NetworkStateTracker $r0;
+        java.lang.String $r1, $r2, $r3, $r4;
+        int $i0;
+        java.lang.StringBuilder $r5;
+        boolean $z0;
+
+        $r0 := @this: android.net.NetworkStateTracker;
+
+        $r1 = virtualinvoke $r0.<android.net.NetworkStateTracker: java.lang.String getTcpBufferSizesPropName()>();
+
+        $r2 = $r1;
+
+        $r3 = staticinvoke <android.os.SystemProperties: java.lang.String get(java.lang.String)>($r1);
+
+        $r4 = $r3;
+
+        $i0 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        if $i0 != 0 goto label1;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" not found in system properties. Using defaults");
+
+        $r2 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("NetworkStateTracker", $r2);
+
+        $r2 = "net.tcp.buffersize.default";
+
+        $r4 = staticinvoke <android.os.SystemProperties: java.lang.String get(java.lang.String)>("net.tcp.buffersize.default");
+
+     label1:
+        $i0 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        if $i0 == 0 goto label3;
+
+        $z0 = <android.net.NetworkStateTracker: boolean DBG>;
+
+        if $z0 == 0 goto label2;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Setting TCP values: [");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("] which comes from [");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r2 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("NetworkStateTracker", $r2);
+
+     label2:
+        specialinvoke $r0.<android.net.NetworkStateTracker: void setBufferSize(java.lang.String)>($r4);
+
+        return;
+
+     label3:
+        return;
+    }
+}

@@ -1,0 +1,970 @@
+public class android.net.http.AndroidHttpClientConnection extends java.lang.Object implements org.apache.http.HttpConnection, org.apache.http.HttpInetConnection
+{
+    private final org.apache.http.impl.entity.EntitySerializer entityserializer;
+    private org.apache.http.io.SessionInputBuffer inbuffer;
+    private int maxHeaderCount;
+    private int maxLineLength;
+    private org.apache.http.impl.HttpConnectionMetricsImpl metrics;
+    private volatile boolean open;
+    private org.apache.http.io.SessionOutputBuffer outbuffer;
+    private org.apache.http.io.HttpMessageWriter requestWriter;
+    private java.net.Socket socket;
+
+    public void <init>()
+    {
+        android.net.http.AndroidHttpClientConnection $r0;
+        org.apache.http.impl.entity.StrictContentLengthStrategy $r1;
+        org.apache.http.impl.entity.EntitySerializer $r2;
+
+        $r0 := @this: android.net.http.AndroidHttpClientConnection;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r0.<android.net.http.AndroidHttpClientConnection: org.apache.http.io.SessionInputBuffer inbuffer> = null;
+
+        $r0.<android.net.http.AndroidHttpClientConnection: org.apache.http.io.SessionOutputBuffer outbuffer> = null;
+
+        $r0.<android.net.http.AndroidHttpClientConnection: org.apache.http.io.HttpMessageWriter requestWriter> = null;
+
+        $r0.<android.net.http.AndroidHttpClientConnection: org.apache.http.impl.HttpConnectionMetricsImpl metrics> = null;
+
+        $r0.<android.net.http.AndroidHttpClientConnection: java.net.Socket socket> = null;
+
+        $r2 = new org.apache.http.impl.entity.EntitySerializer;
+
+        $r1 = new org.apache.http.impl.entity.StrictContentLengthStrategy;
+
+        specialinvoke $r1.<org.apache.http.impl.entity.StrictContentLengthStrategy: void <init>()>();
+
+        specialinvoke $r2.<org.apache.http.impl.entity.EntitySerializer: void <init>(org.apache.http.entity.ContentLengthStrategy)>($r1);
+
+        $r0.<android.net.http.AndroidHttpClientConnection: org.apache.http.impl.entity.EntitySerializer entityserializer> = $r2;
+
+        return;
+    }
+
+    private void assertNotOpen()
+    {
+        android.net.http.AndroidHttpClientConnection $r0;
+        boolean $z0;
+        java.lang.IllegalStateException $r1;
+
+        $r0 := @this: android.net.http.AndroidHttpClientConnection;
+
+        $z0 = $r0.<android.net.http.AndroidHttpClientConnection: boolean open>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Connection is already open");
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+
+    private void assertOpen()
+    {
+        android.net.http.AndroidHttpClientConnection $r0;
+        boolean $z0;
+        java.lang.IllegalStateException $r1;
+
+        $r0 := @this: android.net.http.AndroidHttpClientConnection;
+
+        $z0 = $r0.<android.net.http.AndroidHttpClientConnection: boolean open>;
+
+        if $z0 != 0 goto label1;
+
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Connection is not open");
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+
+    private long determineLength(android.net.http.Headers)
+    {
+        android.net.http.AndroidHttpClientConnection $r0;
+        android.net.http.Headers $r1;
+        long $l0;
+        byte $b1;
+
+        $r0 := @this: android.net.http.AndroidHttpClientConnection;
+
+        $r1 := @parameter0: android.net.http.Headers;
+
+        $l0 = virtualinvoke $r1.<android.net.http.Headers: long getTransferEncoding()>();
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 >= 0 goto label1;
+
+        return $l0;
+
+     label1:
+        $l0 = virtualinvoke $r1.<android.net.http.Headers: long getContentLength()>();
+
+        $b1 = $l0 cmp -1L;
+
+        if $b1 <= 0 goto label2;
+
+        return $l0;
+
+     label2:
+        return -1L;
+    }
+
+    public void bind(java.net.Socket, org.apache.http.params.HttpParams) throws java.io.IOException
+    {
+        android.net.http.AndroidHttpClientConnection $r0;
+        java.net.Socket $r1;
+        org.apache.http.params.HttpParams $r2;
+        java.lang.IllegalArgumentException $r3;
+        boolean $z0;
+        int $i0;
+        org.apache.http.impl.io.SocketInputBuffer $r4;
+        org.apache.http.impl.io.SocketOutputBuffer $r5;
+        org.apache.http.impl.io.HttpRequestWriter $r6;
+        org.apache.http.io.SessionOutputBuffer $r7;
+        org.apache.http.impl.HttpConnectionMetricsImpl $r8;
+        org.apache.http.io.SessionInputBuffer $r9;
+        org.apache.http.io.HttpTransportMetrics $r10, $r11;
+
+        $r0 := @this: android.net.http.AndroidHttpClientConnection;
+
+        $r1 := @parameter0: java.net.Socket;
+
+        $r2 := @parameter1: org.apache.http.params.HttpParams;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Socket may not be null");
+
+        throw $r3;
+
+     label1:
+        if $r2 != null goto label2;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("HTTP parameters may not be null");
+
+        throw $r3;
+
+     label2:
+        specialinvoke $r0.<android.net.http.AndroidHttpClientConnection: void assertNotOpen()>();
+
+        $z0 = staticinvoke <org.apache.http.params.HttpConnectionParams: boolean getTcpNoDelay(org.apache.http.params.HttpParams)>($r2);
+
+        virtualinvoke $r1.<java.net.Socket: void setTcpNoDelay(boolean)>($z0);
+
+        $i0 = staticinvoke <org.apache.http.params.HttpConnectionParams: int getSoTimeout(org.apache.http.params.HttpParams)>($r2);
+
+        virtualinvoke $r1.<java.net.Socket: void setSoTimeout(int)>($i0);
+
+        $i0 = staticinvoke <org.apache.http.params.HttpConnectionParams: int getLinger(org.apache.http.params.HttpParams)>($r2);
+
+        if $i0 < 0 goto label4;
+
+        if $i0 <= 0 goto label5;
+
+        $z0 = 1;
+
+     label3:
+        virtualinvoke $r1.<java.net.Socket: void setSoLinger(boolean,int)>($z0, $i0);
+
+     label4:
+        $r0.<android.net.http.AndroidHttpClientConnection: java.net.Socket socket> = $r1;
+
+        $i0 = staticinvoke <org.apache.http.params.HttpConnectionParams: int getSocketBufferSize(org.apache.http.params.HttpParams)>($r2);
+
+        $r4 = new org.apache.http.impl.io.SocketInputBuffer;
+
+        specialinvoke $r4.<org.apache.http.impl.io.SocketInputBuffer: void <init>(java.net.Socket,int,org.apache.http.params.HttpParams)>($r1, $i0, $r2);
+
+        $r0.<android.net.http.AndroidHttpClientConnection: org.apache.http.io.SessionInputBuffer inbuffer> = $r4;
+
+        $r5 = new org.apache.http.impl.io.SocketOutputBuffer;
+
+        specialinvoke $r5.<org.apache.http.impl.io.SocketOutputBuffer: void <init>(java.net.Socket,int,org.apache.http.params.HttpParams)>($r1, $i0, $r2);
+
+        $r0.<android.net.http.AndroidHttpClientConnection: org.apache.http.io.SessionOutputBuffer outbuffer> = $r5;
+
+        $i0 = interfaceinvoke $r2.<org.apache.http.params.HttpParams: int getIntParameter(java.lang.String,int)>("http.connection.max-header-count", -1);
+
+        $r0.<android.net.http.AndroidHttpClientConnection: int maxHeaderCount> = $i0;
+
+        $i0 = interfaceinvoke $r2.<org.apache.http.params.HttpParams: int getIntParameter(java.lang.String,int)>("http.connection.max-line-length", -1);
+
+        $r0.<android.net.http.AndroidHttpClientConnection: int maxLineLength> = $i0;
+
+        $r6 = new org.apache.http.impl.io.HttpRequestWriter;
+
+        $r7 = $r0.<android.net.http.AndroidHttpClientConnection: org.apache.http.io.SessionOutputBuffer outbuffer>;
+
+        specialinvoke $r6.<org.apache.http.impl.io.HttpRequestWriter: void <init>(org.apache.http.io.SessionOutputBuffer,org.apache.http.message.LineFormatter,org.apache.http.params.HttpParams)>($r7, null, $r2);
+
+        $r0.<android.net.http.AndroidHttpClientConnection: org.apache.http.io.HttpMessageWriter requestWriter> = $r6;
+
+        $r8 = new org.apache.http.impl.HttpConnectionMetricsImpl;
+
+        $r9 = $r0.<android.net.http.AndroidHttpClientConnection: org.apache.http.io.SessionInputBuffer inbuffer>;
+
+        $r10 = interfaceinvoke $r9.<org.apache.http.io.SessionInputBuffer: org.apache.http.io.HttpTransportMetrics getMetrics()>();
+
+        $r7 = $r0.<android.net.http.AndroidHttpClientConnection: org.apache.http.io.SessionOutputBuffer outbuffer>;
+
+        $r11 = interfaceinvoke $r7.<org.apache.http.io.SessionOutputBuffer: org.apache.http.io.HttpTransportMetrics getMetrics()>();
+
+        specialinvoke $r8.<org.apache.http.impl.HttpConnectionMetricsImpl: void <init>(org.apache.http.io.HttpTransportMetrics,org.apache.http.io.HttpTransportMetrics)>($r10, $r11);
+
+        $r0.<android.net.http.AndroidHttpClientConnection: org.apache.http.impl.HttpConnectionMetricsImpl metrics> = $r8;
+
+        $r0.<android.net.http.AndroidHttpClientConnection: boolean open> = 1;
+
+        return;
+
+     label5:
+        $z0 = 0;
+
+        goto label3;
+    }
+
+    public void close() throws java.io.IOException
+    {
+        android.net.http.AndroidHttpClientConnection $r0;
+        boolean $z0;
+        java.net.Socket $r1;
+        java.lang.UnsupportedOperationException $r2;
+        java.io.IOException $r3, $r4;
+
+        $r0 := @this: android.net.http.AndroidHttpClientConnection;
+
+        $z0 = $r0.<android.net.http.AndroidHttpClientConnection: boolean open>;
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r0.<android.net.http.AndroidHttpClientConnection: boolean open> = 0;
+
+        virtualinvoke $r0.<android.net.http.AndroidHttpClientConnection: void doFlush()>();
+
+        $r1 = $r0.<android.net.http.AndroidHttpClientConnection: java.net.Socket socket>;
+
+     label2:
+        virtualinvoke $r1.<java.net.Socket: void shutdownOutput()>();
+
+     label3:
+        $r1 = $r0.<android.net.http.AndroidHttpClientConnection: java.net.Socket socket>;
+
+     label4:
+        virtualinvoke $r1.<java.net.Socket: void shutdownInput()>();
+
+     label5:
+        $r1 = $r0.<android.net.http.AndroidHttpClientConnection: java.net.Socket socket>;
+
+        virtualinvoke $r1.<java.net.Socket: void close()>();
+
+        return;
+
+     label6:
+        $r2 := @caughtexception;
+
+        goto label5;
+
+     label7:
+        $r3 := @caughtexception;
+
+        goto label5;
+
+     label8:
+        $r4 := @caughtexception;
+
+        goto label3;
+
+        catch java.io.IOException from label2 to label3 with label8;
+        catch java.lang.UnsupportedOperationException from label2 to label3 with label6;
+        catch java.io.IOException from label4 to label5 with label7;
+        catch java.lang.UnsupportedOperationException from label4 to label5 with label6;
+    }
+
+    protected void doFlush() throws java.io.IOException
+    {
+        android.net.http.AndroidHttpClientConnection $r0;
+        org.apache.http.io.SessionOutputBuffer $r1;
+
+        $r0 := @this: android.net.http.AndroidHttpClientConnection;
+
+        $r1 = $r0.<android.net.http.AndroidHttpClientConnection: org.apache.http.io.SessionOutputBuffer outbuffer>;
+
+        interfaceinvoke $r1.<org.apache.http.io.SessionOutputBuffer: void flush()>();
+
+        return;
+    }
+
+    public void flush() throws java.io.IOException
+    {
+        android.net.http.AndroidHttpClientConnection $r0;
+
+        $r0 := @this: android.net.http.AndroidHttpClientConnection;
+
+        specialinvoke $r0.<android.net.http.AndroidHttpClientConnection: void assertOpen()>();
+
+        virtualinvoke $r0.<android.net.http.AndroidHttpClientConnection: void doFlush()>();
+
+        return;
+    }
+
+    public java.net.InetAddress getLocalAddress()
+    {
+        android.net.http.AndroidHttpClientConnection $r0;
+        java.net.InetAddress $r1;
+        java.net.Socket $r2;
+
+        $r0 := @this: android.net.http.AndroidHttpClientConnection;
+
+        $r2 = $r0.<android.net.http.AndroidHttpClientConnection: java.net.Socket socket>;
+
+        if $r2 == null goto label1;
+
+        $r2 = $r0.<android.net.http.AndroidHttpClientConnection: java.net.Socket socket>;
+
+        $r1 = virtualinvoke $r2.<java.net.Socket: java.net.InetAddress getLocalAddress()>();
+
+        return $r1;
+
+     label1:
+        return null;
+    }
+
+    public int getLocalPort()
+    {
+        android.net.http.AndroidHttpClientConnection $r0;
+        int $i0;
+        java.net.Socket $r1;
+
+        $r0 := @this: android.net.http.AndroidHttpClientConnection;
+
+        $r1 = $r0.<android.net.http.AndroidHttpClientConnection: java.net.Socket socket>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<android.net.http.AndroidHttpClientConnection: java.net.Socket socket>;
+
+        $i0 = virtualinvoke $r1.<java.net.Socket: int getLocalPort()>();
+
+        return $i0;
+
+     label1:
+        return -1;
+    }
+
+    public org.apache.http.HttpConnectionMetrics getMetrics()
+    {
+        android.net.http.AndroidHttpClientConnection $r0;
+        org.apache.http.impl.HttpConnectionMetricsImpl r1;
+
+        $r0 := @this: android.net.http.AndroidHttpClientConnection;
+
+        r1 = $r0.<android.net.http.AndroidHttpClientConnection: org.apache.http.impl.HttpConnectionMetricsImpl metrics>;
+
+        return r1;
+    }
+
+    public java.net.InetAddress getRemoteAddress()
+    {
+        android.net.http.AndroidHttpClientConnection $r0;
+        java.net.InetAddress $r1;
+        java.net.Socket $r2;
+
+        $r0 := @this: android.net.http.AndroidHttpClientConnection;
+
+        $r2 = $r0.<android.net.http.AndroidHttpClientConnection: java.net.Socket socket>;
+
+        if $r2 == null goto label1;
+
+        $r2 = $r0.<android.net.http.AndroidHttpClientConnection: java.net.Socket socket>;
+
+        $r1 = virtualinvoke $r2.<java.net.Socket: java.net.InetAddress getInetAddress()>();
+
+        return $r1;
+
+     label1:
+        return null;
+    }
+
+    public int getRemotePort()
+    {
+        android.net.http.AndroidHttpClientConnection $r0;
+        int $i0;
+        java.net.Socket $r1;
+
+        $r0 := @this: android.net.http.AndroidHttpClientConnection;
+
+        $r1 = $r0.<android.net.http.AndroidHttpClientConnection: java.net.Socket socket>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<android.net.http.AndroidHttpClientConnection: java.net.Socket socket>;
+
+        $i0 = virtualinvoke $r1.<java.net.Socket: int getPort()>();
+
+        return $i0;
+
+     label1:
+        return -1;
+    }
+
+    public int getSocketTimeout()
+    {
+        android.net.http.AndroidHttpClientConnection $r0;
+        int $i0;
+        java.net.Socket $r1;
+        java.net.SocketException $r2;
+
+        $r0 := @this: android.net.http.AndroidHttpClientConnection;
+
+        $r1 = $r0.<android.net.http.AndroidHttpClientConnection: java.net.Socket socket>;
+
+        if $r1 == null goto label4;
+
+        $r1 = $r0.<android.net.http.AndroidHttpClientConnection: java.net.Socket socket>;
+
+     label1:
+        $i0 = virtualinvoke $r1.<java.net.Socket: int getSoTimeout()>();
+
+     label2:
+        return $i0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        return -1;
+
+     label4:
+        return -1;
+
+        catch java.net.SocketException from label1 to label2 with label3;
+    }
+
+    public boolean isOpen()
+    {
+        android.net.http.AndroidHttpClientConnection $r0;
+        boolean $z0;
+        java.net.Socket $r1;
+
+        $r0 := @this: android.net.http.AndroidHttpClientConnection;
+
+        $z0 = $r0.<android.net.http.AndroidHttpClientConnection: boolean open>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = $r0.<android.net.http.AndroidHttpClientConnection: java.net.Socket socket>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<android.net.http.AndroidHttpClientConnection: java.net.Socket socket>;
+
+        $z0 = virtualinvoke $r1.<java.net.Socket: boolean isConnected()>();
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    public boolean isStale()
+    {
+        android.net.http.AndroidHttpClientConnection $r0;
+        org.apache.http.io.SessionInputBuffer $r1;
+        java.io.IOException $r2;
+
+        $r0 := @this: android.net.http.AndroidHttpClientConnection;
+
+        specialinvoke $r0.<android.net.http.AndroidHttpClientConnection: void assertOpen()>();
+
+        $r1 = $r0.<android.net.http.AndroidHttpClientConnection: org.apache.http.io.SessionInputBuffer inbuffer>;
+
+     label1:
+        interfaceinvoke $r1.<org.apache.http.io.SessionInputBuffer: boolean isDataAvailable(int)>(1);
+
+     label2:
+        return 0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        return 1;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public org.apache.http.StatusLine parseResponseHeader(android.net.http.Headers) throws java.io.IOException, org.apache.http.ParseException
+    {
+        android.net.http.AndroidHttpClientConnection $r0;
+        android.net.http.Headers $r1;
+        org.apache.http.util.CharArrayBuffer $r2, $r8;
+        org.apache.http.io.SessionInputBuffer $r3;
+        int $i0, $i1, $i2, $i4, $i5;
+        org.apache.http.NoHttpResponseException $r4;
+        org.apache.http.message.BasicLineParser $r5;
+        org.apache.http.message.ParserCursor $r6;
+        org.apache.http.StatusLine $r7;
+        org.apache.http.impl.HttpConnectionMetricsImpl $r9;
+        char $c3;
+        java.io.IOException $r10;
+
+        $r0 := @this: android.net.http.AndroidHttpClientConnection;
+
+        $r1 := @parameter0: android.net.http.Headers;
+
+        specialinvoke $r0.<android.net.http.AndroidHttpClientConnection: void assertOpen()>();
+
+        $r2 = new org.apache.http.util.CharArrayBuffer;
+
+        specialinvoke $r2.<org.apache.http.util.CharArrayBuffer: void <init>(int)>(64);
+
+        $r3 = $r0.<android.net.http.AndroidHttpClientConnection: org.apache.http.io.SessionInputBuffer inbuffer>;
+
+        $i0 = interfaceinvoke $r3.<org.apache.http.io.SessionInputBuffer: int readLine(org.apache.http.util.CharArrayBuffer)>($r2);
+
+        if $i0 != -1 goto label01;
+
+        $r4 = new org.apache.http.NoHttpResponseException;
+
+        specialinvoke $r4.<org.apache.http.NoHttpResponseException: void <init>(java.lang.String)>("The target server failed to respond");
+
+        throw $r4;
+
+     label01:
+        $r5 = <org.apache.http.message.BasicLineParser: org.apache.http.message.BasicLineParser DEFAULT>;
+
+        $r6 = new org.apache.http.message.ParserCursor;
+
+        $i0 = virtualinvoke $r2.<org.apache.http.util.CharArrayBuffer: int length()>();
+
+        specialinvoke $r6.<org.apache.http.message.ParserCursor: void <init>(int,int)>(0, $i0);
+
+        $r7 = virtualinvoke $r5.<org.apache.http.message.BasicLineParser: org.apache.http.StatusLine parseStatusLine(org.apache.http.util.CharArrayBuffer,org.apache.http.message.ParserCursor)>($r2, $r6);
+
+        $i0 = interfaceinvoke $r7.<org.apache.http.StatusLine: int getStatusCode()>();
+
+        $r8 = null;
+
+        $i1 = 0;
+
+     label02:
+        if $r2 != null goto label06;
+
+        $r2 = new org.apache.http.util.CharArrayBuffer;
+
+        specialinvoke $r2.<org.apache.http.util.CharArrayBuffer: void <init>(int)>(64);
+
+     label03:
+        $r3 = $r0.<android.net.http.AndroidHttpClientConnection: org.apache.http.io.SessionInputBuffer inbuffer>;
+
+        $i2 = interfaceinvoke $r3.<org.apache.http.io.SessionInputBuffer: int readLine(org.apache.http.util.CharArrayBuffer)>($r2);
+
+        if $i2 == -1 goto label04;
+
+        $i2 = virtualinvoke $r2.<org.apache.http.util.CharArrayBuffer: int length()>();
+
+        if $i2 >= 1 goto label07;
+
+     label04:
+        if $r8 == null goto label05;
+
+        virtualinvoke $r1.<android.net.http.Headers: void parseHeader(org.apache.http.util.CharArrayBuffer)>($r8);
+
+     label05:
+        if $i0 < 200 goto label16;
+
+        $r9 = $r0.<android.net.http.AndroidHttpClientConnection: org.apache.http.impl.HttpConnectionMetricsImpl metrics>;
+
+        virtualinvoke $r9.<org.apache.http.impl.HttpConnectionMetricsImpl: void incrementResponseCount()>();
+
+        return $r7;
+
+     label06:
+        virtualinvoke $r2.<org.apache.http.util.CharArrayBuffer: void clear()>();
+
+        goto label03;
+
+     label07:
+        $c3 = virtualinvoke $r2.<org.apache.http.util.CharArrayBuffer: char charAt(int)>(0);
+
+        if $c3 == 32 goto label08;
+
+        if $c3 != 9 goto label14;
+
+     label08:
+        if $r8 == null goto label14;
+
+        $i2 = 0;
+
+        $i4 = virtualinvoke $r2.<org.apache.http.util.CharArrayBuffer: int length()>();
+
+     label09:
+        if $i2 >= $i4 goto label10;
+
+        $c3 = virtualinvoke $r2.<org.apache.http.util.CharArrayBuffer: char charAt(int)>($i2);
+
+        if $c3 == 32 goto label11;
+
+        if $c3 == 9 goto label11;
+
+     label10:
+        $i4 = $r0.<android.net.http.AndroidHttpClientConnection: int maxLineLength>;
+
+        if $i4 <= 0 goto label12;
+
+        $i4 = virtualinvoke $r8.<org.apache.http.util.CharArrayBuffer: int length()>();
+
+        $i4 = $i4 + 1;
+
+        $i5 = virtualinvoke $r2.<org.apache.http.util.CharArrayBuffer: int length()>();
+
+        $i4 = $i4 + $i5;
+
+        $i4 = $i4 - $i2;
+
+        $i5 = $r0.<android.net.http.AndroidHttpClientConnection: int maxLineLength>;
+
+        if $i4 <= $i5 goto label12;
+
+        $r10 = new java.io.IOException;
+
+        specialinvoke $r10.<java.io.IOException: void <init>(java.lang.String)>("Maximum line length limit exceeded");
+
+        throw $r10;
+
+     label11:
+        $i2 = $i2 + 1;
+
+        goto label09;
+
+     label12:
+        virtualinvoke $r8.<org.apache.http.util.CharArrayBuffer: void append(char)>(32);
+
+        $i4 = virtualinvoke $r2.<org.apache.http.util.CharArrayBuffer: int length()>();
+
+        $i4 = $i4 - $i2;
+
+        virtualinvoke $r8.<org.apache.http.util.CharArrayBuffer: void append(org.apache.http.util.CharArrayBuffer,int,int)>($r2, $i2, $i4);
+
+     label13:
+        $i2 = $r0.<android.net.http.AndroidHttpClientConnection: int maxHeaderCount>;
+
+        if $i2 <= 0 goto label02;
+
+        $i2 = $r0.<android.net.http.AndroidHttpClientConnection: int maxHeaderCount>;
+
+        if $i1 < $i2 goto label02;
+
+        $r10 = new java.io.IOException;
+
+        specialinvoke $r10.<java.io.IOException: void <init>(java.lang.String)>("Maximum header count exceeded");
+
+        throw $r10;
+
+     label14:
+        if $r8 == null goto label15;
+
+        virtualinvoke $r1.<android.net.http.Headers: void parseHeader(org.apache.http.util.CharArrayBuffer)>($r8);
+
+     label15:
+        $i1 = $i1 + 1;
+
+        $r8 = $r2;
+
+        $r2 = null;
+
+        goto label13;
+
+     label16:
+        return $r7;
+    }
+
+    public org.apache.http.HttpEntity receiveResponseEntity(android.net.http.Headers)
+    {
+        android.net.http.AndroidHttpClientConnection $r0;
+        android.net.http.Headers $r1;
+        org.apache.http.entity.BasicHttpEntity $r2;
+        long $l0;
+        byte $b1;
+        org.apache.http.impl.io.ChunkedInputStream $r3;
+        org.apache.http.io.SessionInputBuffer $r4;
+        java.lang.String $r5;
+        org.apache.http.impl.io.IdentityInputStream $r6;
+        org.apache.http.impl.io.ContentLengthInputStream $r7;
+
+        $r0 := @this: android.net.http.AndroidHttpClientConnection;
+
+        $r1 := @parameter0: android.net.http.Headers;
+
+        specialinvoke $r0.<android.net.http.AndroidHttpClientConnection: void assertOpen()>();
+
+        $r2 = new org.apache.http.entity.BasicHttpEntity;
+
+        specialinvoke $r2.<org.apache.http.entity.BasicHttpEntity: void <init>()>();
+
+        $l0 = specialinvoke $r0.<android.net.http.AndroidHttpClientConnection: long determineLength(android.net.http.Headers)>($r1);
+
+        $b1 = $l0 cmp -2L;
+
+        if $b1 != 0 goto label3;
+
+        virtualinvoke $r2.<org.apache.http.entity.AbstractHttpEntity: void setChunked(boolean)>(1);
+
+        virtualinvoke $r2.<org.apache.http.entity.BasicHttpEntity: void setContentLength(long)>(-1L);
+
+        $r3 = new org.apache.http.impl.io.ChunkedInputStream;
+
+        $r4 = $r0.<android.net.http.AndroidHttpClientConnection: org.apache.http.io.SessionInputBuffer inbuffer>;
+
+        specialinvoke $r3.<org.apache.http.impl.io.ChunkedInputStream: void <init>(org.apache.http.io.SessionInputBuffer)>($r4);
+
+        virtualinvoke $r2.<org.apache.http.entity.BasicHttpEntity: void setContent(java.io.InputStream)>($r3);
+
+     label1:
+        $r5 = virtualinvoke $r1.<android.net.http.Headers: java.lang.String getContentType()>();
+
+        if $r5 == null goto label2;
+
+        virtualinvoke $r2.<org.apache.http.entity.AbstractHttpEntity: void setContentType(java.lang.String)>($r5);
+
+     label2:
+        $r5 = virtualinvoke $r1.<android.net.http.Headers: java.lang.String getContentEncoding()>();
+
+        if $r5 == null goto label5;
+
+        virtualinvoke $r2.<org.apache.http.entity.AbstractHttpEntity: void setContentEncoding(java.lang.String)>($r5);
+
+        return $r2;
+
+     label3:
+        $b1 = $l0 cmp -1L;
+
+        if $b1 != 0 goto label4;
+
+        virtualinvoke $r2.<org.apache.http.entity.AbstractHttpEntity: void setChunked(boolean)>(0);
+
+        virtualinvoke $r2.<org.apache.http.entity.BasicHttpEntity: void setContentLength(long)>(-1L);
+
+        $r6 = new org.apache.http.impl.io.IdentityInputStream;
+
+        $r4 = $r0.<android.net.http.AndroidHttpClientConnection: org.apache.http.io.SessionInputBuffer inbuffer>;
+
+        specialinvoke $r6.<org.apache.http.impl.io.IdentityInputStream: void <init>(org.apache.http.io.SessionInputBuffer)>($r4);
+
+        virtualinvoke $r2.<org.apache.http.entity.BasicHttpEntity: void setContent(java.io.InputStream)>($r6);
+
+        goto label1;
+
+     label4:
+        virtualinvoke $r2.<org.apache.http.entity.AbstractHttpEntity: void setChunked(boolean)>(0);
+
+        virtualinvoke $r2.<org.apache.http.entity.BasicHttpEntity: void setContentLength(long)>($l0);
+
+        $r7 = new org.apache.http.impl.io.ContentLengthInputStream;
+
+        $r4 = $r0.<android.net.http.AndroidHttpClientConnection: org.apache.http.io.SessionInputBuffer inbuffer>;
+
+        specialinvoke $r7.<org.apache.http.impl.io.ContentLengthInputStream: void <init>(org.apache.http.io.SessionInputBuffer,long)>($r4, $l0);
+
+        virtualinvoke $r2.<org.apache.http.entity.BasicHttpEntity: void setContent(java.io.InputStream)>($r7);
+
+        goto label1;
+
+     label5:
+        return $r2;
+    }
+
+    public void sendRequestEntity(org.apache.http.HttpEntityEnclosingRequest) throws org.apache.http.HttpException, java.io.IOException
+    {
+        android.net.http.AndroidHttpClientConnection $r0;
+        org.apache.http.HttpEntityEnclosingRequest $r1;
+        java.lang.IllegalArgumentException $r2;
+        org.apache.http.HttpEntity $r3;
+        org.apache.http.impl.entity.EntitySerializer $r4;
+        org.apache.http.io.SessionOutputBuffer $r5;
+
+        $r0 := @this: android.net.http.AndroidHttpClientConnection;
+
+        $r1 := @parameter0: org.apache.http.HttpEntityEnclosingRequest;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("HTTP request may not be null");
+
+        throw $r2;
+
+     label1:
+        specialinvoke $r0.<android.net.http.AndroidHttpClientConnection: void assertOpen()>();
+
+        $r3 = interfaceinvoke $r1.<org.apache.http.HttpEntityEnclosingRequest: org.apache.http.HttpEntity getEntity()>();
+
+        if $r3 != null goto label2;
+
+        return;
+
+     label2:
+        $r4 = $r0.<android.net.http.AndroidHttpClientConnection: org.apache.http.impl.entity.EntitySerializer entityserializer>;
+
+        $r5 = $r0.<android.net.http.AndroidHttpClientConnection: org.apache.http.io.SessionOutputBuffer outbuffer>;
+
+        $r3 = interfaceinvoke $r1.<org.apache.http.HttpEntityEnclosingRequest: org.apache.http.HttpEntity getEntity()>();
+
+        virtualinvoke $r4.<org.apache.http.impl.entity.EntitySerializer: void serialize(org.apache.http.io.SessionOutputBuffer,org.apache.http.HttpMessage,org.apache.http.HttpEntity)>($r5, $r1, $r3);
+
+        return;
+    }
+
+    public void sendRequestHeader(org.apache.http.HttpRequest) throws org.apache.http.HttpException, java.io.IOException
+    {
+        android.net.http.AndroidHttpClientConnection $r0;
+        org.apache.http.HttpRequest $r1;
+        java.lang.IllegalArgumentException $r2;
+        org.apache.http.io.HttpMessageWriter $r3;
+        org.apache.http.impl.HttpConnectionMetricsImpl $r4;
+
+        $r0 := @this: android.net.http.AndroidHttpClientConnection;
+
+        $r1 := @parameter0: org.apache.http.HttpRequest;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("HTTP request may not be null");
+
+        throw $r2;
+
+     label1:
+        specialinvoke $r0.<android.net.http.AndroidHttpClientConnection: void assertOpen()>();
+
+        $r3 = $r0.<android.net.http.AndroidHttpClientConnection: org.apache.http.io.HttpMessageWriter requestWriter>;
+
+        interfaceinvoke $r3.<org.apache.http.io.HttpMessageWriter: void write(org.apache.http.HttpMessage)>($r1);
+
+        $r4 = $r0.<android.net.http.AndroidHttpClientConnection: org.apache.http.impl.HttpConnectionMetricsImpl metrics>;
+
+        virtualinvoke $r4.<org.apache.http.impl.HttpConnectionMetricsImpl: void incrementRequestCount()>();
+
+        return;
+    }
+
+    public void setSocketTimeout(int)
+    {
+        android.net.http.AndroidHttpClientConnection $r0;
+        int $i0;
+        java.net.Socket $r1;
+        java.net.SocketException $r2;
+
+        $r0 := @this: android.net.http.AndroidHttpClientConnection;
+
+        $i0 := @parameter0: int;
+
+        specialinvoke $r0.<android.net.http.AndroidHttpClientConnection: void assertOpen()>();
+
+        $r1 = $r0.<android.net.http.AndroidHttpClientConnection: java.net.Socket socket>;
+
+        if $r1 == null goto label4;
+
+        $r1 = $r0.<android.net.http.AndroidHttpClientConnection: java.net.Socket socket>;
+
+     label1:
+        virtualinvoke $r1.<java.net.Socket: void setSoTimeout(int)>($i0);
+
+     label2:
+        return;
+
+     label3:
+        $r2 := @caughtexception;
+
+        return;
+
+     label4:
+        return;
+
+        catch java.net.SocketException from label1 to label2 with label3;
+    }
+
+    public void shutdown() throws java.io.IOException
+    {
+        android.net.http.AndroidHttpClientConnection $r0;
+        java.net.Socket $r1;
+
+        $r0 := @this: android.net.http.AndroidHttpClientConnection;
+
+        $r0.<android.net.http.AndroidHttpClientConnection: boolean open> = 0;
+
+        $r1 = $r0.<android.net.http.AndroidHttpClientConnection: java.net.Socket socket>;
+
+        if $r1 == null goto label1;
+
+        virtualinvoke $r1.<java.net.Socket: void close()>();
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public java.lang.String toString()
+    {
+        android.net.http.AndroidHttpClientConnection $r0;
+        java.lang.StringBuilder $r1, $r4;
+        java.lang.Class $r2;
+        java.lang.String $r3;
+        boolean $z0;
+        int $i0;
+
+        $r0 := @this: android.net.http.AndroidHttpClientConnection;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.String getSimpleName()>();
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[");
+
+        $z0 = virtualinvoke $r0.<android.net.http.AndroidHttpClientConnection: boolean isOpen()>();
+
+        if $z0 == 0 goto label2;
+
+        $i0 = virtualinvoke $r0.<android.net.http.AndroidHttpClientConnection: int getRemotePort()>();
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+     label1:
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r3;
+
+     label2:
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("closed");
+
+        goto label1;
+    }
+}

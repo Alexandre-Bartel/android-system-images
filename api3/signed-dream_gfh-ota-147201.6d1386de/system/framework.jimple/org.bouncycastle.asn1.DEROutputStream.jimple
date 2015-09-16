@@ -1,0 +1,164 @@
+public class org.bouncycastle.asn1.DEROutputStream extends java.io.FilterOutputStream implements org.bouncycastle.asn1.DERTags
+{
+
+    public void <init>(java.io.OutputStream)
+    {
+        org.bouncycastle.asn1.DEROutputStream $r0;
+        java.io.OutputStream $r1;
+
+        $r0 := @this: org.bouncycastle.asn1.DEROutputStream;
+
+        $r1 := @parameter0: java.io.OutputStream;
+
+        specialinvoke $r0.<java.io.FilterOutputStream: void <init>(java.io.OutputStream)>($r1);
+
+        return;
+    }
+
+    private void writeLength(int) throws java.io.IOException
+    {
+        org.bouncycastle.asn1.DEROutputStream $r0;
+        int $i0, $i1, $i2;
+        byte $b3;
+
+        $r0 := @this: org.bouncycastle.asn1.DEROutputStream;
+
+        $i0 := @parameter0: int;
+
+        if $i0 <= 127 goto label4;
+
+        $i1 = 1;
+
+        $i2 = $i0;
+
+     label1:
+        $i2 = $i2 >>> 8;
+
+        if $i2 == 0 goto label2;
+
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label2:
+        $i2 = $i1 | 128;
+
+        $b3 = (byte) $i2;
+
+        virtualinvoke $r0.<java.io.FilterOutputStream: void write(int)>($b3);
+
+        $i1 = $i1 - 1;
+
+        $i1 = $i1 * 8;
+
+     label3:
+        if $i1 < 0 goto label5;
+
+        $i2 = $i0 >> $i1;
+
+        $b3 = (byte) $i2;
+
+        virtualinvoke $r0.<java.io.FilterOutputStream: void write(int)>($b3);
+
+        $i1 = $i1 + -8;
+
+        goto label3;
+
+     label4:
+        $b3 = (byte) $i0;
+
+        virtualinvoke $r0.<java.io.FilterOutputStream: void write(int)>($b3);
+
+        return;
+
+     label5:
+        return;
+    }
+
+    void writeEncoded(int, byte[]) throws java.io.IOException
+    {
+        org.bouncycastle.asn1.DEROutputStream $r0;
+        int $i0;
+        byte[] $r1;
+
+        $r0 := @this: org.bouncycastle.asn1.DEROutputStream;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: byte[];
+
+        virtualinvoke $r0.<java.io.FilterOutputStream: void write(int)>($i0);
+
+        $i0 = lengthof $r1;
+
+        specialinvoke $r0.<org.bouncycastle.asn1.DEROutputStream: void writeLength(int)>($i0);
+
+        virtualinvoke $r0.<java.io.FilterOutputStream: void write(byte[])>($r1);
+
+        return;
+    }
+
+    protected void writeNull() throws java.io.IOException
+    {
+        org.bouncycastle.asn1.DEROutputStream $r0;
+
+        $r0 := @this: org.bouncycastle.asn1.DEROutputStream;
+
+        virtualinvoke $r0.<java.io.FilterOutputStream: void write(int)>(5);
+
+        virtualinvoke $r0.<java.io.FilterOutputStream: void write(int)>(0);
+
+        return;
+    }
+
+    public void writeObject(java.lang.Object) throws java.io.IOException
+    {
+        org.bouncycastle.asn1.DEROutputStream $r0;
+        org.bouncycastle.asn1.DERObject $r1;
+        java.lang.Object $r2;
+        boolean $z0;
+        org.bouncycastle.asn1.DEREncodable $r3;
+        java.io.IOException $r4;
+
+        $r0 := @this: org.bouncycastle.asn1.DEROutputStream;
+
+        $r2 := @parameter0: java.lang.Object;
+
+        if $r2 != null goto label1;
+
+        virtualinvoke $r0.<org.bouncycastle.asn1.DEROutputStream: void writeNull()>();
+
+        return;
+
+     label1:
+        $z0 = $r2 instanceof org.bouncycastle.asn1.DERObject;
+
+        if $z0 == 0 goto label2;
+
+        $r1 = (org.bouncycastle.asn1.DERObject) $r2;
+
+        virtualinvoke $r1.<org.bouncycastle.asn1.DERObject: void encode(org.bouncycastle.asn1.DEROutputStream)>($r0);
+
+        return;
+
+     label2:
+        $z0 = $r2 instanceof org.bouncycastle.asn1.DEREncodable;
+
+        if $z0 == 0 goto label3;
+
+        $r3 = (org.bouncycastle.asn1.DEREncodable) $r2;
+
+        $r1 = interfaceinvoke $r3.<org.bouncycastle.asn1.DEREncodable: org.bouncycastle.asn1.DERObject getDERObject()>();
+
+        virtualinvoke $r1.<org.bouncycastle.asn1.DERObject: void encode(org.bouncycastle.asn1.DEROutputStream)>($r0);
+
+        return;
+
+     label3:
+        $r4 = new java.io.IOException;
+
+        specialinvoke $r4.<java.io.IOException: void <init>(java.lang.String)>("object not DEREncodable");
+
+        throw $r4;
+    }
+}

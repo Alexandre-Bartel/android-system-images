@@ -1,0 +1,910 @@
+class com.android.internal.telephony.gsm.stk.IconLoader extends android.os.Handler
+{
+    private static final int CLUT_ENTRY_SIZE;
+    private static final int CLUT_LOCATION_OFFSET;
+    private static final int EVENT_READ_CLUT_DONE;
+    private static final int EVENT_READ_EF_IMG_RECOED_DONE;
+    private static final int EVENT_READ_ICON_DONE;
+    private static final int STATE_MULTI_ICONS;
+    private static final int STATE_SINGLE_ICON;
+    private static com.android.internal.telephony.gsm.stk.IconLoader sLoader;
+    private android.graphics.Bitmap mCurrentIcon;
+    private int mCurrentRecordIndex;
+    private android.os.Message mEndMsg;
+    private byte[] mIconData;
+    private android.graphics.Bitmap[] mIcons;
+    private java.util.HashMap mIconsCache;
+    private com.android.internal.telephony.gsm.stk.ImageDescriptor mId;
+    private int mRecordNumber;
+    private int[] mRecordNumbers;
+    private com.android.internal.telephony.gsm.SIMFileHandler mSimFH;
+    private int mState;
+
+    static void <clinit>()
+    {
+        <com.android.internal.telephony.gsm.stk.IconLoader: int STATE_SINGLE_ICON> = 1;
+
+        <com.android.internal.telephony.gsm.stk.IconLoader: int STATE_MULTI_ICONS> = 2;
+
+        <com.android.internal.telephony.gsm.stk.IconLoader: int EVENT_READ_ICON_DONE> = 2;
+
+        <com.android.internal.telephony.gsm.stk.IconLoader: int EVENT_READ_EF_IMG_RECOED_DONE> = 1;
+
+        <com.android.internal.telephony.gsm.stk.IconLoader: int EVENT_READ_CLUT_DONE> = 3;
+
+        <com.android.internal.telephony.gsm.stk.IconLoader: int CLUT_LOCATION_OFFSET> = 4;
+
+        <com.android.internal.telephony.gsm.stk.IconLoader: int CLUT_ENTRY_SIZE> = 3;
+
+        <com.android.internal.telephony.gsm.stk.IconLoader: com.android.internal.telephony.gsm.stk.IconLoader sLoader> = null;
+
+        return;
+    }
+
+    private void <init>(android.os.Looper, com.android.internal.telephony.gsm.SIMFileHandler)
+    {
+        com.android.internal.telephony.gsm.stk.IconLoader $r0;
+        android.os.Looper $r1;
+        com.android.internal.telephony.gsm.SIMFileHandler $r2;
+        java.util.HashMap $r3;
+
+        $r0 := @this: com.android.internal.telephony.gsm.stk.IconLoader;
+
+        $r1 := @parameter0: android.os.Looper;
+
+        $r2 := @parameter1: com.android.internal.telephony.gsm.SIMFileHandler;
+
+        specialinvoke $r0.<android.os.Handler: void <init>(android.os.Looper)>($r1);
+
+        $r0.<com.android.internal.telephony.gsm.stk.IconLoader: int mState> = 1;
+
+        $r0.<com.android.internal.telephony.gsm.stk.IconLoader: com.android.internal.telephony.gsm.stk.ImageDescriptor mId> = null;
+
+        $r0.<com.android.internal.telephony.gsm.stk.IconLoader: android.graphics.Bitmap mCurrentIcon> = null;
+
+        $r0.<com.android.internal.telephony.gsm.stk.IconLoader: com.android.internal.telephony.gsm.SIMFileHandler mSimFH> = null;
+
+        $r0.<com.android.internal.telephony.gsm.stk.IconLoader: android.os.Message mEndMsg> = null;
+
+        $r0.<com.android.internal.telephony.gsm.stk.IconLoader: byte[] mIconData> = null;
+
+        $r0.<com.android.internal.telephony.gsm.stk.IconLoader: int[] mRecordNumbers> = null;
+
+        $r0.<com.android.internal.telephony.gsm.stk.IconLoader: int mCurrentRecordIndex> = 0;
+
+        $r0.<com.android.internal.telephony.gsm.stk.IconLoader: android.graphics.Bitmap[] mIcons> = null;
+
+        $r0.<com.android.internal.telephony.gsm.stk.IconLoader: java.util.HashMap mIconsCache> = null;
+
+        $r0.<com.android.internal.telephony.gsm.stk.IconLoader: com.android.internal.telephony.gsm.SIMFileHandler mSimFH> = $r2;
+
+        $r3 = new java.util.HashMap;
+
+        specialinvoke $r3.<java.util.HashMap: void <init>(int)>(50);
+
+        $r0.<com.android.internal.telephony.gsm.stk.IconLoader: java.util.HashMap mIconsCache> = $r3;
+
+        return;
+    }
+
+    private static int bitToBnW(int)
+    {
+        int $i0;
+
+        $i0 := @parameter0: int;
+
+        if $i0 != 1 goto label1;
+
+        return -1;
+
+     label1:
+        return -16777216;
+    }
+
+    static com.android.internal.telephony.gsm.stk.IconLoader getInstance(android.os.Handler, com.android.internal.telephony.gsm.SIMFileHandler)
+    {
+        android.os.Handler $r0;
+        com.android.internal.telephony.gsm.SIMFileHandler $r1;
+        android.os.HandlerThread $r2;
+        android.os.Looper $r3;
+        com.android.internal.telephony.gsm.stk.IconLoader $r4;
+
+        $r0 := @parameter0: android.os.Handler;
+
+        $r1 := @parameter1: com.android.internal.telephony.gsm.SIMFileHandler;
+
+        $r4 = <com.android.internal.telephony.gsm.stk.IconLoader: com.android.internal.telephony.gsm.stk.IconLoader sLoader>;
+
+        if $r4 == null goto label1;
+
+        $r4 = <com.android.internal.telephony.gsm.stk.IconLoader: com.android.internal.telephony.gsm.stk.IconLoader sLoader>;
+
+        return $r4;
+
+     label1:
+        if $r1 == null goto label2;
+
+        $r2 = new android.os.HandlerThread;
+
+        specialinvoke $r2.<android.os.HandlerThread: void <init>(java.lang.String)>("Stk Icon Loader");
+
+        virtualinvoke $r2.<java.lang.Thread: void start()>();
+
+        $r4 = new com.android.internal.telephony.gsm.stk.IconLoader;
+
+        $r3 = virtualinvoke $r2.<android.os.HandlerThread: android.os.Looper getLooper()>();
+
+        specialinvoke $r4.<com.android.internal.telephony.gsm.stk.IconLoader: void <init>(android.os.Looper,com.android.internal.telephony.gsm.SIMFileHandler)>($r3, $r1);
+
+        return $r4;
+
+     label2:
+        return null;
+    }
+
+    private static int getMask(int)
+    {
+        int $i0;
+
+        $i0 := @parameter0: int;
+
+        lookupswitch($i0)
+        {
+            case 1: goto label2;
+            case 2: goto label3;
+            case 3: goto label4;
+            case 4: goto label5;
+            case 5: goto label6;
+            case 6: goto label7;
+            case 7: goto label8;
+            case 8: goto label9;
+            default: goto label1;
+        };
+
+     label1:
+        return 0;
+
+     label2:
+        return 1;
+
+     label3:
+        return 3;
+
+     label4:
+        return 7;
+
+     label5:
+        return 15;
+
+     label6:
+        return 31;
+
+     label7:
+        return 63;
+
+     label8:
+        return 127;
+
+     label9:
+        return 255;
+    }
+
+    private boolean handleImageDescriptor(byte[])
+    {
+        com.android.internal.telephony.gsm.stk.IconLoader $r0;
+        byte[] $r1;
+        com.android.internal.telephony.gsm.stk.ImageDescriptor $r2;
+
+        $r0 := @this: com.android.internal.telephony.gsm.stk.IconLoader;
+
+        $r1 := @parameter0: byte[];
+
+        $r2 = staticinvoke <com.android.internal.telephony.gsm.stk.ImageDescriptor: com.android.internal.telephony.gsm.stk.ImageDescriptor parse(byte[],int)>($r1, 1);
+
+        $r0.<com.android.internal.telephony.gsm.stk.IconLoader: com.android.internal.telephony.gsm.stk.ImageDescriptor mId> = $r2;
+
+        $r2 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: com.android.internal.telephony.gsm.stk.ImageDescriptor mId>;
+
+        if $r2 != null goto label1;
+
+        return 0;
+
+     label1:
+        return 1;
+    }
+
+    public static android.graphics.Bitmap parseToBnW(byte[], int)
+    {
+        byte[] $r0;
+        int $i0, $i1, $i5, $i6, $i7;
+        short $s2, $s3;
+        int[] $r1;
+        byte $b4, $b9;
+        android.graphics.Bitmap$Config $r2;
+        android.graphics.Bitmap $r3;
+
+        $r0 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i0 = 0 + 1;
+
+        $b4 = $r0[0];
+
+        $s3 = $b4 & 255;
+
+        $i5 = $i0 + 1;
+
+        $b4 = $r0[$i0];
+
+        $s2 = $b4 & 255;
+
+        $i0 = $s3 * $s2;
+
+        $r1 = newarray (int)[$i0];
+
+        $i6 = 7;
+
+        $b4 = 0;
+
+        $i7 = 0;
+
+        $i1 = $i5;
+
+     label1:
+        if $i7 >= $i0 goto label3;
+
+        $i5 = $i7 % 8;
+
+        if $i5 != 0 goto label5;
+
+        $i5 = $i1 + 1;
+
+        $b4 = $r0[$i1];
+
+        $i6 = 7;
+
+     label2:
+        $i1 = $i6 - 1;
+
+        $b9 = $b4 >> $i6;
+
+        $b9 = $b9 & 1;
+
+        $i6 = staticinvoke <com.android.internal.telephony.gsm.stk.IconLoader: int bitToBnW(int)>($b9);
+
+        $r1[$i7] = $i6;
+
+        $i6 = $i1;
+
+        $i7 = $i7 + 1;
+
+        $i1 = $i5;
+
+        goto label1;
+
+     label3:
+        if $i7 == $i0 goto label4;
+
+        staticinvoke <com.android.internal.telephony.gsm.stk.StkLog: void d(java.lang.String,java.lang.String)>("IconLoader", "parseToBnW; size error");
+
+     label4:
+        $r2 = <android.graphics.Bitmap$Config: android.graphics.Bitmap$Config ARGB_8888>;
+
+        $r3 = staticinvoke <android.graphics.Bitmap: android.graphics.Bitmap createBitmap(int[],int,int,android.graphics.Bitmap$Config)>($r1, $s3, $s2, $r2);
+
+        return $r3;
+
+     label5:
+        $i5 = $i1;
+
+        goto label2;
+    }
+
+    public static android.graphics.Bitmap parseToRGB(byte[], int, boolean, byte[])
+    {
+        byte[] $r0, $r2;
+        short $s0, $s5, $s6, $s7;
+        int $i1, $i3, $i8, $i9, $i10, $i11, $i12, $i13, $i14;
+        int[] $r1;
+        byte $b2, $b4, $b15, $b16;
+        boolean $z0;
+        android.graphics.Bitmap$Config $r3;
+        android.graphics.Bitmap $r4;
+
+        $r2 := @parameter0: byte[];
+
+        $i1 := @parameter1: int;
+
+        $z0 := @parameter2: boolean;
+
+        $r0 := @parameter3: byte[];
+
+        $i3 = 0 + 1;
+
+        $b4 = $r2[0];
+
+        $s5 = $b4 & 255;
+
+        $i1 = $i3 + 1;
+
+        $b4 = $r2[$i3];
+
+        $s0 = $b4 & 255;
+
+        $i3 = $i1 + 1;
+
+        $b4 = $r2[$i1];
+
+        $s6 = $b4 & 255;
+
+        $b4 = $r2[$i3];
+
+        $s7 = $b4 & 255;
+
+        if 1 != $z0 goto label1;
+
+        $i1 = $s7 - 1;
+
+        $r0[$i1] = 0;
+
+     label1:
+        $i1 = $s5 * $s0;
+
+        $r1 = newarray (int)[$i1];
+
+        $i3 = 8 - $s6;
+
+        $i8 = $i3;
+
+        $i9 = 6 + 1;
+
+        $b4 = $r2[6];
+
+        $i10 = staticinvoke <com.android.internal.telephony.gsm.stk.IconLoader: int getMask(int)>($s6);
+
+        $i11 = 8 % $s6;
+
+        if $i11 != 0 goto label6;
+
+        $z0 = 1;
+
+     label2:
+        $i11 = 0;
+
+     label3:
+        if $i11 >= $i1 goto label8;
+
+        if $i8 >= 0 goto label9;
+
+        $i12 = $i9 + 1;
+
+        $b4 = $r2[$i9];
+
+        if $z0 == 0 goto label7;
+
+        $i8 = $i3;
+
+     label4:
+        $i9 = $i12;
+
+     label5:
+        $b2 = $b4 >> $i8;
+
+        $i12 = $b2 & $i10;
+
+        $i13 = $i12 * 3;
+
+        $b2 = $r0[$i13];
+
+        $i14 = $i13 + 1;
+
+        $b15 = $r0[$i14];
+
+        $i13 = $i13 + 2;
+
+        $b16 = $r0[$i13];
+
+        $i13 = staticinvoke <android.graphics.Color: int rgb(int,int,int)>($b2, $b15, $b16);
+
+        $r1[$i11] = $i13;
+
+        $i8 = $i8 - $s6;
+
+        $i11 = $i11 + 1;
+
+        goto label3;
+
+     label6:
+        $z0 = 0;
+
+        goto label2;
+
+     label7:
+        $i8 = $i8 * -1;
+
+        goto label4;
+
+     label8:
+        $r3 = <android.graphics.Bitmap$Config: android.graphics.Bitmap$Config ARGB_8888>;
+
+        $r4 = staticinvoke <android.graphics.Bitmap: android.graphics.Bitmap createBitmap(int[],int,int,android.graphics.Bitmap$Config)>($r1, $s5, $s0, $r3);
+
+        return $r4;
+
+     label9:
+        goto label5;
+    }
+
+    private void postIcon()
+    {
+        com.android.internal.telephony.gsm.stk.IconLoader $r0;
+        int $i0, $i1;
+        android.os.Message $r1;
+        android.graphics.Bitmap $r2;
+        android.graphics.Bitmap[] $r3;
+        int[] $r4;
+
+        $r0 := @this: com.android.internal.telephony.gsm.stk.IconLoader;
+
+        $i0 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: int mState>;
+
+        if $i0 != 1 goto label1;
+
+        $r1 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: android.os.Message mEndMsg>;
+
+        $r2 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: android.graphics.Bitmap mCurrentIcon>;
+
+        $r1.<android.os.Message: java.lang.Object obj> = $r2;
+
+        $r1 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: android.os.Message mEndMsg>;
+
+        virtualinvoke $r1.<android.os.Message: void sendToTarget()>();
+
+        return;
+
+     label1:
+        $i0 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: int mState>;
+
+        if $i0 != 2 goto label3;
+
+        $r3 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: android.graphics.Bitmap[] mIcons>;
+
+        $i0 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: int mCurrentRecordIndex>;
+
+        $i1 = $i0 + 1;
+
+        $r0.<com.android.internal.telephony.gsm.stk.IconLoader: int mCurrentRecordIndex> = $i1;
+
+        $r2 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: android.graphics.Bitmap mCurrentIcon>;
+
+        $r3[$i0] = $r2;
+
+        $i0 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: int mCurrentRecordIndex>;
+
+        $r4 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: int[] mRecordNumbers>;
+
+        $i1 = lengthof $r4;
+
+        if $i0 >= $i1 goto label2;
+
+        $r4 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: int[] mRecordNumbers>;
+
+        $i0 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: int mCurrentRecordIndex>;
+
+        $i0 = $r4[$i0];
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.stk.IconLoader: void startLoadingIcon(int)>($i0);
+
+        return;
+
+     label2:
+        $r1 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: android.os.Message mEndMsg>;
+
+        $r3 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: android.graphics.Bitmap[] mIcons>;
+
+        $r1.<android.os.Message: java.lang.Object obj> = $r3;
+
+        $r1 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: android.os.Message mEndMsg>;
+
+        virtualinvoke $r1.<android.os.Message: void sendToTarget()>();
+
+        return;
+
+     label3:
+        return;
+    }
+
+    private void readClut()
+    {
+        com.android.internal.telephony.gsm.stk.IconLoader $r0;
+        int $i0, $i2;
+        android.os.Message $r1;
+        byte[] $r2;
+        byte $b1, $b3;
+        com.android.internal.telephony.gsm.SIMFileHandler $r3;
+        com.android.internal.telephony.gsm.stk.ImageDescriptor $r4;
+
+        $r0 := @this: com.android.internal.telephony.gsm.stk.IconLoader;
+
+        $r2 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: byte[] mIconData>;
+
+        $b1 = $r2[3];
+
+        $i0 = $b1 * 3;
+
+        $r1 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(3);
+
+        $r3 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: com.android.internal.telephony.gsm.SIMFileHandler mSimFH>;
+
+        $r4 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: com.android.internal.telephony.gsm.stk.ImageDescriptor mId>;
+
+        $i2 = $r4.<com.android.internal.telephony.gsm.stk.ImageDescriptor: int imageId>;
+
+        $r2 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: byte[] mIconData>;
+
+        $b1 = $r2[4];
+
+        $r2 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: byte[] mIconData>;
+
+        $b3 = $r2[5];
+
+        virtualinvoke $r3.<com.android.internal.telephony.gsm.SIMFileHandler: void loadEFImgTransparent(int,int,int,int,android.os.Message)>($i2, $b1, $b3, $i0, $r1);
+
+        return;
+    }
+
+    private void readIconData()
+    {
+        com.android.internal.telephony.gsm.stk.IconLoader $r0;
+        int $i0, $i1;
+        android.os.Message $r1;
+        com.android.internal.telephony.gsm.SIMFileHandler $r2;
+        com.android.internal.telephony.gsm.stk.ImageDescriptor $r3;
+
+        $r0 := @this: com.android.internal.telephony.gsm.stk.IconLoader;
+
+        $r1 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(2);
+
+        $r2 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: com.android.internal.telephony.gsm.SIMFileHandler mSimFH>;
+
+        $r3 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: com.android.internal.telephony.gsm.stk.ImageDescriptor mId>;
+
+        $i1 = $r3.<com.android.internal.telephony.gsm.stk.ImageDescriptor: int imageId>;
+
+        $r3 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: com.android.internal.telephony.gsm.stk.ImageDescriptor mId>;
+
+        $i0 = $r3.<com.android.internal.telephony.gsm.stk.ImageDescriptor: int length>;
+
+        virtualinvoke $r2.<com.android.internal.telephony.gsm.SIMFileHandler: void loadEFImgTransparent(int,int,int,int,android.os.Message)>($i1, 0, 0, $i0, $r1);
+
+        return;
+    }
+
+    private void readId()
+    {
+        com.android.internal.telephony.gsm.stk.IconLoader $r0;
+        int $i0;
+        android.os.Message $r1;
+        com.android.internal.telephony.gsm.SIMFileHandler $r2;
+
+        $r0 := @this: com.android.internal.telephony.gsm.stk.IconLoader;
+
+        $i0 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: int mRecordNumber>;
+
+        if $i0 >= 0 goto label1;
+
+        $r0.<com.android.internal.telephony.gsm.stk.IconLoader: android.graphics.Bitmap mCurrentIcon> = null;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.stk.IconLoader: void postIcon()>();
+
+        return;
+
+     label1:
+        $r1 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(1);
+
+        $r2 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: com.android.internal.telephony.gsm.SIMFileHandler mSimFH>;
+
+        $i0 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: int mRecordNumber>;
+
+        virtualinvoke $r2.<com.android.internal.telephony.gsm.SIMFileHandler: void loadEFImgLinearFixed(int,android.os.Message)>($i0, $r1);
+
+        return;
+    }
+
+    private void startLoadingIcon(int)
+    {
+        com.android.internal.telephony.gsm.stk.IconLoader $r0;
+        int $i0;
+        java.util.HashMap $r1;
+        java.lang.Integer $r2;
+        boolean $z0;
+        java.lang.Object $r3;
+        android.graphics.Bitmap $r4;
+
+        $r0 := @this: com.android.internal.telephony.gsm.stk.IconLoader;
+
+        $i0 := @parameter0: int;
+
+        $r0.<com.android.internal.telephony.gsm.stk.IconLoader: com.android.internal.telephony.gsm.stk.ImageDescriptor mId> = null;
+
+        $r0.<com.android.internal.telephony.gsm.stk.IconLoader: byte[] mIconData> = null;
+
+        $r0.<com.android.internal.telephony.gsm.stk.IconLoader: android.graphics.Bitmap mCurrentIcon> = null;
+
+        $r0.<com.android.internal.telephony.gsm.stk.IconLoader: int mRecordNumber> = $i0;
+
+        $r1 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: java.util.HashMap mIconsCache>;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $z0 = virtualinvoke $r1.<java.util.HashMap: boolean containsKey(java.lang.Object)>($r2);
+
+        if $z0 == 0 goto label1;
+
+        $r1 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: java.util.HashMap mIconsCache>;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3 = virtualinvoke $r1.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r2);
+
+        $r4 = (android.graphics.Bitmap) $r3;
+
+        $r0.<com.android.internal.telephony.gsm.stk.IconLoader: android.graphics.Bitmap mCurrentIcon> = $r4;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.stk.IconLoader: void postIcon()>();
+
+        return;
+
+     label1:
+        specialinvoke $r0.<com.android.internal.telephony.gsm.stk.IconLoader: void readId()>();
+
+        return;
+    }
+
+    public void handleMessage(android.os.Message)
+    {
+        com.android.internal.telephony.gsm.stk.IconLoader $r0;
+        android.os.Message $r1;
+        int $i0;
+        java.lang.Object $r2;
+        android.os.AsyncResult $r3;
+        byte[] $r4, $r10, $r11;
+        boolean $z0;
+        java.lang.Exception $r5;
+        com.android.internal.telephony.gsm.stk.ImageDescriptor $r6;
+        android.graphics.Bitmap $r7;
+        java.util.HashMap $r8;
+        java.lang.Integer $r9;
+
+        $r0 := @this: com.android.internal.telephony.gsm.stk.IconLoader;
+
+        $r1 := @parameter0: android.os.Message;
+
+     label01:
+        $i0 = $r1.<android.os.Message: int what>;
+
+        lookupswitch($i0)
+        {
+            case 1: goto label03;
+            case 2: goto label08;
+            case 3: goto label12;
+            default: goto label02;
+        };
+
+     label02:
+        return;
+
+     label03:
+        $r2 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r3 = (android.os.AsyncResult) $r2;
+
+        $r2 = $r3.<android.os.AsyncResult: java.lang.Object result>;
+
+        $r4 = (byte[]) $r2;
+
+        $r4 = (byte[]) $r4;
+
+        $z0 = specialinvoke $r0.<com.android.internal.telephony.gsm.stk.IconLoader: boolean handleImageDescriptor(byte[])>($r4);
+
+        if $z0 == 0 goto label06;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.stk.IconLoader: void readIconData()>();
+
+     label04:
+        return;
+
+     label05:
+        $r5 := @caughtexception;
+
+        staticinvoke <com.android.internal.telephony.gsm.stk.StkLog: void d(java.lang.Object,java.lang.String)>($r0, "Icon load failed");
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.stk.IconLoader: void postIcon()>();
+
+        return;
+
+     label06:
+        $r5 = new java.lang.Exception;
+
+     label07:
+        specialinvoke $r5.<java.lang.Exception: void <init>(java.lang.String)>("Unable to parse image descriptor");
+
+        throw $r5;
+
+     label08:
+        $r2 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r3 = (android.os.AsyncResult) $r2;
+
+        $r2 = $r3.<android.os.AsyncResult: java.lang.Object result>;
+
+        $r4 = (byte[]) $r2;
+
+        $r4 = (byte[]) $r4;
+
+        $r6 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: com.android.internal.telephony.gsm.stk.ImageDescriptor mId>;
+
+        $i0 = $r6.<com.android.internal.telephony.gsm.stk.ImageDescriptor: int codingScheme>;
+
+        if $i0 != 17 goto label10;
+
+        $i0 = lengthof $r4;
+
+        $r7 = staticinvoke <com.android.internal.telephony.gsm.stk.IconLoader: android.graphics.Bitmap parseToBnW(byte[],int)>($r4, $i0);
+
+        $r0.<com.android.internal.telephony.gsm.stk.IconLoader: android.graphics.Bitmap mCurrentIcon> = $r7;
+
+        $r8 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: java.util.HashMap mIconsCache>;
+
+        $i0 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: int mRecordNumber>;
+
+        $r9 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r7 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: android.graphics.Bitmap mCurrentIcon>;
+
+        virtualinvoke $r8.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r9, $r7);
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.stk.IconLoader: void postIcon()>();
+
+     label09:
+        return;
+
+     label10:
+        $r6 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: com.android.internal.telephony.gsm.stk.ImageDescriptor mId>;
+
+        $i0 = $r6.<com.android.internal.telephony.gsm.stk.ImageDescriptor: int codingScheme>;
+
+        if $i0 != 33 goto label14;
+
+        $r0.<com.android.internal.telephony.gsm.stk.IconLoader: byte[] mIconData> = $r4;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.stk.IconLoader: void readClut()>();
+
+     label11:
+        return;
+
+     label12:
+        $r2 = $r1.<android.os.Message: java.lang.Object obj>;
+
+        $r3 = (android.os.AsyncResult) $r2;
+
+        $r2 = $r3.<android.os.AsyncResult: java.lang.Object result>;
+
+        $r4 = (byte[]) $r2;
+
+        $r4 = (byte[]) $r4;
+
+        $r10 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: byte[] mIconData>;
+
+        $r11 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: byte[] mIconData>;
+
+        $i0 = lengthof $r11;
+
+        $r7 = staticinvoke <com.android.internal.telephony.gsm.stk.IconLoader: android.graphics.Bitmap parseToRGB(byte[],int,boolean,byte[])>($r10, $i0, 0, $r4);
+
+        $r0.<com.android.internal.telephony.gsm.stk.IconLoader: android.graphics.Bitmap mCurrentIcon> = $r7;
+
+        $r8 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: java.util.HashMap mIconsCache>;
+
+        $i0 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: int mRecordNumber>;
+
+        $r9 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r7 = $r0.<com.android.internal.telephony.gsm.stk.IconLoader: android.graphics.Bitmap mCurrentIcon>;
+
+        virtualinvoke $r8.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r9, $r7);
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.stk.IconLoader: void postIcon()>();
+
+     label13:
+        return;
+
+     label14:
+        return;
+
+        catch java.lang.Exception from label01 to label02 with label05;
+        catch java.lang.Exception from label03 to label04 with label05;
+        catch java.lang.Exception from label07 to label09 with label05;
+        catch java.lang.Exception from label10 to label11 with label05;
+        catch java.lang.Exception from label12 to label13 with label05;
+    }
+
+    void loadIcon(int, android.os.Message)
+    {
+        com.android.internal.telephony.gsm.stk.IconLoader $r0;
+        int $i0;
+        android.os.Message $r1;
+
+        $r0 := @this: com.android.internal.telephony.gsm.stk.IconLoader;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: android.os.Message;
+
+        if $r1 != null goto label1;
+
+        return;
+
+     label1:
+        $r0.<com.android.internal.telephony.gsm.stk.IconLoader: android.os.Message mEndMsg> = $r1;
+
+        $r0.<com.android.internal.telephony.gsm.stk.IconLoader: int mState> = 1;
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.stk.IconLoader: void startLoadingIcon(int)>($i0);
+
+        return;
+    }
+
+    void loadIcons(int[], android.os.Message)
+    {
+        com.android.internal.telephony.gsm.stk.IconLoader $r0;
+        int[] $r1;
+        android.os.Message $r2;
+        int $i0;
+        android.graphics.Bitmap[] $r3;
+
+        $r0 := @this: com.android.internal.telephony.gsm.stk.IconLoader;
+
+        $r1 := @parameter0: int[];
+
+        $r2 := @parameter1: android.os.Message;
+
+        if $r1 == null goto label2;
+
+        $i0 = lengthof $r1;
+
+        if $i0 == 0 goto label3;
+
+        if $r2 != null goto label1;
+
+        return;
+
+     label1:
+        $r0.<com.android.internal.telephony.gsm.stk.IconLoader: android.os.Message mEndMsg> = $r2;
+
+        $i0 = lengthof $r1;
+
+        $r3 = newarray (android.graphics.Bitmap)[$i0];
+
+        $r0.<com.android.internal.telephony.gsm.stk.IconLoader: android.graphics.Bitmap[] mIcons> = $r3;
+
+        $r0.<com.android.internal.telephony.gsm.stk.IconLoader: int[] mRecordNumbers> = $r1;
+
+        $r0.<com.android.internal.telephony.gsm.stk.IconLoader: int mCurrentRecordIndex> = 0;
+
+        $r0.<com.android.internal.telephony.gsm.stk.IconLoader: int mState> = 2;
+
+        $i0 = $r1[0];
+
+        specialinvoke $r0.<com.android.internal.telephony.gsm.stk.IconLoader: void startLoadingIcon(int)>($i0);
+
+        return;
+
+     label2:
+        return;
+
+     label3:
+        return;
+    }
+}

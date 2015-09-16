@@ -1,0 +1,526 @@
+public class org.bouncycastle.crypto.modes.GOFBBlockCipher extends java.lang.Object implements org.bouncycastle.crypto.BlockCipher
+{
+    static final int C1;
+    static final int C2;
+    private byte[] IV;
+    int N3;
+    int N4;
+    private final int blockSize;
+    private final org.bouncycastle.crypto.BlockCipher cipher;
+    boolean firstStep;
+    private byte[] ofbOutV;
+    private byte[] ofbV;
+
+    public void <init>(org.bouncycastle.crypto.BlockCipher)
+    {
+        org.bouncycastle.crypto.modes.GOFBBlockCipher $r0;
+        org.bouncycastle.crypto.BlockCipher $r1;
+        int $i0;
+        java.lang.IllegalArgumentException $r2;
+        byte[] $r3;
+
+        $r0 := @this: org.bouncycastle.crypto.modes.GOFBBlockCipher;
+
+        $r1 := @parameter0: org.bouncycastle.crypto.BlockCipher;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: boolean firstStep> = 1;
+
+        $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: org.bouncycastle.crypto.BlockCipher cipher> = $r1;
+
+        $i0 = interfaceinvoke $r1.<org.bouncycastle.crypto.BlockCipher: int getBlockSize()>();
+
+        $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: int blockSize> = $i0;
+
+        $i0 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: int blockSize>;
+
+        if $i0 == 8 goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("GTCR only for 64 bit block ciphers");
+
+        throw $r2;
+
+     label1:
+        $i0 = interfaceinvoke $r1.<org.bouncycastle.crypto.BlockCipher: int getBlockSize()>();
+
+        $r3 = newarray (byte)[$i0];
+
+        $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: byte[] IV> = $r3;
+
+        $i0 = interfaceinvoke $r1.<org.bouncycastle.crypto.BlockCipher: int getBlockSize()>();
+
+        $r3 = newarray (byte)[$i0];
+
+        $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: byte[] ofbV> = $r3;
+
+        $i0 = interfaceinvoke $r1.<org.bouncycastle.crypto.BlockCipher: int getBlockSize()>();
+
+        $r3 = newarray (byte)[$i0];
+
+        $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: byte[] ofbOutV> = $r3;
+
+        return;
+    }
+
+    private int bytesToint(byte[], int)
+    {
+        org.bouncycastle.crypto.modes.GOFBBlockCipher $r0;
+        byte[] $r1;
+        int $i0, $i1, $i3;
+        byte $b2;
+        short $s4;
+
+        $r0 := @this: org.bouncycastle.crypto.modes.GOFBBlockCipher;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 = $i0 + 3;
+
+        $b2 = $r1[$i1];
+
+        $i1 = $b2 << 24;
+
+        $i1 = $i1 & -16777216;
+
+        $i3 = $i0 + 2;
+
+        $b2 = $r1[$i3];
+
+        $i3 = $b2 << 16;
+
+        $i3 = $i3 & 16711680;
+
+        $i1 = $i1 + $i3;
+
+        $i3 = $i0 + 1;
+
+        $b2 = $r1[$i3];
+
+        $i3 = $b2 << 8;
+
+        $i3 = $i3 & 65280;
+
+        $i1 = $i1 + $i3;
+
+        $b2 = $r1[$i0];
+
+        $s4 = $b2 & 255;
+
+        $i0 = $i1 + $s4;
+
+        return $i0;
+    }
+
+    private void intTobytes(int, byte[], int)
+    {
+        org.bouncycastle.crypto.modes.GOFBBlockCipher $r0;
+        int $i0, $i1, $i2, $i3;
+        byte[] $r1;
+        byte $b4;
+
+        $r0 := @this: org.bouncycastle.crypto.modes.GOFBBlockCipher;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: byte[];
+
+        $i1 := @parameter2: int;
+
+        $i2 = $i1 + 3;
+
+        $i3 = $i0 >>> 24;
+
+        $b4 = (byte) $i3;
+
+        $r1[$i2] = $b4;
+
+        $i2 = $i1 + 2;
+
+        $i3 = $i0 >>> 16;
+
+        $b4 = (byte) $i3;
+
+        $r1[$i2] = $b4;
+
+        $i2 = $i1 + 1;
+
+        $i3 = $i0 >>> 8;
+
+        $b4 = (byte) $i3;
+
+        $r1[$i2] = $b4;
+
+        $b4 = (byte) $i0;
+
+        $r1[$i1] = $b4;
+
+        return;
+    }
+
+    public java.lang.String getAlgorithmName()
+    {
+        org.bouncycastle.crypto.modes.GOFBBlockCipher $r0;
+        java.lang.StringBuilder $r1;
+        org.bouncycastle.crypto.BlockCipher $r2;
+        java.lang.String $r3;
+
+        $r0 := @this: org.bouncycastle.crypto.modes.GOFBBlockCipher;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: org.bouncycastle.crypto.BlockCipher cipher>;
+
+        $r3 = interfaceinvoke $r2.<org.bouncycastle.crypto.BlockCipher: java.lang.String getAlgorithmName()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/GCTR");
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r3;
+    }
+
+    public int getBlockSize()
+    {
+        org.bouncycastle.crypto.modes.GOFBBlockCipher $r0;
+        int i0;
+
+        $r0 := @this: org.bouncycastle.crypto.modes.GOFBBlockCipher;
+
+        i0 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: int blockSize>;
+
+        return i0;
+    }
+
+    public org.bouncycastle.crypto.BlockCipher getUnderlyingCipher()
+    {
+        org.bouncycastle.crypto.modes.GOFBBlockCipher $r0;
+        org.bouncycastle.crypto.BlockCipher r1;
+
+        $r0 := @this: org.bouncycastle.crypto.modes.GOFBBlockCipher;
+
+        r1 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: org.bouncycastle.crypto.BlockCipher cipher>;
+
+        return r1;
+    }
+
+    public void init(boolean, org.bouncycastle.crypto.CipherParameters) throws java.lang.IllegalArgumentException
+    {
+        org.bouncycastle.crypto.modes.GOFBBlockCipher $r0;
+        boolean $z0;
+        org.bouncycastle.crypto.CipherParameters $r1;
+        org.bouncycastle.crypto.params.ParametersWithIV $r2;
+        byte[] $r3, $r4, $r5;
+        int $i0, $i1, $i2;
+        org.bouncycastle.crypto.BlockCipher $r6;
+
+        $r0 := @this: org.bouncycastle.crypto.modes.GOFBBlockCipher;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 := @parameter1: org.bouncycastle.crypto.CipherParameters;
+
+        $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: boolean firstStep> = 1;
+
+        $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: int N3> = 0;
+
+        $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: int N4> = 0;
+
+        $z0 = $r1 instanceof org.bouncycastle.crypto.params.ParametersWithIV;
+
+        if $z0 == 0 goto label4;
+
+        $r2 = (org.bouncycastle.crypto.params.ParametersWithIV) $r1;
+
+        $r3 = virtualinvoke $r2.<org.bouncycastle.crypto.params.ParametersWithIV: byte[] getIV()>();
+
+        $i0 = lengthof $r3;
+
+        $r4 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: byte[] IV>;
+
+        $i1 = lengthof $r4;
+
+        if $i0 >= $i1 goto label2;
+
+        $r4 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: byte[] IV>;
+
+        $r5 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: byte[] IV>;
+
+        $i0 = lengthof $r5;
+
+        $i1 = lengthof $r3;
+
+        $i0 = $i0 - $i1;
+
+        $i1 = lengthof $r3;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, 0, $r4, $i0, $i1);
+
+        $i0 = 0;
+
+     label1:
+        $r4 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: byte[] IV>;
+
+        $i1 = lengthof $r4;
+
+        $i2 = lengthof $r3;
+
+        $i1 = $i1 - $i2;
+
+        if $i0 >= $i1 goto label3;
+
+        $r4 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: byte[] IV>;
+
+        $r4[$i0] = 0;
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label2:
+        $r4 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: byte[] IV>;
+
+        $r5 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: byte[] IV>;
+
+        $i0 = lengthof $r5;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, 0, $r4, 0, $i0);
+
+     label3:
+        virtualinvoke $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: void reset()>();
+
+        $r6 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: org.bouncycastle.crypto.BlockCipher cipher>;
+
+        $r1 = virtualinvoke $r2.<org.bouncycastle.crypto.params.ParametersWithIV: org.bouncycastle.crypto.CipherParameters getParameters()>();
+
+        interfaceinvoke $r6.<org.bouncycastle.crypto.BlockCipher: void init(boolean,org.bouncycastle.crypto.CipherParameters)>(1, $r1);
+
+        return;
+
+     label4:
+        virtualinvoke $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: void reset()>();
+
+        $r6 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: org.bouncycastle.crypto.BlockCipher cipher>;
+
+        interfaceinvoke $r6.<org.bouncycastle.crypto.BlockCipher: void init(boolean,org.bouncycastle.crypto.CipherParameters)>(1, $r1);
+
+        return;
+    }
+
+    public int processBlock(byte[], int, byte[], int) throws org.bouncycastle.crypto.DataLengthException, java.lang.IllegalStateException
+    {
+        org.bouncycastle.crypto.modes.GOFBBlockCipher $r0;
+        byte[] $r1, $r2, $r5, $r6;
+        int $i0, $i1, $i2, $i3, $i5;
+        org.bouncycastle.crypto.DataLengthException $r3;
+        boolean $z0;
+        org.bouncycastle.crypto.BlockCipher $r4;
+        byte $b4, $b6;
+
+        $r0 := @this: org.bouncycastle.crypto.modes.GOFBBlockCipher;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: byte[];
+
+        $i1 := @parameter3: int;
+
+        $i2 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: int blockSize>;
+
+        $i2 = $i2 + $i0;
+
+        $i3 = lengthof $r1;
+
+        if $i2 <= $i3 goto label1;
+
+        $r3 = new org.bouncycastle.crypto.DataLengthException;
+
+        specialinvoke $r3.<org.bouncycastle.crypto.DataLengthException: void <init>(java.lang.String)>("input buffer too short");
+
+        throw $r3;
+
+     label1:
+        $i2 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: int blockSize>;
+
+        $i2 = $i2 + $i1;
+
+        $i3 = lengthof $r2;
+
+        if $i2 <= $i3 goto label2;
+
+        $r3 = new org.bouncycastle.crypto.DataLengthException;
+
+        specialinvoke $r3.<org.bouncycastle.crypto.DataLengthException: void <init>(java.lang.String)>("output buffer too short");
+
+        throw $r3;
+
+     label2:
+        $z0 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: boolean firstStep>;
+
+        if $z0 == 0 goto label3;
+
+        $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: boolean firstStep> = 0;
+
+        $r4 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: org.bouncycastle.crypto.BlockCipher cipher>;
+
+        $r5 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: byte[] ofbV>;
+
+        $r6 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: byte[] ofbOutV>;
+
+        interfaceinvoke $r4.<org.bouncycastle.crypto.BlockCipher: int processBlock(byte[],int,byte[],int)>($r5, 0, $r6, 0);
+
+        $r5 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: byte[] ofbOutV>;
+
+        $i2 = specialinvoke $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: int bytesToint(byte[],int)>($r5, 0);
+
+        $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: int N3> = $i2;
+
+        $r5 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: byte[] ofbOutV>;
+
+        $i2 = specialinvoke $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: int bytesToint(byte[],int)>($r5, 4);
+
+        $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: int N4> = $i2;
+
+     label3:
+        $i2 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: int N3>;
+
+        $i2 = $i2 + 16843009;
+
+        $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: int N3> = $i2;
+
+        $i2 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: int N4>;
+
+        $i2 = $i2 + 16843012;
+
+        $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: int N4> = $i2;
+
+        $i2 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: int N3>;
+
+        $r5 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: byte[] ofbV>;
+
+        specialinvoke $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: void intTobytes(int,byte[],int)>($i2, $r5, 0);
+
+        $i2 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: int N4>;
+
+        $r5 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: byte[] ofbV>;
+
+        specialinvoke $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: void intTobytes(int,byte[],int)>($i2, $r5, 4);
+
+        $r4 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: org.bouncycastle.crypto.BlockCipher cipher>;
+
+        $r5 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: byte[] ofbV>;
+
+        $r6 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: byte[] ofbOutV>;
+
+        interfaceinvoke $r4.<org.bouncycastle.crypto.BlockCipher: int processBlock(byte[],int,byte[],int)>($r5, 0, $r6, 0);
+
+        $i2 = 0;
+
+     label4:
+        $i3 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: int blockSize>;
+
+        if $i2 >= $i3 goto label5;
+
+        $i3 = $i1 + $i2;
+
+        $r5 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: byte[] ofbOutV>;
+
+        $b4 = $r5[$i2];
+
+        $i5 = $i0 + $i2;
+
+        $b6 = $r1[$i5];
+
+        $b4 = $b4 ^ $b6;
+
+        $b4 = (byte) $b4;
+
+        $r2[$i3] = $b4;
+
+        $i2 = $i2 + 1;
+
+        goto label4;
+
+     label5:
+        $r1 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: byte[] ofbV>;
+
+        $i0 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: int blockSize>;
+
+        $r2 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: byte[] ofbV>;
+
+        $r5 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: byte[] ofbV>;
+
+        $i2 = lengthof $r5;
+
+        $i1 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: int blockSize>;
+
+        $i1 = $i2 - $i1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, $i0, $r2, 0, $i1);
+
+        $r1 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: byte[] ofbOutV>;
+
+        $r2 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: byte[] ofbV>;
+
+        $r5 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: byte[] ofbV>;
+
+        $i0 = lengthof $r5;
+
+        $i1 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: int blockSize>;
+
+        $i0 = $i0 - $i1;
+
+        $i1 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: int blockSize>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, 0, $r2, $i0, $i1);
+
+        $i0 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: int blockSize>;
+
+        return $i0;
+    }
+
+    public void reset()
+    {
+        org.bouncycastle.crypto.modes.GOFBBlockCipher $r0;
+        byte[] $r1, $r2, $r3;
+        int $i0;
+        org.bouncycastle.crypto.BlockCipher $r4;
+
+        $r0 := @this: org.bouncycastle.crypto.modes.GOFBBlockCipher;
+
+        $r2 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: byte[] IV>;
+
+        $r1 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: byte[] ofbV>;
+
+        $r3 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: byte[] IV>;
+
+        $i0 = lengthof $r3;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, 0, $r1, 0, $i0);
+
+        $r4 = $r0.<org.bouncycastle.crypto.modes.GOFBBlockCipher: org.bouncycastle.crypto.BlockCipher cipher>;
+
+        interfaceinvoke $r4.<org.bouncycastle.crypto.BlockCipher: void reset()>();
+
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <org.bouncycastle.crypto.modes.GOFBBlockCipher: int C2> = 16843009;
+
+        <org.bouncycastle.crypto.modes.GOFBBlockCipher: int C1> = 16843012;
+
+        return;
+    }
+}

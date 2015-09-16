@@ -1,0 +1,1968 @@
+public class org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl extends org.apache.harmony.xnet.provider.jsse.HandshakeProtocol
+{
+
+    void <init>(java.lang.Object)
+    {
+        org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl $r0;
+        java.lang.Object $r1;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl;
+
+        $r1 := @parameter0: java.lang.Object;
+
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void <init>(java.lang.Object)>($r1);
+
+        return;
+    }
+
+    private org.apache.harmony.xnet.provider.jsse.SSLSessionImpl findSessionToResume()
+    {
+        org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl $r0;
+        java.lang.String $r1;
+        int $i0;
+        org.apache.harmony.xnet.provider.jsse.SSLEngineImpl $r2;
+        org.apache.harmony.xnet.provider.jsse.SSLParameters $r3;
+        org.apache.harmony.xnet.provider.jsse.ClientSessionContext $r4;
+        javax.net.ssl.SSLSession $r5;
+        org.apache.harmony.xnet.provider.jsse.SSLSessionImpl $r6;
+        java.lang.Object $r7;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl;
+
+        $r1 = null;
+
+        $i0 = -1;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLEngineImpl engineOwner>;
+
+        if $r2 == null goto label1;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLEngineImpl engineOwner>;
+
+        $r1 = virtualinvoke $r2.<javax.net.ssl.SSLEngine: java.lang.String getPeerHost()>();
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLEngineImpl engineOwner>;
+
+        $i0 = virtualinvoke $r2.<javax.net.ssl.SSLEngine: int getPeerPort()>();
+
+     label1:
+        if $r1 == null goto label2;
+
+        if $i0 != -1 goto label3;
+
+     label2:
+        return null;
+
+     label3:
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLParameters parameters>;
+
+        $r4 = virtualinvoke $r3.<org.apache.harmony.xnet.provider.jsse.SSLParameters: org.apache.harmony.xnet.provider.jsse.ClientSessionContext getClientSessionContext()>();
+
+        $r5 = virtualinvoke $r4.<org.apache.harmony.xnet.provider.jsse.ClientSessionContext: javax.net.ssl.SSLSession getSession(java.lang.String,int)>($r1, $i0);
+
+        $r6 = (org.apache.harmony.xnet.provider.jsse.SSLSessionImpl) $r5;
+
+        if $r6 == null goto label4;
+
+        $r7 = virtualinvoke $r6.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: java.lang.Object clone()>();
+
+        $r6 = (org.apache.harmony.xnet.provider.jsse.SSLSessionImpl) $r7;
+
+     label4:
+        return $r6;
+    }
+
+    private void renegotiateNewSession()
+    {
+        org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl $r0;
+        org.apache.harmony.xnet.provider.jsse.SSLParameters $r1;
+        boolean $z0;
+        org.apache.harmony.xnet.provider.jsse.SSLSessionImpl $r2;
+        java.security.SecureRandom $r3;
+        java.lang.String[] $r4;
+        org.apache.harmony.xnet.provider.jsse.ProtocolVersion $r5;
+        org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol $r6;
+        byte[] $r7;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLParameters parameters>;
+
+        $z0 = virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.SSLParameters: boolean getEnableSessionCreation()>();
+
+        if $z0 == 0 goto label1;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: boolean isResuming> = 0;
+
+        $r2 = new org.apache.harmony.xnet.provider.jsse.SSLSessionImpl;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLParameters parameters>;
+
+        $r3 = virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.SSLParameters: java.security.SecureRandom getSecureRandom()>();
+
+        specialinvoke $r2.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: void <init>(java.security.SecureRandom)>($r3);
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session> = $r2;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLParameters parameters>;
+
+        $r4 = virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.SSLParameters: java.lang.String[] getEnabledProtocols()>();
+
+        $r5 = staticinvoke <org.apache.harmony.xnet.provider.jsse.ProtocolVersion: org.apache.harmony.xnet.provider.jsse.ProtocolVersion getLatestVersion(java.lang.String[])>($r4);
+
+        $r2.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: org.apache.harmony.xnet.provider.jsse.ProtocolVersion protocol> = $r5;
+
+        $r6 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol recordProtocol>;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r5 = $r2.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: org.apache.harmony.xnet.provider.jsse.ProtocolVersion protocol>;
+
+        $r7 = $r5.<org.apache.harmony.xnet.provider.jsse.ProtocolVersion: byte[] version>;
+
+        virtualinvoke $r6.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: void setVersion(byte[])>($r7);
+
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl: void startSession()>();
+
+        return;
+
+     label1:
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: int status> = 2;
+
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void sendWarningAlert(byte)>(100);
+
+        return;
+    }
+
+    private void startSession()
+    {
+        org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl $r0;
+        boolean $z0;
+        org.apache.harmony.xnet.provider.jsse.CipherSuite[] $r1;
+        org.apache.harmony.xnet.provider.jsse.SSLSessionImpl $r2;
+        org.apache.harmony.xnet.provider.jsse.CipherSuite $r3;
+        org.apache.harmony.xnet.provider.jsse.ClientHello $r4;
+        org.apache.harmony.xnet.provider.jsse.SSLParameters $r5;
+        java.security.SecureRandom $r6;
+        org.apache.harmony.xnet.provider.jsse.ProtocolVersion $r7;
+        byte[] $r8, $r9;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl;
+
+        $z0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: boolean isResuming>;
+
+        if $z0 == 0 goto label2;
+
+        $r1 = newarray (org.apache.harmony.xnet.provider.jsse.CipherSuite)[1];
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r3 = $r2.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: org.apache.harmony.xnet.provider.jsse.CipherSuite cipherSuite>;
+
+        $r1[0] = $r3;
+
+     label1:
+        $r4 = new org.apache.harmony.xnet.provider.jsse.ClientHello;
+
+        $r5 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLParameters parameters>;
+
+        $r6 = virtualinvoke $r5.<org.apache.harmony.xnet.provider.jsse.SSLParameters: java.security.SecureRandom getSecureRandom()>();
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r7 = $r2.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: org.apache.harmony.xnet.provider.jsse.ProtocolVersion protocol>;
+
+        $r8 = $r7.<org.apache.harmony.xnet.provider.jsse.ProtocolVersion: byte[] version>;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r9 = $r2.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: byte[] id>;
+
+        specialinvoke $r4.<org.apache.harmony.xnet.provider.jsse.ClientHello: void <init>(java.security.SecureRandom,byte[],byte[],org.apache.harmony.xnet.provider.jsse.CipherSuite[])>($r6, $r8, $r9, $r1);
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ClientHello clientHello> = $r4;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r4 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ClientHello clientHello>;
+
+        $r8 = $r4.<org.apache.harmony.xnet.provider.jsse.ClientHello: byte[] random>;
+
+        $r2.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: byte[] clientRandom> = $r8;
+
+        $r4 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ClientHello clientHello>;
+
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void send(org.apache.harmony.xnet.provider.jsse.Message)>($r4);
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: int status> = 1;
+
+        return;
+
+     label2:
+        $r5 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLParameters parameters>;
+
+        $r1 = virtualinvoke $r5.<org.apache.harmony.xnet.provider.jsse.SSLParameters: org.apache.harmony.xnet.provider.jsse.CipherSuite[] getEnabledCipherSuitesMember()>();
+
+        goto label1;
+    }
+
+    private void verifyServerCert()
+    {
+        org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl $r0;
+        javax.net.ssl.X509TrustManager $r1;
+        java.lang.String $r2;
+        org.apache.harmony.xnet.provider.jsse.SSLSessionImpl $r3;
+        org.apache.harmony.xnet.provider.jsse.CipherSuite $r4;
+        int $i0;
+        org.apache.harmony.xnet.provider.jsse.SSLParameters $r5;
+        org.apache.harmony.xnet.provider.jsse.CertificateMessage $r6;
+        java.security.cert.X509Certificate[] $r7;
+        org.apache.harmony.xnet.provider.jsse.ServerKeyExchange $r8;
+        java.security.cert.CertificateException $r9;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl;
+
+        $r2 = null;
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r4 = $r3.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: org.apache.harmony.xnet.provider.jsse.CipherSuite cipherSuite>;
+
+        $i0 = $r4.<org.apache.harmony.xnet.provider.jsse.CipherSuite: int keyExchange>;
+
+        lookupswitch($i0)
+        {
+            case 1: goto label07;
+            case 2: goto label08;
+            case 3: goto label10;
+            case 4: goto label10;
+            case 5: goto label11;
+            case 6: goto label11;
+            case 7: goto label12;
+            case 8: goto label13;
+            case 9: goto label06;
+            case 10: goto label06;
+            case 11: goto label12;
+            case 12: goto label13;
+            default: goto label01;
+        };
+
+     label01:
+        $r5 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLParameters parameters>;
+
+     label02:
+        $r1 = virtualinvoke $r5.<org.apache.harmony.xnet.provider.jsse.SSLParameters: javax.net.ssl.X509TrustManager getTrustManager()>();
+
+     label03:
+        $r6 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.CertificateMessage serverCert>;
+
+     label04:
+        $r7 = $r6.<org.apache.harmony.xnet.provider.jsse.CertificateMessage: java.security.cert.X509Certificate[] certs>;
+
+        interfaceinvoke $r1.<javax.net.ssl.X509TrustManager: void checkServerTrusted(java.security.cert.X509Certificate[],java.lang.String)>($r7, $r2);
+
+     label05:
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r6 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.CertificateMessage serverCert>;
+
+        $r7 = $r6.<org.apache.harmony.xnet.provider.jsse.CertificateMessage: java.security.cert.X509Certificate[] certs>;
+
+        $r3.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: java.security.cert.X509Certificate[] peerCertificates> = $r7;
+
+     label06:
+        return;
+
+     label07:
+        $r2 = "RSA";
+
+        goto label01;
+
+     label08:
+        $r8 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerKeyExchange serverKeyExchange>;
+
+        if $r8 == null goto label09;
+
+        $r2 = "RSA_EXPORT";
+
+        goto label01;
+
+     label09:
+        $r2 = "RSA";
+
+        goto label01;
+
+     label10:
+        $r2 = "DHE_DSS";
+
+        goto label01;
+
+     label11:
+        $r2 = "DHE_RSA";
+
+        goto label01;
+
+     label12:
+        $r2 = "DH_DSS";
+
+        goto label01;
+
+     label13:
+        $r2 = "DH_RSA";
+
+        goto label01;
+
+     label14:
+        $r9 := @caughtexception;
+
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void fatalAlert(byte,java.lang.String,java.lang.Exception)>(42, "Not trusted server certificate", $r9);
+
+        return;
+
+        catch java.security.cert.CertificateException from label02 to label03 with label14;
+        catch java.security.cert.CertificateException from label04 to label05 with label14;
+    }
+
+    protected void makeFinished()
+    {
+        org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl $r0;
+        long $l0;
+        org.apache.harmony.xnet.provider.jsse.ServerHello $r1;
+        byte[] $r2, $r5;
+        byte $b1;
+        org.apache.harmony.xnet.provider.jsse.Finished $r3;
+        boolean $z0;
+        org.apache.harmony.xnet.provider.jsse.SSLSessionImpl $r4;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerHello serverHello>;
+
+        $r2 = $r1.<org.apache.harmony.xnet.provider.jsse.ServerHello: byte[] server_version>;
+
+        $b1 = $r2[1];
+
+        if $b1 != 1 goto label2;
+
+        $r2 = newarray (byte)[12];
+
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void computerVerifyDataTLS(java.lang.String,byte[])>("client finished", $r2);
+
+     label1:
+        $r3 = new org.apache.harmony.xnet.provider.jsse.Finished;
+
+        specialinvoke $r3.<org.apache.harmony.xnet.provider.jsse.Finished: void <init>(byte[])>($r2);
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.Finished clientFinished> = $r3;
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.Finished clientFinished>;
+
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void send(org.apache.harmony.xnet.provider.jsse.Message)>($r3);
+
+        $z0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: boolean isResuming>;
+
+        if $z0 == 0 goto label3;
+
+        $r4 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r4.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: long lastAccessedTime> = $l0;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: int status> = 3;
+
+        return;
+
+     label2:
+        $r2 = newarray (byte)[36];
+
+        $r5 = <org.apache.harmony.xnet.provider.jsse.SSLv3Constants: byte[] client>;
+
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void computerVerifyDataSSLv3(byte[],byte[])>($r5, $r2);
+
+        goto label1;
+
+     label3:
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerHello serverHello>;
+
+        $r2 = $r1.<org.apache.harmony.xnet.provider.jsse.ServerHello: byte[] server_version>;
+
+        $b1 = $r2[1];
+
+        if $b1 != 1 goto label5;
+
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void computerReferenceVerifyDataTLS(java.lang.String)>("server finished");
+
+     label4:
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: int status> = 1;
+
+        return;
+
+     label5:
+        $r2 = <org.apache.harmony.xnet.provider.jsse.SSLv3Constants: byte[] server>;
+
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void computerReferenceVerifyDataSSLv3(byte[])>($r2);
+
+        goto label4;
+    }
+
+    void processServerHelloDone()
+    {
+        org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl $r0;
+        java.security.PrivateKey $r1, $r41;
+        org.apache.harmony.xnet.provider.jsse.CertificateMessage $r2;
+        org.apache.harmony.xnet.provider.jsse.SSLSessionImpl $r3;
+        org.apache.harmony.xnet.provider.jsse.CipherSuite $r4;
+        int $i0, $i1;
+        org.apache.harmony.xnet.provider.jsse.CertificateRequest $r5;
+        java.security.cert.X509Certificate[] $r6;
+        org.apache.harmony.xnet.provider.jsse.SSLParameters $r7;
+        javax.net.ssl.X509KeyManager $r8;
+        javax.net.ssl.X509ExtendedKeyManager $r9;
+        java.lang.String[] $r10;
+        javax.security.auth.x500.X500Principal[] $r11;
+        java.lang.String $r12;
+        javax.crypto.Cipher $r13;
+        org.apache.harmony.xnet.provider.jsse.ServerKeyExchange $r14;
+        java.security.interfaces.RSAPublicKey $r15;
+        byte[] $r16, $r19;
+        java.security.SecureRandom $r17;
+        org.apache.harmony.xnet.provider.jsse.ClientHello $r18;
+        org.apache.harmony.xnet.provider.jsse.ClientKeyExchange $r20;
+        org.apache.harmony.xnet.provider.jsse.ServerHello $r21;
+        byte $b2;
+        boolean $z0;
+        org.apache.harmony.xnet.provider.jsse.DigitalSignature $r22;
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r23;
+        org.apache.harmony.xnet.provider.jsse.CertificateVerify $r24;
+        java.security.cert.X509Certificate $r25;
+        java.lang.Exception $r26, $r27, $r42;
+        java.security.KeyFactory $r28;
+        javax.crypto.KeyAgreement $r29;
+        java.security.KeyPairGenerator $r30;
+        javax.crypto.spec.DHPublicKeySpec $r31;
+        java.math.BigInteger $r32, $r33, $r34;
+        java.security.PublicKey $r35, $r38, $r39;
+        javax.crypto.spec.DHParameterSpec $r36;
+        java.security.KeyPair $r37;
+        javax.crypto.interfaces.DHKey $r40;
+        java.security.NoSuchAlgorithmException $r43, $r44, $r45;
+        javax.crypto.interfaces.DHPublicKey $r46;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl;
+
+        $r1 = null;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.CertificateMessage serverCert>;
+
+        if $r2 == null goto label17;
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r4 = $r3.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: org.apache.harmony.xnet.provider.jsse.CipherSuite cipherSuite>;
+
+        $i0 = $r4.<org.apache.harmony.xnet.provider.jsse.CipherSuite: int keyExchange>;
+
+        $i1 = <org.apache.harmony.xnet.provider.jsse.CipherSuite: int KeyExchange_DH_anon>;
+
+        if $i0 == $i1 goto label01;
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r4 = $r3.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: org.apache.harmony.xnet.provider.jsse.CipherSuite cipherSuite>;
+
+        $i0 = $r4.<org.apache.harmony.xnet.provider.jsse.CipherSuite: int keyExchange>;
+
+        $i1 = <org.apache.harmony.xnet.provider.jsse.CipherSuite: int KeyExchange_DH_anon_EXPORT>;
+
+        if $i0 != $i1 goto label02;
+
+     label01:
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void unexpectedMessage()>();
+
+        return;
+
+     label02:
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl: void verifyServerCert()>();
+
+     label03:
+        $r5 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.CertificateRequest certificateRequest>;
+
+        if $r5 == null goto label05;
+
+        $r6 = null;
+
+        $r7 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLParameters parameters>;
+
+        $r8 = virtualinvoke $r7.<org.apache.harmony.xnet.provider.jsse.SSLParameters: javax.net.ssl.X509KeyManager getKeyManager()>();
+
+        $r9 = (javax.net.ssl.X509ExtendedKeyManager) $r8;
+
+        $r5 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.CertificateRequest certificateRequest>;
+
+        $r10 = virtualinvoke $r5.<org.apache.harmony.xnet.provider.jsse.CertificateRequest: java.lang.String[] getTypesAsString()>();
+
+        $r5 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.CertificateRequest certificateRequest>;
+
+        $r11 = $r5.<org.apache.harmony.xnet.provider.jsse.CertificateRequest: javax.security.auth.x500.X500Principal[] certificate_authorities>;
+
+        $r12 = virtualinvoke $r9.<javax.net.ssl.X509ExtendedKeyManager: java.lang.String chooseClientAlias(java.lang.String[],java.security.Principal[],java.net.Socket)>($r10, $r11, null);
+
+        if $r12 == null goto label04;
+
+        $r7 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLParameters parameters>;
+
+        $r8 = virtualinvoke $r7.<org.apache.harmony.xnet.provider.jsse.SSLParameters: javax.net.ssl.X509KeyManager getKeyManager()>();
+
+        $r9 = (javax.net.ssl.X509ExtendedKeyManager) $r8;
+
+        $r6 = virtualinvoke $r9.<javax.net.ssl.X509ExtendedKeyManager: java.security.cert.X509Certificate[] getCertificateChain(java.lang.String)>($r12);
+
+        $r1 = virtualinvoke $r9.<javax.net.ssl.X509ExtendedKeyManager: java.security.PrivateKey getPrivateKey(java.lang.String)>($r12);
+
+     label04:
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r3.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: java.security.cert.X509Certificate[] localCertificates> = $r6;
+
+        $r2 = new org.apache.harmony.xnet.provider.jsse.CertificateMessage;
+
+        specialinvoke $r2.<org.apache.harmony.xnet.provider.jsse.CertificateMessage: void <init>(java.security.cert.X509Certificate[])>($r6);
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.CertificateMessage clientCert> = $r2;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.CertificateMessage clientCert>;
+
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void send(org.apache.harmony.xnet.provider.jsse.Message)>($r2);
+
+     label05:
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r4 = $r3.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: org.apache.harmony.xnet.provider.jsse.CipherSuite cipherSuite>;
+
+        $i0 = $r4.<org.apache.harmony.xnet.provider.jsse.CipherSuite: int keyExchange>;
+
+        $i1 = <org.apache.harmony.xnet.provider.jsse.CipherSuite: int KeyExchange_RSA>;
+
+        if $i0 == $i1 goto label06;
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r4 = $r3.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: org.apache.harmony.xnet.provider.jsse.CipherSuite cipherSuite>;
+
+        $i0 = $r4.<org.apache.harmony.xnet.provider.jsse.CipherSuite: int keyExchange>;
+
+        $i1 = <org.apache.harmony.xnet.provider.jsse.CipherSuite: int KeyExchange_RSA_EXPORT>;
+
+        if $i0 != $i1 goto label23;
+
+     label06:
+        $r13 = staticinvoke <javax.crypto.Cipher: javax.crypto.Cipher getInstance(java.lang.String)>("RSA/ECB/PKCS1Padding");
+
+        $r14 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerKeyExchange serverKeyExchange>;
+
+        if $r14 == null goto label18;
+
+        $r14 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerKeyExchange serverKeyExchange>;
+
+        $r15 = virtualinvoke $r14.<org.apache.harmony.xnet.provider.jsse.ServerKeyExchange: java.security.interfaces.RSAPublicKey getRSAPublicKey()>();
+
+        virtualinvoke $r13.<javax.crypto.Cipher: void init(int,java.security.Key)>(1, $r15);
+
+     label07:
+        $r16 = newarray (byte)[48];
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: byte[] preMasterSecret> = $r16;
+
+        $r7 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLParameters parameters>;
+
+        $r17 = virtualinvoke $r7.<org.apache.harmony.xnet.provider.jsse.SSLParameters: java.security.SecureRandom getSecureRandom()>();
+
+        $r16 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: byte[] preMasterSecret>;
+
+        virtualinvoke $r17.<java.security.SecureRandom: void nextBytes(byte[])>($r16);
+
+        $r18 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ClientHello clientHello>;
+
+        $r16 = $r18.<org.apache.harmony.xnet.provider.jsse.ClientHello: byte[] client_version>;
+
+        $r19 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: byte[] preMasterSecret>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r16, 0, $r19, 0, 2);
+
+        $r20 = new org.apache.harmony.xnet.provider.jsse.ClientKeyExchange;
+
+     label08:
+        $r16 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: byte[] preMasterSecret>;
+
+        $r16 = virtualinvoke $r13.<javax.crypto.Cipher: byte[] doFinal(byte[])>($r16);
+
+        $r21 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerHello serverHello>;
+
+        $r19 = $r21.<org.apache.harmony.xnet.provider.jsse.ServerHello: byte[] server_version>;
+
+        $b2 = $r19[1];
+
+     label09:
+        if $b2 != 1 goto label21;
+
+     label10:
+        $z0 = 1;
+
+     label11:
+        specialinvoke $r20.<org.apache.harmony.xnet.provider.jsse.ClientKeyExchange: void <init>(byte[],boolean)>($r16, $z0);
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ClientKeyExchange clientKeyExchange> = $r20;
+
+     label12:
+        $r20 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ClientKeyExchange clientKeyExchange>;
+
+        if $r20 == null goto label13;
+
+        $r20 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ClientKeyExchange clientKeyExchange>;
+
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void send(org.apache.harmony.xnet.provider.jsse.Message)>($r20);
+
+     label13:
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void computerMasterSecret()>();
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.CertificateMessage clientCert>;
+
+        if $r2 == null goto label16;
+
+        $r20 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ClientKeyExchange clientKeyExchange>;
+
+        $z0 = virtualinvoke $r20.<org.apache.harmony.xnet.provider.jsse.ClientKeyExchange: boolean isEmpty()>();
+
+        if $z0 != 0 goto label16;
+
+        $r22 = new org.apache.harmony.xnet.provider.jsse.DigitalSignature;
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r4 = $r3.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: org.apache.harmony.xnet.provider.jsse.CipherSuite cipherSuite>;
+
+        $i0 = $r4.<org.apache.harmony.xnet.provider.jsse.CipherSuite: int keyExchange>;
+
+        specialinvoke $r22.<org.apache.harmony.xnet.provider.jsse.DigitalSignature: void <init>(int)>($i0);
+
+        virtualinvoke $r22.<org.apache.harmony.xnet.provider.jsse.DigitalSignature: void init(java.security.PrivateKey)>($r1);
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r4 = $r3.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: org.apache.harmony.xnet.provider.jsse.CipherSuite cipherSuite>;
+
+        $i0 = $r4.<org.apache.harmony.xnet.provider.jsse.CipherSuite: int keyExchange>;
+
+        $i1 = <org.apache.harmony.xnet.provider.jsse.CipherSuite: int KeyExchange_RSA_EXPORT>;
+
+        if $i0 == $i1 goto label14;
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r4 = $r3.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: org.apache.harmony.xnet.provider.jsse.CipherSuite cipherSuite>;
+
+        $i0 = $r4.<org.apache.harmony.xnet.provider.jsse.CipherSuite: int keyExchange>;
+
+        $i1 = <org.apache.harmony.xnet.provider.jsse.CipherSuite: int KeyExchange_RSA>;
+
+        if $i0 == $i1 goto label14;
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r4 = $r3.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: org.apache.harmony.xnet.provider.jsse.CipherSuite cipherSuite>;
+
+        $i0 = $r4.<org.apache.harmony.xnet.provider.jsse.CipherSuite: int keyExchange>;
+
+        $i1 = <org.apache.harmony.xnet.provider.jsse.CipherSuite: int KeyExchange_DHE_RSA>;
+
+        if $i0 == $i1 goto label14;
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r4 = $r3.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: org.apache.harmony.xnet.provider.jsse.CipherSuite cipherSuite>;
+
+        $i0 = $r4.<org.apache.harmony.xnet.provider.jsse.CipherSuite: int keyExchange>;
+
+        $i1 = <org.apache.harmony.xnet.provider.jsse.CipherSuite: int KeyExchange_DHE_RSA_EXPORT>;
+
+        if $i0 != $i1 goto label52;
+
+     label14:
+        $r23 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream io_stream>;
+
+        $r16 = virtualinvoke $r23.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] getDigestMD5()>();
+
+        virtualinvoke $r22.<org.apache.harmony.xnet.provider.jsse.DigitalSignature: void setMD5(byte[])>($r16);
+
+        $r23 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream io_stream>;
+
+        $r16 = virtualinvoke $r23.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] getDigestSHA()>();
+
+        virtualinvoke $r22.<org.apache.harmony.xnet.provider.jsse.DigitalSignature: void setSHA(byte[])>($r16);
+
+     label15:
+        $r24 = new org.apache.harmony.xnet.provider.jsse.CertificateVerify;
+
+        $r16 = virtualinvoke $r22.<org.apache.harmony.xnet.provider.jsse.DigitalSignature: byte[] sign()>();
+
+        specialinvoke $r24.<org.apache.harmony.xnet.provider.jsse.CertificateVerify: void <init>(byte[])>($r16);
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.CertificateVerify certificateVerify> = $r24;
+
+        $r24 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.CertificateVerify certificateVerify>;
+
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void send(org.apache.harmony.xnet.provider.jsse.Message)>($r24);
+
+     label16:
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void sendChangeCipherSpec()>();
+
+        return;
+
+     label17:
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r4 = $r3.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: org.apache.harmony.xnet.provider.jsse.CipherSuite cipherSuite>;
+
+        $i0 = $r4.<org.apache.harmony.xnet.provider.jsse.CipherSuite: int keyExchange>;
+
+        $i1 = <org.apache.harmony.xnet.provider.jsse.CipherSuite: int KeyExchange_DH_anon>;
+
+        if $i0 == $i1 goto label03;
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r4 = $r3.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: org.apache.harmony.xnet.provider.jsse.CipherSuite cipherSuite>;
+
+        $i0 = $r4.<org.apache.harmony.xnet.provider.jsse.CipherSuite: int keyExchange>;
+
+        $i1 = <org.apache.harmony.xnet.provider.jsse.CipherSuite: int KeyExchange_DH_anon_EXPORT>;
+
+        if $i0 == $i1 goto label03;
+
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void unexpectedMessage()>();
+
+        return;
+
+     label18:
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.CertificateMessage serverCert>;
+
+        $r6 = $r2.<org.apache.harmony.xnet.provider.jsse.CertificateMessage: java.security.cert.X509Certificate[] certs>;
+
+        $r25 = $r6[0];
+
+        virtualinvoke $r13.<javax.crypto.Cipher: void init(int,java.security.cert.Certificate)>(1, $r25);
+
+     label19:
+        goto label07;
+
+     label20:
+        $r26 := @caughtexception;
+
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void fatalAlert(byte,java.lang.String,java.lang.Exception)>(80, "Unexpected exception", $r26);
+
+        return;
+
+     label21:
+        $z0 = 0;
+
+        goto label11;
+
+     label22:
+        $r27 := @caughtexception;
+
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void fatalAlert(byte,java.lang.String,java.lang.Exception)>(80, "Unexpected exception", $r27);
+
+        return;
+
+     label23:
+        $r28 = staticinvoke <java.security.KeyFactory: java.security.KeyFactory getInstance(java.lang.String)>("DH");
+
+     label24:
+        $r29 = staticinvoke <javax.crypto.KeyAgreement: javax.crypto.KeyAgreement getInstance(java.lang.String)>("DH");
+
+     label25:
+        $r30 = staticinvoke <java.security.KeyPairGenerator: java.security.KeyPairGenerator getInstance(java.lang.String)>("DH");
+
+     label26:
+        $r14 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerKeyExchange serverKeyExchange>;
+
+        if $r14 == null goto label48;
+
+        $r31 = new javax.crypto.spec.DHPublicKeySpec;
+
+        $r14 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerKeyExchange serverKeyExchange>;
+
+        $r32 = $r14.<org.apache.harmony.xnet.provider.jsse.ServerKeyExchange: java.math.BigInteger par3>;
+
+        $r14 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerKeyExchange serverKeyExchange>;
+
+        $r33 = $r14.<org.apache.harmony.xnet.provider.jsse.ServerKeyExchange: java.math.BigInteger par1>;
+
+        $r14 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerKeyExchange serverKeyExchange>;
+
+        $r34 = $r14.<org.apache.harmony.xnet.provider.jsse.ServerKeyExchange: java.math.BigInteger par2>;
+
+        specialinvoke $r31.<javax.crypto.spec.DHPublicKeySpec: void <init>(java.math.BigInteger,java.math.BigInteger,java.math.BigInteger)>($r32, $r33, $r34);
+
+        $r35 = virtualinvoke $r28.<java.security.KeyFactory: java.security.PublicKey generatePublic(java.security.spec.KeySpec)>($r31);
+
+     label27:
+        $r36 = new javax.crypto.spec.DHParameterSpec;
+
+        $r14 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerKeyExchange serverKeyExchange>;
+
+        $r32 = $r14.<org.apache.harmony.xnet.provider.jsse.ServerKeyExchange: java.math.BigInteger par1>;
+
+        $r14 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerKeyExchange serverKeyExchange>;
+
+        $r33 = $r14.<org.apache.harmony.xnet.provider.jsse.ServerKeyExchange: java.math.BigInteger par2>;
+
+        specialinvoke $r36.<javax.crypto.spec.DHParameterSpec: void <init>(java.math.BigInteger,java.math.BigInteger)>($r32, $r33);
+
+     label28:
+        virtualinvoke $r30.<java.security.KeyPairGenerator: void initialize(java.security.spec.AlgorithmParameterSpec)>($r36);
+
+        $r37 = virtualinvoke $r30.<java.security.KeyPairGenerator: java.security.KeyPair generateKeyPair()>();
+
+        $r38 = virtualinvoke $r37.<java.security.KeyPair: java.security.PublicKey getPublic()>();
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.CertificateMessage clientCert>;
+
+        if $r2 == null goto label50;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.CertificateMessage serverCert>;
+
+        if $r2 == null goto label50;
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r4 = $r3.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: org.apache.harmony.xnet.provider.jsse.CipherSuite cipherSuite>;
+
+        $i0 = $r4.<org.apache.harmony.xnet.provider.jsse.CipherSuite: int keyExchange>;
+
+     label29:
+        $i1 = <org.apache.harmony.xnet.provider.jsse.CipherSuite: int KeyExchange_DHE_RSA>;
+
+     label30:
+        if $i0 == $i1 goto label33;
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r4 = $r3.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: org.apache.harmony.xnet.provider.jsse.CipherSuite cipherSuite>;
+
+        $i0 = $r4.<org.apache.harmony.xnet.provider.jsse.CipherSuite: int keyExchange>;
+
+     label31:
+        $i1 = <org.apache.harmony.xnet.provider.jsse.CipherSuite: int KeyExchange_DHE_DSS>;
+
+     label32:
+        if $i0 != $i1 goto label50;
+
+     label33:
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.CertificateMessage clientCert>;
+
+        $r6 = $r2.<org.apache.harmony.xnet.provider.jsse.CertificateMessage: java.security.cert.X509Certificate[] certs>;
+
+        $r25 = $r6[0];
+
+        $r38 = virtualinvoke $r25.<java.security.cert.Certificate: java.security.PublicKey getPublicKey()>();
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.CertificateMessage serverCert>;
+
+        $r6 = $r2.<org.apache.harmony.xnet.provider.jsse.CertificateMessage: java.security.cert.X509Certificate[] certs>;
+
+        $r25 = $r6[0];
+
+        $r39 = virtualinvoke $r25.<java.security.cert.Certificate: java.security.PublicKey getPublicKey()>();
+
+     label34:
+        $z0 = $r38 instanceof javax.crypto.interfaces.DHKey;
+
+     label35:
+        if $z0 == 0 goto label38;
+
+     label36:
+        $z0 = $r39 instanceof javax.crypto.interfaces.DHKey;
+
+     label37:
+        if $z0 == 0 goto label38;
+
+        $r40 = (javax.crypto.interfaces.DHKey) $r38;
+
+        $r36 = interfaceinvoke $r40.<javax.crypto.interfaces.DHKey: javax.crypto.spec.DHParameterSpec getParams()>();
+
+        $r32 = virtualinvoke $r36.<javax.crypto.spec.DHParameterSpec: java.math.BigInteger getG()>();
+
+        $r40 = (javax.crypto.interfaces.DHKey) $r39;
+
+        $r36 = interfaceinvoke $r40.<javax.crypto.interfaces.DHKey: javax.crypto.spec.DHParameterSpec getParams()>();
+
+        $r33 = virtualinvoke $r36.<javax.crypto.spec.DHParameterSpec: java.math.BigInteger getG()>();
+
+        $z0 = virtualinvoke $r32.<java.math.BigInteger: boolean equals(java.lang.Object)>($r33);
+
+        if $z0 == 0 goto label38;
+
+        $r40 = (javax.crypto.interfaces.DHKey) $r38;
+
+        $r36 = interfaceinvoke $r40.<javax.crypto.interfaces.DHKey: javax.crypto.spec.DHParameterSpec getParams()>();
+
+        $r32 = virtualinvoke $r36.<javax.crypto.spec.DHParameterSpec: java.math.BigInteger getP()>();
+
+        $r40 = (javax.crypto.interfaces.DHKey) $r39;
+
+        $r36 = interfaceinvoke $r40.<javax.crypto.interfaces.DHKey: javax.crypto.spec.DHParameterSpec getParams()>();
+
+        $r33 = virtualinvoke $r36.<javax.crypto.spec.DHParameterSpec: java.math.BigInteger getG()>();
+
+        $z0 = virtualinvoke $r32.<java.math.BigInteger: boolean equals(java.lang.Object)>($r33);
+
+        if $z0 == 0 goto label38;
+
+        $r20 = new org.apache.harmony.xnet.provider.jsse.ClientKeyExchange;
+
+        specialinvoke $r20.<org.apache.harmony.xnet.provider.jsse.ClientKeyExchange: void <init>()>();
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ClientKeyExchange clientKeyExchange> = $r20;
+
+     label38:
+        $r41 = virtualinvoke $r37.<java.security.KeyPair: java.security.PrivateKey getPrivate()>();
+
+        virtualinvoke $r29.<javax.crypto.KeyAgreement: void init(java.security.Key)>($r41);
+
+        virtualinvoke $r29.<javax.crypto.KeyAgreement: java.security.Key doPhase(java.security.Key,boolean)>($r35, 1);
+
+        $r16 = virtualinvoke $r29.<javax.crypto.KeyAgreement: byte[] generateSecret()>();
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: byte[] preMasterSecret> = $r16;
+
+     label39:
+        goto label12;
+
+     label40:
+        $r42 := @caughtexception;
+
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void fatalAlert(byte,java.lang.String,java.lang.Exception)>(80, "Unexpected exception", $r42);
+
+        return;
+
+     label41:
+        $r43 := @caughtexception;
+
+     label42:
+        $r28 = staticinvoke <java.security.KeyFactory: java.security.KeyFactory getInstance(java.lang.String)>("DiffieHellman");
+
+     label43:
+        goto label24;
+
+     label44:
+        $r44 := @caughtexception;
+
+        $r29 = staticinvoke <javax.crypto.KeyAgreement: javax.crypto.KeyAgreement getInstance(java.lang.String)>("DiffieHellman");
+
+     label45:
+        goto label25;
+
+     label46:
+        $r45 := @caughtexception;
+
+        $r30 = staticinvoke <java.security.KeyPairGenerator: java.security.KeyPairGenerator getInstance(java.lang.String)>("DiffieHellman");
+
+     label47:
+        goto label26;
+
+     label48:
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.CertificateMessage serverCert>;
+
+        $r6 = $r2.<org.apache.harmony.xnet.provider.jsse.CertificateMessage: java.security.cert.X509Certificate[] certs>;
+
+        $r25 = $r6[0];
+
+        $r38 = virtualinvoke $r25.<java.security.cert.Certificate: java.security.PublicKey getPublicKey()>();
+
+        $r35 = $r38;
+
+        $r46 = (javax.crypto.interfaces.DHPublicKey) $r38;
+
+        $r36 = interfaceinvoke $r46.<javax.crypto.interfaces.DHPublicKey: javax.crypto.spec.DHParameterSpec getParams()>();
+
+     label49:
+        goto label28;
+
+     label50:
+        $r20 = new org.apache.harmony.xnet.provider.jsse.ClientKeyExchange;
+
+        $r46 = (javax.crypto.interfaces.DHPublicKey) $r38;
+
+        $r32 = interfaceinvoke $r46.<javax.crypto.interfaces.DHPublicKey: java.math.BigInteger getY()>();
+
+        specialinvoke $r20.<org.apache.harmony.xnet.provider.jsse.ClientKeyExchange: void <init>(java.math.BigInteger)>($r32);
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ClientKeyExchange clientKeyExchange> = $r20;
+
+     label51:
+        goto label38;
+
+     label52:
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r4 = $r3.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: org.apache.harmony.xnet.provider.jsse.CipherSuite cipherSuite>;
+
+        $i0 = $r4.<org.apache.harmony.xnet.provider.jsse.CipherSuite: int keyExchange>;
+
+        $i1 = <org.apache.harmony.xnet.provider.jsse.CipherSuite: int KeyExchange_DHE_DSS>;
+
+        if $i0 == $i1 goto label53;
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r4 = $r3.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: org.apache.harmony.xnet.provider.jsse.CipherSuite cipherSuite>;
+
+        $i0 = $r4.<org.apache.harmony.xnet.provider.jsse.CipherSuite: int keyExchange>;
+
+        $i1 = <org.apache.harmony.xnet.provider.jsse.CipherSuite: int KeyExchange_DHE_DSS_EXPORT>;
+
+        if $i0 != $i1 goto label15;
+
+     label53:
+        $r23 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream io_stream>;
+
+        $r16 = virtualinvoke $r23.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: byte[] getDigestSHA()>();
+
+        virtualinvoke $r22.<org.apache.harmony.xnet.provider.jsse.DigitalSignature: void setSHA(byte[])>($r16);
+
+        goto label15;
+
+        catch java.lang.Exception from label06 to label07 with label20;
+        catch java.lang.Exception from label08 to label09 with label22;
+        catch java.lang.Exception from label10 to label12 with label22;
+        catch java.lang.Exception from label18 to label19 with label20;
+        catch java.security.NoSuchAlgorithmException from label23 to label24 with label41;
+        catch java.lang.Exception from label23 to label24 with label40;
+        catch java.security.NoSuchAlgorithmException from label24 to label25 with label44;
+        catch java.lang.Exception from label24 to label25 with label40;
+        catch java.security.NoSuchAlgorithmException from label25 to label26 with label46;
+        catch java.lang.Exception from label25 to label26 with label40;
+        catch java.lang.Exception from label26 to label27 with label40;
+        catch java.lang.Exception from label27 to label29 with label40;
+        catch java.lang.Exception from label30 to label31 with label40;
+        catch java.lang.Exception from label32 to label34 with label40;
+        catch java.lang.Exception from label35 to label36 with label40;
+        catch java.lang.Exception from label37 to label39 with label40;
+        catch java.lang.Exception from label42 to label43 with label40;
+        catch java.lang.Exception from label43 to label45 with label40;
+        catch java.lang.Exception from label45 to label47 with label40;
+        catch java.lang.Exception from label47 to label49 with label40;
+        catch java.lang.Exception from label49 to label51 with label40;
+    }
+
+    public void receiveChangeCipherSpec()
+    {
+        org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl $r0;
+        boolean $z0;
+        org.apache.harmony.xnet.provider.jsse.ServerHello $r1;
+        org.apache.harmony.xnet.provider.jsse.Finished $r2;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl;
+
+        $z0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: boolean isResuming>;
+
+        if $z0 == 0 goto label2;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerHello serverHello>;
+
+        if $r1 != null goto label1;
+
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void unexpectedMessage()>();
+
+     label1:
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: boolean changeCipherSpecReceived> = 1;
+
+        return;
+
+     label2:
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.Finished clientFinished>;
+
+        if $r2 != null goto label1;
+
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void unexpectedMessage()>();
+
+        goto label1;
+    }
+
+    public void start()
+    {
+        org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl $r0;
+        org.apache.harmony.xnet.provider.jsse.SSLSessionImpl $r1;
+        org.apache.harmony.xnet.provider.jsse.ClientHello $r2;
+        int $i0;
+        boolean $z0;
+        org.apache.harmony.xnet.provider.jsse.SSLParameters $r3;
+        java.security.SecureRandom $r4;
+        java.lang.String[] $r5;
+        org.apache.harmony.xnet.provider.jsse.ProtocolVersion $r6;
+        org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol $r7;
+        byte[] $r8;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        if $r1 != null goto label3;
+
+        $r1 = specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl findSessionToResume()>();
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session> = $r1;
+
+     label1:
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        if $r1 == null goto label5;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: boolean isResuming> = 1;
+
+     label2:
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl: void startSession()>();
+
+        return;
+
+     label3:
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ClientHello clientHello>;
+
+        if $r2 == null goto label4;
+
+        $i0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: int status>;
+
+        if $i0 != 3 goto label7;
+
+     label4:
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $z0 = virtualinvoke $r1.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: boolean isValid()>();
+
+        if $z0 != 0 goto label1;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session> = null;
+
+        goto label1;
+
+     label5:
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLParameters parameters>;
+
+        $z0 = virtualinvoke $r3.<org.apache.harmony.xnet.provider.jsse.SSLParameters: boolean getEnableSessionCreation()>();
+
+        if $z0 == 0 goto label6;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: boolean isResuming> = 0;
+
+        $r1 = new org.apache.harmony.xnet.provider.jsse.SSLSessionImpl;
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLParameters parameters>;
+
+        $r4 = virtualinvoke $r3.<org.apache.harmony.xnet.provider.jsse.SSLParameters: java.security.SecureRandom getSecureRandom()>();
+
+        specialinvoke $r1.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: void <init>(java.security.SecureRandom)>($r4);
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session> = $r1;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLParameters parameters>;
+
+        $r5 = virtualinvoke $r3.<org.apache.harmony.xnet.provider.jsse.SSLParameters: java.lang.String[] getEnabledProtocols()>();
+
+        $r6 = staticinvoke <org.apache.harmony.xnet.provider.jsse.ProtocolVersion: org.apache.harmony.xnet.provider.jsse.ProtocolVersion getLatestVersion(java.lang.String[])>($r5);
+
+        $r1.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: org.apache.harmony.xnet.provider.jsse.ProtocolVersion protocol> = $r6;
+
+        $r7 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol recordProtocol>;
+
+        $r1 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r6 = $r1.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: org.apache.harmony.xnet.provider.jsse.ProtocolVersion protocol>;
+
+        $r8 = $r6.<org.apache.harmony.xnet.provider.jsse.ProtocolVersion: byte[] version>;
+
+        virtualinvoke $r7.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: void setVersion(byte[])>($r8);
+
+        goto label2;
+
+     label6:
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void fatalAlert(byte,java.lang.String)>(40, "SSL Session may not be created ");
+
+        goto label2;
+
+     label7:
+        return;
+    }
+
+    public void unwrap(byte[])
+    {
+        org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl $r0;
+        byte[] $r1, $r19;
+        java.lang.Exception $r2;
+        org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream $r3;
+        int $i0, $i1, $i2;
+        java.io.IOException $r4;
+        org.apache.harmony.xnet.provider.jsse.ClientHello $r5;
+        org.apache.harmony.xnet.provider.jsse.Finished $r6;
+        org.apache.harmony.xnet.provider.jsse.SSLSessionImpl $r7;
+        boolean $z0;
+        java.lang.Object $r8;
+        org.apache.harmony.xnet.provider.jsse.ServerHello $r9;
+        org.apache.harmony.xnet.provider.jsse.ProtocolVersion $r10, $r14;
+        org.apache.harmony.xnet.provider.jsse.SSLParameters $r11;
+        java.lang.String[] $r12;
+        java.lang.String $r13;
+        byte $b3;
+        org.apache.harmony.xnet.provider.jsse.CipherSuite[] $r15;
+        org.apache.harmony.xnet.provider.jsse.CipherSuite $r16, $r17;
+        org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol $r18;
+        org.apache.harmony.xnet.provider.jsse.ServerKeyExchange $r20;
+        org.apache.harmony.xnet.provider.jsse.CertificateMessage $r21;
+        org.apache.harmony.xnet.provider.jsse.CertificateRequest $r22;
+        org.apache.harmony.xnet.provider.jsse.ServerHelloDone $r23;
+        java.util.Vector $r24;
+        org.apache.harmony.xnet.provider.jsse.DelegatedTask $r25;
+        org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl$1 $r26;
+        java.security.AccessControlContext $r27;
+        long $l4;
+        org.apache.harmony.xnet.provider.jsse.ClientSessionContext $r28;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl;
+
+        $r1 := @parameter0: byte[];
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: java.lang.Exception delegatedTaskErr>;
+
+        if $r2 == null goto label001;
+
+        $r2 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: java.lang.Exception delegatedTaskErr>;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: java.lang.Exception delegatedTaskErr> = null;
+
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void fatalAlert(byte,java.lang.String,java.lang.Exception)>(40, "Error in delegated task", $r2);
+
+     label001:
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream io_stream>;
+
+        virtualinvoke $r3.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: void append(byte[])>($r1);
+
+     label002:
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream io_stream>;
+
+        $i0 = virtualinvoke $r3.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int available()>();
+
+        if $i0 <= 0 goto label138;
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream io_stream>;
+
+        virtualinvoke $r3.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: void mark()>();
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream io_stream>;
+
+     label003:
+        $i1 = virtualinvoke $r3.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int read()>();
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream io_stream>;
+
+        $i0 = virtualinvoke $r3.<org.apache.harmony.xnet.provider.jsse.SSLInputStream: int readUint24()>();
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream io_stream>;
+
+        $i2 = virtualinvoke $r3.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: int available()>();
+
+     label004:
+        if $i2 >= $i0 goto label007;
+
+     label005:
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream io_stream>;
+
+        virtualinvoke $r3.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: void reset()>();
+
+     label006:
+        return;
+
+     label007:
+        lookupswitch($i1)
+        {
+            case 0: goto label011;
+            case 2: goto label020;
+            case 11: goto label068;
+            case 12: goto label081;
+            case 13: goto label092;
+            case 14: goto label105;
+            case 20: goto label122;
+            default: goto label008;
+        };
+
+     label008:
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void unexpectedMessage()>();
+
+     label009:
+        return;
+
+     label010:
+        $r4 := @caughtexception;
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream io_stream>;
+
+        virtualinvoke $r3.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: void reset()>();
+
+        return;
+
+     label011:
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream io_stream>;
+
+     label012:
+        virtualinvoke $r3.<org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream: void removeFromMarkedPosition()>();
+
+     label013:
+        $r5 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ClientHello clientHello>;
+
+        if $r5 == null goto label014;
+
+        $r6 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.Finished clientFinished>;
+
+        if $r6 == null goto label002;
+
+        $r6 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.Finished serverFinished>;
+
+        if $r6 == null goto label002;
+
+     label014:
+        $r7 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $z0 = virtualinvoke $r7.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: boolean isValid()>();
+
+        if $z0 == 0 goto label018;
+
+        $r7 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r8 = virtualinvoke $r7.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: java.lang.Object clone()>();
+
+     label015:
+        $r7 = (org.apache.harmony.xnet.provider.jsse.SSLSessionImpl) $r8;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session> = $r7;
+
+     label016:
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: boolean isResuming> = 1;
+
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl: void startSession()>();
+
+     label017:
+        goto label002;
+
+     label018:
+        specialinvoke $r0.<org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl: void renegotiateNewSession()>();
+
+     label019:
+        goto label002;
+
+     label020:
+        $r5 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ClientHello clientHello>;
+
+     label021:
+        if $r5 == null goto label024;
+
+     label022:
+        $r9 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerHello serverHello>;
+
+     label023:
+        if $r9 == null goto label026;
+
+     label024:
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void unexpectedMessage()>();
+
+     label025:
+        return;
+
+     label026:
+        $r9 = new org.apache.harmony.xnet.provider.jsse.ServerHello;
+
+     label027:
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream io_stream>;
+
+        specialinvoke $r9.<org.apache.harmony.xnet.provider.jsse.ServerHello: void <init>(org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream,int)>($r3, $i0);
+
+     label028:
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerHello serverHello> = $r9;
+
+        $r9 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerHello serverHello>;
+
+     label029:
+        $r1 = $r9.<org.apache.harmony.xnet.provider.jsse.ServerHello: byte[] server_version>;
+
+        $r10 = staticinvoke <org.apache.harmony.xnet.provider.jsse.ProtocolVersion: org.apache.harmony.xnet.provider.jsse.ProtocolVersion getByVersion(byte[])>($r1);
+
+        $r11 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLParameters parameters>;
+
+        $r12 = virtualinvoke $r11.<org.apache.harmony.xnet.provider.jsse.SSLParameters: java.lang.String[] getEnabledProtocols()>();
+
+     label030:
+        $i0 = 0;
+
+     label031:
+        $i1 = lengthof $r12;
+
+     label032:
+        if $i0 >= $i1 goto label052;
+
+        $r13 = $r12[$i0];
+
+        $r14 = staticinvoke <org.apache.harmony.xnet.provider.jsse.ProtocolVersion: org.apache.harmony.xnet.provider.jsse.ProtocolVersion getByName(java.lang.String)>($r13);
+
+        $z0 = virtualinvoke $r10.<org.apache.harmony.xnet.provider.jsse.ProtocolVersion: boolean equals(java.lang.Object)>($r14);
+
+     label033:
+        if $z0 == 0 goto label051;
+
+     label034:
+        $r9 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerHello serverHello>;
+
+        $b3 = $r9.<org.apache.harmony.xnet.provider.jsse.ServerHello: byte compression_method>;
+
+     label035:
+        if $b3 == 0 goto label036;
+
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void fatalAlert(byte,java.lang.String)>(40, "Bad server hello compression method");
+
+     label036:
+        $r11 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLParameters parameters>;
+
+        $r15 = virtualinvoke $r11.<org.apache.harmony.xnet.provider.jsse.SSLParameters: org.apache.harmony.xnet.provider.jsse.CipherSuite[] getEnabledCipherSuitesMember()>();
+
+     label037:
+        $i0 = 0;
+
+     label038:
+        $i1 = lengthof $r15;
+
+     label039:
+        if $i0 >= $i1 goto label055;
+
+     label040:
+        $r9 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerHello serverHello>;
+
+        $r16 = $r9.<org.apache.harmony.xnet.provider.jsse.ServerHello: org.apache.harmony.xnet.provider.jsse.CipherSuite cipher_suite>;
+
+     label041:
+        $r17 = $r15[$i0];
+
+        $z0 = virtualinvoke $r16.<org.apache.harmony.xnet.provider.jsse.CipherSuite: boolean equals(java.lang.Object)>($r17);
+
+     label042:
+        if $z0 == 0 goto label054;
+
+     label043:
+        $z0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: boolean isResuming>;
+
+        if $z0 == 0 goto label046;
+
+        $r9 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerHello serverHello>;
+
+        $r1 = $r9.<org.apache.harmony.xnet.provider.jsse.ServerHello: byte[] session_id>;
+
+        $i0 = lengthof $r1;
+
+        if $i0 != 0 goto label057;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: boolean isResuming> = 0;
+
+     label044:
+        $r9 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerHello serverHello>;
+
+        $r1 = $r9.<org.apache.harmony.xnet.provider.jsse.ServerHello: byte[] server_version>;
+
+        $b3 = $r1[1];
+
+     label045:
+        if $b3 != 1 goto label066;
+
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void computerReferenceVerifyDataTLS(java.lang.String)>("server finished");
+
+     label046:
+        $r7 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r7.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: org.apache.harmony.xnet.provider.jsse.ProtocolVersion protocol> = $r10;
+
+        $r18 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol recordProtocol>;
+
+        $r7 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r10 = $r7.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: org.apache.harmony.xnet.provider.jsse.ProtocolVersion protocol>;
+
+     label047:
+        $r1 = $r10.<org.apache.harmony.xnet.provider.jsse.ProtocolVersion: byte[] version>;
+
+        virtualinvoke $r18.<org.apache.harmony.xnet.provider.jsse.SSLRecordProtocol: void setVersion(byte[])>($r1);
+
+     label048:
+        $r7 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r9 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerHello serverHello>;
+
+        $r16 = $r9.<org.apache.harmony.xnet.provider.jsse.ServerHello: org.apache.harmony.xnet.provider.jsse.CipherSuite cipher_suite>;
+
+        $r7.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: org.apache.harmony.xnet.provider.jsse.CipherSuite cipherSuite> = $r16;
+
+        $r7 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r9 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerHello serverHello>;
+
+     label049:
+        $r1 = $r9.<org.apache.harmony.xnet.provider.jsse.ServerHello: byte[] session_id>;
+
+        $r8 = virtualinvoke $r1.<java.lang.Object: java.lang.Object clone()>();
+
+     label050:
+        $r1 = (byte[]) $r8;
+
+        $r1 = (byte[]) $r1;
+
+        $r7.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: byte[] id> = $r1;
+
+        $r7 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r9 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerHello serverHello>;
+
+        $r1 = $r9.<org.apache.harmony.xnet.provider.jsse.ServerHello: byte[] random>;
+
+        $r7.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: byte[] serverRandom> = $r1;
+
+        goto label002;
+
+     label051:
+        $i0 = $i0 + 1;
+
+        goto label031;
+
+     label052:
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void fatalAlert(byte,java.lang.String)>(40, "Bad server hello protocol version");
+
+     label053:
+        goto label034;
+
+     label054:
+        $i0 = $i0 + 1;
+
+        goto label038;
+
+     label055:
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void fatalAlert(byte,java.lang.String)>(40, "Bad server hello cipher suite");
+
+     label056:
+        goto label043;
+
+     label057:
+        $r9 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerHello serverHello>;
+
+        $r1 = $r9.<org.apache.harmony.xnet.provider.jsse.ServerHello: byte[] session_id>;
+
+        $r5 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ClientHello clientHello>;
+
+     label058:
+        $r19 = $r5.<org.apache.harmony.xnet.provider.jsse.ClientHello: byte[] session_id>;
+
+        $z0 = staticinvoke <java.util.Arrays: boolean equals(byte[],byte[])>($r1, $r19);
+
+     label059:
+        if $z0 != 0 goto label060;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: boolean isResuming> = 0;
+
+        goto label044;
+
+     label060:
+        $r7 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+     label061:
+        $r14 = $r7.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: org.apache.harmony.xnet.provider.jsse.ProtocolVersion protocol>;
+
+        $z0 = virtualinvoke $r14.<org.apache.harmony.xnet.provider.jsse.ProtocolVersion: boolean equals(java.lang.Object)>($r10);
+
+        if $z0 != 0 goto label063;
+
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void fatalAlert(byte,java.lang.String)>(40, "Bad server hello protocol version");
+
+     label062:
+        goto label044;
+
+     label063:
+        $r7 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r16 = $r7.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: org.apache.harmony.xnet.provider.jsse.CipherSuite cipherSuite>;
+
+        $r9 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerHello serverHello>;
+
+     label064:
+        $r17 = $r9.<org.apache.harmony.xnet.provider.jsse.ServerHello: org.apache.harmony.xnet.provider.jsse.CipherSuite cipher_suite>;
+
+        $z0 = virtualinvoke $r16.<org.apache.harmony.xnet.provider.jsse.CipherSuite: boolean equals(java.lang.Object)>($r17);
+
+        if $z0 != 0 goto label044;
+
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void fatalAlert(byte,java.lang.String)>(40, "Bad server hello cipher suite");
+
+     label065:
+        goto label044;
+
+     label066:
+        $r1 = <org.apache.harmony.xnet.provider.jsse.SSLv3Constants: byte[] server>;
+
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void computerReferenceVerifyDataSSLv3(byte[])>($r1);
+
+     label067:
+        goto label046;
+
+     label068:
+        $r9 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerHello serverHello>;
+
+     label069:
+        if $r9 == null goto label076;
+
+     label070:
+        $r20 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerKeyExchange serverKeyExchange>;
+
+     label071:
+        if $r20 != null goto label076;
+
+     label072:
+        $r21 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.CertificateMessage serverCert>;
+
+     label073:
+        if $r21 != null goto label076;
+
+     label074:
+        $z0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: boolean isResuming>;
+
+     label075:
+        if $z0 == 0 goto label078;
+
+     label076:
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void unexpectedMessage()>();
+
+     label077:
+        return;
+
+     label078:
+        $r21 = new org.apache.harmony.xnet.provider.jsse.CertificateMessage;
+
+     label079:
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream io_stream>;
+
+        specialinvoke $r21.<org.apache.harmony.xnet.provider.jsse.CertificateMessage: void <init>(org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream,int)>($r3, $i0);
+
+     label080:
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.CertificateMessage serverCert> = $r21;
+
+        goto label002;
+
+     label081:
+        $r9 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerHello serverHello>;
+
+     label082:
+        if $r9 == null goto label087;
+
+     label083:
+        $r20 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerKeyExchange serverKeyExchange>;
+
+     label084:
+        if $r20 != null goto label087;
+
+     label085:
+        $z0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: boolean isResuming>;
+
+     label086:
+        if $z0 == 0 goto label089;
+
+     label087:
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void unexpectedMessage()>();
+
+     label088:
+        return;
+
+     label089:
+        $r20 = new org.apache.harmony.xnet.provider.jsse.ServerKeyExchange;
+
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream io_stream>;
+
+        $r7 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $r16 = $r7.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: org.apache.harmony.xnet.provider.jsse.CipherSuite cipherSuite>;
+
+     label090:
+        $i1 = $r16.<org.apache.harmony.xnet.provider.jsse.CipherSuite: int keyExchange>;
+
+        specialinvoke $r20.<org.apache.harmony.xnet.provider.jsse.ServerKeyExchange: void <init>(org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream,int,int)>($r3, $i0, $i1);
+
+     label091:
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerKeyExchange serverKeyExchange> = $r20;
+
+        goto label002;
+
+     label092:
+        $r21 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.CertificateMessage serverCert>;
+
+     label093:
+        if $r21 == null goto label100;
+
+     label094:
+        $r22 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.CertificateRequest certificateRequest>;
+
+     label095:
+        if $r22 != null goto label100;
+
+     label096:
+        $r7 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+     label097:
+        $r16 = $r7.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: org.apache.harmony.xnet.provider.jsse.CipherSuite cipherSuite>;
+
+        $z0 = virtualinvoke $r16.<org.apache.harmony.xnet.provider.jsse.CipherSuite: boolean isAnonymous()>();
+
+        if $z0 != 0 goto label100;
+
+     label098:
+        $z0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: boolean isResuming>;
+
+     label099:
+        if $z0 == 0 goto label102;
+
+     label100:
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void unexpectedMessage()>();
+
+     label101:
+        return;
+
+     label102:
+        $r22 = new org.apache.harmony.xnet.provider.jsse.CertificateRequest;
+
+     label103:
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream io_stream>;
+
+        specialinvoke $r22.<org.apache.harmony.xnet.provider.jsse.CertificateRequest: void <init>(org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream,int)>($r3, $i0);
+
+     label104:
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.CertificateRequest certificateRequest> = $r22;
+
+        goto label002;
+
+     label105:
+        $r9 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerHello serverHello>;
+
+     label106:
+        if $r9 == null goto label111;
+
+     label107:
+        $r23 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerHelloDone serverHelloDone>;
+
+     label108:
+        if $r23 != null goto label111;
+
+     label109:
+        $z0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: boolean isResuming>;
+
+     label110:
+        if $z0 == 0 goto label113;
+
+     label111:
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void unexpectedMessage()>();
+
+     label112:
+        return;
+
+     label113:
+        $r23 = new org.apache.harmony.xnet.provider.jsse.ServerHelloDone;
+
+     label114:
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream io_stream>;
+
+        specialinvoke $r23.<org.apache.harmony.xnet.provider.jsse.ServerHelloDone: void <init>(org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream,int)>($r3, $i0);
+
+     label115:
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.ServerHelloDone serverHelloDone> = $r23;
+
+        $z0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: boolean nonBlocking>;
+
+     label116:
+        if $z0 == 0 goto label120;
+
+     label117:
+        $r24 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: java.util.Vector delegatedTasks>;
+
+        $r25 = new org.apache.harmony.xnet.provider.jsse.DelegatedTask;
+
+     label118:
+        $r26 = new org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl$1;
+
+        specialinvoke $r26.<org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl$1: void <init>(org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl)>($r0);
+
+        $r27 = staticinvoke <java.security.AccessController: java.security.AccessControlContext getContext()>();
+
+        specialinvoke $r25.<org.apache.harmony.xnet.provider.jsse.DelegatedTask: void <init>(java.security.PrivilegedExceptionAction,org.apache.harmony.xnet.provider.jsse.HandshakeProtocol,java.security.AccessControlContext)>($r26, $r0, $r27);
+
+        virtualinvoke $r24.<java.util.Vector: boolean add(java.lang.Object)>($r25);
+
+     label119:
+        return;
+
+     label120:
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl: void processServerHelloDone()>();
+
+     label121:
+        goto label002;
+
+     label122:
+        $z0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: boolean changeCipherSpecReceived>;
+
+     label123:
+        if $z0 != 0 goto label125;
+
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void unexpectedMessage()>();
+
+     label124:
+        return;
+
+     label125:
+        $r6 = new org.apache.harmony.xnet.provider.jsse.Finished;
+
+     label126:
+        $r3 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream io_stream>;
+
+        specialinvoke $r6.<org.apache.harmony.xnet.provider.jsse.Finished: void <init>(org.apache.harmony.xnet.provider.jsse.HandshakeIODataStream,int)>($r3, $i0);
+
+     label127:
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.Finished serverFinished> = $r6;
+
+     label128:
+        $r6 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.Finished serverFinished>;
+
+        $r1 = virtualinvoke $r6.<org.apache.harmony.xnet.provider.jsse.Finished: byte[] getData()>();
+
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void verifyFinished(byte[])>($r1);
+
+        $r7 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $l4 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+     label129:
+        $r7.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: long lastAccessedTime> = $l4;
+
+        $r7 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+     label130:
+        $r11 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLParameters parameters>;
+
+        $r28 = virtualinvoke $r11.<org.apache.harmony.xnet.provider.jsse.SSLParameters: org.apache.harmony.xnet.provider.jsse.ClientSessionContext getClientSessionContext()>();
+
+     label131:
+        $r7.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: javax.net.ssl.SSLSessionContext context> = $r28;
+
+     label132:
+        $r11 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLParameters parameters>;
+
+        $r28 = virtualinvoke $r11.<org.apache.harmony.xnet.provider.jsse.SSLParameters: org.apache.harmony.xnet.provider.jsse.ClientSessionContext getClientSessionContext()>();
+
+        $r7 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        virtualinvoke $r28.<org.apache.harmony.xnet.provider.jsse.ClientSessionContext: void putSession(javax.net.ssl.SSLSession)>($r7);
+
+     label133:
+        $z0 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: boolean isResuming>;
+
+     label134:
+        if $z0 == 0 goto label136;
+
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void sendChangeCipherSpec()>();
+
+     label135:
+        goto label002;
+
+     label136:
+        $r7 = $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: org.apache.harmony.xnet.provider.jsse.SSLSessionImpl session>;
+
+        $l4 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+     label137:
+        $r7.<org.apache.harmony.xnet.provider.jsse.SSLSessionImpl: long lastAccessedTime> = $l4;
+
+        $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: int status> = 3;
+
+        goto label002;
+
+     label138:
+        return;
+
+        catch java.io.IOException from label003 to label004 with label010;
+        catch java.io.IOException from label005 to label006 with label010;
+        catch java.io.IOException from label007 to label009 with label010;
+        catch java.io.IOException from label012 to label013 with label010;
+        catch java.io.IOException from label014 to label015 with label010;
+        catch java.io.IOException from label016 to label017 with label010;
+        catch java.io.IOException from label018 to label019 with label010;
+        catch java.io.IOException from label021 to label022 with label010;
+        catch java.io.IOException from label023 to label025 with label010;
+        catch java.io.IOException from label027 to label028 with label010;
+        catch java.io.IOException from label029 to label030 with label010;
+        catch java.io.IOException from label032 to label033 with label010;
+        catch java.io.IOException from label035 to label037 with label010;
+        catch java.io.IOException from label039 to label040 with label010;
+        catch java.io.IOException from label041 to label042 with label010;
+        catch java.io.IOException from label045 to label046 with label010;
+        catch java.io.IOException from label047 to label048 with label010;
+        catch java.io.IOException from label049 to label050 with label010;
+        catch java.io.IOException from label052 to label053 with label010;
+        catch java.io.IOException from label055 to label056 with label010;
+        catch java.io.IOException from label058 to label059 with label010;
+        catch java.io.IOException from label061 to label062 with label010;
+        catch java.io.IOException from label064 to label065 with label010;
+        catch java.io.IOException from label066 to label067 with label010;
+        catch java.io.IOException from label069 to label070 with label010;
+        catch java.io.IOException from label071 to label072 with label010;
+        catch java.io.IOException from label073 to label074 with label010;
+        catch java.io.IOException from label075 to label077 with label010;
+        catch java.io.IOException from label079 to label080 with label010;
+        catch java.io.IOException from label082 to label083 with label010;
+        catch java.io.IOException from label084 to label085 with label010;
+        catch java.io.IOException from label086 to label088 with label010;
+        catch java.io.IOException from label090 to label091 with label010;
+        catch java.io.IOException from label093 to label094 with label010;
+        catch java.io.IOException from label095 to label096 with label010;
+        catch java.io.IOException from label097 to label098 with label010;
+        catch java.io.IOException from label099 to label101 with label010;
+        catch java.io.IOException from label103 to label104 with label010;
+        catch java.io.IOException from label106 to label107 with label010;
+        catch java.io.IOException from label108 to label109 with label010;
+        catch java.io.IOException from label110 to label112 with label010;
+        catch java.io.IOException from label114 to label115 with label010;
+        catch java.io.IOException from label116 to label117 with label010;
+        catch java.io.IOException from label118 to label119 with label010;
+        catch java.io.IOException from label120 to label121 with label010;
+        catch java.io.IOException from label123 to label124 with label010;
+        catch java.io.IOException from label126 to label127 with label010;
+        catch java.io.IOException from label128 to label129 with label010;
+        catch java.io.IOException from label130 to label131 with label010;
+        catch java.io.IOException from label132 to label133 with label010;
+        catch java.io.IOException from label134 to label135 with label010;
+        catch java.io.IOException from label136 to label137 with label010;
+    }
+
+    public void unwrapSSLv2(byte[])
+    {
+        org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl $r0;
+        byte[] $r1;
+
+        $r0 := @this: org.apache.harmony.xnet.provider.jsse.ClientHandshakeImpl;
+
+        $r1 := @parameter0: byte[];
+
+        virtualinvoke $r0.<org.apache.harmony.xnet.provider.jsse.HandshakeProtocol: void unexpectedMessage()>();
+
+        return;
+    }
+}

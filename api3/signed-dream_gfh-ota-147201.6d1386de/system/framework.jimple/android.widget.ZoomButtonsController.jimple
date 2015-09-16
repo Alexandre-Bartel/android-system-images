@@ -1,0 +1,1287 @@
+public class android.widget.ZoomButtonsController extends java.lang.Object implements android.view.View$OnTouchListener
+{
+    private static final int MSG_DISMISS_ZOOM_CONTROLS;
+    private static final int MSG_POST_CONFIGURATION_CHANGED;
+    private static final int MSG_POST_SET_VISIBLE;
+    private static final java.lang.String TAG;
+    private static final int ZOOM_CONTROLS_TIMEOUT;
+    private static final int ZOOM_CONTROLS_TOUCH_PADDING;
+    private boolean mAutoDismissControls;
+    private android.widget.ZoomButtonsController$OnZoomListener mCallback;
+    private android.content.IntentFilter mConfigurationChangedFilter;
+    private android.content.BroadcastReceiver mConfigurationChangedReceiver;
+    private android.widget.FrameLayout mContainer;
+    private android.view.WindowManager$LayoutParams mContainerLayoutParams;
+    private int[] mContainerRawLocation;
+    private android.content.Context mContext;
+    private android.widget.ZoomControls mControls;
+    private android.os.Handler mHandler;
+    private boolean mIsVisible;
+    private android.view.View mOwnerView;
+    private int[] mOwnerViewRawLocation;
+    private java.lang.Runnable mPostedVisibleInitializer;
+    private boolean mReleaseTouchListenerOnUp;
+    private int[] mTempIntArray;
+    private android.graphics.Rect mTempRect;
+    private int mTouchPaddingScaledSq;
+    private android.view.View mTouchTargetView;
+    private int[] mTouchTargetWindowLocation;
+    private android.view.WindowManager mWindowManager;
+
+    static void <clinit>()
+    {
+        long $l0;
+        int $i1;
+
+        <android.widget.ZoomButtonsController: int ZOOM_CONTROLS_TOUCH_PADDING> = 20;
+
+        <android.widget.ZoomButtonsController: java.lang.String TAG> = "ZoomButtonsController";
+
+        <android.widget.ZoomButtonsController: int MSG_POST_SET_VISIBLE> = 4;
+
+        <android.widget.ZoomButtonsController: int MSG_POST_CONFIGURATION_CHANGED> = 2;
+
+        <android.widget.ZoomButtonsController: int MSG_DISMISS_ZOOM_CONTROLS> = 3;
+
+        $l0 = staticinvoke <android.view.ViewConfiguration: long getZoomControlsTimeout()>();
+
+        $i1 = (int) $l0;
+
+        <android.widget.ZoomButtonsController: int ZOOM_CONTROLS_TIMEOUT> = $i1;
+
+        return;
+    }
+
+    public void <init>(android.view.View)
+    {
+        android.widget.ZoomButtonsController $r0;
+        android.view.View $r1;
+        int[] $r2;
+        android.graphics.Rect $r3;
+        android.content.IntentFilter $r4;
+        android.widget.ZoomButtonsController$1 $r5;
+        android.widget.ZoomButtonsController$2 $r6;
+        android.content.Context $r7;
+        java.lang.Object $r8;
+        android.view.WindowManager $r9;
+        android.content.res.Resources $r10;
+        android.util.DisplayMetrics $r11;
+        float $f0;
+        int $i0, $i1;
+        android.widget.FrameLayout $r12;
+
+        $r0 := @this: android.widget.ZoomButtonsController;
+
+        $r1 := @parameter0: android.view.View;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r0.<android.widget.ZoomButtonsController: boolean mAutoDismissControls> = 1;
+
+        $r2 = newarray (int)[2];
+
+        $r0.<android.widget.ZoomButtonsController: int[] mOwnerViewRawLocation> = $r2;
+
+        $r2 = newarray (int)[2];
+
+        $r0.<android.widget.ZoomButtonsController: int[] mContainerRawLocation> = $r2;
+
+        $r2 = newarray (int)[2];
+
+        $r0.<android.widget.ZoomButtonsController: int[] mTouchTargetWindowLocation> = $r2;
+
+        $r3 = new android.graphics.Rect;
+
+        specialinvoke $r3.<android.graphics.Rect: void <init>()>();
+
+        $r0.<android.widget.ZoomButtonsController: android.graphics.Rect mTempRect> = $r3;
+
+        $r2 = newarray (int)[2];
+
+        $r0.<android.widget.ZoomButtonsController: int[] mTempIntArray> = $r2;
+
+        $r4 = new android.content.IntentFilter;
+
+        specialinvoke $r4.<android.content.IntentFilter: void <init>(java.lang.String)>("android.intent.action.CONFIGURATION_CHANGED");
+
+        $r0.<android.widget.ZoomButtonsController: android.content.IntentFilter mConfigurationChangedFilter> = $r4;
+
+        $r5 = new android.widget.ZoomButtonsController$1;
+
+        specialinvoke $r5.<android.widget.ZoomButtonsController$1: void <init>(android.widget.ZoomButtonsController)>($r0);
+
+        $r0.<android.widget.ZoomButtonsController: android.content.BroadcastReceiver mConfigurationChangedReceiver> = $r5;
+
+        $r6 = new android.widget.ZoomButtonsController$2;
+
+        specialinvoke $r6.<android.widget.ZoomButtonsController$2: void <init>(android.widget.ZoomButtonsController)>($r0);
+
+        $r0.<android.widget.ZoomButtonsController: android.os.Handler mHandler> = $r6;
+
+        $r7 = virtualinvoke $r1.<android.view.View: android.content.Context getContext()>();
+
+        $r0.<android.widget.ZoomButtonsController: android.content.Context mContext> = $r7;
+
+        $r7 = $r0.<android.widget.ZoomButtonsController: android.content.Context mContext>;
+
+        $r8 = virtualinvoke $r7.<android.content.Context: java.lang.Object getSystemService(java.lang.String)>("window");
+
+        $r9 = (android.view.WindowManager) $r8;
+
+        $r0.<android.widget.ZoomButtonsController: android.view.WindowManager mWindowManager> = $r9;
+
+        $r0.<android.widget.ZoomButtonsController: android.view.View mOwnerView> = $r1;
+
+        $r7 = $r0.<android.widget.ZoomButtonsController: android.content.Context mContext>;
+
+        $r10 = virtualinvoke $r7.<android.content.Context: android.content.res.Resources getResources()>();
+
+        $r11 = virtualinvoke $r10.<android.content.res.Resources: android.util.DisplayMetrics getDisplayMetrics()>();
+
+        $f0 = $r11.<android.util.DisplayMetrics: float density>;
+
+        $f0 = 20.0F * $f0;
+
+        $i0 = (int) $f0;
+
+        $r0.<android.widget.ZoomButtonsController: int mTouchPaddingScaledSq> = $i0;
+
+        $i0 = $r0.<android.widget.ZoomButtonsController: int mTouchPaddingScaledSq>;
+
+        $i1 = $r0.<android.widget.ZoomButtonsController: int mTouchPaddingScaledSq>;
+
+        $i0 = $i0 * $i1;
+
+        $r0.<android.widget.ZoomButtonsController: int mTouchPaddingScaledSq> = $i0;
+
+        $r12 = specialinvoke $r0.<android.widget.ZoomButtonsController: android.widget.FrameLayout createContainer()>();
+
+        $r0.<android.widget.ZoomButtonsController: android.widget.FrameLayout mContainer> = $r12;
+
+        return;
+    }
+
+    static boolean access$000(android.widget.ZoomButtonsController)
+    {
+        android.widget.ZoomButtonsController $r0;
+        boolean z0;
+
+        $r0 := @parameter0: android.widget.ZoomButtonsController;
+
+        z0 = $r0.<android.widget.ZoomButtonsController: boolean mIsVisible>;
+
+        return z0;
+    }
+
+    static android.os.Handler access$100(android.widget.ZoomButtonsController)
+    {
+        android.widget.ZoomButtonsController $r0;
+        android.os.Handler r1;
+
+        $r0 := @parameter0: android.widget.ZoomButtonsController;
+
+        r1 = $r0.<android.widget.ZoomButtonsController: android.os.Handler mHandler>;
+
+        return r1;
+    }
+
+    static void access$200(android.widget.ZoomButtonsController)
+    {
+        android.widget.ZoomButtonsController $r0;
+
+        $r0 := @parameter0: android.widget.ZoomButtonsController;
+
+        specialinvoke $r0.<android.widget.ZoomButtonsController: void onPostConfigurationChanged()>();
+
+        return;
+    }
+
+    static android.view.View access$300(android.widget.ZoomButtonsController)
+    {
+        android.widget.ZoomButtonsController $r0;
+        android.view.View r1;
+
+        $r0 := @parameter0: android.widget.ZoomButtonsController;
+
+        r1 = $r0.<android.widget.ZoomButtonsController: android.view.View mOwnerView>;
+
+        return r1;
+    }
+
+    static int access$400()
+    {
+        int i0;
+
+        i0 = <android.widget.ZoomButtonsController: int ZOOM_CONTROLS_TIMEOUT>;
+
+        return i0;
+    }
+
+    static void access$500(android.widget.ZoomButtonsController, int)
+    {
+        android.widget.ZoomButtonsController $r0;
+        int $i0;
+
+        $r0 := @parameter0: android.widget.ZoomButtonsController;
+
+        $i0 := @parameter1: int;
+
+        specialinvoke $r0.<android.widget.ZoomButtonsController: void dismissControlsDelayed(int)>($i0);
+
+        return;
+    }
+
+    static android.widget.ZoomButtonsController$OnZoomListener access$600(android.widget.ZoomButtonsController)
+    {
+        android.widget.ZoomButtonsController $r0;
+        android.widget.ZoomButtonsController$OnZoomListener r1;
+
+        $r0 := @parameter0: android.widget.ZoomButtonsController;
+
+        r1 = $r0.<android.widget.ZoomButtonsController: android.widget.ZoomButtonsController$OnZoomListener mCallback>;
+
+        return r1;
+    }
+
+    static void access$700(android.widget.ZoomButtonsController)
+    {
+        android.widget.ZoomButtonsController $r0;
+
+        $r0 := @parameter0: android.widget.ZoomButtonsController;
+
+        specialinvoke $r0.<android.widget.ZoomButtonsController: void refreshPositioningVariables()>();
+
+        return;
+    }
+
+    static boolean access$800(android.widget.ZoomButtonsController, android.view.KeyEvent)
+    {
+        android.widget.ZoomButtonsController $r0;
+        android.view.KeyEvent $r1;
+        boolean $z0;
+
+        $r0 := @parameter0: android.widget.ZoomButtonsController;
+
+        $r1 := @parameter1: android.view.KeyEvent;
+
+        $z0 = specialinvoke $r0.<android.widget.ZoomButtonsController: boolean onContainerKey(android.view.KeyEvent)>($r1);
+
+        return $z0;
+    }
+
+    private android.widget.FrameLayout createContainer()
+    {
+        android.widget.ZoomButtonsController $r0;
+        android.widget.ZoomButtonsController$Container $r1;
+        android.view.WindowManager$LayoutParams $r2;
+        android.content.Context $r3;
+        java.lang.Object $r4;
+        android.view.LayoutInflater $r5;
+        android.view.View $r6;
+        android.widget.ZoomControls $r7;
+        android.widget.ZoomButtonsController$3 $r8;
+        android.widget.ZoomButtonsController$4 $r9;
+
+        $r0 := @this: android.widget.ZoomButtonsController;
+
+        $r2 = new android.view.WindowManager$LayoutParams;
+
+        specialinvoke $r2.<android.view.WindowManager$LayoutParams: void <init>(int,int)>(-2, -2);
+
+        $r2.<android.view.WindowManager$LayoutParams: int gravity> = 51;
+
+        $r2.<android.view.WindowManager$LayoutParams: int flags> = 131608;
+
+        $r2.<android.view.ViewGroup$LayoutParams: int height> = -2;
+
+        $r2.<android.view.ViewGroup$LayoutParams: int width> = -1;
+
+        $r2.<android.view.WindowManager$LayoutParams: int type> = 1000;
+
+        $r2.<android.view.WindowManager$LayoutParams: int format> = -2;
+
+        $r2.<android.view.WindowManager$LayoutParams: int windowAnimations> = 16973929;
+
+        $r0.<android.widget.ZoomButtonsController: android.view.WindowManager$LayoutParams mContainerLayoutParams> = $r2;
+
+        $r1 = new android.widget.ZoomButtonsController$Container;
+
+        $r3 = $r0.<android.widget.ZoomButtonsController: android.content.Context mContext>;
+
+        specialinvoke $r1.<android.widget.ZoomButtonsController$Container: void <init>(android.widget.ZoomButtonsController,android.content.Context)>($r0, $r3);
+
+        virtualinvoke $r1.<android.view.View: void setLayoutParams(android.view.ViewGroup$LayoutParams)>($r2);
+
+        virtualinvoke $r1.<android.widget.FrameLayout: void setMeasureAllChildren(boolean)>(1);
+
+        $r3 = $r0.<android.widget.ZoomButtonsController: android.content.Context mContext>;
+
+        $r4 = virtualinvoke $r3.<android.content.Context: java.lang.Object getSystemService(java.lang.String)>("layout_inflater");
+
+        $r5 = (android.view.LayoutInflater) $r4;
+
+        virtualinvoke $r5.<android.view.LayoutInflater: android.view.View inflate(int,android.view.ViewGroup)>(17367146, $r1);
+
+        $r6 = virtualinvoke $r1.<android.view.View: android.view.View findViewById(int)>(16908777);
+
+        $r7 = (android.widget.ZoomControls) $r6;
+
+        $r0.<android.widget.ZoomButtonsController: android.widget.ZoomControls mControls> = $r7;
+
+        $r7 = $r0.<android.widget.ZoomButtonsController: android.widget.ZoomControls mControls>;
+
+        $r8 = new android.widget.ZoomButtonsController$3;
+
+        specialinvoke $r8.<android.widget.ZoomButtonsController$3: void <init>(android.widget.ZoomButtonsController)>($r0);
+
+        virtualinvoke $r7.<android.widget.ZoomControls: void setOnZoomInClickListener(android.view.View$OnClickListener)>($r8);
+
+        $r7 = $r0.<android.widget.ZoomButtonsController: android.widget.ZoomControls mControls>;
+
+        $r9 = new android.widget.ZoomButtonsController$4;
+
+        specialinvoke $r9.<android.widget.ZoomButtonsController$4: void <init>(android.widget.ZoomButtonsController)>($r0);
+
+        virtualinvoke $r7.<android.widget.ZoomControls: void setOnZoomOutClickListener(android.view.View$OnClickListener)>($r9);
+
+        return $r1;
+    }
+
+    private void dismissControlsDelayed(int)
+    {
+        android.widget.ZoomButtonsController $r0;
+        int $i0;
+        long $l1;
+        boolean $z0;
+        android.os.Handler $r1;
+
+        $r0 := @this: android.widget.ZoomButtonsController;
+
+        $i0 := @parameter0: int;
+
+        $z0 = $r0.<android.widget.ZoomButtonsController: boolean mAutoDismissControls>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = $r0.<android.widget.ZoomButtonsController: android.os.Handler mHandler>;
+
+        virtualinvoke $r1.<android.os.Handler: void removeMessages(int)>(3);
+
+        $r1 = $r0.<android.widget.ZoomButtonsController: android.os.Handler mHandler>;
+
+        $l1 = (long) $i0;
+
+        virtualinvoke $r1.<android.os.Handler: boolean sendEmptyMessageDelayed(int,long)>(3, $l1);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    private android.view.View findViewForTouch(int, int)
+    {
+        android.widget.ZoomButtonsController $r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6;
+        android.graphics.Rect $r1;
+        int[] $r2;
+        android.view.View $r3, $r5;
+        android.widget.FrameLayout $r4;
+        boolean $z0;
+
+        $r0 := @this: android.widget.ZoomButtonsController;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r2 = $r0.<android.widget.ZoomButtonsController: int[] mContainerRawLocation>;
+
+        $i3 = $r2[0];
+
+        $i0 = $i0 - $i3;
+
+        $r2 = $r0.<android.widget.ZoomButtonsController: int[] mContainerRawLocation>;
+
+        $i3 = $r2[1];
+
+        $i1 = $i1 - $i3;
+
+        $r1 = $r0.<android.widget.ZoomButtonsController: android.graphics.Rect mTempRect>;
+
+        $r3 = null;
+
+        $i3 = 2147483647;
+
+        $r4 = $r0.<android.widget.ZoomButtonsController: android.widget.FrameLayout mContainer>;
+
+        $i4 = virtualinvoke $r4.<android.view.ViewGroup: int getChildCount()>();
+
+        $i4 = $i4 - 1;
+
+     label1:
+        if $i4 < 0 goto label9;
+
+        $r4 = $r0.<android.widget.ZoomButtonsController: android.widget.FrameLayout mContainer>;
+
+        $r5 = virtualinvoke $r4.<android.view.ViewGroup: android.view.View getChildAt(int)>($i4);
+
+        $i2 = virtualinvoke $r5.<android.view.View: int getVisibility()>();
+
+        if $i2 == 0 goto label3;
+
+     label2:
+        $i4 = $i4 + -1;
+
+        goto label1;
+
+     label3:
+        virtualinvoke $r5.<android.view.View: void getHitRect(android.graphics.Rect)>($r1);
+
+        $z0 = virtualinvoke $r1.<android.graphics.Rect: boolean contains(int,int)>($i0, $i1);
+
+        if $z0 == 0 goto label4;
+
+        return $r5;
+
+     label4:
+        $i2 = $r1.<android.graphics.Rect: int left>;
+
+        if $i0 < $i2 goto label7;
+
+        $i2 = $r1.<android.graphics.Rect: int right>;
+
+        if $i0 > $i2 goto label7;
+
+        $i2 = 0;
+
+     label5:
+        $i5 = $r1.<android.graphics.Rect: int top>;
+
+        if $i1 < $i5 goto label8;
+
+        $i5 = $r1.<android.graphics.Rect: int bottom>;
+
+        if $i1 > $i5 goto label8;
+
+        $i5 = 0;
+
+     label6:
+        $i2 = $i2 * $i2;
+
+        $i5 = $i5 * $i5;
+
+        $i2 = $i2 + $i5;
+
+        $i5 = $r0.<android.widget.ZoomButtonsController: int mTouchPaddingScaledSq>;
+
+        if $i2 >= $i5 goto label2;
+
+        if $i2 >= $i3 goto label2;
+
+        $r3 = $r5;
+
+        $i3 = $i2;
+
+        goto label2;
+
+     label7:
+        $i2 = $r1.<android.graphics.Rect: int left>;
+
+        $i2 = $i2 - $i0;
+
+        $i2 = staticinvoke <java.lang.Math: int abs(int)>($i2);
+
+        $i5 = $r1.<android.graphics.Rect: int right>;
+
+        $i5 = $i0 - $i5;
+
+        $i5 = staticinvoke <java.lang.Math: int abs(int)>($i5);
+
+        $i2 = staticinvoke <java.lang.Math: int min(int,int)>($i2, $i5);
+
+        goto label5;
+
+     label8:
+        $i5 = $r1.<android.graphics.Rect: int top>;
+
+        $i5 = $i5 - $i1;
+
+        $i5 = staticinvoke <java.lang.Math: int abs(int)>($i5);
+
+        $i6 = $r1.<android.graphics.Rect: int bottom>;
+
+        $i6 = $i1 - $i6;
+
+        $i6 = staticinvoke <java.lang.Math: int abs(int)>($i6);
+
+        $i5 = staticinvoke <java.lang.Math: int min(int,int)>($i5, $i6);
+
+        goto label6;
+
+     label9:
+        return $r3;
+    }
+
+    private android.view.ViewRoot getOwnerViewRoot()
+    {
+        android.widget.ZoomButtonsController $r0;
+        android.view.View $r1;
+        android.view.ViewParent $r2;
+        boolean $z0;
+        android.view.ViewRoot $r3;
+
+        $r0 := @this: android.widget.ZoomButtonsController;
+
+        $r1 = $r0.<android.widget.ZoomButtonsController: android.view.View mOwnerView>;
+
+        $r1 = virtualinvoke $r1.<android.view.View: android.view.View getRootView()>();
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r2 = virtualinvoke $r1.<android.view.View: android.view.ViewParent getParent()>();
+
+        $z0 = $r2 instanceof android.view.ViewRoot;
+
+        if $z0 == 0 goto label2;
+
+        $r3 = (android.view.ViewRoot) $r2;
+
+        return $r3;
+
+     label2:
+        return null;
+    }
+
+    private boolean isInterestingKey(int)
+    {
+        android.widget.ZoomButtonsController $r0;
+        int $i0;
+
+        $r0 := @this: android.widget.ZoomButtonsController;
+
+        $i0 := @parameter0: int;
+
+        lookupswitch($i0)
+        {
+            case 4: goto label2;
+            case 19: goto label2;
+            case 20: goto label2;
+            case 21: goto label2;
+            case 22: goto label2;
+            case 23: goto label2;
+            case 66: goto label2;
+            default: goto label1;
+        };
+
+     label1:
+        return 0;
+
+     label2:
+        return 1;
+    }
+
+    private boolean onContainerKey(android.view.KeyEvent)
+    {
+        android.widget.ZoomButtonsController $r0;
+        android.view.KeyEvent $r1;
+        int $i0;
+        boolean $z0;
+        android.view.ViewRoot $r2;
+
+        $r0 := @this: android.widget.ZoomButtonsController;
+
+        $r1 := @parameter0: android.view.KeyEvent;
+
+        $i0 = virtualinvoke $r1.<android.view.KeyEvent: int getKeyCode()>();
+
+        $z0 = specialinvoke $r0.<android.widget.ZoomButtonsController: boolean isInterestingKey(int)>($i0);
+
+        if $z0 == 0 goto label3;
+
+        if $i0 != 4 goto label2;
+
+        virtualinvoke $r0.<android.widget.ZoomButtonsController: void setVisible(boolean)>(0);
+
+     label1:
+        return 0;
+
+     label2:
+        $i0 = <android.widget.ZoomButtonsController: int ZOOM_CONTROLS_TIMEOUT>;
+
+        specialinvoke $r0.<android.widget.ZoomButtonsController: void dismissControlsDelayed(int)>($i0);
+
+        goto label1;
+
+     label3:
+        $r2 = specialinvoke $r0.<android.widget.ZoomButtonsController: android.view.ViewRoot getOwnerViewRoot()>();
+
+        if $r2 == null goto label4;
+
+        virtualinvoke $r2.<android.view.ViewRoot: void dispatchKey(android.view.KeyEvent)>($r1);
+
+     label4:
+        return 1;
+    }
+
+    private void onPostConfigurationChanged()
+    {
+        android.widget.ZoomButtonsController $r0;
+        int $i0;
+
+        $r0 := @this: android.widget.ZoomButtonsController;
+
+        $i0 = <android.widget.ZoomButtonsController: int ZOOM_CONTROLS_TIMEOUT>;
+
+        specialinvoke $r0.<android.widget.ZoomButtonsController: void dismissControlsDelayed(int)>($i0);
+
+        specialinvoke $r0.<android.widget.ZoomButtonsController: void refreshPositioningVariables()>();
+
+        return;
+    }
+
+    private void refreshPositioningVariables()
+    {
+        android.widget.ZoomButtonsController $r0;
+        int $i0, $i1, $i2;
+        int[] $r1, $r4;
+        android.view.View $r2;
+        android.widget.FrameLayout $r3;
+        android.view.WindowManager$LayoutParams $r5;
+        boolean $z0;
+        android.view.WindowManager $r6;
+
+        $r0 := @this: android.widget.ZoomButtonsController;
+
+        $r2 = $r0.<android.widget.ZoomButtonsController: android.view.View mOwnerView>;
+
+        $i0 = virtualinvoke $r2.<android.view.View: int getHeight()>();
+
+        $r2 = $r0.<android.widget.ZoomButtonsController: android.view.View mOwnerView>;
+
+        $i1 = virtualinvoke $r2.<android.view.View: int getWidth()>();
+
+        $r3 = $r0.<android.widget.ZoomButtonsController: android.widget.FrameLayout mContainer>;
+
+        $i2 = virtualinvoke $r3.<android.view.View: int getHeight()>();
+
+        $i0 = $i0 - $i2;
+
+        $r2 = $r0.<android.widget.ZoomButtonsController: android.view.View mOwnerView>;
+
+        $r1 = $r0.<android.widget.ZoomButtonsController: int[] mOwnerViewRawLocation>;
+
+        virtualinvoke $r2.<android.view.View: void getLocationOnScreen(int[])>($r1);
+
+        $r1 = $r0.<android.widget.ZoomButtonsController: int[] mContainerRawLocation>;
+
+        $r4 = $r0.<android.widget.ZoomButtonsController: int[] mOwnerViewRawLocation>;
+
+        $i2 = $r4[0];
+
+        $r1[0] = $i2;
+
+        $r1 = $r0.<android.widget.ZoomButtonsController: int[] mContainerRawLocation>;
+
+        $r4 = $r0.<android.widget.ZoomButtonsController: int[] mOwnerViewRawLocation>;
+
+        $i2 = $r4[1];
+
+        $i2 = $i2 + $i0;
+
+        $r1[1] = $i2;
+
+        $r1 = $r0.<android.widget.ZoomButtonsController: int[] mTempIntArray>;
+
+        $r2 = $r0.<android.widget.ZoomButtonsController: android.view.View mOwnerView>;
+
+        virtualinvoke $r2.<android.view.View: void getLocationInWindow(int[])>($r1);
+
+        $r5 = $r0.<android.widget.ZoomButtonsController: android.view.WindowManager$LayoutParams mContainerLayoutParams>;
+
+        $i2 = $r1[0];
+
+        $r5.<android.view.WindowManager$LayoutParams: int x> = $i2;
+
+        $r5 = $r0.<android.widget.ZoomButtonsController: android.view.WindowManager$LayoutParams mContainerLayoutParams>;
+
+        $r5.<android.view.ViewGroup$LayoutParams: int width> = $i1;
+
+        $r5 = $r0.<android.widget.ZoomButtonsController: android.view.WindowManager$LayoutParams mContainerLayoutParams>;
+
+        $i1 = $r1[1];
+
+        $i1 = $i1 + $i0;
+
+        $r5.<android.view.WindowManager$LayoutParams: int y> = $i1;
+
+        $z0 = $r0.<android.widget.ZoomButtonsController: boolean mIsVisible>;
+
+        if $z0 == 0 goto label1;
+
+        $r6 = $r0.<android.widget.ZoomButtonsController: android.view.WindowManager mWindowManager>;
+
+        $r3 = $r0.<android.widget.ZoomButtonsController: android.widget.FrameLayout mContainer>;
+
+        $r5 = $r0.<android.widget.ZoomButtonsController: android.view.WindowManager$LayoutParams mContainerLayoutParams>;
+
+        interfaceinvoke $r6.<android.view.WindowManager: void updateViewLayout(android.view.View,android.view.ViewGroup$LayoutParams)>($r3, $r5);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    private void setTouchTargetView(android.view.View)
+    {
+        android.widget.ZoomButtonsController $r0;
+        android.view.View $r1;
+        int[] $r2;
+
+        $r0 := @this: android.widget.ZoomButtonsController;
+
+        $r1 := @parameter0: android.view.View;
+
+        $r0.<android.widget.ZoomButtonsController: android.view.View mTouchTargetView> = $r1;
+
+        if $r1 == null goto label1;
+
+        $r2 = $r0.<android.widget.ZoomButtonsController: int[] mTouchTargetWindowLocation>;
+
+        virtualinvoke $r1.<android.view.View: void getLocationInWindow(int[])>($r2);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public android.view.ViewGroup getContainer()
+    {
+        android.widget.ZoomButtonsController $r0;
+        android.widget.FrameLayout r1;
+
+        $r0 := @this: android.widget.ZoomButtonsController;
+
+        r1 = $r0.<android.widget.ZoomButtonsController: android.widget.FrameLayout mContainer>;
+
+        return r1;
+    }
+
+    public android.view.View getZoomControls()
+    {
+        android.widget.ZoomButtonsController $r0;
+        android.widget.ZoomControls r1;
+
+        $r0 := @this: android.widget.ZoomButtonsController;
+
+        r1 = $r0.<android.widget.ZoomButtonsController: android.widget.ZoomControls mControls>;
+
+        return r1;
+    }
+
+    public boolean isAutoDismissed()
+    {
+        android.widget.ZoomButtonsController $r0;
+        boolean z0;
+
+        $r0 := @this: android.widget.ZoomButtonsController;
+
+        z0 = $r0.<android.widget.ZoomButtonsController: boolean mAutoDismissControls>;
+
+        return z0;
+    }
+
+    public boolean isVisible()
+    {
+        android.widget.ZoomButtonsController $r0;
+        boolean z0;
+
+        $r0 := @this: android.widget.ZoomButtonsController;
+
+        z0 = $r0.<android.widget.ZoomButtonsController: boolean mIsVisible>;
+
+        return z0;
+    }
+
+    public boolean onTouch(android.view.View, android.view.MotionEvent)
+    {
+        android.widget.ZoomButtonsController $r0;
+        android.view.View $r1, $r4;
+        android.view.MotionEvent $r2;
+        int $i0, $i1, $i2;
+        boolean $z0;
+        int[] $r3;
+        float $f0, $f1;
+        byte $b3;
+
+        $r0 := @this: android.widget.ZoomButtonsController;
+
+        $r1 := @parameter0: android.view.View;
+
+        $r2 := @parameter1: android.view.MotionEvent;
+
+        $i0 = virtualinvoke $r2.<android.view.MotionEvent: int getAction()>();
+
+        $z0 = $r0.<android.widget.ZoomButtonsController: boolean mReleaseTouchListenerOnUp>;
+
+        if $z0 == 0 goto label3;
+
+        if $i0 == 1 goto label1;
+
+        if $i0 != 3 goto label2;
+
+     label1:
+        $r1 = $r0.<android.widget.ZoomButtonsController: android.view.View mOwnerView>;
+
+        virtualinvoke $r1.<android.view.View: void setOnTouchListener(android.view.View$OnTouchListener)>(null);
+
+        specialinvoke $r0.<android.widget.ZoomButtonsController: void setTouchTargetView(android.view.View)>(null);
+
+        $r0.<android.widget.ZoomButtonsController: boolean mReleaseTouchListenerOnUp> = 0;
+
+     label2:
+        return 1;
+
+     label3:
+        $i1 = <android.widget.ZoomButtonsController: int ZOOM_CONTROLS_TIMEOUT>;
+
+        specialinvoke $r0.<android.widget.ZoomButtonsController: void dismissControlsDelayed(int)>($i1);
+
+        $r1 = $r0.<android.widget.ZoomButtonsController: android.view.View mTouchTargetView>;
+
+        lookupswitch($i0)
+        {
+            case 0: goto label7;
+            case 1: goto label8;
+            case 2: goto label4;
+            case 3: goto label8;
+            default: goto label4;
+        };
+
+     label4:
+        if $r1 == null goto label9;
+
+        $r3 = $r0.<android.widget.ZoomButtonsController: int[] mContainerRawLocation>;
+
+        $i0 = $r3[0];
+
+        $r3 = $r0.<android.widget.ZoomButtonsController: int[] mTouchTargetWindowLocation>;
+
+        $i1 = $r3[0];
+
+        $i0 = $i0 + $i1;
+
+        $r3 = $r0.<android.widget.ZoomButtonsController: int[] mContainerRawLocation>;
+
+        $i1 = $r3[1];
+
+        $r3 = $r0.<android.widget.ZoomButtonsController: int[] mTouchTargetWindowLocation>;
+
+        $i2 = $r3[1];
+
+        $i1 = $i1 + $i2;
+
+        $r2 = staticinvoke <android.view.MotionEvent: android.view.MotionEvent obtain(android.view.MotionEvent)>($r2);
+
+        $r3 = $r0.<android.widget.ZoomButtonsController: int[] mOwnerViewRawLocation>;
+
+        $i2 = $r3[0];
+
+        $i0 = $i2 - $i0;
+
+        $f0 = (float) $i0;
+
+        $r3 = $r0.<android.widget.ZoomButtonsController: int[] mOwnerViewRawLocation>;
+
+        $i0 = $r3[1];
+
+        $i0 = $i0 - $i1;
+
+        $f1 = (float) $i0;
+
+        virtualinvoke $r2.<android.view.MotionEvent: void offsetLocation(float,float)>($f0, $f1);
+
+        $f1 = virtualinvoke $r2.<android.view.MotionEvent: float getX()>();
+
+        $f0 = virtualinvoke $r2.<android.view.MotionEvent: float getY()>();
+
+        $b3 = $f1 cmpg 0.0F;
+
+        if $b3 >= 0 goto label5;
+
+        $b3 = $f1 cmpl -20.0F;
+
+        if $b3 <= 0 goto label5;
+
+        $f1 = neg $f1;
+
+        virtualinvoke $r2.<android.view.MotionEvent: void offsetLocation(float,float)>($f1, 0.0F);
+
+     label5:
+        $b3 = $f0 cmpg 0.0F;
+
+        if $b3 >= 0 goto label6;
+
+        $b3 = $f0 cmpl -20.0F;
+
+        if $b3 <= 0 goto label6;
+
+        $f0 = neg $f0;
+
+        virtualinvoke $r2.<android.view.MotionEvent: void offsetLocation(float,float)>(0.0F, $f0);
+
+     label6:
+        $z0 = virtualinvoke $r1.<android.view.View: boolean dispatchTouchEvent(android.view.MotionEvent)>($r2);
+
+        virtualinvoke $r2.<android.view.MotionEvent: void recycle()>();
+
+        return $z0;
+
+     label7:
+        $f0 = virtualinvoke $r2.<android.view.MotionEvent: float getRawX()>();
+
+        $i0 = (int) $f0;
+
+        $f0 = virtualinvoke $r2.<android.view.MotionEvent: float getRawY()>();
+
+        $i1 = (int) $f0;
+
+        $r4 = specialinvoke $r0.<android.widget.ZoomButtonsController: android.view.View findViewForTouch(int,int)>($i0, $i1);
+
+        $r1 = $r4;
+
+        specialinvoke $r0.<android.widget.ZoomButtonsController: void setTouchTargetView(android.view.View)>($r4);
+
+        goto label4;
+
+     label8:
+        specialinvoke $r0.<android.widget.ZoomButtonsController: void setTouchTargetView(android.view.View)>(null);
+
+        goto label4;
+
+     label9:
+        return 0;
+    }
+
+    public void setAutoDismissed(boolean)
+    {
+        android.widget.ZoomButtonsController $r0;
+        boolean $z0, $z1;
+
+        $r0 := @this: android.widget.ZoomButtonsController;
+
+        $z0 := @parameter0: boolean;
+
+        $z1 = $r0.<android.widget.ZoomButtonsController: boolean mAutoDismissControls>;
+
+        if $z1 != $z0 goto label1;
+
+        return;
+
+     label1:
+        $r0.<android.widget.ZoomButtonsController: boolean mAutoDismissControls> = $z0;
+
+        return;
+    }
+
+    public void setFocusable(boolean)
+    {
+        android.widget.ZoomButtonsController $r0;
+        boolean $z0;
+        int $i0, $i1;
+        android.view.WindowManager$LayoutParams $r1;
+        android.view.WindowManager $r2;
+        android.widget.FrameLayout $r3;
+
+        $r0 := @this: android.widget.ZoomButtonsController;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 = $r0.<android.widget.ZoomButtonsController: android.view.WindowManager$LayoutParams mContainerLayoutParams>;
+
+        $i0 = $r1.<android.view.WindowManager$LayoutParams: int flags>;
+
+        if $z0 == 0 goto label2;
+
+        $r1 = $r0.<android.widget.ZoomButtonsController: android.view.WindowManager$LayoutParams mContainerLayoutParams>;
+
+        $i1 = $r1.<android.view.WindowManager$LayoutParams: int flags>;
+
+        $i1 = $i1 & -9;
+
+        $r1.<android.view.WindowManager$LayoutParams: int flags> = $i1;
+
+     label1:
+        $r1 = $r0.<android.widget.ZoomButtonsController: android.view.WindowManager$LayoutParams mContainerLayoutParams>;
+
+        $i1 = $r1.<android.view.WindowManager$LayoutParams: int flags>;
+
+        if $i1 == $i0 goto label3;
+
+        $z0 = $r0.<android.widget.ZoomButtonsController: boolean mIsVisible>;
+
+        if $z0 == 0 goto label4;
+
+        $r2 = $r0.<android.widget.ZoomButtonsController: android.view.WindowManager mWindowManager>;
+
+        $r3 = $r0.<android.widget.ZoomButtonsController: android.widget.FrameLayout mContainer>;
+
+        $r1 = $r0.<android.widget.ZoomButtonsController: android.view.WindowManager$LayoutParams mContainerLayoutParams>;
+
+        interfaceinvoke $r2.<android.view.WindowManager: void updateViewLayout(android.view.View,android.view.ViewGroup$LayoutParams)>($r3, $r1);
+
+        return;
+
+     label2:
+        $r1 = $r0.<android.widget.ZoomButtonsController: android.view.WindowManager$LayoutParams mContainerLayoutParams>;
+
+        $i1 = $r1.<android.view.WindowManager$LayoutParams: int flags>;
+
+        $i1 = $i1 | 8;
+
+        $r1.<android.view.WindowManager$LayoutParams: int flags> = $i1;
+
+        goto label1;
+
+     label3:
+        return;
+
+     label4:
+        return;
+    }
+
+    public void setOnZoomListener(android.widget.ZoomButtonsController$OnZoomListener)
+    {
+        android.widget.ZoomButtonsController $r0;
+        android.widget.ZoomButtonsController$OnZoomListener $r1;
+
+        $r0 := @this: android.widget.ZoomButtonsController;
+
+        $r1 := @parameter0: android.widget.ZoomButtonsController$OnZoomListener;
+
+        $r0.<android.widget.ZoomButtonsController: android.widget.ZoomButtonsController$OnZoomListener mCallback> = $r1;
+
+        return;
+    }
+
+    public void setVisible(boolean)
+    {
+        android.widget.ZoomButtonsController $r0;
+        boolean $z0, $z1;
+        android.view.View $r1;
+        android.os.IBinder $r2;
+        android.os.Handler $r3;
+        int $i0;
+        android.view.WindowManager$LayoutParams $r4;
+        android.view.WindowManager $r5;
+        android.widget.FrameLayout $r6;
+        java.lang.Runnable $r7;
+        android.widget.ZoomButtonsController$5 $r8;
+        android.content.Context $r9;
+        android.content.BroadcastReceiver $r10;
+        android.content.IntentFilter $r11;
+        android.widget.ZoomButtonsController$OnZoomListener $r12;
+
+        $r0 := @this: android.widget.ZoomButtonsController;
+
+        $z0 := @parameter0: boolean;
+
+        if $z0 == 0 goto label02;
+
+        $r1 = $r0.<android.widget.ZoomButtonsController: android.view.View mOwnerView>;
+
+        $r2 = virtualinvoke $r1.<android.view.View: android.os.IBinder getWindowToken()>();
+
+        if $r2 != null goto label01;
+
+        $r3 = $r0.<android.widget.ZoomButtonsController: android.os.Handler mHandler>;
+
+        $z0 = virtualinvoke $r3.<android.os.Handler: boolean hasMessages(int)>(4);
+
+        if $z0 != 0 goto label08;
+
+        $r3 = $r0.<android.widget.ZoomButtonsController: android.os.Handler mHandler>;
+
+        virtualinvoke $r3.<android.os.Handler: boolean sendEmptyMessage(int)>(4);
+
+        return;
+
+     label01:
+        $i0 = <android.widget.ZoomButtonsController: int ZOOM_CONTROLS_TIMEOUT>;
+
+        specialinvoke $r0.<android.widget.ZoomButtonsController: void dismissControlsDelayed(int)>($i0);
+
+     label02:
+        $z1 = $r0.<android.widget.ZoomButtonsController: boolean mIsVisible>;
+
+        if $z1 == $z0 goto label09;
+
+        $r0.<android.widget.ZoomButtonsController: boolean mIsVisible> = $z0;
+
+        if $z0 == 0 goto label05;
+
+        $r4 = $r0.<android.widget.ZoomButtonsController: android.view.WindowManager$LayoutParams mContainerLayoutParams>;
+
+        $r2 = $r4.<android.view.WindowManager$LayoutParams: android.os.IBinder token>;
+
+        if $r2 != null goto label03;
+
+        $r4 = $r0.<android.widget.ZoomButtonsController: android.view.WindowManager$LayoutParams mContainerLayoutParams>;
+
+        $r1 = $r0.<android.widget.ZoomButtonsController: android.view.View mOwnerView>;
+
+        $r2 = virtualinvoke $r1.<android.view.View: android.os.IBinder getWindowToken()>();
+
+        $r4.<android.view.WindowManager$LayoutParams: android.os.IBinder token> = $r2;
+
+     label03:
+        $r5 = $r0.<android.widget.ZoomButtonsController: android.view.WindowManager mWindowManager>;
+
+        $r6 = $r0.<android.widget.ZoomButtonsController: android.widget.FrameLayout mContainer>;
+
+        $r4 = $r0.<android.widget.ZoomButtonsController: android.view.WindowManager$LayoutParams mContainerLayoutParams>;
+
+        interfaceinvoke $r5.<android.view.WindowManager: void addView(android.view.View,android.view.ViewGroup$LayoutParams)>($r6, $r4);
+
+        $r7 = $r0.<android.widget.ZoomButtonsController: java.lang.Runnable mPostedVisibleInitializer>;
+
+        if $r7 != null goto label04;
+
+        $r8 = new android.widget.ZoomButtonsController$5;
+
+        specialinvoke $r8.<android.widget.ZoomButtonsController$5: void <init>(android.widget.ZoomButtonsController)>($r0);
+
+        $r0.<android.widget.ZoomButtonsController: java.lang.Runnable mPostedVisibleInitializer> = $r8;
+
+     label04:
+        $r3 = $r0.<android.widget.ZoomButtonsController: android.os.Handler mHandler>;
+
+        $r7 = $r0.<android.widget.ZoomButtonsController: java.lang.Runnable mPostedVisibleInitializer>;
+
+        virtualinvoke $r3.<android.os.Handler: boolean post(java.lang.Runnable)>($r7);
+
+        $r9 = $r0.<android.widget.ZoomButtonsController: android.content.Context mContext>;
+
+        $r10 = $r0.<android.widget.ZoomButtonsController: android.content.BroadcastReceiver mConfigurationChangedReceiver>;
+
+        $r11 = $r0.<android.widget.ZoomButtonsController: android.content.IntentFilter mConfigurationChangedFilter>;
+
+        virtualinvoke $r9.<android.content.Context: android.content.Intent registerReceiver(android.content.BroadcastReceiver,android.content.IntentFilter)>($r10, $r11);
+
+        $r1 = $r0.<android.widget.ZoomButtonsController: android.view.View mOwnerView>;
+
+        virtualinvoke $r1.<android.view.View: void setOnTouchListener(android.view.View$OnTouchListener)>($r0);
+
+        $r0.<android.widget.ZoomButtonsController: boolean mReleaseTouchListenerOnUp> = 0;
+
+        return;
+
+     label05:
+        $r1 = $r0.<android.widget.ZoomButtonsController: android.view.View mTouchTargetView>;
+
+        if $r1 == null goto label07;
+
+        $r0.<android.widget.ZoomButtonsController: boolean mReleaseTouchListenerOnUp> = 1;
+
+     label06:
+        $r9 = $r0.<android.widget.ZoomButtonsController: android.content.Context mContext>;
+
+        $r10 = $r0.<android.widget.ZoomButtonsController: android.content.BroadcastReceiver mConfigurationChangedReceiver>;
+
+        virtualinvoke $r9.<android.content.Context: void unregisterReceiver(android.content.BroadcastReceiver)>($r10);
+
+        $r5 = $r0.<android.widget.ZoomButtonsController: android.view.WindowManager mWindowManager>;
+
+        $r6 = $r0.<android.widget.ZoomButtonsController: android.widget.FrameLayout mContainer>;
+
+        interfaceinvoke $r5.<android.view.WindowManager: void removeView(android.view.View)>($r6);
+
+        $r3 = $r0.<android.widget.ZoomButtonsController: android.os.Handler mHandler>;
+
+        $r7 = $r0.<android.widget.ZoomButtonsController: java.lang.Runnable mPostedVisibleInitializer>;
+
+        virtualinvoke $r3.<android.os.Handler: void removeCallbacks(java.lang.Runnable)>($r7);
+
+        $r12 = $r0.<android.widget.ZoomButtonsController: android.widget.ZoomButtonsController$OnZoomListener mCallback>;
+
+        if $r12 == null goto label10;
+
+        $r12 = $r0.<android.widget.ZoomButtonsController: android.widget.ZoomButtonsController$OnZoomListener mCallback>;
+
+        interfaceinvoke $r12.<android.widget.ZoomButtonsController$OnZoomListener: void onVisibilityChanged(boolean)>(0);
+
+        return;
+
+     label07:
+        $r1 = $r0.<android.widget.ZoomButtonsController: android.view.View mOwnerView>;
+
+        virtualinvoke $r1.<android.view.View: void setOnTouchListener(android.view.View$OnTouchListener)>(null);
+
+        goto label06;
+
+     label08:
+        return;
+
+     label09:
+        return;
+
+     label10:
+        return;
+    }
+
+    public void setZoomInEnabled(boolean)
+    {
+        android.widget.ZoomButtonsController $r0;
+        boolean $z0;
+        android.widget.ZoomControls $r1;
+
+        $r0 := @this: android.widget.ZoomButtonsController;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 = $r0.<android.widget.ZoomButtonsController: android.widget.ZoomControls mControls>;
+
+        virtualinvoke $r1.<android.widget.ZoomControls: void setIsZoomInEnabled(boolean)>($z0);
+
+        return;
+    }
+
+    public void setZoomOutEnabled(boolean)
+    {
+        android.widget.ZoomButtonsController $r0;
+        boolean $z0;
+        android.widget.ZoomControls $r1;
+
+        $r0 := @this: android.widget.ZoomButtonsController;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 = $r0.<android.widget.ZoomButtonsController: android.widget.ZoomControls mControls>;
+
+        virtualinvoke $r1.<android.widget.ZoomControls: void setIsZoomOutEnabled(boolean)>($z0);
+
+        return;
+    }
+
+    public void setZoomSpeed(long)
+    {
+        android.widget.ZoomButtonsController $r0;
+        long $l0;
+        android.widget.ZoomControls $r1;
+
+        $r0 := @this: android.widget.ZoomButtonsController;
+
+        $l0 := @parameter0: long;
+
+        $r1 = $r0.<android.widget.ZoomButtonsController: android.widget.ZoomControls mControls>;
+
+        virtualinvoke $r1.<android.widget.ZoomControls: void setZoomSpeed(long)>($l0);
+
+        return;
+    }
+}

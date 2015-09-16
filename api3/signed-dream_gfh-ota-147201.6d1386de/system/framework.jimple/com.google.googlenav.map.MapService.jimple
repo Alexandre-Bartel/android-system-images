@@ -1,0 +1,2191 @@
+public class com.google.googlenav.map.MapService extends java.lang.Object implements com.google.common.OutOfMemoryHandler, java.lang.Runnable
+{
+    public static final int AUTO_CONFIG;
+    static final long BACKGROUND_THREAD_WAIT_INTERVAL;
+    private static final long COMPACT_IMAGE_TIME;
+    private static final long COMPACT_TIME;
+    private static final long EMERGENCY_IMAGE_COMPACT_TIME;
+    private static final int MINIMUM_CACHE_SIZE;
+    private static final int MINIMUM_FREE_MEM;
+    private static final long OUT_OF_MEMORY_RECOVERY_TIME;
+    private static final long TRIM_TIME;
+    private final boolean autoConfigCache;
+    private com.google.googlenav.map.MapService$MapTileRequest currentRequest;
+    volatile boolean exitWorkThread;
+    final com.google.googlenav.map.MapTileStorage flashService;
+    private final java.lang.Object indefiniteThreadLockObject;
+    final java.util.Hashtable mapCache;
+    private volatile boolean mapCacheLocked;
+    private int maxCacheDataSize;
+    private long outOfMemoryTime;
+    private com.google.common.ui.RepaintListener repaintListener;
+    private int requestType;
+    private int targetCacheDataSize;
+    private final java.util.Hashtable tempScaledImages;
+    private final java.lang.Object timedThreadLockObject;
+
+    void <init>(int, int, int, int, java.lang.String)
+    {
+        com.google.googlenav.map.MapService $r0;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String $r1;
+        java.lang.Object $r2;
+        java.util.Hashtable $r3;
+        com.google.googlenav.map.MapFlashService $r4;
+        com.google.googlenav.map.NullMapTileStorage $r5;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i2 := @parameter2: int;
+
+        $i3 := @parameter3: int;
+
+        $r1 := @parameter4: java.lang.String;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r0.<com.google.googlenav.map.MapService: com.google.googlenav.map.MapService$MapTileRequest currentRequest> = null;
+
+        $r2 = new java.lang.Object;
+
+        specialinvoke $r2.<java.lang.Object: void <init>()>();
+
+        $r0.<com.google.googlenav.map.MapService: java.lang.Object indefiniteThreadLockObject> = $r2;
+
+        $r2 = new java.lang.Object;
+
+        specialinvoke $r2.<java.lang.Object: void <init>()>();
+
+        $r0.<com.google.googlenav.map.MapService: java.lang.Object timedThreadLockObject> = $r2;
+
+        $r0.<com.google.googlenav.map.MapService: boolean exitWorkThread> = 1;
+
+        $r0.<com.google.googlenav.map.MapService: int requestType> = 26;
+
+        if $i0 != -1 goto label3;
+
+        $r0.<com.google.googlenav.map.MapService: boolean autoConfigCache> = 1;
+
+        $r0.<com.google.googlenav.map.MapService: int maxCacheDataSize> = 25000;
+
+        specialinvoke $r0.<com.google.googlenav.map.MapService: void setAutoTargetCacheSize()>();
+
+     label1:
+        $r3 = new java.util.Hashtable;
+
+        specialinvoke $r3.<java.util.Hashtable: void <init>()>();
+
+        $r0.<com.google.googlenav.map.MapService: java.util.Hashtable tempScaledImages> = $r3;
+
+        $r3 = new java.util.Hashtable;
+
+        specialinvoke $r3.<java.util.Hashtable: void <init>()>();
+
+        $r0.<com.google.googlenav.map.MapService: java.util.Hashtable mapCache> = $r3;
+
+        $r0.<com.google.googlenav.map.MapService: boolean mapCacheLocked> = 0;
+
+        if $i2 <= 0 goto label5;
+
+        $r4 = new com.google.googlenav.map.MapFlashService;
+
+        specialinvoke $r4.<com.google.googlenav.map.MapFlashService: void <init>(com.google.googlenav.map.MapService,java.lang.String,int,int)>($r0, $r1, $i2, $i3);
+
+        $r0.<com.google.googlenav.map.MapService: com.google.googlenav.map.MapTileStorage flashService> = $r4;
+
+     label2:
+        specialinvoke $r0.<com.google.googlenav.map.MapService: void startWorkThread()>();
+
+        staticinvoke <com.google.common.StaticUtil: void registerOutOfMemoryHandler(com.google.common.OutOfMemoryHandler)>($r0);
+
+        return;
+
+     label3:
+        $r0.<com.google.googlenav.map.MapService: boolean autoConfigCache> = 0;
+
+        $r0.<com.google.googlenav.map.MapService: int maxCacheDataSize> = $i0;
+
+        if $i1 != -1 goto label4;
+
+        specialinvoke $r0.<com.google.googlenav.map.MapService: void setAutoTargetCacheSize()>();
+
+        goto label1;
+
+     label4:
+        $r0.<com.google.googlenav.map.MapService: int targetCacheDataSize> = $i1;
+
+        goto label1;
+
+     label5:
+        $r5 = new com.google.googlenav.map.NullMapTileStorage;
+
+        specialinvoke $r5.<com.google.googlenav.map.NullMapTileStorage: void <init>()>();
+
+        $r0.<com.google.googlenav.map.MapService: com.google.googlenav.map.MapTileStorage flashService> = $r5;
+
+        goto label2;
+    }
+
+    static int access$000(com.google.googlenav.map.MapService)
+    {
+        com.google.googlenav.map.MapService $r0;
+        int i0;
+
+        $r0 := @parameter0: com.google.googlenav.map.MapService;
+
+        i0 = $r0.<com.google.googlenav.map.MapService: int requestType>;
+
+        return i0;
+    }
+
+    static java.util.Hashtable access$100(com.google.googlenav.map.MapService)
+    {
+        com.google.googlenav.map.MapService $r0;
+        java.util.Hashtable r1;
+
+        $r0 := @parameter0: com.google.googlenav.map.MapService;
+
+        r1 = $r0.<com.google.googlenav.map.MapService: java.util.Hashtable tempScaledImages>;
+
+        return r1;
+    }
+
+    static com.google.common.ui.RepaintListener access$200(com.google.googlenav.map.MapService)
+    {
+        com.google.googlenav.map.MapService $r0;
+        com.google.common.ui.RepaintListener r1;
+
+        $r0 := @parameter0: com.google.googlenav.map.MapService;
+
+        r1 = $r0.<com.google.googlenav.map.MapService: com.google.common.ui.RepaintListener repaintListener>;
+
+        return r1;
+    }
+
+    private void addMapEntry(com.google.googlenav.map.MapTile)
+    {
+        com.google.googlenav.map.MapService $r0;
+        com.google.googlenav.map.MapTile $r1;
+        java.util.Hashtable $r2;
+        com.google.googlenav.map.Tile $r3;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $r1 := @parameter0: com.google.googlenav.map.MapTile;
+
+        $r3 = virtualinvoke $r1.<com.google.googlenav.map.MapTile: com.google.googlenav.map.Tile getLocation()>();
+
+        $r2 = $r0.<com.google.googlenav.map.MapService: java.util.Hashtable mapCache>;
+
+        virtualinvoke $r2.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, $r1);
+
+        return;
+    }
+
+    private void clearScaledImages()
+    {
+        com.google.googlenav.map.MapService $r0;
+        java.util.Hashtable $r1, $r2;
+        java.util.Enumeration $r3;
+        boolean $z0;
+        java.lang.Object $r4;
+        com.google.googlenav.map.MapTile $r5;
+        java.lang.Throwable $r6;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $r1 = $r0.<com.google.googlenav.map.MapService: java.util.Hashtable mapCache>;
+
+        entermonitor $r1;
+
+     label1:
+        $r0.<com.google.googlenav.map.MapService: boolean mapCacheLocked> = 1;
+
+        $r2 = $r0.<com.google.googlenav.map.MapService: java.util.Hashtable tempScaledImages>;
+
+        virtualinvoke $r2.<java.util.Hashtable: void clear()>();
+
+        $r2 = $r0.<com.google.googlenav.map.MapService: java.util.Hashtable mapCache>;
+
+        $r3 = virtualinvoke $r2.<java.util.Hashtable: java.util.Enumeration elements()>();
+
+     label2:
+        $z0 = interfaceinvoke $r3.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label5;
+
+        $r4 = interfaceinvoke $r3.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        $r5 = (com.google.googlenav.map.MapTile) $r4;
+
+        virtualinvoke $r5.<com.google.googlenav.map.MapTile: void removeScaledImage()>();
+
+        goto label2;
+
+     label3:
+        $r6 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r6;
+
+     label5:
+        $r0.<com.google.googlenav.map.MapService: boolean mapCacheLocked> = 0;
+
+        exitmonitor $r1;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label3;
+        catch java.lang.Throwable from label5 to label6 with label3;
+    }
+
+    private com.google.common.graphics.GoogleImage createScaledImage(com.google.googlenav.map.Tile)
+    {
+        com.google.googlenav.map.MapService $r0;
+        com.google.googlenav.map.Tile $r1, $r2;
+        long $l0, $l1;
+        byte $b2;
+        com.google.map.Zoom $r3, $r4;
+        int $i3;
+        com.google.googlenav.map.MapTile $r5;
+        boolean $z0;
+        com.google.common.graphics.GoogleImage $r6;
+        java.lang.OutOfMemoryError $r7;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $r1 := @parameter0: com.google.googlenav.map.Tile;
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l1 = $r0.<com.google.googlenav.map.MapService: long outOfMemoryTime>;
+
+        $l1 = $l1 + 10000L;
+
+        $b2 = $l0 cmp $l1;
+
+        if $b2 >= 0 goto label1;
+
+        return null;
+
+     label1:
+        $r2 = virtualinvoke $r1.<com.google.googlenav.map.Tile: com.google.googlenav.map.Tile getZoomParent(boolean)>(0);
+
+        if $r2 == null goto label7;
+
+        $r3 = virtualinvoke $r2.<com.google.googlenav.map.Tile: com.google.map.Zoom getZoom()>();
+
+        $r4 = virtualinvoke $r1.<com.google.googlenav.map.Tile: com.google.map.Zoom getZoom()>();
+
+        $i3 = virtualinvoke $r3.<com.google.map.Zoom: int getZoomRatio(com.google.map.Zoom)>($r4);
+
+        $r5 = specialinvoke $r0.<com.google.googlenav.map.MapService: com.google.googlenav.map.MapTile getTileInternal(com.google.googlenav.map.Tile,int,boolean,boolean)>($r2, 0, 0, 0);
+
+        if $i3 != 2 goto label3;
+
+        $z0 = virtualinvoke $r5.<com.google.googlenav.map.MapTile: boolean hasImage()>();
+
+        if $z0 == 0 goto label3;
+
+        $r6 = virtualinvoke $r5.<com.google.googlenav.map.MapTile: com.google.common.graphics.GoogleImage getImage()>();
+
+        $r6 = specialinvoke $r0.<com.google.googlenav.map.MapService: com.google.common.graphics.GoogleImage createScaledImage(com.google.googlenav.map.Tile,com.google.googlenav.map.Tile,com.google.common.graphics.GoogleImage)>($r1, $r2, $r6);
+
+     label2:
+        return $r6;
+
+     label3:
+        if $i3 == 4 goto label4;
+
+        if $i3 != 2 goto label7;
+
+        $z0 = virtualinvoke $r5.<com.google.googlenav.map.MapTile: boolean hasImage()>();
+
+        if $z0 != 0 goto label7;
+
+     label4:
+        $r6 = specialinvoke $r0.<com.google.googlenav.map.MapService: com.google.common.graphics.GoogleImage createScaledImageFromAncestor(com.google.googlenav.map.Tile)>($r1);
+
+     label5:
+        return $r6;
+
+     label6:
+        $r7 := @caughtexception;
+
+        specialinvoke $r0.<com.google.googlenav.map.MapService: void clearScaledImages()>();
+
+        $r0.<com.google.googlenav.map.MapService: long outOfMemoryTime> = $l0;
+
+        staticinvoke <com.google.common.Log: void logQuietThrowable(java.lang.String,java.lang.Throwable)>("Map Service image scaling", $r7);
+
+     label7:
+        return null;
+
+        catch java.lang.OutOfMemoryError from label1 to label2 with label6;
+        catch java.lang.OutOfMemoryError from label3 to label5 with label6;
+    }
+
+    private com.google.common.graphics.GoogleImage createScaledImage(com.google.googlenav.map.Tile, com.google.googlenav.map.Tile, com.google.common.graphics.GoogleImage)
+    {
+        com.google.googlenav.map.MapService $r0;
+        com.google.googlenav.map.Tile $r1, $r2;
+        com.google.common.graphics.GoogleImage $r3, $r6;
+        int $i0, $i1;
+        byte $b2, $b3;
+        com.google.common.Config $r4;
+        com.google.common.graphics.ImageFactory $r5;
+        com.google.common.graphics.GoogleGraphics $r7;
+        boolean $z0;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $r1 := @parameter0: com.google.googlenav.map.Tile;
+
+        $r2 := @parameter1: com.google.googlenav.map.Tile;
+
+        $r3 := @parameter2: com.google.common.graphics.GoogleImage;
+
+        $i0 = virtualinvoke $r1.<com.google.googlenav.map.Tile: int getXIndex()>();
+
+        $i1 = virtualinvoke $r2.<com.google.googlenav.map.Tile: int getXIndex()>();
+
+        $i1 = $i1 * 2;
+
+        if $i0 != $i1 goto label3;
+
+        $b2 = 0;
+
+     label1:
+        $i0 = virtualinvoke $r1.<com.google.googlenav.map.Tile: int getYIndex()>();
+
+        $i1 = virtualinvoke $r2.<com.google.googlenav.map.Tile: int getYIndex()>();
+
+        $i1 = $i1 * 2;
+
+        if $i0 != $i1 goto label4;
+
+        $b3 = 0;
+
+     label2:
+        $r4 = staticinvoke <com.google.common.Config: com.google.common.Config getInstance()>();
+
+        $r5 = virtualinvoke $r4.<com.google.common.Config: com.google.common.graphics.ImageFactory getImageFactory()>();
+
+        $r6 = interfaceinvoke $r5.<com.google.common.graphics.ImageFactory: com.google.common.graphics.GoogleImage createImage(int,int)>(128, 128);
+
+        $r7 = interfaceinvoke $r6.<com.google.common.graphics.GoogleImage: com.google.common.graphics.GoogleGraphics getGraphics()>();
+
+        $z0 = interfaceinvoke $r7.<com.google.common.graphics.GoogleGraphics: boolean drawScaledImage(com.google.common.graphics.GoogleImage,int,int,int,int,int,int,int,int)>($r3, 0, 0, 128, 128, $b2, $b3, 64, 64);
+
+        if $z0 == 0 goto label5;
+
+        return $r6;
+
+     label3:
+        $b2 = 64;
+
+        goto label1;
+
+     label4:
+        $b3 = 64;
+
+        goto label2;
+
+     label5:
+        return null;
+    }
+
+    private com.google.common.graphics.GoogleImage createScaledImageFromAncestor(com.google.googlenav.map.Tile)
+    {
+        com.google.googlenav.map.MapService $r0;
+        com.google.googlenav.map.Tile $r1, $r5;
+        java.util.Vector $r2;
+        com.google.common.graphics.GoogleImage $r3, $r8;
+        int $i0, $i1;
+        java.lang.Object $r4;
+        com.google.googlenav.map.MapTile $r6;
+        java.util.Hashtable $r7;
+        boolean $z0;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $r1 := @parameter0: com.google.googlenav.map.Tile;
+
+        $r2 = specialinvoke $r0.<com.google.googlenav.map.MapService: java.util.Vector getAncestorsUpToTileWithImage(com.google.googlenav.map.Tile)>($r1);
+
+        if $r2 != null goto label1;
+
+        return null;
+
+     label1:
+        $i0 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        $i0 = $i0 - 1;
+
+        $r3 = null;
+
+     label2:
+        if $i0 <= 0 goto label8;
+
+        $r4 = virtualinvoke $r2.<java.util.Vector: java.lang.Object elementAt(int)>($i0);
+
+        $r1 = (com.google.googlenav.map.Tile) $r4;
+
+        $i1 = $i0 - 1;
+
+        $r4 = virtualinvoke $r2.<java.util.Vector: java.lang.Object elementAt(int)>($i1);
+
+        $r5 = (com.google.googlenav.map.Tile) $r4;
+
+        $r6 = specialinvoke $r0.<com.google.googlenav.map.MapService: com.google.googlenav.map.MapTile getTileInternal(com.google.googlenav.map.Tile,int,boolean,boolean)>($r1, 0, 0, 0);
+
+        $r7 = $r0.<com.google.googlenav.map.MapService: java.util.Hashtable tempScaledImages>;
+
+        $z0 = virtualinvoke $r7.<java.util.Hashtable: boolean containsKey(java.lang.Object)>($r5);
+
+        if $z0 == 0 goto label4;
+
+        $r7 = $r0.<com.google.googlenav.map.MapService: java.util.Hashtable tempScaledImages>;
+
+        $r4 = virtualinvoke $r7.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r5);
+
+        $r3 = (com.google.common.graphics.GoogleImage) $r4;
+
+     label3:
+        $i0 = $i0 + -1;
+
+        goto label2;
+
+     label4:
+        $z0 = virtualinvoke $r6.<com.google.googlenav.map.MapTile: boolean hasImage()>();
+
+        if $z0 == 0 goto label6;
+
+        $r3 = virtualinvoke $r6.<com.google.googlenav.map.MapTile: com.google.common.graphics.GoogleImage getImage()>();
+
+     label5:
+        if $r3 == null goto label7;
+
+        $r8 = specialinvoke $r0.<com.google.googlenav.map.MapService: com.google.common.graphics.GoogleImage createScaledImage(com.google.googlenav.map.Tile,com.google.googlenav.map.Tile,com.google.common.graphics.GoogleImage)>($r5, $r1, $r3);
+
+        $r3 = $r8;
+
+        $r7 = $r0.<com.google.googlenav.map.MapService: java.util.Hashtable tempScaledImages>;
+
+        virtualinvoke $r7.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r5, $r8);
+
+        goto label3;
+
+     label6:
+        $r7 = $r0.<com.google.googlenav.map.MapService: java.util.Hashtable tempScaledImages>;
+
+        $r4 = virtualinvoke $r7.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r3 = (com.google.common.graphics.GoogleImage) $r4;
+
+        goto label5;
+
+     label7:
+        return null;
+
+     label8:
+        return $r3;
+    }
+
+    private void doCompact(boolean)
+    {
+        com.google.googlenav.map.MapService $r0;
+        boolean $z0;
+        java.util.Hashtable $r1, $r2;
+        long $l0, $l1, $l2;
+        java.util.Enumeration $r3;
+        java.lang.Object $r4;
+        com.google.googlenav.map.Tile $r5;
+        com.google.googlenav.map.MapTile $r6;
+        byte $b3;
+        java.lang.Throwable $r7, $r8;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $z0 := @parameter0: boolean;
+
+        if $z0 == 0 goto label10;
+
+        $l0 = 2000L;
+
+     label01:
+        $r1 = $r0.<com.google.googlenav.map.MapService: java.util.Hashtable mapCache>;
+
+        entermonitor $r1;
+
+     label02:
+        virtualinvoke $r0.<com.google.googlenav.map.MapService: void setMapCacheLocked(boolean)>(1);
+
+     label03:
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r2 = $r0.<com.google.googlenav.map.MapService: java.util.Hashtable mapCache>;
+
+        $r3 = virtualinvoke $r2.<java.util.Hashtable: java.util.Enumeration keys()>();
+
+     label04:
+        $z0 = interfaceinvoke $r3.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label11;
+
+        $r4 = interfaceinvoke $r3.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        $r5 = (com.google.googlenav.map.Tile) $r4;
+
+        $r2 = $r0.<com.google.googlenav.map.MapService: java.util.Hashtable mapCache>;
+
+        $r4 = virtualinvoke $r2.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r5);
+
+        $r6 = (com.google.googlenav.map.MapTile) $r4;
+
+        $l2 = virtualinvoke $r6.<com.google.googlenav.map.MapTile: long getLastAccessTime()>();
+
+        $l2 = $l2 + $l0;
+
+        $b3 = $l2 cmp $l1;
+
+        if $b3 >= 0 goto label04;
+
+        virtualinvoke $r6.<com.google.googlenav.map.MapTile: void compact()>();
+
+     label05:
+        goto label04;
+
+     label06:
+        $r7 := @caughtexception;
+
+     label07:
+        virtualinvoke $r0.<com.google.googlenav.map.MapService: void setMapCacheLocked(boolean)>(0);
+
+        throw $r7;
+
+     label08:
+        $r8 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label09:
+        throw $r8;
+
+     label10:
+        $l0 = 12000L;
+
+        goto label01;
+
+     label11:
+        virtualinvoke $r0.<com.google.googlenav.map.MapService: void setMapCacheLocked(boolean)>(0);
+
+        exitmonitor $r1;
+
+     label12:
+        return;
+
+        catch java.lang.Throwable from label02 to label03 with label08;
+        catch java.lang.Throwable from label03 to label05 with label06;
+        catch java.lang.Throwable from label07 to label09 with label08;
+        catch java.lang.Throwable from label11 to label12 with label08;
+    }
+
+    private java.util.Vector getAncestorsUpToTileWithImage(com.google.googlenav.map.Tile)
+    {
+        com.google.googlenav.map.MapService $r0;
+        com.google.googlenav.map.Tile $r1, $r4;
+        java.util.Vector $r2;
+        int $i0;
+        com.google.googlenav.map.MapTile $r3;
+        boolean $z0;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $r1 := @parameter0: com.google.googlenav.map.Tile;
+
+        $r2 = new java.util.Vector;
+
+        specialinvoke $r2.<java.util.Vector: void <init>()>();
+
+        virtualinvoke $r2.<java.util.Vector: void addElement(java.lang.Object)>($r1);
+
+     label1:
+        $i0 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        if $i0 > 6 goto label2;
+
+        $r3 = specialinvoke $r0.<com.google.googlenav.map.MapService: com.google.googlenav.map.MapTile getTileInternal(com.google.googlenav.map.Tile,int,boolean,boolean)>($r1, 0, 0, 0);
+
+        $z0 = virtualinvoke $r3.<com.google.googlenav.map.MapTile: boolean hasImage()>();
+
+        if $z0 == 0 goto label3;
+
+     label2:
+        $i0 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        if $i0 <= 6 goto label5;
+
+        return null;
+
+     label3:
+        $r4 = virtualinvoke $r1.<com.google.googlenav.map.Tile: com.google.googlenav.map.Tile getZoomParent(boolean)>(1);
+
+        $r1 = $r4;
+
+        if $r4 != null goto label4;
+
+        return null;
+
+     label4:
+        virtualinvoke $r2.<java.util.Vector: void addElement(java.lang.Object)>($r4);
+
+        goto label1;
+
+     label5:
+        return $r2;
+    }
+
+    private com.google.common.graphics.GoogleImage getScaledImage(com.google.googlenav.map.Tile)
+    {
+        com.google.googlenav.map.MapService $r0;
+        com.google.googlenav.map.Tile $r1;
+        java.util.Hashtable $r2;
+        java.lang.Object $r3;
+        com.google.common.graphics.GoogleImage $r4;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $r1 := @parameter0: com.google.googlenav.map.Tile;
+
+        $r2 = $r0.<com.google.googlenav.map.MapService: java.util.Hashtable tempScaledImages>;
+
+        $r3 = virtualinvoke $r2.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r4 = (com.google.common.graphics.GoogleImage) $r3;
+
+        if $r4 != null goto label1;
+
+        $r4 = specialinvoke $r0.<com.google.googlenav.map.MapService: com.google.common.graphics.GoogleImage createScaledImage(com.google.googlenav.map.Tile)>($r1);
+
+        if $r4 == null goto label2;
+
+        $r2 = $r0.<com.google.googlenav.map.MapService: java.util.Hashtable tempScaledImages>;
+
+        virtualinvoke $r2.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, $r4);
+
+        return $r4;
+
+     label1:
+        return $r4;
+
+     label2:
+        return $r4;
+    }
+
+    static long getScore(com.google.googlenav.map.Tile, long, long)
+    {
+        com.google.googlenav.map.Tile $r0;
+        long $l0, $l1;
+
+        $r0 := @parameter0: com.google.googlenav.map.Tile;
+
+        $l0 := @parameter1: long;
+
+        $l1 := @parameter2: long;
+
+        $l0 = $l0 - $l1;
+
+        return $l0;
+    }
+
+    private com.google.googlenav.map.MapTile getTileInternal(com.google.googlenav.map.Tile, int, boolean, boolean)
+    {
+        com.google.googlenav.map.Tile $r0;
+        int $i0;
+        boolean $z0, $z1, $z2;
+        com.google.googlenav.map.MapService $r1;
+        com.google.common.graphics.GoogleImage $r2;
+        java.util.Hashtable $r3;
+        java.lang.Object $r4;
+        com.google.googlenav.map.MapTile $r5;
+        long $l1;
+        com.google.googlenav.map.MapTileStorage $r6;
+        com.google.common.DataRequestDispatcher $r7;
+        com.google.googlenav.Stats $r8;
+        java.lang.Throwable $r9, $r10;
+
+        $r1 := @this: com.google.googlenav.map.MapService;
+
+        $r0 := @parameter0: com.google.googlenav.map.Tile;
+
+        $i0 := @parameter1: int;
+
+        $z0 := @parameter2: boolean;
+
+        $z1 := @parameter3: boolean;
+
+        $r2 = null;
+
+        $r3 = $r1.<com.google.googlenav.map.MapService: java.util.Hashtable mapCache>;
+
+        $r4 = virtualinvoke $r3.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r0);
+
+        $r5 = (com.google.googlenav.map.MapTile) $r4;
+
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        if $r5 != null goto label16;
+
+        $z2 = $r1.<com.google.googlenav.map.MapService: boolean mapCacheLocked>;
+
+        if $z2 != 0 goto label14;
+
+        $r3 = $r1.<com.google.googlenav.map.MapService: java.util.Hashtable mapCache>;
+
+        entermonitor $r3;
+
+     label01:
+        virtualinvoke $r1.<com.google.googlenav.map.MapService: void setMapCacheLocked(boolean)>(1);
+
+     label02:
+        $r6 = $r1.<com.google.googlenav.map.MapService: com.google.googlenav.map.MapTileStorage flashService>;
+
+        $r5 = interfaceinvoke $r6.<com.google.googlenav.map.MapTileStorage: com.google.googlenav.map.MapTile getMapTile(com.google.googlenav.map.Tile)>($r0);
+
+        if $r5 != null goto label07;
+
+        if $z1 == 0 goto label03;
+
+        $r2 = specialinvoke $r1.<com.google.googlenav.map.MapService: com.google.common.graphics.GoogleImage getScaledImage(com.google.googlenav.map.Tile)>($r0);
+
+     label03:
+        if $z0 == 0 goto label06;
+
+        $r7 = staticinvoke <com.google.common.DataRequestDispatcher: com.google.common.DataRequestDispatcher getInstance()>();
+
+        $z0 = virtualinvoke $r7.<com.google.common.DataRequestDispatcher: boolean canDispatchNow()>();
+
+        if $z0 == 0 goto label06;
+
+        $r5 = new com.google.googlenav.map.MapTile;
+
+        specialinvoke $r5.<com.google.googlenav.map.MapTile: void <init>(com.google.googlenav.map.Tile,com.google.common.graphics.GoogleImage)>($r0, $r2);
+
+        specialinvoke $r1.<com.google.googlenav.map.MapService: void queueTileRequest(com.google.googlenav.map.MapTile,int)>($r5, $i0);
+
+        specialinvoke $r1.<com.google.googlenav.map.MapService: void addMapEntry(com.google.googlenav.map.MapTile)>($r5);
+
+        $r8 = staticinvoke <com.google.googlenav.Stats: com.google.googlenav.Stats getInstance()>();
+
+        virtualinvoke $r8.<com.google.googlenav.Stats: void flashCacheMiss()>();
+
+     label04:
+        virtualinvoke $r1.<com.google.googlenav.map.MapService: void setMapCacheLocked(boolean)>(0);
+
+        exitmonitor $r3;
+
+     label05:
+        virtualinvoke $r5.<com.google.googlenav.map.MapTile: void setLastAccessTime(long)>($l1);
+
+        return $r5;
+
+     label06:
+        $r5 = new com.google.googlenav.map.MapTile;
+
+        specialinvoke $r5.<com.google.googlenav.map.MapTile: void <init>(com.google.googlenav.map.Tile,com.google.common.graphics.GoogleImage,boolean)>($r0, $r2, 1);
+
+        goto label04;
+
+     label07:
+        if $z0 != 0 goto label15;
+
+        $l1 = $l1 - 20000L;
+
+     label08:
+        specialinvoke $r1.<com.google.googlenav.map.MapService: void addMapEntry(com.google.googlenav.map.MapTile)>($r5);
+
+        $r8 = staticinvoke <com.google.googlenav.Stats: com.google.googlenav.Stats getInstance()>();
+
+        virtualinvoke $r8.<com.google.googlenav.Stats: void flashCacheHit()>();
+
+     label09:
+        goto label04;
+
+     label10:
+        $r9 := @caughtexception;
+
+     label11:
+        virtualinvoke $r1.<com.google.googlenav.map.MapService: void setMapCacheLocked(boolean)>(0);
+
+        throw $r9;
+
+     label12:
+        $r10 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label13:
+        throw $r10;
+
+     label14:
+        $r5 = new com.google.googlenav.map.MapTile;
+
+        specialinvoke $r5.<com.google.googlenav.map.MapTile: void <init>(com.google.googlenav.map.Tile,com.google.common.graphics.GoogleImage,boolean)>($r0, null, 1);
+
+        goto label05;
+
+     label15:
+        goto label08;
+
+     label16:
+        goto label05;
+
+        catch java.lang.Throwable from label01 to label02 with label12;
+        catch java.lang.Throwable from label02 to label04 with label10;
+        catch java.lang.Throwable from label04 to label05 with label12;
+        catch java.lang.Throwable from label06 to label09 with label10;
+        catch java.lang.Throwable from label11 to label13 with label12;
+    }
+
+    private int partition(long[], com.google.googlenav.map.Tile[], int, int, int)
+    {
+        com.google.googlenav.map.MapService $r0;
+        long[] $r1;
+        com.google.googlenav.map.Tile[] $r2;
+        int $i0, $i1, $i2;
+        long $l3, $l4;
+        byte $b5;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $r1 := @parameter0: long[];
+
+        $r2 := @parameter1: com.google.googlenav.map.Tile[];
+
+        $i0 := @parameter2: int;
+
+        $i1 := @parameter3: int;
+
+        $i2 := @parameter4: int;
+
+        $l3 = $r1[$i2];
+
+        specialinvoke $r0.<com.google.googlenav.map.MapService: void swap(long[],com.google.googlenav.map.Tile[],int,int)>($r1, $r2, $i2, $i1);
+
+        $i2 = $i0;
+
+     label1:
+        if $i2 >= $i1 goto label3;
+
+        $l4 = $r1[$i2];
+
+        $b5 = $l4 cmp $l3;
+
+        if $b5 < 0 goto label2;
+
+        specialinvoke $r0.<com.google.googlenav.map.MapService: void swap(long[],com.google.googlenav.map.Tile[],int,int)>($r1, $r2, $i2, $i0);
+
+        $i0 = $i0 + 1;
+
+     label2:
+        $i2 = $i2 + 1;
+
+        goto label1;
+
+     label3:
+        $l3 = $r1[$i1];
+
+        $l4 = $r1[$i0];
+
+        $b5 = $l3 cmp $l4;
+
+        if $b5 <= 0 goto label4;
+
+        specialinvoke $r0.<com.google.googlenav.map.MapService: void swap(long[],com.google.googlenav.map.Tile[],int,int)>($r1, $r2, $i1, $i0);
+
+        return $i0;
+
+     label4:
+        return $i1;
+    }
+
+    private void qsort(long[], com.google.googlenav.map.Tile[], int, int)
+    {
+        com.google.googlenav.map.MapService $r0;
+        long[] $r1;
+        com.google.googlenav.map.Tile[] $r2;
+        int $i0, $i1, $i2, $i3;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $r1 := @parameter0: long[];
+
+        $r2 := @parameter1: com.google.googlenav.map.Tile[];
+
+        $i0 := @parameter2: int;
+
+        $i1 := @parameter3: int;
+
+        if $i1 <= $i0 goto label1;
+
+        $i2 = specialinvoke $r0.<com.google.googlenav.map.MapService: int partition(long[],com.google.googlenav.map.Tile[],int,int,int)>($r1, $r2, $i0, $i1, $i0);
+
+        $i3 = $i2 - 1;
+
+        specialinvoke $r0.<com.google.googlenav.map.MapService: void qsort(long[],com.google.googlenav.map.Tile[],int,int)>($r1, $r2, $i0, $i3);
+
+        $i0 = $i2 + 1;
+
+        specialinvoke $r0.<com.google.googlenav.map.MapService: void qsort(long[],com.google.googlenav.map.Tile[],int,int)>($r1, $r2, $i0, $i1);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    private void queueTileRequest(com.google.googlenav.map.MapTile, int)
+    {
+        com.google.googlenav.map.MapService $r0;
+        com.google.googlenav.map.MapTile $r1;
+        int $i0;
+        com.google.googlenav.map.MapService$MapTileRequest $r2;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $r1 := @parameter0: com.google.googlenav.map.MapTile;
+
+        $i0 := @parameter1: int;
+
+        $r2 = $r0.<com.google.googlenav.map.MapService: com.google.googlenav.map.MapService$MapTileRequest currentRequest>;
+
+        if $r2 != null goto label1;
+
+        $r2 = new com.google.googlenav.map.MapService$MapTileRequest;
+
+        specialinvoke $r2.<com.google.googlenav.map.MapService$MapTileRequest: void <init>(com.google.googlenav.map.MapService)>($r0);
+
+        $r0.<com.google.googlenav.map.MapService: com.google.googlenav.map.MapService$MapTileRequest currentRequest> = $r2;
+
+     label1:
+        $r2 = $r0.<com.google.googlenav.map.MapService: com.google.googlenav.map.MapService$MapTileRequest currentRequest>;
+
+        virtualinvoke $r2.<com.google.googlenav.map.MapService$MapTileRequest: void requestTile(com.google.googlenav.map.MapTile,int)>($r1, $i0);
+
+        return;
+    }
+
+    private void setAutoTargetCacheSize()
+    {
+        com.google.googlenav.map.MapService $r0;
+        int $i0;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $i0 = $r0.<com.google.googlenav.map.MapService: int maxCacheDataSize>;
+
+        $i0 = $i0 * 4;
+
+        $i0 = $i0 / 5;
+
+        $r0.<com.google.googlenav.map.MapService: int targetCacheDataSize> = $i0;
+
+        return;
+    }
+
+    private void sort(long[], com.google.googlenav.map.Tile[])
+    {
+        com.google.googlenav.map.MapService $r0;
+        long[] $r1;
+        com.google.googlenav.map.Tile[] $r2;
+        int $i0;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $r1 := @parameter0: long[];
+
+        $r2 := @parameter1: com.google.googlenav.map.Tile[];
+
+        $i0 = lengthof $r2;
+
+        $i0 = $i0 - 1;
+
+        specialinvoke $r0.<com.google.googlenav.map.MapService: void qsort(long[],com.google.googlenav.map.Tile[],int,int)>($r1, $r2, 0, $i0);
+
+        return;
+    }
+
+    private void startWorkThread()
+    {
+        com.google.googlenav.map.MapService $r0;
+        boolean $z0;
+        java.lang.Thread $r1;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $z0 = $r0.<com.google.googlenav.map.MapService: boolean exitWorkThread>;
+
+        if $z0 == 0 goto label1;
+
+        $r0.<com.google.googlenav.map.MapService: boolean exitWorkThread> = 0;
+
+        $r1 = new java.lang.Thread;
+
+        specialinvoke $r1.<java.lang.Thread: void <init>(java.lang.Runnable)>($r0);
+
+        virtualinvoke $r1.<java.lang.Thread: void start()>();
+
+        return;
+
+     label1:
+        return;
+    }
+
+    private void stopWorkThread()
+    {
+        com.google.googlenav.map.MapService $r0;
+        boolean $z0;
+        java.lang.Object $r1, $r2;
+        java.lang.Throwable $r3, $r4;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $z0 = $r0.<com.google.googlenav.map.MapService: boolean exitWorkThread>;
+
+        if $z0 != 0 goto label11;
+
+        $r0.<com.google.googlenav.map.MapService: boolean exitWorkThread> = 1;
+
+        $r1 = $r0.<com.google.googlenav.map.MapService: java.lang.Object timedThreadLockObject>;
+
+        entermonitor $r1;
+
+     label01:
+        $r2 = $r0.<com.google.googlenav.map.MapService: java.lang.Object timedThreadLockObject>;
+
+        virtualinvoke $r2.<java.lang.Object: void notify()>();
+
+        exitmonitor $r1;
+
+     label02:
+        $r1 = $r0.<com.google.googlenav.map.MapService: java.lang.Object indefiniteThreadLockObject>;
+
+        entermonitor $r1;
+
+     label03:
+        $r2 = $r0.<com.google.googlenav.map.MapService: java.lang.Object indefiniteThreadLockObject>;
+
+        virtualinvoke $r2.<java.lang.Object: void notify()>();
+
+        exitmonitor $r1;
+
+     label04:
+        return;
+
+     label05:
+        $r3 := @caughtexception;
+
+     label06:
+        exitmonitor $r1;
+
+     label07:
+        throw $r3;
+
+     label08:
+        $r4 := @caughtexception;
+
+     label09:
+        exitmonitor $r1;
+
+     label10:
+        throw $r4;
+
+     label11:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label05;
+        catch java.lang.Throwable from label03 to label04 with label08;
+        catch java.lang.Throwable from label06 to label07 with label05;
+        catch java.lang.Throwable from label09 to label10 with label08;
+    }
+
+    private void swap(long[], com.google.googlenav.map.Tile[], int, int)
+    {
+        com.google.googlenav.map.MapService $r0;
+        long[] $r1;
+        com.google.googlenav.map.Tile[] $r2;
+        int $i0, $i1;
+        com.google.googlenav.map.Tile $r3, $r4;
+        long $l2, $l3;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $r1 := @parameter0: long[];
+
+        $r2 := @parameter1: com.google.googlenav.map.Tile[];
+
+        $i0 := @parameter2: int;
+
+        $i1 := @parameter3: int;
+
+        $r4 = $r2[$i1];
+
+        $r3 = $r2[$i0];
+
+        $r2[$i1] = $r3;
+
+        $r2[$i0] = $r4;
+
+        $l3 = $r1[$i1];
+
+        $l2 = $r1[$i0];
+
+        $r1[$i1] = $l2;
+
+        $r1[$i0] = $l3;
+
+        return;
+    }
+
+    private void trimCache(int)
+    {
+        com.google.googlenav.map.MapService $r0;
+        int $i0, $i1, $i2;
+        java.util.Hashtable $r1, $r4;
+        com.google.googlenav.map.Tile[] $r2;
+        com.google.googlenav.map.Tile $r3;
+        java.lang.Object $r5;
+        com.google.googlenav.map.MapTile $r6;
+        boolean $z0;
+        java.lang.StringBuilder $r7;
+        java.lang.String $r8;
+        java.lang.Throwable $r9, $r10;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<com.google.googlenav.map.MapService: java.util.Hashtable mapCache>;
+
+        entermonitor $r1;
+
+     label01:
+        $r0.<com.google.googlenav.map.MapService: boolean mapCacheLocked> = 1;
+
+        staticinvoke <com.google.common.Log: void startTimer(java.lang.String)>("TrimCache");
+
+        staticinvoke <com.google.common.Log: void log(java.lang.String,java.lang.String)>("MAP", "Start Trim");
+
+        $r2 = virtualinvoke $r0.<com.google.googlenav.map.MapService: com.google.googlenav.map.Tile[] getSortedCacheList()>();
+
+        staticinvoke <com.google.common.Log: void log(java.lang.String,java.lang.String)>("MAP", "Trim: Got sorted List");
+
+        $i1 = 0;
+
+     label02:
+        $i2 = lengthof $r2;
+
+        if $i1 >= $i2 goto label05;
+
+        $i2 = $r0.<com.google.googlenav.map.MapService: int targetCacheDataSize>;
+
+        if $i0 <= $i2 goto label05;
+
+        $r3 = $r2[$i1];
+
+        $r4 = $r0.<com.google.googlenav.map.MapService: java.util.Hashtable mapCache>;
+
+        $r5 = virtualinvoke $r4.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r3);
+
+        $r6 = (com.google.googlenav.map.MapTile) $r5;
+
+        $z0 = virtualinvoke $r6.<com.google.googlenav.map.MapTile: boolean isComplete()>();
+
+        if $z0 == 0 goto label04;
+
+        $r4 = $r0.<com.google.googlenav.map.MapService: java.util.Hashtable mapCache>;
+
+        virtualinvoke $r4.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>($r3);
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Remove Cached Tile: ");
+
+        $r8 = virtualinvoke $r3.<com.google.googlenav.map.Tile: java.lang.String toString()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.google.common.Log: void log(java.lang.String,java.lang.String)>("MAP", $r8);
+
+        $i2 = virtualinvoke $r6.<com.google.googlenav.map.MapTile: int getDataSize()>();
+
+        $i0 = $i0 - $i2;
+
+     label03:
+        $i1 = $i1 + 1;
+
+        goto label02;
+
+     label04:
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Skipping Tile: ");
+
+        $r3 = virtualinvoke $r6.<com.google.googlenav.map.MapTile: com.google.googlenav.map.Tile getLocation()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r3);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.google.common.Log: void log(java.lang.String,java.lang.String)>("MAP", $r8);
+
+        goto label03;
+
+     label05:
+        staticinvoke <com.google.common.Log: long endTimerAndLog(java.lang.String,java.lang.String)>("MAP", "TrimCache");
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("MapCache: Tiles ");
+
+        $r4 = $r0.<com.google.googlenav.map.MapService: java.util.Hashtable mapCache>;
+
+        $i1 = virtualinvoke $r4.<java.util.Hashtable: int size()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  --> ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $i0 = $r0.<com.google.googlenav.map.MapService: int targetCacheDataSize>;
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" Bytes");
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.google.common.Log: void log(java.lang.String,java.lang.String)>("MAP", $r8);
+
+     label06:
+        $r0.<com.google.googlenav.map.MapService: boolean mapCacheLocked> = 0;
+
+        exitmonitor $r1;
+
+     label07:
+        return;
+
+     label08:
+        $r9 := @caughtexception;
+
+        $r0.<com.google.googlenav.map.MapService: boolean mapCacheLocked> = 0;
+
+        throw $r9;
+
+     label09:
+        $r10 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label10:
+        throw $r10;
+
+        catch java.lang.Throwable from label01 to label06 with label08;
+        catch java.lang.Throwable from label06 to label07 with label09;
+        catch java.lang.Throwable from label08 to label10 with label09;
+    }
+
+    void checkTrimCache()
+    {
+        com.google.googlenav.map.MapService $r0;
+        int $i0, $i1, $i4;
+        boolean $z0;
+        java.lang.Runtime $r1;
+        long $l2, $l3;
+        java.lang.StringBuilder $r2;
+        java.lang.String $r3;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $i0 = virtualinvoke $r0.<com.google.googlenav.map.MapService: int getCacheSize()>();
+
+        $i1 = $r0.<com.google.googlenav.map.MapService: int maxCacheDataSize>;
+
+        if $i0 <= $i1 goto label2;
+
+        $z0 = $r0.<com.google.googlenav.map.MapService: boolean autoConfigCache>;
+
+        if $z0 == 0 goto label1;
+
+        staticinvoke <java.lang.System: void gc()>();
+
+        $r1 = staticinvoke <java.lang.Runtime: java.lang.Runtime getRuntime()>();
+
+        $l2 = virtualinvoke $r1.<java.lang.Runtime: long freeMemory()>();
+
+        $l3 = (long) $i0;
+
+        $l2 = $l2 + $l3;
+
+        $l2 = $l2 - 40000L;
+
+        $i1 = (int) $l2;
+
+        $i1 = $i1 / 2;
+
+        $r1 = staticinvoke <java.lang.Runtime: java.lang.Runtime getRuntime()>();
+
+        $l2 = virtualinvoke $r1.<java.lang.Runtime: long totalMemory()>();
+
+        $i4 = (int) $l2;
+
+        $i4 = $i4 / 3;
+
+        $i1 = staticinvoke <java.lang.Math: int min(int,int)>($i1, $i4);
+
+        $i1 = staticinvoke <java.lang.Math: int max(int,int)>(25000, $i1);
+
+        $r0.<com.google.googlenav.map.MapService: int maxCacheDataSize> = $i1;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("New cache size: ");
+
+        $i1 = $r0.<com.google.googlenav.map.MapService: int maxCacheDataSize>;
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.google.common.Log: void log(java.lang.String,java.lang.String)>("MAP", $r3);
+
+        specialinvoke $r0.<com.google.googlenav.map.MapService: void setAutoTargetCacheSize()>();
+
+        $i1 = $r0.<com.google.googlenav.map.MapService: int maxCacheDataSize>;
+
+        if $i0 >= $i1 goto label1;
+
+        return;
+
+     label1:
+        specialinvoke $r0.<com.google.googlenav.map.MapService: void trimCache(int)>($i0);
+
+        return;
+
+     label2:
+        return;
+    }
+
+    void close(boolean)
+    {
+        com.google.googlenav.map.MapService $r0;
+        boolean $z0;
+        com.google.googlenav.map.MapTileStorage $r1;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $z0 := @parameter0: boolean;
+
+        staticinvoke <com.google.common.StaticUtil: void removeOutOfMemoryHandler(com.google.common.OutOfMemoryHandler)>($r0);
+
+        specialinvoke $r0.<com.google.googlenav.map.MapService: void stopWorkThread()>();
+
+        $r1 = $r0.<com.google.googlenav.map.MapService: com.google.googlenav.map.MapTileStorage flashService>;
+
+        interfaceinvoke $r1.<com.google.googlenav.map.MapTileStorage: void close(boolean)>($z0);
+
+        return;
+    }
+
+    void eraseAll()
+    {
+        com.google.googlenav.map.MapService $r0;
+        java.util.Hashtable $r1, $r2;
+        com.google.googlenav.map.MapTileStorage $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $r1 = $r0.<com.google.googlenav.map.MapService: java.util.Hashtable mapCache>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = $r0.<com.google.googlenav.map.MapService: java.util.Hashtable mapCache>;
+
+        virtualinvoke $r2.<java.util.Hashtable: void clear()>();
+
+        $r3 = $r0.<com.google.googlenav.map.MapService: com.google.googlenav.map.MapTileStorage flashService>;
+
+        interfaceinvoke $r3.<com.google.googlenav.map.MapTileStorage: void eraseAll()>();
+
+        exitmonitor $r1;
+
+     label2:
+        return;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    int getCacheSize()
+    {
+        java.util.Hashtable $r0, $r2;
+        com.google.googlenav.map.MapService $r1;
+        int $i0, $i1;
+        java.util.Enumeration $r3;
+        boolean $z0;
+        java.lang.Object $r4;
+        com.google.googlenav.map.MapTile $r5;
+        java.lang.Throwable $r6;
+
+        $r1 := @this: com.google.googlenav.map.MapService;
+
+        $i0 = 0;
+
+        $r0 = $r1.<com.google.googlenav.map.MapService: java.util.Hashtable mapCache>;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r1.<com.google.googlenav.map.MapService: java.util.Hashtable mapCache>;
+
+        $r3 = virtualinvoke $r2.<java.util.Hashtable: java.util.Enumeration elements()>();
+
+     label2:
+        $z0 = interfaceinvoke $r3.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label3;
+
+        $r4 = interfaceinvoke $r3.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        $r5 = (com.google.googlenav.map.MapTile) $r4;
+
+        $i1 = virtualinvoke $r5.<com.google.googlenav.map.MapTile: int getDataSize()>();
+
+        $i0 = $i0 + $i1;
+
+        goto label2;
+
+     label3:
+        exitmonitor $r0;
+
+     label4:
+        return $i0;
+
+     label5:
+        $r6 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label6:
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    java.util.Hashtable getMapCache()
+    {
+        com.google.googlenav.map.MapService $r0;
+        java.util.Hashtable r1;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        r1 = $r0.<com.google.googlenav.map.MapService: java.util.Hashtable mapCache>;
+
+        return r1;
+    }
+
+    com.google.googlenav.map.MapTileStorage getMapFlashService()
+    {
+        com.google.googlenav.map.MapService $r0;
+        com.google.googlenav.map.MapTileStorage r1;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        r1 = $r0.<com.google.googlenav.map.MapService: com.google.googlenav.map.MapTileStorage flashService>;
+
+        return r1;
+    }
+
+    public int getMaxCacheDataSize()
+    {
+        com.google.googlenav.map.MapService $r0;
+        int i0;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        i0 = $r0.<com.google.googlenav.map.MapService: int maxCacheDataSize>;
+
+        return i0;
+    }
+
+    com.google.googlenav.map.Tile[] getSortedCacheList()
+    {
+        com.google.googlenav.map.MapService $r0;
+        com.google.googlenav.map.Tile[] $r1;
+        long[] $r2;
+        long $l0, $l2;
+        java.util.Hashtable $r3;
+        int $i1;
+        java.util.Enumeration $r4;
+        boolean $z0;
+        java.lang.Object $r5;
+        com.google.googlenav.map.Tile $r6, $r7;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r3 = $r0.<com.google.googlenav.map.MapService: java.util.Hashtable mapCache>;
+
+        $i1 = virtualinvoke $r3.<java.util.Hashtable: int size()>();
+
+        $r1 = newarray (com.google.googlenav.map.Tile)[$i1];
+
+        $r3 = $r0.<com.google.googlenav.map.MapService: java.util.Hashtable mapCache>;
+
+        $i1 = virtualinvoke $r3.<java.util.Hashtable: int size()>();
+
+        $r2 = newarray (long)[$i1];
+
+        $r3 = $r0.<com.google.googlenav.map.MapService: java.util.Hashtable mapCache>;
+
+        $r4 = virtualinvoke $r3.<java.util.Hashtable: java.util.Enumeration keys()>();
+
+        $i1 = 0;
+
+     label1:
+        $z0 = interfaceinvoke $r4.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label2;
+
+        $r5 = interfaceinvoke $r4.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        $r6 = (com.google.googlenav.map.Tile) $r5;
+
+        $r1[$i1] = $r6;
+
+        $r6 = $r1[$i1];
+
+        $r7 = $r1[$i1];
+
+        $l2 = virtualinvoke $r0.<com.google.googlenav.map.MapService: long getTileDate(com.google.googlenav.map.Tile)>($r7);
+
+        $l2 = staticinvoke <com.google.googlenav.map.MapService: long getScore(com.google.googlenav.map.Tile,long,long)>($r6, $l0, $l2);
+
+        $r2[$i1] = $l2;
+
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label2:
+        staticinvoke <com.google.common.StaticUtil: void simulateLatency(java.lang.String,int)>("MAP", 800);
+
+        specialinvoke $r0.<com.google.googlenav.map.MapService: void sort(long[],com.google.googlenav.map.Tile[])>($r2, $r1);
+
+        return $r1;
+    }
+
+    com.google.googlenav.map.MapTile getTile(com.google.googlenav.map.Tile, int, boolean, boolean)
+    {
+        com.google.googlenav.map.MapService $r0;
+        com.google.googlenav.map.Tile $r1;
+        int $i0;
+        boolean $z0, $z1;
+        com.google.googlenav.map.MapTile $r2;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $r1 := @parameter0: com.google.googlenav.map.Tile;
+
+        $i0 := @parameter1: int;
+
+        $z0 := @parameter2: boolean;
+
+        $z1 := @parameter3: boolean;
+
+        $r2 = specialinvoke $r0.<com.google.googlenav.map.MapService: com.google.googlenav.map.MapTile getTileInternal(com.google.googlenav.map.Tile,int,boolean,boolean)>($r1, $i0, $z0, $z1);
+
+        return $r2;
+    }
+
+    long getTileDate(com.google.googlenav.map.Tile)
+    {
+        com.google.googlenav.map.Tile $r0;
+        com.google.googlenav.map.MapService $r1;
+        java.util.Hashtable $r2;
+        java.lang.Object $r3;
+        com.google.googlenav.map.MapTile $r4;
+        long $l0;
+
+        $r1 := @this: com.google.googlenav.map.MapService;
+
+        $r0 := @parameter0: com.google.googlenav.map.Tile;
+
+        $r2 = $r1.<com.google.googlenav.map.MapService: java.util.Hashtable mapCache>;
+
+        $r3 = virtualinvoke $r2.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r0);
+
+        $r4 = (com.google.googlenav.map.MapTile) $r3;
+
+        $l0 = virtualinvoke $r4.<com.google.googlenav.map.MapTile: long getLastAccessTime()>();
+
+        return $l0;
+    }
+
+    int getTileEdition()
+    {
+        com.google.googlenav.map.MapService $r0;
+        int $i0;
+        com.google.googlenav.map.MapTileStorage $r1;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $r1 = $r0.<com.google.googlenav.map.MapService: com.google.googlenav.map.MapTileStorage flashService>;
+
+        $i0 = interfaceinvoke $r1.<com.google.googlenav.map.MapTileStorage: int getTileEdition()>();
+
+        return $i0;
+    }
+
+    public void handleOutOfMemory()
+    {
+        com.google.googlenav.map.MapService $r0;
+        java.util.Hashtable $r1;
+        int $i0;
+        boolean $z0;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        staticinvoke <com.google.googlenav.map.FlashRecord: void clearDataCache()>();
+
+        specialinvoke $r0.<com.google.googlenav.map.MapService: void clearScaledImages()>();
+
+        $r1 = $r0.<com.google.googlenav.map.MapService: java.util.Hashtable mapCache>;
+
+        entermonitor $r1;
+
+     label1:
+        specialinvoke $r0.<com.google.googlenav.map.MapService: void doCompact(boolean)>(1);
+
+        $z0 = $r0.<com.google.googlenav.map.MapService: boolean autoConfigCache>;
+
+        if $z0 == 0 goto label4;
+
+        $r0.<com.google.googlenav.map.MapService: int maxCacheDataSize> = 25000;
+
+        specialinvoke $r0.<com.google.googlenav.map.MapService: void setAutoTargetCacheSize()>();
+
+     label2:
+        virtualinvoke $r0.<com.google.googlenav.map.MapService: void checkTrimCache()>();
+
+        exitmonitor $r1;
+
+     label3:
+        return;
+
+     label4:
+        $i0 = $r0.<com.google.googlenav.map.MapService: int maxCacheDataSize>;
+
+        $i0 = $i0 - 8000;
+
+        $i0 = staticinvoke <java.lang.Math: int max(int,int)>($i0, 25000);
+
+        $r0.<com.google.googlenav.map.MapService: int maxCacheDataSize> = $i0;
+
+        specialinvoke $r0.<com.google.googlenav.map.MapService: void setAutoTargetCacheSize()>();
+
+        goto label2;
+
+     label5:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label3 with label5;
+        catch java.lang.Throwable from label4 to label6 with label5;
+    }
+
+    boolean isTileInMemoryOrQueued(com.google.googlenav.map.Tile)
+    {
+        com.google.googlenav.map.MapService $r0;
+        com.google.googlenav.map.Tile $r1;
+        boolean $z0;
+        java.util.Hashtable $r2;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $r1 := @parameter0: com.google.googlenav.map.Tile;
+
+        $r2 = $r0.<com.google.googlenav.map.MapService: java.util.Hashtable mapCache>;
+
+        $z0 = virtualinvoke $r2.<java.util.Hashtable: boolean containsKey(java.lang.Object)>($r1);
+
+        return $z0;
+    }
+
+    void mapChanged()
+    {
+        com.google.googlenav.map.MapService $r0;
+        com.google.googlenav.map.MapTileStorage $r1;
+        java.lang.Object $r2, $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $r1 = $r0.<com.google.googlenav.map.MapService: com.google.googlenav.map.MapTileStorage flashService>;
+
+        interfaceinvoke $r1.<com.google.googlenav.map.MapTileStorage: void mapChanged()>();
+
+        $r2 = $r0.<com.google.googlenav.map.MapService: java.lang.Object indefiniteThreadLockObject>;
+
+        entermonitor $r2;
+
+     label1:
+        $r3 = $r0.<com.google.googlenav.map.MapService: java.lang.Object indefiniteThreadLockObject>;
+
+        virtualinvoke $r3.<java.lang.Object: void notify()>();
+
+        exitmonitor $r2;
+
+     label2:
+        return;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label4:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    void notifyUserInput()
+    {
+        com.google.googlenav.map.MapService $r0;
+        com.google.googlenav.map.MapTileStorage $r1;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $r1 = $r0.<com.google.googlenav.map.MapService: com.google.googlenav.map.MapTileStorage flashService>;
+
+        interfaceinvoke $r1.<com.google.googlenav.map.MapTileStorage: void notifyUserInput()>();
+
+        return;
+    }
+
+    void pause()
+    {
+        com.google.googlenav.map.MapService $r0;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        specialinvoke $r0.<com.google.googlenav.map.MapService: void stopWorkThread()>();
+
+        return;
+    }
+
+    boolean requestTiles(boolean)
+    {
+        com.google.googlenav.map.MapService $r0;
+        boolean $z0;
+        com.google.common.DataRequestDispatcher $r1;
+        com.google.googlenav.map.MapService$MapTileRequest $r2;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $z0 := @parameter0: boolean;
+
+        $r2 = $r0.<com.google.googlenav.map.MapService: com.google.googlenav.map.MapService$MapTileRequest currentRequest>;
+
+        if $r2 == null goto label1;
+
+        $r2 = $r0.<com.google.googlenav.map.MapService: com.google.googlenav.map.MapService$MapTileRequest currentRequest>;
+
+        virtualinvoke $r2.<com.google.googlenav.map.MapService$MapTileRequest: void setForeground(boolean)>($z0);
+
+        $r0.<com.google.googlenav.map.MapService: com.google.googlenav.map.MapService$MapTileRequest currentRequest> = null;
+
+        $r1 = staticinvoke <com.google.common.DataRequestDispatcher: com.google.common.DataRequestDispatcher getInstance()>();
+
+        virtualinvoke $r1.<com.google.common.DataRequestDispatcher: void addDataRequest(com.google.common.DataRequest)>($r2);
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    void resume()
+    {
+        com.google.googlenav.map.MapService $r0;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        specialinvoke $r0.<com.google.googlenav.map.MapService: void startWorkThread()>();
+
+        return;
+    }
+
+    public void run()
+    {
+        com.google.googlenav.map.MapService $r0;
+        long $l0, $l1, $l2, $l3;
+        boolean $z0;
+        java.lang.Object $r1, $r2;
+        byte $b4;
+        com.google.googlenav.map.MapTileStorage $r3;
+        java.lang.Exception $r4;
+        java.lang.Throwable $r5, $r7;
+        java.lang.OutOfMemoryError $r6;
+        java.lang.InterruptedException $r8, $r9;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l1 = $l0;
+
+     label01:
+        $z0 = $r0.<com.google.googlenav.map.MapService: boolean exitWorkThread>;
+
+        if $z0 != 0 goto label29;
+
+     label02:
+        $r1 = $r0.<com.google.googlenav.map.MapService: java.lang.Object indefiniteThreadLockObject>;
+
+        entermonitor $r1;
+
+     label03:
+        $r2 = $r0.<com.google.googlenav.map.MapService: java.lang.Object indefiniteThreadLockObject>;
+
+     label04:
+        virtualinvoke $r2.<java.lang.Object: void wait()>();
+
+     label05:
+        exitmonitor $r1;
+
+     label06:
+        $r1 = $r0.<com.google.googlenav.map.MapService: java.lang.Object timedThreadLockObject>;
+
+        entermonitor $r1;
+
+     label07:
+        $r2 = $r0.<com.google.googlenav.map.MapService: java.lang.Object timedThreadLockObject>;
+
+     label08:
+        virtualinvoke $r2.<java.lang.Object: void wait(long)>(250L);
+
+     label09:
+        exitmonitor $r1;
+
+     label10:
+        staticinvoke <com.google.common.Log: void log(java.lang.String,java.lang.String)>("MAP", "MapService thread wakeup");
+
+     label11:
+        $z0 = $r0.<com.google.googlenav.map.MapService: boolean exitWorkThread>;
+
+     label12:
+        if $z0 != 0 goto label01;
+
+     label13:
+        $l2 = 2101L + $l0;
+
+        $l3 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+     label14:
+        $b4 = $l2 cmp $l3;
+
+     label15:
+        if $b4 >= 0 goto label16;
+
+        virtualinvoke $r0.<com.google.googlenav.map.MapService: void checkTrimCache()>();
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+     label16:
+        $l2 = 3113L + $l1;
+
+        $l3 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+     label17:
+        $b4 = $l2 cmp $l3;
+
+     label18:
+        if $b4 >= 0 goto label19;
+
+        specialinvoke $r0.<com.google.googlenav.map.MapService: void doCompact(boolean)>(0);
+
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+     label19:
+        $r3 = $r0.<com.google.googlenav.map.MapService: com.google.googlenav.map.MapTileStorage flashService>;
+
+        interfaceinvoke $r3.<com.google.googlenav.map.MapTileStorage: void writeCache()>();
+
+     label20:
+        goto label01;
+
+     label21:
+        $r4 := @caughtexception;
+
+        staticinvoke <com.google.common.Log: void logThrowable(java.lang.String,java.lang.Throwable)>("MapService BG", $r4);
+
+        goto label01;
+
+     label22:
+        $r5 := @caughtexception;
+
+     label23:
+        exitmonitor $r1;
+
+     label24:
+        throw $r5;
+
+     label25:
+        $r6 := @caughtexception;
+
+        staticinvoke <com.google.common.StaticUtil: void handleOutOfMemory()>();
+
+        goto label01;
+
+     label26:
+        $r7 := @caughtexception;
+
+     label27:
+        exitmonitor $r1;
+
+     label28:
+        throw $r7;
+
+     label29:
+        staticinvoke <com.google.common.Log: void log(java.lang.String,java.lang.String)>("MAP", "Exit MapService BG thread");
+
+        return;
+
+     label30:
+        $r8 := @caughtexception;
+
+        goto label09;
+
+     label31:
+        $r9 := @caughtexception;
+
+        goto label05;
+
+        catch java.lang.Exception from label02 to label03 with label21;
+        catch java.lang.InterruptedException from label04 to label05 with label31;
+        catch java.lang.Throwable from label03 to label05 with label22;
+        catch java.lang.Throwable from label05 to label06 with label22;
+        catch java.lang.Exception from label06 to label07 with label21;
+        catch java.lang.InterruptedException from label08 to label09 with label30;
+        catch java.lang.Throwable from label07 to label09 with label26;
+        catch java.lang.Throwable from label09 to label10 with label26;
+        catch java.lang.Exception from label10 to label12 with label21;
+        catch java.lang.Exception from label13 to label14 with label21;
+        catch java.lang.Exception from label15 to label16 with label21;
+        catch java.lang.Exception from label16 to label17 with label21;
+        catch java.lang.Exception from label18 to label20 with label21;
+        catch java.lang.OutOfMemoryError from label10 to label11 with label25;
+        catch java.lang.OutOfMemoryError from label13 to label14 with label25;
+        catch java.lang.OutOfMemoryError from label15 to label16 with label25;
+        catch java.lang.OutOfMemoryError from label16 to label17 with label25;
+        catch java.lang.OutOfMemoryError from label18 to label19 with label25;
+        catch java.lang.OutOfMemoryError from label19 to label20 with label25;
+        catch java.lang.Throwable from label23 to label24 with label22;
+        catch java.lang.Exception from label24 to label25 with label21;
+        catch java.lang.OutOfMemoryError from label24 to label25 with label25;
+        catch java.lang.Throwable from label27 to label28 with label26;
+        catch java.lang.Exception from label28 to label29 with label21;
+        catch java.lang.OutOfMemoryError from label28 to label29 with label25;
+    }
+
+    void setMapCacheLocked(boolean)
+    {
+        com.google.googlenav.map.MapService $r0;
+        boolean $z0;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $z0 := @parameter0: boolean;
+
+        $r0.<com.google.googlenav.map.MapService: boolean mapCacheLocked> = $z0;
+
+        return;
+    }
+
+    void setRepaintListener(com.google.common.ui.RepaintListener)
+    {
+        com.google.googlenav.map.MapService $r0;
+        com.google.common.ui.RepaintListener $r1;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $r1 := @parameter0: com.google.common.ui.RepaintListener;
+
+        $r0.<com.google.googlenav.map.MapService: com.google.common.ui.RepaintListener repaintListener> = $r1;
+
+        return;
+    }
+
+    void setTileEdition(int)
+    {
+        com.google.googlenav.map.MapService $r0;
+        int $i0, $i1;
+        java.util.Hashtable $r1, $r4;
+        java.util.Vector $r2;
+        com.google.googlenav.map.MapTileStorage $r3;
+        boolean $z0;
+        java.util.Enumeration $r5;
+        java.lang.Object $r6;
+        com.google.googlenav.map.Tile $r7;
+        com.google.googlenav.map.MapTile $r8;
+        java.lang.Throwable $r9;
+
+        $r0 := @this: com.google.googlenav.map.MapService;
+
+        $i0 := @parameter0: int;
+
+        $r3 = $r0.<com.google.googlenav.map.MapService: com.google.googlenav.map.MapTileStorage flashService>;
+
+        $z0 = interfaceinvoke $r3.<com.google.googlenav.map.MapTileStorage: boolean setTileEdition(int)>($i0);
+
+        if $z0 == 0 goto label9;
+
+        $r1 = $r0.<com.google.googlenav.map.MapService: java.util.Hashtable mapCache>;
+
+        entermonitor $r1;
+
+     label1:
+        $r4 = $r0.<com.google.googlenav.map.MapService: java.util.Hashtable mapCache>;
+
+        $r5 = virtualinvoke $r4.<java.util.Hashtable: java.util.Enumeration keys()>();
+
+        $r2 = new java.util.Vector;
+
+        specialinvoke $r2.<java.util.Vector: void <init>()>();
+
+     label2:
+        $z0 = interfaceinvoke $r5.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label5;
+
+        $r6 = interfaceinvoke $r5.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        $r7 = (com.google.googlenav.map.Tile) $r6;
+
+        $r4 = $r0.<com.google.googlenav.map.MapService: java.util.Hashtable mapCache>;
+
+        $r6 = virtualinvoke $r4.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r7);
+
+        $r8 = (com.google.googlenav.map.MapTile) $r6;
+
+        $z0 = virtualinvoke $r8.<com.google.googlenav.map.MapTile: boolean isComplete()>();
+
+        if $z0 == 0 goto label2;
+
+        virtualinvoke $r2.<java.util.Vector: void addElement(java.lang.Object)>($r7);
+
+        goto label2;
+
+     label3:
+        $r9 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r9;
+
+     label5:
+        $i0 = 0;
+
+     label6:
+        $i1 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        if $i0 >= $i1 goto label7;
+
+        $r4 = $r0.<com.google.googlenav.map.MapService: java.util.Hashtable mapCache>;
+
+        $r6 = virtualinvoke $r2.<java.util.Vector: java.lang.Object elementAt(int)>($i0);
+
+        virtualinvoke $r4.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>($r6);
+
+        $i0 = $i0 + 1;
+
+        goto label6;
+
+     label7:
+        exitmonitor $r1;
+
+     label8:
+        return;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label3;
+        catch java.lang.Throwable from label6 to label8 with label3;
+    }
+
+    public static void <clinit>()
+    {
+        <com.google.googlenav.map.MapService: long TRIM_TIME> = 2101L;
+
+        <com.google.googlenav.map.MapService: long OUT_OF_MEMORY_RECOVERY_TIME> = 10000L;
+
+        <com.google.googlenav.map.MapService: int MINIMUM_FREE_MEM> = 40000;
+
+        <com.google.googlenav.map.MapService: int MINIMUM_CACHE_SIZE> = 25000;
+
+        <com.google.googlenav.map.MapService: long EMERGENCY_IMAGE_COMPACT_TIME> = 2000L;
+
+        <com.google.googlenav.map.MapService: long COMPACT_TIME> = 3113L;
+
+        <com.google.googlenav.map.MapService: long COMPACT_IMAGE_TIME> = 12000L;
+
+        <com.google.googlenav.map.MapService: long BACKGROUND_THREAD_WAIT_INTERVAL> = 250L;
+
+        <com.google.googlenav.map.MapService: int AUTO_CONFIG> = -1;
+
+        return;
+    }
+}

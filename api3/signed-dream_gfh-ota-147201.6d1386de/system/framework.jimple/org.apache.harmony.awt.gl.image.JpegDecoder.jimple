@@ -1,0 +1,430 @@
+public class org.apache.harmony.awt.gl.image.JpegDecoder extends org.apache.harmony.awt.gl.image.ImageDecoder
+{
+    private static final int BUFFER_SIZE;
+    public static final int JCS_GRAYSCALE;
+    public static final int JCS_RGB;
+    private static java.awt.image.ColorModel cmGray;
+    private static java.awt.image.ColorModel cmRGB;
+    private static final int hintflagsProgressive;
+    private static final int hintflagsSingle;
+    private byte[] buffer;
+    private int bytesConsumed;
+    private java.awt.image.ColorModel cm;
+    private int currScanline;
+    private long hNativeDecoder;
+    private boolean headerDone;
+    private int imageHeight;
+    private int imageWidth;
+    private int jpegColorSpace;
+    private boolean progressive;
+
+    static void <clinit>()
+    {
+        java.awt.color.ColorSpace $r0;
+        java.awt.image.ComponentColorModel $r1;
+        java.awt.image.DirectColorModel $r2;
+
+        <org.apache.harmony.awt.gl.image.JpegDecoder: int hintflagsSingle> = 30;
+
+        <org.apache.harmony.awt.gl.image.JpegDecoder: int hintflagsProgressive> = 22;
+
+        <org.apache.harmony.awt.gl.image.JpegDecoder: int JCS_RGB> = 2;
+
+        <org.apache.harmony.awt.gl.image.JpegDecoder: int JCS_GRAYSCALE> = 1;
+
+        <org.apache.harmony.awt.gl.image.JpegDecoder: int BUFFER_SIZE> = 1024;
+
+        staticinvoke <java.lang.System: void loadLibrary(java.lang.String)>("jpegdecoder");
+
+        $r1 = new java.awt.image.ComponentColorModel;
+
+        $r0 = staticinvoke <java.awt.color.ColorSpace: java.awt.color.ColorSpace getInstance(int)>(1003);
+
+        specialinvoke $r1.<java.awt.image.ComponentColorModel: void <init>(java.awt.color.ColorSpace,boolean,boolean,int,int)>($r0, 0, 0, 1, 0);
+
+        <org.apache.harmony.awt.gl.image.JpegDecoder: java.awt.image.ColorModel cmGray> = $r1;
+
+        $r2 = new java.awt.image.DirectColorModel;
+
+        specialinvoke $r2.<java.awt.image.DirectColorModel: void <init>(int,int,int,int)>(24, 16711680, 65280, 255);
+
+        <org.apache.harmony.awt.gl.image.JpegDecoder: java.awt.image.ColorModel cmRGB> = $r2;
+
+        staticinvoke <org.apache.harmony.awt.gl.image.JpegDecoder: void initIDs()>();
+
+        return;
+    }
+
+    public void <init>(org.apache.harmony.awt.gl.image.DecodingImageSource, java.io.InputStream)
+    {
+        org.apache.harmony.awt.gl.image.JpegDecoder $r0;
+        org.apache.harmony.awt.gl.image.DecodingImageSource $r1;
+        java.io.InputStream $r2;
+        byte[] $r3;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.JpegDecoder;
+
+        $r1 := @parameter0: org.apache.harmony.awt.gl.image.DecodingImageSource;
+
+        $r2 := @parameter1: java.io.InputStream;
+
+        specialinvoke $r0.<org.apache.harmony.awt.gl.image.ImageDecoder: void <init>(org.apache.harmony.awt.gl.image.DecodingImageSource,java.io.InputStream)>($r1, $r2);
+
+        $r3 = newarray (byte)[1024];
+
+        $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: byte[] buffer> = $r3;
+
+        $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: long hNativeDecoder> = 0L;
+
+        $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: boolean headerDone> = 0;
+
+        $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: int imageWidth> = -1;
+
+        $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: int imageHeight> = -1;
+
+        $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: boolean progressive> = 0;
+
+        $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: int jpegColorSpace> = 0;
+
+        $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: int bytesConsumed> = 0;
+
+        $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: int currScanline> = 0;
+
+        $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: java.awt.image.ColorModel cm> = null;
+
+        return;
+    }
+
+    private native java.lang.Object decode(byte[], int, long);
+
+    private static native void initIDs();
+
+    private static native void releaseNativeDecoder(long);
+
+    public void decodeImage() throws java.io.IOException
+    {
+        org.apache.harmony.awt.gl.image.JpegDecoder $r0;
+        int $i0, $i1, $i2;
+        boolean $z0, $z1;
+        java.io.InputStream $r1;
+        byte[] $r2;
+        long $l3;
+        java.lang.Object $r3;
+        byte $b4;
+        java.io.IOException $r4;
+        java.lang.Throwable $r5;
+        int[] $r6;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.JpegDecoder;
+
+        $z0 = 0;
+
+        $i1 = 0;
+
+     label01:
+        $i0 = 1024 - $i1;
+
+     label02:
+        $r1 = $r0.<org.apache.harmony.awt.gl.image.ImageDecoder: java.io.InputStream inputStream>;
+
+        $r2 = $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: byte[] buffer>;
+
+     label03:
+        $i0 = virtualinvoke $r1.<java.io.InputStream: int read(byte[],int,int)>($r2, $i1, $i0);
+
+     label04:
+        $i2 = $i0;
+
+        if $i0 >= 0 goto label05;
+
+        $i2 = 0;
+
+        $z0 = 1;
+
+     label05:
+        $i1 = $i1 + $i2;
+
+        $r2 = $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: byte[] buffer>;
+
+     label06:
+        $l3 = $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: long hNativeDecoder>;
+
+        $r3 = specialinvoke $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: java.lang.Object decode(byte[],int,long)>($r2, $i1, $l3);
+
+     label07:
+        $i0 = $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: int bytesConsumed>;
+
+        $i1 = $i1 - $i0;
+
+        $z1 = $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: boolean headerDone>;
+
+        if $z1 != 0 goto label10;
+
+        $i0 = $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: int imageWidth>;
+
+     label08:
+        if $i0 == -1 goto label10;
+
+        virtualinvoke $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: void returnHeader()>();
+
+     label09:
+        $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: boolean headerDone> = 1;
+
+     label10:
+        $i0 = $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: int bytesConsumed>;
+
+     label11:
+        if $i0 >= 0 goto label14;
+
+     label12:
+        virtualinvoke $r0.<org.apache.harmony.awt.gl.image.ImageDecoder: void imageComplete(int)>(3);
+
+     label13:
+        virtualinvoke $r0.<org.apache.harmony.awt.gl.image.ImageDecoder: void closeStream()>();
+
+        return;
+
+     label14:
+        $z1 = $r3 instanceof byte[];
+
+        if $z1 == 0 goto label26;
+
+        $r2 = (byte[]) $r3;
+
+        $r2 = (byte[]) $r2;
+
+        $i0 = lengthof $r2;
+
+        $i2 = $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: int currScanline>;
+
+     label15:
+        virtualinvoke $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: void returnData(byte[],int)>($r2, $i2);
+
+     label16:
+        $l3 = $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: long hNativeDecoder>;
+
+     label17:
+        $b4 = $l3 cmp 0L;
+
+     label18:
+        if $b4 == 0 goto label12;
+
+     label19:
+        if $i0 != 0 goto label01;
+
+     label20:
+        if $z0 == 0 goto label01;
+
+     label21:
+        $l3 = $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: long hNativeDecoder>;
+
+        staticinvoke <org.apache.harmony.awt.gl.image.JpegDecoder: void releaseNativeDecoder(long)>($l3);
+
+     label22:
+        goto label12;
+
+     label23:
+        $r4 := @caughtexception;
+
+     label24:
+        throw $r4;
+
+     label25:
+        $r5 := @caughtexception;
+
+        virtualinvoke $r0.<org.apache.harmony.awt.gl.image.ImageDecoder: void closeStream()>();
+
+        throw $r5;
+
+     label26:
+        $z1 = $r3 instanceof int[];
+
+        if $z1 == 0 goto label29;
+
+        $r6 = (int[]) $r3;
+
+        $r6 = (int[]) $r6;
+
+        $i0 = lengthof $r6;
+
+        $i2 = $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: int currScanline>;
+
+     label27:
+        virtualinvoke $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: void returnData(int[],int)>($r6, $i2);
+
+     label28:
+        goto label16;
+
+     label29:
+        $i0 = 0;
+
+        goto label16;
+
+        catch java.io.IOException from label03 to label04 with label23;
+        catch java.io.IOException from label06 to label07 with label23;
+        catch java.io.IOException from label08 to label09 with label23;
+        catch java.io.IOException from label11 to label13 with label23;
+        catch java.lang.Throwable from label02 to label04 with label25;
+        catch java.lang.Throwable from label05 to label13 with label25;
+        catch java.io.IOException from label15 to label16 with label23;
+        catch java.io.IOException from label18 to label19 with label23;
+        catch java.io.IOException from label21 to label22 with label23;
+        catch java.lang.Throwable from label14 to label17 with label25;
+        catch java.lang.Throwable from label18 to label19 with label25;
+        catch java.lang.Throwable from label20 to label22 with label25;
+        catch java.lang.Throwable from label24 to label25 with label25;
+        catch java.io.IOException from label27 to label28 with label23;
+        catch java.lang.Throwable from label26 to label28 with label25;
+    }
+
+    public void returnData(byte[], int)
+    {
+        org.apache.harmony.awt.gl.image.JpegDecoder $r0;
+        byte[] $r1;
+        int $i0, $i1, $i2, $i3;
+        java.awt.image.ColorModel $r2;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.JpegDecoder;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 = lengthof $r1;
+
+        $i2 = $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: int imageWidth>;
+
+        $i1 = $i1 / $i2;
+
+        if $i1 <= 0 goto label1;
+
+        $i3 = $i0 - $i1;
+
+        $i0 = $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: int imageWidth>;
+
+        $r2 = $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: java.awt.image.ColorModel cm>;
+
+        $i2 = $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: int imageWidth>;
+
+        virtualinvoke $r0.<org.apache.harmony.awt.gl.image.ImageDecoder: void setPixels(int,int,int,int,java.awt.image.ColorModel,byte[],int,int)>(0, $i3, $i0, $i1, $r2, $r1, 0, $i2);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public void returnData(int[], int)
+    {
+        org.apache.harmony.awt.gl.image.JpegDecoder $r0;
+        int[] $r1;
+        int $i0, $i1, $i2, $i3;
+        java.awt.image.ColorModel $r2;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.JpegDecoder;
+
+        $r1 := @parameter0: int[];
+
+        $i0 := @parameter1: int;
+
+        $i1 = lengthof $r1;
+
+        $i2 = $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: int imageWidth>;
+
+        $i1 = $i1 / $i2;
+
+        if $i1 <= 0 goto label1;
+
+        $i3 = $i0 - $i1;
+
+        $i0 = $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: int imageWidth>;
+
+        $r2 = $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: java.awt.image.ColorModel cm>;
+
+        $i2 = $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: int imageWidth>;
+
+        virtualinvoke $r0.<org.apache.harmony.awt.gl.image.ImageDecoder: void setPixels(int,int,int,int,java.awt.image.ColorModel,int[],int,int)>(0, $i3, $i0, $i1, $r2, $r1, 0, $i2);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public void returnHeader()
+    {
+        org.apache.harmony.awt.gl.image.JpegDecoder $r0;
+        java.lang.String $r1;
+        int $i0, $i1;
+        java.lang.IllegalArgumentException $r2;
+        java.awt.image.ColorModel $r3;
+        boolean $z0;
+        byte $b2;
+        java.util.Hashtable $r4;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.JpegDecoder;
+
+        $i0 = $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: int imageWidth>;
+
+        $i1 = $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: int imageHeight>;
+
+        virtualinvoke $r0.<org.apache.harmony.awt.gl.image.ImageDecoder: void setDimensions(int,int)>($i0, $i1);
+
+        $i0 = $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: int jpegColorSpace>;
+
+        lookupswitch($i0)
+        {
+            case 1: goto label2;
+            case 2: goto label5;
+            default: goto label1;
+        };
+
+     label1:
+        $r2 = new java.lang.IllegalArgumentException;
+
+        $r1 = staticinvoke <org.apache.harmony.awt.internal.nls.Messages: java.lang.String getString(java.lang.String)>("awt.3D");
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r1);
+
+        throw $r2;
+
+     label2:
+        $r3 = <org.apache.harmony.awt.gl.image.JpegDecoder: java.awt.image.ColorModel cmGray>;
+
+        $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: java.awt.image.ColorModel cm> = $r3;
+
+     label3:
+        $r3 = $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: java.awt.image.ColorModel cm>;
+
+        virtualinvoke $r0.<org.apache.harmony.awt.gl.image.ImageDecoder: void setColorModel(java.awt.image.ColorModel)>($r3);
+
+        $z0 = $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: boolean progressive>;
+
+        if $z0 == 0 goto label6;
+
+        $b2 = 22;
+
+     label4:
+        virtualinvoke $r0.<org.apache.harmony.awt.gl.image.ImageDecoder: void setHints(int)>($b2);
+
+        $r4 = new java.util.Hashtable;
+
+        specialinvoke $r4.<java.util.Hashtable: void <init>()>();
+
+        virtualinvoke $r0.<org.apache.harmony.awt.gl.image.ImageDecoder: void setProperties(java.util.Hashtable)>($r4);
+
+        return;
+
+     label5:
+        $r3 = <org.apache.harmony.awt.gl.image.JpegDecoder: java.awt.image.ColorModel cmRGB>;
+
+        $r0.<org.apache.harmony.awt.gl.image.JpegDecoder: java.awt.image.ColorModel cm> = $r3;
+
+        goto label3;
+
+     label6:
+        $b2 = 30;
+
+        goto label4;
+    }
+}

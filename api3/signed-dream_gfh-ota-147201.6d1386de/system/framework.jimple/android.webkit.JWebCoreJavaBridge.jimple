@@ -1,0 +1,337 @@
+final class android.webkit.JWebCoreJavaBridge extends android.os.Handler
+{
+    private static final int FUNCPTR_MESSAGE;
+    private static final java.lang.String LOGTAG;
+    private static final int TIMER_MESSAGE;
+    private boolean mHasInstantTimer;
+    private int mNativeBridge;
+    private int mPauseTimerRefCount;
+
+    public void <init>()
+    {
+        android.webkit.JWebCoreJavaBridge $r0;
+
+        $r0 := @this: android.webkit.JWebCoreJavaBridge;
+
+        specialinvoke $r0.<android.os.Handler: void <init>()>();
+
+        specialinvoke $r0.<android.webkit.JWebCoreJavaBridge: void nativeConstructor()>();
+
+        return;
+    }
+
+    private java.lang.String cookies(java.lang.String)
+    {
+        android.webkit.JWebCoreJavaBridge $r0;
+        java.lang.String $r1;
+        android.webkit.CookieManager $r2;
+
+        $r0 := @this: android.webkit.JWebCoreJavaBridge;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = staticinvoke <android.webkit.CookieManager: android.webkit.CookieManager getInstance()>();
+
+        $r1 = virtualinvoke $r2.<android.webkit.CookieManager: java.lang.String getCookie(java.lang.String)>($r1);
+
+        return $r1;
+    }
+
+    private boolean cookiesEnabled()
+    {
+        android.webkit.JWebCoreJavaBridge $r0;
+        android.webkit.CookieManager $r1;
+        boolean $z0;
+
+        $r0 := @this: android.webkit.JWebCoreJavaBridge;
+
+        $r1 = staticinvoke <android.webkit.CookieManager: android.webkit.CookieManager getInstance()>();
+
+        $z0 = virtualinvoke $r1.<android.webkit.CookieManager: boolean acceptCookie()>();
+
+        return $z0;
+    }
+
+    private native void nativeConstructor();
+
+    private native void nativeFinalize();
+
+    private native void nativeServiceFuncPtrQueue();
+
+    private void setCookies(java.lang.String, java.lang.String, java.lang.String)
+    {
+        android.webkit.JWebCoreJavaBridge $r0;
+        java.lang.String $r1, $r2, $r4;
+        java.lang.StringBuilder $r3;
+        boolean $z0;
+        int $i0, $i1, $i2, $i3;
+        java.lang.CharSequence $r5;
+        android.webkit.CookieManager $r6;
+
+        $r0 := @this: android.webkit.JWebCoreJavaBridge;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r4 := @parameter2: java.lang.String;
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean contains(java.lang.CharSequence)>("\r");
+
+        if $z0 != 0 goto label01;
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean contains(java.lang.CharSequence)>("\n");
+
+        if $z0 == 0 goto label10;
+
+     label01:
+        $i0 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>(int)>($i0);
+
+        $i1 = 0;
+
+     label02:
+        if $i1 == -1 goto label09;
+
+        if $i1 >= $i0 goto label09;
+
+        $i2 = virtualinvoke $r4.<java.lang.String: int indexOf(int,int)>(13, $i1);
+
+        $i3 = virtualinvoke $r4.<java.lang.String: int indexOf(int,int)>(10, $i1);
+
+        if $i2 != -1 goto label05;
+
+        $i2 = $i3;
+
+     label03:
+        if $i2 <= $i1 goto label08;
+
+        $r5 = virtualinvoke $r4.<java.lang.String: java.lang.CharSequence subSequence(int,int)>($i1, $i2);
+
+        virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.CharSequence)>($r5);
+
+     label04:
+        $i1 = $i2 + 1;
+
+        goto label02;
+
+     label05:
+        if $i3 != -1 goto label06;
+
+        goto label03;
+
+     label06:
+        if $i2 >= $i3 goto label07;
+
+        goto label03;
+
+     label07:
+        $i2 = $i3;
+
+        goto label03;
+
+     label08:
+        if $i2 != -1 goto label04;
+
+        $r5 = virtualinvoke $r4.<java.lang.String: java.lang.CharSequence subSequence(int,int)>($i1, $i0);
+
+        virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.CharSequence)>($r5);
+
+     label09:
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label10:
+        $r6 = staticinvoke <android.webkit.CookieManager: android.webkit.CookieManager getInstance()>();
+
+        virtualinvoke $r6.<android.webkit.CookieManager: void setCookie(java.lang.String,java.lang.String)>($r1, $r4);
+
+        return;
+    }
+
+    private native void setDeferringTimers(boolean);
+
+    private void setSharedTimer(long)
+    {
+        android.webkit.JWebCoreJavaBridge $r0;
+        long $l0;
+        byte $b1;
+        boolean $z0;
+        android.os.Message $r1;
+
+        $r0 := @this: android.webkit.JWebCoreJavaBridge;
+
+        $l0 := @parameter0: long;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 > 0 goto label2;
+
+        $z0 = $r0.<android.webkit.JWebCoreJavaBridge: boolean mHasInstantTimer>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r0.<android.webkit.JWebCoreJavaBridge: boolean mHasInstantTimer> = 1;
+
+        $r1 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(1);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessageDelayed(android.os.Message,long)>($r1, $l0);
+
+        return;
+
+     label2:
+        $r1 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(1);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessageDelayed(android.os.Message,long)>($r1, $l0);
+
+        return;
+    }
+
+    private native void sharedTimerFired();
+
+    private void signalServiceFuncPtrQueue()
+    {
+        android.webkit.JWebCoreJavaBridge $r0;
+        android.os.Message $r1;
+
+        $r0 := @this: android.webkit.JWebCoreJavaBridge;
+
+        $r1 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(2);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r1);
+
+        return;
+    }
+
+    private void stopSharedTimer()
+    {
+        android.webkit.JWebCoreJavaBridge $r0;
+
+        $r0 := @this: android.webkit.JWebCoreJavaBridge;
+
+        virtualinvoke $r0.<android.os.Handler: void removeMessages(int)>(1);
+
+        $r0.<android.webkit.JWebCoreJavaBridge: boolean mHasInstantTimer> = 0;
+
+        return;
+    }
+
+    protected void finalize()
+    {
+        android.webkit.JWebCoreJavaBridge $r0;
+
+        $r0 := @this: android.webkit.JWebCoreJavaBridge;
+
+        specialinvoke $r0.<android.webkit.JWebCoreJavaBridge: void nativeFinalize()>();
+
+        return;
+    }
+
+    public void handleMessage(android.os.Message)
+    {
+        android.webkit.JWebCoreJavaBridge $r0;
+        android.os.Message $r1;
+        android.webkit.PerfChecker $r2;
+        int $i0;
+
+        $r0 := @this: android.webkit.JWebCoreJavaBridge;
+
+        $r1 := @parameter0: android.os.Message;
+
+        $i0 = $r1.<android.os.Message: int what>;
+
+        lookupswitch($i0)
+        {
+            case 1: goto label2;
+            case 2: goto label3;
+            default: goto label1;
+        };
+
+     label1:
+        return;
+
+     label2:
+        $r2 = new android.webkit.PerfChecker;
+
+        specialinvoke $r2.<android.webkit.PerfChecker: void <init>()>();
+
+        $r0.<android.webkit.JWebCoreJavaBridge: boolean mHasInstantTimer> = 0;
+
+        specialinvoke $r0.<android.webkit.JWebCoreJavaBridge: void sharedTimerFired()>();
+
+        virtualinvoke $r2.<android.webkit.PerfChecker: void responseAlert(java.lang.String)>("sharedTimer");
+
+        return;
+
+     label3:
+        specialinvoke $r0.<android.webkit.JWebCoreJavaBridge: void nativeServiceFuncPtrQueue()>();
+
+        return;
+    }
+
+    public void pause()
+    {
+        android.webkit.JWebCoreJavaBridge $r0;
+        int $i0;
+
+        $r0 := @this: android.webkit.JWebCoreJavaBridge;
+
+        $i0 = $r0.<android.webkit.JWebCoreJavaBridge: int mPauseTimerRefCount>;
+
+        $i0 = $i0 - 1;
+
+        $r0.<android.webkit.JWebCoreJavaBridge: int mPauseTimerRefCount> = $i0;
+
+        if $i0 != 0 goto label1;
+
+        specialinvoke $r0.<android.webkit.JWebCoreJavaBridge: void setDeferringTimers(boolean)>(1);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public void resume()
+    {
+        android.webkit.JWebCoreJavaBridge $r0;
+        int $i0;
+
+        $r0 := @this: android.webkit.JWebCoreJavaBridge;
+
+        $i0 = $r0.<android.webkit.JWebCoreJavaBridge: int mPauseTimerRefCount>;
+
+        $i0 = $i0 + 1;
+
+        $r0.<android.webkit.JWebCoreJavaBridge: int mPauseTimerRefCount> = $i0;
+
+        if $i0 != 1 goto label1;
+
+        specialinvoke $r0.<android.webkit.JWebCoreJavaBridge: void setDeferringTimers(boolean)>(0);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public native void setCacheSize(int);
+
+    public native void setNetworkOnLine(boolean);
+
+    public static void <clinit>()
+    {
+        <android.webkit.JWebCoreJavaBridge: int TIMER_MESSAGE> = 1;
+
+        <android.webkit.JWebCoreJavaBridge: java.lang.String LOGTAG> = "webkit-timers";
+
+        <android.webkit.JWebCoreJavaBridge: int FUNCPTR_MESSAGE> = 2;
+
+        return;
+    }
+}

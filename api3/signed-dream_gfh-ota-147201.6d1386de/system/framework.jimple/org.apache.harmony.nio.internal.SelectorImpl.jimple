@@ -1,0 +1,1037 @@
+final class org.apache.harmony.nio.internal.SelectorImpl extends java.nio.channels.spi.AbstractSelector
+{
+    private static final int MOCK_READBUF_SIZE;
+    private static final int MOCK_WRITEBUF_SIZE;
+    private static final int NA;
+    private static final int READABLE;
+    private static final int SELECT_BLOCK;
+    private static final int SELECT_NOW;
+    private static final int WRITEABLE;
+    private final java.util.Set keys;
+    final java.lang.Object keysLock;
+    private java.io.FileDescriptor[] readable;
+    private java.nio.channels.SelectionKey[] readableChannels;
+    private java.util.List readableFDs;
+    private final java.util.Set selectedKeys;
+    private java.nio.channels.Pipe$SinkChannel sink;
+    private java.nio.channels.Pipe$SourceChannel source;
+    private java.io.FileDescriptor sourcefd;
+    private java.util.Set unaddableSelectedKeys;
+    private java.util.Set unmodifiableKeys;
+    private java.io.FileDescriptor[] writable;
+    private java.nio.channels.SelectionKey[] writableChannels;
+    private java.util.List writableFDs;
+
+    public void <init>(java.nio.channels.spi.SelectorProvider)
+    {
+        org.apache.harmony.nio.internal.SelectorImpl $r0;
+        java.nio.channels.spi.SelectorProvider $r1;
+        java.lang.Object $r2;
+        java.util.HashSet $r3;
+        java.util.Set $r4;
+        org.apache.harmony.nio.internal.SelectorImpl$UnaddableSet $r5;
+        java.util.ArrayList $r6;
+        java.nio.channels.Pipe $r7;
+        java.nio.channels.Pipe$SinkChannel $r8;
+        java.nio.channels.Pipe$SourceChannel $r9;
+        org.apache.harmony.luni.platform.FileDescriptorHandler $r10;
+        java.io.FileDescriptor $r11;
+        java.io.IOException $r12;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SelectorImpl;
+
+        $r1 := @parameter0: java.nio.channels.spi.SelectorProvider;
+
+        specialinvoke $r0.<java.nio.channels.spi.AbstractSelector: void <init>(java.nio.channels.spi.SelectorProvider)>($r1);
+
+        $r2 = new java.lang.Object;
+
+        specialinvoke $r2.<java.lang.Object: void <init>()>();
+
+        $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.lang.Object keysLock> = $r2;
+
+        $r3 = new java.util.HashSet;
+
+        specialinvoke $r3.<java.util.HashSet: void <init>()>();
+
+        $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.util.Set keys> = $r3;
+
+        $r4 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.util.Set keys>;
+
+        $r4 = staticinvoke <java.util.Collections: java.util.Set unmodifiableSet(java.util.Set)>($r4);
+
+        $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.util.Set unmodifiableKeys> = $r4;
+
+        $r3 = new java.util.HashSet;
+
+        specialinvoke $r3.<java.util.HashSet: void <init>()>();
+
+        $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.util.Set selectedKeys> = $r3;
+
+        $r5 = new org.apache.harmony.nio.internal.SelectorImpl$UnaddableSet;
+
+        $r4 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.util.Set selectedKeys>;
+
+        specialinvoke $r5.<org.apache.harmony.nio.internal.SelectorImpl$UnaddableSet: void <init>(java.util.Set)>($r4);
+
+        $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.util.Set unaddableSelectedKeys> = $r5;
+
+        $r6 = new java.util.ArrayList;
+
+        specialinvoke $r6.<java.util.ArrayList: void <init>()>();
+
+        $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.util.List readableFDs> = $r6;
+
+        $r6 = new java.util.ArrayList;
+
+        specialinvoke $r6.<java.util.ArrayList: void <init>()>();
+
+        $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.util.List writableFDs> = $r6;
+
+     label1:
+        $r7 = virtualinvoke $r1.<java.nio.channels.spi.SelectorProvider: java.nio.channels.Pipe openPipe()>();
+
+        $r8 = virtualinvoke $r7.<java.nio.channels.Pipe: java.nio.channels.Pipe$SinkChannel sink()>();
+
+        $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.nio.channels.Pipe$SinkChannel sink> = $r8;
+
+        $r9 = virtualinvoke $r7.<java.nio.channels.Pipe: java.nio.channels.Pipe$SourceChannel source()>();
+
+     label2:
+        $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.nio.channels.Pipe$SourceChannel source> = $r9;
+
+        $r9 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.nio.channels.Pipe$SourceChannel source>;
+
+     label3:
+        $r10 = (org.apache.harmony.luni.platform.FileDescriptorHandler) $r9;
+
+        $r11 = interfaceinvoke $r10.<org.apache.harmony.luni.platform.FileDescriptorHandler: java.io.FileDescriptor getFD()>();
+
+     label4:
+        $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.io.FileDescriptor sourcefd> = $r11;
+
+     label5:
+        $r9 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.nio.channels.Pipe$SourceChannel source>;
+
+        virtualinvoke $r9.<java.nio.channels.spi.AbstractSelectableChannel: java.nio.channels.SelectableChannel configureBlocking(boolean)>(0);
+
+     label6:
+        return;
+
+     label7:
+        $r12 := @caughtexception;
+
+        return;
+
+        catch java.io.IOException from label1 to label2 with label7;
+        catch java.io.IOException from label3 to label4 with label7;
+        catch java.io.IOException from label5 to label6 with label7;
+    }
+
+    private void closeCheck()
+    {
+        org.apache.harmony.nio.internal.SelectorImpl $r0;
+        boolean $z0;
+        java.nio.channels.ClosedSelectorException $r1;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SelectorImpl;
+
+        $z0 = virtualinvoke $r0.<java.nio.channels.spi.AbstractSelector: boolean isOpen()>();
+
+        if $z0 != 0 goto label1;
+
+        $r1 = new java.nio.channels.ClosedSelectorException;
+
+        specialinvoke $r1.<java.nio.channels.ClosedSelectorException: void <init>()>();
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+
+    private void doCancel()
+    {
+        org.apache.harmony.nio.internal.SelectorImpl $r0;
+        java.util.Set $r1, $r6;
+        int $i0;
+        java.util.Iterator $r2;
+        boolean $z0;
+        java.lang.Object $r3;
+        java.nio.channels.SelectionKey $r4;
+        java.nio.channels.spi.AbstractSelectionKey $r5;
+        java.lang.Throwable $r7;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SelectorImpl;
+
+        $r1 = virtualinvoke $r0.<java.nio.channels.spi.AbstractSelector: java.util.Set cancelledKeys()>();
+
+        entermonitor $r1;
+
+     label1:
+        $i0 = interfaceinvoke $r1.<java.util.Set: int size()>();
+
+        if $i0 <= 0 goto label5;
+
+        $r2 = interfaceinvoke $r1.<java.util.Set: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label5;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        $r4 = (java.nio.channels.SelectionKey) $r3;
+
+        $r5 = (java.nio.channels.spi.AbstractSelectionKey) $r4;
+
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractSelector: void deregister(java.nio.channels.spi.AbstractSelectionKey)>($r5);
+
+        $r6 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.util.Set keys>;
+
+        interfaceinvoke $r6.<java.util.Set: boolean remove(java.lang.Object)>($r4);
+
+        $r6 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.util.Set selectedKeys>;
+
+        interfaceinvoke $r6.<java.util.Set: boolean remove(java.lang.Object)>($r4);
+
+        goto label2;
+
+     label3:
+        $r7 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r7;
+
+     label5:
+        interfaceinvoke $r1.<java.util.Set: void clear()>();
+
+        exitmonitor $r1;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label3;
+        catch java.lang.Throwable from label5 to label6 with label3;
+    }
+
+    private boolean isConnected(org.apache.harmony.nio.internal.SelectionKeyImpl)
+    {
+        org.apache.harmony.nio.internal.SelectorImpl $r0;
+        org.apache.harmony.nio.internal.SelectionKeyImpl $r1;
+        java.nio.channels.SelectableChannel $r2;
+        boolean $z0;
+        java.nio.channels.SocketChannel $r3;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SelectorImpl;
+
+        $r1 := @parameter0: org.apache.harmony.nio.internal.SelectionKeyImpl;
+
+        $r2 = virtualinvoke $r1.<org.apache.harmony.nio.internal.SelectionKeyImpl: java.nio.channels.SelectableChannel channel()>();
+
+        $z0 = $r2 instanceof java.nio.channels.SocketChannel;
+
+        if $z0 == 0 goto label1;
+
+        $r3 = (java.nio.channels.SocketChannel) $r2;
+
+        $z0 = virtualinvoke $r3.<java.nio.channels.SocketChannel: boolean isConnected()>();
+
+        return $z0;
+
+     label1:
+        return 1;
+    }
+
+    private void prepareChannels()
+    {
+        org.apache.harmony.nio.internal.SelectorImpl $r0;
+        java.util.ArrayList $r1, $r2;
+        java.util.List $r3;
+        java.io.FileDescriptor $r4;
+        java.nio.channels.Pipe$SourceChannel $r5;
+        java.nio.channels.SelectionKey $r6;
+        java.lang.Object $r7, $r10;
+        java.util.Set $r8;
+        java.util.Iterator $r9;
+        boolean $z0, $z1;
+        org.apache.harmony.nio.internal.SelectionKeyImpl $r11;
+        int $i0;
+        java.nio.channels.SelectableChannel $r12;
+        org.apache.harmony.luni.platform.FileDescriptorHandler $r13;
+        java.lang.Throwable $r14;
+        java.nio.channels.SelectionKey[] $r15;
+        java.lang.Object[] $r16;
+        java.io.FileDescriptor[] $r17;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SelectorImpl;
+
+        $r3 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.util.List readableFDs>;
+
+        $r4 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.io.FileDescriptor sourcefd>;
+
+        interfaceinvoke $r3.<java.util.List: boolean add(java.lang.Object)>($r4);
+
+        $r1 = new java.util.ArrayList;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>()>();
+
+        $r5 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.nio.channels.Pipe$SourceChannel source>;
+
+        $r6 = virtualinvoke $r5.<java.nio.channels.spi.AbstractSelectableChannel: java.nio.channels.SelectionKey keyFor(java.nio.channels.Selector)>($r0);
+
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>($r6);
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        $r7 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.lang.Object keysLock>;
+
+        entermonitor $r7;
+
+     label01:
+        $r8 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.util.Set keys>;
+
+        $r9 = interfaceinvoke $r8.<java.util.Set: java.util.Iterator iterator()>();
+
+     label02:
+        $z0 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label10;
+
+        $r10 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+        $r11 = (org.apache.harmony.nio.internal.SelectionKeyImpl) $r10;
+
+        $i0 = virtualinvoke $r11.<org.apache.harmony.nio.internal.SelectionKeyImpl: int interestOps()>();
+
+        $r11.<org.apache.harmony.nio.internal.SelectionKeyImpl: int oldInterestOps> = $i0;
+
+        $i0 = $r11.<org.apache.harmony.nio.internal.SelectionKeyImpl: int oldInterestOps>;
+
+        $i0 = $i0 & 17;
+
+        if $i0 == 0 goto label08;
+
+        $z0 = 1;
+
+     label03:
+        $i0 = $r11.<org.apache.harmony.nio.internal.SelectionKeyImpl: int oldInterestOps>;
+
+        $i0 = $i0 & 12;
+
+        if $i0 == 0 goto label09;
+
+        $z1 = 1;
+
+     label04:
+        $r12 = virtualinvoke $r11.<org.apache.harmony.nio.internal.SelectionKeyImpl: java.nio.channels.SelectableChannel channel()>();
+
+        if $z0 == 0 goto label05;
+
+        $r6 = virtualinvoke $r12.<java.nio.channels.SelectableChannel: java.nio.channels.SelectionKey keyFor(java.nio.channels.Selector)>($r0);
+
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>($r6);
+
+        $r3 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.util.List readableFDs>;
+
+        $r13 = (org.apache.harmony.luni.platform.FileDescriptorHandler) $r12;
+
+        $r4 = interfaceinvoke $r13.<org.apache.harmony.luni.platform.FileDescriptorHandler: java.io.FileDescriptor getFD()>();
+
+        interfaceinvoke $r3.<java.util.List: boolean add(java.lang.Object)>($r4);
+
+     label05:
+        if $z1 == 0 goto label02;
+
+        $r6 = virtualinvoke $r12.<java.nio.channels.SelectableChannel: java.nio.channels.SelectionKey keyFor(java.nio.channels.Selector)>($r0);
+
+        interfaceinvoke $r2.<java.util.List: boolean add(java.lang.Object)>($r6);
+
+        $r3 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.util.List writableFDs>;
+
+        $r13 = (org.apache.harmony.luni.platform.FileDescriptorHandler) $r12;
+
+        $r4 = interfaceinvoke $r13.<org.apache.harmony.luni.platform.FileDescriptorHandler: java.io.FileDescriptor getFD()>();
+
+        interfaceinvoke $r3.<java.util.List: boolean add(java.lang.Object)>($r4);
+
+        goto label02;
+
+     label06:
+        $r14 := @caughtexception;
+
+        exitmonitor $r7;
+
+     label07:
+        throw $r14;
+
+     label08:
+        $z0 = 0;
+
+        goto label03;
+
+     label09:
+        $z1 = 0;
+
+        goto label04;
+
+     label10:
+        exitmonitor $r7;
+
+     label11:
+        $r15 = newarray (java.nio.channels.SelectionKey)[0];
+
+        $r16 = interfaceinvoke $r1.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r15);
+
+        $r15 = (java.nio.channels.SelectionKey[]) $r16;
+
+        $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.nio.channels.SelectionKey[] readableChannels> = $r15;
+
+        $r15 = newarray (java.nio.channels.SelectionKey)[0];
+
+        $r16 = interfaceinvoke $r2.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r15);
+
+        $r15 = (java.nio.channels.SelectionKey[]) $r16;
+
+        $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.nio.channels.SelectionKey[] writableChannels> = $r15;
+
+        $r3 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.util.List readableFDs>;
+
+        $r17 = newarray (java.io.FileDescriptor)[0];
+
+        $r16 = interfaceinvoke $r3.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r17);
+
+        $r17 = (java.io.FileDescriptor[]) $r16;
+
+        $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.io.FileDescriptor[] readable> = $r17;
+
+        $r3 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.util.List writableFDs>;
+
+        $r17 = newarray (java.io.FileDescriptor)[0];
+
+        $r16 = interfaceinvoke $r3.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r17);
+
+        $r17 = (java.io.FileDescriptor[]) $r16;
+
+        $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.io.FileDescriptor[] writable> = $r17;
+
+        return;
+
+        catch java.lang.Throwable from label01 to label07 with label06;
+        catch java.lang.Throwable from label10 to label11 with label06;
+    }
+
+    private int processSelectResult(int[]) throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.SelectorImpl $r0;
+        int[] $r1;
+        int $i0, $i1, $i2, $i3;
+        java.nio.ByteBuffer $r2;
+        java.nio.channels.Pipe$SourceChannel $r3;
+        java.io.FileDescriptor[] $r4;
+        java.nio.channels.SelectionKey[] $r5;
+        java.nio.channels.SelectionKey $r6;
+        org.apache.harmony.nio.internal.SelectionKeyImpl $r7;
+        java.util.Set $r8;
+        boolean $z0, $z1;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SelectorImpl;
+
+        $r1 := @parameter0: int[];
+
+        $i0 = lengthof $r1;
+
+        if $i0 != 0 goto label01;
+
+        return 0;
+
+     label01:
+        $i0 = $r1[0];
+
+        if 1 != $i0 goto label03;
+
+        $r2 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer allocate(int)>(8);
+
+     label02:
+        $r3 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.nio.channels.Pipe$SourceChannel source>;
+
+        $i0 = virtualinvoke $r3.<java.nio.channels.Pipe$SourceChannel: int read(java.nio.ByteBuffer)>($r2);
+
+        if $i0 <= 0 goto label03;
+
+        virtualinvoke $r2.<java.nio.Buffer: java.nio.Buffer flip()>();
+
+        goto label02;
+
+     label03:
+        $i0 = 0;
+
+        $i1 = 1;
+
+     label04:
+        $i2 = lengthof $r1;
+
+        if $i1 >= $i2 goto label15;
+
+        $r4 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.io.FileDescriptor[] readable>;
+
+        $i2 = lengthof $r4;
+
+        if $i1 < $i2 goto label07;
+
+        $r5 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.nio.channels.SelectionKey[] writableChannels>;
+
+        $r4 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.io.FileDescriptor[] readable>;
+
+        $i2 = lengthof $r4;
+
+        $i2 = $i1 - $i2;
+
+        $r6 = $r5[$i2];
+
+     label05:
+        $r7 = (org.apache.harmony.nio.internal.SelectionKeyImpl) $r6;
+
+        if $r7 != null goto label08;
+
+     label06:
+        $i1 = $i1 + 1;
+
+        goto label04;
+
+     label07:
+        $r5 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.nio.channels.SelectionKey[] readableChannels>;
+
+        $r6 = $r5[$i1];
+
+        goto label05;
+
+     label08:
+        $r8 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.util.Set selectedKeys>;
+
+        $z0 = interfaceinvoke $r8.<java.util.Set: boolean contains(java.lang.Object)>($r7);
+
+        $i2 = 0;
+
+        $i3 = $r1[$i1];
+
+        lookupswitch($i3)
+        {
+            case 0: goto label10;
+            case 1: goto label11;
+            case 2: goto label12;
+            default: goto label09;
+        };
+
+     label09:
+        if $i2 == 0 goto label06;
+
+        if $z0 == 0 goto label14;
+
+        $i3 = virtualinvoke $r7.<org.apache.harmony.nio.internal.SelectionKeyImpl: int readyOps()>();
+
+        if $i3 == $i2 goto label14;
+
+        $i3 = virtualinvoke $r7.<org.apache.harmony.nio.internal.SelectionKeyImpl: int readyOps()>();
+
+        $i2 = $i3 | $i2;
+
+        virtualinvoke $r7.<org.apache.harmony.nio.internal.SelectionKeyImpl: void setReadyOps(int)>($i2);
+
+        $i0 = $i0 + 1;
+
+        goto label06;
+
+     label10:
+        $i2 = 0;
+
+        goto label09;
+
+     label11:
+        $i2 = $r7.<org.apache.harmony.nio.internal.SelectionKeyImpl: int oldInterestOps>;
+
+        $i2 = $i2 & 17;
+
+        goto label09;
+
+     label12:
+        $z1 = specialinvoke $r0.<org.apache.harmony.nio.internal.SelectorImpl: boolean isConnected(org.apache.harmony.nio.internal.SelectionKeyImpl)>($r7);
+
+        if $z1 == 0 goto label13;
+
+        $i2 = $r7.<org.apache.harmony.nio.internal.SelectionKeyImpl: int oldInterestOps>;
+
+        $i2 = $i2 & 4;
+
+        goto label09;
+
+     label13:
+        $i2 = $r7.<org.apache.harmony.nio.internal.SelectionKeyImpl: int oldInterestOps>;
+
+        $i2 = $i2 & 8;
+
+        goto label09;
+
+     label14:
+        if $z0 != 0 goto label06;
+
+        virtualinvoke $r7.<org.apache.harmony.nio.internal.SelectionKeyImpl: void setReadyOps(int)>($i2);
+
+        $r8 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.util.Set selectedKeys>;
+
+        interfaceinvoke $r8.<java.util.Set: boolean add(java.lang.Object)>($r7);
+
+        $i0 = $i0 + 1;
+
+        goto label06;
+
+     label15:
+        $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.nio.channels.SelectionKey[] readableChannels> = null;
+
+        $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.nio.channels.SelectionKey[] writableChannels> = null;
+
+        return $i0;
+    }
+
+    private int selectInternal(long) throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.SelectorImpl $r0;
+        long $l0;
+        java.io.FileDescriptor[] $r1, $r5;
+        java.util.Set $r2, $r3;
+        byte $b1;
+        boolean $z0;
+        org.apache.harmony.luni.platform.INetworkSystem $r4;
+        int[] $r6;
+        java.util.List $r7;
+        int $i2;
+        java.lang.Throwable $r8, $r9, $r10, $r11;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SelectorImpl;
+
+        $l0 := @parameter0: long;
+
+        specialinvoke $r0.<org.apache.harmony.nio.internal.SelectorImpl: void closeCheck()>();
+
+        entermonitor $r0;
+
+     label01:
+        $r2 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.util.Set keys>;
+
+        entermonitor $r2;
+
+     label02:
+        $r3 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.util.Set selectedKeys>;
+
+        entermonitor $r3;
+
+     label03:
+        specialinvoke $r0.<org.apache.harmony.nio.internal.SelectorImpl: void doCancel()>();
+
+        $b1 = 0L cmp $l0;
+
+        if $b1 == 0 goto label13;
+
+        $z0 = 1;
+
+     label04:
+        specialinvoke $r0.<org.apache.harmony.nio.internal.SelectorImpl: void prepareChannels()>();
+
+     label05:
+        if $z0 == 0 goto label07;
+
+     label06:
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractSelector: void begin()>();
+
+     label07:
+        $r4 = staticinvoke <org.apache.harmony.luni.platform.Platform: org.apache.harmony.luni.platform.INetworkSystem getNetworkSystem()>();
+
+        $r5 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.io.FileDescriptor[] readable>;
+
+        $r1 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.io.FileDescriptor[] writable>;
+
+        $r6 = interfaceinvoke $r4.<org.apache.harmony.luni.platform.INetworkSystem: int[] select(java.io.FileDescriptor[],java.io.FileDescriptor[],long)>($r5, $r1, $l0);
+
+     label08:
+        $r7 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.util.List readableFDs>;
+
+        interfaceinvoke $r7.<java.util.List: void clear()>();
+
+        $r7 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.util.List writableFDs>;
+
+        interfaceinvoke $r7.<java.util.List: void clear()>();
+
+        if $z0 == 0 goto label09;
+
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractSelector: void end()>();
+
+     label09:
+        $i2 = specialinvoke $r0.<org.apache.harmony.nio.internal.SelectorImpl: int processSelectResult(int[])>($r6);
+
+        exitmonitor $r3;
+
+     label10:
+        exitmonitor $r2;
+
+     label11:
+        exitmonitor $r0;
+
+     label12:
+        return $i2;
+
+     label13:
+        $z0 = 0;
+
+        goto label04;
+
+     label14:
+        $r8 := @caughtexception;
+
+     label15:
+        $r7 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.util.List readableFDs>;
+
+        interfaceinvoke $r7.<java.util.List: void clear()>();
+
+        $r7 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.util.List writableFDs>;
+
+        interfaceinvoke $r7.<java.util.List: void clear()>();
+
+        if $z0 == 0 goto label16;
+
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractSelector: void end()>();
+
+     label16:
+        throw $r8;
+
+     label17:
+        $r9 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label18:
+        throw $r9;
+
+     label19:
+        $r10 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label20:
+        throw $r10;
+
+     label21:
+        $r11 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label22:
+        throw $r11;
+
+        catch java.lang.Throwable from label01 to label02 with label21;
+        catch java.lang.Throwable from label02 to label03 with label19;
+        catch java.lang.Throwable from label03 to label05 with label17;
+        catch java.lang.Throwable from label06 to label08 with label14;
+        catch java.lang.Throwable from label08 to label10 with label17;
+        catch java.lang.Throwable from label10 to label11 with label19;
+        catch java.lang.Throwable from label11 to label12 with label21;
+        catch java.lang.Throwable from label15 to label18 with label17;
+        catch java.lang.Throwable from label18 to label20 with label19;
+        catch java.lang.Throwable from label20 to label22 with label21;
+    }
+
+    protected void implCloseSelector() throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.SelectorImpl $r0;
+        java.util.Set $r1;
+        java.util.Iterator $r2;
+        boolean $z0;
+        java.lang.Object $r3;
+        java.nio.channels.SelectionKey $r4;
+        java.nio.channels.spi.AbstractSelectionKey $r5;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SelectorImpl;
+
+        specialinvoke $r0.<org.apache.harmony.nio.internal.SelectorImpl: void doCancel()>();
+
+        $r1 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.util.Set keys>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        $r4 = (java.nio.channels.SelectionKey) $r3;
+
+        $r5 = (java.nio.channels.spi.AbstractSelectionKey) $r4;
+
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractSelector: void deregister(java.nio.channels.spi.AbstractSelectionKey)>($r5);
+
+        goto label1;
+
+     label2:
+        virtualinvoke $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.nio.channels.Selector wakeup()>();
+
+        return;
+    }
+
+    public java.util.Set keys()
+    {
+        org.apache.harmony.nio.internal.SelectorImpl $r0;
+        java.lang.Throwable $r1;
+        java.util.Set r2;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SelectorImpl;
+
+        entermonitor $r0;
+
+     label1:
+        specialinvoke $r0.<org.apache.harmony.nio.internal.SelectorImpl: void closeCheck()>();
+
+        r2 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.util.Set unmodifiableKeys>;
+
+     label2:
+        exitmonitor $r0;
+
+        return r2;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    protected java.nio.channels.SelectionKey register(java.nio.channels.spi.AbstractSelectableChannel, int, java.lang.Object)
+    {
+        org.apache.harmony.nio.internal.SelectorImpl $r0;
+        java.nio.channels.spi.AbstractSelectableChannel $r1;
+        int $i0;
+        java.lang.Object $r2;
+        org.apache.harmony.nio.internal.SelectionKeyImpl $r3;
+        java.nio.channels.spi.SelectorProvider $r4, $r5;
+        boolean $z0;
+        java.nio.channels.IllegalSelectorException $r6;
+        java.util.Set $r7, $r8;
+        java.lang.Throwable $r9, $r10;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SelectorImpl;
+
+        $r1 := @parameter0: java.nio.channels.spi.AbstractSelectableChannel;
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: java.lang.Object;
+
+        $r4 = virtualinvoke $r0.<java.nio.channels.spi.AbstractSelector: java.nio.channels.spi.SelectorProvider provider()>();
+
+        $r5 = virtualinvoke $r1.<java.nio.channels.spi.AbstractSelectableChannel: java.nio.channels.spi.SelectorProvider provider()>();
+
+        $z0 = virtualinvoke $r4.<java.lang.Object: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 != 0 goto label01;
+
+        $r6 = new java.nio.channels.IllegalSelectorException;
+
+        specialinvoke $r6.<java.nio.channels.IllegalSelectorException: void <init>()>();
+
+        throw $r6;
+
+     label01:
+        entermonitor $r0;
+
+     label02:
+        $r7 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.util.Set keys>;
+
+        entermonitor $r7;
+
+     label03:
+        $r3 = new org.apache.harmony.nio.internal.SelectionKeyImpl;
+
+        specialinvoke $r3.<org.apache.harmony.nio.internal.SelectionKeyImpl: void <init>(java.nio.channels.spi.AbstractSelectableChannel,int,java.lang.Object,org.apache.harmony.nio.internal.SelectorImpl)>($r1, $i0, $r2, $r0);
+
+        $r8 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.util.Set keys>;
+
+        interfaceinvoke $r8.<java.util.Set: boolean add(java.lang.Object)>($r3);
+
+        exitmonitor $r7;
+
+     label04:
+        exitmonitor $r0;
+
+     label05:
+        return $r3;
+
+     label06:
+        $r9 := @caughtexception;
+
+     label07:
+        exitmonitor $r7;
+
+     label08:
+        throw $r9;
+
+     label09:
+        $r10 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label10:
+        throw $r10;
+
+        catch java.lang.Throwable from label02 to label03 with label09;
+        catch java.lang.Throwable from label03 to label04 with label06;
+        catch java.lang.Throwable from label04 to label05 with label09;
+        catch java.lang.Throwable from label07 to label08 with label06;
+        catch java.lang.Throwable from label08 to label10 with label09;
+    }
+
+    public int select() throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.SelectorImpl $r0;
+        int $i0;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SelectorImpl;
+
+        $i0 = specialinvoke $r0.<org.apache.harmony.nio.internal.SelectorImpl: int selectInternal(long)>(-1L);
+
+        return $i0;
+    }
+
+    public int select(long) throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.SelectorImpl $r0;
+        long $l0;
+        int $i1;
+        byte $b2;
+        java.lang.IllegalArgumentException $r1;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SelectorImpl;
+
+        $l0 := @parameter0: long;
+
+        $b2 = $l0 cmp 0L;
+
+        if $b2 >= 0 goto label1;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r1;
+
+     label1:
+        $b2 = 0L cmp $l0;
+
+        if $b2 != 0 goto label3;
+
+        $l0 = -1L;
+
+     label2:
+        $i1 = specialinvoke $r0.<org.apache.harmony.nio.internal.SelectorImpl: int selectInternal(long)>($l0);
+
+        return $i1;
+
+     label3:
+        goto label2;
+    }
+
+    public int selectNow() throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.SelectorImpl $r0;
+        int $i0;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SelectorImpl;
+
+        $i0 = specialinvoke $r0.<org.apache.harmony.nio.internal.SelectorImpl: int selectInternal(long)>(0L);
+
+        return $i0;
+    }
+
+    public java.util.Set selectedKeys()
+    {
+        org.apache.harmony.nio.internal.SelectorImpl $r0;
+        java.lang.Throwable $r1;
+        java.util.Set r2;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SelectorImpl;
+
+        entermonitor $r0;
+
+     label1:
+        specialinvoke $r0.<org.apache.harmony.nio.internal.SelectorImpl: void closeCheck()>();
+
+        r2 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.util.Set unaddableSelectedKeys>;
+
+     label2:
+        exitmonitor $r0;
+
+        return r2;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public java.nio.channels.Selector wakeup()
+    {
+        org.apache.harmony.nio.internal.SelectorImpl $r0;
+        java.nio.ByteBuffer $r1;
+        java.nio.channels.Pipe$SinkChannel $r2;
+        java.io.IOException $r3;
+
+        $r0 := @this: org.apache.harmony.nio.internal.SelectorImpl;
+
+        $r2 = $r0.<org.apache.harmony.nio.internal.SelectorImpl: java.nio.channels.Pipe$SinkChannel sink>;
+
+     label1:
+        $r1 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer allocate(int)>(1);
+
+        virtualinvoke $r2.<java.nio.channels.Pipe$SinkChannel: int write(java.nio.ByteBuffer)>($r1);
+
+     label2:
+        return $r0;
+
+     label3:
+        $r3 := @caughtexception;
+
+        return $r0;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public static void <clinit>()
+    {
+        <org.apache.harmony.nio.internal.SelectorImpl: int WRITEABLE> = 2;
+
+        <org.apache.harmony.nio.internal.SelectorImpl: int SELECT_NOW> = 0;
+
+        <org.apache.harmony.nio.internal.SelectorImpl: int SELECT_BLOCK> = -1;
+
+        <org.apache.harmony.nio.internal.SelectorImpl: int READABLE> = 1;
+
+        <org.apache.harmony.nio.internal.SelectorImpl: int NA> = 0;
+
+        <org.apache.harmony.nio.internal.SelectorImpl: int MOCK_WRITEBUF_SIZE> = 1;
+
+        <org.apache.harmony.nio.internal.SelectorImpl: int MOCK_READBUF_SIZE> = 8;
+
+        return;
+    }
+}

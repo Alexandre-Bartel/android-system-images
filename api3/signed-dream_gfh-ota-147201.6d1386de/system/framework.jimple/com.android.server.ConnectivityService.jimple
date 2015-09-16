@@ -1,0 +1,1738 @@
+public class com.android.server.ConnectivityService extends android.net.IConnectivityManager$Stub
+{
+    private static final boolean DBG;
+    private static final int EVENTLOG_CONNECTIVITY_STATE_CHANGED;
+    private static final java.lang.String TAG;
+    private static int sDnsChangeCounter;
+    private static com.android.server.ConnectivityService sServiceInstance;
+    private android.net.NetworkStateTracker mActiveNetwork;
+    private android.content.Context mContext;
+    private android.net.MobileDataStateTracker mMobileDataStateTracker;
+    private android.net.NetworkStateTracker[] mNetTrackers;
+    private int mNetworkPreference;
+    private int mNumDnsEntries;
+    private boolean mTestMode;
+    private android.net.wifi.WifiStateTracker mWifiStateTracker;
+    private com.android.server.WifiWatchdogService mWifiWatchdogService;
+
+    private void <init>(android.content.Context)
+    {
+        com.android.server.ConnectivityService $r0;
+        android.content.Context $r1;
+        android.net.NetworkStateTracker[] $r2;
+        com.android.server.ConnectivityService$MyHandler $r3, r11;
+        int $i0, $i1;
+        android.net.NetworkStateTracker $r4;
+        android.net.wifi.WifiStateTracker $r6, r12;
+        java.lang.Object[] $r7;
+        android.net.MobileDataStateTracker $r8, r14;
+        java.lang.String $r9;
+        boolean $z0;
+        com.android.server.WifiService r13;
+        com.android.server.WifiWatchdogService r15;
+        android.os.IBinder r16;
+
+        $r0 := @this: com.android.server.ConnectivityService;
+
+        $r1 := @parameter0: android.content.Context;
+
+        specialinvoke $r0.<android.net.IConnectivityManager$Stub: void <init>()>();
+
+        $r0.<com.android.server.ConnectivityService: android.content.Context mContext> = $r1;
+
+        $r2 = newarray (android.net.NetworkStateTracker)[2];
+
+        $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker[] mNetTrackers> = $r2;
+
+        r11 = new com.android.server.ConnectivityService$MyHandler;
+
+        $r3 = r11;
+
+        specialinvoke r11.<com.android.server.ConnectivityService$MyHandler: void <init>(com.android.server.ConnectivityService,com.android.server.ConnectivityService$1)>($r0, null);
+
+        $i0 = specialinvoke $r0.<com.android.server.ConnectivityService: int getPersistedNetworkPreference()>();
+
+        $r0.<com.android.server.ConnectivityService: int mNetworkPreference> = $i0;
+
+        r12 = new android.net.wifi.WifiStateTracker;
+
+        specialinvoke r12.<android.net.wifi.WifiStateTracker: void <init>(android.content.Context,android.os.Handler)>($r1, $r3);
+
+        $r0.<com.android.server.ConnectivityService: android.net.wifi.WifiStateTracker mWifiStateTracker> = r12;
+
+        r13 = new com.android.server.WifiService;
+
+        $r6 = $r0.<com.android.server.ConnectivityService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        specialinvoke r13.<com.android.server.WifiService: void <init>(android.content.Context,android.net.wifi.WifiStateTracker)>($r1, $r6);
+
+        r16 = (android.os.IBinder) r13;
+
+        staticinvoke <android.os.ServiceManager: void addService(java.lang.String,android.os.IBinder)>("wifi", r16);
+
+        $r7 = $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker[] mNetTrackers>;
+
+        $r6 = $r0.<com.android.server.ConnectivityService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        $r7[1] = $r6;
+
+        r14 = new android.net.MobileDataStateTracker;
+
+        specialinvoke r14.<android.net.MobileDataStateTracker: void <init>(android.content.Context,android.os.Handler)>($r1, $r3);
+
+        $r0.<com.android.server.ConnectivityService: android.net.MobileDataStateTracker mMobileDataStateTracker> = r14;
+
+        $r7 = $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker[] mNetTrackers>;
+
+        $r8 = $r0.<com.android.server.ConnectivityService: android.net.MobileDataStateTracker mMobileDataStateTracker>;
+
+        $r7[0] = $r8;
+
+        $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker mActiveNetwork> = null;
+
+        $r0.<com.android.server.ConnectivityService: int mNumDnsEntries> = 0;
+
+        $r9 = staticinvoke <android.os.SystemProperties: java.lang.String get(java.lang.String)>("cm.test.mode");
+
+        $z0 = virtualinvoke $r9.<java.lang.String: boolean equals(java.lang.Object)>("true");
+
+        if $z0 == 0 goto label3;
+
+        $r9 = staticinvoke <android.os.SystemProperties: java.lang.String get(java.lang.String)>("ro.build.type");
+
+        $z0 = virtualinvoke $r9.<java.lang.String: boolean equals(java.lang.Object)>("eng");
+
+        if $z0 == 0 goto label3;
+
+        $z0 = 1;
+
+     label1:
+        $r0.<com.android.server.ConnectivityService: boolean mTestMode> = $z0;
+
+        $r2 = $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker[] mNetTrackers>;
+
+        $i0 = lengthof $r2;
+
+        $i1 = 0;
+
+     label2:
+        if $i1 >= $i0 goto label4;
+
+        $r4 = $r2[$i1];
+
+        virtualinvoke $r4.<android.net.NetworkStateTracker: void startMonitoring()>();
+
+        $i1 = $i1 + 1;
+
+        goto label2;
+
+     label3:
+        $z0 = 0;
+
+        goto label1;
+
+     label4:
+        r15 = new com.android.server.WifiWatchdogService;
+
+        $r6 = $r0.<com.android.server.ConnectivityService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        specialinvoke r15.<com.android.server.WifiWatchdogService: void <init>(android.content.Context,android.net.wifi.WifiStateTracker)>($r1, $r6);
+
+        $r0.<com.android.server.ConnectivityService: com.android.server.WifiWatchdogService mWifiWatchdogService> = r15;
+
+        return;
+    }
+
+    void <init>(android.content.Context, com.android.server.ConnectivityService$1)
+    {
+        com.android.server.ConnectivityService $r0;
+        android.content.Context $r1;
+        com.android.server.ConnectivityService$1 $r2;
+
+        $r0 := @this: com.android.server.ConnectivityService;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: com.android.server.ConnectivityService$1;
+
+        specialinvoke $r0.<com.android.server.ConnectivityService: void <init>(android.content.Context)>($r1);
+
+        return;
+    }
+
+    static com.android.server.ConnectivityService access$000()
+    {
+        com.android.server.ConnectivityService r0;
+
+        r0 = <com.android.server.ConnectivityService: com.android.server.ConnectivityService sServiceInstance>;
+
+        return r0;
+    }
+
+    static com.android.server.ConnectivityService access$002(com.android.server.ConnectivityService)
+    {
+        com.android.server.ConnectivityService $r0;
+
+        $r0 := @parameter0: com.android.server.ConnectivityService;
+
+        <com.android.server.ConnectivityService: com.android.server.ConnectivityService sServiceInstance> = $r0;
+
+        return $r0;
+    }
+
+    static void access$300(com.android.server.ConnectivityService, android.net.NetworkInfo)
+    {
+        com.android.server.ConnectivityService $r0;
+        android.net.NetworkInfo $r1;
+
+        $r0 := @parameter0: com.android.server.ConnectivityService;
+
+        $r1 := @parameter1: android.net.NetworkInfo;
+
+        specialinvoke $r0.<com.android.server.ConnectivityService: void handleConnectionFailure(android.net.NetworkInfo)>($r1);
+
+        return;
+    }
+
+    static void access$400(com.android.server.ConnectivityService, android.net.NetworkInfo)
+    {
+        com.android.server.ConnectivityService $r0;
+        android.net.NetworkInfo $r1;
+
+        $r0 := @parameter0: com.android.server.ConnectivityService;
+
+        $r1 := @parameter1: android.net.NetworkInfo;
+
+        specialinvoke $r0.<com.android.server.ConnectivityService: void handleDisconnect(android.net.NetworkInfo)>($r1);
+
+        return;
+    }
+
+    static void access$500(com.android.server.ConnectivityService, android.net.NetworkInfo)
+    {
+        com.android.server.ConnectivityService $r0;
+        android.net.NetworkInfo $r1;
+
+        $r0 := @parameter0: com.android.server.ConnectivityService;
+
+        $r1 := @parameter1: android.net.NetworkInfo;
+
+        specialinvoke $r0.<com.android.server.ConnectivityService: void handleConnect(android.net.NetworkInfo)>($r1);
+
+        return;
+    }
+
+    static void access$600(com.android.server.ConnectivityService)
+    {
+        com.android.server.ConnectivityService $r0;
+
+        $r0 := @parameter0: com.android.server.ConnectivityService;
+
+        specialinvoke $r0.<com.android.server.ConnectivityService: void handleConnectivityChange()>();
+
+        return;
+    }
+
+    static void access$700(com.android.server.ConnectivityService, android.net.NetworkInfo)
+    {
+        com.android.server.ConnectivityService $r0;
+        android.net.NetworkInfo $r1;
+
+        $r0 := @parameter0: com.android.server.ConnectivityService;
+
+        $r1 := @parameter1: android.net.NetworkInfo;
+
+        specialinvoke $r0.<com.android.server.ConnectivityService: void handleScanResultsAvailable(android.net.NetworkInfo)>($r1);
+
+        return;
+    }
+
+    static void access$800(com.android.server.ConnectivityService, boolean, int, android.app.Notification)
+    {
+        com.android.server.ConnectivityService $r0;
+        boolean $z0;
+        int $i0;
+        android.app.Notification $r1;
+
+        $r0 := @parameter0: com.android.server.ConnectivityService;
+
+        $z0 := @parameter1: boolean;
+
+        $i0 := @parameter2: int;
+
+        $r1 := @parameter3: android.app.Notification;
+
+        specialinvoke $r0.<com.android.server.ConnectivityService: void handleNotificationChange(boolean,int,android.app.Notification)>($z0, $i0, $r1);
+
+        return;
+    }
+
+    static int access$900(com.android.server.ConnectivityService)
+    {
+        com.android.server.ConnectivityService $r0;
+        int $i0;
+
+        $r0 := @parameter0: com.android.server.ConnectivityService;
+
+        $i0 = specialinvoke $r0.<com.android.server.ConnectivityService: int handleConfigurationChange()>();
+
+        return $i0;
+    }
+
+    private void enforceAccessPermission()
+    {
+        com.android.server.ConnectivityService $r0;
+        android.content.Context $r1;
+
+        $r0 := @this: com.android.server.ConnectivityService;
+
+        $r1 = $r0.<com.android.server.ConnectivityService: android.content.Context mContext>;
+
+        virtualinvoke $r1.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.ACCESS_NETWORK_STATE", "ConnectivityService");
+
+        return;
+    }
+
+    private void enforceChangePermission()
+    {
+        com.android.server.ConnectivityService $r0;
+        android.content.Context $r1;
+
+        $r0 := @this: com.android.server.ConnectivityService;
+
+        $r1 = $r0.<com.android.server.ConnectivityService: android.content.Context mContext>;
+
+        virtualinvoke $r1.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.CHANGE_NETWORK_STATE", "ConnectivityService");
+
+        return;
+    }
+
+    private void enforcePreference()
+    {
+        com.android.server.ConnectivityService $r0;
+        android.net.NetworkStateTracker[] $r1, $r5;
+        int $i0, $i1, $i2, $i4;
+        android.net.NetworkStateTracker $r2, $r3;
+        android.net.NetworkInfo $r4;
+        byte $b3;
+        boolean $z0;
+
+        $r0 := @this: com.android.server.ConnectivityService;
+
+        $r3 = $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker mActiveNetwork>;
+
+        if $r3 != null goto label1;
+
+        return;
+
+     label1:
+        $r1 = $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker[] mNetTrackers>;
+
+        $i0 = lengthof $r1;
+
+        $i2 = 0;
+
+     label2:
+        if $i2 >= $i0 goto label6;
+
+        $r3 = $r1[$i2];
+
+        $r2 = $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker mActiveNetwork>;
+
+        if $r3 != $r2 goto label4;
+
+        $r4 = virtualinvoke $r3.<android.net.NetworkStateTracker: android.net.NetworkInfo getNetworkInfo()>();
+
+        $i1 = virtualinvoke $r4.<android.net.NetworkInfo: int getType()>();
+
+        if $i1 != 1 goto label5;
+
+        $b3 = 0;
+
+     label3:
+        $r4 = virtualinvoke $r3.<android.net.NetworkStateTracker: android.net.NetworkInfo getNetworkInfo()>();
+
+        $i4 = virtualinvoke $r4.<android.net.NetworkInfo: int getType()>();
+
+        $i1 = $r0.<com.android.server.ConnectivityService: int mNetworkPreference>;
+
+        if $i4 == $i1 goto label4;
+
+        $r5 = $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker[] mNetTrackers>;
+
+        $r2 = $r5[$b3];
+
+        $z0 = virtualinvoke $r2.<android.net.NetworkStateTracker: boolean isAvailable()>();
+
+        if $z0 == 0 goto label4;
+
+        specialinvoke $r0.<com.android.server.ConnectivityService: boolean teardown(android.net.NetworkStateTracker)>($r3);
+
+     label4:
+        $i2 = $i2 + 1;
+
+        goto label2;
+
+     label5:
+        $b3 = 1;
+
+        goto label3;
+
+     label6:
+        return;
+    }
+
+    public static com.android.server.ConnectivityService getInstance(android.content.Context)
+    {
+        android.content.Context $r0;
+        com.android.server.ConnectivityService $r1;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 = staticinvoke <com.android.server.ConnectivityService$ConnectivityThread: com.android.server.ConnectivityService getServiceInstance(android.content.Context)>($r0);
+
+        return $r1;
+    }
+
+    private int getNumConnectedNetworks()
+    {
+        com.android.server.ConnectivityService $r0;
+        android.net.NetworkStateTracker[] $r1;
+        int $i0, $i1, $i2;
+        android.net.NetworkStateTracker $r2;
+        android.net.NetworkInfo $r3;
+        boolean $z0;
+
+        $r0 := @this: com.android.server.ConnectivityService;
+
+        $i1 = 0;
+
+        $r1 = $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker[] mNetTrackers>;
+
+        $i0 = lengthof $r1;
+
+        $i2 = 0;
+
+     label1:
+        if $i2 >= $i0 goto label3;
+
+        $r2 = $r1[$i2];
+
+        $r3 = virtualinvoke $r2.<android.net.NetworkStateTracker: android.net.NetworkInfo getNetworkInfo()>();
+
+        $z0 = virtualinvoke $r3.<android.net.NetworkInfo: boolean isConnected()>();
+
+        if $z0 == 0 goto label2;
+
+        $z0 = virtualinvoke $r2.<android.net.NetworkStateTracker: boolean isTeardownRequested()>();
+
+        if $z0 != 0 goto label2;
+
+        $i1 = $i1 + 1;
+
+     label2:
+        $i2 = $i2 + 1;
+
+        goto label1;
+
+     label3:
+        return $i1;
+    }
+
+    private int getPersistedNetworkPreference()
+    {
+        com.android.server.ConnectivityService $r0;
+        android.content.Context $r1;
+        android.content.ContentResolver $r2;
+        int $i0;
+
+        $r0 := @this: com.android.server.ConnectivityService;
+
+        $r1 = $r0.<com.android.server.ConnectivityService: android.content.Context mContext>;
+
+        $r2 = virtualinvoke $r1.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $i0 = staticinvoke <android.provider.Settings$Secure: int getInt(android.content.ContentResolver,java.lang.String,int)>($r2, "network_preference", -1);
+
+        if $i0 == -1 goto label1;
+
+        return $i0;
+
+     label1:
+        return 1;
+    }
+
+    private int handleConfigurationChange()
+    {
+        com.android.server.ConnectivityService $r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        android.net.NetworkStateTracker $r1;
+        java.lang.String $r2, $r6;
+        android.net.NetworkStateTracker[] $r3;
+        android.net.NetworkInfo $r4;
+        boolean $z0;
+        java.lang.String[] $r5;
+        java.lang.StringBuilder $r7;
+
+        $r0 := @this: com.android.server.ConnectivityService;
+
+        $i2 = 1;
+
+        $r2 = "";
+
+        $i3 = 0;
+
+        $i1 = -1 + 0;
+
+        $i4 = 1;
+
+     label1:
+        if $i4 == $i1 goto label5;
+
+        $r3 = $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker[] mNetTrackers>;
+
+        $r1 = $r3[$i4];
+
+        $r4 = virtualinvoke $r1.<android.net.NetworkStateTracker: android.net.NetworkInfo getNetworkInfo()>();
+
+        $z0 = virtualinvoke $r4.<android.net.NetworkInfo: boolean isConnected()>();
+
+        if $z0 == 0 goto label4;
+
+        $z0 = virtualinvoke $r1.<android.net.NetworkStateTracker: boolean isTeardownRequested()>();
+
+        if $z0 != 0 goto label4;
+
+        $i3 = $i3 + 1;
+
+        $r5 = virtualinvoke $r1.<android.net.NetworkStateTracker: java.lang.String[] getNameServers()>();
+
+        $i5 = 0;
+
+     label2:
+        $i0 = lengthof $r5;
+
+        if $i5 >= $i0 goto label4;
+
+        $r6 = $r5[$i5];
+
+        if $r6 == null goto label4;
+
+        $r6 = $r5[$i5];
+
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 != 0 goto label3;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("net.dns");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r2 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r6 = $r5[$i5];
+
+        staticinvoke <android.os.SystemProperties: void set(java.lang.String,java.lang.String)>($r2, $r6);
+
+        $r2 = $r5[$i5];
+
+        $i2 = $i2 + 1;
+
+     label3:
+        $i5 = $i5 + 1;
+
+        goto label2;
+
+     label4:
+        $i4 = $i4 + -1;
+
+        goto label1;
+
+     label5:
+        $i1 = $i2;
+
+     label6:
+        $i4 = $r0.<com.android.server.ConnectivityService: int mNumDnsEntries>;
+
+        if $i1 > $i4 goto label7;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("net.dns");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r2 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.os.SystemProperties: void set(java.lang.String,java.lang.String)>($r2, "");
+
+        $i1 = $i1 + 1;
+
+        goto label6;
+
+     label7:
+        $i2 = $i2 - 1;
+
+        $r0.<com.android.server.ConnectivityService: int mNumDnsEntries> = $i2;
+
+        $i2 = <com.android.server.ConnectivityService: int sDnsChangeCounter>;
+
+        $i1 = $i2 + 1;
+
+        <com.android.server.ConnectivityService: int sDnsChangeCounter> = $i1;
+
+        $r2 = staticinvoke <java.lang.String: java.lang.String valueOf(int)>($i2);
+
+        staticinvoke <android.os.SystemProperties: void set(java.lang.String,java.lang.String)>("net.dnschange", $r2);
+
+        return $i3;
+    }
+
+    private void handleConnect(android.net.NetworkInfo)
+    {
+        com.android.server.ConnectivityService $r0;
+        android.net.NetworkInfo $r1, $r7, $r9;
+        android.net.NetworkStateTracker $r2, r10;
+        boolean $z0, $z1, $z2;
+        android.net.NetworkStateTracker[] $r3;
+        int $i0, $i1;
+        java.lang.Object $r4, $r5;
+        android.net.wifi.WifiStateTracker $r6;
+        android.net.MobileDataStateTracker $r8;
+
+        $r0 := @this: com.android.server.ConnectivityService;
+
+        $r1 := @parameter0: android.net.NetworkInfo;
+
+        $z0 = virtualinvoke $r1.<android.net.NetworkInfo: boolean isFailover()>();
+
+        $r3 = $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker[] mNetTrackers>;
+
+        $i0 = virtualinvoke $r1.<android.net.NetworkInfo: int getType()>();
+
+        $r2 = $r3[$i0];
+
+        $r4 = null;
+
+        $i0 = virtualinvoke $r1.<android.net.NetworkInfo: int getType()>();
+
+        if $i0 != 0 goto label5;
+
+        $r5 = $r0.<com.android.server.ConnectivityService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+     label1:
+        $r6 = $r0.<com.android.server.ConnectivityService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        $r7 = virtualinvoke $r6.<android.net.NetworkStateTracker: android.net.NetworkInfo getNetworkInfo()>();
+
+        $r8 = $r0.<com.android.server.ConnectivityService: android.net.MobileDataStateTracker mMobileDataStateTracker>;
+
+        $r9 = virtualinvoke $r8.<android.net.NetworkStateTracker: android.net.NetworkInfo getNetworkInfo()>();
+
+        $z1 = virtualinvoke $r7.<android.net.NetworkInfo: boolean isConnected()>();
+
+        if $z1 == 0 goto label2;
+
+        $z1 = virtualinvoke $r9.<android.net.NetworkInfo: boolean isConnected()>();
+
+        if $z1 == 0 goto label2;
+
+        $i0 = $r0.<com.android.server.ConnectivityService: int mNetworkPreference>;
+
+        if $i0 != 1 goto label6;
+
+        $r4 = $r0.<com.android.server.ConnectivityService: android.net.MobileDataStateTracker mMobileDataStateTracker>;
+
+     label2:
+        $z1 = 0;
+
+        virtualinvoke $r2.<android.net.NetworkStateTracker: void setTeardownRequested(boolean)>(0);
+
+        $z2 = $r0.<com.android.server.ConnectivityService: boolean mTestMode>;
+
+        if $z2 != 0 goto label3;
+
+        if $r4 == null goto label3;
+
+        r10 = (android.net.NetworkStateTracker) $r4;
+
+        $z1 = specialinvoke $r0.<com.android.server.ConnectivityService: boolean teardown(android.net.NetworkStateTracker)>(r10);
+
+     label3:
+        if $z1 == 0 goto label4;
+
+        r10 = (android.net.NetworkStateTracker) $r4;
+
+        $r7 = virtualinvoke r10.<android.net.NetworkStateTracker: android.net.NetworkInfo getNetworkInfo()>();
+
+        $i0 = virtualinvoke $r7.<android.net.NetworkInfo: int getType()>();
+
+        $i1 = virtualinvoke $r1.<android.net.NetworkInfo: int getType()>();
+
+        if $i0 == $i1 goto label7;
+
+     label4:
+        $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker mActiveNetwork> = $r2;
+
+        virtualinvoke $r2.<android.net.NetworkStateTracker: void updateNetworkSettings()>();
+
+        specialinvoke $r0.<com.android.server.ConnectivityService: void sendConnectedBroadcast(android.net.NetworkInfo)>($r1);
+
+        if $z0 == 0 goto label8;
+
+        $r2 = (android.net.NetworkStateTracker) $r5;
+
+        virtualinvoke $r2.<android.net.NetworkStateTracker: void releaseWakeLock()>();
+
+        return;
+
+     label5:
+        $r5 = $r0.<com.android.server.ConnectivityService: android.net.MobileDataStateTracker mMobileDataStateTracker>;
+
+        goto label1;
+
+     label6:
+        $r4 = $r0.<com.android.server.ConnectivityService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+        goto label2;
+
+     label7:
+        return;
+
+     label8:
+        return;
+    }
+
+    private void handleConnectionFailure(android.net.NetworkInfo)
+    {
+        com.android.server.ConnectivityService $r0;
+        android.net.NetworkInfo $r1, $r5;
+        android.content.Intent $r2;
+        android.net.NetworkStateTracker[] $r3;
+        int $i0;
+        android.net.NetworkStateTracker $r4;
+        java.lang.String $r6, $r7;
+        boolean $z0;
+        android.content.Context $r8;
+
+        $r0 := @this: com.android.server.ConnectivityService;
+
+        $r1 := @parameter0: android.net.NetworkInfo;
+
+        $r3 = $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker[] mNetTrackers>;
+
+        $i0 = virtualinvoke $r1.<android.net.NetworkInfo: int getType()>();
+
+        $r4 = $r3[$i0];
+
+        virtualinvoke $r4.<android.net.NetworkStateTracker: void setTeardownRequested(boolean)>(0);
+
+        $r5 = virtualinvoke $r0.<com.android.server.ConnectivityService: android.net.NetworkInfo getActiveNetworkInfo()>();
+
+        if $r5 != null goto label4;
+
+        $r6 = virtualinvoke $r1.<android.net.NetworkInfo: java.lang.String getReason()>();
+
+        $r7 = virtualinvoke $r1.<android.net.NetworkInfo: java.lang.String getExtraInfo()>();
+
+        $r2 = new android.content.Intent;
+
+        specialinvoke $r2.<android.content.Intent: void <init>(java.lang.String)>("android.net.conn.CONNECTIVITY_CHANGE");
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,android.os.Parcelable)>("networkInfo", $r1);
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,boolean)>("noConnectivity", 1);
+
+        if $r6 == null goto label1;
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("reason", $r6);
+
+     label1:
+        if $r7 == null goto label2;
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("extraInfo", $r7);
+
+     label2:
+        $z0 = virtualinvoke $r1.<android.net.NetworkInfo: boolean isFailover()>();
+
+        if $z0 == 0 goto label3;
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,boolean)>("isFailover", 1);
+
+        virtualinvoke $r1.<android.net.NetworkInfo: void setFailover(boolean)>(0);
+
+     label3:
+        $r8 = $r0.<com.android.server.ConnectivityService: android.content.Context mContext>;
+
+        virtualinvoke $r8.<android.content.Context: void sendStickyBroadcast(android.content.Intent)>($r2);
+
+        return;
+
+     label4:
+        return;
+    }
+
+    private void handleConnectivityChange()
+    {
+        com.android.server.ConnectivityService $r0;
+        int $i0;
+        android.net.MobileDataStateTracker $r1;
+        android.net.NetworkInfo $r2;
+        boolean $z0;
+
+        $r0 := @this: com.android.server.ConnectivityService;
+
+        $i0 = specialinvoke $r0.<com.android.server.ConnectivityService: int handleConfigurationChange()>();
+
+        if $i0 <= 1 goto label1;
+
+        $r1 = $r0.<com.android.server.ConnectivityService: android.net.MobileDataStateTracker mMobileDataStateTracker>;
+
+        virtualinvoke $r1.<android.net.MobileDataStateTracker: void addPrivateRoutes()>();
+
+        $r1 = $r0.<com.android.server.ConnectivityService: android.net.MobileDataStateTracker mMobileDataStateTracker>;
+
+        virtualinvoke $r1.<android.net.MobileDataStateTracker: void removeDefaultRoute()>();
+
+        return;
+
+     label1:
+        $r1 = $r0.<com.android.server.ConnectivityService: android.net.MobileDataStateTracker mMobileDataStateTracker>;
+
+        $r2 = virtualinvoke $r1.<android.net.NetworkStateTracker: android.net.NetworkInfo getNetworkInfo()>();
+
+        $z0 = virtualinvoke $r2.<android.net.NetworkInfo: boolean isConnected()>();
+
+        if $z0 == 0 goto label2;
+
+        $r1 = $r0.<com.android.server.ConnectivityService: android.net.MobileDataStateTracker mMobileDataStateTracker>;
+
+        virtualinvoke $r1.<android.net.MobileDataStateTracker: void removePrivateRoutes()>();
+
+        $r1 = $r0.<com.android.server.ConnectivityService: android.net.MobileDataStateTracker mMobileDataStateTracker>;
+
+        virtualinvoke $r1.<android.net.MobileDataStateTracker: void restoreDefaultRoute()>();
+
+        return;
+
+     label2:
+        return;
+    }
+
+    private void handleDisconnect(android.net.NetworkInfo)
+    {
+        com.android.server.ConnectivityService $r0;
+        android.net.NetworkInfo $r1, $r5, $r7;
+        android.content.Intent $r2, r10;
+        android.net.NetworkStateTracker[] $r3;
+        int $i0, $i1;
+        android.net.NetworkStateTracker $r4;
+        java.lang.Object $r6;
+        boolean $z0, $z1;
+        java.lang.String $r8;
+        android.content.Context $r9;
+
+        $r0 := @this: com.android.server.ConnectivityService;
+
+        $r1 := @parameter0: android.net.NetworkInfo;
+
+        $r3 = $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker[] mNetTrackers>;
+
+        $i0 = virtualinvoke $r1.<android.net.NetworkInfo: int getType()>();
+
+        $r4 = $r3[$i0];
+
+        virtualinvoke $r4.<android.net.NetworkStateTracker: void setTeardownRequested(boolean)>(0);
+
+        $r4 = $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker mActiveNetwork>;
+
+        if $r4 == null goto label11;
+
+        $i0 = virtualinvoke $r1.<android.net.NetworkInfo: int getType()>();
+
+        $r4 = $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker mActiveNetwork>;
+
+        $r5 = virtualinvoke $r4.<android.net.NetworkStateTracker: android.net.NetworkInfo getNetworkInfo()>();
+
+        $i1 = virtualinvoke $r5.<android.net.NetworkInfo: int getType()>();
+
+        if $i0 == $i1 goto label01;
+
+        return;
+
+     label01:
+        $i0 = virtualinvoke $r1.<android.net.NetworkInfo: int getType()>();
+
+        if $i0 != 0 goto label08;
+
+        $r6 = $r0.<com.android.server.ConnectivityService: android.net.wifi.WifiStateTracker mWifiStateTracker>;
+
+     label02:
+        $r5 = null;
+
+        $r4 = (android.net.NetworkStateTracker) $r6;
+
+        $z0 = virtualinvoke $r4.<android.net.NetworkStateTracker: boolean isAvailable()>();
+
+        if $z0 == 0 goto label09;
+
+        $r4 = (android.net.NetworkStateTracker) $r6;
+
+        $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker mActiveNetwork> = $r4;
+
+        $r4 = (android.net.NetworkStateTracker) $r6;
+
+        $r7 = virtualinvoke $r4.<android.net.NetworkStateTracker: android.net.NetworkInfo getNetworkInfo()>();
+
+        $r5 = $r7;
+
+        virtualinvoke $r7.<android.net.NetworkInfo: void setFailover(boolean)>(1);
+
+        $z0 = virtualinvoke $r7.<android.net.NetworkInfo: boolean isConnectedOrConnecting()>();
+
+        if $z0 != 0 goto label03;
+
+        $r4 = (android.net.NetworkStateTracker) $r6;
+
+        virtualinvoke $r4.<android.net.NetworkStateTracker: boolean reconnect()>();
+
+     label03:
+        $z0 = 0;
+
+        r10 = new android.content.Intent;
+
+        $r2 = r10;
+
+        specialinvoke r10.<android.content.Intent: void <init>(java.lang.String)>("android.net.conn.CONNECTIVITY_CHANGE");
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,android.os.Parcelable)>("networkInfo", $r1);
+
+        $z1 = virtualinvoke $r1.<android.net.NetworkInfo: boolean isFailover()>();
+
+        if $z1 == 0 goto label04;
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,boolean)>("isFailover", 1);
+
+        virtualinvoke $r1.<android.net.NetworkInfo: void setFailover(boolean)>(0);
+
+     label04:
+        $r8 = virtualinvoke $r1.<android.net.NetworkInfo: java.lang.String getReason()>();
+
+        if $r8 == null goto label05;
+
+        $r8 = virtualinvoke $r1.<android.net.NetworkInfo: java.lang.String getReason()>();
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("reason", $r8);
+
+     label05:
+        $r8 = virtualinvoke $r1.<android.net.NetworkInfo: java.lang.String getExtraInfo()>();
+
+        if $r8 == null goto label06;
+
+        $r8 = virtualinvoke $r1.<android.net.NetworkInfo: java.lang.String getExtraInfo()>();
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("extraInfo", $r8);
+
+     label06:
+        if $r5 == null goto label10;
+
+        $z0 = virtualinvoke $r5.<android.net.NetworkInfo: boolean isConnected()>();
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,android.os.Parcelable)>("otherNetwork", $r5);
+
+     label07:
+        $r9 = $r0.<com.android.server.ConnectivityService: android.content.Context mContext>;
+
+        virtualinvoke $r9.<android.content.Context: void sendStickyBroadcast(android.content.Intent)>($r2);
+
+        if $r5 == null goto label12;
+
+        if $z0 == 0 goto label13;
+
+        specialinvoke $r0.<com.android.server.ConnectivityService: void sendConnectedBroadcast(android.net.NetworkInfo)>($r5);
+
+        return;
+
+     label08:
+        $r6 = $r0.<com.android.server.ConnectivityService: android.net.MobileDataStateTracker mMobileDataStateTracker>;
+
+        goto label02;
+
+     label09:
+        $r4 = (android.net.NetworkStateTracker) $r6;
+
+        virtualinvoke $r4.<android.net.NetworkStateTracker: boolean reconnect()>();
+
+        goto label03;
+
+     label10:
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,boolean)>("noConnectivity", 1);
+
+        goto label07;
+
+     label11:
+        return;
+
+     label12:
+        return;
+
+     label13:
+        return;
+    }
+
+    private void handleNotificationChange(boolean, int, android.app.Notification)
+    {
+        com.android.server.ConnectivityService $r0;
+        boolean $z0;
+        int $i0;
+        android.app.Notification $r1;
+        android.content.Context $r2;
+        java.lang.Object $r3;
+        android.app.NotificationManager $r4;
+
+        $r0 := @this: com.android.server.ConnectivityService;
+
+        $z0 := @parameter0: boolean;
+
+        $i0 := @parameter1: int;
+
+        $r1 := @parameter2: android.app.Notification;
+
+        $r2 = $r0.<com.android.server.ConnectivityService: android.content.Context mContext>;
+
+        $r3 = virtualinvoke $r2.<android.content.Context: java.lang.Object getSystemService(java.lang.String)>("notification");
+
+        $r4 = (android.app.NotificationManager) $r3;
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke $r4.<android.app.NotificationManager: void notify(int,android.app.Notification)>($i0, $r1);
+
+        return;
+
+     label1:
+        virtualinvoke $r4.<android.app.NotificationManager: void cancel(int)>($i0);
+
+        return;
+    }
+
+    private void handleScanResultsAvailable(android.net.NetworkInfo)
+    {
+        com.android.server.ConnectivityService $r0;
+        android.net.NetworkInfo $r1;
+        int $i0;
+        android.net.NetworkStateTracker[] $r2;
+        android.net.NetworkStateTracker $r3;
+
+        $r0 := @this: com.android.server.ConnectivityService;
+
+        $r1 := @parameter0: android.net.NetworkInfo;
+
+        $i0 = virtualinvoke $r1.<android.net.NetworkInfo: int getType()>();
+
+        if $i0 == 1 goto label1;
+
+     label1:
+        $r2 = $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker[] mNetTrackers>;
+
+        $r3 = $r2[$i0];
+
+        virtualinvoke $r3.<android.net.NetworkStateTracker: void interpretScanResultsAvailable()>();
+
+        return;
+    }
+
+    private void persistNetworkPreference(int)
+    {
+        com.android.server.ConnectivityService $r0;
+        int $i0;
+        android.content.ContentResolver $r1;
+        android.content.Context $r2;
+
+        $r0 := @this: com.android.server.ConnectivityService;
+
+        $i0 := @parameter0: int;
+
+        $r2 = $r0.<com.android.server.ConnectivityService: android.content.Context mContext>;
+
+        $r1 = virtualinvoke $r2.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        staticinvoke <android.provider.Settings$Secure: boolean putInt(android.content.ContentResolver,java.lang.String,int)>($r1, "network_preference", $i0);
+
+        return;
+    }
+
+    private void sendConnectedBroadcast(android.net.NetworkInfo)
+    {
+        com.android.server.ConnectivityService $r0;
+        android.net.NetworkInfo $r1;
+        android.content.Intent $r2;
+        boolean $z0;
+        java.lang.String $r3;
+        android.content.Context $r4;
+
+        $r0 := @this: com.android.server.ConnectivityService;
+
+        $r1 := @parameter0: android.net.NetworkInfo;
+
+        $r2 = new android.content.Intent;
+
+        specialinvoke $r2.<android.content.Intent: void <init>(java.lang.String)>("android.net.conn.CONNECTIVITY_CHANGE");
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,android.os.Parcelable)>("networkInfo", $r1);
+
+        $z0 = virtualinvoke $r1.<android.net.NetworkInfo: boolean isFailover()>();
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,boolean)>("isFailover", 1);
+
+        virtualinvoke $r1.<android.net.NetworkInfo: void setFailover(boolean)>(0);
+
+     label1:
+        $r3 = virtualinvoke $r1.<android.net.NetworkInfo: java.lang.String getReason()>();
+
+        if $r3 == null goto label2;
+
+        $r3 = virtualinvoke $r1.<android.net.NetworkInfo: java.lang.String getReason()>();
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("reason", $r3);
+
+     label2:
+        $r3 = virtualinvoke $r1.<android.net.NetworkInfo: java.lang.String getExtraInfo()>();
+
+        if $r3 == null goto label3;
+
+        $r3 = virtualinvoke $r1.<android.net.NetworkInfo: java.lang.String getExtraInfo()>();
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("extraInfo", $r3);
+
+     label3:
+        $r4 = $r0.<com.android.server.ConnectivityService: android.content.Context mContext>;
+
+        virtualinvoke $r4.<android.content.Context: void sendStickyBroadcast(android.content.Intent)>($r2);
+
+        return;
+    }
+
+    private boolean teardown(android.net.NetworkStateTracker)
+    {
+        com.android.server.ConnectivityService $r0;
+        android.net.NetworkStateTracker $r1;
+        boolean $z0;
+
+        $r0 := @this: com.android.server.ConnectivityService;
+
+        $r1 := @parameter0: android.net.NetworkStateTracker;
+
+        $z0 = virtualinvoke $r1.<android.net.NetworkStateTracker: boolean teardown()>();
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke $r1.<android.net.NetworkStateTracker: void setTeardownRequested(boolean)>(1);
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    protected void dump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[])
+    {
+        com.android.server.ConnectivityService $r0;
+        java.io.FileDescriptor $r1;
+        java.io.PrintWriter $r2;
+        java.lang.String[] $r3;
+        android.net.NetworkStateTracker[] $r4;
+        int $i0, $i1;
+        android.net.NetworkStateTracker $r5;
+        android.content.Context $r6;
+        java.lang.StringBuilder $r7;
+        java.lang.String $r8;
+        android.net.NetworkInfo $r9;
+
+        $r0 := @this: com.android.server.ConnectivityService;
+
+        $r1 := @parameter0: java.io.FileDescriptor;
+
+        $r2 := @parameter1: java.io.PrintWriter;
+
+        $r3 := @parameter2: java.lang.String[];
+
+        $r6 = $r0.<com.android.server.ConnectivityService: android.content.Context mContext>;
+
+        $i0 = virtualinvoke $r6.<android.content.Context: int checkCallingOrSelfPermission(java.lang.String)>("android.permission.DUMP");
+
+        if $i0 == 0 goto label1;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Permission Denial: can\'t dump ConnectivityService from from pid=");
+
+        $i0 = staticinvoke <android.os.Binder: int getCallingPid()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", uid=");
+
+        $i0 = staticinvoke <android.os.Binder: int getCallingUid()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r8);
+
+        return;
+
+     label1:
+        $r5 = $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker mActiveNetwork>;
+
+        if $r5 != null goto label4;
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("No active network");
+
+     label2:
+        virtualinvoke $r2.<java.io.PrintWriter: void println()>();
+
+        $r4 = $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker[] mNetTrackers>;
+
+        $i0 = lengthof $r4;
+
+        $i1 = 0;
+
+     label3:
+        if $i1 >= $i0 goto label5;
+
+        $r5 = $r4[$i1];
+
+        $r9 = virtualinvoke $r5.<android.net.NetworkStateTracker: android.net.NetworkInfo getNetworkInfo()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.Object)>($r9);
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.Object)>($r5);
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println()>();
+
+        $i1 = $i1 + 1;
+
+        goto label3;
+
+     label4:
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Active network: ");
+
+        $r5 = $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker mActiveNetwork>;
+
+        $r9 = virtualinvoke $r5.<android.net.NetworkStateTracker: android.net.NetworkInfo getNetworkInfo()>();
+
+        $r8 = virtualinvoke $r9.<android.net.NetworkInfo: java.lang.String getTypeName()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r8);
+
+        goto label2;
+
+     label5:
+        return;
+    }
+
+    public android.net.NetworkInfo getActiveNetworkInfo()
+    {
+        com.android.server.ConnectivityService $r0;
+        android.net.NetworkStateTracker[] $r1;
+        int $i0, $i1;
+        android.net.NetworkStateTracker $r2;
+        android.net.NetworkInfo $r3;
+        boolean $z0;
+
+        $r0 := @this: com.android.server.ConnectivityService;
+
+        specialinvoke $r0.<com.android.server.ConnectivityService: void enforceAccessPermission()>();
+
+        $r1 = $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker[] mNetTrackers>;
+
+        $i0 = lengthof $r1;
+
+        $i1 = 0;
+
+     label1:
+        if $i1 >= $i0 goto label3;
+
+        $r2 = $r1[$i1];
+
+        $r3 = virtualinvoke $r2.<android.net.NetworkStateTracker: android.net.NetworkInfo getNetworkInfo()>();
+
+        $z0 = virtualinvoke $r3.<android.net.NetworkInfo: boolean isConnected()>();
+
+        if $z0 == 0 goto label2;
+
+        return $r3;
+
+     label2:
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label3:
+        return null;
+    }
+
+    public android.net.NetworkInfo[] getAllNetworkInfo()
+    {
+        com.android.server.ConnectivityService $r0;
+        android.net.NetworkStateTracker[] $r1;
+        int $i0, $i1, $i2;
+        android.net.NetworkInfo[] $r2;
+        android.net.NetworkStateTracker $r3;
+        android.net.NetworkInfo $r4;
+
+        $r0 := @this: com.android.server.ConnectivityService;
+
+        specialinvoke $r0.<com.android.server.ConnectivityService: void enforceAccessPermission()>();
+
+        $r1 = $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker[] mNetTrackers>;
+
+        $i0 = lengthof $r1;
+
+        $r2 = newarray (android.net.NetworkInfo)[$i0];
+
+        $r1 = $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker[] mNetTrackers>;
+
+        $i0 = lengthof $r1;
+
+        $i1 = 0;
+
+        $i2 = 0;
+
+     label1:
+        if $i1 >= $i0 goto label2;
+
+        $r3 = $r1[$i1];
+
+        $r4 = virtualinvoke $r3.<android.net.NetworkStateTracker: android.net.NetworkInfo getNetworkInfo()>();
+
+        $r2[$i2] = $r4;
+
+        $i1 = $i1 + 1;
+
+        $i2 = $i2 + 1;
+
+        goto label1;
+
+     label2:
+        return $r2;
+    }
+
+    public boolean getBackgroundDataSetting()
+    {
+        com.android.server.ConnectivityService $r0;
+        android.content.Context $r1;
+        android.content.ContentResolver $r2;
+        int $i0;
+
+        $r0 := @this: com.android.server.ConnectivityService;
+
+        $r1 = $r0.<com.android.server.ConnectivityService: android.content.Context mContext>;
+
+        $r2 = virtualinvoke $r1.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $i0 = staticinvoke <android.provider.Settings$Secure: int getInt(android.content.ContentResolver,java.lang.String,int)>($r2, "background_data", 1);
+
+        if $i0 != 1 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    public android.net.NetworkInfo getNetworkInfo(int)
+    {
+        com.android.server.ConnectivityService $r0;
+        int $i0;
+        android.net.NetworkStateTracker $r1;
+        boolean $z0;
+        android.net.NetworkStateTracker[] $r2;
+        android.net.NetworkInfo $r3;
+
+        $r0 := @this: com.android.server.ConnectivityService;
+
+        $i0 := @parameter0: int;
+
+        specialinvoke $r0.<com.android.server.ConnectivityService: void enforceAccessPermission()>();
+
+        $z0 = staticinvoke <android.net.ConnectivityManager: boolean isNetworkTypeValid(int)>($i0);
+
+        if $z0 == 0 goto label1;
+
+        $r2 = $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker[] mNetTrackers>;
+
+        $r1 = $r2[$i0];
+
+        if $r1 == null goto label1;
+
+        $r3 = virtualinvoke $r1.<android.net.NetworkStateTracker: android.net.NetworkInfo getNetworkInfo()>();
+
+        return $r3;
+
+     label1:
+        return null;
+    }
+
+    public int getNetworkPreference()
+    {
+        com.android.server.ConnectivityService $r0;
+        int i0;
+
+        $r0 := @this: com.android.server.ConnectivityService;
+
+        specialinvoke $r0.<com.android.server.ConnectivityService: void enforceAccessPermission()>();
+
+        i0 = $r0.<com.android.server.ConnectivityService: int mNetworkPreference>;
+
+        return i0;
+    }
+
+    public boolean requestRouteToHost(int, int)
+    {
+        com.android.server.ConnectivityService $r0;
+        int $i0, $i1, $i2;
+        android.net.NetworkStateTracker $r1;
+        boolean $z0;
+        android.net.NetworkStateTracker[] $r2;
+        android.net.NetworkInfo $r3;
+
+        $r0 := @this: com.android.server.ConnectivityService;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        specialinvoke $r0.<com.android.server.ConnectivityService: void enforceChangePermission()>();
+
+        $z0 = staticinvoke <android.net.ConnectivityManager: boolean isNetworkTypeValid(int)>($i0);
+
+        if $z0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $r2 = $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker[] mNetTrackers>;
+
+        $r1 = $r2[$i0];
+
+        $i2 = specialinvoke $r0.<com.android.server.ConnectivityService: int getNumConnectedNetworks()>();
+
+        if $i2 <= 1 goto label2;
+
+        $z0 = virtualinvoke $r1.<android.net.NetworkStateTracker: boolean requestRouteToHost(int)>($i1);
+
+        return $z0;
+
+     label2:
+        $r3 = virtualinvoke $r1.<android.net.NetworkStateTracker: android.net.NetworkInfo getNetworkInfo()>();
+
+        $i1 = virtualinvoke $r3.<android.net.NetworkInfo: int getType()>();
+
+        if $i1 != $i0 goto label3;
+
+        return 1;
+
+     label3:
+        return 0;
+    }
+
+    public void setBackgroundDataSetting(boolean)
+    {
+        com.android.server.ConnectivityService $r0;
+        boolean $z0, $z1;
+        android.content.Intent $r1;
+        android.content.Context $r2;
+        android.content.ContentResolver $r3;
+        byte $b0;
+
+        $r0 := @this: com.android.server.ConnectivityService;
+
+        $z0 := @parameter0: boolean;
+
+        $r2 = $r0.<com.android.server.ConnectivityService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.CHANGE_BACKGROUND_DATA_SETTING", "ConnectivityService");
+
+        $z1 = virtualinvoke $r0.<com.android.server.ConnectivityService: boolean getBackgroundDataSetting()>();
+
+        if $z1 != $z0 goto label1;
+
+        return;
+
+     label1:
+        $r2 = $r0.<com.android.server.ConnectivityService: android.content.Context mContext>;
+
+        $r3 = virtualinvoke $r2.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        if $z0 == 0 goto label3;
+
+        $b0 = 1;
+
+     label2:
+        staticinvoke <android.provider.Settings$Secure: boolean putInt(android.content.ContentResolver,java.lang.String,int)>($r3, "background_data", $b0);
+
+        $r1 = new android.content.Intent;
+
+        specialinvoke $r1.<android.content.Intent: void <init>(java.lang.String)>("android.net.conn.BACKGROUND_DATA_SETTING_CHANGED");
+
+        $r2 = $r0.<com.android.server.ConnectivityService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void sendBroadcast(android.content.Intent)>($r1);
+
+        return;
+
+     label3:
+        $b0 = 0;
+
+        goto label2;
+    }
+
+    public void setNetworkPreference(int)
+    {
+        com.android.server.ConnectivityService $r0;
+        int $i0, $i1;
+        boolean $z0;
+        java.lang.Throwable $r1;
+
+        $r0 := @this: com.android.server.ConnectivityService;
+
+        $i0 := @parameter0: int;
+
+        entermonitor $r0;
+
+     label1:
+        specialinvoke $r0.<com.android.server.ConnectivityService: void enforceChangePermission()>();
+
+        $z0 = staticinvoke <android.net.ConnectivityManager: boolean isNetworkTypeValid(int)>($i0);
+
+        if $z0 == 0 goto label2;
+
+        $i1 = $r0.<com.android.server.ConnectivityService: int mNetworkPreference>;
+
+        if $i1 == $i0 goto label2;
+
+        specialinvoke $r0.<com.android.server.ConnectivityService: void persistNetworkPreference(int)>($i0);
+
+        $r0.<com.android.server.ConnectivityService: int mNetworkPreference> = $i0;
+
+        specialinvoke $r0.<com.android.server.ConnectivityService: void enforcePreference()>();
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public boolean setRadio(int, boolean)
+    {
+        com.android.server.ConnectivityService $r0;
+        int $i0;
+        boolean $z0, $z1;
+        android.net.NetworkStateTracker $r1;
+        android.net.NetworkStateTracker[] $r2;
+
+        $r0 := @this: com.android.server.ConnectivityService;
+
+        $i0 := @parameter0: int;
+
+        $z0 := @parameter1: boolean;
+
+        specialinvoke $r0.<com.android.server.ConnectivityService: void enforceChangePermission()>();
+
+        $z1 = staticinvoke <android.net.ConnectivityManager: boolean isNetworkTypeValid(int)>($i0);
+
+        if $z1 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $r2 = $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker[] mNetTrackers>;
+
+        $r1 = $r2[$i0];
+
+        if $r1 == null goto label2;
+
+        $z0 = virtualinvoke $r1.<android.net.NetworkStateTracker: boolean setRadio(boolean)>($z0);
+
+        if $z0 == 0 goto label2;
+
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    public boolean setRadios(boolean)
+    {
+        com.android.server.ConnectivityService $r0;
+        boolean $z0, $z1, $z2;
+        android.net.NetworkStateTracker[] $r1;
+        int $i0, $i1;
+        android.net.NetworkStateTracker $r2;
+
+        $r0 := @this: com.android.server.ConnectivityService;
+
+        $z0 := @parameter0: boolean;
+
+        $z2 = 1;
+
+        specialinvoke $r0.<com.android.server.ConnectivityService: void enforceChangePermission()>();
+
+        $r1 = $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker[] mNetTrackers>;
+
+        $i0 = lengthof $r1;
+
+        $i1 = 0;
+
+     label1:
+        if $i1 >= $i0 goto label4;
+
+        $r2 = $r1[$i1];
+
+        $z1 = virtualinvoke $r2.<android.net.NetworkStateTracker: boolean setRadio(boolean)>($z0);
+
+        if $z1 == 0 goto label3;
+
+        if $z2 == 0 goto label3;
+
+        $z2 = 1;
+
+     label2:
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label3:
+        $z2 = 0;
+
+        goto label2;
+
+     label4:
+        return $z2;
+    }
+
+    public int startUsingNetworkFeature(int, java.lang.String)
+    {
+        com.android.server.ConnectivityService $r0;
+        int $i0, $i1;
+        java.lang.String $r1;
+        android.net.NetworkStateTracker $r2;
+        boolean $z0;
+        android.net.NetworkStateTracker[] $r3;
+
+        $r0 := @this: com.android.server.ConnectivityService;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.lang.String;
+
+        specialinvoke $r0.<com.android.server.ConnectivityService: void enforceChangePermission()>();
+
+        $z0 = staticinvoke <android.net.ConnectivityManager: boolean isNetworkTypeValid(int)>($i0);
+
+        if $z0 != 0 goto label1;
+
+        return -1;
+
+     label1:
+        $r3 = $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker[] mNetTrackers>;
+
+        $r2 = $r3[$i0];
+
+        if $r2 == null goto label2;
+
+        $i0 = staticinvoke <com.android.server.ConnectivityService: int getCallingPid()>();
+
+        $i1 = staticinvoke <com.android.server.ConnectivityService: int getCallingUid()>();
+
+        $i0 = virtualinvoke $r2.<android.net.NetworkStateTracker: int startUsingNetworkFeature(java.lang.String,int,int)>($r1, $i0, $i1);
+
+        return $i0;
+
+     label2:
+        return -1;
+    }
+
+    public int stopUsingNetworkFeature(int, java.lang.String)
+    {
+        com.android.server.ConnectivityService $r0;
+        int $i0, $i1;
+        java.lang.String $r1;
+        android.net.NetworkStateTracker $r2;
+        boolean $z0;
+        android.net.NetworkStateTracker[] $r3;
+
+        $r0 := @this: com.android.server.ConnectivityService;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.lang.String;
+
+        specialinvoke $r0.<com.android.server.ConnectivityService: void enforceChangePermission()>();
+
+        $z0 = staticinvoke <android.net.ConnectivityManager: boolean isNetworkTypeValid(int)>($i0);
+
+        if $z0 != 0 goto label1;
+
+        return -1;
+
+     label1:
+        $r3 = $r0.<com.android.server.ConnectivityService: android.net.NetworkStateTracker[] mNetTrackers>;
+
+        $r2 = $r3[$i0];
+
+        if $r2 == null goto label2;
+
+        $i0 = staticinvoke <com.android.server.ConnectivityService: int getCallingPid()>();
+
+        $i1 = staticinvoke <com.android.server.ConnectivityService: int getCallingUid()>();
+
+        $i0 = virtualinvoke $r2.<android.net.NetworkStateTracker: int stopUsingNetworkFeature(java.lang.String,int,int)>($r1, $i0, $i1);
+
+        return $i0;
+
+     label2:
+        return -1;
+    }
+
+    public static void <clinit>()
+    {
+        <com.android.server.ConnectivityService: java.lang.String TAG> = "ConnectivityService";
+
+        <com.android.server.ConnectivityService: int EVENTLOG_CONNECTIVITY_STATE_CHANGED> = 50020;
+
+        <com.android.server.ConnectivityService: boolean DBG> = 0;
+
+        return;
+    }
+}

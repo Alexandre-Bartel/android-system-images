@@ -1,0 +1,1361 @@
+class com.android.server.MountService extends android.os.IMountService$Stub
+{
+    private static final java.lang.String TAG;
+    private boolean mAutoStartUms;
+    android.content.BroadcastReceiver mBroadcastReceiver;
+    private android.content.Context mContext;
+    private com.android.server.MountListener mListener;
+    private android.app.Notification mMediaStorageNotification;
+    private boolean mMounted;
+    private boolean mPlaySounds;
+    private boolean mShowSafeUnmountNotificationWhenUnmounted;
+    private android.app.Notification mUsbStorageNotification;
+
+    public void <init>(android.content.Context)
+    {
+        com.android.server.MountService $r0;
+        android.content.Context $r1;
+        android.content.IntentFilter $r2;
+        com.android.server.MountService$1 $r3;
+        android.content.BroadcastReceiver $r4;
+        com.android.server.MountListener $r5;
+        java.lang.String $r6;
+        boolean $z0;
+
+        $r0 := @this: com.android.server.MountService;
+
+        $r1 := @parameter0: android.content.Context;
+
+        specialinvoke $r0.<android.os.IMountService$Stub: void <init>()>();
+
+        $r3 = new com.android.server.MountService$1;
+
+        specialinvoke $r3.<com.android.server.MountService$1: void <init>(com.android.server.MountService)>($r0);
+
+        $r0.<com.android.server.MountService: android.content.BroadcastReceiver mBroadcastReceiver> = $r3;
+
+        $r0.<com.android.server.MountService: android.content.Context mContext> = $r1;
+
+        $r1 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        $r4 = $r0.<com.android.server.MountService: android.content.BroadcastReceiver mBroadcastReceiver>;
+
+        $r2 = new android.content.IntentFilter;
+
+        specialinvoke $r2.<android.content.IntentFilter: void <init>(java.lang.String)>("android.intent.action.BOOT_COMPLETED");
+
+        virtualinvoke $r1.<android.content.Context: android.content.Intent registerReceiver(android.content.BroadcastReceiver,android.content.IntentFilter,java.lang.String,android.os.Handler)>($r4, $r2, null, null);
+
+        $r5 = new com.android.server.MountListener;
+
+        specialinvoke $r5.<com.android.server.MountListener: void <init>(com.android.server.MountService)>($r0);
+
+        $r0.<com.android.server.MountService: com.android.server.MountListener mListener> = $r5;
+
+        $r0.<com.android.server.MountService: boolean mShowSafeUnmountNotificationWhenUnmounted> = 0;
+
+        $r6 = staticinvoke <android.os.SystemProperties: java.lang.String get(java.lang.String,java.lang.String)>("persist.service.mount.playsnd", "1");
+
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>("1");
+
+        $r0.<com.android.server.MountService: boolean mPlaySounds> = $z0;
+
+        $r6 = staticinvoke <android.os.SystemProperties: java.lang.String get(java.lang.String,java.lang.String)>("persist.service.mount.umsauto", "0");
+
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>("1");
+
+        $r0.<com.android.server.MountService: boolean mAutoStartUms> = $z0;
+
+        return;
+    }
+
+    static com.android.server.MountListener access$000(com.android.server.MountService)
+    {
+        com.android.server.MountService $r0;
+        com.android.server.MountListener r1;
+
+        $r0 := @parameter0: com.android.server.MountService;
+
+        r1 = $r0.<com.android.server.MountService: com.android.server.MountListener mListener>;
+
+        return r1;
+    }
+
+    private boolean getMediaStorageNotificationDismissable()
+    {
+        com.android.server.MountService $r0;
+        android.app.Notification $r1;
+        int $i0;
+        boolean $z0;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: com.android.server.MountService;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = $r0.<com.android.server.MountService: android.app.Notification mMediaStorageNotification>;
+
+        if $r1 == null goto label4;
+
+        $r1 = $r0.<com.android.server.MountService: android.app.Notification mMediaStorageNotification>;
+
+        $i0 = $r1.<android.app.Notification: int flags>;
+
+     label2:
+        $i0 = $i0 & 16;
+
+        if $i0 != 16 goto label4;
+
+        $z0 = 1;
+
+     label3:
+        exitmonitor $r0;
+
+        return $z0;
+
+     label4:
+        $z0 = 0;
+
+        goto label3;
+
+     label5:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+    }
+
+    private void setMediaStorageNotification(int, int, int, boolean, boolean, android.app.PendingIntent)
+    {
+        com.android.server.MountService $r0;
+        int $i0, $i1, $i2, $i3;
+        boolean $z0, $z1, $z2;
+        android.content.Intent $r1;
+        android.app.PendingIntent $r2;
+        android.app.Notification $r3;
+        android.content.Context $r4;
+        java.lang.Object $r5;
+        android.app.NotificationManager $r6;
+        android.content.res.Resources $r7;
+        java.lang.CharSequence $r8, $r9;
+        java.lang.Throwable $r10;
+
+        $r0 := @this: com.android.server.MountService;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i2 := @parameter2: int;
+
+        $z0 := @parameter3: boolean;
+
+        $z1 := @parameter4: boolean;
+
+        $r2 := @parameter5: android.app.PendingIntent;
+
+        entermonitor $r0;
+
+        if $z0 != 0 goto label04;
+
+     label01:
+        $r3 = $r0.<com.android.server.MountService: android.app.Notification mMediaStorageNotification>;
+
+     label02:
+        if $r3 != null goto label04;
+
+     label03:
+        exitmonitor $r0;
+
+        return;
+
+     label04:
+        $r4 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        $r5 = virtualinvoke $r4.<android.content.Context: java.lang.Object getSystemService(java.lang.String)>("notification");
+
+        $r6 = (android.app.NotificationManager) $r5;
+
+        if $r6 == null goto label03;
+
+        $r3 = $r0.<com.android.server.MountService: android.app.Notification mMediaStorageNotification>;
+
+        if $r3 == null goto label05;
+
+        if $z0 == 0 goto label05;
+
+        $r3 = $r0.<com.android.server.MountService: android.app.Notification mMediaStorageNotification>;
+
+        $i3 = $r3.<android.app.Notification: int icon>;
+
+        virtualinvoke $r6.<android.app.NotificationManager: void cancel(int)>($i3);
+
+     label05:
+        if $z0 == 0 goto label10;
+
+        $r7 = staticinvoke <android.content.res.Resources: android.content.res.Resources getSystem()>();
+
+        $r8 = virtualinvoke $r7.<android.content.res.Resources: java.lang.CharSequence getText(int)>($i0);
+
+        $r9 = virtualinvoke $r7.<android.content.res.Resources: java.lang.CharSequence getText(int)>($i1);
+
+        $r3 = $r0.<com.android.server.MountService: android.app.Notification mMediaStorageNotification>;
+
+        if $r3 != null goto label06;
+
+        $r3 = new android.app.Notification;
+
+        specialinvoke $r3.<android.app.Notification: void <init>()>();
+
+        $r0.<com.android.server.MountService: android.app.Notification mMediaStorageNotification> = $r3;
+
+        $r3 = $r0.<com.android.server.MountService: android.app.Notification mMediaStorageNotification>;
+
+        $r3.<android.app.Notification: long when> = 0L;
+
+     label06:
+        $z2 = $r0.<com.android.server.MountService: boolean mPlaySounds>;
+
+        if $z2 == 0 goto label13;
+
+        $r3 = $r0.<com.android.server.MountService: android.app.Notification mMediaStorageNotification>;
+
+        $i0 = $r3.<android.app.Notification: int defaults>;
+
+        $i0 = $i0 | 1;
+
+        $r3.<android.app.Notification: int defaults> = $i0;
+
+     label07:
+        if $z1 == 0 goto label14;
+
+        $r3 = $r0.<com.android.server.MountService: android.app.Notification mMediaStorageNotification>;
+
+        $r3.<android.app.Notification: int flags> = 16;
+
+     label08:
+        $r3 = $r0.<com.android.server.MountService: android.app.Notification mMediaStorageNotification>;
+
+        $r3.<android.app.Notification: java.lang.CharSequence tickerText> = $r8;
+
+        if $r2 != null goto label09;
+
+        $r1 = new android.content.Intent;
+
+        specialinvoke $r1.<android.content.Intent: void <init>()>();
+
+        $r4 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        $r2 = staticinvoke <android.app.PendingIntent: android.app.PendingIntent getBroadcast(android.content.Context,int,android.content.Intent,int)>($r4, 0, $r1, 0);
+
+     label09:
+        $r3 = $r0.<com.android.server.MountService: android.app.Notification mMediaStorageNotification>;
+
+        $r3.<android.app.Notification: int icon> = $i2;
+
+        $r3 = $r0.<com.android.server.MountService: android.app.Notification mMediaStorageNotification>;
+
+        $r4 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        virtualinvoke $r3.<android.app.Notification: void setLatestEventInfo(android.content.Context,java.lang.CharSequence,java.lang.CharSequence,android.app.PendingIntent)>($r4, $r8, $r9, $r2);
+
+     label10:
+        $r3 = $r0.<com.android.server.MountService: android.app.Notification mMediaStorageNotification>;
+
+        $i0 = $r3.<android.app.Notification: int icon>;
+
+        if $z0 == 0 goto label15;
+
+        $r3 = $r0.<com.android.server.MountService: android.app.Notification mMediaStorageNotification>;
+
+        virtualinvoke $r6.<android.app.NotificationManager: void notify(int,android.app.Notification)>($i0, $r3);
+
+     label11:
+        goto label03;
+
+     label12:
+        $r10 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r10;
+
+     label13:
+        $r3 = $r0.<com.android.server.MountService: android.app.Notification mMediaStorageNotification>;
+
+        $i0 = $r3.<android.app.Notification: int defaults>;
+
+        $i0 = $i0 & -2;
+
+        $r3.<android.app.Notification: int defaults> = $i0;
+
+        goto label07;
+
+     label14:
+        $r3 = $r0.<com.android.server.MountService: android.app.Notification mMediaStorageNotification>;
+
+        $r3.<android.app.Notification: int flags> = 2;
+
+        goto label08;
+
+     label15:
+        virtualinvoke $r6.<android.app.NotificationManager: void cancel(int)>($i0);
+
+     label16:
+        goto label03;
+
+        catch java.lang.Throwable from label01 to label02 with label12;
+        catch java.lang.Throwable from label04 to label11 with label12;
+        catch java.lang.Throwable from label13 to label16 with label12;
+    }
+
+    private void setUsbStorageNotification(int, int, int, boolean, boolean, android.app.PendingIntent)
+    {
+        com.android.server.MountService $r0;
+        int $i0, $i1, $i2;
+        boolean $z0, $z1;
+        android.content.Intent $r1;
+        android.app.PendingIntent $r2;
+        android.app.Notification $r3;
+        android.content.Context $r4;
+        java.lang.Object $r5;
+        android.app.NotificationManager $r6;
+        android.content.res.Resources $r7;
+        java.lang.CharSequence $r8, $r9;
+        java.lang.Throwable $r10;
+
+        $r0 := @this: com.android.server.MountService;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i2 := @parameter2: int;
+
+        $z0 := @parameter3: boolean;
+
+        $z1 := @parameter4: boolean;
+
+        $r2 := @parameter5: android.app.PendingIntent;
+
+        entermonitor $r0;
+
+        if $z1 != 0 goto label04;
+
+     label01:
+        $r3 = $r0.<com.android.server.MountService: android.app.Notification mUsbStorageNotification>;
+
+     label02:
+        if $r3 != null goto label04;
+
+     label03:
+        exitmonitor $r0;
+
+        return;
+
+     label04:
+        $r4 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        $r5 = virtualinvoke $r4.<android.content.Context: java.lang.Object getSystemService(java.lang.String)>("notification");
+
+        $r6 = (android.app.NotificationManager) $r5;
+
+        if $r6 == null goto label03;
+
+        if $z1 == 0 goto label08;
+
+        $r7 = staticinvoke <android.content.res.Resources: android.content.res.Resources getSystem()>();
+
+        $r8 = virtualinvoke $r7.<android.content.res.Resources: java.lang.CharSequence getText(int)>($i0);
+
+        $r9 = virtualinvoke $r7.<android.content.res.Resources: java.lang.CharSequence getText(int)>($i1);
+
+        $r3 = $r0.<com.android.server.MountService: android.app.Notification mUsbStorageNotification>;
+
+        if $r3 != null goto label05;
+
+        $r3 = new android.app.Notification;
+
+        specialinvoke $r3.<android.app.Notification: void <init>()>();
+
+        $r0.<com.android.server.MountService: android.app.Notification mUsbStorageNotification> = $r3;
+
+        $r3 = $r0.<com.android.server.MountService: android.app.Notification mUsbStorageNotification>;
+
+        $r3.<android.app.Notification: int icon> = $i2;
+
+        $r3 = $r0.<com.android.server.MountService: android.app.Notification mUsbStorageNotification>;
+
+        $r3.<android.app.Notification: long when> = 0L;
+
+     label05:
+        if $z0 == 0 goto label11;
+
+        $z0 = $r0.<com.android.server.MountService: boolean mPlaySounds>;
+
+        if $z0 == 0 goto label11;
+
+        $r3 = $r0.<com.android.server.MountService: android.app.Notification mUsbStorageNotification>;
+
+        $i0 = $r3.<android.app.Notification: int defaults>;
+
+        $i0 = $i0 | 1;
+
+        $r3.<android.app.Notification: int defaults> = $i0;
+
+     label06:
+        $r3 = $r0.<com.android.server.MountService: android.app.Notification mUsbStorageNotification>;
+
+        $r3.<android.app.Notification: int flags> = 2;
+
+        $r3 = $r0.<com.android.server.MountService: android.app.Notification mUsbStorageNotification>;
+
+        $r3.<android.app.Notification: java.lang.CharSequence tickerText> = $r8;
+
+        if $r2 != null goto label07;
+
+        $r1 = new android.content.Intent;
+
+        specialinvoke $r1.<android.content.Intent: void <init>()>();
+
+        $r4 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        $r2 = staticinvoke <android.app.PendingIntent: android.app.PendingIntent getBroadcast(android.content.Context,int,android.content.Intent,int)>($r4, 0, $r1, 0);
+
+     label07:
+        $r3 = $r0.<com.android.server.MountService: android.app.Notification mUsbStorageNotification>;
+
+        $r4 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        virtualinvoke $r3.<android.app.Notification: void setLatestEventInfo(android.content.Context,java.lang.CharSequence,java.lang.CharSequence,android.app.PendingIntent)>($r4, $r8, $r9, $r2);
+
+     label08:
+        $r3 = $r0.<com.android.server.MountService: android.app.Notification mUsbStorageNotification>;
+
+        $i0 = $r3.<android.app.Notification: int icon>;
+
+        if $z1 == 0 goto label12;
+
+        $r3 = $r0.<com.android.server.MountService: android.app.Notification mUsbStorageNotification>;
+
+        virtualinvoke $r6.<android.app.NotificationManager: void notify(int,android.app.Notification)>($i0, $r3);
+
+     label09:
+        goto label03;
+
+     label10:
+        $r10 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r10;
+
+     label11:
+        $r3 = $r0.<com.android.server.MountService: android.app.Notification mUsbStorageNotification>;
+
+        $i0 = $r3.<android.app.Notification: int defaults>;
+
+        $i0 = $i0 & -2;
+
+        $r3.<android.app.Notification: int defaults> = $i0;
+
+        goto label06;
+
+     label12:
+        virtualinvoke $r6.<android.app.NotificationManager: void cancel(int)>($i0);
+
+     label13:
+        goto label03;
+
+        catch java.lang.Throwable from label01 to label02 with label10;
+        catch java.lang.Throwable from label04 to label09 with label10;
+        catch java.lang.Throwable from label11 to label13 with label10;
+    }
+
+    public void formatMedia(java.lang.String) throws android.os.RemoteException
+    {
+        com.android.server.MountService $r0;
+        java.lang.String $r1;
+        int $i0;
+        android.content.Context $r2;
+        java.lang.SecurityException $r3;
+        com.android.server.MountListener $r4;
+
+        $r0 := @this: com.android.server.MountService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        $i0 = virtualinvoke $r2.<android.content.Context: int checkCallingOrSelfPermission(java.lang.String)>("android.permission.MOUNT_FORMAT_FILESYSTEMS");
+
+        if $i0 == 0 goto label1;
+
+        $r3 = new java.lang.SecurityException;
+
+        specialinvoke $r3.<java.lang.SecurityException: void <init>(java.lang.String)>("Requires MOUNT_FORMAT_FILESYSTEMS permission");
+
+        throw $r3;
+
+     label1:
+        $r4 = $r0.<com.android.server.MountService: com.android.server.MountListener mListener>;
+
+        virtualinvoke $r4.<com.android.server.MountListener: void formatMedia(java.lang.String)>($r1);
+
+        return;
+    }
+
+    public boolean getAutoStartUms()
+    {
+        com.android.server.MountService $r0;
+        boolean z0;
+
+        $r0 := @this: com.android.server.MountService;
+
+        z0 = $r0.<com.android.server.MountService: boolean mAutoStartUms>;
+
+        return z0;
+    }
+
+    public boolean getMassStorageConnected() throws android.os.RemoteException
+    {
+        com.android.server.MountService $r0;
+        boolean $z0;
+        com.android.server.MountListener $r1;
+
+        $r0 := @this: com.android.server.MountService;
+
+        $r1 = $r0.<com.android.server.MountService: com.android.server.MountListener mListener>;
+
+        $z0 = virtualinvoke $r1.<com.android.server.MountListener: boolean getMassStorageConnected()>();
+
+        return $z0;
+    }
+
+    public boolean getMassStorageEnabled() throws android.os.RemoteException
+    {
+        com.android.server.MountService $r0;
+        boolean $z0;
+        com.android.server.MountListener $r1;
+
+        $r0 := @this: com.android.server.MountService;
+
+        $r1 = $r0.<com.android.server.MountService: com.android.server.MountListener mListener>;
+
+        $z0 = virtualinvoke $r1.<com.android.server.MountListener: boolean getMassStorageEnabled()>();
+
+        return $z0;
+    }
+
+    public boolean getPlayNotificationSounds()
+    {
+        com.android.server.MountService $r0;
+        boolean z0;
+
+        $r0 := @this: com.android.server.MountService;
+
+        z0 = $r0.<com.android.server.MountService: boolean mPlaySounds>;
+
+        return z0;
+    }
+
+    void handlePossibleExplicitUnmountBroadcast(java.lang.String)
+    {
+        com.android.server.MountService $r0;
+        java.lang.String $r1;
+        android.content.Intent $r2;
+        boolean $z0;
+        java.lang.StringBuilder $r3;
+        android.net.Uri $r4;
+        android.content.Context $r5;
+
+        $r0 := @this: com.android.server.MountService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $z0 = $r0.<com.android.server.MountService: boolean mMounted>;
+
+        if $z0 == 0 goto label1;
+
+        $r0.<com.android.server.MountService: boolean mMounted> = 0;
+
+        $r2 = new android.content.Intent;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("file://");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r4 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>($r1);
+
+        specialinvoke $r2.<android.content.Intent: void <init>(java.lang.String,android.net.Uri)>("android.intent.action.MEDIA_UNMOUNTED", $r4);
+
+        $r5 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        virtualinvoke $r5.<android.content.Context: void sendBroadcast(android.content.Intent)>($r2);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public void mountMedia(java.lang.String) throws android.os.RemoteException
+    {
+        com.android.server.MountService $r0;
+        java.lang.String $r1;
+        int $i0;
+        android.content.Context $r2;
+        java.lang.SecurityException $r3;
+        com.android.server.MountListener $r4;
+
+        $r0 := @this: com.android.server.MountService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        $i0 = virtualinvoke $r2.<android.content.Context: int checkCallingOrSelfPermission(java.lang.String)>("android.permission.MOUNT_UNMOUNT_FILESYSTEMS");
+
+        if $i0 == 0 goto label1;
+
+        $r3 = new java.lang.SecurityException;
+
+        specialinvoke $r3.<java.lang.SecurityException: void <init>(java.lang.String)>("Requires MOUNT_UNMOUNT_FILESYSTEMS permission");
+
+        throw $r3;
+
+     label1:
+        $r4 = $r0.<com.android.server.MountService: com.android.server.MountListener mListener>;
+
+        virtualinvoke $r4.<com.android.server.MountListener: void mountMedia(java.lang.String)>($r1);
+
+        return;
+    }
+
+    void notifyMediaBadRemoval(java.lang.String)
+    {
+        com.android.server.MountService $r0;
+        java.lang.String $r1, $r4;
+        android.content.Intent $r2;
+        java.lang.StringBuilder $r3;
+        android.net.Uri $r5;
+        android.content.Context $r6;
+
+        $r0 := @this: com.android.server.MountService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        virtualinvoke $r0.<com.android.server.MountService: void updateUsbMassStorageNotification(boolean,boolean)>(1, 0);
+
+        specialinvoke $r0.<com.android.server.MountService: void setMediaStorageNotification(int,int,int,boolean,boolean,android.app.PendingIntent)>(17040014, 17040015, 17301642, 1, 1, null);
+
+        virtualinvoke $r0.<com.android.server.MountService: void handlePossibleExplicitUnmountBroadcast(java.lang.String)>($r1);
+
+        $r2 = new android.content.Intent;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("file://");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r5 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>($r4);
+
+        specialinvoke $r2.<android.content.Intent: void <init>(java.lang.String,android.net.Uri)>("android.intent.action.MEDIA_BAD_REMOVAL", $r5);
+
+        $r6 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        virtualinvoke $r6.<android.content.Context: void sendBroadcast(android.content.Intent)>($r2);
+
+        $r2 = new android.content.Intent;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("file://");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r5 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>($r1);
+
+        specialinvoke $r2.<android.content.Intent: void <init>(java.lang.String,android.net.Uri)>("android.intent.action.MEDIA_REMOVED", $r5);
+
+        $r6 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        virtualinvoke $r6.<android.content.Context: void sendBroadcast(android.content.Intent)>($r2);
+
+        return;
+    }
+
+    void notifyMediaChecking(java.lang.String)
+    {
+        com.android.server.MountService $r0;
+        java.lang.String $r1;
+        android.content.Intent $r2;
+        java.lang.StringBuilder $r3;
+        android.net.Uri $r4;
+        android.content.Context $r5;
+
+        $r0 := @this: com.android.server.MountService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        specialinvoke $r0.<com.android.server.MountService: void setMediaStorageNotification(int,int,int,boolean,boolean,android.app.PendingIntent)>(17040008, 17040009, 17302024, 1, 0, null);
+
+        virtualinvoke $r0.<com.android.server.MountService: void updateUsbMassStorageNotification(boolean,boolean)>(1, 0);
+
+        $r2 = new android.content.Intent;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("file://");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r4 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>($r1);
+
+        specialinvoke $r2.<android.content.Intent: void <init>(java.lang.String,android.net.Uri)>("android.intent.action.MEDIA_CHECKING", $r4);
+
+        $r5 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        virtualinvoke $r5.<android.content.Context: void sendBroadcast(android.content.Intent)>($r2);
+
+        return;
+    }
+
+    void notifyMediaEject(java.lang.String)
+    {
+        com.android.server.MountService $r0;
+        java.lang.String $r1;
+        android.content.Intent $r2;
+        java.lang.StringBuilder $r3;
+        android.net.Uri $r4;
+        android.content.Context $r5;
+
+        $r0 := @this: com.android.server.MountService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new android.content.Intent;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("file://");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r4 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>($r1);
+
+        specialinvoke $r2.<android.content.Intent: void <init>(java.lang.String,android.net.Uri)>("android.intent.action.MEDIA_EJECT", $r4);
+
+        $r5 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        virtualinvoke $r5.<android.content.Context: void sendBroadcast(android.content.Intent)>($r2);
+
+        return;
+    }
+
+    void notifyMediaMounted(java.lang.String, boolean)
+    {
+        com.android.server.MountService $r0;
+        java.lang.String $r1;
+        boolean $z0;
+        android.content.Intent $r2;
+        java.lang.StringBuilder $r3;
+        android.net.Uri $r4;
+        android.content.Context $r5;
+
+        $r0 := @this: com.android.server.MountService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $z0 := @parameter1: boolean;
+
+        specialinvoke $r0.<com.android.server.MountService: void setMediaStorageNotification(int,int,int,boolean,boolean,android.app.PendingIntent)>(0, 0, 0, 0, 0, null);
+
+        virtualinvoke $r0.<com.android.server.MountService: void updateUsbMassStorageNotification(boolean,boolean)>(0, 0);
+
+        $r2 = new android.content.Intent;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("file://");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r4 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>($r1);
+
+        specialinvoke $r2.<android.content.Intent: void <init>(java.lang.String,android.net.Uri)>("android.intent.action.MEDIA_MOUNTED", $r4);
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,boolean)>("read-only", $z0);
+
+        $r0.<com.android.server.MountService: boolean mMounted> = 1;
+
+        $r5 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        virtualinvoke $r5.<android.content.Context: void sendBroadcast(android.content.Intent)>($r2);
+
+        return;
+    }
+
+    void notifyMediaNoFs(java.lang.String)
+    {
+        com.android.server.MountService $r0;
+        java.lang.String $r1;
+        android.content.Intent $r2;
+        android.content.Context $r3;
+        android.app.PendingIntent $r4;
+        java.lang.StringBuilder $r5;
+        android.net.Uri $r6;
+
+        $r0 := @this: com.android.server.MountService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new android.content.Intent;
+
+        specialinvoke $r2.<android.content.Intent: void <init>()>();
+
+        $r3 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent setClass(android.content.Context,java.lang.Class)>($r3, class "com/android/internal/app/ExternalMediaFormatActivity");
+
+        $r3 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        $r4 = staticinvoke <android.app.PendingIntent: android.app.PendingIntent getActivity(android.content.Context,int,android.content.Intent,int)>($r3, 0, $r2, 0);
+
+        specialinvoke $r0.<com.android.server.MountService: void setMediaStorageNotification(int,int,int,boolean,boolean,android.app.PendingIntent)>(17040010, 17040011, 17302067, 1, 0, $r4);
+
+        virtualinvoke $r0.<com.android.server.MountService: void updateUsbMassStorageNotification(boolean,boolean)>(0, 0);
+
+        $r2 = new android.content.Intent;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("file://");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r6 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>($r1);
+
+        specialinvoke $r2.<android.content.Intent: void <init>(java.lang.String,android.net.Uri)>("android.intent.action.MEDIA_NOFS", $r6);
+
+        $r3 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        virtualinvoke $r3.<android.content.Context: void sendBroadcast(android.content.Intent)>($r2);
+
+        return;
+    }
+
+    void notifyMediaRemoved(java.lang.String)
+    {
+        com.android.server.MountService $r0;
+        java.lang.String $r1;
+        android.content.Intent $r2;
+        java.lang.StringBuilder $r3;
+        android.net.Uri $r4;
+        android.content.Context $r5;
+
+        $r0 := @this: com.android.server.MountService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        virtualinvoke $r0.<com.android.server.MountService: void updateUsbMassStorageNotification(boolean,boolean)>(1, 0);
+
+        specialinvoke $r0.<com.android.server.MountService: void setMediaStorageNotification(int,int,int,boolean,boolean,android.app.PendingIntent)>(17040018, 17040019, 17302067, 1, 0, null);
+
+        virtualinvoke $r0.<com.android.server.MountService: void handlePossibleExplicitUnmountBroadcast(java.lang.String)>($r1);
+
+        $r2 = new android.content.Intent;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("file://");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r4 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>($r1);
+
+        specialinvoke $r2.<android.content.Intent: void <init>(java.lang.String,android.net.Uri)>("android.intent.action.MEDIA_REMOVED", $r4);
+
+        $r5 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        virtualinvoke $r5.<android.content.Context: void sendBroadcast(android.content.Intent)>($r2);
+
+        return;
+    }
+
+    void notifyMediaShared(java.lang.String)
+    {
+        com.android.server.MountService $r0;
+        java.lang.String $r1;
+        android.content.Intent $r2;
+        android.content.Context $r3;
+        android.app.PendingIntent $r4;
+        java.lang.StringBuilder $r5;
+        android.net.Uri $r6;
+
+        $r0 := @this: com.android.server.MountService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new android.content.Intent;
+
+        specialinvoke $r2.<android.content.Intent: void <init>()>();
+
+        $r3 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent setClass(android.content.Context,java.lang.Class)>($r3, class "com/android/internal/app/UsbStorageStopActivity");
+
+        $r3 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        $r4 = staticinvoke <android.app.PendingIntent: android.app.PendingIntent getActivity(android.content.Context,int,android.content.Intent,int)>($r3, 0, $r2, 0);
+
+        specialinvoke $r0.<com.android.server.MountService: void setUsbStorageNotification(int,int,int,boolean,boolean,android.app.PendingIntent)>(17039993, 17039994, 17301642, 0, 1, $r4);
+
+        virtualinvoke $r0.<com.android.server.MountService: void handlePossibleExplicitUnmountBroadcast(java.lang.String)>($r1);
+
+        $r2 = new android.content.Intent;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("file://");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r6 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>($r1);
+
+        specialinvoke $r2.<android.content.Intent: void <init>(java.lang.String,android.net.Uri)>("android.intent.action.MEDIA_SHARED", $r6);
+
+        $r3 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        virtualinvoke $r3.<android.content.Context: void sendBroadcast(android.content.Intent)>($r2);
+
+        return;
+    }
+
+    void notifyMediaUnmountable(java.lang.String)
+    {
+        com.android.server.MountService $r0;
+        java.lang.String $r1;
+        android.content.Intent $r2;
+        android.content.Context $r3;
+        android.app.PendingIntent $r4;
+        java.lang.StringBuilder $r5;
+        android.net.Uri $r6;
+
+        $r0 := @this: com.android.server.MountService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new android.content.Intent;
+
+        specialinvoke $r2.<android.content.Intent: void <init>()>();
+
+        $r3 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent setClass(android.content.Context,java.lang.Class)>($r3, class "com/android/internal/app/ExternalMediaFormatActivity");
+
+        $r3 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        $r4 = staticinvoke <android.app.PendingIntent: android.app.PendingIntent getActivity(android.content.Context,int,android.content.Intent,int)>($r3, 0, $r2, 0);
+
+        specialinvoke $r0.<com.android.server.MountService: void setMediaStorageNotification(int,int,int,boolean,boolean,android.app.PendingIntent)>(17040012, 17040013, 17302067, 1, 0, $r4);
+
+        virtualinvoke $r0.<com.android.server.MountService: void updateUsbMassStorageNotification(boolean,boolean)>(0, 0);
+
+        virtualinvoke $r0.<com.android.server.MountService: void handlePossibleExplicitUnmountBroadcast(java.lang.String)>($r1);
+
+        $r2 = new android.content.Intent;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("file://");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r6 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>($r1);
+
+        specialinvoke $r2.<android.content.Intent: void <init>(java.lang.String,android.net.Uri)>("android.intent.action.MEDIA_UNMOUNTABLE", $r6);
+
+        $r3 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        virtualinvoke $r3.<android.content.Context: void sendBroadcast(android.content.Intent)>($r2);
+
+        return;
+    }
+
+    void notifyMediaUnmounted(java.lang.String)
+    {
+        com.android.server.MountService $r0;
+        java.lang.String $r1;
+        android.content.Intent $r2;
+        boolean $z0;
+        java.lang.StringBuilder $r3;
+        android.net.Uri $r4;
+        android.content.Context $r5;
+
+        $r0 := @this: com.android.server.MountService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $z0 = $r0.<com.android.server.MountService: boolean mShowSafeUnmountNotificationWhenUnmounted>;
+
+        if $z0 == 0 goto label2;
+
+        specialinvoke $r0.<com.android.server.MountService: void setMediaStorageNotification(int,int,int,boolean,boolean,android.app.PendingIntent)>(17040016, 17040017, 17302024, 1, 1, null);
+
+        $r0.<com.android.server.MountService: boolean mShowSafeUnmountNotificationWhenUnmounted> = 0;
+
+     label1:
+        virtualinvoke $r0.<com.android.server.MountService: void updateUsbMassStorageNotification(boolean,boolean)>(0, 0);
+
+        $r2 = new android.content.Intent;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("file://");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r4 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>($r1);
+
+        specialinvoke $r2.<android.content.Intent: void <init>(java.lang.String,android.net.Uri)>("android.intent.action.MEDIA_UNMOUNTED", $r4);
+
+        $r5 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        virtualinvoke $r5.<android.content.Context: void sendBroadcast(android.content.Intent)>($r2);
+
+        return;
+
+     label2:
+        specialinvoke $r0.<com.android.server.MountService: void setMediaStorageNotification(int,int,int,boolean,boolean,android.app.PendingIntent)>(0, 0, 0, 0, 0, null);
+
+        goto label1;
+    }
+
+    void notifyUmsConnected()
+    {
+        com.android.server.MountService $r0;
+        android.content.Intent $r1;
+        java.lang.String $r2;
+        boolean $z0;
+        android.content.Context $r3;
+        android.os.RemoteException $r4;
+
+        $r0 := @this: com.android.server.MountService;
+
+        $r2 = staticinvoke <android.os.Environment: java.lang.String getExternalStorageState()>();
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("removed");
+
+        if $z0 != 0 goto label2;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("bad_removal");
+
+        if $z0 != 0 goto label2;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("checking");
+
+        if $z0 != 0 goto label2;
+
+        $z0 = $r0.<com.android.server.MountService: boolean mAutoStartUms>;
+
+        if $z0 == 0 goto label3;
+
+     label1:
+        virtualinvoke $r0.<com.android.server.MountService: void setMassStorageEnabled(boolean)>(1);
+
+     label2:
+        $r1 = new android.content.Intent;
+
+        specialinvoke $r1.<android.content.Intent: void <init>(java.lang.String)>("android.intent.action.UMS_CONNECTED");
+
+        $r3 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        virtualinvoke $r3.<android.content.Context: void sendBroadcast(android.content.Intent)>($r1);
+
+        return;
+
+     label3:
+        virtualinvoke $r0.<com.android.server.MountService: void updateUsbMassStorageNotification(boolean,boolean)>(0, 1);
+
+        goto label2;
+
+     label4:
+        $r4 := @caughtexception;
+
+        goto label2;
+
+        catch android.os.RemoteException from label1 to label2 with label4;
+    }
+
+    void notifyUmsDisconnected()
+    {
+        com.android.server.MountService $r0;
+        android.content.Intent $r1;
+        android.content.Context $r2;
+
+        $r0 := @this: com.android.server.MountService;
+
+        virtualinvoke $r0.<com.android.server.MountService: void updateUsbMassStorageNotification(boolean,boolean)>(0, 0);
+
+        $r1 = new android.content.Intent;
+
+        specialinvoke $r1.<android.content.Intent: void <init>(java.lang.String)>("android.intent.action.UMS_DISCONNECTED");
+
+        $r2 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void sendBroadcast(android.content.Intent)>($r1);
+
+        return;
+    }
+
+    public void setAutoStartUms(boolean)
+    {
+        com.android.server.MountService $r0;
+        boolean $z0;
+        int $i0;
+        android.content.Context $r1;
+        java.lang.SecurityException $r2;
+        java.lang.String $r3;
+
+        $r0 := @this: com.android.server.MountService;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        $i0 = virtualinvoke $r1.<android.content.Context: int checkCallingOrSelfPermission(java.lang.String)>("android.permission.WRITE_SETTINGS");
+
+        if $i0 == 0 goto label1;
+
+        $r2 = new java.lang.SecurityException;
+
+        specialinvoke $r2.<java.lang.SecurityException: void <init>(java.lang.String)>("Requires WRITE_SETTINGS permission");
+
+        throw $r2;
+
+     label1:
+        $r0.<com.android.server.MountService: boolean mAutoStartUms> = $z0;
+
+        if $z0 == 0 goto label3;
+
+        $r3 = "1";
+
+     label2:
+        staticinvoke <android.os.SystemProperties: void set(java.lang.String,java.lang.String)>("persist.service.mount.umsauto", $r3);
+
+        return;
+
+     label3:
+        $r3 = "0";
+
+        goto label2;
+    }
+
+    public void setMassStorageEnabled(boolean) throws android.os.RemoteException
+    {
+        com.android.server.MountService $r0;
+        boolean $z0;
+        com.android.server.MountListener $r1;
+
+        $r0 := @this: com.android.server.MountService;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 = $r0.<com.android.server.MountService: com.android.server.MountListener mListener>;
+
+        virtualinvoke $r1.<com.android.server.MountListener: void setMassStorageEnabled(boolean)>($z0);
+
+        return;
+    }
+
+    public void setPlayNotificationSounds(boolean)
+    {
+        com.android.server.MountService $r0;
+        boolean $z0;
+        int $i0;
+        android.content.Context $r1;
+        java.lang.SecurityException $r2;
+        java.lang.String $r3;
+
+        $r0 := @this: com.android.server.MountService;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        $i0 = virtualinvoke $r1.<android.content.Context: int checkCallingOrSelfPermission(java.lang.String)>("android.permission.WRITE_SETTINGS");
+
+        if $i0 == 0 goto label1;
+
+        $r2 = new java.lang.SecurityException;
+
+        specialinvoke $r2.<java.lang.SecurityException: void <init>(java.lang.String)>("Requires WRITE_SETTINGS permission");
+
+        throw $r2;
+
+     label1:
+        $r0.<com.android.server.MountService: boolean mPlaySounds> = $z0;
+
+        if $z0 == 0 goto label3;
+
+        $r3 = "1";
+
+     label2:
+        staticinvoke <android.os.SystemProperties: void set(java.lang.String,java.lang.String)>("persist.service.mount.playsnd", $r3);
+
+        return;
+
+     label3:
+        $r3 = "0";
+
+        goto label2;
+    }
+
+    public void unmountMedia(java.lang.String) throws android.os.RemoteException
+    {
+        com.android.server.MountService $r0;
+        java.lang.String $r1;
+        int $i0;
+        android.content.Context $r2;
+        java.lang.SecurityException $r3;
+        com.android.server.MountListener $r4;
+
+        $r0 := @this: com.android.server.MountService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        $i0 = virtualinvoke $r2.<android.content.Context: int checkCallingOrSelfPermission(java.lang.String)>("android.permission.MOUNT_UNMOUNT_FILESYSTEMS");
+
+        if $i0 == 0 goto label1;
+
+        $r3 = new java.lang.SecurityException;
+
+        specialinvoke $r3.<java.lang.SecurityException: void <init>(java.lang.String)>("Requires MOUNT_UNMOUNT_FILESYSTEMS permission");
+
+        throw $r3;
+
+     label1:
+        $r0.<com.android.server.MountService: boolean mShowSafeUnmountNotificationWhenUnmounted> = 1;
+
+        $r4 = $r0.<com.android.server.MountService: com.android.server.MountListener mListener>;
+
+        virtualinvoke $r4.<com.android.server.MountListener: void ejectMedia(java.lang.String)>($r1);
+
+        return;
+    }
+
+    void updateUsbMassStorageNotification(boolean, boolean)
+    {
+        com.android.server.MountService $r0;
+        boolean $z0, $z1, $z2;
+        android.content.Intent $r1;
+        android.content.Context $r2;
+        android.app.PendingIntent $r3;
+        android.os.RemoteException $r4;
+
+        $r0 := @this: com.android.server.MountService;
+
+        $z0 := @parameter0: boolean;
+
+        $z1 := @parameter1: boolean;
+
+     label1:
+        $z2 = virtualinvoke $r0.<com.android.server.MountService: boolean getMassStorageConnected()>();
+
+        if $z2 == 0 goto label3;
+
+        if $z0 != 0 goto label3;
+
+        $r1 = new android.content.Intent;
+
+        specialinvoke $r1.<android.content.Intent: void <init>()>();
+
+        $r2 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        virtualinvoke $r1.<android.content.Intent: android.content.Intent setClass(android.content.Context,java.lang.Class)>($r2, class "com/android/internal/app/UsbStorageActivity");
+
+        $r2 = $r0.<com.android.server.MountService: android.content.Context mContext>;
+
+        $r3 = staticinvoke <android.app.PendingIntent: android.app.PendingIntent getActivity(android.content.Context,int,android.content.Intent,int)>($r2, 0, $r1, 0);
+
+        specialinvoke $r0.<com.android.server.MountService: void setUsbStorageNotification(int,int,int,boolean,boolean,android.app.PendingIntent)>(17039991, 17039992, 17302057, $z1, 1, $r3);
+
+     label2:
+        return;
+
+     label3:
+        specialinvoke $r0.<com.android.server.MountService: void setUsbStorageNotification(int,int,int,boolean,boolean,android.app.PendingIntent)>(0, 0, 0, 0, 0, null);
+
+     label4:
+        return;
+
+     label5:
+        $r4 := @caughtexception;
+
+        return;
+
+        catch android.os.RemoteException from label1 to label2 with label5;
+        catch android.os.RemoteException from label3 to label4 with label5;
+    }
+
+    public static void <clinit>()
+    {
+        <com.android.server.MountService: java.lang.String TAG> = "MountService";
+
+        return;
+    }
+}

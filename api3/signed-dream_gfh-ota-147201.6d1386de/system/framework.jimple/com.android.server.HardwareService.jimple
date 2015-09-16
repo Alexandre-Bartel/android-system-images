@@ -1,0 +1,922 @@
+public class com.android.server.HardwareService extends android.os.IHardwareService$Stub
+{
+    static final int LIGHT_FLASH_NONE;
+    static final int LIGHT_FLASH_TIMED;
+    static final int LIGHT_ID_ATTENTION;
+    static final int LIGHT_ID_BACKLIGHT;
+    static final int LIGHT_ID_BATTERY;
+    static final int LIGHT_ID_BUTTONS;
+    static final int LIGHT_ID_KEYBOARD;
+    static final int LIGHT_ID_NOTIFICATIONS;
+    private static final java.lang.String TAG;
+    private boolean mAttentionLightOn;
+    private final com.android.internal.app.IBatteryStats mBatteryStats;
+    private final android.content.Context mContext;
+    volatile com.android.server.HardwareService$Death mDeath;
+    private android.os.Handler mH;
+    android.content.BroadcastReceiver mIntentReceiver;
+    private int mNativePointer;
+    private boolean mPulsing;
+    volatile com.android.server.HardwareService$VibrateThread mThread;
+    volatile android.os.IBinder mToken;
+    private final android.os.PowerManager$WakeLock mWakeLock;
+
+    void <init>(android.content.Context)
+    {
+        com.android.server.HardwareService $r0;
+        android.content.Context $r1;
+        android.content.IntentFilter $r2;
+        com.android.server.HardwareService$1 $r3;
+        com.android.server.HardwareService$2 $r4;
+        int $i0;
+        java.lang.Object $r5;
+        android.os.PowerManager $r6;
+        android.os.PowerManager$WakeLock $r7;
+        com.android.internal.app.IBatteryStats $r8;
+        android.content.BroadcastReceiver $r9;
+
+        $r0 := @this: com.android.server.HardwareService;
+
+        $r1 := @parameter0: android.content.Context;
+
+        specialinvoke $r0.<android.os.IHardwareService$Stub: void <init>()>();
+
+        $r3 = new com.android.server.HardwareService$1;
+
+        specialinvoke $r3.<com.android.server.HardwareService$1: void <init>(com.android.server.HardwareService)>($r0);
+
+        $r0.<com.android.server.HardwareService: android.os.Handler mH> = $r3;
+
+        $r4 = new com.android.server.HardwareService$2;
+
+        specialinvoke $r4.<com.android.server.HardwareService$2: void <init>(com.android.server.HardwareService)>($r0);
+
+        $r0.<com.android.server.HardwareService: android.content.BroadcastReceiver mIntentReceiver> = $r4;
+
+        staticinvoke <com.android.server.HardwareService: void vibratorOff()>();
+
+        $i0 = staticinvoke <com.android.server.HardwareService: int init_native()>();
+
+        $r0.<com.android.server.HardwareService: int mNativePointer> = $i0;
+
+        $r0.<com.android.server.HardwareService: android.content.Context mContext> = $r1;
+
+        $r5 = virtualinvoke $r1.<android.content.Context: java.lang.Object getSystemService(java.lang.String)>("power");
+
+        $r6 = (android.os.PowerManager) $r5;
+
+        $r7 = virtualinvoke $r6.<android.os.PowerManager: android.os.PowerManager$WakeLock newWakeLock(int,java.lang.String)>(1, "HardwareService");
+
+        $r0.<com.android.server.HardwareService: android.os.PowerManager$WakeLock mWakeLock> = $r7;
+
+        $r7 = $r0.<com.android.server.HardwareService: android.os.PowerManager$WakeLock mWakeLock>;
+
+        virtualinvoke $r7.<android.os.PowerManager$WakeLock: void setReferenceCounted(boolean)>(1);
+
+        $r8 = staticinvoke <com.android.server.am.BatteryStatsService: com.android.internal.app.IBatteryStats getService()>();
+
+        $r0.<com.android.server.HardwareService: com.android.internal.app.IBatteryStats mBatteryStats> = $r8;
+
+        $r2 = new android.content.IntentFilter;
+
+        specialinvoke $r2.<android.content.IntentFilter: void <init>()>();
+
+        virtualinvoke $r2.<android.content.IntentFilter: void addAction(java.lang.String)>("android.intent.action.SCREEN_OFF");
+
+        $r9 = $r0.<com.android.server.HardwareService: android.content.BroadcastReceiver mIntentReceiver>;
+
+        virtualinvoke $r1.<android.content.Context: android.content.Intent registerReceiver(android.content.BroadcastReceiver,android.content.IntentFilter)>($r9, $r2);
+
+        return;
+    }
+
+    static boolean access$000(com.android.server.HardwareService)
+    {
+        com.android.server.HardwareService $r0;
+        boolean z0;
+
+        $r0 := @parameter0: com.android.server.HardwareService;
+
+        z0 = $r0.<com.android.server.HardwareService: boolean mPulsing>;
+
+        return z0;
+    }
+
+    static boolean access$002(com.android.server.HardwareService, boolean)
+    {
+        com.android.server.HardwareService $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: com.android.server.HardwareService;
+
+        $z0 := @parameter1: boolean;
+
+        $r0.<com.android.server.HardwareService: boolean mPulsing> = $z0;
+
+        return $z0;
+    }
+
+    static int access$100(com.android.server.HardwareService)
+    {
+        com.android.server.HardwareService $r0;
+        int i0;
+
+        $r0 := @parameter0: com.android.server.HardwareService;
+
+        i0 = $r0.<com.android.server.HardwareService: int mNativePointer>;
+
+        return i0;
+    }
+
+    static boolean access$200(com.android.server.HardwareService)
+    {
+        com.android.server.HardwareService $r0;
+        boolean z0;
+
+        $r0 := @parameter0: com.android.server.HardwareService;
+
+        z0 = $r0.<com.android.server.HardwareService: boolean mAttentionLightOn>;
+
+        return z0;
+    }
+
+    static void access$300(int, int, int, int, int, int)
+    {
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i2 := @parameter2: int;
+
+        $i3 := @parameter3: int;
+
+        $i4 := @parameter4: int;
+
+        $i5 := @parameter5: int;
+
+        staticinvoke <com.android.server.HardwareService: void setLight_native(int,int,int,int,int,int)>($i0, $i1, $i2, $i3, $i4, $i5);
+
+        return;
+    }
+
+    static android.os.PowerManager$WakeLock access$400(com.android.server.HardwareService)
+    {
+        com.android.server.HardwareService $r0;
+        android.os.PowerManager$WakeLock r1;
+
+        $r0 := @parameter0: com.android.server.HardwareService;
+
+        r1 = $r0.<com.android.server.HardwareService: android.os.PowerManager$WakeLock mWakeLock>;
+
+        return r1;
+    }
+
+    static void access$500(com.android.server.HardwareService)
+    {
+        com.android.server.HardwareService $r0;
+
+        $r0 := @parameter0: com.android.server.HardwareService;
+
+        specialinvoke $r0.<com.android.server.HardwareService: void doCancelVibrate()>();
+
+        return;
+    }
+
+    private void doCancelVibrate()
+    {
+        com.android.server.HardwareService $r0;
+        com.android.server.HardwareService$VibrateThread $r1, $r2;
+        java.lang.Throwable $r3, $r4;
+
+        $r0 := @this: com.android.server.HardwareService;
+
+        entermonitor $r0;
+
+     label01:
+        $r1 = $r0.<com.android.server.HardwareService: com.android.server.HardwareService$VibrateThread mThread>;
+
+        if $r1 == null goto label04;
+
+        $r1 = $r0.<com.android.server.HardwareService: com.android.server.HardwareService$VibrateThread mThread>;
+
+        entermonitor $r1;
+
+     label02:
+        $r2 = $r0.<com.android.server.HardwareService: com.android.server.HardwareService$VibrateThread mThread>;
+
+        $r2.<com.android.server.HardwareService$VibrateThread: boolean mDone> = 1;
+
+        $r2 = $r0.<com.android.server.HardwareService: com.android.server.HardwareService$VibrateThread mThread>;
+
+        virtualinvoke $r2.<java.lang.Object: void notify()>();
+
+        exitmonitor $r1;
+
+     label03:
+        $r0.<com.android.server.HardwareService: com.android.server.HardwareService$VibrateThread mThread> = null;
+
+     label04:
+        staticinvoke <com.android.server.HardwareService: void vibratorOff()>();
+
+        exitmonitor $r0;
+
+     label05:
+        return;
+
+     label06:
+        $r3 := @caughtexception;
+
+     label07:
+        exitmonitor $r1;
+
+     label08:
+        throw $r3;
+
+     label09:
+        $r4 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label10:
+        throw $r4;
+
+        catch java.lang.Throwable from label01 to label02 with label09;
+        catch java.lang.Throwable from label02 to label03 with label06;
+        catch java.lang.Throwable from label03 to label05 with label09;
+        catch java.lang.Throwable from label07 to label08 with label06;
+        catch java.lang.Throwable from label08 to label10 with label09;
+    }
+
+    private static native void finalize_native(int);
+
+    private static native int init_native();
+
+    private boolean isAll0(long[])
+    {
+        com.android.server.HardwareService $r0;
+        long[] $r1;
+        int $i0, $i1;
+        long $l2;
+        byte $b3;
+
+        $r0 := @this: com.android.server.HardwareService;
+
+        $r1 := @parameter0: long[];
+
+        $i0 = lengthof $r1;
+
+        $i1 = 0;
+
+     label1:
+        if $i1 >= $i0 goto label3;
+
+        $l2 = $r1[$i1];
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 == 0 goto label2;
+
+        return 0;
+
+     label2:
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label3:
+        return 1;
+    }
+
+    private static native void setLight_native(int, int, int, int, int, int);
+
+    static native void vibratorOff();
+
+    static native void vibratorOn(long);
+
+    public void cancelVibrate()
+    {
+        com.android.server.HardwareService $r0;
+        long $l0;
+        android.content.Context $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: com.android.server.HardwareService;
+
+        $r1 = $r0.<com.android.server.HardwareService: android.content.Context mContext>;
+
+        virtualinvoke $r1.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.VIBRATE", "cancelVibrate");
+
+        $l0 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label1:
+        specialinvoke $r0.<com.android.server.HardwareService: void doCancelVibrate()>();
+
+     label2:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l0);
+
+        return;
+
+     label3:
+        $r2 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l0);
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public void enableCameraFlash(int)
+    {
+        com.android.server.HardwareService $r0;
+        int $i0, $i1;
+        android.content.Context $r1;
+        java.lang.SecurityException $r2;
+
+        $r0 := @this: com.android.server.HardwareService;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<com.android.server.HardwareService: android.content.Context mContext>;
+
+        $i1 = virtualinvoke $r1.<android.content.Context: int checkCallingOrSelfPermission(java.lang.String)>("android.permission.CAMERA");
+
+        if $i1 == 0 goto label1;
+
+        $r1 = $r0.<com.android.server.HardwareService: android.content.Context mContext>;
+
+        $i1 = virtualinvoke $r1.<android.content.Context: int checkCallingOrSelfPermission(java.lang.String)>("android.permission.HARDWARE_TEST");
+
+        if $i1 == 0 goto label1;
+
+        $r2 = new java.lang.SecurityException;
+
+        specialinvoke $r2.<java.lang.SecurityException: void <init>(java.lang.String)>("Requires CAMERA or HARDWARE_TEST permission");
+
+        throw $r2;
+
+     label1:
+        staticinvoke <android.os.Hardware: void enableCameraFlash(int)>($i0);
+
+        return;
+    }
+
+    protected void finalize() throws java.lang.Throwable
+    {
+        com.android.server.HardwareService $r0;
+        int $i0;
+        android.os.Binder r1;
+
+        $r0 := @this: com.android.server.HardwareService;
+
+        $i0 = $r0.<com.android.server.HardwareService: int mNativePointer>;
+
+        staticinvoke <com.android.server.HardwareService: void finalize_native(int)>($i0);
+
+        r1 = (android.os.Binder) $r0;
+
+        specialinvoke r1.<android.os.Binder: void finalize()>();
+
+        return;
+    }
+
+    public boolean getFlashlightEnabled()
+    {
+        com.android.server.HardwareService $r0;
+        boolean $z0;
+
+        $r0 := @this: com.android.server.HardwareService;
+
+        $z0 = staticinvoke <android.os.Hardware: boolean getFlashlightEnabled()>();
+
+        return $z0;
+    }
+
+    public void pulseBreathingLight()
+    {
+        com.android.server.HardwareService $r0;
+        android.os.Message $r1;
+        boolean $z0;
+        int $i0;
+        android.os.Handler $r2, $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: com.android.server.HardwareService;
+
+        entermonitor $r0;
+
+     label1:
+        $z0 = $r0.<com.android.server.HardwareService: boolean mAttentionLightOn>;
+
+        if $z0 != 0 goto label2;
+
+        $z0 = $r0.<com.android.server.HardwareService: boolean mPulsing>;
+
+        if $z0 != 0 goto label2;
+
+        $r0.<com.android.server.HardwareService: boolean mPulsing> = 1;
+
+        $i0 = $r0.<com.android.server.HardwareService: int mNativePointer>;
+
+        staticinvoke <com.android.server.HardwareService: void setLight_native(int,int,int,int,int,int)>($i0, 5, -15724528, 0, 0, 0);
+
+        $r2 = $r0.<com.android.server.HardwareService: android.os.Handler mH>;
+
+        $r3 = $r0.<com.android.server.HardwareService: android.os.Handler mH>;
+
+        $r1 = staticinvoke <android.os.Message: android.os.Message obtain(android.os.Handler,int)>($r3, 1);
+
+        virtualinvoke $r2.<android.os.Handler: boolean sendMessageDelayed(android.os.Message,long)>($r1, 3000L);
+
+     label2:
+        exitmonitor $r0;
+
+     label3:
+        return;
+
+     label4:
+        $r4 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label5:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public void setAttentionLight(boolean)
+    {
+        com.android.server.HardwareService $r0;
+        boolean $z0;
+        byte $b0;
+        int $i1;
+        java.lang.Throwable $r1;
+
+        $r0 := @this: com.android.server.HardwareService;
+
+        $z0 := @parameter0: boolean;
+
+        $b0 = 0;
+
+        entermonitor $r0;
+
+     label1:
+        $r0.<com.android.server.HardwareService: boolean mAttentionLightOn> = $z0;
+
+        $r0.<com.android.server.HardwareService: boolean mPulsing> = 0;
+
+        $i1 = $r0.<com.android.server.HardwareService: int mNativePointer>;
+
+        if $z0 == 0 goto label2;
+
+        $b0 = -1;
+
+     label2:
+        staticinvoke <com.android.server.HardwareService: void setLight_native(int,int,int,int,int,int)>($i1, 5, $b0, 0, 0, 0);
+
+        exitmonitor $r0;
+
+     label3:
+        return;
+
+     label4:
+        $r1 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label5:
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public void setBacklights(int)
+    {
+        com.android.server.HardwareService $r0;
+        int $i0, $i1;
+        android.content.Context $r1;
+        java.lang.SecurityException $r2;
+        long $l2;
+        com.android.internal.app.IBatteryStats $r3;
+        android.os.RemoteException $r4;
+        java.lang.Throwable $r5;
+
+        $r0 := @this: com.android.server.HardwareService;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<com.android.server.HardwareService: android.content.Context mContext>;
+
+        $i1 = virtualinvoke $r1.<android.content.Context: int checkCallingOrSelfPermission(java.lang.String)>("android.permission.HARDWARE_TEST");
+
+        if $i1 == 0 goto label1;
+
+        $r2 = new java.lang.SecurityException;
+
+        specialinvoke $r2.<java.lang.SecurityException: void <init>(java.lang.String)>("Requires HARDWARE_TEST permission");
+
+        throw $r2;
+
+     label1:
+        $i0 = staticinvoke <java.lang.Math: int max(int,int)>($i0, 20);
+
+        virtualinvoke $r0.<com.android.server.HardwareService: void setLightBrightness_UNCHECKED(int,int)>(0, $i0);
+
+        virtualinvoke $r0.<com.android.server.HardwareService: void setLightBrightness_UNCHECKED(int,int)>(1, $i0);
+
+        virtualinvoke $r0.<com.android.server.HardwareService: void setLightBrightness_UNCHECKED(int,int)>(2, $i0);
+
+        $l2 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label2:
+        $r3 = $r0.<com.android.server.HardwareService: com.android.internal.app.IBatteryStats mBatteryStats>;
+
+     label3:
+        interfaceinvoke $r3.<com.android.internal.app.IBatteryStats: void noteScreenBrightness(int)>($i0);
+
+     label4:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l2);
+
+        return;
+
+     label5:
+        $r4 := @caughtexception;
+
+     label6:
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String,java.lang.Throwable)>("HardwareService", "RemoteException calling noteScreenBrightness on BatteryStatsService", $r4);
+
+     label7:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l2);
+
+        return;
+
+     label8:
+        $r5 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l2);
+
+        throw $r5;
+
+        catch android.os.RemoteException from label3 to label4 with label5;
+        catch java.lang.Throwable from label2 to label4 with label8;
+        catch java.lang.Throwable from label6 to label7 with label8;
+    }
+
+    public void setFlashlightEnabled(boolean)
+    {
+        com.android.server.HardwareService $r0;
+        boolean $z0;
+        android.content.Context $r1;
+        int $i0;
+        java.lang.SecurityException $r2;
+
+        $r0 := @this: com.android.server.HardwareService;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 = $r0.<com.android.server.HardwareService: android.content.Context mContext>;
+
+        $i0 = virtualinvoke $r1.<android.content.Context: int checkCallingOrSelfPermission(java.lang.String)>("android.permission.FLASHLIGHT");
+
+        if $i0 == 0 goto label1;
+
+        $r1 = $r0.<com.android.server.HardwareService: android.content.Context mContext>;
+
+        $i0 = virtualinvoke $r1.<android.content.Context: int checkCallingOrSelfPermission(java.lang.String)>("android.permission.HARDWARE_TEST");
+
+        if $i0 == 0 goto label1;
+
+        $r2 = new java.lang.SecurityException;
+
+        specialinvoke $r2.<java.lang.SecurityException: void <init>(java.lang.String)>("Requires FLASHLIGHT or HARDWARE_TEST permission");
+
+        throw $r2;
+
+     label1:
+        staticinvoke <android.os.Hardware: void setFlashlightEnabled(boolean)>($z0);
+
+        return;
+    }
+
+    void setLightBrightness_UNCHECKED(int, int)
+    {
+        com.android.server.HardwareService $r0;
+        int $i0, $i1, $i2, $i3;
+
+        $r0 := @this: com.android.server.HardwareService;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i1 = $i1 & 255;
+
+        $i2 = $i1 << 16;
+
+        $i2 = -16777216 | $i2;
+
+        $i3 = $i1 << 8;
+
+        $i2 = $i2 | $i3;
+
+        $i1 = $i1 | $i2;
+
+        $i2 = $r0.<com.android.server.HardwareService: int mNativePointer>;
+
+        staticinvoke <com.android.server.HardwareService: void setLight_native(int,int,int,int,int,int)>($i2, $i0, $i1, 0, 0, 0);
+
+        return;
+    }
+
+    void setLightColor_UNCHECKED(int, int)
+    {
+        com.android.server.HardwareService $r0;
+        int $i0, $i1, $i2;
+
+        $r0 := @this: com.android.server.HardwareService;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i2 = $r0.<com.android.server.HardwareService: int mNativePointer>;
+
+        staticinvoke <com.android.server.HardwareService: void setLight_native(int,int,int,int,int,int)>($i2, $i0, $i1, 0, 0, 0);
+
+        return;
+    }
+
+    void setLightFlashing_UNCHECKED(int, int, int, int, int)
+    {
+        com.android.server.HardwareService $r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+
+        $r0 := @this: com.android.server.HardwareService;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i2 := @parameter2: int;
+
+        $i3 := @parameter3: int;
+
+        $i4 := @parameter4: int;
+
+        $i5 = $r0.<com.android.server.HardwareService: int mNativePointer>;
+
+        staticinvoke <com.android.server.HardwareService: void setLight_native(int,int,int,int,int,int)>($i5, $i0, $i1, $i2, $i3, $i4);
+
+        return;
+    }
+
+    void setLightOff_UNCHECKED(int)
+    {
+        com.android.server.HardwareService $r0;
+        int $i0, $i1;
+
+        $r0 := @this: com.android.server.HardwareService;
+
+        $i0 := @parameter0: int;
+
+        $i1 = $r0.<com.android.server.HardwareService: int mNativePointer>;
+
+        staticinvoke <com.android.server.HardwareService: void setLight_native(int,int,int,int,int,int)>($i1, $i0, 0, 0, 0, 0);
+
+        return;
+    }
+
+    public void vibrate(long)
+    {
+        com.android.server.HardwareService $r0;
+        long $l0;
+        int $i1;
+        android.content.Context $r1;
+        java.lang.SecurityException $r2;
+
+        $r0 := @this: com.android.server.HardwareService;
+
+        $l0 := @parameter0: long;
+
+        $r1 = $r0.<com.android.server.HardwareService: android.content.Context mContext>;
+
+        $i1 = virtualinvoke $r1.<android.content.Context: int checkCallingOrSelfPermission(java.lang.String)>("android.permission.VIBRATE");
+
+        if $i1 == 0 goto label1;
+
+        $r2 = new java.lang.SecurityException;
+
+        specialinvoke $r2.<java.lang.SecurityException: void <init>(java.lang.String)>("Requires VIBRATE permission");
+
+        throw $r2;
+
+     label1:
+        specialinvoke $r0.<com.android.server.HardwareService: void doCancelVibrate()>();
+
+        staticinvoke <com.android.server.HardwareService: void vibratorOn(long)>($l0);
+
+        return;
+    }
+
+    public void vibratePattern(long[], int, android.os.IBinder)
+    {
+        com.android.server.HardwareService $r0;
+        long[] $r1;
+        int $i0, $i1;
+        android.os.IBinder $r2, $r10;
+        com.android.server.HardwareService$Death $r3, $r9;
+        android.os.RemoteException $r4;
+        com.android.server.HardwareService$VibrateThread $r5, $r8;
+        android.content.Context $r6;
+        java.lang.SecurityException $r7;
+        long $l2;
+        boolean $z0;
+        java.lang.Throwable $r11, $r12, $r13;
+
+        $r0 := @this: com.android.server.HardwareService;
+
+        $r1 := @parameter0: long[];
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: android.os.IBinder;
+
+        $r6 = $r0.<com.android.server.HardwareService: android.content.Context mContext>;
+
+        $i1 = virtualinvoke $r6.<android.content.Context: int checkCallingOrSelfPermission(java.lang.String)>("android.permission.VIBRATE");
+
+        if $i1 == 0 goto label01;
+
+        $r7 = new java.lang.SecurityException;
+
+        specialinvoke $r7.<java.lang.SecurityException: void <init>(java.lang.String)>("Requires VIBRATE permission");
+
+        throw $r7;
+
+     label01:
+        $l2 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+        if $r1 == null goto label04;
+
+     label02:
+        $i1 = lengthof $r1;
+
+        if $i1 == 0 goto label04;
+
+        $z0 = specialinvoke $r0.<com.android.server.HardwareService: boolean isAll0(long[])>($r1);
+
+        if $z0 != 0 goto label04;
+
+        $i1 = lengthof $r1;
+
+     label03:
+        if $i0 >= $i1 goto label04;
+
+        if $r2 != null goto label05;
+
+     label04:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l2);
+
+        return;
+
+     label05:
+        entermonitor $r0;
+
+     label06:
+        $r3 = new com.android.server.HardwareService$Death;
+
+        specialinvoke $r3.<com.android.server.HardwareService$Death: void <init>(com.android.server.HardwareService,android.os.IBinder)>($r0, $r2);
+
+     label07:
+        interfaceinvoke $r2.<android.os.IBinder: void linkToDeath(android.os.IBinder$DeathRecipient,int)>($r3, 0);
+
+     label08:
+        $r5 = $r0.<com.android.server.HardwareService: com.android.server.HardwareService$VibrateThread mThread>;
+
+        if $r5 == null goto label10;
+
+        $r5 = $r0.<com.android.server.HardwareService: com.android.server.HardwareService$VibrateThread mThread>;
+
+        entermonitor $r5;
+
+     label09:
+        $r8 = $r0.<com.android.server.HardwareService: com.android.server.HardwareService$VibrateThread mThread>;
+
+        $r8.<com.android.server.HardwareService$VibrateThread: boolean mDone> = 1;
+
+        $r8 = $r0.<com.android.server.HardwareService: com.android.server.HardwareService$VibrateThread mThread>;
+
+        virtualinvoke $r8.<java.lang.Object: void notify()>();
+
+        exitmonitor $r5;
+
+     label10:
+        $r9 = $r0.<com.android.server.HardwareService: com.android.server.HardwareService$Death mDeath>;
+
+        if $r9 == null goto label11;
+
+        $r10 = $r0.<com.android.server.HardwareService: android.os.IBinder mToken>;
+
+        $r9 = $r0.<com.android.server.HardwareService: com.android.server.HardwareService$Death mDeath>;
+
+        interfaceinvoke $r10.<android.os.IBinder: boolean unlinkToDeath(android.os.IBinder$DeathRecipient,int)>($r9, 0);
+
+     label11:
+        $r0.<com.android.server.HardwareService: com.android.server.HardwareService$Death mDeath> = $r3;
+
+        $r0.<com.android.server.HardwareService: android.os.IBinder mToken> = $r2;
+
+        $r5 = new com.android.server.HardwareService$VibrateThread;
+
+        specialinvoke $r5.<com.android.server.HardwareService$VibrateThread: void <init>(com.android.server.HardwareService,long[],int)>($r0, $r1, $i0);
+
+        $r0.<com.android.server.HardwareService: com.android.server.HardwareService$VibrateThread mThread> = $r5;
+
+        $r5 = $r0.<com.android.server.HardwareService: com.android.server.HardwareService$VibrateThread mThread>;
+
+        virtualinvoke $r5.<java.lang.Thread: void start()>();
+
+        exitmonitor $r0;
+
+     label12:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l2);
+
+        return;
+
+     label13:
+        $r4 := @caughtexception;
+
+     label14:
+        exitmonitor $r0;
+
+     label15:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l2);
+
+        return;
+
+     label16:
+        $r11 := @caughtexception;
+
+     label17:
+        exitmonitor $r5;
+
+     label18:
+        throw $r11;
+
+     label19:
+        $r12 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label20:
+        throw $r12;
+
+     label21:
+        $r13 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l2);
+
+        throw $r13;
+
+        catch java.lang.Throwable from label02 to label03 with label21;
+        catch java.lang.Throwable from label05 to label06 with label21;
+        catch java.lang.Throwable from label06 to label07 with label19;
+        catch android.os.RemoteException from label07 to label08 with label13;
+        catch java.lang.Throwable from label07 to label08 with label19;
+        catch java.lang.Throwable from label08 to label09 with label19;
+        catch java.lang.Throwable from label09 to label10 with label16;
+        catch java.lang.Throwable from label10 to label12 with label19;
+        catch java.lang.Throwable from label14 to label15 with label19;
+        catch java.lang.Throwable from label17 to label18 with label16;
+        catch java.lang.Throwable from label18 to label20 with label19;
+        catch java.lang.Throwable from label20 to label21 with label21;
+    }
+
+    public static void <clinit>()
+    {
+        <com.android.server.HardwareService: java.lang.String TAG> = "HardwareService";
+
+        <com.android.server.HardwareService: int LIGHT_ID_NOTIFICATIONS> = 4;
+
+        <com.android.server.HardwareService: int LIGHT_ID_KEYBOARD> = 1;
+
+        <com.android.server.HardwareService: int LIGHT_ID_BUTTONS> = 2;
+
+        <com.android.server.HardwareService: int LIGHT_ID_BATTERY> = 3;
+
+        <com.android.server.HardwareService: int LIGHT_ID_BACKLIGHT> = 0;
+
+        <com.android.server.HardwareService: int LIGHT_ID_ATTENTION> = 5;
+
+        <com.android.server.HardwareService: int LIGHT_FLASH_TIMED> = 1;
+
+        <com.android.server.HardwareService: int LIGHT_FLASH_NONE> = 0;
+
+        return;
+    }
+}

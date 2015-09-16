@@ -1,0 +1,430 @@
+public class org.apache.harmony.awt.wtk.Synchronizer extends java.lang.Object
+{
+    protected int acquestCounter;
+    protected java.lang.Thread dispatchThread;
+    protected java.lang.Thread owner;
+    private final java.util.Hashtable storedStates;
+    protected final java.util.LinkedList waitQueue;
+
+    public void <init>()
+    {
+        org.apache.harmony.awt.wtk.Synchronizer $r0;
+        java.util.LinkedList $r1;
+        java.util.Hashtable $r2;
+
+        $r0 := @this: org.apache.harmony.awt.wtk.Synchronizer;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.LinkedList;
+
+        specialinvoke $r1.<java.util.LinkedList: void <init>()>();
+
+        $r0.<org.apache.harmony.awt.wtk.Synchronizer: java.util.LinkedList waitQueue> = $r1;
+
+        $r2 = new java.util.Hashtable;
+
+        specialinvoke $r2.<java.util.Hashtable: void <init>()>();
+
+        $r0.<org.apache.harmony.awt.wtk.Synchronizer: java.util.Hashtable storedStates> = $r2;
+
+        return;
+    }
+
+    public void lock()
+    {
+        org.apache.harmony.awt.wtk.Synchronizer $r0;
+        java.lang.InterruptedException $r1;
+        java.lang.Thread $r2, $r3;
+        int $i0;
+        java.lang.Throwable $r4;
+        java.util.LinkedList $r5;
+        java.lang.RuntimeException $r6;
+        java.lang.String $r7;
+
+        $r0 := @this: org.apache.harmony.awt.wtk.Synchronizer;
+
+        entermonitor $r0;
+
+     label01:
+        $r2 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $i0 = $r0.<org.apache.harmony.awt.wtk.Synchronizer: int acquestCounter>;
+
+        if $i0 != 0 goto label04;
+
+        $r0.<org.apache.harmony.awt.wtk.Synchronizer: int acquestCounter> = 1;
+
+        $r0.<org.apache.harmony.awt.wtk.Synchronizer: java.lang.Thread owner> = $r2;
+
+     label02:
+        exitmonitor $r0;
+
+     label03:
+        return;
+
+     label04:
+        $r3 = $r0.<org.apache.harmony.awt.wtk.Synchronizer: java.lang.Thread owner>;
+
+        if $r3 != $r2 goto label07;
+
+        $i0 = $r0.<org.apache.harmony.awt.wtk.Synchronizer: int acquestCounter>;
+
+        $i0 = $i0 + 1;
+
+        $r0.<org.apache.harmony.awt.wtk.Synchronizer: int acquestCounter> = $i0;
+
+        goto label02;
+
+     label05:
+        $r4 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label06:
+        throw $r4;
+
+     label07:
+        $r3 = $r0.<org.apache.harmony.awt.wtk.Synchronizer: java.lang.Thread dispatchThread>;
+
+        if $r2 != $r3 goto label12;
+
+        $r5 = $r0.<org.apache.harmony.awt.wtk.Synchronizer: java.util.LinkedList waitQueue>;
+
+        virtualinvoke $r5.<java.util.LinkedList: void addFirst(java.lang.Object)>($r2);
+
+     label08:
+        virtualinvoke $r0.<java.lang.Object: void wait()>();
+
+     label09:
+        goto label02;
+
+     label10:
+        $r1 := @caughtexception;
+
+     label11:
+        $r3 = $r0.<org.apache.harmony.awt.wtk.Synchronizer: java.lang.Thread owner>;
+
+        if $r3 == $r2 goto label02;
+
+        $r5 = $r0.<org.apache.harmony.awt.wtk.Synchronizer: java.util.LinkedList waitQueue>;
+
+        virtualinvoke $r5.<java.util.LinkedList: boolean remove(java.lang.Object)>($r2);
+
+        $r6 = new java.lang.RuntimeException;
+
+        $r7 = staticinvoke <org.apache.harmony.awt.internal.nls.Messages: java.lang.String getString(java.lang.String)>("awt.1F");
+
+        specialinvoke $r6.<java.lang.RuntimeException: void <init>(java.lang.String)>($r7);
+
+        throw $r6;
+
+     label12:
+        $r5 = $r0.<org.apache.harmony.awt.wtk.Synchronizer: java.util.LinkedList waitQueue>;
+
+        virtualinvoke $r5.<java.util.LinkedList: void addLast(java.lang.Object)>($r2);
+
+     label13:
+        goto label08;
+
+        catch java.lang.Throwable from label01 to label03 with label05;
+        catch java.lang.Throwable from label04 to label06 with label05;
+        catch java.lang.Throwable from label07 to label08 with label05;
+        catch java.lang.InterruptedException from label08 to label09 with label10;
+        catch java.lang.Throwable from label08 to label09 with label05;
+        catch java.lang.Throwable from label11 to label13 with label05;
+    }
+
+    public void lockAndRestoreState()
+    {
+        org.apache.harmony.awt.wtk.Synchronizer $r0;
+        java.lang.Thread $r1, $r2;
+        java.lang.RuntimeException $r3;
+        java.lang.String $r4;
+        java.lang.Throwable $r5;
+        java.util.Hashtable $r6;
+        boolean $z0;
+        java.lang.Object $r7;
+        java.lang.Integer $r8;
+        int $i0;
+
+        $r0 := @this: org.apache.harmony.awt.wtk.Synchronizer;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r2 = $r0.<org.apache.harmony.awt.wtk.Synchronizer: java.lang.Thread owner>;
+
+        if $r2 != $r1 goto label4;
+
+        $r3 = new java.lang.RuntimeException;
+
+        $r4 = staticinvoke <org.apache.harmony.awt.internal.nls.Messages: java.lang.String getString(java.lang.String)>("awt.24");
+
+        specialinvoke $r3.<java.lang.RuntimeException: void <init>(java.lang.String)>($r4);
+
+        throw $r3;
+
+     label2:
+        $r5 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label3:
+        throw $r5;
+
+     label4:
+        $r6 = $r0.<org.apache.harmony.awt.wtk.Synchronizer: java.util.Hashtable storedStates>;
+
+        $z0 = virtualinvoke $r6.<java.util.Hashtable: boolean containsKey(java.lang.Object)>($r1);
+
+        if $z0 != 0 goto label5;
+
+        $r3 = new java.lang.RuntimeException;
+
+        $r4 = staticinvoke <org.apache.harmony.awt.internal.nls.Messages: java.lang.String getString(java.lang.String)>("awt.25");
+
+        specialinvoke $r3.<java.lang.RuntimeException: void <init>(java.lang.String)>($r4);
+
+        throw $r3;
+
+     label5:
+        virtualinvoke $r0.<org.apache.harmony.awt.wtk.Synchronizer: void lock()>();
+
+        $r6 = $r0.<org.apache.harmony.awt.wtk.Synchronizer: java.util.Hashtable storedStates>;
+
+        $r7 = virtualinvoke $r6.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r8 = (java.lang.Integer) $r7;
+
+        $i0 = virtualinvoke $r8.<java.lang.Integer: int intValue()>();
+
+        $r0.<org.apache.harmony.awt.wtk.Synchronizer: int acquestCounter> = $i0;
+
+        $r6 = $r0.<org.apache.harmony.awt.wtk.Synchronizer: java.util.Hashtable storedStates>;
+
+        virtualinvoke $r6.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>($r1);
+
+        exitmonitor $r0;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label2;
+        catch java.lang.Throwable from label4 to label6 with label2;
+    }
+
+    public void setEnvironment(org.apache.harmony.awt.wtk.WTK, java.lang.Thread)
+    {
+        org.apache.harmony.awt.wtk.Synchronizer $r0;
+        org.apache.harmony.awt.wtk.WTK $r1;
+        java.lang.Thread $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: org.apache.harmony.awt.wtk.Synchronizer;
+
+        $r1 := @parameter0: org.apache.harmony.awt.wtk.WTK;
+
+        $r2 := @parameter1: java.lang.Thread;
+
+        entermonitor $r0;
+
+     label1:
+        $r0.<org.apache.harmony.awt.wtk.Synchronizer: java.lang.Thread dispatchThread> = $r2;
+
+        exitmonitor $r0;
+
+     label2:
+        return;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label4:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void storeStateAndFree()
+    {
+        org.apache.harmony.awt.wtk.Synchronizer $r0;
+        int $i0;
+        java.lang.Thread $r1, $r2;
+        java.lang.RuntimeException $r3;
+        java.lang.String $r4;
+        java.lang.Throwable $r5;
+        java.util.Hashtable $r6;
+        boolean $z0;
+        java.lang.Integer $r7;
+
+        $r0 := @this: org.apache.harmony.awt.wtk.Synchronizer;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r2 = $r0.<org.apache.harmony.awt.wtk.Synchronizer: java.lang.Thread owner>;
+
+        if $r2 == $r1 goto label4;
+
+        $r3 = new java.lang.RuntimeException;
+
+        $r4 = staticinvoke <org.apache.harmony.awt.internal.nls.Messages: java.lang.String getString(java.lang.String)>("awt.22");
+
+        specialinvoke $r3.<java.lang.RuntimeException: void <init>(java.lang.String)>($r4);
+
+        throw $r3;
+
+     label2:
+        $r5 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label3:
+        throw $r5;
+
+     label4:
+        $r6 = $r0.<org.apache.harmony.awt.wtk.Synchronizer: java.util.Hashtable storedStates>;
+
+        $z0 = virtualinvoke $r6.<java.util.Hashtable: boolean containsKey(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label5;
+
+        $r3 = new java.lang.RuntimeException;
+
+        $r4 = staticinvoke <org.apache.harmony.awt.internal.nls.Messages: java.lang.String getString(java.lang.String)>("awt.23");
+
+        specialinvoke $r3.<java.lang.RuntimeException: void <init>(java.lang.String)>($r4);
+
+        throw $r3;
+
+     label5:
+        $r6 = $r0.<org.apache.harmony.awt.wtk.Synchronizer: java.util.Hashtable storedStates>;
+
+        $r7 = new java.lang.Integer;
+
+        $i0 = $r0.<org.apache.harmony.awt.wtk.Synchronizer: int acquestCounter>;
+
+        specialinvoke $r7.<java.lang.Integer: void <init>(int)>($i0);
+
+        virtualinvoke $r6.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, $r7);
+
+        $r0.<org.apache.harmony.awt.wtk.Synchronizer: int acquestCounter> = 1;
+
+        virtualinvoke $r0.<org.apache.harmony.awt.wtk.Synchronizer: void unlock()>();
+
+        exitmonitor $r0;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label2;
+        catch java.lang.Throwable from label4 to label6 with label2;
+    }
+
+    public void unlock()
+    {
+        org.apache.harmony.awt.wtk.Synchronizer $r0;
+        int $i0;
+        java.lang.RuntimeException $r1;
+        java.lang.String $r2;
+        java.lang.Throwable $r3;
+        java.lang.Thread $r4, $r5;
+        java.util.LinkedList $r6;
+        java.lang.Object $r7;
+
+        $r0 := @this: org.apache.harmony.awt.wtk.Synchronizer;
+
+        entermonitor $r0;
+
+     label1:
+        $i0 = $r0.<org.apache.harmony.awt.wtk.Synchronizer: int acquestCounter>;
+
+        if $i0 != 0 goto label4;
+
+        $r1 = new java.lang.RuntimeException;
+
+        $r2 = staticinvoke <org.apache.harmony.awt.internal.nls.Messages: java.lang.String getString(java.lang.String)>("awt.20");
+
+        specialinvoke $r1.<java.lang.RuntimeException: void <init>(java.lang.String)>($r2);
+
+        throw $r1;
+
+     label2:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label3:
+        throw $r3;
+
+     label4:
+        $r4 = $r0.<org.apache.harmony.awt.wtk.Synchronizer: java.lang.Thread owner>;
+
+        $r5 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        if $r4 == $r5 goto label5;
+
+        $r1 = new java.lang.RuntimeException;
+
+        $r2 = staticinvoke <org.apache.harmony.awt.internal.nls.Messages: java.lang.String getString(java.lang.String)>("awt.21");
+
+        specialinvoke $r1.<java.lang.RuntimeException: void <init>(java.lang.String)>($r2);
+
+        throw $r1;
+
+     label5:
+        $i0 = $r0.<org.apache.harmony.awt.wtk.Synchronizer: int acquestCounter>;
+
+        $i0 = $i0 - 1;
+
+        $r0.<org.apache.harmony.awt.wtk.Synchronizer: int acquestCounter> = $i0;
+
+        $i0 = $r0.<org.apache.harmony.awt.wtk.Synchronizer: int acquestCounter>;
+
+        if $i0 != 0 goto label6;
+
+        $r6 = $r0.<org.apache.harmony.awt.wtk.Synchronizer: java.util.LinkedList waitQueue>;
+
+        $i0 = virtualinvoke $r6.<java.util.LinkedList: int size()>();
+
+        if $i0 <= 0 goto label8;
+
+        $r0.<org.apache.harmony.awt.wtk.Synchronizer: int acquestCounter> = 1;
+
+        $r6 = $r0.<org.apache.harmony.awt.wtk.Synchronizer: java.util.LinkedList waitQueue>;
+
+        $r7 = virtualinvoke $r6.<java.util.LinkedList: java.lang.Object removeFirst()>();
+
+        $r4 = (java.lang.Thread) $r7;
+
+        $r0.<org.apache.harmony.awt.wtk.Synchronizer: java.lang.Thread owner> = $r4;
+
+        $r4 = $r0.<org.apache.harmony.awt.wtk.Synchronizer: java.lang.Thread owner>;
+
+        virtualinvoke $r4.<java.lang.Thread: void interrupt()>();
+
+     label6:
+        exitmonitor $r0;
+
+     label7:
+        return;
+
+     label8:
+        $r0.<org.apache.harmony.awt.wtk.Synchronizer: java.lang.Thread owner> = null;
+
+     label9:
+        goto label6;
+
+        catch java.lang.Throwable from label1 to label3 with label2;
+        catch java.lang.Throwable from label4 to label7 with label2;
+        catch java.lang.Throwable from label8 to label9 with label2;
+    }
+}

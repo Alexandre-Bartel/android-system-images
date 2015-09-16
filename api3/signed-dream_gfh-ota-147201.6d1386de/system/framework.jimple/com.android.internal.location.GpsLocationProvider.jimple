@@ -1,0 +1,2303 @@
+public class com.android.internal.location.GpsLocationProvider extends android.location.LocationProviderImpl
+{
+    private static final int ALMANAC_MASK;
+    private static final int EPHEMERIS_MASK;
+    public static final java.lang.String EXTRA_ENABLED;
+    private static final int GPS_DELETE_ALL;
+    private static final int GPS_DELETE_ALMANAC;
+    private static final int GPS_DELETE_CELLDB_INFO;
+    private static final int GPS_DELETE_EPHEMERIS;
+    private static final int GPS_DELETE_HEALTH;
+    private static final int GPS_DELETE_IONO;
+    private static final int GPS_DELETE_POSITION;
+    private static final int GPS_DELETE_RTI;
+    private static final int GPS_DELETE_SADATA;
+    private static final int GPS_DELETE_SVDIR;
+    private static final int GPS_DELETE_SVSTEER;
+    private static final int GPS_DELETE_TIME;
+    private static final int GPS_DELETE_UTC;
+    public static final java.lang.String GPS_ENABLED_CHANGE_ACTION;
+    public static final java.lang.String GPS_FIX_CHANGE_ACTION;
+    private static final int GPS_POSITION_MODE_MS_ASSISTED;
+    private static final int GPS_POSITION_MODE_MS_BASED;
+    private static final int GPS_POSITION_MODE_STANDALONE;
+    private static final int GPS_STATUS_ENGINE_OFF;
+    private static final int GPS_STATUS_ENGINE_ON;
+    private static final int GPS_STATUS_NONE;
+    private static final int GPS_STATUS_SESSION_BEGIN;
+    private static final int GPS_STATUS_SESSION_END;
+    private static final int LOCATION_HAS_ACCURACY;
+    private static final int LOCATION_HAS_ALTITUDE;
+    private static final int LOCATION_HAS_BEARING;
+    private static final int LOCATION_HAS_LAT_LONG;
+    private static final int LOCATION_HAS_SPEED;
+    private static final int LOCATION_INVALID;
+    private static final int MAX_SVS;
+    private static final long NTP_INTERVAL;
+    private static final java.lang.String PROPERTIES_FILE;
+    private static final long RECENT_FIX_TIMEOUT;
+    private static final long RETRY_INTERVAL;
+    private static final java.lang.String TAG;
+    private static final int USED_FOR_FIX_MASK;
+    private com.android.internal.location.ILocationCollector mCollector;
+    private android.content.Context mContext;
+    private boolean mEnabled;
+    private com.android.internal.location.GpsLocationProvider$GpsEventThread mEventThread;
+    private int mFixInterval;
+    private long mFixRequestTime;
+    private long mLastFixTime;
+    private java.util.ArrayList mListeners;
+    private android.location.Location mLocation;
+    private android.os.Bundle mLocationExtras;
+    private int mLocationFlags;
+    private boolean mLocationTracking;
+    private boolean mNavigating;
+    private boolean mNetworkAvailable;
+    private com.android.internal.location.GpsLocationProvider$GpsNetworkThread mNetworkThread;
+    private java.lang.Object mNetworkThreadLock;
+    private java.lang.String mNtpServer;
+    private int mPositionMode;
+    private java.util.Properties mProperties;
+    private boolean mSetSuplServer;
+    private float[] mSnrs;
+    private boolean mStarted;
+    private int mStatus;
+    private long mStatusUpdateTime;
+    private java.lang.String mSuplHost;
+    private int mSuplPort;
+    private float[] mSvAzimuths;
+    private int mSvCount;
+    private float[] mSvElevations;
+    private int[] mSvMasks;
+    private int[] mSvs;
+    private int mTTFF;
+
+    static void <clinit>()
+    {
+        <com.android.internal.location.GpsLocationProvider: int USED_FOR_FIX_MASK> = 2;
+
+        <com.android.internal.location.GpsLocationProvider: java.lang.String TAG> = "GpsLocationProvider";
+
+        <com.android.internal.location.GpsLocationProvider: long RETRY_INTERVAL> = 300000L;
+
+        <com.android.internal.location.GpsLocationProvider: long RECENT_FIX_TIMEOUT> = 10000L;
+
+        <com.android.internal.location.GpsLocationProvider: java.lang.String PROPERTIES_FILE> = "/etc/gps.conf";
+
+        <com.android.internal.location.GpsLocationProvider: long NTP_INTERVAL> = 14400000L;
+
+        <com.android.internal.location.GpsLocationProvider: int MAX_SVS> = 32;
+
+        <com.android.internal.location.GpsLocationProvider: int LOCATION_INVALID> = 0;
+
+        <com.android.internal.location.GpsLocationProvider: int LOCATION_HAS_SPEED> = 4;
+
+        <com.android.internal.location.GpsLocationProvider: int LOCATION_HAS_LAT_LONG> = 1;
+
+        <com.android.internal.location.GpsLocationProvider: int LOCATION_HAS_BEARING> = 8;
+
+        <com.android.internal.location.GpsLocationProvider: int LOCATION_HAS_ALTITUDE> = 2;
+
+        <com.android.internal.location.GpsLocationProvider: int LOCATION_HAS_ACCURACY> = 16;
+
+        <com.android.internal.location.GpsLocationProvider: int GPS_STATUS_SESSION_END> = 2;
+
+        <com.android.internal.location.GpsLocationProvider: int GPS_STATUS_SESSION_BEGIN> = 1;
+
+        <com.android.internal.location.GpsLocationProvider: int GPS_STATUS_NONE> = 0;
+
+        <com.android.internal.location.GpsLocationProvider: int GPS_STATUS_ENGINE_ON> = 3;
+
+        <com.android.internal.location.GpsLocationProvider: int GPS_STATUS_ENGINE_OFF> = 4;
+
+        <com.android.internal.location.GpsLocationProvider: int GPS_POSITION_MODE_STANDALONE> = 0;
+
+        <com.android.internal.location.GpsLocationProvider: int GPS_POSITION_MODE_MS_BASED> = 1;
+
+        <com.android.internal.location.GpsLocationProvider: int GPS_POSITION_MODE_MS_ASSISTED> = 2;
+
+        <com.android.internal.location.GpsLocationProvider: java.lang.String GPS_FIX_CHANGE_ACTION> = "android.location.GPS_FIX_CHANGE";
+
+        <com.android.internal.location.GpsLocationProvider: java.lang.String GPS_ENABLED_CHANGE_ACTION> = "android.location.GPS_ENABLED_CHANGE";
+
+        <com.android.internal.location.GpsLocationProvider: int GPS_DELETE_UTC> = 32;
+
+        <com.android.internal.location.GpsLocationProvider: int GPS_DELETE_TIME> = 8;
+
+        <com.android.internal.location.GpsLocationProvider: int GPS_DELETE_SVSTEER> = 256;
+
+        <com.android.internal.location.GpsLocationProvider: int GPS_DELETE_SVDIR> = 128;
+
+        <com.android.internal.location.GpsLocationProvider: int GPS_DELETE_SADATA> = 512;
+
+        <com.android.internal.location.GpsLocationProvider: int GPS_DELETE_RTI> = 1024;
+
+        <com.android.internal.location.GpsLocationProvider: int GPS_DELETE_POSITION> = 4;
+
+        <com.android.internal.location.GpsLocationProvider: int GPS_DELETE_IONO> = 16;
+
+        <com.android.internal.location.GpsLocationProvider: int GPS_DELETE_HEALTH> = 64;
+
+        <com.android.internal.location.GpsLocationProvider: int GPS_DELETE_EPHEMERIS> = 1;
+
+        <com.android.internal.location.GpsLocationProvider: int GPS_DELETE_CELLDB_INFO> = 32768;
+
+        <com.android.internal.location.GpsLocationProvider: int GPS_DELETE_ALMANAC> = 2;
+
+        <com.android.internal.location.GpsLocationProvider: int GPS_DELETE_ALL> = 65535;
+
+        <com.android.internal.location.GpsLocationProvider: java.lang.String EXTRA_ENABLED> = "enabled";
+
+        <com.android.internal.location.GpsLocationProvider: int EPHEMERIS_MASK> = 0;
+
+        <com.android.internal.location.GpsLocationProvider: int ALMANAC_MASK> = 1;
+
+        staticinvoke <com.android.internal.location.GpsLocationProvider: void class_init_native()>();
+
+        return;
+    }
+
+    public void <init>(android.content.Context)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        android.content.Context $r1;
+        java.io.File $r2;
+        android.content.IntentFilter $r3;
+        com.android.internal.location.GpsLocationProvider$TelephonyBroadcastReceiver $r4;
+        java.io.FileInputStream $r5;
+        long $l0;
+        android.location.Location $r6;
+        android.os.Bundle $r7;
+        java.util.ArrayList $r8;
+        java.lang.Object $r9;
+        int[] $r10;
+        float[] $r11;
+        java.util.Properties $r12;
+        java.lang.String $r13, $r14;
+        int $i1;
+        java.lang.NumberFormatException $r15;
+        java.lang.StringBuilder $r16;
+        java.io.IOException $r17;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        $r1 := @parameter0: android.content.Context;
+
+        specialinvoke $r0.<android.location.LocationProviderImpl: void <init>(java.lang.String)>("gps");
+
+        $r0.<com.android.internal.location.GpsLocationProvider: int mLocationFlags> = 0;
+
+        $r0.<com.android.internal.location.GpsLocationProvider: int mStatus> = 1;
+
+        $l0 = staticinvoke <android.os.SystemClock: long elapsedRealtime()>();
+
+        $r0.<com.android.internal.location.GpsLocationProvider: long mStatusUpdateTime> = $l0;
+
+        $r0.<com.android.internal.location.GpsLocationProvider: int mFixInterval> = 1;
+
+        $r0.<com.android.internal.location.GpsLocationProvider: int mPositionMode> = 0;
+
+        $r0.<com.android.internal.location.GpsLocationProvider: long mFixRequestTime> = 0L;
+
+        $r0.<com.android.internal.location.GpsLocationProvider: int mTTFF> = 0;
+
+        $r6 = new android.location.Location;
+
+        specialinvoke $r6.<android.location.Location: void <init>(java.lang.String)>("gps");
+
+        $r0.<com.android.internal.location.GpsLocationProvider: android.location.Location mLocation> = $r6;
+
+        $r7 = new android.os.Bundle;
+
+        specialinvoke $r7.<android.os.Bundle: void <init>()>();
+
+        $r0.<com.android.internal.location.GpsLocationProvider: android.os.Bundle mLocationExtras> = $r7;
+
+        $r8 = new java.util.ArrayList;
+
+        specialinvoke $r8.<java.util.ArrayList: void <init>()>();
+
+        $r0.<com.android.internal.location.GpsLocationProvider: java.util.ArrayList mListeners> = $r8;
+
+        $r9 = new java.lang.Object;
+
+        specialinvoke $r9.<java.lang.Object: void <init>()>();
+
+        $r0.<com.android.internal.location.GpsLocationProvider: java.lang.Object mNetworkThreadLock> = $r9;
+
+        $r10 = newarray (int)[32];
+
+        $r0.<com.android.internal.location.GpsLocationProvider: int[] mSvs> = $r10;
+
+        $r11 = newarray (float)[32];
+
+        $r0.<com.android.internal.location.GpsLocationProvider: float[] mSnrs> = $r11;
+
+        $r11 = newarray (float)[32];
+
+        $r0.<com.android.internal.location.GpsLocationProvider: float[] mSvElevations> = $r11;
+
+        $r11 = newarray (float)[32];
+
+        $r0.<com.android.internal.location.GpsLocationProvider: float[] mSvAzimuths> = $r11;
+
+        $r10 = newarray (int)[3];
+
+        $r0.<com.android.internal.location.GpsLocationProvider: int[] mSvMasks> = $r10;
+
+        $r0.<com.android.internal.location.GpsLocationProvider: android.content.Context mContext> = $r1;
+
+        $r4 = new com.android.internal.location.GpsLocationProvider$TelephonyBroadcastReceiver;
+
+        specialinvoke $r4.<com.android.internal.location.GpsLocationProvider$TelephonyBroadcastReceiver: void <init>(com.android.internal.location.GpsLocationProvider,com.android.internal.location.GpsLocationProvider$1)>($r0, null);
+
+        $r3 = new android.content.IntentFilter;
+
+        specialinvoke $r3.<android.content.IntentFilter: void <init>()>();
+
+        virtualinvoke $r3.<android.content.IntentFilter: void addAction(java.lang.String)>("android.intent.action.ANY_DATA_STATE");
+
+        virtualinvoke $r1.<android.content.Context: android.content.Intent registerReceiver(android.content.BroadcastReceiver,android.content.IntentFilter)>($r4, $r3);
+
+        $r12 = new java.util.Properties;
+
+        specialinvoke $r12.<java.util.Properties: void <init>()>();
+
+        $r0.<com.android.internal.location.GpsLocationProvider: java.util.Properties mProperties> = $r12;
+
+        $r2 = new java.io.File;
+
+     label01:
+        specialinvoke $r2.<java.io.File: void <init>(java.lang.String)>("/etc/gps.conf");
+
+        $r5 = new java.io.FileInputStream;
+
+        specialinvoke $r5.<java.io.FileInputStream: void <init>(java.io.File)>($r2);
+
+        $r12 = $r0.<com.android.internal.location.GpsLocationProvider: java.util.Properties mProperties>;
+
+        virtualinvoke $r12.<java.util.Properties: void load(java.io.InputStream)>($r5);
+
+        virtualinvoke $r5.<java.io.FileInputStream: void close()>();
+
+        $r12 = $r0.<com.android.internal.location.GpsLocationProvider: java.util.Properties mProperties>;
+
+        $r13 = virtualinvoke $r12.<java.util.Properties: java.lang.String getProperty(java.lang.String,java.lang.String)>("NTP_SERVER", null);
+
+     label02:
+        $r0.<com.android.internal.location.GpsLocationProvider: java.lang.String mNtpServer> = $r13;
+
+     label03:
+        $r12 = $r0.<com.android.internal.location.GpsLocationProvider: java.util.Properties mProperties>;
+
+        $r13 = virtualinvoke $r12.<java.util.Properties: java.lang.String getProperty(java.lang.String)>("SUPL_HOST");
+
+     label04:
+        $r0.<com.android.internal.location.GpsLocationProvider: java.lang.String mSuplHost> = $r13;
+
+     label05:
+        $r12 = $r0.<com.android.internal.location.GpsLocationProvider: java.util.Properties mProperties>;
+
+        $r13 = virtualinvoke $r12.<java.util.Properties: java.lang.String getProperty(java.lang.String)>("SUPL_PORT");
+
+     label06:
+        $r14 = $r0.<com.android.internal.location.GpsLocationProvider: java.lang.String mSuplHost>;
+
+        if $r14 == null goto label13;
+
+        if $r13 == null goto label14;
+
+     label07:
+        $i1 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r13);
+
+     label08:
+        $r0.<com.android.internal.location.GpsLocationProvider: int mSuplPort> = $i1;
+
+        $r0.<com.android.internal.location.GpsLocationProvider: boolean mSetSuplServer> = 1;
+
+        return;
+
+     label09:
+        $r15 := @caughtexception;
+
+        $r16 = new java.lang.StringBuilder;
+
+     label10:
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unable to parse SUPL_PORT: ");
+
+        $r16 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r13 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("GpsLocationProvider", $r13);
+
+     label11:
+        return;
+
+     label12:
+        $r17 := @caughtexception;
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("GpsLocationProvider", "Could not open GPS configuration file /etc/gps.conf");
+
+        return;
+
+     label13:
+        return;
+
+     label14:
+        return;
+
+        catch java.io.IOException from label01 to label02 with label12;
+        catch java.io.IOException from label03 to label04 with label12;
+        catch java.io.IOException from label05 to label06 with label12;
+        catch java.lang.NumberFormatException from label07 to label08 with label09;
+        catch java.io.IOException from label07 to label08 with label12;
+        catch java.io.IOException from label10 to label11 with label12;
+    }
+
+    static void access$000(com.android.internal.location.GpsLocationProvider, java.lang.String)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        java.lang.String $r1;
+
+        $r0 := @parameter0: com.android.internal.location.GpsLocationProvider;
+
+        $r1 := @parameter1: java.lang.String;
+
+        specialinvoke $r0.<com.android.internal.location.GpsLocationProvider: void native_set_supl_apn(java.lang.String)>($r1);
+
+        return;
+    }
+
+    static boolean access$1000(com.android.internal.location.GpsLocationProvider)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        boolean z0;
+
+        $r0 := @parameter0: com.android.internal.location.GpsLocationProvider;
+
+        z0 = $r0.<com.android.internal.location.GpsLocationProvider: boolean mNetworkAvailable>;
+
+        return z0;
+    }
+
+    static boolean access$1100(com.android.internal.location.GpsLocationProvider)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        boolean z0;
+
+        $r0 := @parameter0: com.android.internal.location.GpsLocationProvider;
+
+        z0 = $r0.<com.android.internal.location.GpsLocationProvider: boolean mSetSuplServer>;
+
+        return z0;
+    }
+
+    static boolean access$1102(com.android.internal.location.GpsLocationProvider, boolean)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: com.android.internal.location.GpsLocationProvider;
+
+        $z0 := @parameter1: boolean;
+
+        $r0.<com.android.internal.location.GpsLocationProvider: boolean mSetSuplServer> = $z0;
+
+        return $z0;
+    }
+
+    static java.lang.String access$1200(com.android.internal.location.GpsLocationProvider)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        java.lang.String r1;
+
+        $r0 := @parameter0: com.android.internal.location.GpsLocationProvider;
+
+        r1 = $r0.<com.android.internal.location.GpsLocationProvider: java.lang.String mNtpServer>;
+
+        return r1;
+    }
+
+    static void access$1300(com.android.internal.location.GpsLocationProvider, long, long, int)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        long $l0, $l1;
+        int $i2;
+
+        $r0 := @parameter0: com.android.internal.location.GpsLocationProvider;
+
+        $l0 := @parameter1: long;
+
+        $l1 := @parameter2: long;
+
+        $i2 := @parameter3: int;
+
+        specialinvoke $r0.<com.android.internal.location.GpsLocationProvider: void native_inject_time(long,long,int)>($l0, $l1, $i2);
+
+        return;
+    }
+
+    static java.lang.String access$1400(com.android.internal.location.GpsLocationProvider)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        java.lang.String r1;
+
+        $r0 := @parameter0: com.android.internal.location.GpsLocationProvider;
+
+        r1 = $r0.<com.android.internal.location.GpsLocationProvider: java.lang.String mSuplHost>;
+
+        return r1;
+    }
+
+    static int access$1502(com.android.internal.location.GpsLocationProvider, int)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        int $i0;
+
+        $r0 := @parameter0: com.android.internal.location.GpsLocationProvider;
+
+        $i0 := @parameter1: int;
+
+        $r0.<com.android.internal.location.GpsLocationProvider: int mPositionMode> = $i0;
+
+        return $i0;
+    }
+
+    static int access$1600(com.android.internal.location.GpsLocationProvider)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        int i0;
+
+        $r0 := @parameter0: com.android.internal.location.GpsLocationProvider;
+
+        i0 = $r0.<com.android.internal.location.GpsLocationProvider: int mSuplPort>;
+
+        return i0;
+    }
+
+    static void access$1700(com.android.internal.location.GpsLocationProvider, int, int)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        int $i0, $i1;
+
+        $r0 := @parameter0: com.android.internal.location.GpsLocationProvider;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        specialinvoke $r0.<com.android.internal.location.GpsLocationProvider: void native_set_supl_server(int,int)>($i0, $i1);
+
+        return;
+    }
+
+    static void access$1800(com.android.internal.location.GpsLocationProvider, byte[], int)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        byte[] $r1;
+        int $i0;
+
+        $r0 := @parameter0: com.android.internal.location.GpsLocationProvider;
+
+        $r1 := @parameter1: byte[];
+
+        $i0 := @parameter2: int;
+
+        specialinvoke $r0.<com.android.internal.location.GpsLocationProvider: void native_inject_xtra_data(byte[],int)>($r1, $i0);
+
+        return;
+    }
+
+    static java.util.ArrayList access$200(com.android.internal.location.GpsLocationProvider)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        java.util.ArrayList r1;
+
+        $r0 := @parameter0: com.android.internal.location.GpsLocationProvider;
+
+        r1 = $r0.<com.android.internal.location.GpsLocationProvider: java.util.ArrayList mListeners>;
+
+        return r1;
+    }
+
+    static boolean access$300(com.android.internal.location.GpsLocationProvider)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        boolean z0;
+
+        $r0 := @parameter0: com.android.internal.location.GpsLocationProvider;
+
+        z0 = $r0.<com.android.internal.location.GpsLocationProvider: boolean mEnabled>;
+
+        return z0;
+    }
+
+    static boolean access$400(com.android.internal.location.GpsLocationProvider)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        boolean z0;
+
+        $r0 := @parameter0: com.android.internal.location.GpsLocationProvider;
+
+        z0 = $r0.<com.android.internal.location.GpsLocationProvider: boolean mNavigating>;
+
+        return z0;
+    }
+
+    static void access$500(com.android.internal.location.GpsLocationProvider)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+
+        $r0 := @parameter0: com.android.internal.location.GpsLocationProvider;
+
+        specialinvoke $r0.<com.android.internal.location.GpsLocationProvider: void native_wait_for_event()>();
+
+        return;
+    }
+
+    static java.lang.Object access$600(com.android.internal.location.GpsLocationProvider)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        java.lang.Object r1;
+
+        $r0 := @parameter0: com.android.internal.location.GpsLocationProvider;
+
+        r1 = $r0.<com.android.internal.location.GpsLocationProvider: java.lang.Object mNetworkThreadLock>;
+
+        return r1;
+    }
+
+    static boolean access$700(com.android.internal.location.GpsLocationProvider)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: com.android.internal.location.GpsLocationProvider;
+
+        $z0 = specialinvoke $r0.<com.android.internal.location.GpsLocationProvider: boolean native_supports_xtra()>();
+
+        return $z0;
+    }
+
+    static android.content.Context access$800(com.android.internal.location.GpsLocationProvider)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        android.content.Context r1;
+
+        $r0 := @parameter0: com.android.internal.location.GpsLocationProvider;
+
+        r1 = $r0.<com.android.internal.location.GpsLocationProvider: android.content.Context mContext>;
+
+        return r1;
+    }
+
+    static java.util.Properties access$900(com.android.internal.location.GpsLocationProvider)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        java.util.Properties r1;
+
+        $r0 := @parameter0: com.android.internal.location.GpsLocationProvider;
+
+        r1 = $r0.<com.android.internal.location.GpsLocationProvider: java.util.Properties mProperties>;
+
+        return r1;
+    }
+
+    private static native void class_init_native();
+
+    private boolean deleteAidingData(android.os.Bundle)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        android.os.Bundle $r1;
+        char $c0;
+        boolean $z0;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        $r1 := @parameter0: android.os.Bundle;
+
+        if $r1 != null goto label02;
+
+        $c0 = 65535;
+
+     label01:
+        if $c0 == 0 goto label15;
+
+        specialinvoke $r0.<com.android.internal.location.GpsLocationProvider: void native_delete_aiding_data(int)>($c0);
+
+        return 1;
+
+     label02:
+        $c0 = 0;
+
+        $z0 = virtualinvoke $r1.<android.os.Bundle: boolean getBoolean(java.lang.String)>("ephemeris");
+
+        if $z0 == 0 goto label03;
+
+        $c0 = 0 | 1;
+
+     label03:
+        $z0 = virtualinvoke $r1.<android.os.Bundle: boolean getBoolean(java.lang.String)>("almanac");
+
+        if $z0 == 0 goto label04;
+
+        $c0 = $c0 | 2;
+
+     label04:
+        $z0 = virtualinvoke $r1.<android.os.Bundle: boolean getBoolean(java.lang.String)>("position");
+
+        if $z0 == 0 goto label05;
+
+        $c0 = $c0 | 4;
+
+     label05:
+        $z0 = virtualinvoke $r1.<android.os.Bundle: boolean getBoolean(java.lang.String)>("time");
+
+        if $z0 == 0 goto label06;
+
+        $c0 = $c0 | 8;
+
+     label06:
+        $z0 = virtualinvoke $r1.<android.os.Bundle: boolean getBoolean(java.lang.String)>("iono");
+
+        if $z0 == 0 goto label07;
+
+        $c0 = $c0 | 16;
+
+     label07:
+        $z0 = virtualinvoke $r1.<android.os.Bundle: boolean getBoolean(java.lang.String)>("utc");
+
+        if $z0 == 0 goto label08;
+
+        $c0 = $c0 | 32;
+
+     label08:
+        $z0 = virtualinvoke $r1.<android.os.Bundle: boolean getBoolean(java.lang.String)>("health");
+
+        if $z0 == 0 goto label09;
+
+        $c0 = $c0 | 64;
+
+     label09:
+        $z0 = virtualinvoke $r1.<android.os.Bundle: boolean getBoolean(java.lang.String)>("svdir");
+
+        if $z0 == 0 goto label10;
+
+        $c0 = $c0 | 128;
+
+     label10:
+        $z0 = virtualinvoke $r1.<android.os.Bundle: boolean getBoolean(java.lang.String)>("svsteer");
+
+        if $z0 == 0 goto label11;
+
+        $c0 = $c0 | 256;
+
+     label11:
+        $z0 = virtualinvoke $r1.<android.os.Bundle: boolean getBoolean(java.lang.String)>("sadata");
+
+        if $z0 == 0 goto label12;
+
+        $c0 = $c0 | 512;
+
+     label12:
+        $z0 = virtualinvoke $r1.<android.os.Bundle: boolean getBoolean(java.lang.String)>("rti");
+
+        if $z0 == 0 goto label13;
+
+        $c0 = $c0 | 1024;
+
+     label13:
+        $z0 = virtualinvoke $r1.<android.os.Bundle: boolean getBoolean(java.lang.String)>("celldb-info");
+
+        if $z0 == 0 goto label14;
+
+        $c0 = $c0 | 32768;
+
+     label14:
+        $z0 = virtualinvoke $r1.<android.os.Bundle: boolean getBoolean(java.lang.String)>("all");
+
+        if $z0 == 0 goto label01;
+
+        $c0 = $c0 | 65535;
+
+        goto label01;
+
+     label15:
+        return 0;
+    }
+
+    public static boolean isSupported()
+    {
+        boolean $z0;
+
+        $z0 = staticinvoke <com.android.internal.location.GpsLocationProvider: boolean native_is_supported()>();
+
+        return $z0;
+    }
+
+    private native void native_cleanup();
+
+    private native void native_delete_aiding_data(int);
+
+    private native void native_disable();
+
+    private native boolean native_init();
+
+    private native void native_inject_time(long, long, int);
+
+    private native void native_inject_xtra_data(byte[], int);
+
+    private static native boolean native_is_supported();
+
+    private native int native_read_sv_status(int[], float[], float[], float[], int[]);
+
+    private native void native_set_fix_frequency(int);
+
+    private native void native_set_supl_apn(java.lang.String);
+
+    private native void native_set_supl_server(int, int);
+
+    private native boolean native_start(int, boolean, int);
+
+    private native boolean native_stop();
+
+    private native boolean native_supports_xtra();
+
+    private native void native_wait_for_event();
+
+    private void reportLocation(int, double, double, double, float, float, float, long)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        int $i0, $i3, $i5, $i6;
+        double $d0, $d1, $d2;
+        float $f0, $f1, $f2;
+        long $l1, $l2, $l4;
+        android.content.Intent $r1;
+        java.lang.StringBuilder $r2;
+        java.lang.String $r3;
+        java.util.ArrayList $r4, $r5;
+        java.lang.Object $r6;
+        com.android.internal.location.GpsLocationProvider$Listener $r7;
+        android.location.IGpsStatusListener $r8;
+        android.os.RemoteException $r9;
+        android.location.Location $r10, $r11;
+        com.android.internal.location.ILocationCollector $r12;
+        boolean $z0;
+        android.content.Context $r13;
+        java.lang.Throwable $r14, $r15;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        $i0 := @parameter0: int;
+
+        $d0 := @parameter1: double;
+
+        $d1 := @parameter2: double;
+
+        $d2 := @parameter3: double;
+
+        $f0 := @parameter4: float;
+
+        $f1 := @parameter5: float;
+
+        $f2 := @parameter6: float;
+
+        $l1 := @parameter7: long;
+
+        $l2 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r0.<com.android.internal.location.GpsLocationProvider: long mLastFixTime> = $l2;
+
+        $i3 = $r0.<com.android.internal.location.GpsLocationProvider: int mTTFF>;
+
+        if $i3 != 0 goto label09;
+
+        $i3 = $i0 & 1;
+
+        if $i3 != 1 goto label09;
+
+        $l2 = $r0.<com.android.internal.location.GpsLocationProvider: long mLastFixTime>;
+
+        $l4 = $r0.<com.android.internal.location.GpsLocationProvider: long mFixRequestTime>;
+
+        $l2 = $l2 - $l4;
+
+        $i3 = (int) $l2;
+
+        $r0.<com.android.internal.location.GpsLocationProvider: int mTTFF> = $i3;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("TTFF: ");
+
+        $i3 = $r0.<com.android.internal.location.GpsLocationProvider: int mTTFF>;
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GpsLocationProvider", $r3);
+
+        $r4 = $r0.<com.android.internal.location.GpsLocationProvider: java.util.ArrayList mListeners>;
+
+        entermonitor $r4;
+
+     label01:
+        $r5 = $r0.<com.android.internal.location.GpsLocationProvider: java.util.ArrayList mListeners>;
+
+        $i3 = virtualinvoke $r5.<java.util.ArrayList: int size()>();
+
+        $i5 = 0;
+
+     label02:
+        if $i5 >= $i3 goto label08;
+
+        $r5 = $r0.<com.android.internal.location.GpsLocationProvider: java.util.ArrayList mListeners>;
+
+        $r6 = virtualinvoke $r5.<java.util.ArrayList: java.lang.Object get(int)>($i5);
+
+        $r7 = (com.android.internal.location.GpsLocationProvider$Listener) $r6;
+
+     label03:
+        $r8 = $r7.<com.android.internal.location.GpsLocationProvider$Listener: android.location.IGpsStatusListener mListener>;
+
+        $i6 = $r0.<com.android.internal.location.GpsLocationProvider: int mTTFF>;
+
+     label04:
+        interfaceinvoke $r8.<android.location.IGpsStatusListener: void onFirstFix(int)>($i6);
+
+     label05:
+        $i5 = $i5 + 1;
+
+        goto label02;
+
+     label06:
+        $r9 := @caughtexception;
+
+     label07:
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("GpsLocationProvider", "RemoteException in stopNavigating");
+
+        $r5 = $r0.<com.android.internal.location.GpsLocationProvider: java.util.ArrayList mListeners>;
+
+        virtualinvoke $r5.<java.util.ArrayList: boolean remove(java.lang.Object)>($r7);
+
+        $i3 = $i3 + -1;
+
+        goto label05;
+
+     label08:
+        exitmonitor $r4;
+
+     label09:
+        $r10 = $r0.<com.android.internal.location.GpsLocationProvider: android.location.Location mLocation>;
+
+        entermonitor $r10;
+
+     label10:
+        $r0.<com.android.internal.location.GpsLocationProvider: int mLocationFlags> = $i0;
+
+        $i3 = $i0 & 1;
+
+        if $i3 != 1 goto label11;
+
+        $r11 = $r0.<com.android.internal.location.GpsLocationProvider: android.location.Location mLocation>;
+
+        virtualinvoke $r11.<android.location.Location: void setLatitude(double)>($d0);
+
+        $r11 = $r0.<com.android.internal.location.GpsLocationProvider: android.location.Location mLocation>;
+
+        virtualinvoke $r11.<android.location.Location: void setLongitude(double)>($d1);
+
+        $r11 = $r0.<com.android.internal.location.GpsLocationProvider: android.location.Location mLocation>;
+
+        virtualinvoke $r11.<android.location.Location: void setTime(long)>($l1);
+
+     label11:
+        $i3 = $i0 & 2;
+
+        if $i3 != 2 goto label21;
+
+        $r11 = $r0.<com.android.internal.location.GpsLocationProvider: android.location.Location mLocation>;
+
+        virtualinvoke $r11.<android.location.Location: void setAltitude(double)>($d2);
+
+     label12:
+        $i3 = $i0 & 4;
+
+        if $i3 != 4 goto label24;
+
+        $r11 = $r0.<com.android.internal.location.GpsLocationProvider: android.location.Location mLocation>;
+
+        virtualinvoke $r11.<android.location.Location: void setSpeed(float)>($f0);
+
+     label13:
+        $i3 = $i0 & 8;
+
+        if $i3 != 8 goto label25;
+
+        $r11 = $r0.<com.android.internal.location.GpsLocationProvider: android.location.Location mLocation>;
+
+        virtualinvoke $r11.<android.location.Location: void setBearing(float)>($f1);
+
+     label14:
+        $i3 = $i0 & 16;
+
+        if $i3 != 16 goto label26;
+
+        $r11 = $r0.<com.android.internal.location.GpsLocationProvider: android.location.Location mLocation>;
+
+        virtualinvoke $r11.<android.location.Location: void setAccuracy(float)>($f2);
+
+     label15:
+        $i0 = $i0 & 1;
+
+        if $i0 != 1 goto label16;
+
+        $r12 = $r0.<com.android.internal.location.GpsLocationProvider: com.android.internal.location.ILocationCollector mCollector>;
+
+        if $r12 == null goto label16;
+
+        $r12 = $r0.<com.android.internal.location.GpsLocationProvider: com.android.internal.location.ILocationCollector mCollector>;
+
+        $r11 = $r0.<com.android.internal.location.GpsLocationProvider: android.location.Location mLocation>;
+
+        interfaceinvoke $r12.<com.android.internal.location.ILocationCollector: void updateLocation(android.location.Location)>($r11);
+
+     label16:
+        exitmonitor $r10;
+
+     label17:
+        $z0 = $r0.<com.android.internal.location.GpsLocationProvider: boolean mStarted>;
+
+        if $z0 == 0 goto label28;
+
+        $i0 = $r0.<com.android.internal.location.GpsLocationProvider: int mStatus>;
+
+        if $i0 == 2 goto label29;
+
+        $r1 = new android.content.Intent;
+
+        specialinvoke $r1.<android.content.Intent: void <init>(java.lang.String)>("android.location.GPS_FIX_CHANGE");
+
+        virtualinvoke $r1.<android.content.Intent: android.content.Intent putExtra(java.lang.String,boolean)>("enabled", 1);
+
+        $r13 = $r0.<com.android.internal.location.GpsLocationProvider: android.content.Context mContext>;
+
+        virtualinvoke $r13.<android.content.Context: void sendBroadcast(android.content.Intent)>($r1);
+
+        $i0 = $r0.<com.android.internal.location.GpsLocationProvider: int mSvCount>;
+
+        specialinvoke $r0.<com.android.internal.location.GpsLocationProvider: void updateStatus(int,int)>(2, $i0);
+
+        return;
+
+     label18:
+        $r14 := @caughtexception;
+
+     label19:
+        exitmonitor $r4;
+
+     label20:
+        throw $r14;
+
+     label21:
+        $r11 = $r0.<com.android.internal.location.GpsLocationProvider: android.location.Location mLocation>;
+
+        virtualinvoke $r11.<android.location.Location: void removeAltitude()>();
+
+        goto label12;
+
+     label22:
+        $r15 := @caughtexception;
+
+        exitmonitor $r10;
+
+     label23:
+        throw $r15;
+
+     label24:
+        $r11 = $r0.<com.android.internal.location.GpsLocationProvider: android.location.Location mLocation>;
+
+        virtualinvoke $r11.<android.location.Location: void removeSpeed()>();
+
+        goto label13;
+
+     label25:
+        $r11 = $r0.<com.android.internal.location.GpsLocationProvider: android.location.Location mLocation>;
+
+        virtualinvoke $r11.<android.location.Location: void removeBearing()>();
+
+        goto label14;
+
+     label26:
+        $r11 = $r0.<com.android.internal.location.GpsLocationProvider: android.location.Location mLocation>;
+
+        virtualinvoke $r11.<android.location.Location: void removeAccuracy()>();
+
+     label27:
+        goto label15;
+
+     label28:
+        return;
+
+     label29:
+        return;
+
+        catch java.lang.Throwable from label01 to label03 with label18;
+        catch android.os.RemoteException from label04 to label05 with label06;
+        catch java.lang.Throwable from label03 to label05 with label18;
+        catch java.lang.Throwable from label07 to label09 with label18;
+        catch java.lang.Throwable from label10 to label17 with label22;
+        catch java.lang.Throwable from label19 to label20 with label18;
+        catch java.lang.Throwable from label21 to label23 with label22;
+        catch java.lang.Throwable from label24 to label27 with label22;
+    }
+
+    private void reportStatus(int)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        int $i0, $i1, $i2;
+        android.content.Intent $r1;
+        boolean $z0, $z1;
+        java.util.ArrayList $r2, $r3;
+        java.lang.Object $r4;
+        com.android.internal.location.GpsLocationProvider$Listener $r5;
+        android.location.IGpsStatusListener $r6;
+        android.os.RemoteException $r7;
+        android.content.Context $r8;
+        java.lang.Throwable $r9;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        $i0 := @parameter0: int;
+
+        $z1 = 1;
+
+        $z0 = $r0.<com.android.internal.location.GpsLocationProvider: boolean mNavigating>;
+
+        if $i0 != 1 goto label07;
+
+     label01:
+        $r0.<com.android.internal.location.GpsLocationProvider: boolean mNavigating> = $z1;
+
+        $z1 = $r0.<com.android.internal.location.GpsLocationProvider: boolean mNavigating>;
+
+        if $z0 == $z1 goto label17;
+
+        $r2 = $r0.<com.android.internal.location.GpsLocationProvider: java.util.ArrayList mListeners>;
+
+        entermonitor $r2;
+
+     label02:
+        $r3 = $r0.<com.android.internal.location.GpsLocationProvider: java.util.ArrayList mListeners>;
+
+        $i1 = virtualinvoke $r3.<java.util.ArrayList: int size()>();
+
+        $i2 = 0;
+
+     label03:
+        if $i2 >= $i1 goto label12;
+
+        $r3 = $r0.<com.android.internal.location.GpsLocationProvider: java.util.ArrayList mListeners>;
+
+        $r4 = virtualinvoke $r3.<java.util.ArrayList: java.lang.Object get(int)>($i2);
+
+        $r5 = (com.android.internal.location.GpsLocationProvider$Listener) $r4;
+
+     label04:
+        $z0 = $r0.<com.android.internal.location.GpsLocationProvider: boolean mNavigating>;
+
+        if $z0 == 0 goto label08;
+
+        $r6 = $r5.<com.android.internal.location.GpsLocationProvider$Listener: android.location.IGpsStatusListener mListener>;
+
+     label05:
+        interfaceinvoke $r6.<android.location.IGpsStatusListener: void onGpsStarted()>();
+
+     label06:
+        $i2 = $i2 + 1;
+
+        goto label03;
+
+     label07:
+        $z1 = 0;
+
+        goto label01;
+
+     label08:
+        $r6 = $r5.<com.android.internal.location.GpsLocationProvider$Listener: android.location.IGpsStatusListener mListener>;
+
+        interfaceinvoke $r6.<android.location.IGpsStatusListener: void onGpsStopped()>();
+
+     label09:
+        goto label06;
+
+     label10:
+        $r7 := @caughtexception;
+
+     label11:
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("GpsLocationProvider", "RemoteException in reportStatus");
+
+        $r3 = $r0.<com.android.internal.location.GpsLocationProvider: java.util.ArrayList mListeners>;
+
+        virtualinvoke $r3.<java.util.ArrayList: boolean remove(java.lang.Object)>($r5);
+
+        $i1 = $i1 + -1;
+
+        goto label06;
+
+     label12:
+        exitmonitor $r2;
+
+     label13:
+        $r1 = new android.content.Intent;
+
+        specialinvoke $r1.<android.content.Intent: void <init>(java.lang.String)>("android.location.GPS_ENABLED_CHANGE");
+
+        $z0 = $r0.<com.android.internal.location.GpsLocationProvider: boolean mNavigating>;
+
+        virtualinvoke $r1.<android.content.Intent: android.content.Intent putExtra(java.lang.String,boolean)>("enabled", $z0);
+
+        $r8 = $r0.<com.android.internal.location.GpsLocationProvider: android.content.Context mContext>;
+
+        virtualinvoke $r8.<android.content.Context: void sendBroadcast(android.content.Intent)>($r1);
+
+        return;
+
+     label14:
+        $r9 := @caughtexception;
+
+     label15:
+        exitmonitor $r2;
+
+     label16:
+        throw $r9;
+
+     label17:
+        return;
+
+        catch java.lang.Throwable from label02 to label04 with label14;
+        catch android.os.RemoteException from label05 to label06 with label10;
+        catch android.os.RemoteException from label08 to label09 with label10;
+        catch java.lang.Throwable from label04 to label07 with label14;
+        catch java.lang.Throwable from label08 to label09 with label14;
+        catch java.lang.Throwable from label11 to label13 with label14;
+        catch java.lang.Throwable from label15 to label16 with label14;
+    }
+
+    private void reportSvStatus()
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        int[] $r1, $r5;
+        float[] $r2, $r3, $r4;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        java.util.ArrayList $r6, $r7;
+        java.lang.Object $r8;
+        com.android.internal.location.GpsLocationProvider$Listener $r9;
+        android.location.IGpsStatusListener $r10;
+        android.os.RemoteException $r11;
+        java.lang.Throwable $r12;
+        boolean $z0;
+        long $l6, $l8;
+        byte $b7;
+        android.content.Intent $r13;
+        android.content.Context $r14;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        $r1 = $r0.<com.android.internal.location.GpsLocationProvider: int[] mSvs>;
+
+        $r2 = $r0.<com.android.internal.location.GpsLocationProvider: float[] mSnrs>;
+
+        $r3 = $r0.<com.android.internal.location.GpsLocationProvider: float[] mSvElevations>;
+
+        $r4 = $r0.<com.android.internal.location.GpsLocationProvider: float[] mSvAzimuths>;
+
+        $r5 = $r0.<com.android.internal.location.GpsLocationProvider: int[] mSvMasks>;
+
+        $i0 = specialinvoke $r0.<com.android.internal.location.GpsLocationProvider: int native_read_sv_status(int[],float[],float[],float[],int[])>($r1, $r2, $r3, $r4, $r5);
+
+        $r6 = $r0.<com.android.internal.location.GpsLocationProvider: java.util.ArrayList mListeners>;
+
+        entermonitor $r6;
+
+     label01:
+        $r7 = $r0.<com.android.internal.location.GpsLocationProvider: java.util.ArrayList mListeners>;
+
+        $i1 = virtualinvoke $r7.<java.util.ArrayList: int size()>();
+
+        $i2 = 0;
+
+     label02:
+        if $i2 >= $i1 goto label08;
+
+        $r7 = $r0.<com.android.internal.location.GpsLocationProvider: java.util.ArrayList mListeners>;
+
+        $r8 = virtualinvoke $r7.<java.util.ArrayList: java.lang.Object get(int)>($i2);
+
+        $r9 = (com.android.internal.location.GpsLocationProvider$Listener) $r8;
+
+     label03:
+        $r10 = $r9.<com.android.internal.location.GpsLocationProvider$Listener: android.location.IGpsStatusListener mListener>;
+
+        $r1 = $r0.<com.android.internal.location.GpsLocationProvider: int[] mSvs>;
+
+        $r2 = $r0.<com.android.internal.location.GpsLocationProvider: float[] mSnrs>;
+
+        $r3 = $r0.<com.android.internal.location.GpsLocationProvider: float[] mSvElevations>;
+
+        $r4 = $r0.<com.android.internal.location.GpsLocationProvider: float[] mSvAzimuths>;
+
+        $r5 = $r0.<com.android.internal.location.GpsLocationProvider: int[] mSvMasks>;
+
+        $i3 = $r5[0];
+
+        $r5 = $r0.<com.android.internal.location.GpsLocationProvider: int[] mSvMasks>;
+
+        $i4 = $r5[1];
+
+        $r5 = $r0.<com.android.internal.location.GpsLocationProvider: int[] mSvMasks>;
+
+        $i5 = $r5[2];
+
+     label04:
+        interfaceinvoke $r10.<android.location.IGpsStatusListener: void onSvStatusChanged(int,int[],float[],float[],float[],int,int,int)>($i0, $r1, $r2, $r3, $r4, $i3, $i4, $i5);
+
+     label05:
+        $i2 = $i2 + 1;
+
+        goto label02;
+
+     label06:
+        $r11 := @caughtexception;
+
+     label07:
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("GpsLocationProvider", "RemoteException in reportSvInfo");
+
+        $r7 = $r0.<com.android.internal.location.GpsLocationProvider: java.util.ArrayList mListeners>;
+
+        virtualinvoke $r7.<java.util.ArrayList: boolean remove(java.lang.Object)>($r9);
+
+        $i1 = $i1 + -1;
+
+        goto label05;
+
+     label08:
+        exitmonitor $r6;
+
+     label09:
+        $i1 = 0;
+
+     label10:
+        if $i1 >= $i0 goto label13;
+
+        $i1 = $i1 + 1;
+
+        goto label10;
+
+     label11:
+        $r12 := @caughtexception;
+
+        exitmonitor $r6;
+
+     label12:
+        throw $r12;
+
+     label13:
+        $i1 = $r0.<com.android.internal.location.GpsLocationProvider: int mStatus>;
+
+        specialinvoke $r0.<com.android.internal.location.GpsLocationProvider: void updateStatus(int,int)>($i1, $i0);
+
+        $z0 = $r0.<com.android.internal.location.GpsLocationProvider: boolean mNavigating>;
+
+        if $z0 == 0 goto label14;
+
+        $i0 = $r0.<com.android.internal.location.GpsLocationProvider: int mStatus>;
+
+        if $i0 != 2 goto label15;
+
+        $l6 = $r0.<com.android.internal.location.GpsLocationProvider: long mLastFixTime>;
+
+        $b7 = $l6 cmp 0L;
+
+        if $b7 <= 0 goto label16;
+
+        $l6 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l8 = $r0.<com.android.internal.location.GpsLocationProvider: long mLastFixTime>;
+
+        $l6 = $l6 - $l8;
+
+        $b7 = $l6 cmp 10000L;
+
+        if $b7 <= 0 goto label17;
+
+        $r13 = new android.content.Intent;
+
+        specialinvoke $r13.<android.content.Intent: void <init>(java.lang.String)>("android.location.GPS_FIX_CHANGE");
+
+        virtualinvoke $r13.<android.content.Intent: android.content.Intent putExtra(java.lang.String,boolean)>("enabled", 0);
+
+        $r14 = $r0.<com.android.internal.location.GpsLocationProvider: android.content.Context mContext>;
+
+        virtualinvoke $r14.<android.content.Context: void sendBroadcast(android.content.Intent)>($r13);
+
+        $i0 = $r0.<com.android.internal.location.GpsLocationProvider: int mSvCount>;
+
+        specialinvoke $r0.<com.android.internal.location.GpsLocationProvider: void updateStatus(int,int)>(1, $i0);
+
+        return;
+
+     label14:
+        return;
+
+     label15:
+        return;
+
+     label16:
+        return;
+
+     label17:
+        return;
+
+        catch java.lang.Throwable from label01 to label03 with label11;
+        catch android.os.RemoteException from label04 to label05 with label06;
+        catch java.lang.Throwable from label03 to label05 with label11;
+        catch java.lang.Throwable from label07 to label09 with label11;
+        catch java.lang.Throwable from label11 to label12 with label11;
+    }
+
+    private void updateStatus(int, int)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        int $i0, $i1, $i3;
+        long $l2;
+        android.os.Bundle $r1;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i3 = $r0.<com.android.internal.location.GpsLocationProvider: int mStatus>;
+
+        if $i0 != $i3 goto label1;
+
+        $i3 = $r0.<com.android.internal.location.GpsLocationProvider: int mSvCount>;
+
+        if $i1 == $i3 goto label2;
+
+     label1:
+        $r0.<com.android.internal.location.GpsLocationProvider: int mStatus> = $i0;
+
+        $r0.<com.android.internal.location.GpsLocationProvider: int mSvCount> = $i1;
+
+        $r1 = $r0.<com.android.internal.location.GpsLocationProvider: android.os.Bundle mLocationExtras>;
+
+        virtualinvoke $r1.<android.os.Bundle: void putInt(java.lang.String,int)>("satellites", $i1);
+
+        $l2 = staticinvoke <android.os.SystemClock: long elapsedRealtime()>();
+
+        $r0.<com.android.internal.location.GpsLocationProvider: long mStatusUpdateTime> = $l2;
+
+        return;
+
+     label2:
+        return;
+    }
+
+    private void xtraDownloadRequest()
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        com.android.internal.location.GpsLocationProvider$GpsNetworkThread $r1;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GpsLocationProvider", "xtraDownloadRequest");
+
+        $r1 = $r0.<com.android.internal.location.GpsLocationProvider: com.android.internal.location.GpsLocationProvider$GpsNetworkThread mNetworkThread>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<com.android.internal.location.GpsLocationProvider: com.android.internal.location.GpsLocationProvider$GpsNetworkThread mNetworkThread>;
+
+        virtualinvoke $r1.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: void xtraDownloadRequest()>();
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public void addGpsStatusListener(android.location.IGpsStatusListener) throws android.os.RemoteException
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        android.location.IGpsStatusListener $r1, $r8;
+        com.android.internal.location.GpsLocationProvider$Listener $r2;
+        java.lang.NullPointerException $r3;
+        java.util.ArrayList $r4, $r6;
+        android.os.IBinder $r5, $r9;
+        int $i0, $i1;
+        java.lang.Object $r7;
+        boolean $z0;
+        java.lang.Throwable $r10;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        $r1 := @parameter0: android.location.IGpsStatusListener;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.lang.NullPointerException;
+
+        specialinvoke $r3.<java.lang.NullPointerException: void <init>(java.lang.String)>("listener is null in addGpsStatusListener");
+
+        throw $r3;
+
+     label1:
+        $r4 = $r0.<com.android.internal.location.GpsLocationProvider: java.util.ArrayList mListeners>;
+
+        entermonitor $r4;
+
+     label2:
+        $r5 = interfaceinvoke $r1.<android.location.IGpsStatusListener: android.os.IBinder asBinder()>();
+
+        $r6 = $r0.<com.android.internal.location.GpsLocationProvider: java.util.ArrayList mListeners>;
+
+        $i0 = virtualinvoke $r6.<java.util.ArrayList: int size()>();
+
+        $i1 = 0;
+
+     label3:
+        if $i1 >= $i0 goto label6;
+
+        $r6 = $r0.<com.android.internal.location.GpsLocationProvider: java.util.ArrayList mListeners>;
+
+        $r7 = virtualinvoke $r6.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r2 = (com.android.internal.location.GpsLocationProvider$Listener) $r7;
+
+        $r8 = $r2.<com.android.internal.location.GpsLocationProvider$Listener: android.location.IGpsStatusListener mListener>;
+
+        $r9 = interfaceinvoke $r8.<android.location.IGpsStatusListener: android.os.IBinder asBinder()>();
+
+        $z0 = virtualinvoke $r5.<java.lang.Object: boolean equals(java.lang.Object)>($r9);
+
+        if $z0 == 0 goto label5;
+
+        exitmonitor $r4;
+
+     label4:
+        return;
+
+     label5:
+        $i1 = $i1 + 1;
+
+        goto label3;
+
+     label6:
+        $r2 = new com.android.internal.location.GpsLocationProvider$Listener;
+
+        specialinvoke $r2.<com.android.internal.location.GpsLocationProvider$Listener: void <init>(com.android.internal.location.GpsLocationProvider,android.location.IGpsStatusListener)>($r0, $r1);
+
+        interfaceinvoke $r5.<android.os.IBinder: void linkToDeath(android.os.IBinder$DeathRecipient,int)>($r2, 0);
+
+        $r6 = $r0.<com.android.internal.location.GpsLocationProvider: java.util.ArrayList mListeners>;
+
+        virtualinvoke $r6.<java.util.ArrayList: boolean add(java.lang.Object)>($r2);
+
+        exitmonitor $r4;
+
+     label7:
+        return;
+
+     label8:
+        $r10 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label9:
+        throw $r10;
+
+        catch java.lang.Throwable from label2 to label4 with label8;
+        catch java.lang.Throwable from label5 to label7 with label8;
+        catch java.lang.Throwable from label8 to label9 with label8;
+    }
+
+    public void disable()
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        boolean $z0;
+        com.android.internal.location.GpsLocationProvider$GpsEventThread $r1;
+        com.android.internal.location.GpsLocationProvider$GpsNetworkThread $r2;
+        java.lang.Throwable $r3;
+        java.lang.InterruptedException $r4;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        entermonitor $r0;
+
+     label01:
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GpsLocationProvider", "disable");
+
+        $z0 = $r0.<com.android.internal.location.GpsLocationProvider: boolean mEnabled>;
+
+     label02:
+        if $z0 != 0 goto label04;
+
+     label03:
+        exitmonitor $r0;
+
+        return;
+
+     label04:
+        $r0.<com.android.internal.location.GpsLocationProvider: boolean mEnabled> = 0;
+
+        virtualinvoke $r0.<com.android.internal.location.GpsLocationProvider: void stopNavigating()>();
+
+        specialinvoke $r0.<com.android.internal.location.GpsLocationProvider: void native_disable()>();
+
+        $r1 = $r0.<com.android.internal.location.GpsLocationProvider: com.android.internal.location.GpsLocationProvider$GpsEventThread mEventThread>;
+
+     label05:
+        if $r1 == null goto label09;
+
+     label06:
+        $r1 = $r0.<com.android.internal.location.GpsLocationProvider: com.android.internal.location.GpsLocationProvider$GpsEventThread mEventThread>;
+
+     label07:
+        virtualinvoke $r1.<java.lang.Thread: void join()>();
+
+     label08:
+        $r0.<com.android.internal.location.GpsLocationProvider: com.android.internal.location.GpsLocationProvider$GpsEventThread mEventThread> = null;
+
+     label09:
+        $r2 = $r0.<com.android.internal.location.GpsLocationProvider: com.android.internal.location.GpsLocationProvider$GpsNetworkThread mNetworkThread>;
+
+        if $r2 == null goto label10;
+
+        $r2 = $r0.<com.android.internal.location.GpsLocationProvider: com.android.internal.location.GpsLocationProvider$GpsNetworkThread mNetworkThread>;
+
+        virtualinvoke $r2.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: void setDone()>();
+
+        $r0.<com.android.internal.location.GpsLocationProvider: com.android.internal.location.GpsLocationProvider$GpsNetworkThread mNetworkThread> = null;
+
+     label10:
+        specialinvoke $r0.<com.android.internal.location.GpsLocationProvider: void native_cleanup()>();
+
+     label11:
+        goto label03;
+
+     label12:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+     label13:
+        $r4 := @caughtexception;
+
+     label14:
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("GpsLocationProvider", "InterruptedException when joining mEventThread");
+
+     label15:
+        goto label08;
+
+        catch java.lang.Throwable from label01 to label02 with label12;
+        catch java.lang.Throwable from label04 to label05 with label12;
+        catch java.lang.InterruptedException from label07 to label08 with label13;
+        catch java.lang.Throwable from label06 to label08 with label12;
+        catch java.lang.Throwable from label08 to label11 with label12;
+        catch java.lang.Throwable from label14 to label15 with label12;
+    }
+
+    public void enable()
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        boolean $z0;
+        com.android.internal.location.GpsLocationProvider$GpsEventThread $r1;
+        com.android.internal.location.GpsLocationProvider$GpsNetworkThread $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        entermonitor $r0;
+
+     label1:
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GpsLocationProvider", "enable");
+
+        $z0 = $r0.<com.android.internal.location.GpsLocationProvider: boolean mEnabled>;
+
+     label2:
+        if $z0 == 0 goto label4;
+
+     label3:
+        exitmonitor $r0;
+
+        return;
+
+     label4:
+        $z0 = specialinvoke $r0.<com.android.internal.location.GpsLocationProvider: boolean native_init()>();
+
+        $r0.<com.android.internal.location.GpsLocationProvider: boolean mEnabled> = $z0;
+
+        $z0 = $r0.<com.android.internal.location.GpsLocationProvider: boolean mEnabled>;
+
+        if $z0 == 0 goto label8;
+
+        $r1 = new com.android.internal.location.GpsLocationProvider$GpsEventThread;
+
+        specialinvoke $r1.<com.android.internal.location.GpsLocationProvider$GpsEventThread: void <init>(com.android.internal.location.GpsLocationProvider)>($r0);
+
+        $r0.<com.android.internal.location.GpsLocationProvider: com.android.internal.location.GpsLocationProvider$GpsEventThread mEventThread> = $r1;
+
+        $r1 = $r0.<com.android.internal.location.GpsLocationProvider: com.android.internal.location.GpsLocationProvider$GpsEventThread mEventThread>;
+
+        virtualinvoke $r1.<java.lang.Thread: void start()>();
+
+        $z0 = virtualinvoke $r0.<com.android.internal.location.GpsLocationProvider: boolean requiresNetwork()>();
+
+        if $z0 == 0 goto label3;
+
+        $r2 = $r0.<com.android.internal.location.GpsLocationProvider: com.android.internal.location.GpsLocationProvider$GpsNetworkThread mNetworkThread>;
+
+        if $r2 != null goto label7;
+
+        $r2 = new com.android.internal.location.GpsLocationProvider$GpsNetworkThread;
+
+        specialinvoke $r2.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: void <init>(com.android.internal.location.GpsLocationProvider)>($r0);
+
+        $r0.<com.android.internal.location.GpsLocationProvider: com.android.internal.location.GpsLocationProvider$GpsNetworkThread mNetworkThread> = $r2;
+
+        $r2 = $r0.<com.android.internal.location.GpsLocationProvider: com.android.internal.location.GpsLocationProvider$GpsNetworkThread mNetworkThread>;
+
+        virtualinvoke $r2.<java.lang.Thread: void start()>();
+
+     label5:
+        goto label3;
+
+     label6:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+     label7:
+        $r2 = $r0.<com.android.internal.location.GpsLocationProvider: com.android.internal.location.GpsLocationProvider$GpsNetworkThread mNetworkThread>;
+
+        virtualinvoke $r2.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: void signal()>();
+
+        goto label3;
+
+     label8:
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("GpsLocationProvider", "Failed to enable location provider");
+
+     label9:
+        goto label3;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+        catch java.lang.Throwable from label7 to label9 with label6;
+    }
+
+    public void enableLocationTracking(boolean)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        boolean $z0, $z1;
+        long $l0;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        $z0 := @parameter0: boolean;
+
+        $z1 = $r0.<com.android.internal.location.GpsLocationProvider: boolean mLocationTracking>;
+
+        if $z1 != $z0 goto label1;
+
+        return;
+
+     label1:
+        if $z0 == 0 goto label3;
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r0.<com.android.internal.location.GpsLocationProvider: long mFixRequestTime> = $l0;
+
+        $r0.<com.android.internal.location.GpsLocationProvider: int mTTFF> = 0;
+
+        $r0.<com.android.internal.location.GpsLocationProvider: long mLastFixTime> = 0L;
+
+        virtualinvoke $r0.<com.android.internal.location.GpsLocationProvider: void startNavigating()>();
+
+     label2:
+        $r0.<com.android.internal.location.GpsLocationProvider: boolean mLocationTracking> = $z0;
+
+        return;
+
+     label3:
+        virtualinvoke $r0.<com.android.internal.location.GpsLocationProvider: void stopNavigating()>();
+
+        goto label2;
+    }
+
+    public int getAccuracy()
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        return 1;
+    }
+
+    public boolean getLocation(android.location.Location)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        android.location.Location $r1, $r2, $r3;
+        int $i0;
+        android.os.Bundle $r4;
+        java.lang.Throwable $r5;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        $r1 := @parameter0: android.location.Location;
+
+        $r2 = $r0.<com.android.internal.location.GpsLocationProvider: android.location.Location mLocation>;
+
+        entermonitor $r2;
+
+     label1:
+        $i0 = $r0.<com.android.internal.location.GpsLocationProvider: int mLocationFlags>;
+
+        $i0 = $i0 & 1;
+
+        if $i0 != 0 goto label3;
+
+        exitmonitor $r2;
+
+     label2:
+        return 0;
+
+     label3:
+        $r3 = $r0.<com.android.internal.location.GpsLocationProvider: android.location.Location mLocation>;
+
+        virtualinvoke $r1.<android.location.Location: void set(android.location.Location)>($r3);
+
+        $r4 = $r0.<com.android.internal.location.GpsLocationProvider: android.os.Bundle mLocationExtras>;
+
+        virtualinvoke $r1.<android.location.Location: void setExtras(android.os.Bundle)>($r4);
+
+        exitmonitor $r2;
+
+     label4:
+        return 1;
+
+     label5:
+        $r5 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label6:
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public int getPowerRequirement()
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        return 3;
+    }
+
+    public int getStatus(android.os.Bundle)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        android.os.Bundle $r1;
+        int $i0;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        $r1 := @parameter0: android.os.Bundle;
+
+        if $r1 == null goto label1;
+
+        $i0 = $r0.<com.android.internal.location.GpsLocationProvider: int mSvCount>;
+
+        virtualinvoke $r1.<android.os.Bundle: void putInt(java.lang.String,int)>("satellites", $i0);
+
+     label1:
+        $i0 = $r0.<com.android.internal.location.GpsLocationProvider: int mStatus>;
+
+        return $i0;
+    }
+
+    public long getStatusUpdateTime()
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        long l0;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        l0 = $r0.<com.android.internal.location.GpsLocationProvider: long mStatusUpdateTime>;
+
+        return l0;
+    }
+
+    public boolean hasMonetaryCost()
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        return 0;
+    }
+
+    public boolean isEnabled()
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        boolean z0;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        z0 = $r0.<com.android.internal.location.GpsLocationProvider: boolean mEnabled>;
+
+        return z0;
+    }
+
+    public boolean isLocationTracking()
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        boolean z0;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        z0 = $r0.<com.android.internal.location.GpsLocationProvider: boolean mLocationTracking>;
+
+        return z0;
+    }
+
+    public void removeGpsStatusListener(android.location.IGpsStatusListener)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        android.location.IGpsStatusListener $r1;
+        java.lang.NullPointerException $r2;
+        java.util.ArrayList $r3, $r6;
+        android.os.IBinder $r4, $r9;
+        com.android.internal.location.GpsLocationProvider$Listener $r5, $r8;
+        int $i0, $i1;
+        java.lang.Object $r7;
+        boolean $z0;
+        java.lang.Throwable $r10;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        $r1 := @parameter0: android.location.IGpsStatusListener;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.NullPointerException;
+
+        specialinvoke $r2.<java.lang.NullPointerException: void <init>(java.lang.String)>("listener is null in addGpsStatusListener");
+
+        throw $r2;
+
+     label1:
+        $r3 = $r0.<com.android.internal.location.GpsLocationProvider: java.util.ArrayList mListeners>;
+
+        entermonitor $r3;
+
+     label2:
+        $r4 = interfaceinvoke $r1.<android.location.IGpsStatusListener: android.os.IBinder asBinder()>();
+
+        $r5 = null;
+
+        $r6 = $r0.<com.android.internal.location.GpsLocationProvider: java.util.ArrayList mListeners>;
+
+        $i0 = virtualinvoke $r6.<java.util.ArrayList: int size()>();
+
+        $i1 = 0;
+
+     label3:
+        if $i1 >= $i0 goto label5;
+
+        if $r5 != null goto label5;
+
+        $r6 = $r0.<com.android.internal.location.GpsLocationProvider: java.util.ArrayList mListeners>;
+
+        $r7 = virtualinvoke $r6.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r8 = (com.android.internal.location.GpsLocationProvider$Listener) $r7;
+
+        $r1 = $r8.<com.android.internal.location.GpsLocationProvider$Listener: android.location.IGpsStatusListener mListener>;
+
+        $r9 = interfaceinvoke $r1.<android.location.IGpsStatusListener: android.os.IBinder asBinder()>();
+
+        $z0 = virtualinvoke $r4.<java.lang.Object: boolean equals(java.lang.Object)>($r9);
+
+        if $z0 == 0 goto label4;
+
+        $r5 = $r8;
+
+     label4:
+        $i1 = $i1 + 1;
+
+        goto label3;
+
+     label5:
+        if $r5 == null goto label6;
+
+        $r6 = $r0.<com.android.internal.location.GpsLocationProvider: java.util.ArrayList mListeners>;
+
+        virtualinvoke $r6.<java.util.ArrayList: boolean remove(java.lang.Object)>($r5);
+
+        interfaceinvoke $r4.<android.os.IBinder: boolean unlinkToDeath(android.os.IBinder$DeathRecipient,int)>($r5, 0);
+
+     label6:
+        exitmonitor $r3;
+
+     label7:
+        return;
+
+     label8:
+        $r10 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label9:
+        throw $r10;
+
+        catch java.lang.Throwable from label2 to label7 with label8;
+        catch java.lang.Throwable from label8 to label9 with label8;
+    }
+
+    public boolean requiresCell()
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        return 0;
+    }
+
+    public boolean requiresNetwork()
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        boolean $z0;
+        java.lang.String $r1;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        $r1 = $r0.<com.android.internal.location.GpsLocationProvider: java.lang.String mNtpServer>;
+
+        if $r1 != null goto label1;
+
+        $z0 = specialinvoke $r0.<com.android.internal.location.GpsLocationProvider: boolean native_supports_xtra()>();
+
+        if $z0 != 0 goto label1;
+
+        $r1 = $r0.<com.android.internal.location.GpsLocationProvider: java.lang.String mSuplHost>;
+
+        if $r1 == null goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    public boolean requiresSatellite()
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        return 1;
+    }
+
+    public boolean sendExtraCommand(java.lang.String, android.os.Bundle)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        java.lang.String $r1, $r3;
+        android.os.Bundle $r2;
+        boolean $z0;
+        java.lang.StringBuilder $r4;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: android.os.Bundle;
+
+        $r3 = "delete_aiding_data";
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        $z0 = specialinvoke $r0.<com.android.internal.location.GpsLocationProvider: boolean deleteAidingData(android.os.Bundle)>($r2);
+
+        return $z0;
+
+     label1:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("sendExtraCommand: unknown command ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("GpsLocationProvider", $r1);
+
+        return 0;
+    }
+
+    public void setLocationCollector(com.android.internal.location.ILocationCollector)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        com.android.internal.location.ILocationCollector $r1;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        $r1 := @parameter0: com.android.internal.location.ILocationCollector;
+
+        $r0.<com.android.internal.location.GpsLocationProvider: com.android.internal.location.ILocationCollector mCollector> = $r1;
+
+        return;
+    }
+
+    public void setMinTime(long)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        long $l0;
+        java.lang.StringBuilder $r1;
+        java.lang.String $r2;
+        byte $b1;
+        int $i2;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        $l0 := @parameter0: long;
+
+        specialinvoke $r0.<android.location.LocationProviderImpl: void setMinTime(long)>($l0);
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("setMinTime ");
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GpsLocationProvider", $r2);
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 < 0 goto label2;
+
+        $l0 = $l0 / 1000L;
+
+        $i2 = (int) $l0;
+
+        if $i2 >= 1 goto label1;
+
+        $i2 = 1;
+
+     label1:
+        $r0.<com.android.internal.location.GpsLocationProvider: int mFixInterval> = $i2;
+
+        $i2 = $r0.<com.android.internal.location.GpsLocationProvider: int mFixInterval>;
+
+        specialinvoke $r0.<com.android.internal.location.GpsLocationProvider: void native_set_fix_frequency(int)>($i2);
+
+        return;
+
+     label2:
+        return;
+    }
+
+    public void startNavigating()
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        boolean $z0;
+        int $i0, $i1;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        $z0 = $r0.<com.android.internal.location.GpsLocationProvider: boolean mStarted>;
+
+        if $z0 != 0 goto label2;
+
+        $r0.<com.android.internal.location.GpsLocationProvider: boolean mStarted> = 1;
+
+        $i0 = $r0.<com.android.internal.location.GpsLocationProvider: int mPositionMode>;
+
+        $i1 = $r0.<com.android.internal.location.GpsLocationProvider: int mFixInterval>;
+
+        $z0 = specialinvoke $r0.<com.android.internal.location.GpsLocationProvider: boolean native_start(int,boolean,int)>($i0, 0, $i1);
+
+        if $z0 != 0 goto label1;
+
+        $r0.<com.android.internal.location.GpsLocationProvider: boolean mStarted> = 0;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("GpsLocationProvider", "native_start failed in startNavigating()");
+
+     label1:
+        specialinvoke $r0.<com.android.internal.location.GpsLocationProvider: void updateStatus(int,int)>(1, 0);
+
+        return;
+
+     label2:
+        return;
+    }
+
+    public void stopNavigating()
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        boolean $z0;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        $z0 = $r0.<com.android.internal.location.GpsLocationProvider: boolean mStarted>;
+
+        if $z0 == 0 goto label1;
+
+        $r0.<com.android.internal.location.GpsLocationProvider: boolean mStarted> = 0;
+
+        specialinvoke $r0.<com.android.internal.location.GpsLocationProvider: boolean native_stop()>();
+
+        $r0.<com.android.internal.location.GpsLocationProvider: int mTTFF> = 0;
+
+        $r0.<com.android.internal.location.GpsLocationProvider: long mLastFixTime> = 0L;
+
+        $r0.<com.android.internal.location.GpsLocationProvider: int mLocationFlags> = 0;
+
+        specialinvoke $r0.<com.android.internal.location.GpsLocationProvider: void updateStatus(int,int)>(1, 0);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public boolean supportsAltitude()
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        return 1;
+    }
+
+    public boolean supportsBearing()
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        return 1;
+    }
+
+    public boolean supportsSpeed()
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        return 1;
+    }
+
+    public void updateNetworkState(int)
+    {
+        com.android.internal.location.GpsLocationProvider $r0;
+        int $i0;
+        boolean $z0;
+        java.lang.StringBuilder $r1;
+        java.lang.String $r2;
+        com.android.internal.location.GpsLocationProvider$GpsNetworkThread $r3;
+
+        $r0 := @this: com.android.internal.location.GpsLocationProvider;
+
+        $i0 := @parameter0: int;
+
+        if $i0 != 2 goto label3;
+
+        $z0 = 1;
+
+     label1:
+        $r0.<com.android.internal.location.GpsLocationProvider: boolean mNetworkAvailable> = $z0;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("updateNetworkState ");
+
+        $z0 = $r0.<com.android.internal.location.GpsLocationProvider: boolean mNetworkAvailable>;
+
+        if $z0 == 0 goto label4;
+
+        $r2 = "available";
+
+     label2:
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("GpsLocationProvider", $r2);
+
+        $z0 = $r0.<com.android.internal.location.GpsLocationProvider: boolean mNetworkAvailable>;
+
+        if $z0 == 0 goto label5;
+
+        $r3 = $r0.<com.android.internal.location.GpsLocationProvider: com.android.internal.location.GpsLocationProvider$GpsNetworkThread mNetworkThread>;
+
+        if $r3 == null goto label6;
+
+        $z0 = $r0.<com.android.internal.location.GpsLocationProvider: boolean mEnabled>;
+
+        if $z0 == 0 goto label7;
+
+        $r3 = $r0.<com.android.internal.location.GpsLocationProvider: com.android.internal.location.GpsLocationProvider$GpsNetworkThread mNetworkThread>;
+
+        virtualinvoke $r3.<com.android.internal.location.GpsLocationProvider$GpsNetworkThread: void signal()>();
+
+        return;
+
+     label3:
+        $z0 = 0;
+
+        goto label1;
+
+     label4:
+        $r2 = "unavailable";
+
+        goto label2;
+
+     label5:
+        return;
+
+     label6:
+        return;
+
+     label7:
+        return;
+    }
+}

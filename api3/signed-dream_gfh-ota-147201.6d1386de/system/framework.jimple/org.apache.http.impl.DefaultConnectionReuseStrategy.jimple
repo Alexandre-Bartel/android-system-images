@@ -1,0 +1,190 @@
+public class org.apache.http.impl.DefaultConnectionReuseStrategy extends java.lang.Object implements org.apache.http.ConnectionReuseStrategy
+{
+
+    public void <init>()
+    {
+        org.apache.http.impl.DefaultConnectionReuseStrategy $r0;
+
+        $r0 := @this: org.apache.http.impl.DefaultConnectionReuseStrategy;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    protected org.apache.http.TokenIterator createTokenIterator(org.apache.http.HeaderIterator)
+    {
+        org.apache.http.impl.DefaultConnectionReuseStrategy $r0;
+        org.apache.http.HeaderIterator $r1;
+        org.apache.http.message.BasicTokenIterator $r2;
+
+        $r0 := @this: org.apache.http.impl.DefaultConnectionReuseStrategy;
+
+        $r1 := @parameter0: org.apache.http.HeaderIterator;
+
+        $r2 = new org.apache.http.message.BasicTokenIterator;
+
+        specialinvoke $r2.<org.apache.http.message.BasicTokenIterator: void <init>(org.apache.http.HeaderIterator)>($r1);
+
+        return $r2;
+    }
+
+    public boolean keepAlive(org.apache.http.HttpResponse, org.apache.http.protocol.HttpContext)
+    {
+        org.apache.http.impl.DefaultConnectionReuseStrategy $r0;
+        org.apache.http.HttpResponse $r1;
+        org.apache.http.protocol.HttpContext $r2;
+        java.lang.IllegalArgumentException $r3;
+        java.lang.Object $r4;
+        org.apache.http.HttpConnection $r5;
+        boolean $z0, $z1;
+        org.apache.http.HttpEntity $r6;
+        org.apache.http.StatusLine $r7;
+        org.apache.http.ProtocolVersion $r8;
+        long $l0;
+        byte $b1;
+        org.apache.http.HttpVersion $r9;
+        org.apache.http.HeaderIterator $r10, $r11;
+        org.apache.http.TokenIterator $r12;
+        java.lang.String $r13, $r14;
+        org.apache.http.ParseException $r15;
+
+        $r0 := @this: org.apache.http.impl.DefaultConnectionReuseStrategy;
+
+        $r1 := @parameter0: org.apache.http.HttpResponse;
+
+        $r2 := @parameter1: org.apache.http.protocol.HttpContext;
+
+        if $r1 != null goto label01;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("HTTP response may not be null.");
+
+        throw $r3;
+
+     label01:
+        if $r2 != null goto label02;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("HTTP context may not be null.");
+
+        throw $r3;
+
+     label02:
+        $r4 = interfaceinvoke $r2.<org.apache.http.protocol.HttpContext: java.lang.Object getAttribute(java.lang.String)>("http.connection");
+
+        $r5 = (org.apache.http.HttpConnection) $r4;
+
+        if $r5 == null goto label03;
+
+        $z0 = interfaceinvoke $r5.<org.apache.http.HttpConnection: boolean isOpen()>();
+
+        if $z0 != 0 goto label03;
+
+        return 0;
+
+     label03:
+        $r6 = interfaceinvoke $r1.<org.apache.http.HttpResponse: org.apache.http.HttpEntity getEntity()>();
+
+        $r7 = interfaceinvoke $r1.<org.apache.http.HttpResponse: org.apache.http.StatusLine getStatusLine()>();
+
+        $r8 = interfaceinvoke $r7.<org.apache.http.StatusLine: org.apache.http.ProtocolVersion getProtocolVersion()>();
+
+        if $r6 == null goto label05;
+
+        $l0 = interfaceinvoke $r6.<org.apache.http.HttpEntity: long getContentLength()>();
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 >= 0 goto label05;
+
+        $z0 = interfaceinvoke $r6.<org.apache.http.HttpEntity: boolean isChunked()>();
+
+        if $z0 == 0 goto label04;
+
+        $r9 = <org.apache.http.HttpVersion: org.apache.http.HttpVersion HTTP_1_0>;
+
+        $z0 = virtualinvoke $r8.<org.apache.http.ProtocolVersion: boolean lessEquals(org.apache.http.ProtocolVersion)>($r9);
+
+        if $z0 == 0 goto label05;
+
+     label04:
+        return 0;
+
+     label05:
+        $r10 = interfaceinvoke $r1.<org.apache.http.HttpResponse: org.apache.http.HeaderIterator headerIterator(java.lang.String)>("Connection");
+
+        $r11 = $r10;
+
+        $z0 = interfaceinvoke $r10.<org.apache.http.HeaderIterator: boolean hasNext()>();
+
+        if $z0 != 0 goto label06;
+
+        $r11 = interfaceinvoke $r1.<org.apache.http.HttpResponse: org.apache.http.HeaderIterator headerIterator(java.lang.String)>("Proxy-Connection");
+
+     label06:
+        $z0 = interfaceinvoke $r11.<org.apache.http.HeaderIterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label14;
+
+     label07:
+        $r12 = virtualinvoke $r0.<org.apache.http.impl.DefaultConnectionReuseStrategy: org.apache.http.TokenIterator createTokenIterator(org.apache.http.HeaderIterator)>($r11);
+
+        $z0 = 0;
+
+     label08:
+        $z1 = interfaceinvoke $r12.<org.apache.http.TokenIterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label12;
+
+        $r13 = interfaceinvoke $r12.<org.apache.http.TokenIterator: java.lang.String nextToken()>();
+
+        $r14 = "Close";
+
+        $z1 = virtualinvoke $r14.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r13);
+
+     label09:
+        if $z1 == 0 goto label10;
+
+        return 0;
+
+     label10:
+        $r14 = "Keep-Alive";
+
+        $z1 = virtualinvoke $r14.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r13);
+
+     label11:
+        if $z1 == 0 goto label08;
+
+        $z0 = 1;
+
+        goto label08;
+
+     label12:
+        if $z0 == 0 goto label14;
+
+        return 1;
+
+     label13:
+        $r15 := @caughtexception;
+
+        return 0;
+
+     label14:
+        $r9 = <org.apache.http.HttpVersion: org.apache.http.HttpVersion HTTP_1_0>;
+
+        $z0 = virtualinvoke $r8.<org.apache.http.ProtocolVersion: boolean lessEquals(org.apache.http.ProtocolVersion)>($r9);
+
+        if $z0 != 0 goto label15;
+
+        return 1;
+
+     label15:
+        return 0;
+
+        catch org.apache.http.ParseException from label07 to label09 with label13;
+        catch org.apache.http.ParseException from label10 to label11 with label13;
+    }
+}

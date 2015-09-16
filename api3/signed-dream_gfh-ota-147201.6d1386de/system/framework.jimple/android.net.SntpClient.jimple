@@ -1,0 +1,485 @@
+public class android.net.SntpClient extends java.lang.Object
+{
+    private static final int NTP_MODE_CLIENT;
+    private static final int NTP_PACKET_SIZE;
+    private static final int NTP_PORT;
+    private static final int NTP_VERSION;
+    private static final long OFFSET_1900_TO_1970;
+    private static final int ORIGINATE_TIME_OFFSET;
+    private static final int RECEIVE_TIME_OFFSET;
+    private static final int REFERENCE_TIME_OFFSET;
+    private static final java.lang.String TAG;
+    private static final int TRANSMIT_TIME_OFFSET;
+    private long mNtpTime;
+    private long mNtpTimeReference;
+    private long mRoundTripTime;
+
+    public void <init>()
+    {
+        android.net.SntpClient $r0;
+
+        $r0 := @this: android.net.SntpClient;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    private long read32(byte[], int)
+    {
+        android.net.SntpClient $r0;
+        byte[] $r1;
+        int $i0, $i5, $i7, $i8;
+        byte $b1, $b2, $b3, $b4;
+        short $s6;
+        long $l9, $l10;
+
+        $r0 := @this: android.net.SntpClient;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $b1 = $r1[$i0];
+
+        $i5 = $i0 + 1;
+
+        $b2 = $r1[$i5];
+
+        $i5 = $i0 + 2;
+
+        $b3 = $r1[$i5];
+
+        $i0 = $i0 + 3;
+
+        $b4 = $r1[$i0];
+
+        $s6 = $b1 & 128;
+
+        if $s6 != 128 goto label5;
+
+        $b1 = $b1 & 127;
+
+        $i0 = $b1 + 128;
+
+     label1:
+        $s6 = $b2 & 128;
+
+        if $s6 != 128 goto label6;
+
+        $b2 = $b2 & 127;
+
+        $i5 = $b2 + 128;
+
+     label2:
+        $s6 = $b3 & 128;
+
+        if $s6 != 128 goto label7;
+
+        $b3 = $b3 & 127;
+
+        $i7 = $b3 + 128;
+
+     label3:
+        $s6 = $b4 & 128;
+
+        if $s6 != 128 goto label8;
+
+        $b4 = $b4 & 127;
+
+        $i8 = $b4 + 128;
+
+     label4:
+        $l9 = (long) $i0;
+
+        $l9 = $l9 << 24;
+
+        $l10 = (long) $i5;
+
+        $l10 = $l10 << 16;
+
+        $l9 = $l9 + $l10;
+
+        $l10 = (long) $i7;
+
+        $l10 = $l10 << 8;
+
+        $l9 = $l9 + $l10;
+
+        $l10 = (long) $i8;
+
+        $l9 = $l9 + $l10;
+
+        return $l9;
+
+     label5:
+        $i0 = $b1;
+
+        goto label1;
+
+     label6:
+        $i5 = $b2;
+
+        goto label2;
+
+     label7:
+        $i7 = $b3;
+
+        goto label3;
+
+     label8:
+        $i8 = $b4;
+
+        goto label4;
+    }
+
+    private long readTimeStamp(byte[], int)
+    {
+        android.net.SntpClient $r0;
+        byte[] $r1;
+        int $i0;
+        long $l1, $l2;
+
+        $r0 := @this: android.net.SntpClient;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $l1 = specialinvoke $r0.<android.net.SntpClient: long read32(byte[],int)>($r1, $i0);
+
+        $i0 = $i0 + 4;
+
+        $l2 = specialinvoke $r0.<android.net.SntpClient: long read32(byte[],int)>($r1, $i0);
+
+        $l1 = $l1 - 2208988800L;
+
+        $l1 = $l1 * 1000L;
+
+        $l2 = 1000L * $l2;
+
+        $l2 = $l2 / 4294967296L;
+
+        $l2 = $l1 + $l2;
+
+        return $l2;
+    }
+
+    private void writeTimeStamp(byte[], int, long)
+    {
+        android.net.SntpClient $r0;
+        byte[] $r1;
+        long $l0, $l2, $l3;
+        double $d0;
+        int $i1, $i4, $i5;
+        byte $b6;
+
+        $r0 := @this: android.net.SntpClient;
+
+        $r1 := @parameter0: byte[];
+
+        $i1 := @parameter1: int;
+
+        $l0 := @parameter2: long;
+
+        $l2 = $l0 / 1000L;
+
+        $l3 = 1000L * $l2;
+
+        $l0 = $l0 - $l3;
+
+        $l2 = $l2 + 2208988800L;
+
+        $i4 = $i1 + 1;
+
+        $l3 = $l2 >> 24;
+
+        $i5 = (int) $l3;
+
+        $b6 = (byte) $i5;
+
+        $r1[$i1] = $b6;
+
+        $i1 = $i4 + 1;
+
+        $l3 = $l2 >> 16;
+
+        $i5 = (int) $l3;
+
+        $b6 = (byte) $i5;
+
+        $r1[$i4] = $b6;
+
+        $i4 = $i1 + 1;
+
+        $l3 = $l2 >> 8;
+
+        $i5 = (int) $l3;
+
+        $b6 = (byte) $i5;
+
+        $r1[$i1] = $b6;
+
+        $i1 = $i4 + 1;
+
+        $l2 = $l2 >> 0;
+
+        $i5 = (int) $l2;
+
+        $b6 = (byte) $i5;
+
+        $r1[$i4] = $b6;
+
+        $l0 = 4294967296L * $l0;
+
+        $l0 = $l0 / 1000L;
+
+        $i4 = $i1 + 1;
+
+        $l2 = $l0 >> 24;
+
+        $i5 = (int) $l2;
+
+        $b6 = (byte) $i5;
+
+        $r1[$i1] = $b6;
+
+        $i1 = $i4 + 1;
+
+        $l2 = $l0 >> 16;
+
+        $i5 = (int) $l2;
+
+        $b6 = (byte) $i5;
+
+        $r1[$i4] = $b6;
+
+        $i4 = $i1 + 1;
+
+        $l0 = $l0 >> 8;
+
+        $i5 = (int) $l0;
+
+        $b6 = (byte) $i5;
+
+        $r1[$i1] = $b6;
+
+        $d0 = staticinvoke <java.lang.Math: double random()>();
+
+        $d0 = $d0 * 255.0;
+
+        $i1 = (int) $d0;
+
+        $b6 = (byte) $i1;
+
+        $r1[$i4] = $b6;
+
+        return;
+    }
+
+    public long getNtpTime()
+    {
+        android.net.SntpClient $r0;
+        long l0;
+
+        $r0 := @this: android.net.SntpClient;
+
+        l0 = $r0.<android.net.SntpClient: long mNtpTime>;
+
+        return l0;
+    }
+
+    public long getNtpTimeReference()
+    {
+        android.net.SntpClient $r0;
+        long l0;
+
+        $r0 := @this: android.net.SntpClient;
+
+        l0 = $r0.<android.net.SntpClient: long mNtpTimeReference>;
+
+        return l0;
+    }
+
+    public long getRoundTripTime()
+    {
+        android.net.SntpClient $r0;
+        long l0;
+
+        $r0 := @this: android.net.SntpClient;
+
+        l0 = $r0.<android.net.SntpClient: long mRoundTripTime>;
+
+        return l0;
+    }
+
+    public boolean requestTime(java.lang.String, int)
+    {
+        android.net.SntpClient $r0;
+        java.lang.String $r1;
+        int $i0;
+        long $l1, $l2, $l3, $l4, $l5, $l6, $l7, $l8;
+        java.net.DatagramPacket $r2;
+        java.net.DatagramSocket $r3;
+        java.net.InetAddress $r4;
+        byte[] $r5;
+        java.lang.StringBuilder $r6;
+        java.lang.Exception $r7;
+
+        $r0 := @this: android.net.SntpClient;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $r3 = new java.net.DatagramSocket;
+
+     label1:
+        specialinvoke $r3.<java.net.DatagramSocket: void <init>()>();
+
+        virtualinvoke $r3.<java.net.DatagramSocket: void setSoTimeout(int)>($i0);
+
+        $r4 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByName(java.lang.String)>($r1);
+
+        $r5 = newarray (byte)[48];
+
+        $r2 = new java.net.DatagramPacket;
+
+        $i0 = lengthof $r5;
+
+        specialinvoke $r2.<java.net.DatagramPacket: void <init>(byte[],int,java.net.InetAddress,int)>($r5, $i0, $r4, 123);
+
+        $r5[0] = 27;
+
+        $l3 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l4 = staticinvoke <android.os.SystemClock: long elapsedRealtime()>();
+
+        specialinvoke $r0.<android.net.SntpClient: void writeTimeStamp(byte[],int,long)>($r5, 40, $l3);
+
+        virtualinvoke $r3.<java.net.DatagramSocket: void send(java.net.DatagramPacket)>($r2);
+
+        $r2 = new java.net.DatagramPacket;
+
+        $i0 = lengthof $r5;
+
+        specialinvoke $r2.<java.net.DatagramPacket: void <init>(byte[],int)>($r5, $i0);
+
+        virtualinvoke $r3.<java.net.DatagramSocket: void receive(java.net.DatagramPacket)>($r2);
+
+        $l2 = staticinvoke <android.os.SystemClock: long elapsedRealtime()>();
+
+     label2:
+        $l1 = $l2 - $l4;
+
+     label3:
+        $l1 = $l3 + $l1;
+
+        virtualinvoke $r3.<java.net.DatagramSocket: void close()>();
+
+        $l5 = specialinvoke $r0.<android.net.SntpClient: long readTimeStamp(byte[],int)>($r5, 24);
+
+        $l6 = specialinvoke $r0.<android.net.SntpClient: long readTimeStamp(byte[],int)>($r5, 32);
+
+        $l7 = specialinvoke $r0.<android.net.SntpClient: long readTimeStamp(byte[],int)>($r5, 40);
+
+     label4:
+        $l2 = $l2 - $l4;
+
+        $l8 = $l7 - $l6;
+
+        $l2 = $l2 - $l8;
+
+        $l5 = $l6 - $l5;
+
+        $l1 = $l7 - $l1;
+
+        $l1 = $l5 + $l1;
+
+     label5:
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("round trip: ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l2);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ms");
+
+        $r1 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("SntpClient", $r1);
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("clock offset: ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l1);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ms");
+
+        $r1 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("SntpClient", $r1);
+
+        $l3 = $l3 + $l1;
+
+        $r0.<android.net.SntpClient: long mNtpTime> = $l3;
+
+        $r0.<android.net.SntpClient: long mNtpTimeReference> = $l4;
+
+        $r0.<android.net.SntpClient: long mRoundTripTime> = $l2;
+
+     label6:
+        return 1;
+
+     label7:
+        $r7 := @caughtexception;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("request time failed: ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r7);
+
+        $r1 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("SntpClient", $r1);
+
+        return 0;
+
+        catch java.lang.Exception from label1 to label2 with label7;
+        catch java.lang.Exception from label3 to label4 with label7;
+        catch java.lang.Exception from label5 to label6 with label7;
+    }
+
+    public static void <clinit>()
+    {
+        <android.net.SntpClient: int TRANSMIT_TIME_OFFSET> = 40;
+
+        <android.net.SntpClient: java.lang.String TAG> = "SntpClient";
+
+        <android.net.SntpClient: int REFERENCE_TIME_OFFSET> = 16;
+
+        <android.net.SntpClient: int RECEIVE_TIME_OFFSET> = 32;
+
+        <android.net.SntpClient: int ORIGINATE_TIME_OFFSET> = 24;
+
+        <android.net.SntpClient: long OFFSET_1900_TO_1970> = 2208988800L;
+
+        <android.net.SntpClient: int NTP_VERSION> = 3;
+
+        <android.net.SntpClient: int NTP_PORT> = 123;
+
+        <android.net.SntpClient: int NTP_PACKET_SIZE> = 48;
+
+        <android.net.SntpClient: int NTP_MODE_CLIENT> = 3;
+
+        return;
+    }
+}

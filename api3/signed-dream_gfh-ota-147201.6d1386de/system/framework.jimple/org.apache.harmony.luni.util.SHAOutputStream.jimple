@@ -1,0 +1,1192 @@
+public class org.apache.harmony.luni.util.SHAOutputStream extends java.io.OutputStream implements java.lang.Cloneable
+{
+    private static final int BlockSizeInBytes;
+    private static final int H0;
+    private static final int H1;
+    private static final int H2;
+    private static final int H3;
+    private static final int H4;
+    private static final int HConstantsSize;
+    private static final int HashSizeInBytes;
+    private static final int K0_19;
+    private static final int K20_39;
+    private static final int K40_59;
+    private static final int K60_79;
+    private static final int WArraySize;
+    private int[] HConstants;
+    private byte[] MArray;
+    private int[] WArray;
+    private long bytesProcessed;
+    private int bytesToProcess;
+    private byte[] oneByte;
+
+    public void <init>()
+    {
+        org.apache.harmony.luni.util.SHAOutputStream $r0;
+        byte[] $r1;
+
+        $r0 := @this: org.apache.harmony.luni.util.SHAOutputStream;
+
+        specialinvoke $r0.<java.io.OutputStream: void <init>()>();
+
+        $r1 = newarray (byte)[1];
+
+        $r0.<org.apache.harmony.luni.util.SHAOutputStream: byte[] oneByte> = $r1;
+
+        specialinvoke $r0.<org.apache.harmony.luni.util.SHAOutputStream: void initialize()>();
+
+        virtualinvoke $r0.<org.apache.harmony.luni.util.SHAOutputStream: void reset()>();
+
+        return;
+    }
+
+    public void <init>(byte[])
+    {
+        org.apache.harmony.luni.util.SHAOutputStream $r0;
+        byte[] $r1;
+        int $i0, $i1, $i2, $i3;
+        java.lang.IllegalArgumentException $r2;
+        int[] $r3;
+        byte $b4;
+        short $s5;
+
+        $r0 := @this: org.apache.harmony.luni.util.SHAOutputStream;
+
+        $r1 := @parameter0: byte[];
+
+        specialinvoke $r0.<org.apache.harmony.luni.util.SHAOutputStream: void <init>()>();
+
+        $i0 = lengthof $r1;
+
+        if $i0 >= 20 goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        $i0 = 0;
+
+     label2:
+        if $i0 >= 4 goto label5;
+
+        $r3 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $r3[$i0] = 0;
+
+        $i1 = 0;
+
+     label3:
+        if $i1 >= 4 goto label4;
+
+        $r3 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $i2 = $r3[$i0];
+
+        $i3 = $i0 * 4;
+
+        $i3 = $i3 + $i1;
+
+        $b4 = $r1[$i3];
+
+        $s5 = $b4 & 255;
+
+        $i3 = 3 - $i1;
+
+        $i3 = $i3 * 8;
+
+        $i3 = $s5 << $i3;
+
+        $i2 = $i2 + $i3;
+
+        $r3[$i0] = $i2;
+
+        $i1 = $i1 + 1;
+
+        goto label3;
+
+     label4:
+        $i0 = $i0 + 1;
+
+        goto label2;
+
+     label5:
+        return;
+    }
+
+    private void copyToInternalBuffer(byte[], int, int)
+    {
+        org.apache.harmony.luni.util.SHAOutputStream $r0;
+        byte[] $r1, $r2;
+        int $i0, $i1, $i3, $i4;
+        byte $b2;
+
+        $r0 := @this: org.apache.harmony.luni.util.SHAOutputStream;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i3 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int bytesToProcess>;
+
+     label1:
+        $i4 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int bytesToProcess>;
+
+        $i4 = $i4 + $i1;
+
+        if $i3 >= $i4 goto label2;
+
+        $r2 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: byte[] MArray>;
+
+        $b2 = $r1[$i0];
+
+        $r2[$i3] = $b2;
+
+        $i0 = $i0 + 1;
+
+        $i3 = $i3 + 1;
+
+        goto label1;
+
+     label2:
+        $i0 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int bytesToProcess>;
+
+        $i0 = $i0 + $i1;
+
+        $r0.<org.apache.harmony.luni.util.SHAOutputStream: int bytesToProcess> = $i0;
+
+        return;
+    }
+
+    private void initialize()
+    {
+        org.apache.harmony.luni.util.SHAOutputStream $r0;
+        int[] $r1;
+        byte[] $r2;
+
+        $r0 := @this: org.apache.harmony.luni.util.SHAOutputStream;
+
+        $r1 = newarray (int)[5];
+
+        $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants> = $r1;
+
+        $r2 = newarray (byte)[64];
+
+        $r0.<org.apache.harmony.luni.util.SHAOutputStream: byte[] MArray> = $r2;
+
+        $r1 = newarray (int)[80];
+
+        $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] WArray> = $r1;
+
+        return;
+    }
+
+    private void padBuffer()
+    {
+        org.apache.harmony.luni.util.SHAOutputStream $r0;
+        byte[] $r1;
+        int $i0, $i3, $i4;
+        long $l1, $l2;
+        byte $b5;
+
+        $r0 := @this: org.apache.harmony.luni.util.SHAOutputStream;
+
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: byte[] MArray>;
+
+        $i0 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int bytesToProcess>;
+
+        $r1[$i0] = -128;
+
+        $i0 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int bytesToProcess>;
+
+        $i0 = $i0 + 1;
+
+     label1:
+        if $i0 >= 64 goto label2;
+
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: byte[] MArray>;
+
+        $r1[$i0] = 0;
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label2:
+        $i0 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int bytesToProcess>;
+
+        $l1 = (long) $i0;
+
+        $l2 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: long bytesProcessed>;
+
+        $l1 = $l1 + $l2;
+
+        $l1 = $l1 * 8L;
+
+        $i0 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int bytesToProcess>;
+
+        $i0 = $i0 + 9;
+
+        if $i0 <= 64 goto label4;
+
+        specialinvoke $r0.<org.apache.harmony.luni.util.SHAOutputStream: void processBuffer()>();
+
+        $i0 = 0;
+
+     label3:
+        if $i0 >= 64 goto label4;
+
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: byte[] MArray>;
+
+        $r1[$i0] = 0;
+
+        $i0 = $i0 + 1;
+
+        goto label3;
+
+     label4:
+        $i0 = 1;
+
+     label5:
+        if $i0 >= 9 goto label6;
+
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: byte[] MArray>;
+
+        $i3 = 64 - $i0;
+
+        $l2 = 255L & $l1;
+
+        $i4 = (int) $l2;
+
+        $b5 = (byte) $i4;
+
+        $r1[$i3] = $b5;
+
+        $l1 = $l1 >>> 8;
+
+        $i0 = $i0 + 1;
+
+        goto label5;
+
+     label6:
+        return;
+    }
+
+    private void processBuffer()
+    {
+        org.apache.harmony.luni.util.SHAOutputStream $r0;
+        int $i0, $i1, $i4, $i5, $i6, $i7, $i8, $i9;
+        int[] $r1, $r3;
+        byte[] $r2;
+        byte $b2;
+        short $s3;
+        long $l10;
+
+        $r0 := @this: org.apache.harmony.luni.util.SHAOutputStream;
+
+        $i0 = 0;
+
+     label01:
+        if $i0 > 15 goto label02;
+
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] WArray>;
+
+        $r2 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: byte[] MArray>;
+
+        $i1 = $i0 * 4;
+
+        $b2 = $r2[$i1];
+
+        $s3 = $b2 & 255;
+
+        $i1 = $s3 << 24;
+
+        $r2 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: byte[] MArray>;
+
+        $i4 = $i0 * 4;
+
+        $i4 = $i4 + 1;
+
+        $b2 = $r2[$i4];
+
+        $s3 = $b2 & 255;
+
+        $i4 = $s3 << 16;
+
+        $i1 = $i1 | $i4;
+
+        $r2 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: byte[] MArray>;
+
+        $i4 = $i0 * 4;
+
+        $i4 = $i4 + 2;
+
+        $b2 = $r2[$i4];
+
+        $s3 = $b2 & 255;
+
+        $i4 = $s3 << 8;
+
+        $i1 = $i1 | $i4;
+
+        $r2 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: byte[] MArray>;
+
+        $i4 = $i0 * 4;
+
+        $i4 = $i4 + 3;
+
+        $b2 = $r2[$i4];
+
+        $s3 = $b2 & 255;
+
+        $i1 = $i1 | $s3;
+
+        $r1[$i0] = $i1;
+
+        $i0 = $i0 + 1;
+
+        goto label01;
+
+     label02:
+        $i0 = 16;
+
+     label03:
+        if $i0 > 79 goto label04;
+
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] WArray>;
+
+        $i1 = $i0 - 3;
+
+        $i1 = $r1[$i1];
+
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] WArray>;
+
+        $i4 = $i0 - 8;
+
+        $i4 = $r1[$i4];
+
+        $i1 = $i1 ^ $i4;
+
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] WArray>;
+
+        $i4 = $i0 - 14;
+
+        $i4 = $r1[$i4];
+
+        $i1 = $i1 ^ $i4;
+
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] WArray>;
+
+        $i4 = $i0 - 16;
+
+        $i4 = $r1[$i4];
+
+        $i4 = $i1 ^ $i4;
+
+        $i1 = $i4 << 1;
+
+        $i4 = $i4 >>> 31;
+
+        $i1 = $i1 | $i4;
+
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] WArray>;
+
+        $r1[$i0] = $i1;
+
+        $i0 = $i0 + 1;
+
+        goto label03;
+
+     label04:
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $i1 = $r1[0];
+
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $i4 = $r1[1];
+
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $i5 = $r1[2];
+
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $i0 = $r1[3];
+
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $i6 = $r1[4];
+
+        $i7 = 0;
+
+     label05:
+        if $i7 > 19 goto label06;
+
+        $i8 = $i1 << 5;
+
+        $i9 = $i1 >>> 27;
+
+        $i8 = $i8 | $i9;
+
+        $i6 = $i8 + $i6;
+
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] WArray>;
+
+        $i8 = $r1[$i7];
+
+        $i6 = $i6 + $i8;
+
+        $i6 = $i6 + 1518500249;
+
+        $i8 = $i4 & $i5;
+
+        $i9 = $i4 ^ -1;
+
+        $i9 = $i9 & $i0;
+
+        $i8 = $i8 | $i9;
+
+        $i8 = $i6 + $i8;
+
+        $i6 = $i0;
+
+        $i0 = $i5;
+
+        $i5 = $i4 << 30;
+
+        $i4 = $i4 >>> 2;
+
+        $i5 = $i5 | $i4;
+
+        $i4 = $i1;
+
+        $i1 = $i8;
+
+        $i7 = $i7 + 1;
+
+        goto label05;
+
+     label06:
+        $i7 = 20;
+
+     label07:
+        if $i7 > 39 goto label08;
+
+        $i8 = $i1 << 5;
+
+        $i9 = $i1 >>> 27;
+
+        $i8 = $i8 | $i9;
+
+        $i6 = $i8 + $i6;
+
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] WArray>;
+
+        $i8 = $r1[$i7];
+
+        $i6 = $i6 + $i8;
+
+        $i6 = $i6 + 1859775393;
+
+        $i8 = $i4 ^ $i5;
+
+        $i8 = $i8 ^ $i0;
+
+        $i8 = $i6 + $i8;
+
+        $i6 = $i0;
+
+        $i0 = $i5;
+
+        $i5 = $i4 << 30;
+
+        $i4 = $i4 >>> 2;
+
+        $i5 = $i5 | $i4;
+
+        $i4 = $i1;
+
+        $i1 = $i8;
+
+        $i7 = $i7 + 1;
+
+        goto label07;
+
+     label08:
+        $i7 = 40;
+
+     label09:
+        if $i7 > 59 goto label10;
+
+        $i8 = $i1 << 5;
+
+        $i9 = $i1 >>> 27;
+
+        $i8 = $i8 | $i9;
+
+        $i6 = $i8 + $i6;
+
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] WArray>;
+
+        $i8 = $r1[$i7];
+
+        $i6 = $i6 + $i8;
+
+        $i6 = $i6 + -1894007588;
+
+        $i8 = $i4 & $i5;
+
+        $i9 = $i4 & $i0;
+
+        $i8 = $i8 | $i9;
+
+        $i9 = $i5 & $i0;
+
+        $i8 = $i8 | $i9;
+
+        $i8 = $i6 + $i8;
+
+        $i6 = $i0;
+
+        $i0 = $i5;
+
+        $i5 = $i4 << 30;
+
+        $i4 = $i4 >>> 2;
+
+        $i5 = $i5 | $i4;
+
+        $i4 = $i1;
+
+        $i1 = $i8;
+
+        $i7 = $i7 + 1;
+
+        goto label09;
+
+     label10:
+        $i7 = 60;
+
+     label11:
+        if $i7 > 79 goto label12;
+
+        $i8 = $i1 << 5;
+
+        $i9 = $i1 >>> 27;
+
+        $i8 = $i8 | $i9;
+
+        $i6 = $i8 + $i6;
+
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] WArray>;
+
+        $i8 = $r1[$i7];
+
+        $i6 = $i6 + $i8;
+
+        $i6 = $i6 + -899497514;
+
+        $i8 = $i4 ^ $i5;
+
+        $i8 = $i8 ^ $i0;
+
+        $i8 = $i6 + $i8;
+
+        $i6 = $i0;
+
+        $i0 = $i5;
+
+        $i5 = $i4 << 30;
+
+        $i4 = $i4 >>> 2;
+
+        $i5 = $i5 | $i4;
+
+        $i4 = $i1;
+
+        $i1 = $i8;
+
+        $i7 = $i7 + 1;
+
+        goto label11;
+
+     label12:
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $r3 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $i7 = $r3[0];
+
+        $i1 = $i7 + $i1;
+
+        $r1[0] = $i1;
+
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $r3 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $i1 = $r3[1];
+
+        $i1 = $i1 + $i4;
+
+        $r1[1] = $i1;
+
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $r3 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $i1 = $r3[2];
+
+        $i1 = $i1 + $i5;
+
+        $r1[2] = $i1;
+
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $r3 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $i1 = $r3[3];
+
+        $i0 = $i1 + $i0;
+
+        $r1[3] = $i0;
+
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $r3 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $i0 = $r3[4];
+
+        $i0 = $i0 + $i6;
+
+        $r1[4] = $i0;
+
+        $l10 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: long bytesProcessed>;
+
+        $l10 = $l10 + 64L;
+
+        $r0.<org.apache.harmony.luni.util.SHAOutputStream: long bytesProcessed> = $l10;
+
+        $r0.<org.apache.harmony.luni.util.SHAOutputStream: int bytesToProcess> = 0;
+
+        return;
+    }
+
+    private static java.lang.String toStringBlock(byte[])
+    {
+        byte[] $r0;
+        int $i0;
+        java.lang.String $r1;
+
+        $r0 := @parameter0: byte[];
+
+        $i0 = lengthof $r0;
+
+        $r1 = staticinvoke <org.apache.harmony.luni.util.SHAOutputStream: java.lang.String toStringBlock(byte[],int,int)>($r0, 0, $i0);
+
+        return $r1;
+    }
+
+    private static java.lang.String toStringBlock(byte[], int, int)
+    {
+        byte[] $r0;
+        int $i0, $i1, $i2, $i3;
+        java.lang.StringBuilder $r1;
+        java.lang.String $r2;
+        byte $b4;
+        char $c5;
+
+        $r0 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $r2 = "0123456789ABCDEF";
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(91);
+
+        $i2 = $i0;
+
+     label1:
+        $i3 = $i0 + $i1;
+
+        if $i2 >= $i3 goto label2;
+
+        $b4 = $r0[$i2];
+
+        $b4 = $b4 >>> 4;
+
+        $b4 = $b4 & 15;
+
+        $c5 = virtualinvoke $r2.<java.lang.String: char charAt(int)>($b4);
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c5);
+
+        $b4 = $r0[$i2];
+
+        $b4 = $b4 & 15;
+
+        $c5 = virtualinvoke $r2.<java.lang.String: char charAt(int)>($b4);
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c5);
+
+        $i2 = $i2 + 1;
+
+        goto label1;
+
+     label2:
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(93);
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r2;
+    }
+
+    public java.lang.Object clone() throws java.lang.CloneNotSupportedException
+    {
+        org.apache.harmony.luni.util.SHAOutputStream $r0, $r2;
+        java.lang.Object $r1;
+        int[] $r3;
+        byte[] $r4;
+
+        $r0 := @this: org.apache.harmony.luni.util.SHAOutputStream;
+
+        $r1 = specialinvoke $r0.<java.lang.Object: java.lang.Object clone()>();
+
+        $r2 = (org.apache.harmony.luni.util.SHAOutputStream) $r1;
+
+        $r3 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $r1 = virtualinvoke $r3.<java.lang.Object: java.lang.Object clone()>();
+
+        $r3 = (int[]) $r1;
+
+        $r2.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants> = $r3;
+
+        $r3 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] WArray>;
+
+        $r1 = virtualinvoke $r3.<java.lang.Object: java.lang.Object clone()>();
+
+        $r3 = (int[]) $r1;
+
+        $r2.<org.apache.harmony.luni.util.SHAOutputStream: int[] WArray> = $r3;
+
+        $r4 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: byte[] MArray>;
+
+        $r1 = virtualinvoke $r4.<java.lang.Object: java.lang.Object clone()>();
+
+        $r4 = (byte[]) $r1;
+
+        $r2.<org.apache.harmony.luni.util.SHAOutputStream: byte[] MArray> = $r4;
+
+        $r4 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: byte[] oneByte>;
+
+        $r1 = virtualinvoke $r4.<java.lang.Object: java.lang.Object clone()>();
+
+        $r4 = (byte[]) $r1;
+
+        $r2.<org.apache.harmony.luni.util.SHAOutputStream: byte[] oneByte> = $r4;
+
+        return $r2;
+    }
+
+    public int[] getHash()
+    {
+        org.apache.harmony.luni.util.SHAOutputStream $r0;
+        int[] $r1;
+        java.lang.Object $r2;
+
+        $r0 := @this: org.apache.harmony.luni.util.SHAOutputStream;
+
+        specialinvoke $r0.<org.apache.harmony.luni.util.SHAOutputStream: void padBuffer()>();
+
+        specialinvoke $r0.<org.apache.harmony.luni.util.SHAOutputStream: void processBuffer()>();
+
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $r2 = virtualinvoke $r1.<java.lang.Object: java.lang.Object clone()>();
+
+        $r1 = (int[]) $r2;
+
+        virtualinvoke $r0.<org.apache.harmony.luni.util.SHAOutputStream: void reset()>();
+
+        return $r1;
+    }
+
+    public byte[] getHashAsBytes()
+    {
+        org.apache.harmony.luni.util.SHAOutputStream $r0;
+        byte[] $r1;
+        int $i0, $i1, $i2;
+        int[] $r2;
+        byte $b3;
+
+        $r0 := @this: org.apache.harmony.luni.util.SHAOutputStream;
+
+        $r1 = newarray (byte)[20];
+
+        specialinvoke $r0.<org.apache.harmony.luni.util.SHAOutputStream: void padBuffer()>();
+
+        specialinvoke $r0.<org.apache.harmony.luni.util.SHAOutputStream: void processBuffer()>();
+
+        $i0 = 0;
+
+     label1:
+        if $i0 >= 5 goto label2;
+
+        $i1 = $i0 * 4;
+
+        $r2 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $i2 = $r2[$i0];
+
+        $i2 = $i2 >>> 24;
+
+        $i2 = $i2 & 255;
+
+        $b3 = (byte) $i2;
+
+        $r1[$i1] = $b3;
+
+        $i1 = $i0 * 4;
+
+        $i1 = $i1 + 1;
+
+        $r2 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $i2 = $r2[$i0];
+
+        $i2 = $i2 >>> 16;
+
+        $i2 = $i2 & 255;
+
+        $b3 = (byte) $i2;
+
+        $r1[$i1] = $b3;
+
+        $i1 = $i0 * 4;
+
+        $i1 = $i1 + 2;
+
+        $r2 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $i2 = $r2[$i0];
+
+        $i2 = $i2 >>> 8;
+
+        $i2 = $i2 & 255;
+
+        $b3 = (byte) $i2;
+
+        $r1[$i1] = $b3;
+
+        $i1 = $i0 * 4;
+
+        $i1 = $i1 + 3;
+
+        $r2 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $i2 = $r2[$i0];
+
+        $i2 = $i2 & 255;
+
+        $b3 = (byte) $i2;
+
+        $r1[$i1] = $b3;
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label2:
+        virtualinvoke $r0.<org.apache.harmony.luni.util.SHAOutputStream: void reset()>();
+
+        return $r1;
+    }
+
+    public byte[] getHashAsBytes(boolean)
+    {
+        org.apache.harmony.luni.util.SHAOutputStream $r0;
+        boolean $z0;
+        byte[] $r1;
+        int $i0, $i1, $i2;
+        int[] $r2;
+        byte $b3;
+
+        $r0 := @this: org.apache.harmony.luni.util.SHAOutputStream;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 = newarray (byte)[20];
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke $r0.<org.apache.harmony.luni.util.SHAOutputStream: void padBuffer()>();
+
+        specialinvoke $r0.<org.apache.harmony.luni.util.SHAOutputStream: void processBuffer()>();
+
+     label1:
+        $i0 = 0;
+
+     label2:
+        if $i0 >= 5 goto label3;
+
+        $i1 = $i0 * 4;
+
+        $r2 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $i2 = $r2[$i0];
+
+        $i2 = $i2 >>> 24;
+
+        $i2 = $i2 & 255;
+
+        $b3 = (byte) $i2;
+
+        $r1[$i1] = $b3;
+
+        $i1 = $i0 * 4;
+
+        $i1 = $i1 + 1;
+
+        $r2 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $i2 = $r2[$i0];
+
+        $i2 = $i2 >>> 16;
+
+        $i2 = $i2 & 255;
+
+        $b3 = (byte) $i2;
+
+        $r1[$i1] = $b3;
+
+        $i1 = $i0 * 4;
+
+        $i1 = $i1 + 2;
+
+        $r2 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $i2 = $r2[$i0];
+
+        $i2 = $i2 >>> 8;
+
+        $i2 = $i2 & 255;
+
+        $b3 = (byte) $i2;
+
+        $r1[$i1] = $b3;
+
+        $i1 = $i0 * 4;
+
+        $i1 = $i1 + 3;
+
+        $r2 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $i2 = $r2[$i0];
+
+        $i2 = $i2 & 255;
+
+        $b3 = (byte) $i2;
+
+        $r1[$i1] = $b3;
+
+        $i0 = $i0 + 1;
+
+        goto label2;
+
+     label3:
+        virtualinvoke $r0.<org.apache.harmony.luni.util.SHAOutputStream: void reset()>();
+
+        return $r1;
+    }
+
+    public void reset()
+    {
+        org.apache.harmony.luni.util.SHAOutputStream $r0;
+        int[] $r1;
+
+        $r0 := @this: org.apache.harmony.luni.util.SHAOutputStream;
+
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $r1[0] = 1732584193;
+
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $r1[1] = -271733879;
+
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $r1[2] = -1732584194;
+
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $r1[3] = 271733878;
+
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int[] HConstants>;
+
+        $r1[4] = -1009589776;
+
+        $r0.<org.apache.harmony.luni.util.SHAOutputStream: long bytesProcessed> = 0L;
+
+        $r0.<org.apache.harmony.luni.util.SHAOutputStream: int bytesToProcess> = 0;
+
+        return;
+    }
+
+    public java.lang.String toString()
+    {
+        org.apache.harmony.luni.util.SHAOutputStream $r0;
+        java.lang.StringBuilder $r1;
+        java.lang.Class $r2;
+        java.lang.String $r3;
+        byte[] $r4;
+
+        $r0 := @this: org.apache.harmony.luni.util.SHAOutputStream;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(58);
+
+        $r4 = virtualinvoke $r0.<org.apache.harmony.luni.util.SHAOutputStream: byte[] getHashAsBytes()>();
+
+        $r3 = staticinvoke <org.apache.harmony.luni.util.SHAOutputStream: java.lang.String toStringBlock(byte[])>($r4);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r3;
+    }
+
+    public void write(int)
+    {
+        org.apache.harmony.luni.util.SHAOutputStream $r0;
+        int $i0;
+        byte[] $r1;
+        byte $b1;
+
+        $r0 := @this: org.apache.harmony.luni.util.SHAOutputStream;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: byte[] oneByte>;
+
+        $b1 = (byte) $i0;
+
+        $r1[0] = $b1;
+
+        $r1 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: byte[] oneByte>;
+
+        virtualinvoke $r0.<org.apache.harmony.luni.util.SHAOutputStream: void write(byte[],int,int)>($r1, 0, 1);
+
+        return;
+    }
+
+    public void write(byte[], int, int)
+    {
+        org.apache.harmony.luni.util.SHAOutputStream $r0;
+        byte[] $r1;
+        int $i0, $i1, $i2;
+
+        $r0 := @this: org.apache.harmony.luni.util.SHAOutputStream;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i2 = $r0.<org.apache.harmony.luni.util.SHAOutputStream: int bytesToProcess>;
+
+        $i2 = 64 - $i2;
+
+        if $i1 >= $i2 goto label1;
+
+        specialinvoke $r0.<org.apache.harmony.luni.util.SHAOutputStream: void copyToInternalBuffer(byte[],int,int)>($r1, $i0, $i1);
+
+        return;
+
+     label1:
+        specialinvoke $r0.<org.apache.harmony.luni.util.SHAOutputStream: void copyToInternalBuffer(byte[],int,int)>($r1, $i0, $i2);
+
+        $i1 = $i1 - $i2;
+
+        specialinvoke $r0.<org.apache.harmony.luni.util.SHAOutputStream: void processBuffer()>();
+
+        $i0 = $i0 + $i2;
+
+     label2:
+        if $i1 < 64 goto label3;
+
+        specialinvoke $r0.<org.apache.harmony.luni.util.SHAOutputStream: void copyToInternalBuffer(byte[],int,int)>($r1, $i0, 64);
+
+        $i1 = $i1 - 64;
+
+        specialinvoke $r0.<org.apache.harmony.luni.util.SHAOutputStream: void processBuffer()>();
+
+        $i0 = $i0 + 64;
+
+        goto label2;
+
+     label3:
+        if $i1 <= 0 goto label4;
+
+        specialinvoke $r0.<org.apache.harmony.luni.util.SHAOutputStream: void copyToInternalBuffer(byte[],int,int)>($r1, $i0, $i1);
+
+        return;
+
+     label4:
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <org.apache.harmony.luni.util.SHAOutputStream: int WArraySize> = 80;
+
+        <org.apache.harmony.luni.util.SHAOutputStream: int K60_79> = -899497514;
+
+        <org.apache.harmony.luni.util.SHAOutputStream: int K40_59> = -1894007588;
+
+        <org.apache.harmony.luni.util.SHAOutputStream: int K20_39> = 1859775393;
+
+        <org.apache.harmony.luni.util.SHAOutputStream: int K0_19> = 1518500249;
+
+        <org.apache.harmony.luni.util.SHAOutputStream: int HashSizeInBytes> = 20;
+
+        <org.apache.harmony.luni.util.SHAOutputStream: int HConstantsSize> = 5;
+
+        <org.apache.harmony.luni.util.SHAOutputStream: int H4> = -1009589776;
+
+        <org.apache.harmony.luni.util.SHAOutputStream: int H3> = 271733878;
+
+        <org.apache.harmony.luni.util.SHAOutputStream: int H2> = -1732584194;
+
+        <org.apache.harmony.luni.util.SHAOutputStream: int H1> = -271733879;
+
+        <org.apache.harmony.luni.util.SHAOutputStream: int H0> = 1732584193;
+
+        <org.apache.harmony.luni.util.SHAOutputStream: int BlockSizeInBytes> = 64;
+
+        return;
+    }
+}

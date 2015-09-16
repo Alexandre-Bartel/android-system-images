@@ -1,0 +1,1552 @@
+public class com.android.server.IntentResolver extends java.lang.Object
+{
+    private static final boolean DEBUG;
+    private static final java.lang.String TAG;
+    private static final boolean localLOGV;
+    private static final java.util.Comparator mResolvePrioritySorter;
+    private final java.util.HashMap mActionToFilter;
+    private final java.util.HashMap mBaseTypeToFilter;
+    private final java.util.HashSet mFilters;
+    private final java.util.HashMap mSchemeToFilter;
+    private final java.util.HashMap mTypeToFilter;
+    private final java.util.HashMap mTypedActionToFilter;
+    private final java.util.HashMap mWildTypeToFilter;
+
+    static void <clinit>()
+    {
+        com.android.server.IntentResolver$1 $r0;
+
+        <com.android.server.IntentResolver: java.lang.String TAG> = "IntentResolver";
+
+        <com.android.server.IntentResolver: boolean DEBUG> = 0;
+
+        $r0 = new com.android.server.IntentResolver$1;
+
+        specialinvoke $r0.<com.android.server.IntentResolver$1: void <init>()>();
+
+        <com.android.server.IntentResolver: java.util.Comparator mResolvePrioritySorter> = $r0;
+
+        return;
+    }
+
+    public void <init>()
+    {
+        com.android.server.IntentResolver $r0;
+        java.util.HashSet $r1;
+        java.util.HashMap $r2;
+
+        $r0 := @this: com.android.server.IntentResolver;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.HashSet;
+
+        specialinvoke $r1.<java.util.HashSet: void <init>()>();
+
+        $r0.<com.android.server.IntentResolver: java.util.HashSet mFilters> = $r1;
+
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>()>();
+
+        $r0.<com.android.server.IntentResolver: java.util.HashMap mTypeToFilter> = $r2;
+
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>()>();
+
+        $r0.<com.android.server.IntentResolver: java.util.HashMap mBaseTypeToFilter> = $r2;
+
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>()>();
+
+        $r0.<com.android.server.IntentResolver: java.util.HashMap mWildTypeToFilter> = $r2;
+
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>()>();
+
+        $r0.<com.android.server.IntentResolver: java.util.HashMap mSchemeToFilter> = $r2;
+
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>()>();
+
+        $r0.<com.android.server.IntentResolver: java.util.HashMap mActionToFilter> = $r2;
+
+        $r2 = new java.util.HashMap;
+
+        specialinvoke $r2.<java.util.HashMap: void <init>()>();
+
+        $r0.<com.android.server.IntentResolver: java.util.HashMap mTypedActionToFilter> = $r2;
+
+        return;
+    }
+
+    private void buildResolveList(android.content.Intent, boolean, boolean, java.lang.String, java.lang.String, java.util.List, java.util.List)
+    {
+        com.android.server.IntentResolver $r0;
+        android.content.Intent $r1;
+        boolean $z0, $z1, $z2, $z3;
+        java.lang.String $r2, $r3, $r10;
+        java.util.List $r4, $r5;
+        java.util.Set $r6;
+        int $i0, $i1, $i2;
+        java.lang.Object $r7;
+        android.content.IntentFilter $r8;
+        java.lang.StringBuilder $r9;
+        android.net.Uri $r11;
+
+        $r0 := @this: com.android.server.IntentResolver;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $z0 := @parameter1: boolean;
+
+        $z1 := @parameter2: boolean;
+
+        $r2 := @parameter3: java.lang.String;
+
+        $r3 := @parameter4: java.lang.String;
+
+        $r4 := @parameter5: java.util.List;
+
+        $r5 := @parameter6: java.util.List;
+
+        $r6 = virtualinvoke $r1.<android.content.Intent: java.util.Set getCategories()>();
+
+        if $r4 == null goto label05;
+
+        $i0 = interfaceinvoke $r4.<java.util.List: int size()>();
+
+     label01:
+        $z2 = 0;
+
+        $i1 = 0;
+
+     label02:
+        if $i1 >= $i0 goto label17;
+
+        $r7 = interfaceinvoke $r4.<java.util.List: java.lang.Object get(int)>($i1);
+
+        $r8 = (android.content.IntentFilter) $r7;
+
+        if $z0 == 0 goto label03;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Matching against filter ");
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("IntentResolver", $r10);
+
+     label03:
+        $z3 = virtualinvoke $r0.<com.android.server.IntentResolver: boolean allowFilterResult(android.content.IntentFilter,java.util.List)>($r8, $r5);
+
+        if $z3 != 0 goto label06;
+
+        if $z0 == 0 goto label04;
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("IntentResolver", "  Filter\'s target already added");
+
+     label04:
+        $i1 = $i1 + 1;
+
+        goto label02;
+
+     label05:
+        $i0 = 0;
+
+        goto label01;
+
+     label06:
+        $r10 = virtualinvoke $r1.<android.content.Intent: java.lang.String getAction()>();
+
+        $r11 = virtualinvoke $r1.<android.content.Intent: android.net.Uri getData()>();
+
+        $i2 = virtualinvoke $r8.<android.content.IntentFilter: int match(java.lang.String,java.lang.String,java.lang.String,android.net.Uri,java.util.Set,java.lang.String)>($r10, $r2, $r3, $r11, $r6, "IntentResolver");
+
+        if $i2 < 0 goto label10;
+
+        if $z0 == 0 goto label07;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  Filter matched!  match=0x");
+
+        $r10 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i2);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("IntentResolver", $r10);
+
+     label07:
+        if $z1 == 0 goto label08;
+
+        $z3 = virtualinvoke $r8.<android.content.IntentFilter: boolean hasCategory(java.lang.String)>("android.intent.category.DEFAULT");
+
+        if $z3 == 0 goto label09;
+
+     label08:
+        $r7 = virtualinvoke $r0.<com.android.server.IntentResolver: java.lang.Object newResult(android.content.IntentFilter,int)>($r8, $i2);
+
+        if $r7 == null goto label04;
+
+        interfaceinvoke $r5.<java.util.List: boolean add(java.lang.Object)>($r7);
+
+        goto label04;
+
+     label09:
+        $z2 = 1;
+
+        goto label04;
+
+     label10:
+        if $z0 == 0 goto label04;
+
+        lookupswitch($i2)
+        {
+            case -4: goto label14;
+            case -3: goto label13;
+            case -2: goto label15;
+            case -1: goto label16;
+            default: goto label11;
+        };
+
+     label11:
+        $r10 = "unknown reason";
+
+     label12:
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  Filter did not match: ");
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("IntentResolver", $r10);
+
+        goto label04;
+
+     label13:
+        $r10 = "action";
+
+        goto label12;
+
+     label14:
+        $r10 = "category";
+
+        goto label12;
+
+     label15:
+        $r10 = "data";
+
+        goto label12;
+
+     label16:
+        $r10 = "type";
+
+        goto label12;
+
+     label17:
+        $i0 = interfaceinvoke $r5.<java.util.List: int size()>();
+
+        if $i0 != 0 goto label18;
+
+        if $z2 == 0 goto label19;
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("IntentResolver", "resolveIntent failed: found match, but none with Intent.CATEGORY_DEFAULT");
+
+        return;
+
+     label18:
+        return;
+
+     label19:
+        return;
+    }
+
+    private final int register_intent_filter(android.content.IntentFilter, java.util.Iterator, java.util.HashMap, java.lang.String)
+    {
+        com.android.server.IntentResolver $r0;
+        android.content.IntentFilter $r1;
+        java.util.Iterator $r2;
+        java.util.HashMap $r3;
+        java.lang.String $r4;
+        int $i0;
+        boolean $z0;
+        java.lang.Object $r5;
+        java.util.ArrayList $r6;
+
+        $r0 := @this: com.android.server.IntentResolver;
+
+        $r1 := @parameter0: android.content.IntentFilter;
+
+        $r2 := @parameter1: java.util.Iterator;
+
+        $r3 := @parameter2: java.util.HashMap;
+
+        $r4 := @parameter3: java.lang.String;
+
+        if $r2 != null goto label1;
+
+        return 0;
+
+     label1:
+        $i0 = 0;
+
+     label2:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r5 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        $r4 = (java.lang.String) $r5;
+
+        $i0 = $i0 + 1;
+
+        $r5 = virtualinvoke $r3.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r4);
+
+        $r6 = (java.util.ArrayList) $r5;
+
+        if $r6 != null goto label3;
+
+        $r6 = new java.util.ArrayList;
+
+        specialinvoke $r6.<java.util.ArrayList: void <init>()>();
+
+        virtualinvoke $r3.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r4, $r6);
+
+     label3:
+        virtualinvoke $r6.<java.util.ArrayList: boolean add(java.lang.Object)>($r1);
+
+        goto label2;
+
+     label4:
+        return $i0;
+    }
+
+    private final int register_mime_types(android.content.IntentFilter, java.lang.String)
+    {
+        com.android.server.IntentResolver $r0;
+        android.content.IntentFilter $r1;
+        java.lang.String $r2, $r5;
+        java.util.Iterator $r3;
+        int $i0, $i1;
+        boolean $z0;
+        java.lang.Object $r4;
+        java.util.HashMap $r6;
+        java.util.ArrayList $r7;
+        java.lang.StringBuilder $r8;
+
+        $r0 := @this: com.android.server.IntentResolver;
+
+        $r1 := @parameter0: android.content.IntentFilter;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 = virtualinvoke $r1.<android.content.IntentFilter: java.util.Iterator typesIterator()>();
+
+        if $r3 != null goto label1;
+
+        return 0;
+
+     label1:
+        $i0 = 0;
+
+     label2:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label9;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        $r2 = (java.lang.String) $r4;
+
+        $i0 = $i0 + 1;
+
+        $r5 = $r2;
+
+        $i1 = virtualinvoke $r2.<java.lang.String: int indexOf(int)>(47);
+
+        if $i1 <= 0 goto label6;
+
+        $r5 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int,int)>(0, $i1);
+
+        $r5 = virtualinvoke $r5.<java.lang.String: java.lang.String intern()>();
+
+     label3:
+        $r6 = $r0.<com.android.server.IntentResolver: java.util.HashMap mTypeToFilter>;
+
+        $r4 = virtualinvoke $r6.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r2);
+
+        $r7 = (java.util.ArrayList) $r4;
+
+        if $r7 != null goto label4;
+
+        $r7 = new java.util.ArrayList;
+
+        specialinvoke $r7.<java.util.ArrayList: void <init>()>();
+
+        $r6 = $r0.<com.android.server.IntentResolver: java.util.HashMap mTypeToFilter>;
+
+        virtualinvoke $r6.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r2, $r7);
+
+     label4:
+        virtualinvoke $r7.<java.util.ArrayList: boolean add(java.lang.Object)>($r1);
+
+        if $i1 <= 0 goto label7;
+
+        $r6 = $r0.<com.android.server.IntentResolver: java.util.HashMap mBaseTypeToFilter>;
+
+        $r4 = virtualinvoke $r6.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r5);
+
+        $r7 = (java.util.ArrayList) $r4;
+
+        if $r7 != null goto label5;
+
+        $r7 = new java.util.ArrayList;
+
+        specialinvoke $r7.<java.util.ArrayList: void <init>()>();
+
+        $r6 = $r0.<com.android.server.IntentResolver: java.util.HashMap mBaseTypeToFilter>;
+
+        virtualinvoke $r6.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r5, $r7);
+
+     label5:
+        virtualinvoke $r7.<java.util.ArrayList: boolean add(java.lang.Object)>($r1);
+
+        goto label2;
+
+     label6:
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/*");
+
+        $r2 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label3;
+
+     label7:
+        $r6 = $r0.<com.android.server.IntentResolver: java.util.HashMap mWildTypeToFilter>;
+
+        $r4 = virtualinvoke $r6.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r5);
+
+        $r7 = (java.util.ArrayList) $r4;
+
+        if $r7 != null goto label8;
+
+        $r7 = new java.util.ArrayList;
+
+        specialinvoke $r7.<java.util.ArrayList: void <init>()>();
+
+        $r6 = $r0.<com.android.server.IntentResolver: java.util.HashMap mWildTypeToFilter>;
+
+        virtualinvoke $r6.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r5, $r7);
+
+     label8:
+        virtualinvoke $r7.<java.util.ArrayList: boolean add(java.lang.Object)>($r1);
+
+        goto label2;
+
+     label9:
+        return $i0;
+    }
+
+    private final boolean remove_all_objects(java.util.List, java.lang.Object)
+    {
+        com.android.server.IntentResolver $r0;
+        java.util.List $r1;
+        java.lang.Object $r2, $r3;
+        int $i0, $i1;
+
+        $r0 := @this: com.android.server.IntentResolver;
+
+        $r1 := @parameter0: java.util.List;
+
+        $r2 := @parameter1: java.lang.Object;
+
+        if $r1 == null goto label5;
+
+        $i0 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        $i1 = 0;
+
+     label1:
+        if $i1 >= $i0 goto label3;
+
+        $r3 = interfaceinvoke $r1.<java.util.List: java.lang.Object get(int)>($i1);
+
+        if $r3 != $r2 goto label2;
+
+        interfaceinvoke $r1.<java.util.List: java.lang.Object remove(int)>($i1);
+
+        $i1 = $i1 + -1;
+
+        $i0 = $i0 + -1;
+
+     label2:
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label3:
+        if $i0 <= 0 goto label4;
+
+        return 1;
+
+     label4:
+        return 0;
+
+     label5:
+        return 0;
+    }
+
+    private final int unregister_intent_filter(android.content.IntentFilter, java.util.Iterator, java.util.HashMap, java.lang.String)
+    {
+        com.android.server.IntentResolver $r0;
+        android.content.IntentFilter $r1;
+        java.util.Iterator $r2;
+        java.util.HashMap $r3;
+        java.lang.String $r4;
+        int $i0;
+        boolean $z0;
+        java.lang.Object $r5;
+        java.util.List $r6;
+
+        $r0 := @this: com.android.server.IntentResolver;
+
+        $r1 := @parameter0: android.content.IntentFilter;
+
+        $r2 := @parameter1: java.util.Iterator;
+
+        $r3 := @parameter2: java.util.HashMap;
+
+        $r4 := @parameter3: java.lang.String;
+
+        if $r2 != null goto label1;
+
+        return 0;
+
+     label1:
+        $i0 = 0;
+
+     label2:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r5 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        $r4 = (java.lang.String) $r5;
+
+        $i0 = $i0 + 1;
+
+        $r5 = virtualinvoke $r3.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r4);
+
+        $r6 = (java.util.List) $r5;
+
+        $z0 = specialinvoke $r0.<com.android.server.IntentResolver: boolean remove_all_objects(java.util.List,java.lang.Object)>($r6, $r1);
+
+        if $z0 != 0 goto label2;
+
+        virtualinvoke $r3.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>($r4);
+
+        goto label2;
+
+     label3:
+        return $i0;
+    }
+
+    private final int unregister_mime_types(android.content.IntentFilter, java.lang.String)
+    {
+        com.android.server.IntentResolver $r0;
+        android.content.IntentFilter $r1;
+        java.lang.String $r2, $r5;
+        java.util.Iterator $r3;
+        int $i0, $i1;
+        boolean $z0;
+        java.lang.Object $r4;
+        java.util.HashMap $r6;
+        java.util.List $r7;
+        java.lang.StringBuilder $r8;
+
+        $r0 := @this: com.android.server.IntentResolver;
+
+        $r1 := @parameter0: android.content.IntentFilter;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 = virtualinvoke $r1.<android.content.IntentFilter: java.util.Iterator typesIterator()>();
+
+        if $r3 != null goto label1;
+
+        return 0;
+
+     label1:
+        $i0 = 0;
+
+     label2:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label7;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        $r2 = (java.lang.String) $r4;
+
+        $i0 = $i0 + 1;
+
+        $r5 = $r2;
+
+        $i1 = virtualinvoke $r2.<java.lang.String: int indexOf(int)>(47);
+
+        if $i1 <= 0 goto label5;
+
+        $r5 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int,int)>(0, $i1);
+
+        $r5 = virtualinvoke $r5.<java.lang.String: java.lang.String intern()>();
+
+     label3:
+        $r6 = $r0.<com.android.server.IntentResolver: java.util.HashMap mTypeToFilter>;
+
+        $r4 = virtualinvoke $r6.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r2);
+
+        $r7 = (java.util.List) $r4;
+
+        $z0 = specialinvoke $r0.<com.android.server.IntentResolver: boolean remove_all_objects(java.util.List,java.lang.Object)>($r7, $r1);
+
+        if $z0 != 0 goto label4;
+
+        $r6 = $r0.<com.android.server.IntentResolver: java.util.HashMap mTypeToFilter>;
+
+        virtualinvoke $r6.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>($r2);
+
+     label4:
+        if $i1 <= 0 goto label6;
+
+        $r6 = $r0.<com.android.server.IntentResolver: java.util.HashMap mBaseTypeToFilter>;
+
+        $r4 = virtualinvoke $r6.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r5);
+
+        $r7 = (java.util.List) $r4;
+
+        $z0 = specialinvoke $r0.<com.android.server.IntentResolver: boolean remove_all_objects(java.util.List,java.lang.Object)>($r7, $r1);
+
+        if $z0 != 0 goto label2;
+
+        $r6 = $r0.<com.android.server.IntentResolver: java.util.HashMap mBaseTypeToFilter>;
+
+        virtualinvoke $r6.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>($r5);
+
+        goto label2;
+
+     label5:
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/*");
+
+        $r2 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label3;
+
+     label6:
+        $r6 = $r0.<com.android.server.IntentResolver: java.util.HashMap mWildTypeToFilter>;
+
+        $r4 = virtualinvoke $r6.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r5);
+
+        $r7 = (java.util.List) $r4;
+
+        $z0 = specialinvoke $r0.<com.android.server.IntentResolver: boolean remove_all_objects(java.util.List,java.lang.Object)>($r7, $r1);
+
+        if $z0 != 0 goto label2;
+
+        $r6 = $r0.<com.android.server.IntentResolver: java.util.HashMap mWildTypeToFilter>;
+
+        virtualinvoke $r6.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>($r5);
+
+        goto label2;
+
+     label7:
+        return $i0;
+    }
+
+    public void addFilter(android.content.IntentFilter)
+    {
+        com.android.server.IntentResolver $r0;
+        android.content.IntentFilter $r1;
+        java.util.HashSet $r2;
+        java.util.Iterator $r3;
+        java.util.HashMap $r4;
+        int $i0, $i1;
+
+        $r0 := @this: com.android.server.IntentResolver;
+
+        $r1 := @parameter0: android.content.IntentFilter;
+
+        $r2 = $r0.<com.android.server.IntentResolver: java.util.HashSet mFilters>;
+
+        virtualinvoke $r2.<java.util.HashSet: boolean add(java.lang.Object)>($r1);
+
+        $r3 = virtualinvoke $r1.<android.content.IntentFilter: java.util.Iterator schemesIterator()>();
+
+        $r4 = $r0.<com.android.server.IntentResolver: java.util.HashMap mSchemeToFilter>;
+
+        $i0 = specialinvoke $r0.<com.android.server.IntentResolver: int register_intent_filter(android.content.IntentFilter,java.util.Iterator,java.util.HashMap,java.lang.String)>($r1, $r3, $r4, "      Scheme: ");
+
+        $i1 = specialinvoke $r0.<com.android.server.IntentResolver: int register_mime_types(android.content.IntentFilter,java.lang.String)>($r1, "      Type: ");
+
+        if $i0 != 0 goto label1;
+
+        if $i1 != 0 goto label1;
+
+        $r3 = virtualinvoke $r1.<android.content.IntentFilter: java.util.Iterator actionsIterator()>();
+
+        $r4 = $r0.<com.android.server.IntentResolver: java.util.HashMap mActionToFilter>;
+
+        specialinvoke $r0.<com.android.server.IntentResolver: int register_intent_filter(android.content.IntentFilter,java.util.Iterator,java.util.HashMap,java.lang.String)>($r1, $r3, $r4, "      Action: ");
+
+     label1:
+        if $i1 == 0 goto label2;
+
+        $r3 = virtualinvoke $r1.<android.content.IntentFilter: java.util.Iterator actionsIterator()>();
+
+        $r4 = $r0.<com.android.server.IntentResolver: java.util.HashMap mTypedActionToFilter>;
+
+        specialinvoke $r0.<com.android.server.IntentResolver: int register_intent_filter(android.content.IntentFilter,java.util.Iterator,java.util.HashMap,java.lang.String)>($r1, $r3, $r4, "      TypedAction: ");
+
+        return;
+
+     label2:
+        return;
+    }
+
+    protected boolean allowFilterResult(android.content.IntentFilter, java.util.List)
+    {
+        com.android.server.IntentResolver $r0;
+        android.content.IntentFilter $r1;
+        java.util.List $r2;
+
+        $r0 := @this: com.android.server.IntentResolver;
+
+        $r1 := @parameter0: android.content.IntentFilter;
+
+        $r2 := @parameter1: java.util.List;
+
+        return 1;
+    }
+
+    public void dump(android.util.Printer, java.lang.String)
+    {
+        com.android.server.IntentResolver $r0;
+        android.util.Printer $r1;
+        java.lang.String $r2, $r4;
+        java.lang.StringBuilder $r3;
+        java.util.HashMap $r5;
+
+        $r0 := @this: com.android.server.IntentResolver;
+
+        $r1 := @parameter0: android.util.Printer;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Full MIME Types:");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r1.<android.util.Printer: void println(java.lang.String)>($r4);
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r5 = $r0.<com.android.server.IntentResolver: java.util.HashMap mTypeToFilter>;
+
+        virtualinvoke $r0.<com.android.server.IntentResolver: void dumpMap(android.util.Printer,java.lang.String,java.util.Map)>($r1, $r4, $r5);
+
+        interfaceinvoke $r1.<android.util.Printer: void println(java.lang.String)>($r2);
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Base MIME Types:");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r1.<android.util.Printer: void println(java.lang.String)>($r4);
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r5 = $r0.<com.android.server.IntentResolver: java.util.HashMap mBaseTypeToFilter>;
+
+        virtualinvoke $r0.<com.android.server.IntentResolver: void dumpMap(android.util.Printer,java.lang.String,java.util.Map)>($r1, $r4, $r5);
+
+        interfaceinvoke $r1.<android.util.Printer: void println(java.lang.String)>($r2);
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Wild MIME Types:");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r1.<android.util.Printer: void println(java.lang.String)>($r4);
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r5 = $r0.<com.android.server.IntentResolver: java.util.HashMap mWildTypeToFilter>;
+
+        virtualinvoke $r0.<com.android.server.IntentResolver: void dumpMap(android.util.Printer,java.lang.String,java.util.Map)>($r1, $r4, $r5);
+
+        interfaceinvoke $r1.<android.util.Printer: void println(java.lang.String)>($r2);
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Schemes:");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r1.<android.util.Printer: void println(java.lang.String)>($r4);
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r5 = $r0.<com.android.server.IntentResolver: java.util.HashMap mSchemeToFilter>;
+
+        virtualinvoke $r0.<com.android.server.IntentResolver: void dumpMap(android.util.Printer,java.lang.String,java.util.Map)>($r1, $r4, $r5);
+
+        interfaceinvoke $r1.<android.util.Printer: void println(java.lang.String)>($r2);
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Non-Data Actions:");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r1.<android.util.Printer: void println(java.lang.String)>($r4);
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  ");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r5 = $r0.<com.android.server.IntentResolver: java.util.HashMap mActionToFilter>;
+
+        virtualinvoke $r0.<com.android.server.IntentResolver: void dumpMap(android.util.Printer,java.lang.String,java.util.Map)>($r1, $r4, $r5);
+
+        interfaceinvoke $r1.<android.util.Printer: void println(java.lang.String)>($r2);
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("MIME Typed Actions:");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r1.<android.util.Printer: void println(java.lang.String)>($r4);
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  ");
+
+        $r2 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r5 = $r0.<com.android.server.IntentResolver: java.util.HashMap mTypedActionToFilter>;
+
+        virtualinvoke $r0.<com.android.server.IntentResolver: void dumpMap(android.util.Printer,java.lang.String,java.util.Map)>($r1, $r2, $r5);
+
+        return;
+    }
+
+    protected void dumpFilter(android.util.Printer, java.lang.String, android.content.IntentFilter)
+    {
+        com.android.server.IntentResolver $r0;
+        android.util.Printer $r1;
+        java.lang.String $r2;
+        android.content.IntentFilter $r3;
+        java.lang.StringBuilder $r4;
+
+        $r0 := @this: com.android.server.IntentResolver;
+
+        $r1 := @parameter0: android.util.Printer;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: android.content.IntentFilter;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r3);
+
+        $r2 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r1.<android.util.Printer: void println(java.lang.String)>($r2);
+
+        return;
+    }
+
+    void dumpMap(android.util.Printer, java.lang.String, java.util.Map)
+    {
+        com.android.server.IntentResolver $r0;
+        android.util.Printer $r1;
+        java.lang.String $r2, $r5, $r10;
+        java.util.Map $r3;
+        java.lang.StringBuilder $r4;
+        java.util.Set $r6;
+        java.util.Iterator $r7;
+        boolean $z0;
+        java.lang.Object $r8;
+        java.util.Map$Entry $r9;
+        java.util.ArrayList $r11;
+        int $i0, $i1;
+        android.content.IntentFilter $r12;
+
+        $r0 := @this: com.android.server.IntentResolver;
+
+        $r1 := @parameter0: android.util.Printer;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.util.Map;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  ");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("    ");
+
+        $r2 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r6 = interfaceinvoke $r3.<java.util.Map: java.util.Set entrySet()>();
+
+        $r7 = interfaceinvoke $r6.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        $r9 = (java.util.Map$Entry) $r8;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r8 = interfaceinvoke $r9.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r10 = (java.lang.String) $r8;
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r10 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r1.<android.util.Printer: void println(java.lang.String)>($r10);
+
+        $r8 = interfaceinvoke $r9.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r11 = (java.util.ArrayList) $r8;
+
+        $i0 = virtualinvoke $r11.<java.util.ArrayList: int size()>();
+
+        $i1 = 0;
+
+     label2:
+        if $i1 >= $i0 goto label1;
+
+        $r8 = virtualinvoke $r11.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r12 = (android.content.IntentFilter) $r8;
+
+        virtualinvoke $r0.<com.android.server.IntentResolver: void dumpFilter(android.util.Printer,java.lang.String,android.content.IntentFilter)>($r1, $r2, $r12);
+
+        $i1 = $i1 + 1;
+
+        goto label2;
+
+     label3:
+        return;
+    }
+
+    public java.util.Iterator filterIterator()
+    {
+        com.android.server.IntentResolver $r0;
+        com.android.server.IntentResolver$IteratorWrapper $r1;
+        java.util.Iterator $r2;
+        java.util.HashSet $r3;
+
+        $r0 := @this: com.android.server.IntentResolver;
+
+        $r1 = new com.android.server.IntentResolver$IteratorWrapper;
+
+        $r3 = $r0.<com.android.server.IntentResolver: java.util.HashSet mFilters>;
+
+        $r2 = virtualinvoke $r3.<java.util.HashSet: java.util.Iterator iterator()>();
+
+        specialinvoke $r1.<com.android.server.IntentResolver$IteratorWrapper: void <init>(com.android.server.IntentResolver,java.util.Iterator)>($r0, $r2);
+
+        return $r1;
+    }
+
+    public java.util.Set filterSet()
+    {
+        com.android.server.IntentResolver $r0;
+        java.util.Set $r1;
+        java.util.HashSet $r2;
+
+        $r0 := @this: com.android.server.IntentResolver;
+
+        $r2 = $r0.<com.android.server.IntentResolver: java.util.HashSet mFilters>;
+
+        $r1 = staticinvoke <java.util.Collections: java.util.Set unmodifiableSet(java.util.Set)>($r2);
+
+        return $r1;
+    }
+
+    protected java.lang.Object newResult(android.content.IntentFilter, int)
+    {
+        com.android.server.IntentResolver $r0;
+        android.content.IntentFilter $r1;
+        int $i0;
+
+        $r0 := @this: com.android.server.IntentResolver;
+
+        $r1 := @parameter0: android.content.IntentFilter;
+
+        $i0 := @parameter1: int;
+
+        return $r1;
+    }
+
+    public java.util.List queryIntent(android.content.ContentResolver, android.content.Intent, java.lang.String, boolean)
+    {
+        com.android.server.IntentResolver $r0;
+        android.content.ContentResolver $r1;
+        android.content.Intent $r2;
+        java.lang.String $r3, $r5, $r7, $r14;
+        boolean $z0, $z1, $z2;
+        java.util.ArrayList $r4, $r8, $r9, $r10, $r11;
+        int $i0, $i1, $i2;
+        java.lang.StringBuilder $r6;
+        char $c3;
+        java.util.HashMap $r12;
+        java.lang.Object $r13;
+        java.util.Iterator $r15;
+
+        $r0 := @this: com.android.server.IntentResolver;
+
+        $r1 := @parameter0: android.content.ContentResolver;
+
+        $r2 := @parameter1: android.content.Intent;
+
+        $r3 := @parameter2: java.lang.String;
+
+        $z0 := @parameter3: boolean;
+
+        $r5 = virtualinvoke $r2.<android.content.Intent: java.lang.String getScheme()>();
+
+        $r4 = new java.util.ArrayList;
+
+        specialinvoke $r4.<java.util.ArrayList: void <init>()>();
+
+        $i0 = virtualinvoke $r2.<android.content.Intent: int getFlags()>();
+
+        $i0 = $i0 & 8;
+
+        if $i0 == 0 goto label14;
+
+        $z1 = 1;
+
+     label01:
+        if $z1 == 0 goto label02;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Resolving type ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" scheme ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" of intent ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("IntentResolver", $r7);
+
+     label02:
+        $r8 = null;
+
+        $r9 = null;
+
+        $r10 = null;
+
+        $r11 = null;
+
+        if $r3 == null goto label06;
+
+        $i0 = virtualinvoke $r3.<java.lang.String: int indexOf(int)>(47);
+
+        if $i0 <= 0 goto label06;
+
+        $r7 = virtualinvoke $r3.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $z2 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>("*");
+
+        if $z2 != 0 goto label17;
+
+        $i1 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        $i2 = $i0 + 2;
+
+        if $i1 != $i2 goto label03;
+
+        $i0 = $i0 + 1;
+
+        $c3 = virtualinvoke $r3.<java.lang.String: char charAt(int)>($i0);
+
+        if $c3 == 42 goto label15;
+
+     label03:
+        $r12 = $r0.<com.android.server.IntentResolver: java.util.HashMap mTypeToFilter>;
+
+        $r13 = virtualinvoke $r12.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r3);
+
+        $r8 = (java.util.ArrayList) $r13;
+
+        if $z1 == 0 goto label04;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("First type cut: ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+        $r14 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("IntentResolver", $r14);
+
+     label04:
+        $r12 = $r0.<com.android.server.IntentResolver: java.util.HashMap mWildTypeToFilter>;
+
+        $r13 = virtualinvoke $r12.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r7);
+
+        $r9 = (java.util.ArrayList) $r13;
+
+        if $z1 == 0 goto label05;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Second type cut: ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("IntentResolver", $r7);
+
+     label05:
+        $r12 = $r0.<com.android.server.IntentResolver: java.util.HashMap mWildTypeToFilter>;
+
+        $r13 = virtualinvoke $r12.<java.util.HashMap: java.lang.Object get(java.lang.Object)>("*");
+
+        $r10 = (java.util.ArrayList) $r13;
+
+        if $z1 == 0 goto label06;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Third type cut: ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r10);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("IntentResolver", $r7);
+
+     label06:
+        if $r5 == null goto label07;
+
+        $r12 = $r0.<com.android.server.IntentResolver: java.util.HashMap mSchemeToFilter>;
+
+        $r13 = virtualinvoke $r12.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r5);
+
+        $r11 = (java.util.ArrayList) $r13;
+
+        if $z1 == 0 goto label07;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Scheme list: ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r11);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("IntentResolver", $r7);
+
+     label07:
+        if $r3 != null goto label08;
+
+        if $r5 != null goto label08;
+
+        $r7 = virtualinvoke $r2.<android.content.Intent: java.lang.String getAction()>();
+
+        if $r7 == null goto label08;
+
+        $r12 = $r0.<com.android.server.IntentResolver: java.util.HashMap mActionToFilter>;
+
+        $r7 = virtualinvoke $r2.<android.content.Intent: java.lang.String getAction()>();
+
+        $r13 = virtualinvoke $r12.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r7);
+
+        $r8 = (java.util.ArrayList) $r13;
+
+        if $z1 == 0 goto label08;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Action list: ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("IntentResolver", $r7);
+
+     label08:
+        if $r8 == null goto label09;
+
+        specialinvoke $r0.<com.android.server.IntentResolver: void buildResolveList(android.content.Intent,boolean,boolean,java.lang.String,java.lang.String,java.util.List,java.util.List)>($r2, $z1, $z0, $r3, $r5, $r8, $r4);
+
+     label09:
+        if $r9 == null goto label10;
+
+        specialinvoke $r0.<com.android.server.IntentResolver: void buildResolveList(android.content.Intent,boolean,boolean,java.lang.String,java.lang.String,java.util.List,java.util.List)>($r2, $z1, $z0, $r3, $r5, $r9, $r4);
+
+     label10:
+        if $r10 == null goto label11;
+
+        specialinvoke $r0.<com.android.server.IntentResolver: void buildResolveList(android.content.Intent,boolean,boolean,java.lang.String,java.lang.String,java.util.List,java.util.List)>($r2, $z1, $z0, $r3, $r5, $r10, $r4);
+
+     label11:
+        if $r11 == null goto label12;
+
+        specialinvoke $r0.<com.android.server.IntentResolver: void buildResolveList(android.content.Intent,boolean,boolean,java.lang.String,java.lang.String,java.util.List,java.util.List)>($r2, $z1, $z0, $r3, $r5, $r11, $r4);
+
+     label12:
+        virtualinvoke $r0.<com.android.server.IntentResolver: void sortResults(java.util.List)>($r4);
+
+        if $z1 == 0 goto label18;
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("IntentResolver", "Final result list:");
+
+        $r15 = virtualinvoke $r4.<java.util.AbstractList: java.util.Iterator iterator()>();
+
+     label13:
+        $z0 = interfaceinvoke $r15.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label19;
+
+        $r13 = interfaceinvoke $r15.<java.util.Iterator: java.lang.Object next()>();
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r13);
+
+        $r3 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("IntentResolver", $r3);
+
+        goto label13;
+
+     label14:
+        $z1 = 0;
+
+        goto label01;
+
+     label15:
+        $r12 = $r0.<com.android.server.IntentResolver: java.util.HashMap mBaseTypeToFilter>;
+
+        $r13 = virtualinvoke $r12.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r7);
+
+        $r8 = (java.util.ArrayList) $r13;
+
+        if $z1 == 0 goto label16;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("First type cut: ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+        $r14 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("IntentResolver", $r14);
+
+     label16:
+        $r12 = $r0.<com.android.server.IntentResolver: java.util.HashMap mWildTypeToFilter>;
+
+        $r13 = virtualinvoke $r12.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r7);
+
+        $r9 = (java.util.ArrayList) $r13;
+
+        if $z1 == 0 goto label05;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Second type cut: ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("IntentResolver", $r7);
+
+        goto label05;
+
+     label17:
+        $r7 = virtualinvoke $r2.<android.content.Intent: java.lang.String getAction()>();
+
+        if $r7 == null goto label06;
+
+        $r12 = $r0.<com.android.server.IntentResolver: java.util.HashMap mTypedActionToFilter>;
+
+        $r7 = virtualinvoke $r2.<android.content.Intent: java.lang.String getAction()>();
+
+        $r13 = virtualinvoke $r12.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r7);
+
+        $r8 = (java.util.ArrayList) $r13;
+
+        if $z1 == 0 goto label06;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Typed Action list: ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("IntentResolver", $r7);
+
+        goto label06;
+
+     label18:
+        return $r4;
+
+     label19:
+        return $r4;
+    }
+
+    public void removeFilter(android.content.IntentFilter)
+    {
+        com.android.server.IntentResolver $r0;
+        android.content.IntentFilter $r1;
+        java.util.HashSet $r2;
+
+        $r0 := @this: com.android.server.IntentResolver;
+
+        $r1 := @parameter0: android.content.IntentFilter;
+
+        virtualinvoke $r0.<com.android.server.IntentResolver: void removeFilterInternal(android.content.IntentFilter)>($r1);
+
+        $r2 = $r0.<com.android.server.IntentResolver: java.util.HashSet mFilters>;
+
+        virtualinvoke $r2.<java.util.HashSet: boolean remove(java.lang.Object)>($r1);
+
+        return;
+    }
+
+    void removeFilterInternal(android.content.IntentFilter)
+    {
+        com.android.server.IntentResolver $r0;
+        android.content.IntentFilter $r1;
+        java.util.Iterator $r2;
+        java.util.HashMap $r3;
+        int $i0, $i1;
+
+        $r0 := @this: com.android.server.IntentResolver;
+
+        $r1 := @parameter0: android.content.IntentFilter;
+
+        $r2 = virtualinvoke $r1.<android.content.IntentFilter: java.util.Iterator schemesIterator()>();
+
+        $r3 = $r0.<com.android.server.IntentResolver: java.util.HashMap mSchemeToFilter>;
+
+        $i0 = specialinvoke $r0.<com.android.server.IntentResolver: int unregister_intent_filter(android.content.IntentFilter,java.util.Iterator,java.util.HashMap,java.lang.String)>($r1, $r2, $r3, "      Scheme: ");
+
+        $i1 = specialinvoke $r0.<com.android.server.IntentResolver: int unregister_mime_types(android.content.IntentFilter,java.lang.String)>($r1, "      Type: ");
+
+        if $i0 != 0 goto label1;
+
+        if $i1 != 0 goto label1;
+
+        $r2 = virtualinvoke $r1.<android.content.IntentFilter: java.util.Iterator actionsIterator()>();
+
+        $r3 = $r0.<com.android.server.IntentResolver: java.util.HashMap mActionToFilter>;
+
+        specialinvoke $r0.<com.android.server.IntentResolver: int unregister_intent_filter(android.content.IntentFilter,java.util.Iterator,java.util.HashMap,java.lang.String)>($r1, $r2, $r3, "      Action: ");
+
+     label1:
+        if $i1 == 0 goto label2;
+
+        $r2 = virtualinvoke $r1.<android.content.IntentFilter: java.util.Iterator actionsIterator()>();
+
+        $r3 = $r0.<com.android.server.IntentResolver: java.util.HashMap mTypedActionToFilter>;
+
+        specialinvoke $r0.<com.android.server.IntentResolver: int unregister_intent_filter(android.content.IntentFilter,java.util.Iterator,java.util.HashMap,java.lang.String)>($r1, $r2, $r3, "      TypedAction: ");
+
+        return;
+
+     label2:
+        return;
+    }
+
+    protected void sortResults(java.util.List)
+    {
+        com.android.server.IntentResolver $r0;
+        java.util.List $r1;
+        java.util.Comparator $r2;
+
+        $r0 := @this: com.android.server.IntentResolver;
+
+        $r1 := @parameter0: java.util.List;
+
+        $r2 = <com.android.server.IntentResolver: java.util.Comparator mResolvePrioritySorter>;
+
+        staticinvoke <java.util.Collections: void sort(java.util.List,java.util.Comparator)>($r1, $r2);
+
+        return;
+    }
+}

@@ -1,0 +1,147 @@
+final class org.apache.harmony.nio.internal.LockManager extends java.lang.Object
+{
+    private final java.util.Comparator lockComparator;
+    private final java.util.SortedSet locks;
+
+    protected void <init>()
+    {
+        org.apache.harmony.nio.internal.LockManager $r0;
+        java.util.Comparator $r1;
+        org.apache.harmony.nio.internal.LockManager$1 $r2;
+        java.util.TreeSet $r3;
+
+        $r0 := @this: org.apache.harmony.nio.internal.LockManager;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r2 = new org.apache.harmony.nio.internal.LockManager$1;
+
+        specialinvoke $r2.<org.apache.harmony.nio.internal.LockManager$1: void <init>(org.apache.harmony.nio.internal.LockManager)>($r0);
+
+        $r0.<org.apache.harmony.nio.internal.LockManager: java.util.Comparator lockComparator> = $r2;
+
+        $r3 = new java.util.TreeSet;
+
+        $r1 = $r0.<org.apache.harmony.nio.internal.LockManager: java.util.Comparator lockComparator>;
+
+        specialinvoke $r3.<java.util.TreeSet: void <init>(java.util.Comparator)>($r1);
+
+        $r0.<org.apache.harmony.nio.internal.LockManager: java.util.SortedSet locks> = $r3;
+
+        return;
+    }
+
+    void addLock(java.nio.channels.FileLock) throws java.nio.channels.OverlappingFileLockException
+    {
+        org.apache.harmony.nio.internal.LockManager $r0;
+        java.nio.channels.FileLock $r1, $r5;
+        long $l0, $l1, $l3;
+        java.util.SortedSet $r2;
+        java.util.Iterator $r3;
+        boolean $z0;
+        java.lang.Object $r4;
+        byte $b2;
+        java.nio.channels.OverlappingFileLockException $r6;
+        java.lang.Throwable $r7;
+
+        $r0 := @this: org.apache.harmony.nio.internal.LockManager;
+
+        $r1 := @parameter0: java.nio.channels.FileLock;
+
+        entermonitor $r0;
+
+     label1:
+        $l0 = virtualinvoke $r1.<java.nio.channels.FileLock: long position()>();
+
+        $l1 = virtualinvoke $r1.<java.nio.channels.FileLock: long size()>();
+
+        $l0 = $l0 + $l1;
+
+        $r2 = $r0.<org.apache.harmony.nio.internal.LockManager: java.util.SortedSet locks>;
+
+        $r3 = interfaceinvoke $r2.<java.util.SortedSet: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        $r5 = (java.nio.channels.FileLock) $r4;
+
+        $l1 = virtualinvoke $r5.<java.nio.channels.FileLock: long position()>();
+
+        $b2 = $l1 cmp $l0;
+
+        if $b2 <= 0 goto label5;
+
+     label3:
+        $r2 = $r0.<org.apache.harmony.nio.internal.LockManager: java.util.SortedSet locks>;
+
+        interfaceinvoke $r2.<java.util.SortedSet: boolean add(java.lang.Object)>($r1);
+
+     label4:
+        exitmonitor $r0;
+
+        return;
+
+     label5:
+        $l1 = virtualinvoke $r1.<java.nio.channels.FileLock: long position()>();
+
+        $l3 = virtualinvoke $r1.<java.nio.channels.FileLock: long size()>();
+
+        $z0 = virtualinvoke $r5.<java.nio.channels.FileLock: boolean overlaps(long,long)>($l1, $l3);
+
+        if $z0 == 0 goto label2;
+
+        $r6 = new java.nio.channels.OverlappingFileLockException;
+
+        specialinvoke $r6.<java.nio.channels.OverlappingFileLockException: void <init>()>();
+
+        throw $r6;
+
+     label6:
+        $r7 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r7;
+
+        catch java.lang.Throwable from label1 to label4 with label6;
+        catch java.lang.Throwable from label5 to label6 with label6;
+    }
+
+    void removeLock(java.nio.channels.FileLock)
+    {
+        org.apache.harmony.nio.internal.LockManager $r0;
+        java.nio.channels.FileLock $r1;
+        java.util.SortedSet $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: org.apache.harmony.nio.internal.LockManager;
+
+        $r1 := @parameter0: java.nio.channels.FileLock;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = $r0.<org.apache.harmony.nio.internal.LockManager: java.util.SortedSet locks>;
+
+        interfaceinvoke $r2.<java.util.SortedSet: boolean remove(java.lang.Object)>($r1);
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+}

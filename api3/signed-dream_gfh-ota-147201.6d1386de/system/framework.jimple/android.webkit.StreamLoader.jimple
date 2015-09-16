@@ -1,0 +1,297 @@
+abstract class android.webkit.StreamLoader extends android.os.Handler
+{
+    private static final int MSG_DATA;
+    private static final int MSG_END;
+    private static final int MSG_HEADERS;
+    private static final int MSG_STATUS;
+    public static final java.lang.String NO_STORE;
+    protected long mContentLength;
+    private byte[] mData;
+    protected java.io.InputStream mDataStream;
+    protected android.webkit.LoadListener mHandler;
+
+    void <init>(android.webkit.LoadListener)
+    {
+        android.webkit.StreamLoader $r0;
+        android.webkit.LoadListener $r1;
+
+        $r0 := @this: android.webkit.StreamLoader;
+
+        $r1 := @parameter0: android.webkit.LoadListener;
+
+        specialinvoke $r0.<android.os.Handler: void <init>()>();
+
+        $r0.<android.webkit.StreamLoader: android.webkit.LoadListener mHandler> = $r1;
+
+        return;
+    }
+
+    private void closeStreamAndSendEndData()
+    {
+        android.webkit.StreamLoader $r0;
+        java.io.InputStream $r1;
+        android.webkit.LoadListener $r2;
+        java.io.IOException $r3;
+
+        $r0 := @this: android.webkit.StreamLoader;
+
+        $r1 = $r0.<android.webkit.StreamLoader: java.io.InputStream mDataStream>;
+
+        if $r1 == null goto label2;
+
+        $r1 = $r0.<android.webkit.StreamLoader: java.io.InputStream mDataStream>;
+
+     label1:
+        virtualinvoke $r1.<java.io.InputStream: void close()>();
+
+     label2:
+        $r2 = $r0.<android.webkit.StreamLoader: android.webkit.LoadListener mHandler>;
+
+        virtualinvoke $r2.<android.webkit.LoadListener: void endData()>();
+
+        return;
+
+     label3:
+        $r3 := @caughtexception;
+
+        goto label2;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    private boolean sendData()
+    {
+        android.webkit.StreamLoader $r0;
+        java.io.InputStream $r1;
+        byte[] $r2;
+        int $i0;
+        android.webkit.LoadListener $r3;
+        java.io.IOException $r4;
+        java.lang.String $r5;
+
+        $r0 := @this: android.webkit.StreamLoader;
+
+        $r1 = $r0.<android.webkit.StreamLoader: java.io.InputStream mDataStream>;
+
+        if $r1 == null goto label6;
+
+        $r1 = $r0.<android.webkit.StreamLoader: java.io.InputStream mDataStream>;
+
+        $r2 = $r0.<android.webkit.StreamLoader: byte[] mData>;
+
+     label1:
+        $i0 = virtualinvoke $r1.<java.io.InputStream: int read(byte[])>($r2);
+
+     label2:
+        if $i0 <= 0 goto label6;
+
+        $r3 = $r0.<android.webkit.StreamLoader: android.webkit.LoadListener mHandler>;
+
+     label3:
+        $r2 = $r0.<android.webkit.StreamLoader: byte[] mData>;
+
+        virtualinvoke $r3.<android.webkit.LoadListener: void data(byte[],int)>($r2, $i0);
+
+     label4:
+        return 0;
+
+     label5:
+        $r4 := @caughtexception;
+
+        $r3 = $r0.<android.webkit.StreamLoader: android.webkit.LoadListener mHandler>;
+
+        $r5 = virtualinvoke $r4.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        virtualinvoke $r3.<android.webkit.LoadListener: void error(int,java.lang.String)>(-13, $r5);
+
+     label6:
+        return 1;
+
+        catch java.io.IOException from label1 to label2 with label5;
+        catch java.io.IOException from label3 to label4 with label5;
+    }
+
+    private void sendHeaders()
+    {
+        android.webkit.StreamLoader $r0;
+        android.net.http.Headers $r1;
+        long $l0;
+        byte $b1;
+        android.webkit.LoadListener $r2;
+
+        $r0 := @this: android.webkit.StreamLoader;
+
+        $r1 = new android.net.http.Headers;
+
+        specialinvoke $r1.<android.net.http.Headers: void <init>()>();
+
+        $l0 = $r0.<android.webkit.StreamLoader: long mContentLength>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 <= 0 goto label1;
+
+        $l0 = $r0.<android.webkit.StreamLoader: long mContentLength>;
+
+        virtualinvoke $r1.<android.net.http.Headers: void setContentLength(long)>($l0);
+
+     label1:
+        virtualinvoke $r1.<android.net.http.Headers: void setCacheControl(java.lang.String)>("no-store");
+
+        virtualinvoke $r0.<android.webkit.StreamLoader: void buildHeaders(android.net.http.Headers)>($r1);
+
+        $r2 = $r0.<android.webkit.StreamLoader: android.webkit.LoadListener mHandler>;
+
+        virtualinvoke $r2.<android.webkit.LoadListener: void headers(android.net.http.Headers)>($r1);
+
+        return;
+    }
+
+    protected abstract void buildHeaders(android.net.http.Headers);
+
+    public void handleMessage(android.os.Message)
+    {
+        android.webkit.StreamLoader $r0;
+        android.os.Message $r1;
+        int $i0;
+        boolean $z0;
+        byte[] $r2;
+
+        $r0 := @this: android.webkit.StreamLoader;
+
+        $r1 := @parameter0: android.os.Message;
+
+        $i0 = $r1.<android.os.Message: int what>;
+
+        lookupswitch($i0)
+        {
+            case 100: goto label2;
+            case 101: goto label3;
+            case 102: goto label4;
+            case 103: goto label6;
+            default: goto label1;
+        };
+
+     label1:
+        specialinvoke $r0.<android.os.Handler: void handleMessage(android.os.Message)>($r1);
+
+        return;
+
+     label2:
+        $z0 = virtualinvoke $r0.<android.webkit.StreamLoader: boolean setupStreamAndSendStatus()>();
+
+        if $z0 == 0 goto label7;
+
+        $r2 = newarray (byte)[8192];
+
+        $r0.<android.webkit.StreamLoader: byte[] mData> = $r2;
+
+        $r1 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(101);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r1);
+
+        return;
+
+     label3:
+        specialinvoke $r0.<android.webkit.StreamLoader: void sendHeaders()>();
+
+        $r1 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(102);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r1);
+
+        return;
+
+     label4:
+        $z0 = specialinvoke $r0.<android.webkit.StreamLoader: boolean sendData()>();
+
+        if $z0 == 0 goto label5;
+
+        $r1 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(103);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r1);
+
+        return;
+
+     label5:
+        $r1 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(102);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r1);
+
+        return;
+
+     label6:
+        specialinvoke $r0.<android.webkit.StreamLoader: void closeStreamAndSendEndData()>();
+
+        return;
+
+     label7:
+        return;
+    }
+
+    public void load()
+    {
+        android.webkit.StreamLoader $r0;
+        android.webkit.LoadListener $r1;
+        boolean $z0;
+        android.os.Message $r2;
+        byte[] $r3;
+
+        $r0 := @this: android.webkit.StreamLoader;
+
+        $r1 = $r0.<android.webkit.StreamLoader: android.webkit.LoadListener mHandler>;
+
+        $z0 = virtualinvoke $r1.<android.webkit.LoadListener: boolean isSynchronous()>();
+
+        if $z0 != 0 goto label1;
+
+        $r2 = virtualinvoke $r0.<android.os.Handler: android.os.Message obtainMessage(int)>(100);
+
+        virtualinvoke $r0.<android.os.Handler: boolean sendMessage(android.os.Message)>($r2);
+
+        return;
+
+     label1:
+        $z0 = virtualinvoke $r0.<android.webkit.StreamLoader: boolean setupStreamAndSendStatus()>();
+
+        if $z0 == 0 goto label3;
+
+        $r3 = newarray (byte)[8192];
+
+        $r0.<android.webkit.StreamLoader: byte[] mData> = $r3;
+
+        specialinvoke $r0.<android.webkit.StreamLoader: void sendHeaders()>();
+
+     label2:
+        $z0 = specialinvoke $r0.<android.webkit.StreamLoader: boolean sendData()>();
+
+        if $z0 == 0 goto label2;
+
+        specialinvoke $r0.<android.webkit.StreamLoader: void closeStreamAndSendEndData()>();
+
+        $r1 = $r0.<android.webkit.StreamLoader: android.webkit.LoadListener mHandler>;
+
+        virtualinvoke $r1.<android.webkit.LoadListener: void loadSynchronousMessages()>();
+
+        return;
+
+     label3:
+        return;
+    }
+
+    protected abstract boolean setupStreamAndSendStatus();
+
+    public static void <clinit>()
+    {
+        <android.webkit.StreamLoader: java.lang.String NO_STORE> = "no-store";
+
+        <android.webkit.StreamLoader: int MSG_STATUS> = 100;
+
+        <android.webkit.StreamLoader: int MSG_HEADERS> = 101;
+
+        <android.webkit.StreamLoader: int MSG_END> = 103;
+
+        <android.webkit.StreamLoader: int MSG_DATA> = 102;
+
+        return;
+    }
+}

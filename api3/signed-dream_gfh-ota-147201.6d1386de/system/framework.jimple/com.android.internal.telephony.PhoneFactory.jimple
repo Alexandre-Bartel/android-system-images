@@ -1,0 +1,345 @@
+public class com.android.internal.telephony.PhoneFactory extends java.lang.Object
+{
+    static final java.lang.String LOG_TAG;
+    static final int SOCKET_OPEN_MAX_RETRY;
+    static final int SOCKET_OPEN_RETRY_MILLIS;
+    private static android.os.Looper sLooper;
+    private static boolean sMadeDefaults;
+    private static com.android.internal.telephony.PhoneNotifier sPhoneNotifier;
+    private static java.util.ArrayList sPhones;
+    private static java.lang.Object testMailbox;
+
+    static void <clinit>()
+    {
+        java.util.ArrayList $r0;
+
+        <com.android.internal.telephony.PhoneFactory: int SOCKET_OPEN_RETRY_MILLIS> = 2000;
+
+        <com.android.internal.telephony.PhoneFactory: int SOCKET_OPEN_MAX_RETRY> = 3;
+
+        <com.android.internal.telephony.PhoneFactory: java.lang.String LOG_TAG> = "GSM";
+
+        $r0 = new java.util.ArrayList;
+
+        specialinvoke $r0.<java.util.ArrayList: void <init>()>();
+
+        <com.android.internal.telephony.PhoneFactory: java.util.ArrayList sPhones> = $r0;
+
+        <com.android.internal.telephony.PhoneFactory: boolean sMadeDefaults> = 0;
+
+        return;
+    }
+
+    public void <init>()
+    {
+        com.android.internal.telephony.PhoneFactory $r0;
+
+        $r0 := @this: com.android.internal.telephony.PhoneFactory;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static com.android.internal.telephony.Phone getDefaultPhone()
+    {
+        boolean $z0;
+        java.lang.IllegalStateException $r0;
+        android.os.Looper $r1, $r2;
+        java.lang.RuntimeException $r3;
+        java.util.ArrayList $r4, $r5;
+        com.android.internal.telephony.Phone $r6;
+        java.lang.Object $r7;
+        java.lang.Throwable $r8;
+
+        $z0 = <com.android.internal.telephony.PhoneFactory: boolean sMadeDefaults>;
+
+        if $z0 != 0 goto label1;
+
+        $r0 = new java.lang.IllegalStateException;
+
+        specialinvoke $r0.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Default phones haven\'t been made yet!");
+
+        throw $r0;
+
+     label1:
+        $r1 = <com.android.internal.telephony.PhoneFactory: android.os.Looper sLooper>;
+
+        $r2 = staticinvoke <android.os.Looper: android.os.Looper myLooper()>();
+
+        if $r1 == $r2 goto label2;
+
+        $r3 = new java.lang.RuntimeException;
+
+        specialinvoke $r3.<java.lang.RuntimeException: void <init>(java.lang.String)>("PhoneFactory.getDefaultPhone must be called from Looper thread");
+
+        throw $r3;
+
+     label2:
+        $r4 = <com.android.internal.telephony.PhoneFactory: java.util.ArrayList sPhones>;
+
+        entermonitor $r4;
+
+     label3:
+        $r5 = <com.android.internal.telephony.PhoneFactory: java.util.ArrayList sPhones>;
+
+        $z0 = virtualinvoke $r5.<java.util.ArrayList: boolean isEmpty()>();
+
+        if $z0 == 0 goto label6;
+
+        $r6 = null;
+
+     label4:
+        exitmonitor $r4;
+
+     label5:
+        return $r6;
+
+     label6:
+        $r5 = <com.android.internal.telephony.PhoneFactory: java.util.ArrayList sPhones>;
+
+        $r7 = virtualinvoke $r5.<java.util.ArrayList: java.lang.Object get(int)>(0);
+
+        $r6 = (com.android.internal.telephony.Phone) $r7;
+
+        goto label4;
+
+     label7:
+        $r8 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label8:
+        throw $r8;
+
+        catch java.lang.Throwable from label3 to label5 with label7;
+        catch java.lang.Throwable from label6 to label8 with label7;
+    }
+
+    public static void makeDefaultPhones(android.content.Context)
+    {
+        android.content.Context $r0;
+        com.android.internal.telephony.gsm.GSMPhone $r1;
+        boolean $z0;
+        android.os.Looper $r2;
+        java.lang.RuntimeException $r3;
+        java.lang.Throwable $r4;
+        int $i0;
+        android.net.LocalServerSocket $r5;
+        com.android.internal.telephony.DefaultPhoneNotifier $r6;
+        java.lang.String $r7;
+        java.io.IOException $r8;
+        java.lang.InterruptedException $r9;
+        com.android.internal.telephony.test.SimulatedCommands $r10;
+        com.android.internal.telephony.PhoneNotifier $r11;
+
+        $r0 := @parameter0: android.content.Context;
+
+        entermonitor class "com/android/internal/telephony/Phone";
+
+     label01:
+        $z0 = <com.android.internal.telephony.PhoneFactory: boolean sMadeDefaults>;
+
+        if $z0 != 0 goto label11;
+
+        $r2 = staticinvoke <android.os.Looper: android.os.Looper myLooper()>();
+
+        <com.android.internal.telephony.PhoneFactory: android.os.Looper sLooper> = $r2;
+
+        $r2 = <com.android.internal.telephony.PhoneFactory: android.os.Looper sLooper>;
+
+        if $r2 != null goto label04;
+
+        $r3 = new java.lang.RuntimeException;
+
+        specialinvoke $r3.<java.lang.RuntimeException: void <init>(java.lang.String)>("PhoneFactory.makeDefaultPhones must be called from Looper thread");
+
+        throw $r3;
+
+     label02:
+        $r4 := @caughtexception;
+
+        exitmonitor class "com/android/internal/telephony/Phone";
+
+     label03:
+        throw $r4;
+
+     label04:
+        $i0 = 0;
+
+     label05:
+        $z0 = 0;
+
+        $i0 = $i0 + 1;
+
+     label06:
+        $r5 = new android.net.LocalServerSocket;
+
+     label07:
+        specialinvoke $r5.<android.net.LocalServerSocket: void <init>(java.lang.String)>("com.android.internal.telephony");
+
+     label08:
+        if $z0 != 0 goto label14;
+
+     label09:
+        $r6 = new com.android.internal.telephony.DefaultPhoneNotifier;
+
+        specialinvoke $r6.<com.android.internal.telephony.DefaultPhoneNotifier: void <init>()>();
+
+        <com.android.internal.telephony.PhoneFactory: com.android.internal.telephony.PhoneNotifier sPhoneNotifier> = $r6;
+
+        $r7 = staticinvoke <android.os.SystemProperties: java.lang.String get(java.lang.String,java.lang.String)>("ro.radio.noril", "");
+
+        $z0 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z0 == 0 goto label18;
+
+        staticinvoke <com.android.internal.telephony.PhoneFactory: void useNewRIL(android.content.Context)>($r0);
+
+     label10:
+        <com.android.internal.telephony.PhoneFactory: boolean sMadeDefaults> = 1;
+
+     label11:
+        exitmonitor class "com/android/internal/telephony/Phone";
+
+     label12:
+        return;
+
+     label13:
+        $r8 := @caughtexception;
+
+        $z0 = 1;
+
+        goto label08;
+
+     label14:
+        if $i0 <= 3 goto label15;
+
+        $r3 = new java.lang.RuntimeException;
+
+        specialinvoke $r3.<java.lang.RuntimeException: void <init>(java.lang.String)>("PhoneFactory probably already running");
+
+        throw $r3;
+
+     label15:
+        staticinvoke <java.lang.Thread: void sleep(long)>(2000L);
+
+     label16:
+        goto label05;
+
+     label17:
+        $r9 := @caughtexception;
+
+        goto label05;
+
+     label18:
+        $r1 = new com.android.internal.telephony.gsm.GSMPhone;
+
+        $r10 = new com.android.internal.telephony.test.SimulatedCommands;
+
+        specialinvoke $r10.<com.android.internal.telephony.test.SimulatedCommands: void <init>()>();
+
+        $r11 = <com.android.internal.telephony.PhoneFactory: com.android.internal.telephony.PhoneNotifier sPhoneNotifier>;
+
+        specialinvoke $r1.<com.android.internal.telephony.gsm.GSMPhone: void <init>(android.content.Context,com.android.internal.telephony.gsm.CommandsInterface,com.android.internal.telephony.PhoneNotifier)>($r0, $r10, $r11);
+
+        staticinvoke <com.android.internal.telephony.PhoneFactory: void registerPhone(com.android.internal.telephony.Phone)>($r1);
+
+     label19:
+        goto label10;
+
+        catch java.lang.Throwable from label01 to label03 with label02;
+        catch java.io.IOException from label07 to label08 with label13;
+        catch java.lang.Throwable from label06 to label08 with label02;
+        catch java.lang.Throwable from label09 to label12 with label02;
+        catch java.lang.Throwable from label13 to label15 with label02;
+        catch java.lang.InterruptedException from label15 to label16 with label17;
+        catch java.lang.Throwable from label15 to label16 with label02;
+        catch java.lang.Throwable from label18 to label19 with label02;
+    }
+
+    public static void registerPhone(com.android.internal.telephony.Phone)
+    {
+        com.android.internal.telephony.Phone $r0;
+        android.os.Looper $r1, $r2;
+        java.lang.RuntimeException $r3;
+        java.util.ArrayList $r4, $r5;
+        java.lang.Throwable $r6;
+
+        $r0 := @parameter0: com.android.internal.telephony.Phone;
+
+        $r2 = <com.android.internal.telephony.PhoneFactory: android.os.Looper sLooper>;
+
+        $r1 = staticinvoke <android.os.Looper: android.os.Looper myLooper()>();
+
+        if $r2 == $r1 goto label1;
+
+        $r3 = new java.lang.RuntimeException;
+
+        specialinvoke $r3.<java.lang.RuntimeException: void <init>(java.lang.String)>("PhoneFactory.getDefaultPhone must be called from Looper thread");
+
+        throw $r3;
+
+     label1:
+        $r4 = <com.android.internal.telephony.PhoneFactory: java.util.ArrayList sPhones>;
+
+        entermonitor $r4;
+
+     label2:
+        $r5 = <com.android.internal.telephony.PhoneFactory: java.util.ArrayList sPhones>;
+
+        virtualinvoke $r5.<java.util.ArrayList: boolean add(java.lang.Object)>($r0);
+
+        exitmonitor $r4;
+
+     label3:
+        return;
+
+     label4:
+        $r6 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label5:
+        throw $r6;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    private static void useNewRIL(android.content.Context)
+    {
+        android.content.Context $r0;
+        com.android.internal.telephony.gsm.GSMPhone $r1;
+        com.android.internal.telephony.gsm.RIL $r2;
+        com.android.internal.telephony.PhoneNotifier $r3;
+        java.io.IOException $r4;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 = new com.android.internal.telephony.gsm.GSMPhone;
+
+        $r2 = new com.android.internal.telephony.gsm.RIL;
+
+     label1:
+        specialinvoke $r2.<com.android.internal.telephony.gsm.RIL: void <init>(android.content.Context)>($r0);
+
+        $r3 = <com.android.internal.telephony.PhoneFactory: com.android.internal.telephony.PhoneNotifier sPhoneNotifier>;
+
+        specialinvoke $r1.<com.android.internal.telephony.gsm.GSMPhone: void <init>(android.content.Context,com.android.internal.telephony.gsm.CommandsInterface,com.android.internal.telephony.PhoneNotifier)>($r0, $r2, $r3);
+
+        staticinvoke <com.android.internal.telephony.PhoneFactory: void registerPhone(com.android.internal.telephony.Phone)>($r1);
+
+     label2:
+        return;
+
+     label3:
+        $r4 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("GSM", "Error creating ModelInterpreter", $r4);
+
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+}

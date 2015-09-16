@@ -1,0 +1,518 @@
+public class com.google.masf.protocol.BodyPart extends java.lang.Object implements com.google.masf.InputStreamProvider
+{
+    private java.lang.String contentId;
+    private byte[] header;
+    private java.lang.String mimeType;
+    private final com.google.masf.InputStreamProvider payloadStreamProvider;
+    private java.util.Hashtable properties;
+
+    public void <init>(java.lang.String, com.google.masf.InputStreamProvider)
+    {
+        com.google.masf.protocol.BodyPart $r0;
+        java.lang.String $r1;
+        com.google.masf.InputStreamProvider $r2;
+
+        $r0 := @this: com.google.masf.protocol.BodyPart;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: com.google.masf.InputStreamProvider;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r0.<com.google.masf.protocol.BodyPart: java.lang.String mimeType> = $r1;
+
+        $r0.<com.google.masf.protocol.BodyPart: com.google.masf.InputStreamProvider payloadStreamProvider> = $r2;
+
+        return;
+    }
+
+    public void <init>(java.lang.String, java.lang.String)
+    {
+        com.google.masf.protocol.BodyPart $r0;
+        java.lang.String $r1, $r2;
+        byte[] $r3;
+        com.google.masf.ByteArrayInputStreamProvider $r4, $r5;
+        java.io.IOException $r6;
+
+        $r0 := @this: com.google.masf.protocol.BodyPart;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r4 = null;
+
+        $r0.<com.google.masf.protocol.BodyPart: java.lang.String mimeType> = $r1;
+
+        $r5 = new com.google.masf.ByteArrayInputStreamProvider;
+
+     label1:
+        $r3 = virtualinvoke $r2.<java.lang.String: byte[] getBytes(java.lang.String)>("UTF-8");
+
+        specialinvoke $r5.<com.google.masf.ByteArrayInputStreamProvider: void <init>(byte[])>($r3);
+
+     label2:
+        $r4 = $r5;
+
+     label3:
+        $r0.<com.google.masf.protocol.BodyPart: com.google.masf.InputStreamProvider payloadStreamProvider> = $r4;
+
+        return;
+
+     label4:
+        $r6 := @caughtexception;
+
+        goto label3;
+
+        catch java.io.IOException from label1 to label2 with label4;
+    }
+
+    public void <init>(java.lang.String, byte[])
+    {
+        com.google.masf.protocol.BodyPart $r0;
+        java.lang.String $r1;
+        byte[] $r2;
+        com.google.masf.ByteArrayInputStreamProvider $r3;
+
+        $r0 := @this: com.google.masf.protocol.BodyPart;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: byte[];
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r0.<com.google.masf.protocol.BodyPart: java.lang.String mimeType> = $r1;
+
+        $r3 = new com.google.masf.ByteArrayInputStreamProvider;
+
+        specialinvoke $r3.<com.google.masf.ByteArrayInputStreamProvider: void <init>(byte[])>($r2);
+
+        $r0.<com.google.masf.protocol.BodyPart: com.google.masf.InputStreamProvider payloadStreamProvider> = $r3;
+
+        return;
+    }
+
+    public static com.google.masf.protocol.BodyPart fromInputStream(java.io.InputStream) throws java.io.IOException
+    {
+        java.io.InputStream $r0;
+        java.io.DataInputStream $r1;
+        short $s0;
+        java.lang.String $r2, $r3, $r7, $r8;
+        int $i1;
+        java.util.Hashtable $r4;
+        java.util.Enumeration $r5;
+        boolean $z0;
+        java.lang.Object $r6;
+        java.io.PrintStream $r9;
+        java.lang.StringBuilder $r10;
+        com.google.masf.DelimitedInputStream $r11;
+        com.google.masf.protocol.EncodedPayload $r12;
+        com.google.masf.protocol.BodyPart $r13;
+
+        $r0 := @parameter0: java.io.InputStream;
+
+        $r1 = new java.io.DataInputStream;
+
+        specialinvoke $r1.<java.io.DataInputStream: void <init>(java.io.InputStream)>($r0);
+
+        $s0 = virtualinvoke $r1.<java.io.DataInputStream: short readShort()>();
+
+        $r2 = virtualinvoke $r1.<java.io.DataInputStream: java.lang.String readUTF()>();
+
+        $r3 = $r2;
+
+        $i1 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        if $i1 != 0 goto label1;
+
+        $r3 = staticinvoke <com.google.masf.protocol.HttpUtil: java.lang.String getLongMimeType(int)>($s0);
+
+     label1:
+        $r2 = virtualinvoke $r1.<java.io.DataInputStream: java.lang.String readUTF()>();
+
+        $r4 = staticinvoke <com.google.masf.protocol.HttpUtil: java.util.Hashtable readProperties(java.io.DataInputStream)>($r1);
+
+        $r5 = virtualinvoke $r4.<java.util.Hashtable: java.util.Enumeration keys()>();
+
+     label2:
+        $z0 = interfaceinvoke $r5.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label3;
+
+        $r6 = interfaceinvoke $r5.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        $r7 = (java.lang.String) $r6;
+
+        $r6 = virtualinvoke $r4.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r7);
+
+        $r8 = (java.lang.String) $r6;
+
+        $r9 = <java.lang.System: java.io.PrintStream out>;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" => ");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r7 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r9.<java.io.PrintStream: void println(java.lang.String)>($r7);
+
+        goto label2;
+
+     label3:
+        $i1 = virtualinvoke $r1.<java.io.DataInputStream: int readInt()>();
+
+        $r7 = virtualinvoke $r1.<java.io.DataInputStream: java.lang.String readUTF()>();
+
+        $r11 = new com.google.masf.DelimitedInputStream;
+
+        specialinvoke $r11.<com.google.masf.DelimitedInputStream: void <init>(java.io.InputStream,int)>($r1, $i1);
+
+        $r12 = new com.google.masf.protocol.EncodedPayload;
+
+        specialinvoke $r12.<com.google.masf.protocol.EncodedPayload: void <init>(java.lang.String,int,com.google.masf.DelimitedInputStream)>($r7, -1, $r11);
+
+        virtualinvoke $r11.<com.google.masf.DelimitedInputStream: void bufferAndDetach()>();
+
+        $r13 = new com.google.masf.protocol.BodyPart;
+
+        specialinvoke $r13.<com.google.masf.protocol.BodyPart: void <init>(java.lang.String,com.google.masf.InputStreamProvider)>($r3, $r12);
+
+        $r13.<com.google.masf.protocol.BodyPart: java.util.Hashtable properties> = $r4;
+
+        $r13.<com.google.masf.protocol.BodyPart: java.lang.String contentId> = $r2;
+
+        return $r13;
+    }
+
+    private void generateHeader() throws java.io.IOException
+    {
+        com.google.masf.protocol.BodyPart $r0;
+        java.io.DataOutputStream $r1;
+        java.io.ByteArrayOutputStream $r2;
+        java.lang.String $r3;
+        java.util.Hashtable $r4;
+        com.google.masf.InputStreamProvider $r5;
+        int $i0;
+        byte[] $r6;
+        java.lang.Throwable $r7;
+
+        $r0 := @this: com.google.masf.protocol.BodyPart;
+
+        entermonitor $r0;
+
+     label1:
+        $r2 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r2.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        $r1 = new java.io.DataOutputStream;
+
+        specialinvoke $r1.<java.io.DataOutputStream: void <init>(java.io.OutputStream)>($r2);
+
+        $r3 = virtualinvoke $r0.<com.google.masf.protocol.BodyPart: java.lang.String getMimeType()>();
+
+        staticinvoke <com.google.masf.protocol.HttpUtil: void writeContentType(java.io.DataOutputStream,java.lang.String)>($r1, $r3);
+
+        $r3 = virtualinvoke $r0.<com.google.masf.protocol.BodyPart: java.lang.String getContentId()>();
+
+        virtualinvoke $r1.<java.io.DataOutputStream: void writeUTF(java.lang.String)>($r3);
+
+        $r4 = virtualinvoke $r0.<com.google.masf.protocol.BodyPart: java.util.Hashtable getProperties()>();
+
+        staticinvoke <com.google.masf.protocol.HttpUtil: void writeProperties(java.io.DataOutputStream,java.util.Hashtable,java.lang.String)>($r1, $r4, null);
+
+        $r5 = $r0.<com.google.masf.protocol.BodyPart: com.google.masf.InputStreamProvider payloadStreamProvider>;
+
+        $i0 = interfaceinvoke $r5.<com.google.masf.InputStreamProvider: int getStreamLength()>();
+
+        virtualinvoke $r1.<java.io.DataOutputStream: void writeInt(int)>($i0);
+
+        $r5 = $r0.<com.google.masf.protocol.BodyPart: com.google.masf.InputStreamProvider payloadStreamProvider>;
+
+        $i0 = interfaceinvoke $r5.<com.google.masf.InputStreamProvider: int getStreamLength()>();
+
+        if $i0 <= 0 goto label2;
+
+        virtualinvoke $r1.<java.io.DataOutputStream: void writeUTF(java.lang.String)>("");
+
+     label2:
+        virtualinvoke $r1.<java.io.FilterOutputStream: void close()>();
+
+        virtualinvoke $r2.<java.io.ByteArrayOutputStream: void close()>();
+
+        $r6 = virtualinvoke $r2.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        $r0.<com.google.masf.protocol.BodyPart: byte[] header> = $r6;
+
+     label3:
+        exitmonitor $r0;
+
+        return;
+
+     label4:
+        $r7 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r7;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+    }
+
+    public void dispose()
+    {
+        com.google.masf.protocol.BodyPart $r0;
+        com.google.masf.InputStreamProvider $r1;
+
+        $r0 := @this: com.google.masf.protocol.BodyPart;
+
+        $r1 = $r0.<com.google.masf.protocol.BodyPart: com.google.masf.InputStreamProvider payloadStreamProvider>;
+
+        interfaceinvoke $r1.<com.google.masf.InputStreamProvider: void dispose()>();
+
+        return;
+    }
+
+    public java.lang.String getContentId()
+    {
+        com.google.masf.protocol.BodyPart $r0;
+        java.lang.String $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: com.google.masf.protocol.BodyPart;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = $r0.<com.google.masf.protocol.BodyPart: java.lang.String contentId>;
+
+        if $r1 == null goto label3;
+
+        $r1 = $r0.<com.google.masf.protocol.BodyPart: java.lang.String contentId>;
+
+     label2:
+        exitmonitor $r0;
+
+        return $r1;
+
+     label3:
+        $r1 = "";
+
+     label4:
+        goto label2;
+
+     label5:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+    }
+
+    public java.io.InputStream getInputStream() throws java.io.IOException
+    {
+        com.google.masf.protocol.BodyPart $r0;
+        com.google.common.io.SequenceInputStream $r1;
+        java.io.ByteArrayInputStream $r2;
+        java.io.InputStream $r3;
+        byte[] $r4;
+        com.google.masf.InputStreamProvider $r5;
+
+        $r0 := @this: com.google.masf.protocol.BodyPart;
+
+        specialinvoke $r0.<com.google.masf.protocol.BodyPart: void generateHeader()>();
+
+        $r1 = new com.google.common.io.SequenceInputStream;
+
+        $r2 = new java.io.ByteArrayInputStream;
+
+        $r4 = $r0.<com.google.masf.protocol.BodyPart: byte[] header>;
+
+        specialinvoke $r2.<java.io.ByteArrayInputStream: void <init>(byte[])>($r4);
+
+        $r5 = $r0.<com.google.masf.protocol.BodyPart: com.google.masf.InputStreamProvider payloadStreamProvider>;
+
+        $r3 = interfaceinvoke $r5.<com.google.masf.InputStreamProvider: java.io.InputStream getInputStream()>();
+
+        specialinvoke $r1.<com.google.common.io.SequenceInputStream: void <init>(java.io.InputStream,java.io.InputStream)>($r2, $r3);
+
+        return $r1;
+    }
+
+    public java.lang.String getMimeType()
+    {
+        com.google.masf.protocol.BodyPart $r0;
+        java.lang.String r1;
+
+        $r0 := @this: com.google.masf.protocol.BodyPart;
+
+        r1 = $r0.<com.google.masf.protocol.BodyPart: java.lang.String mimeType>;
+
+        return r1;
+    }
+
+    public com.google.masf.InputStreamProvider getPayloadProvider()
+    {
+        com.google.masf.protocol.BodyPart $r0;
+        com.google.masf.InputStreamProvider r1;
+
+        $r0 := @this: com.google.masf.protocol.BodyPart;
+
+        r1 = $r0.<com.google.masf.protocol.BodyPart: com.google.masf.InputStreamProvider payloadStreamProvider>;
+
+        return r1;
+    }
+
+    public java.util.Hashtable getProperties()
+    {
+        com.google.masf.protocol.BodyPart $r0;
+        java.util.Hashtable $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: com.google.masf.protocol.BodyPart;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = $r0.<com.google.masf.protocol.BodyPart: java.util.Hashtable properties>;
+
+        if $r1 != null goto label2;
+
+        $r1 = new java.util.Hashtable;
+
+        specialinvoke $r1.<java.util.Hashtable: void <init>()>();
+
+        $r0.<com.google.masf.protocol.BodyPart: java.util.Hashtable properties> = $r1;
+
+     label2:
+        $r1 = $r0.<com.google.masf.protocol.BodyPart: java.util.Hashtable properties>;
+
+     label3:
+        exitmonitor $r0;
+
+        return $r1;
+
+     label4:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+    }
+
+    public int getStreamLength() throws java.io.IOException
+    {
+        com.google.masf.protocol.BodyPart $r0;
+        int $i0, $i1;
+        byte[] $r1;
+        com.google.masf.InputStreamProvider $r2;
+
+        $r0 := @this: com.google.masf.protocol.BodyPart;
+
+        specialinvoke $r0.<com.google.masf.protocol.BodyPart: void generateHeader()>();
+
+        $r1 = $r0.<com.google.masf.protocol.BodyPart: byte[] header>;
+
+        $i1 = lengthof $r1;
+
+        $r2 = $r0.<com.google.masf.protocol.BodyPart: com.google.masf.InputStreamProvider payloadStreamProvider>;
+
+        $i0 = interfaceinvoke $r2.<com.google.masf.InputStreamProvider: int getStreamLength()>();
+
+        $i0 = $i1 + $i0;
+
+        return $i0;
+    }
+
+    public void setConnectionProperty(java.lang.String, java.lang.String)
+    {
+        com.google.masf.protocol.BodyPart $r0;
+        java.lang.String $r1, $r2;
+        java.util.Hashtable $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: com.google.masf.protocol.BodyPart;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        $r3 = $r0.<com.google.masf.protocol.BodyPart: java.util.Hashtable properties>;
+
+        if $r3 != null goto label2;
+
+        $r3 = new java.util.Hashtable;
+
+        specialinvoke $r3.<java.util.Hashtable: void <init>()>();
+
+        $r0.<com.google.masf.protocol.BodyPart: java.util.Hashtable properties> = $r3;
+
+     label2:
+        $r3 = $r0.<com.google.masf.protocol.BodyPart: java.util.Hashtable properties>;
+
+        virtualinvoke $r3.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, $r2);
+
+     label3:
+        exitmonitor $r0;
+
+        return;
+
+     label4:
+        $r4 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+    }
+
+    public void setContentId(java.lang.String)
+    {
+        com.google.masf.protocol.BodyPart $r0;
+        java.lang.String $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: com.google.masf.protocol.BodyPart;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor $r0;
+
+     label1:
+        $r0.<com.google.masf.protocol.BodyPart: java.lang.String contentId> = $r1;
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+}

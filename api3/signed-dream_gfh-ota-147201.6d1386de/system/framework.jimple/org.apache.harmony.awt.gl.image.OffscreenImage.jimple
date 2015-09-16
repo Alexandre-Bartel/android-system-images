@@ -1,0 +1,1656 @@
+public class org.apache.harmony.awt.gl.image.OffscreenImage extends java.awt.Image implements java.awt.image.ImageConsumer
+{
+    static final java.awt.image.ColorModel rgbCM;
+    java.awt.image.ColorModel cm;
+    int height;
+    int hints;
+    java.awt.image.BufferedImage image;
+    int imageState;
+    private org.apache.harmony.awt.gl.ImageSurface imageSurf;
+    boolean isIntRGB;
+    java.util.Vector observers;
+    private boolean producing;
+    java.util.Hashtable properties;
+    java.awt.image.WritableRaster raster;
+    java.awt.image.ImageProducer src;
+    int width;
+
+    static void <clinit>()
+    {
+        java.awt.image.ColorModel $r0;
+
+        $r0 = staticinvoke <java.awt.image.ColorModel: java.awt.image.ColorModel getRGBdefault()>();
+
+        <org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel rgbCM> = $r0;
+
+        return;
+    }
+
+    public void <init>(java.awt.image.ImageProducer)
+    {
+        org.apache.harmony.awt.gl.image.OffscreenImage $r0;
+        java.awt.image.ImageProducer $r1;
+        java.util.Vector $r2;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.OffscreenImage;
+
+        $r1 := @parameter0: java.awt.image.ImageProducer;
+
+        specialinvoke $r0.<java.awt.Image: void <init>()>();
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int imageState> = 0;
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ImageProducer src> = $r1;
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int width> = -1;
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int height> = -1;
+
+        $r2 = new java.util.Vector;
+
+        specialinvoke $r2.<java.util.Vector: void <init>()>();
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.util.Vector observers> = $r2;
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: boolean producing> = 0;
+
+        return;
+    }
+
+    private void addObserver(java.awt.image.ImageObserver)
+    {
+        org.apache.harmony.awt.gl.image.OffscreenImage $r0;
+        java.awt.image.ImageObserver $r1;
+        boolean $z0;
+        java.util.Vector $r2;
+        int $i0, $i1, $i2;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.OffscreenImage;
+
+        $r1 := @parameter0: java.awt.image.ImageObserver;
+
+        if $r1 == null goto label4;
+
+        $r2 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.util.Vector observers>;
+
+        $z0 = virtualinvoke $r2.<java.util.Vector: boolean contains(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $i0 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int imageState>;
+
+        $i0 = $i0 & 64;
+
+        if $i0 == 0 goto label2;
+
+        interfaceinvoke $r1.<java.awt.image.ImageObserver: boolean imageUpdate(java.awt.Image,int,int,int,int,int)>($r0, 192, -1, -1, -1, -1);
+
+        return;
+
+     label2:
+        $i0 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int imageState>;
+
+        $i0 = $i0 & 32;
+
+        if $i0 == 0 goto label3;
+
+        $i0 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int imageState>;
+
+        $i1 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int width>;
+
+        $i2 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int height>;
+
+        interfaceinvoke $r1.<java.awt.image.ImageObserver: boolean imageUpdate(java.awt.Image,int,int,int,int,int)>($r0, $i0, 0, 0, $i1, $i2);
+
+        return;
+
+     label3:
+        $r2 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.util.Vector observers>;
+
+        virtualinvoke $r2.<java.util.Vector: void addElement(java.lang.Object)>($r1);
+
+        return;
+
+     label4:
+        return;
+    }
+
+    private void createRaster()
+    {
+        org.apache.harmony.awt.gl.image.OffscreenImage $r0;
+        java.awt.image.ColorModel $r1;
+        int $i0, $i1;
+        java.awt.image.WritableRaster $r2;
+        boolean $z0;
+        java.awt.image.DirectColorModel $r3;
+        java.lang.Exception $r4;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.OffscreenImage;
+
+     label01:
+        $r1 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel cm>;
+
+        $i0 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int width>;
+
+        $i1 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int height>;
+
+        $r2 = virtualinvoke $r1.<java.awt.image.ColorModel: java.awt.image.WritableRaster createCompatibleWritableRaster(int,int)>($i0, $i1);
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.WritableRaster raster> = $r2;
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: boolean isIntRGB> = 0;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel cm>;
+
+     label02:
+        $z0 = $r1 instanceof java.awt.image.DirectColorModel;
+
+     label03:
+        if $z0 == 0 goto label06;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel cm>;
+
+        $r3 = (java.awt.image.DirectColorModel) $r1;
+
+        $i0 = virtualinvoke $r3.<java.awt.image.ColorModel: int getTransferType()>();
+
+        if $i0 != 3 goto label07;
+
+        $i0 = virtualinvoke $r3.<java.awt.image.DirectColorModel: int getRedMask()>();
+
+        if $i0 != 16711680 goto label08;
+
+        $i0 = virtualinvoke $r3.<java.awt.image.DirectColorModel: int getGreenMask()>();
+
+        if $i0 != 65280 goto label09;
+
+        $i0 = virtualinvoke $r3.<java.awt.image.DirectColorModel: int getBlueMask()>();
+
+        if $i0 != 255 goto label10;
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: boolean isIntRGB> = 1;
+
+     label04:
+        return;
+
+     label05:
+        $r4 := @caughtexception;
+
+        $r1 = staticinvoke <java.awt.image.ColorModel: java.awt.image.ColorModel getRGBdefault()>();
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel cm> = $r1;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel cm>;
+
+        $i0 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int width>;
+
+        $i1 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int height>;
+
+        $r2 = virtualinvoke $r1.<java.awt.image.ColorModel: java.awt.image.WritableRaster createCompatibleWritableRaster(int,int)>($i0, $i1);
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.WritableRaster raster> = $r2;
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: boolean isIntRGB> = 1;
+
+        return;
+
+     label06:
+        return;
+
+     label07:
+        return;
+
+     label08:
+        return;
+
+     label09:
+        return;
+
+     label10:
+        return;
+
+        catch java.lang.Exception from label01 to label02 with label05;
+        catch java.lang.Exception from label03 to label04 with label05;
+    }
+
+    private void forceToIntARGB()
+    {
+        org.apache.harmony.awt.gl.image.OffscreenImage $r0;
+        int[] $r1, $r6;
+        java.awt.image.WritableRaster $r2, $r7;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.awt.image.ColorModel $r3;
+        java.lang.Object $r4, $r8;
+        boolean $z0;
+        java.awt.image.IndexColorModel $r5;
+        byte[] $r9;
+        byte $b5;
+        short $s6;
+        org.apache.harmony.awt.gl.ImageSurface $r10;
+        java.awt.image.BufferedImage $r11;
+        java.lang.Throwable $r12;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.OffscreenImage;
+
+        $r2 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.WritableRaster raster>;
+
+        $i0 = virtualinvoke $r2.<java.awt.image.Raster: int getWidth()>();
+
+        $r2 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.WritableRaster raster>;
+
+        $i1 = virtualinvoke $r2.<java.awt.image.Raster: int getHeight()>();
+
+        $r3 = <org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel rgbCM>;
+
+        $r2 = virtualinvoke $r3.<java.awt.image.ColorModel: java.awt.image.WritableRaster createCompatibleWritableRaster(int,int)>($i0, $i1);
+
+        $r4 = null;
+
+        $r1 = newarray (int)[$i0];
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel cm>;
+
+        $z0 = $r3 instanceof java.awt.image.IndexColorModel;
+
+        if $z0 == 0 goto label04;
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel cm>;
+
+        $r5 = (java.awt.image.IndexColorModel) $r3;
+
+        $i2 = virtualinvoke $r5.<java.awt.image.IndexColorModel: int getMapSize()>();
+
+        $r6 = newarray (int)[$i2];
+
+        virtualinvoke $r5.<java.awt.image.IndexColorModel: void getRGBs(int[])>($r6);
+
+        $i2 = 0;
+
+     label01:
+        if $i2 >= $i1 goto label08;
+
+        $r7 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.WritableRaster raster>;
+
+        $r8 = virtualinvoke $r7.<java.awt.image.Raster: java.lang.Object getDataElements(int,int,int,int,java.lang.Object)>(0, $i2, $i0, 1, $r4);
+
+        $r4 = $r8;
+
+        $r9 = (byte[]) $r8;
+
+        $r9 = (byte[]) $r9;
+
+        $i3 = 0;
+
+     label02:
+        $i4 = lengthof $r9;
+
+        if $i3 >= $i4 goto label03;
+
+        $b5 = $r9[$i3];
+
+        $s6 = $b5 & 255;
+
+        $i4 = $r6[$s6];
+
+        $r1[$i3] = $i4;
+
+        $i3 = $i3 + 1;
+
+        goto label02;
+
+     label03:
+        virtualinvoke $r2.<java.awt.image.WritableRaster: void setDataElements(int,int,int,int,java.lang.Object)>(0, $i2, $i0, 1, $r1);
+
+        $i2 = $i2 + 1;
+
+        goto label01;
+
+     label04:
+        $i2 = 0;
+
+        $r4 = null;
+
+     label05:
+        if $i2 >= $i1 goto label08;
+
+        $i3 = 0;
+
+     label06:
+        if $i3 >= $i0 goto label07;
+
+        $r7 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.WritableRaster raster>;
+
+        $r4 = virtualinvoke $r7.<java.awt.image.Raster: java.lang.Object getDataElements(int,int,java.lang.Object)>($i3, $i2, $r4);
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel cm>;
+
+        $i4 = virtualinvoke $r3.<java.awt.image.ColorModel: int getRGB(java.lang.Object)>($r4);
+
+        $r1[$i3] = $i4;
+
+        $i3 = $i3 + 1;
+
+        goto label06;
+
+     label07:
+        virtualinvoke $r2.<java.awt.image.WritableRaster: void setDataElements(int,int,int,int,java.lang.Object)>(0, $i2, $i0, 1, $r1);
+
+        $i2 = $i2 + 1;
+
+        goto label05;
+
+     label08:
+        entermonitor $r0;
+
+     label09:
+        $r10 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: org.apache.harmony.awt.gl.ImageSurface imageSurf>;
+
+        if $r10 == null goto label10;
+
+        $r10 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: org.apache.harmony.awt.gl.ImageSurface imageSurf>;
+
+        virtualinvoke $r10.<org.apache.harmony.awt.gl.ImageSurface: void dispose()>();
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: org.apache.harmony.awt.gl.ImageSurface imageSurf> = null;
+
+     label10:
+        $r11 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.BufferedImage image>;
+
+        if $r11 == null goto label11;
+
+        $r11 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.BufferedImage image>;
+
+        virtualinvoke $r11.<java.awt.image.BufferedImage: void flush()>();
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.BufferedImage image> = null;
+
+     label11:
+        $r3 = <org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel rgbCM>;
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel cm> = $r3;
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.WritableRaster raster> = $r2;
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: boolean isIntRGB> = 1;
+
+        exitmonitor $r0;
+
+     label12:
+        return;
+
+     label13:
+        $r12 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label14:
+        throw $r12;
+
+        catch java.lang.Throwable from label09 to label12 with label13;
+        catch java.lang.Throwable from label13 to label14 with label13;
+    }
+
+    private void imageUpdate(java.awt.Image, int, int, int, int, int)
+    {
+        org.apache.harmony.awt.gl.image.OffscreenImage $r0;
+        java.awt.Image $r1;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        java.util.Vector $r2;
+        java.util.Iterator $r3;
+        boolean $z0;
+        java.lang.Object $r4;
+        java.awt.image.ImageObserver $r5;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.OffscreenImage;
+
+        $r1 := @parameter0: java.awt.Image;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        $i3 := @parameter4: int;
+
+        $i4 := @parameter5: int;
+
+        $i5 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int imageState>;
+
+        $i5 = $i5 | $i0;
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int imageState> = $i5;
+
+        $r2 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.util.Vector observers>;
+
+        $r3 = virtualinvoke $r2.<java.util.AbstractList: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        $r5 = (java.awt.image.ImageObserver) $r4;
+
+        interfaceinvoke $r5.<java.awt.image.ImageObserver: boolean imageUpdate(java.awt.Image,int,int,int,int,int)>($r0, $i0, $i1, $i2, $i3, $i4);
+
+        goto label1;
+
+     label2:
+        return;
+    }
+
+    private void startProduction()
+    {
+        org.apache.harmony.awt.gl.image.OffscreenImage $r0;
+        boolean $z0;
+        int $i0;
+        java.awt.image.ImageProducer $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.OffscreenImage;
+
+        entermonitor $r0;
+
+     label1:
+        $z0 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: boolean producing>;
+
+        if $z0 != 0 goto label2;
+
+        $i0 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int imageState>;
+
+        $i0 = $i0 & -129;
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int imageState> = $i0;
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: boolean producing> = 1;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ImageProducer src>;
+
+        interfaceinvoke $r1.<java.awt.image.ImageProducer: void startProduction(java.awt.image.ImageConsumer)>($r0);
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    private void stopProduction()
+    {
+        org.apache.harmony.awt.gl.image.OffscreenImage $r0;
+        java.awt.image.ImageProducer $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.OffscreenImage;
+
+        entermonitor $r0;
+
+     label1:
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: boolean producing> = 0;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ImageProducer src>;
+
+        interfaceinvoke $r1.<java.awt.image.ImageProducer: void removeConsumer(java.awt.image.ImageConsumer)>($r0);
+
+     label2:
+        exitmonitor $r0;
+
+        return;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public int checkImage(java.awt.image.ImageObserver)
+    {
+        org.apache.harmony.awt.gl.image.OffscreenImage $r0;
+        java.awt.image.ImageObserver $r1;
+        int i0;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.OffscreenImage;
+
+        $r1 := @parameter0: java.awt.image.ImageObserver;
+
+        specialinvoke $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: void addObserver(java.awt.image.ImageObserver)>($r1);
+
+        i0 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int imageState>;
+
+        return i0;
+    }
+
+    public void flush()
+    {
+        org.apache.harmony.awt.gl.image.OffscreenImage $r0;
+        int $i0;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.OffscreenImage;
+
+        specialinvoke $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: void stopProduction()>();
+
+        specialinvoke $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: void imageUpdate(java.awt.Image,int,int,int,int,int)>($r0, 128, -1, -1, -1, -1);
+
+        $i0 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int imageState>;
+
+        $i0 = $i0 & -65;
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int imageState> = $i0;
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int imageState> = 0;
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.BufferedImage image> = null;
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel cm> = null;
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.WritableRaster raster> = null;
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int hints> = 0;
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int width> = -1;
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int height> = -1;
+
+        return;
+    }
+
+    public java.awt.image.BufferedImage getBufferedImage()
+    {
+        org.apache.harmony.awt.gl.image.OffscreenImage $r0;
+        java.awt.image.BufferedImage $r1;
+        java.awt.image.ColorModel $r2;
+        java.awt.image.WritableRaster $r3;
+        boolean $z0;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.OffscreenImage;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.BufferedImage image>;
+
+        if $r1 != null goto label1;
+
+        $r2 = virtualinvoke $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel getColorModel()>();
+
+        $r3 = virtualinvoke $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.WritableRaster getRaster()>();
+
+        if $r2 == null goto label1;
+
+        if $r3 == null goto label1;
+
+        $r1 = new java.awt.image.BufferedImage;
+
+        $z0 = virtualinvoke $r2.<java.awt.image.ColorModel: boolean isAlphaPremultiplied()>();
+
+        specialinvoke $r1.<java.awt.image.BufferedImage: void <init>(java.awt.image.ColorModel,java.awt.image.WritableRaster,boolean,java.util.Hashtable)>($r2, $r3, $z0, null);
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.BufferedImage image> = $r1;
+
+     label1:
+        $r1 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.BufferedImage image>;
+
+        return $r1;
+    }
+
+    public java.awt.image.ColorModel getColorModel()
+    {
+        org.apache.harmony.awt.gl.image.OffscreenImage $r0;
+        java.awt.image.ColorModel $r1;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.OffscreenImage;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel cm>;
+
+        if $r1 != null goto label1;
+
+        specialinvoke $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: void startProduction()>();
+
+     label1:
+        $r1 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel cm>;
+
+        return $r1;
+    }
+
+    public java.awt.Graphics getGraphics()
+    {
+        org.apache.harmony.awt.gl.image.OffscreenImage $r0;
+        java.lang.UnsupportedOperationException $r1;
+        java.lang.String $r2;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.OffscreenImage;
+
+        $r1 = new java.lang.UnsupportedOperationException;
+
+        $r2 = staticinvoke <org.apache.harmony.awt.internal.nls.Messages: java.lang.String getString(java.lang.String)>("awt.39");
+
+        specialinvoke $r1.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>($r2);
+
+        throw $r1;
+    }
+
+    public int getHeight(java.awt.image.ImageObserver)
+    {
+        org.apache.harmony.awt.gl.image.OffscreenImage $r0;
+        java.awt.image.ImageObserver $r1;
+        int $i0;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.OffscreenImage;
+
+        $r1 := @parameter0: java.awt.image.ImageObserver;
+
+        $i0 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int imageState>;
+
+        $i0 = $i0 & 2;
+
+        if $i0 != 0 goto label1;
+
+        specialinvoke $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: void addObserver(java.awt.image.ImageObserver)>($r1);
+
+        specialinvoke $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: void startProduction()>();
+
+        $i0 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int imageState>;
+
+        $i0 = $i0 & 2;
+
+        if $i0 != 0 goto label1;
+
+        return -1;
+
+     label1:
+        $i0 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int height>;
+
+        return $i0;
+    }
+
+    public org.apache.harmony.awt.gl.ImageSurface getImageSurface()
+    {
+        org.apache.harmony.awt.gl.image.OffscreenImage $r0;
+        org.apache.harmony.awt.gl.ImageSurface $r1;
+        java.awt.image.ColorModel $r2;
+        java.awt.image.WritableRaster $r3;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.OffscreenImage;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: org.apache.harmony.awt.gl.ImageSurface imageSurf>;
+
+        if $r1 != null goto label1;
+
+        $r2 = virtualinvoke $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel getColorModel()>();
+
+        $r3 = virtualinvoke $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.WritableRaster getRaster()>();
+
+        if $r2 == null goto label1;
+
+        if $r3 == null goto label1;
+
+        $r1 = new org.apache.harmony.awt.gl.ImageSurface;
+
+        specialinvoke $r1.<org.apache.harmony.awt.gl.ImageSurface: void <init>(java.awt.image.ColorModel,java.awt.image.WritableRaster)>($r2, $r3);
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: org.apache.harmony.awt.gl.ImageSurface imageSurf> = $r1;
+
+     label1:
+        $r1 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: org.apache.harmony.awt.gl.ImageSurface imageSurf>;
+
+        return $r1;
+    }
+
+    public java.lang.Object getProperty(java.lang.String, java.awt.image.ImageObserver)
+    {
+        org.apache.harmony.awt.gl.image.OffscreenImage $r0;
+        java.lang.String $r1;
+        java.awt.image.ImageObserver $r2;
+        java.lang.NullPointerException $r3;
+        java.util.Hashtable $r4;
+        java.lang.Object $r5, $r6;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.OffscreenImage;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.awt.image.ImageObserver;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.lang.NullPointerException;
+
+        $r1 = staticinvoke <org.apache.harmony.awt.internal.nls.Messages: java.lang.String getString(java.lang.String)>("awt.38");
+
+        specialinvoke $r3.<java.lang.NullPointerException: void <init>(java.lang.String)>($r1);
+
+        throw $r3;
+
+     label1:
+        $r4 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.util.Hashtable properties>;
+
+        if $r4 != null goto label2;
+
+        specialinvoke $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: void addObserver(java.awt.image.ImageObserver)>($r2);
+
+        specialinvoke $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: void startProduction()>();
+
+        $r4 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.util.Hashtable properties>;
+
+        if $r4 != null goto label2;
+
+        return null;
+
+     label2:
+        $r4 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.util.Hashtable properties>;
+
+        $r5 = virtualinvoke $r4.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r6 = $r5;
+
+        if $r5 != null goto label3;
+
+        $r6 = <org.apache.harmony.awt.gl.image.OffscreenImage: java.lang.Object UndefinedProperty>;
+
+     label3:
+        return $r6;
+    }
+
+    public java.awt.image.WritableRaster getRaster()
+    {
+        org.apache.harmony.awt.gl.image.OffscreenImage $r0;
+        java.awt.image.WritableRaster $r1;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.OffscreenImage;
+
+        $r1 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.WritableRaster raster>;
+
+        if $r1 != null goto label1;
+
+        specialinvoke $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: void startProduction()>();
+
+     label1:
+        $r1 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.WritableRaster raster>;
+
+        return $r1;
+    }
+
+    public java.awt.image.ImageProducer getSource()
+    {
+        org.apache.harmony.awt.gl.image.OffscreenImage $r0;
+        java.awt.image.ImageProducer r1;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.OffscreenImage;
+
+        r1 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ImageProducer src>;
+
+        return r1;
+    }
+
+    public int getState()
+    {
+        org.apache.harmony.awt.gl.image.OffscreenImage $r0;
+        int i0;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.OffscreenImage;
+
+        i0 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int imageState>;
+
+        return i0;
+    }
+
+    public int getWidth(java.awt.image.ImageObserver)
+    {
+        org.apache.harmony.awt.gl.image.OffscreenImage $r0;
+        java.awt.image.ImageObserver $r1;
+        int $i0;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.OffscreenImage;
+
+        $r1 := @parameter0: java.awt.image.ImageObserver;
+
+        $i0 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int imageState>;
+
+        $i0 = $i0 & 1;
+
+        if $i0 != 0 goto label1;
+
+        specialinvoke $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: void addObserver(java.awt.image.ImageObserver)>($r1);
+
+        specialinvoke $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: void startProduction()>();
+
+        $i0 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int imageState>;
+
+        $i0 = $i0 & 1;
+
+        if $i0 != 0 goto label1;
+
+        return -1;
+
+     label1:
+        $i0 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int width>;
+
+        return $i0;
+    }
+
+    public void imageComplete(int)
+    {
+        org.apache.harmony.awt.gl.image.OffscreenImage $r0;
+        int $i0, $i1;
+        java.lang.String $r1;
+        java.lang.IllegalArgumentException $r2;
+        short $s2;
+        java.util.Vector $r3;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.OffscreenImage;
+
+        $i0 := @parameter0: int;
+
+        lookupswitch($i0)
+        {
+            case 1: goto label4;
+            case 2: goto label5;
+            case 3: goto label6;
+            case 4: goto label2;
+            default: goto label1;
+        };
+
+     label1:
+        $r2 = new java.lang.IllegalArgumentException;
+
+        $r1 = staticinvoke <org.apache.harmony.awt.internal.nls.Messages: java.lang.String getString(java.lang.String)>("awt.3B");
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r1);
+
+        throw $r2;
+
+     label2:
+        $s2 = 128;
+
+     label3:
+        $i0 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int width>;
+
+        $i1 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int height>;
+
+        specialinvoke $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: void imageUpdate(java.awt.Image,int,int,int,int,int)>($r0, $s2, 0, 0, $i0, $i1);
+
+        $s2 = $s2 & 224;
+
+        if $s2 == 0 goto label7;
+
+        specialinvoke $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: void stopProduction()>();
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.util.Vector observers>;
+
+        virtualinvoke $r3.<java.util.Vector: void removeAllElements()>();
+
+        return;
+
+     label4:
+        $s2 = 192;
+
+        goto label3;
+
+     label5:
+        $s2 = 16;
+
+        goto label3;
+
+     label6:
+        $s2 = 32;
+
+        goto label3;
+
+     label7:
+        return;
+    }
+
+    public boolean prepareImage(java.awt.image.ImageObserver)
+    {
+        org.apache.harmony.awt.gl.image.OffscreenImage $r0;
+        java.awt.image.ImageObserver $r1;
+        int $i0;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.OffscreenImage;
+
+        $r1 := @parameter0: java.awt.image.ImageObserver;
+
+        $i0 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int imageState>;
+
+        $i0 = $i0 & 64;
+
+        if $i0 == 0 goto label2;
+
+        if $r1 == null goto label1;
+
+        interfaceinvoke $r1.<java.awt.image.ImageObserver: boolean imageUpdate(java.awt.Image,int,int,int,int,int)>($r0, 192, -1, -1, -1, -1);
+
+     label1:
+        return 0;
+
+     label2:
+        $i0 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int imageState>;
+
+        $i0 = $i0 & 32;
+
+        if $i0 == 0 goto label3;
+
+        return 1;
+
+     label3:
+        specialinvoke $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: void addObserver(java.awt.image.ImageObserver)>($r1);
+
+        specialinvoke $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: void startProduction()>();
+
+        $i0 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int imageState>;
+
+        $i0 = $i0 & 32;
+
+        if $i0 == 0 goto label4;
+
+        return 1;
+
+     label4:
+        return 0;
+    }
+
+    public void setColorModel(java.awt.image.ColorModel)
+    {
+        org.apache.harmony.awt.gl.image.OffscreenImage $r0;
+        java.awt.image.ColorModel $r1;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.OffscreenImage;
+
+        $r1 := @parameter0: java.awt.image.ColorModel;
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel cm> = $r1;
+
+        return;
+    }
+
+    public void setDimensions(int, int)
+    {
+        org.apache.harmony.awt.gl.image.OffscreenImage $r0;
+        int $i0, $i1;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.OffscreenImage;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        if $i0 <= 0 goto label1;
+
+        if $i1 > 0 goto label2;
+
+     label1:
+        virtualinvoke $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: void imageComplete(int)>(64);
+
+        return;
+
+     label2:
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int width> = $i0;
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int height> = $i1;
+
+        specialinvoke $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: void imageUpdate(java.awt.Image,int,int,int,int,int)>($r0, 3, 0, 0, $i0, $i1);
+
+        return;
+    }
+
+    public void setHints(int)
+    {
+        org.apache.harmony.awt.gl.image.OffscreenImage $r0;
+        int $i0;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.OffscreenImage;
+
+        $i0 := @parameter0: int;
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int hints> = $i0;
+
+        return;
+    }
+
+    public void setPixels(int, int, int, int, java.awt.image.ColorModel, byte[], int, int)
+    {
+        org.apache.harmony.awt.gl.image.OffscreenImage $r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11;
+        byte[] $r1, $r14;
+        java.awt.image.ColorModel $r2, $r4;
+        java.awt.image.WritableRaster $r3;
+        java.lang.NullPointerException $r5;
+        java.lang.String $r6;
+        boolean $z0;
+        int[] $r7, $r9, $r12;
+        java.awt.image.IndexColorModel $r8;
+        java.awt.image.DataBuffer $r10;
+        java.awt.image.DataBufferInt $r11;
+        byte $b12;
+        short $s13;
+        java.awt.image.DataBufferByte $r13;
+        java.lang.Object $r15;
+        org.apache.harmony.awt.gl.ImageSurface $r16;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.OffscreenImage;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i2 := @parameter2: int;
+
+        $i3 := @parameter3: int;
+
+        $r2 := @parameter4: java.awt.image.ColorModel;
+
+        $r1 := @parameter5: byte[];
+
+        $i4 := @parameter6: int;
+
+        $i5 := @parameter7: int;
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.WritableRaster raster>;
+
+        if $r3 != null goto label03;
+
+        $r4 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel cm>;
+
+        if $r4 != null goto label02;
+
+        if $r2 != null goto label01;
+
+        $r5 = new java.lang.NullPointerException;
+
+        $r6 = staticinvoke <org.apache.harmony.awt.internal.nls.Messages: java.lang.String getString(java.lang.String)>("awt.3A");
+
+        specialinvoke $r5.<java.lang.NullPointerException: void <init>(java.lang.String)>($r6);
+
+        throw $r5;
+
+     label01:
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel cm> = $r2;
+
+     label02:
+        specialinvoke $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: void createRaster()>();
+
+     label03:
+        if $r2 != null goto label04;
+
+        $r2 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel cm>;
+
+     label04:
+        $r4 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel cm>;
+
+        if $r2 == $r4 goto label05;
+
+        specialinvoke $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: void forceToIntARGB()>();
+
+     label05:
+        $z0 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: boolean isIntRGB>;
+
+        if $z0 == 0 goto label13;
+
+        $r7 = newarray (int)[$i2];
+
+        $r8 = (java.awt.image.IndexColorModel) $r2;
+
+        $i6 = virtualinvoke $r8.<java.awt.image.IndexColorModel: int getMapSize()>();
+
+        $r9 = newarray (int)[$i6];
+
+        virtualinvoke $r8.<java.awt.image.IndexColorModel: void getRGBs(int[])>($r9);
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.WritableRaster raster>;
+
+        $r10 = virtualinvoke $r3.<java.awt.image.Raster: java.awt.image.DataBuffer getDataBuffer()>();
+
+        $r11 = (java.awt.image.DataBufferInt) $r10;
+
+        $r12 = virtualinvoke $r11.<java.awt.image.DataBufferInt: int[] getData()>();
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.WritableRaster raster>;
+
+        $i6 = virtualinvoke $r3.<java.awt.image.Raster: int getWidth()>();
+
+        $i7 = virtualinvoke $r11.<java.awt.image.DataBuffer: int getOffset()>();
+
+        $i8 = $i1 * $i6;
+
+        $i7 = $i7 + $i8;
+
+        $i7 = $i7 + $i0;
+
+        $z0 = $r2 instanceof java.awt.image.IndexColorModel;
+
+        if $z0 == 0 goto label09;
+
+        $i8 = $i1;
+
+     label06:
+        $i9 = $i1 + $i3;
+
+        if $i8 >= $i9 goto label21;
+
+        $i9 = $i0;
+
+        $i10 = 0;
+
+     label07:
+        $i11 = $i0 + $i2;
+
+        if $i9 >= $i11 goto label08;
+
+        $i11 = $i4 + $i10;
+
+        $b12 = $r1[$i11];
+
+        $s13 = $b12 & 255;
+
+        $i11 = $r9[$s13];
+
+        $r7[$i10] = $i11;
+
+        $i9 = $i9 + 1;
+
+        $i10 = $i10 + 1;
+
+        goto label07;
+
+     label08:
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r7, 0, $r12, $i7, $i2);
+
+        $i8 = $i8 + 1;
+
+        $i4 = $i4 + $i5;
+
+        $i7 = $i7 + $i6;
+
+        goto label06;
+
+     label09:
+        $i8 = $i1;
+
+     label10:
+        $i9 = $i1 + $i3;
+
+        if $i8 >= $i9 goto label21;
+
+        $i9 = $i0;
+
+        $i10 = 0;
+
+     label11:
+        $i11 = $i0 + $i2;
+
+        if $i9 >= $i11 goto label12;
+
+        $i11 = $i4 + $i10;
+
+        $b12 = $r1[$i11];
+
+        $s13 = $b12 & 255;
+
+        $i11 = virtualinvoke $r2.<java.awt.image.ColorModel: int getRGB(int)>($s13);
+
+        $r7[$i10] = $i11;
+
+        $i9 = $i9 + 1;
+
+        $i10 = $i10 + 1;
+
+        goto label11;
+
+     label12:
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r7, 0, $r12, $i7, $i2);
+
+        $i8 = $i8 + 1;
+
+        $i4 = $i4 + $i5;
+
+        $i7 = $i7 + $i6;
+
+        goto label10;
+
+     label13:
+        $r4 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel cm>;
+
+        if $r2 != $r4 goto label15;
+
+        $i6 = virtualinvoke $r2.<java.awt.image.ColorModel: int getTransferType()>();
+
+        if $i6 != 0 goto label15;
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.WritableRaster raster>;
+
+        $i6 = virtualinvoke $r3.<java.awt.image.Raster: int getNumDataElements()>();
+
+        if $i6 != 1 goto label15;
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.WritableRaster raster>;
+
+        $r10 = virtualinvoke $r3.<java.awt.image.Raster: java.awt.image.DataBuffer getDataBuffer()>();
+
+        $r13 = (java.awt.image.DataBufferByte) $r10;
+
+        $r14 = virtualinvoke $r13.<java.awt.image.DataBufferByte: byte[] getData()>();
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.WritableRaster raster>;
+
+        $i6 = virtualinvoke $r3.<java.awt.image.Raster: int getWidth()>();
+
+        $i7 = virtualinvoke $r13.<java.awt.image.DataBuffer: int getOffset()>();
+
+        $i8 = $i1 * $i6;
+
+        $i7 = $i7 + $i8;
+
+        $i0 = $i7 + $i0;
+
+        $i7 = $i1;
+
+     label14:
+        $i8 = $i1 + $i3;
+
+        if $i7 >= $i8 goto label21;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, $i4, $r14, $i0, $i2);
+
+        $i7 = $i7 + 1;
+
+        $i4 = $i4 + $i5;
+
+        $i0 = $i0 + $i6;
+
+        goto label14;
+
+     label15:
+        $r4 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel cm>;
+
+        if $r2 != $r4 goto label17;
+
+        $i6 = virtualinvoke $r2.<java.awt.image.ColorModel: int getTransferType()>();
+
+        if $i6 != 0 goto label17;
+
+        $r4 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel cm>;
+
+        $z0 = $r4 instanceof java.awt.image.ComponentColorModel;
+
+        if $z0 == 0 goto label17;
+
+        $r2 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel cm>;
+
+        virtualinvoke $r2.<java.awt.image.ColorModel: int getNumComponents()>();
+
+        $r14 = newarray (byte)[$i5];
+
+        $i6 = $i1;
+
+     label16:
+        $i7 = $i1 + $i3;
+
+        if $i6 >= $i7 goto label21;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, $i4, $r14, 0, $i5);
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.WritableRaster raster>;
+
+        virtualinvoke $r3.<java.awt.image.WritableRaster: void setDataElements(int,int,int,int,java.lang.Object)>($i0, $i6, $i2, 1, $r14);
+
+        $i6 = $i6 + 1;
+
+        $i4 = $i4 + $i5;
+
+        goto label16;
+
+     label17:
+        $i6 = $i1;
+
+     label18:
+        $i7 = $i1 + $i3;
+
+        if $i6 >= $i7 goto label21;
+
+        $i7 = $i0;
+
+        $i8 = 0;
+
+     label19:
+        $i9 = $i0 + $i2;
+
+        if $i7 >= $i9 goto label20;
+
+        $i9 = $i4 + $i8;
+
+        $b12 = $r1[$i9];
+
+        $s13 = $b12 & 255;
+
+        $i9 = virtualinvoke $r2.<java.awt.image.ColorModel: int getRGB(int)>($s13);
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.WritableRaster raster>;
+
+        $r4 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel cm>;
+
+        $r15 = virtualinvoke $r4.<java.awt.image.ColorModel: java.lang.Object getDataElements(int,java.lang.Object)>($i9, null);
+
+        virtualinvoke $r3.<java.awt.image.WritableRaster: void setDataElements(int,int,java.lang.Object)>($i7, $i6, $r15);
+
+        $i7 = $i7 + 1;
+
+        $i8 = $i8 + 1;
+
+        goto label19;
+
+     label20:
+        $i6 = $i6 + 1;
+
+        $i4 = $i4 + $i5;
+
+        goto label18;
+
+     label21:
+        $r16 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: org.apache.harmony.awt.gl.ImageSurface imageSurf>;
+
+        if $r16 == null goto label22;
+
+        $r16 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: org.apache.harmony.awt.gl.ImageSurface imageSurf>;
+
+        virtualinvoke $r16.<org.apache.harmony.awt.gl.ImageSurface: void invalidate()>();
+
+     label22:
+        $i0 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int width>;
+
+        $i1 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int height>;
+
+        specialinvoke $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: void imageUpdate(java.awt.Image,int,int,int,int,int)>($r0, 8, 0, 0, $i0, $i1);
+
+        return;
+    }
+
+    public void setPixels(int, int, int, int, java.awt.image.ColorModel, int[], int, int)
+    {
+        org.apache.harmony.awt.gl.image.OffscreenImage $r0;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9, $i10, $i11;
+        int[] $r1, $r9, $r10;
+        java.awt.image.ColorModel $r2, $r4;
+        java.awt.image.WritableRaster $r3;
+        java.lang.NullPointerException $r5;
+        java.lang.String $r6;
+        java.awt.image.DataBuffer $r7;
+        java.awt.image.DataBufferInt $r8;
+        boolean $z0;
+        java.lang.Object $r11;
+        org.apache.harmony.awt.gl.ImageSurface $r12;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.OffscreenImage;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i2 := @parameter2: int;
+
+        $i3 := @parameter3: int;
+
+        $r2 := @parameter4: java.awt.image.ColorModel;
+
+        $r1 := @parameter5: int[];
+
+        $i4 := @parameter6: int;
+
+        $i5 := @parameter7: int;
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.WritableRaster raster>;
+
+        if $r3 != null goto label03;
+
+        $r4 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel cm>;
+
+        if $r4 != null goto label02;
+
+        if $r2 != null goto label01;
+
+        $r5 = new java.lang.NullPointerException;
+
+        $r6 = staticinvoke <org.apache.harmony.awt.internal.nls.Messages: java.lang.String getString(java.lang.String)>("awt.3A");
+
+        specialinvoke $r5.<java.lang.NullPointerException: void <init>(java.lang.String)>($r6);
+
+        throw $r5;
+
+     label01:
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel cm> = $r2;
+
+     label02:
+        specialinvoke $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: void createRaster()>();
+
+     label03:
+        if $r2 != null goto label04;
+
+        $r2 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel cm>;
+
+     label04:
+        $r4 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel cm>;
+
+        if $r4 == $r2 goto label05;
+
+        specialinvoke $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: void forceToIntARGB()>();
+
+     label05:
+        $r4 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel cm>;
+
+        if $r4 != $r2 goto label07;
+
+        $i6 = virtualinvoke $r2.<java.awt.image.ColorModel: int getTransferType()>();
+
+        if $i6 != 3 goto label07;
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.WritableRaster raster>;
+
+        $i6 = virtualinvoke $r3.<java.awt.image.Raster: int getNumDataElements()>();
+
+        if $i6 != 1 goto label07;
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.WritableRaster raster>;
+
+        $r7 = virtualinvoke $r3.<java.awt.image.Raster: java.awt.image.DataBuffer getDataBuffer()>();
+
+        $r8 = (java.awt.image.DataBufferInt) $r7;
+
+        $r9 = virtualinvoke $r8.<java.awt.image.DataBufferInt: int[] getData()>();
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.WritableRaster raster>;
+
+        $i6 = virtualinvoke $r3.<java.awt.image.Raster: int getWidth()>();
+
+        $i7 = virtualinvoke $r8.<java.awt.image.DataBuffer: int getOffset()>();
+
+        $i8 = $i1 * $i6;
+
+        $i7 = $i7 + $i8;
+
+        $i0 = $i7 + $i0;
+
+        $i7 = $i1;
+
+     label06:
+        $i8 = $i1 + $i3;
+
+        if $i7 >= $i8 goto label15;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, $i4, $r9, $i0, $i2);
+
+        $i7 = $i7 + 1;
+
+        $i4 = $i4 + $i5;
+
+        $i0 = $i0 + $i6;
+
+        goto label06;
+
+     label07:
+        $z0 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: boolean isIntRGB>;
+
+        if $z0 == 0 goto label11;
+
+        $r9 = newarray (int)[$i2];
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.WritableRaster raster>;
+
+        $r7 = virtualinvoke $r3.<java.awt.image.Raster: java.awt.image.DataBuffer getDataBuffer()>();
+
+        $r8 = (java.awt.image.DataBufferInt) $r7;
+
+        $r10 = virtualinvoke $r8.<java.awt.image.DataBufferInt: int[] getData()>();
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.WritableRaster raster>;
+
+        $i6 = virtualinvoke $r3.<java.awt.image.Raster: int getWidth()>();
+
+        $i7 = virtualinvoke $r8.<java.awt.image.DataBuffer: int getOffset()>();
+
+        $i8 = $i1 * $i6;
+
+        $i7 = $i7 + $i8;
+
+        $i7 = $i7 + $i0;
+
+        $i8 = $i1;
+
+     label08:
+        $i9 = $i1 + $i3;
+
+        if $i8 >= $i9 goto label15;
+
+        $i9 = $i0;
+
+        $i10 = 0;
+
+     label09:
+        $i11 = $i0 + $i2;
+
+        if $i9 >= $i11 goto label10;
+
+        $i11 = $i4 + $i10;
+
+        $i11 = $r1[$i11];
+
+        $i11 = virtualinvoke $r2.<java.awt.image.ColorModel: int getRGB(int)>($i11);
+
+        $r9[$i10] = $i11;
+
+        $i9 = $i9 + 1;
+
+        $i10 = $i10 + 1;
+
+        goto label09;
+
+     label10:
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r9, 0, $r10, $i7, $i2);
+
+        $i8 = $i8 + 1;
+
+        $i4 = $i4 + $i5;
+
+        $i7 = $i7 + $i6;
+
+        goto label08;
+
+     label11:
+        $i6 = $i1;
+
+        $r11 = null;
+
+     label12:
+        $i7 = $i1 + $i3;
+
+        if $i6 >= $i7 goto label15;
+
+        $i7 = $i0;
+
+        $i8 = 0;
+
+     label13:
+        $i9 = $i0 + $i2;
+
+        if $i7 >= $i9 goto label14;
+
+        $i9 = $i4 + $i8;
+
+        $i9 = $r1[$i9];
+
+        $i9 = virtualinvoke $r2.<java.awt.image.ColorModel: int getRGB(int)>($i9);
+
+        $r4 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.ColorModel cm>;
+
+        $r11 = virtualinvoke $r4.<java.awt.image.ColorModel: java.lang.Object getDataElements(int,java.lang.Object)>($i9, $r11);
+
+        $r3 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.awt.image.WritableRaster raster>;
+
+        virtualinvoke $r3.<java.awt.image.WritableRaster: void setDataElements(int,int,java.lang.Object)>($i7, $i6, $r11);
+
+        $i7 = $i7 + 1;
+
+        $i8 = $i8 + 1;
+
+        goto label13;
+
+     label14:
+        $i6 = $i6 + 1;
+
+        $i4 = $i4 + $i5;
+
+        goto label12;
+
+     label15:
+        $r12 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: org.apache.harmony.awt.gl.ImageSurface imageSurf>;
+
+        if $r12 == null goto label16;
+
+        $r12 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: org.apache.harmony.awt.gl.ImageSurface imageSurf>;
+
+        virtualinvoke $r12.<org.apache.harmony.awt.gl.ImageSurface: void invalidate()>();
+
+     label16:
+        $i0 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int width>;
+
+        $i1 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int height>;
+
+        specialinvoke $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: void imageUpdate(java.awt.Image,int,int,int,int,int)>($r0, 8, 0, 0, $i0, $i1);
+
+        return;
+    }
+
+    public void setProperties(java.util.Hashtable)
+    {
+        org.apache.harmony.awt.gl.image.OffscreenImage $r0;
+        java.util.Hashtable $r1;
+        int $i0, $i1;
+
+        $r0 := @this: org.apache.harmony.awt.gl.image.OffscreenImage;
+
+        $r1 := @parameter0: java.util.Hashtable;
+
+        $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: java.util.Hashtable properties> = $r1;
+
+        $i0 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int width>;
+
+        $i1 = $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: int height>;
+
+        specialinvoke $r0.<org.apache.harmony.awt.gl.image.OffscreenImage: void imageUpdate(java.awt.Image,int,int,int,int,int)>($r0, 4, 0, 0, $i0, $i1);
+
+        return;
+    }
+}

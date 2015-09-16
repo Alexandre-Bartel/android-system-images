@@ -1,0 +1,4903 @@
+class com.android.server.PowerManagerService extends android.os.IPowerManager$Stub implements android.os.LocalPowerManager, com.android.server.Watchdog$Monitor
+{
+    private static final int ALL_BRIGHT;
+    static final boolean ANIMATE_BUTTON_LIGHTS;
+    static final boolean ANIMATE_KEYBOARD_LIGHTS;
+    static final boolean ANIMATE_SCREEN_LIGHTS;
+    static final int ANIM_STEPS;
+    private static final int BATTERY_LOW_BIT;
+    private static final int BUTTON_BRIGHT_BIT;
+    static final int INITIAL_BUTTON_BRIGHTNESS;
+    static final int INITIAL_KEYBOARD_BRIGHTNESS;
+    static final int INITIAL_SCREEN_BRIGHTNESS;
+    private static final int KEYBOARD_BRIGHT_BIT;
+    private static final int LIGHTS_MASK;
+    private static final int LOCK_MASK;
+    private static final boolean LOG_PARTIAL_WL;
+    static final int LOG_POWER_PARTIAL_WAKE_STATE;
+    static final int LOG_POWER_SCREEN_BROADCAST_DONE;
+    static final int LOG_POWER_SCREEN_BROADCAST_SEND;
+    static final int LOG_POWER_SCREEN_BROADCAST_STOP;
+    static final int LOG_POWER_SCREEN_STATE;
+    static final int LOG_POWER_SLEEP_REQUESTED;
+    private static final boolean LOG_TOUCH_DOWNS;
+    private static final int LONG_DIM_TIME;
+    private static final int LONG_KEYLIGHT_DELAY;
+    private static final int MEDIUM_KEYLIGHT_DELAY;
+    static final java.lang.String PARTIAL_NAME;
+    private static final int SCREEN_BRIGHT;
+    private static final int SCREEN_BRIGHT_BIT;
+    private static final int SCREEN_BUTTON_BRIGHT;
+    private static final int SCREEN_DIM;
+    private static final int SCREEN_OFF;
+    private static final int SCREEN_ON_BIT;
+    private static final int SHORT_KEYLIGHT_DELAY_DEFAULT;
+    private static final java.lang.String TAG;
+    private static final boolean mSpew;
+    private final int MY_UID;
+    private android.app.IActivityManager mActivityService;
+    private com.android.server.BatteryService mBatteryService;
+    private com.android.internal.app.IBatteryStats mBatteryStats;
+    private int[] mBroadcastQueue;
+    private com.android.server.PowerManagerService$UnsynchronizedWakeLock mBroadcastWakeLock;
+    private int[] mBroadcastWhy;
+    private final com.android.server.PowerManagerService$BrightnessState mButtonBrightness;
+    private android.content.Context mContext;
+    private int mDimDelay;
+    private boolean mDimScreen;
+    private boolean mDoneBooting;
+    private java.lang.Runnable mForceReenableScreenTask;
+    private android.os.Handler mHandler;
+    private android.os.HandlerThread mHandlerThread;
+    private com.android.server.HardwareService mHardware;
+    private volatile boolean mInitComplete;
+    private boolean mIsPowered;
+    private final com.android.server.PowerManagerService$BrightnessState mKeyboardBrightness;
+    private boolean mKeyboardVisible;
+    private int mKeylightDelay;
+    private long mLastEventTime;
+    private long mLastTouchDown;
+    private com.android.server.PowerManagerService$LightAnimator mLightAnimator;
+    private final com.android.server.PowerManagerService$LockList mLocks;
+    private long mNextTimeout;
+    private java.lang.Runnable mNotificationTask;
+    private boolean mOffBecauseOfUser;
+    private int mPartialCount;
+    private volatile boolean mPokeAwakeOnSet;
+    private java.util.HashMap mPokeLocks;
+    private volatile int mPokey;
+    private volatile android.view.WindowManagerPolicy mPolicy;
+    private int mPowerState;
+    private boolean mPreventScreenOn;
+    private com.android.server.PowerManagerService$UnsynchronizedWakeLock mPreventScreenOnPartialLock;
+    private final com.android.server.PowerManagerService$BrightnessState mScreenBrightness;
+    private int mScreenBrightnessOverride;
+    private android.content.BroadcastReceiver mScreenOffBroadcastDone;
+    private int mScreenOffDelay;
+    private android.content.Intent mScreenOffIntent;
+    long mScreenOffStart;
+    private long mScreenOffTime;
+    private android.content.BroadcastReceiver mScreenOnBroadcastDone;
+    private android.content.Intent mScreenOnIntent;
+    long mScreenOnStart;
+    private long mScreenOnStartTime;
+    private long mScreenOnTime;
+    private android.content.ContentQueryMap mSettings;
+    private int mShortKeylightDelay;
+    private int mStayOnConditions;
+    private com.android.server.PowerManagerService$UnsynchronizedWakeLock mStayOnWhilePluggedInPartialLock;
+    private com.android.server.PowerManagerService$UnsynchronizedWakeLock mStayOnWhilePluggedInScreenDimLock;
+    private boolean mStillNeedSleepNotification;
+    private com.android.server.PowerManagerService$TimeoutTask mTimeoutTask;
+    private int mTotalDelaySetting;
+    private long mTotalTouchDownTime;
+    private int mTouchCycles;
+    private boolean mUserActivityAllowed;
+    private int mUserState;
+    private int mWakeLockState;
+
+    void <init>()
+    {
+        com.android.server.PowerManagerService $r0;
+        int[] $r1;
+        com.android.server.PowerManagerService$LockList $r2;
+        com.android.server.PowerManagerService$TimeoutTask $r3;
+        com.android.server.PowerManagerService$LightAnimator $r4;
+        com.android.server.PowerManagerService$BrightnessState $r5;
+        java.util.HashMap $r6;
+        com.android.server.PowerManagerService$2 $r7;
+        com.android.server.PowerManagerService$3 $r8;
+        com.android.server.PowerManagerService$4 $r9;
+        com.android.server.PowerManagerService$5 $r10;
+        long $l0;
+        int $i1;
+        com.android.server.Watchdog $r11;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        specialinvoke $r0.<android.os.IPowerManager$Stub: void <init>()>();
+
+        $r0.<com.android.server.PowerManagerService: int mShortKeylightDelay> = 6000;
+
+        $r0.<com.android.server.PowerManagerService: boolean mDoneBooting> = 0;
+
+        $r0.<com.android.server.PowerManagerService: int mStayOnConditions> = 0;
+
+        $r1 = newarray (int)[3];
+
+        $r1[0] = -1;
+
+        $r1[1] = -1;
+
+        $r1[2] = -1;
+
+        $r0.<com.android.server.PowerManagerService: int[] mBroadcastQueue> = $r1;
+
+        $r1 = newarray (int)[3];
+
+        $r0.<com.android.server.PowerManagerService: int[] mBroadcastWhy> = $r1;
+
+        $r0.<com.android.server.PowerManagerService: int mPartialCount> = 0;
+
+        $r0.<com.android.server.PowerManagerService: boolean mKeyboardVisible> = 0;
+
+        $r0.<com.android.server.PowerManagerService: boolean mUserActivityAllowed> = 1;
+
+        $r0.<com.android.server.PowerManagerService: long mLastEventTime> = 0L;
+
+        $r2 = new com.android.server.PowerManagerService$LockList;
+
+        specialinvoke $r2.<com.android.server.PowerManagerService$LockList: void <init>(com.android.server.PowerManagerService,com.android.server.PowerManagerService$1)>($r0, null);
+
+        $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks> = $r2;
+
+        $r3 = new com.android.server.PowerManagerService$TimeoutTask;
+
+        specialinvoke $r3.<com.android.server.PowerManagerService$TimeoutTask: void <init>(com.android.server.PowerManagerService,com.android.server.PowerManagerService$1)>($r0, null);
+
+        $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$TimeoutTask mTimeoutTask> = $r3;
+
+        $r4 = new com.android.server.PowerManagerService$LightAnimator;
+
+        specialinvoke $r4.<com.android.server.PowerManagerService$LightAnimator: void <init>(com.android.server.PowerManagerService,com.android.server.PowerManagerService$1)>($r0, null);
+
+        $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LightAnimator mLightAnimator> = $r4;
+
+        $r5 = new com.android.server.PowerManagerService$BrightnessState;
+
+        specialinvoke $r5.<com.android.server.PowerManagerService$BrightnessState: void <init>(com.android.server.PowerManagerService,int)>($r0, 2);
+
+        $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$BrightnessState mScreenBrightness> = $r5;
+
+        $r5 = new com.android.server.PowerManagerService$BrightnessState;
+
+        specialinvoke $r5.<com.android.server.PowerManagerService$BrightnessState: void <init>(com.android.server.PowerManagerService,int)>($r0, 8);
+
+        $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$BrightnessState mKeyboardBrightness> = $r5;
+
+        $r5 = new com.android.server.PowerManagerService$BrightnessState;
+
+        specialinvoke $r5.<com.android.server.PowerManagerService$BrightnessState: void <init>(com.android.server.PowerManagerService,int)>($r0, 4);
+
+        $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$BrightnessState mButtonBrightness> = $r5;
+
+        $r0.<com.android.server.PowerManagerService: boolean mIsPowered> = 0;
+
+        $r0.<com.android.server.PowerManagerService: boolean mDimScreen> = 1;
+
+        $r0.<com.android.server.PowerManagerService: int mPokey> = 0;
+
+        $r0.<com.android.server.PowerManagerService: boolean mPokeAwakeOnSet> = 0;
+
+        $r0.<com.android.server.PowerManagerService: boolean mInitComplete> = 0;
+
+        $r6 = new java.util.HashMap;
+
+        specialinvoke $r6.<java.util.HashMap: void <init>()>();
+
+        $r0.<com.android.server.PowerManagerService: java.util.HashMap mPokeLocks> = $r6;
+
+        $r0.<com.android.server.PowerManagerService: int mScreenBrightnessOverride> = -1;
+
+        $r7 = new com.android.server.PowerManagerService$2;
+
+        specialinvoke $r7.<com.android.server.PowerManagerService$2: void <init>(com.android.server.PowerManagerService)>($r0);
+
+        $r0.<com.android.server.PowerManagerService: java.lang.Runnable mNotificationTask> = $r7;
+
+        $r8 = new com.android.server.PowerManagerService$3;
+
+        specialinvoke $r8.<com.android.server.PowerManagerService$3: void <init>(com.android.server.PowerManagerService)>($r0);
+
+        $r0.<com.android.server.PowerManagerService: android.content.BroadcastReceiver mScreenOnBroadcastDone> = $r8;
+
+        $r9 = new com.android.server.PowerManagerService$4;
+
+        specialinvoke $r9.<com.android.server.PowerManagerService$4: void <init>(com.android.server.PowerManagerService)>($r0);
+
+        $r0.<com.android.server.PowerManagerService: android.content.BroadcastReceiver mScreenOffBroadcastDone> = $r9;
+
+        $r10 = new com.android.server.PowerManagerService$5;
+
+        specialinvoke $r10.<com.android.server.PowerManagerService$5: void <init>(com.android.server.PowerManagerService)>($r0);
+
+        $r0.<com.android.server.PowerManagerService: java.lang.Runnable mForceReenableScreenTask> = $r10;
+
+        $l0 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+        $i1 = staticinvoke <android.os.Binder: int getCallingUid()>();
+
+        $r0.<com.android.server.PowerManagerService: int MY_UID> = $i1;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l0);
+
+        staticinvoke <android.os.Power: int setLastUserActivityTimeout(long)>(604800000L);
+
+        $r0.<com.android.server.PowerManagerService: int mPowerState> = 0;
+
+        $r0.<com.android.server.PowerManagerService: int mUserState> = 0;
+
+        $r11 = staticinvoke <com.android.server.Watchdog: com.android.server.Watchdog getInstance()>();
+
+        virtualinvoke $r11.<com.android.server.Watchdog: void addMonitor(com.android.server.Watchdog$Monitor)>($r0);
+
+        $l0 = staticinvoke <android.os.SystemClock: long elapsedRealtime()>();
+
+        $r0.<com.android.server.PowerManagerService: long mScreenOnStartTime> = $l0;
+
+        return;
+    }
+
+    static android.content.ContentQueryMap access$1000(com.android.server.PowerManagerService)
+    {
+        com.android.server.PowerManagerService $r0;
+        android.content.ContentQueryMap r1;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        r1 = $r0.<com.android.server.PowerManagerService: android.content.ContentQueryMap mSettings>;
+
+        return r1;
+    }
+
+    static int access$1102(com.android.server.PowerManagerService, int)
+    {
+        com.android.server.PowerManagerService $r0;
+        int $i0;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        $i0 := @parameter1: int;
+
+        $r0.<com.android.server.PowerManagerService: int mStayOnConditions> = $i0;
+
+        return $i0;
+    }
+
+    static int access$1202(com.android.server.PowerManagerService, int)
+    {
+        com.android.server.PowerManagerService $r0;
+        int $i0;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        $i0 := @parameter1: int;
+
+        $r0.<com.android.server.PowerManagerService: int mTotalDelaySetting> = $i0;
+
+        return $i0;
+    }
+
+    static void access$1300(com.android.server.PowerManagerService)
+    {
+        com.android.server.PowerManagerService $r0;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        specialinvoke $r0.<com.android.server.PowerManagerService: void setScreenOffTimeoutsLocked()>();
+
+        return;
+    }
+
+    static int access$1702(com.android.server.PowerManagerService, int)
+    {
+        com.android.server.PowerManagerService $r0;
+        int $i0;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        $i0 := @parameter1: int;
+
+        $r0.<com.android.server.PowerManagerService: int mUserState> = $i0;
+
+        return $i0;
+    }
+
+    static int access$1800(com.android.server.PowerManagerService)
+    {
+        com.android.server.PowerManagerService $r0;
+        int i0;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        i0 = $r0.<com.android.server.PowerManagerService: int mWakeLockState>;
+
+        return i0;
+    }
+
+    static void access$1900(com.android.server.PowerManagerService, int)
+    {
+        com.android.server.PowerManagerService $r0;
+        int $i0;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        $i0 := @parameter1: int;
+
+        specialinvoke $r0.<com.android.server.PowerManagerService: void setPowerState(int)>($i0);
+
+        return;
+    }
+
+    static int access$2000(com.android.server.PowerManagerService)
+    {
+        com.android.server.PowerManagerService $r0;
+        int i0;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        i0 = $r0.<com.android.server.PowerManagerService: int mDimDelay>;
+
+        return i0;
+    }
+
+    static void access$2100(com.android.server.PowerManagerService, long, int)
+    {
+        com.android.server.PowerManagerService $r0;
+        long $l0;
+        int $i1;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        $l0 := @parameter1: long;
+
+        $i1 := @parameter2: int;
+
+        specialinvoke $r0.<com.android.server.PowerManagerService: void setTimeoutLocked(long,int)>($l0, $i1);
+
+        return;
+    }
+
+    static int[] access$2200(com.android.server.PowerManagerService)
+    {
+        com.android.server.PowerManagerService $r0;
+        int[] r1;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        r1 = $r0.<com.android.server.PowerManagerService: int[] mBroadcastQueue>;
+
+        return r1;
+    }
+
+    static int[] access$2300(com.android.server.PowerManagerService)
+    {
+        com.android.server.PowerManagerService $r0;
+        int[] r1;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        r1 = $r0.<com.android.server.PowerManagerService: int[] mBroadcastWhy>;
+
+        return r1;
+    }
+
+    static android.content.Context access$2400(com.android.server.PowerManagerService)
+    {
+        com.android.server.PowerManagerService $r0;
+        android.content.Context r1;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        r1 = $r0.<com.android.server.PowerManagerService: android.content.Context mContext>;
+
+        return r1;
+    }
+
+    static android.content.Intent access$2500(com.android.server.PowerManagerService)
+    {
+        com.android.server.PowerManagerService $r0;
+        android.content.Intent r1;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        r1 = $r0.<com.android.server.PowerManagerService: android.content.Intent mScreenOnIntent>;
+
+        return r1;
+    }
+
+    static android.content.BroadcastReceiver access$2600(com.android.server.PowerManagerService)
+    {
+        com.android.server.PowerManagerService $r0;
+        android.content.BroadcastReceiver r1;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        r1 = $r0.<com.android.server.PowerManagerService: android.content.BroadcastReceiver mScreenOnBroadcastDone>;
+
+        return r1;
+    }
+
+    static android.os.Handler access$2700(com.android.server.PowerManagerService)
+    {
+        com.android.server.PowerManagerService $r0;
+        android.os.Handler r1;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        r1 = $r0.<com.android.server.PowerManagerService: android.os.Handler mHandler>;
+
+        return r1;
+    }
+
+    static com.android.server.PowerManagerService$UnsynchronizedWakeLock access$2800(com.android.server.PowerManagerService)
+    {
+        com.android.server.PowerManagerService $r0;
+        com.android.server.PowerManagerService$UnsynchronizedWakeLock r1;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        r1 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$UnsynchronizedWakeLock mBroadcastWakeLock>;
+
+        return r1;
+    }
+
+    static android.content.Intent access$2900(com.android.server.PowerManagerService)
+    {
+        com.android.server.PowerManagerService $r0;
+        android.content.Intent r1;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        r1 = $r0.<com.android.server.PowerManagerService: android.content.Intent mScreenOffIntent>;
+
+        return r1;
+    }
+
+    static int access$300(com.android.server.PowerManagerService)
+    {
+        com.android.server.PowerManagerService $r0;
+        int i0;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        i0 = $r0.<com.android.server.PowerManagerService: int MY_UID>;
+
+        return i0;
+    }
+
+    static android.content.BroadcastReceiver access$3000(com.android.server.PowerManagerService)
+    {
+        com.android.server.PowerManagerService $r0;
+        android.content.BroadcastReceiver r1;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        r1 = $r0.<com.android.server.PowerManagerService: android.content.BroadcastReceiver mScreenOffBroadcastDone>;
+
+        return r1;
+    }
+
+    static void access$3100(com.android.server.PowerManagerService)
+    {
+        com.android.server.PowerManagerService $r0;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        specialinvoke $r0.<com.android.server.PowerManagerService: void forceReenableScreen()>();
+
+        return;
+    }
+
+    static void access$3200(com.android.server.PowerManagerService, int, int)
+    {
+        com.android.server.PowerManagerService $r0;
+        int $i0, $i1;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        specialinvoke $r0.<com.android.server.PowerManagerService: void setLightBrightness(int,int)>($i0, $i1);
+
+        return;
+    }
+
+    static boolean access$3300(com.android.server.PowerManagerService)
+    {
+        com.android.server.PowerManagerService $r0;
+        boolean z0;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        z0 = $r0.<com.android.server.PowerManagerService: boolean mOffBecauseOfUser>;
+
+        return z0;
+    }
+
+    static int access$3400(com.android.server.PowerManagerService, boolean)
+    {
+        com.android.server.PowerManagerService $r0;
+        boolean $z0;
+        int $i0;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        $z0 := @parameter1: boolean;
+
+        $i0 = specialinvoke $r0.<com.android.server.PowerManagerService: int screenOffFinishedAnimatingLocked(boolean)>($z0);
+
+        return $i0;
+    }
+
+    static com.android.server.PowerManagerService$BrightnessState access$3500(com.android.server.PowerManagerService)
+    {
+        com.android.server.PowerManagerService $r0;
+        com.android.server.PowerManagerService$BrightnessState r1;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        r1 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$BrightnessState mScreenBrightness>;
+
+        return r1;
+    }
+
+    static com.android.server.PowerManagerService$BrightnessState access$3600(com.android.server.PowerManagerService)
+    {
+        com.android.server.PowerManagerService $r0;
+        com.android.server.PowerManagerService$BrightnessState r1;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        r1 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$BrightnessState mKeyboardBrightness>;
+
+        return r1;
+    }
+
+    static com.android.server.PowerManagerService$BrightnessState access$3700(com.android.server.PowerManagerService)
+    {
+        com.android.server.PowerManagerService $r0;
+        com.android.server.PowerManagerService$BrightnessState r1;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        r1 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$BrightnessState mButtonBrightness>;
+
+        return r1;
+    }
+
+    static com.android.server.PowerManagerService$LightAnimator access$3800(com.android.server.PowerManagerService)
+    {
+        com.android.server.PowerManagerService $r0;
+        com.android.server.PowerManagerService$LightAnimator r1;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        r1 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LightAnimator mLightAnimator>;
+
+        return r1;
+    }
+
+    static void access$3900(com.android.server.PowerManagerService)
+    {
+        com.android.server.PowerManagerService $r0;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        specialinvoke $r0.<com.android.server.PowerManagerService: void updateGservicesValues()>();
+
+        return;
+    }
+
+    static void access$400(com.android.server.PowerManagerService, android.os.IBinder, boolean)
+    {
+        com.android.server.PowerManagerService $r0;
+        android.os.IBinder $r1;
+        boolean $z0;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        $r1 := @parameter1: android.os.IBinder;
+
+        $z0 := @parameter2: boolean;
+
+        specialinvoke $r0.<com.android.server.PowerManagerService: void releaseWakeLockLocked(android.os.IBinder,boolean)>($r1, $z0);
+
+        return;
+    }
+
+    static boolean access$4000(com.android.server.PowerManagerService, int)
+    {
+        com.android.server.PowerManagerService $r0;
+        int $i0;
+        boolean $z0;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        $i0 := @parameter1: int;
+
+        $z0 = specialinvoke $r0.<com.android.server.PowerManagerService: boolean isScreenLock(int)>($i0);
+
+        return $z0;
+    }
+
+    static com.android.server.PowerManagerService$LockList access$500(com.android.server.PowerManagerService)
+    {
+        com.android.server.PowerManagerService $r0;
+        com.android.server.PowerManagerService$LockList r1;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        r1 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        return r1;
+    }
+
+    static boolean access$600(com.android.server.PowerManagerService)
+    {
+        com.android.server.PowerManagerService $r0;
+        boolean z0;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        z0 = $r0.<com.android.server.PowerManagerService: boolean mIsPowered>;
+
+        return z0;
+    }
+
+    static boolean access$602(com.android.server.PowerManagerService, boolean)
+    {
+        com.android.server.PowerManagerService $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        $z0 := @parameter1: boolean;
+
+        $r0.<com.android.server.PowerManagerService: boolean mIsPowered> = $z0;
+
+        return $z0;
+    }
+
+    static com.android.server.BatteryService access$700(com.android.server.PowerManagerService)
+    {
+        com.android.server.PowerManagerService $r0;
+        com.android.server.BatteryService r1;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        r1 = $r0.<com.android.server.PowerManagerService: com.android.server.BatteryService mBatteryService>;
+
+        return r1;
+    }
+
+    static void access$800(com.android.server.PowerManagerService)
+    {
+        com.android.server.PowerManagerService $r0;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        specialinvoke $r0.<com.android.server.PowerManagerService: void updateWakeLockLocked()>();
+
+        return;
+    }
+
+    static boolean access$900(com.android.server.PowerManagerService)
+    {
+        com.android.server.PowerManagerService $r0;
+        boolean z0;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        z0 = $r0.<com.android.server.PowerManagerService: boolean mUserActivityAllowed>;
+
+        return z0;
+    }
+
+    static boolean access$902(com.android.server.PowerManagerService, boolean)
+    {
+        com.android.server.PowerManagerService $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: com.android.server.PowerManagerService;
+
+        $z0 := @parameter1: boolean;
+
+        $r0.<com.android.server.PowerManagerService: boolean mUserActivityAllowed> = $z0;
+
+        return $z0;
+    }
+
+    private boolean batteryIsLow()
+    {
+        com.android.server.PowerManagerService $r0;
+        int $i0;
+        boolean $z0;
+        com.android.server.BatteryService $r1;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $z0 = $r0.<com.android.server.PowerManagerService: boolean mIsPowered>;
+
+        if $z0 != 0 goto label1;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: com.android.server.BatteryService mBatteryService>;
+
+        $i0 = virtualinvoke $r1.<com.android.server.BatteryService: int getBatteryLevel()>();
+
+        if $i0 > 10 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    private void cancelTimerLocked()
+    {
+        com.android.server.PowerManagerService $r0;
+        android.os.Handler $r1;
+        com.android.server.PowerManagerService$TimeoutTask $r2;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: android.os.Handler mHandler>;
+
+        $r2 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$TimeoutTask mTimeoutTask>;
+
+        virtualinvoke $r1.<android.os.Handler: void removeCallbacks(java.lang.Runnable)>($r2);
+
+        $r2 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$TimeoutTask mTimeoutTask>;
+
+        $r2.<com.android.server.PowerManagerService$TimeoutTask: int nextState> = -1;
+
+        return;
+    }
+
+    private static java.lang.String dumpPowerState(int)
+    {
+        int $i0, $i1;
+        java.lang.StringBuilder $r0;
+        java.lang.String $r1;
+
+        $i0 := @parameter0: int;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $i1 = $i0 & 8;
+
+        if $i1 == 0 goto label5;
+
+        $r1 = "KEYBOARD_BRIGHT_BIT ";
+
+     label1:
+        $r0 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $i1 = $i0 & 2;
+
+        if $i1 == 0 goto label6;
+
+        $r1 = "SCREEN_BRIGHT_BIT ";
+
+     label2:
+        $r0 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $i1 = $i0 & 1;
+
+        if $i1 == 0 goto label7;
+
+        $r1 = "SCREEN_ON_BIT ";
+
+     label3:
+        $r0 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $i0 = $i0 & 16;
+
+        if $i0 == 0 goto label8;
+
+        $r1 = "BATTERY_LOW_BIT ";
+
+     label4:
+        $r0 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r1;
+
+     label5:
+        $r1 = "";
+
+        goto label1;
+
+     label6:
+        $r1 = "";
+
+        goto label2;
+
+     label7:
+        $r1 = "";
+
+        goto label3;
+
+     label8:
+        $r1 = "";
+
+        goto label4;
+    }
+
+    private void forceReenableScreen()
+    {
+        com.android.server.PowerManagerService $r0;
+        boolean $z0;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $z0 = $r0.<com.android.server.PowerManagerService: boolean mPreventScreenOn>;
+
+        if $z0 != 0 goto label1;
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("PowerManagerService", "forceReenableScreen: mPreventScreenOn is false, nothing to do");
+
+        return;
+
+     label1:
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("PowerManagerService", "App called preventScreenOn(true) but didn\'t promptly reenable the screen! Forcing the screen back on...");
+
+        virtualinvoke $r0.<com.android.server.PowerManagerService: void preventScreenOn(boolean)>(0);
+
+        return;
+    }
+
+    private int getPreferredBrightness()
+    {
+        com.android.server.PowerManagerService $r0;
+        int $i0;
+        android.content.Context $r1;
+        android.content.ContentResolver $r2;
+        android.provider.Settings$SettingNotFoundException $r3;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $i0 = $r0.<com.android.server.PowerManagerService: int mScreenBrightnessOverride>;
+
+        if $i0 < 0 goto label1;
+
+        $i0 = $r0.<com.android.server.PowerManagerService: int mScreenBrightnessOverride>;
+
+        return $i0;
+
+     label1:
+        $r1 = $r0.<com.android.server.PowerManagerService: android.content.Context mContext>;
+
+     label2:
+        $r2 = virtualinvoke $r1.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $i0 = staticinvoke <android.provider.Settings$System: int getInt(android.content.ContentResolver,java.lang.String)>($r2, "screen_brightness");
+
+        $i0 = staticinvoke <java.lang.Math: int max(int,int)>($i0, 20);
+
+     label3:
+        return $i0;
+
+     label4:
+        $r3 := @caughtexception;
+
+        return 255;
+
+        catch android.provider.Settings$SettingNotFoundException from label2 to label3 with label4;
+    }
+
+    private void goToSleepLocked(long)
+    {
+        com.android.server.PowerManagerService $r0;
+        long $l0, $l1;
+        byte $b2;
+        com.android.server.PowerManagerService$LockList $r1;
+        int $i3, $i4, $i5, $i6;
+        java.lang.Object $r2;
+        com.android.server.PowerManagerService$WakeLock $r3;
+        boolean $z0;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $l0 := @parameter0: long;
+
+        $l1 = $r0.<com.android.server.PowerManagerService: long mLastEventTime>;
+
+        $b2 = $l1 cmp $l0;
+
+        if $b2 > 0 goto label4;
+
+        $r0.<com.android.server.PowerManagerService: long mLastEventTime> = $l0;
+
+        $r0.<com.android.server.PowerManagerService: int mWakeLockState> = 0;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        $i3 = virtualinvoke $r1.<java.util.ArrayList: int size()>();
+
+        $i4 = 0;
+
+        $i5 = 0;
+
+     label1:
+        if $i5 >= $i3 goto label3;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        $r2 = virtualinvoke $r1.<java.util.ArrayList: java.lang.Object get(int)>($i5);
+
+        $r3 = (com.android.server.PowerManagerService$WakeLock) $r2;
+
+        $i6 = $r3.<com.android.server.PowerManagerService$WakeLock: int flags>;
+
+        $z0 = specialinvoke $r0.<com.android.server.PowerManagerService: boolean isScreenLock(int)>($i6);
+
+        if $z0 == 0 goto label2;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        $r2 = virtualinvoke $r1.<java.util.ArrayList: java.lang.Object get(int)>($i5);
+
+        $r3 = (com.android.server.PowerManagerService$WakeLock) $r2;
+
+        $r3.<com.android.server.PowerManagerService$WakeLock: boolean activated> = 0;
+
+        $i4 = $i4 + 1;
+
+     label2:
+        $i5 = $i5 + 1;
+
+        goto label1;
+
+     label3:
+        staticinvoke <android.util.EventLog: int writeEvent(int,int)>(2724, $i4);
+
+        $r0.<com.android.server.PowerManagerService: boolean mStillNeedSleepNotification> = 1;
+
+        $r0.<com.android.server.PowerManagerService: int mUserState> = 0;
+
+        specialinvoke $r0.<com.android.server.PowerManagerService: void setPowerState(int,boolean,boolean)>(0, 0, 1);
+
+        specialinvoke $r0.<com.android.server.PowerManagerService: void cancelTimerLocked()>();
+
+        return;
+
+     label4:
+        return;
+    }
+
+    private boolean isScreenLock(int)
+    {
+        com.android.server.PowerManagerService $r0;
+        int $i0;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $i0 := @parameter0: int;
+
+        $i0 = $i0 & 31;
+
+        if $i0 == 26 goto label1;
+
+        if $i0 == 10 goto label1;
+
+        if $i0 != 6 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+
+    private static java.lang.String lockType(int)
+    {
+        int $i0;
+
+        $i0 := @parameter0: int;
+
+        lookupswitch($i0)
+        {
+            case 1: goto label5;
+            case 6: goto label4;
+            case 10: goto label3;
+            case 26: goto label2;
+            default: goto label1;
+        };
+
+     label1:
+        return "???                    ";
+
+     label2:
+        return "FULL_WAKE_LOCK         ";
+
+     label3:
+        return "SCREEN_BRIGHT_WAKE_LOCK";
+
+     label4:
+        return "SCREEN_DIM_WAKE_LOCK   ";
+
+     label5:
+        return "PARTIAL_WAKE_LOCK      ";
+    }
+
+    private void reactivateWakeLocksLocked()
+    {
+        com.android.server.PowerManagerService $r0;
+        com.android.server.PowerManagerService$LockList $r1;
+        int $i0, $i1, $i2;
+        java.lang.Object $r2;
+        com.android.server.PowerManagerService$WakeLock $r3;
+        boolean $z0;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        $i0 = virtualinvoke $r1.<java.util.ArrayList: int size()>();
+
+        $i1 = 0;
+
+     label1:
+        if $i1 >= $i0 goto label3;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        $r2 = virtualinvoke $r1.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r3 = (com.android.server.PowerManagerService$WakeLock) $r2;
+
+        $i2 = $r3.<com.android.server.PowerManagerService$WakeLock: int flags>;
+
+        $z0 = specialinvoke $r0.<com.android.server.PowerManagerService: boolean isScreenLock(int)>($i2);
+
+        if $z0 == 0 goto label2;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        $r2 = virtualinvoke $r1.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r3 = (com.android.server.PowerManagerService$WakeLock) $r2;
+
+        $r3.<com.android.server.PowerManagerService$WakeLock: boolean activated> = 1;
+
+     label2:
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    private void releaseWakeLockLocked(android.os.IBinder, boolean)
+    {
+        com.android.server.PowerManagerService $r0;
+        android.os.IBinder $r1;
+        boolean $z0;
+        java.lang.String $r2;
+        int $i0, $i1;
+        com.android.server.PowerManagerService$LockList $r3;
+        com.android.server.PowerManagerService$WakeLock $r4;
+        long $l2;
+        com.android.internal.app.IBatteryStats $r5;
+        android.os.RemoteException $r6;
+        java.lang.Throwable $r7;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $r1 := @parameter0: android.os.IBinder;
+
+        $z0 := @parameter1: boolean;
+
+        $r3 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        $r4 = virtualinvoke $r3.<com.android.server.PowerManagerService$LockList: com.android.server.PowerManagerService$WakeLock removeLock(android.os.IBinder)>($r1);
+
+        if $r4 != null goto label01;
+
+        return;
+
+     label01:
+        $i0 = $r4.<com.android.server.PowerManagerService$WakeLock: int flags>;
+
+        $z0 = specialinvoke $r0.<com.android.server.PowerManagerService: boolean isScreenLock(int)>($i0);
+
+        if $z0 == 0 goto label07;
+
+        $r3 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        $i0 = virtualinvoke $r3.<com.android.server.PowerManagerService$LockList: int gatherState()>();
+
+        $r0.<com.android.server.PowerManagerService: int mWakeLockState> = $i0;
+
+        $i0 = $r4.<com.android.server.PowerManagerService$WakeLock: int flags>;
+
+        $i0 = $i0 & 536870912;
+
+        if $i0 == 0 goto label02;
+
+        $l2 = staticinvoke <android.os.SystemClock: long uptimeMillis()>();
+
+        virtualinvoke $r0.<com.android.server.PowerManagerService: void userActivity(long,boolean)>($l2, 0);
+
+     label02:
+        $i0 = $r0.<com.android.server.PowerManagerService: int mWakeLockState>;
+
+        $i1 = $r0.<com.android.server.PowerManagerService: int mUserState>;
+
+        $i0 = $i0 | $i1;
+
+        specialinvoke $r0.<com.android.server.PowerManagerService: void setPowerState(int)>($i0);
+
+     label03:
+        $r1 = $r4.<com.android.server.PowerManagerService$WakeLock: android.os.IBinder binder>;
+
+        interfaceinvoke $r1.<android.os.IBinder: boolean unlinkToDeath(android.os.IBinder$DeathRecipient,int)>($r4, 0);
+
+        $i1 = $r4.<com.android.server.PowerManagerService$WakeLock: int uid>;
+
+        $r2 = $r4.<com.android.server.PowerManagerService$WakeLock: java.lang.String tag>;
+
+        $i0 = $r4.<com.android.server.PowerManagerService$WakeLock: int monitorType>;
+
+        if $i0 < 0 goto label10;
+
+        $l2 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label04:
+        $r5 = $r0.<com.android.server.PowerManagerService: com.android.internal.app.IBatteryStats mBatteryStats>;
+
+     label05:
+        interfaceinvoke $r5.<com.android.internal.app.IBatteryStats: void noteStopWakelock(int,java.lang.String,int)>($i1, $r2, $i0);
+
+     label06:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l2);
+
+        return;
+
+     label07:
+        $i0 = $r4.<com.android.server.PowerManagerService$WakeLock: int flags>;
+
+        $i0 = $i0 & 31;
+
+        if $i0 != 1 goto label03;
+
+        $i0 = $r0.<com.android.server.PowerManagerService: int mPartialCount>;
+
+        $i0 = $i0 - 1;
+
+        $r0.<com.android.server.PowerManagerService: int mPartialCount> = $i0;
+
+        $i0 = $r0.<com.android.server.PowerManagerService: int mPartialCount>;
+
+        if $i0 != 0 goto label03;
+
+        staticinvoke <android.os.Power: void releaseWakeLock(java.lang.String)>("PowerManagerService");
+
+        goto label03;
+
+     label08:
+        $r6 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l2);
+
+        return;
+
+     label09:
+        $r7 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l2);
+
+        throw $r7;
+
+     label10:
+        return;
+
+        catch android.os.RemoteException from label05 to label06 with label08;
+        catch java.lang.Throwable from label04 to label06 with label09;
+    }
+
+    private int screenOffFinishedAnimatingLocked(boolean)
+    {
+        com.android.server.PowerManagerService $r0;
+        boolean $z0;
+        long $l0, $l2, $l4;
+        java.lang.Object[] $r1;
+        java.lang.Integer $r2;
+        byte $b1;
+        java.lang.Long $r3;
+        int $i3;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 = newarray (java.lang.Object)[4];
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+        $r1[0] = $r2;
+
+        if $z0 == 0 goto label4;
+
+        $b1 = 1;
+
+     label1:
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($b1);
+
+        $r1[1] = $r2;
+
+        $l2 = $r0.<com.android.server.PowerManagerService: long mTotalTouchDownTime>;
+
+        $r3 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l2);
+
+        $r1[2] = $r3;
+
+        $i3 = $r0.<com.android.server.PowerManagerService: int mTouchCycles>;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i3);
+
+        $r1[3] = $r2;
+
+        staticinvoke <android.util.EventLog: int writeEvent(int,java.lang.Object[])>(2728, $r1);
+
+        $r0.<com.android.server.PowerManagerService: long mLastTouchDown> = 0L;
+
+        $i3 = staticinvoke <android.os.Power: int setScreenState(boolean)>(0);
+
+        $l2 = $r0.<com.android.server.PowerManagerService: long mScreenOnStartTime>;
+
+        $b1 = $l2 cmp 0L;
+
+        if $b1 == 0 goto label2;
+
+        $l2 = $r0.<com.android.server.PowerManagerService: long mScreenOnTime>;
+
+        $l4 = staticinvoke <android.os.SystemClock: long elapsedRealtime()>();
+
+        $l0 = $r0.<com.android.server.PowerManagerService: long mScreenOnStartTime>;
+
+        $l0 = $l4 - $l0;
+
+        $l2 = $l2 + $l0;
+
+        $r0.<com.android.server.PowerManagerService: long mScreenOnTime> = $l2;
+
+        $r0.<com.android.server.PowerManagerService: long mScreenOnStartTime> = 0L;
+
+     label2:
+        if $i3 != 0 goto label6;
+
+        if $z0 == 0 goto label5;
+
+        $b1 = 1;
+
+     label3:
+        specialinvoke $r0.<com.android.server.PowerManagerService: void sendNotificationLocked(boolean,int)>(0, $b1);
+
+        return $i3;
+
+     label4:
+        $b1 = 0;
+
+        goto label1;
+
+     label5:
+        $b1 = 2;
+
+        goto label3;
+
+     label6:
+        return $i3;
+    }
+
+    private void sendNotificationLocked(boolean, int)
+    {
+        com.android.server.PowerManagerService $r0;
+        boolean $z0;
+        int $i0, $i1, $i2;
+        int[] $r1;
+        byte $b3;
+        java.lang.Object[] $r2;
+        java.lang.Integer $r3;
+        com.android.server.PowerManagerService$UnsynchronizedWakeLock $r4;
+        android.os.Handler $r5;
+        java.lang.Runnable $r6;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $z0 := @parameter0: boolean;
+
+        $i0 := @parameter1: int;
+
+        if $z0 != 0 goto label01;
+
+        $r0.<com.android.server.PowerManagerService: boolean mStillNeedSleepNotification> = 0;
+
+     label01:
+        $i1 = 0;
+
+     label02:
+        $r1 = $r0.<com.android.server.PowerManagerService: int[] mBroadcastQueue>;
+
+        $i2 = $r1[$i1];
+
+        if $i2 == -1 goto label03;
+
+        $i1 = $i1 + 1;
+
+        goto label02;
+
+     label03:
+        $r1 = $r0.<com.android.server.PowerManagerService: int[] mBroadcastQueue>;
+
+        if $z0 == 0 goto label09;
+
+        $b3 = 1;
+
+     label04:
+        $r1[$i1] = $b3;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: int[] mBroadcastWhy>;
+
+        $r1[$i1] = $i0;
+
+        if $i1 != 2 goto label07;
+
+        if $z0 != 0 goto label05;
+
+        if $i0 != 1 goto label05;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: int[] mBroadcastWhy>;
+
+        $r1[0] = 1;
+
+     label05:
+        $r1 = $r0.<com.android.server.PowerManagerService: int[] mBroadcastQueue>;
+
+        if $z0 == 0 goto label10;
+
+        $b3 = 1;
+
+     label06:
+        $r1[0] = $b3;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: int[] mBroadcastQueue>;
+
+        $r1[1] = -1;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: int[] mBroadcastQueue>;
+
+        $r1[2] = -1;
+
+        $i1 = 0;
+
+     label07:
+        if $i1 != 1 goto label08;
+
+        if $z0 != 0 goto label08;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: int[] mBroadcastQueue>;
+
+        $r1[0] = -1;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: int[] mBroadcastQueue>;
+
+        $r1[1] = -1;
+
+        $i1 = -1;
+
+        $r2 = newarray (java.lang.Object)[2];
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(1);
+
+        $r2[0] = $r3;
+
+        $r4 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$UnsynchronizedWakeLock mBroadcastWakeLock>;
+
+        $i0 = $r4.<com.android.server.PowerManagerService$UnsynchronizedWakeLock: int mCount>;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r2[1] = $r3;
+
+        staticinvoke <android.util.EventLog: int writeEvent(int,java.lang.Object[])>(2727, $r2);
+
+        $r4 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$UnsynchronizedWakeLock mBroadcastWakeLock>;
+
+        virtualinvoke $r4.<com.android.server.PowerManagerService$UnsynchronizedWakeLock: void release()>();
+
+     label08:
+        if $i1 < 0 goto label11;
+
+        $r4 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$UnsynchronizedWakeLock mBroadcastWakeLock>;
+
+        virtualinvoke $r4.<com.android.server.PowerManagerService$UnsynchronizedWakeLock: void acquire()>();
+
+        $r4 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$UnsynchronizedWakeLock mBroadcastWakeLock>;
+
+        $i0 = $r4.<com.android.server.PowerManagerService$UnsynchronizedWakeLock: int mCount>;
+
+        staticinvoke <android.util.EventLog: int writeEvent(int,int)>(2725, $i0);
+
+        $r5 = $r0.<com.android.server.PowerManagerService: android.os.Handler mHandler>;
+
+        $r6 = $r0.<com.android.server.PowerManagerService: java.lang.Runnable mNotificationTask>;
+
+        virtualinvoke $r5.<android.os.Handler: boolean post(java.lang.Runnable)>($r6);
+
+        return;
+
+     label09:
+        $b3 = 0;
+
+        goto label04;
+
+     label10:
+        $b3 = 0;
+
+        goto label06;
+
+     label11:
+        return;
+    }
+
+    private void setLightBrightness(int, int)
+    {
+        com.android.server.PowerManagerService $r0;
+        int $i0, $i1, $i2;
+        com.android.server.HardwareService $r1;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i2 = $i0 & 2;
+
+        if $i2 == 0 goto label1;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: com.android.server.HardwareService mHardware>;
+
+        virtualinvoke $r1.<com.android.server.HardwareService: void setLightBrightness_UNCHECKED(int,int)>(0, $i1);
+
+     label1:
+        $i2 = $i0 & 4;
+
+        if $i2 == 0 goto label2;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: com.android.server.HardwareService mHardware>;
+
+        virtualinvoke $r1.<com.android.server.HardwareService: void setLightBrightness_UNCHECKED(int,int)>(2, $i1);
+
+     label2:
+        $i0 = $i0 & 8;
+
+        if $i0 == 0 goto label3;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: com.android.server.HardwareService mHardware>;
+
+        virtualinvoke $r1.<com.android.server.HardwareService: void setLightBrightness_UNCHECKED(int,int)>(1, $i1);
+
+        return;
+
+     label3:
+        return;
+    }
+
+    private void setPowerState(int)
+    {
+        com.android.server.PowerManagerService $r0;
+        int $i0;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $i0 := @parameter0: int;
+
+        specialinvoke $r0.<com.android.server.PowerManagerService: void setPowerState(int,boolean,boolean)>($i0, 0, 0);
+
+        return;
+    }
+
+    private void setPowerState(int, boolean, boolean)
+    {
+        com.android.server.PowerManagerService $r0;
+        boolean $z0, $z1, $z2;
+        int $i0, $i1;
+        com.android.server.PowerManagerService$LockList $r1;
+        long $l2;
+        com.android.internal.app.IBatteryStats $r2;
+        java.lang.Object[] $r3;
+        java.lang.Integer $r4;
+        byte $b3;
+        java.lang.Long $r5;
+        java.lang.Throwable $r6, $r8, $r11;
+        android.os.RemoteException $r7, $r10;
+        com.android.server.PowerManagerService$BrightnessState $r9;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $i0 := @parameter0: int;
+
+        $z0 := @parameter1: boolean;
+
+        $z1 := @parameter2: boolean;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        entermonitor $r1;
+
+        if $z0 == 0 goto label02;
+
+        $i0 = $i0 & -15;
+
+     label01:
+        $i1 = $r0.<com.android.server.PowerManagerService: int mPowerState>;
+
+        $i1 = $i1 & 14;
+
+        $i0 = $i0 | $i1;
+
+     label02:
+        $z0 = specialinvoke $r0.<com.android.server.PowerManagerService: boolean batteryIsLow()>();
+
+        if $z0 == 0 goto label05;
+
+        $i0 = $i0 | 16;
+
+     label03:
+        $i1 = $r0.<com.android.server.PowerManagerService: int mPowerState>;
+
+        if $i0 != $i1 goto label06;
+
+        exitmonitor $r1;
+
+     label04:
+        return;
+
+     label05:
+        $i0 = $i0 & -17;
+
+        goto label03;
+
+     label06:
+        $z0 = $r0.<com.android.server.PowerManagerService: boolean mDoneBooting>;
+
+        if $z0 != 0 goto label07;
+
+        $i0 = $i0 | 15;
+
+     label07:
+        $i1 = $r0.<com.android.server.PowerManagerService: int mPowerState>;
+
+        $i1 = $i1 & 1;
+
+        if $i1 == 0 goto label22;
+
+        $z0 = 1;
+
+     label08:
+        $i1 = $i0 & 1;
+
+        if $i1 == 0 goto label23;
+
+        $z2 = 1;
+
+     label09:
+        $i1 = $r0.<com.android.server.PowerManagerService: int mPowerState>;
+
+        if $i1 == $i0 goto label10;
+
+        specialinvoke $r0.<com.android.server.PowerManagerService: void updateLightsLocked(int,int)>($i0, 0);
+
+        $i1 = $r0.<com.android.server.PowerManagerService: int mPowerState>;
+
+        $i1 = $i1 & -15;
+
+        $i0 = $i0 & 14;
+
+        $i0 = $i1 | $i0;
+
+        $r0.<com.android.server.PowerManagerService: int mPowerState> = $i0;
+
+     label10:
+        if $z0 == $z2 goto label18;
+
+        if $z2 == 0 goto label30;
+
+        $z0 = $r0.<com.android.server.PowerManagerService: boolean mStillNeedSleepNotification>;
+
+        if $z0 == 0 goto label11;
+
+        specialinvoke $r0.<com.android.server.PowerManagerService: void sendNotificationLocked(boolean,int)>(0, 1);
+
+     label11:
+        $z0 = 1;
+
+        $z2 = $r0.<com.android.server.PowerManagerService: boolean mPreventScreenOn>;
+
+        if $z2 == 0 goto label12;
+
+        $z0 = 0;
+
+     label12:
+        if $z0 == 0 goto label28;
+
+        $i0 = staticinvoke <android.os.Power: int setScreenState(boolean)>(1);
+
+        $l2 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label13:
+        $r2 = $r0.<com.android.server.PowerManagerService: com.android.internal.app.IBatteryStats mBatteryStats>;
+
+     label14:
+        $i1 = specialinvoke $r0.<com.android.server.PowerManagerService: int getPreferredBrightness()>();
+
+        interfaceinvoke $r2.<com.android.internal.app.IBatteryStats: void noteScreenBrightness(int)>($i1);
+
+        $r2 = $r0.<com.android.server.PowerManagerService: com.android.internal.app.IBatteryStats mBatteryStats>;
+
+        interfaceinvoke $r2.<com.android.internal.app.IBatteryStats: void noteScreenOn()>();
+
+     label15:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l2);
+
+     label16:
+        $l2 = staticinvoke <android.os.SystemClock: long elapsedRealtime()>();
+
+        $r0.<com.android.server.PowerManagerService: long mScreenOnStartTime> = $l2;
+
+        $r0.<com.android.server.PowerManagerService: long mLastTouchDown> = 0L;
+
+        $r0.<com.android.server.PowerManagerService: long mTotalTouchDownTime> = 0L;
+
+        $r0.<com.android.server.PowerManagerService: int mTouchCycles> = 0;
+
+        $r3 = newarray (java.lang.Object)[4];
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(1);
+
+        $r3[0] = $r4;
+
+        if $z1 == 0 goto label29;
+
+        $b3 = 1;
+
+     label17:
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($b3);
+
+        $r3[1] = $r4;
+
+        $l2 = $r0.<com.android.server.PowerManagerService: long mTotalTouchDownTime>;
+
+        $r5 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l2);
+
+        $r3[2] = $r5;
+
+        $i1 = $r0.<com.android.server.PowerManagerService: int mTouchCycles>;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r3[3] = $r4;
+
+        staticinvoke <android.util.EventLog: int writeEvent(int,java.lang.Object[])>(2728, $r3);
+
+        if $i0 != 0 goto label18;
+
+        $i0 = $r0.<com.android.server.PowerManagerService: int mPowerState>;
+
+        $i0 = $i0 | 1;
+
+        $r0.<com.android.server.PowerManagerService: int mPowerState> = $i0;
+
+        specialinvoke $r0.<com.android.server.PowerManagerService: void sendNotificationLocked(boolean,int)>(1, -1);
+
+     label18:
+        exitmonitor $r1;
+
+     label19:
+        return;
+
+     label20:
+        $r6 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label21:
+        throw $r6;
+
+     label22:
+        $z0 = 0;
+
+        goto label08;
+
+     label23:
+        $z2 = 0;
+
+        goto label09;
+
+     label24:
+        $r7 := @caughtexception;
+
+     label25:
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String,java.lang.Throwable)>("PowerManagerService", "RemoteException calling noteScreenOn on BatteryStatsService", $r7);
+
+     label26:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l2);
+
+        goto label16;
+
+     label27:
+        $r8 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l2);
+
+        throw $r8;
+
+     label28:
+        staticinvoke <android.os.Power: int setScreenState(boolean)>(0);
+
+        $i0 = 0;
+
+        goto label16;
+
+     label29:
+        $b3 = 0;
+
+        goto label17;
+
+     label30:
+        $l2 = staticinvoke <android.os.SystemClock: long elapsedRealtime()>();
+
+        $r0.<com.android.server.PowerManagerService: long mScreenOffTime> = $l2;
+
+        $l2 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label31:
+        $r2 = $r0.<com.android.server.PowerManagerService: com.android.internal.app.IBatteryStats mBatteryStats>;
+
+     label32:
+        interfaceinvoke $r2.<com.android.internal.app.IBatteryStats: void noteScreenOff()>();
+
+     label33:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l2);
+
+     label34:
+        $i0 = $r0.<com.android.server.PowerManagerService: int mPowerState>;
+
+        $i0 = $i0 & -2;
+
+        $r0.<com.android.server.PowerManagerService: int mPowerState> = $i0;
+
+        $r9 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$BrightnessState mScreenBrightness>;
+
+        $z0 = $r9.<com.android.server.PowerManagerService$BrightnessState: boolean animating>;
+
+        if $z0 != 0 goto label40;
+
+        specialinvoke $r0.<com.android.server.PowerManagerService: int screenOffFinishedAnimatingLocked(boolean)>($z1);
+
+     label35:
+        goto label18;
+
+     label36:
+        $r10 := @caughtexception;
+
+     label37:
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String,java.lang.Throwable)>("PowerManagerService", "RemoteException calling noteScreenOff on BatteryStatsService", $r10);
+
+     label38:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l2);
+
+        goto label34;
+
+     label39:
+        $r11 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l2);
+
+        throw $r11;
+
+     label40:
+        $r0.<com.android.server.PowerManagerService: boolean mOffBecauseOfUser> = $z1;
+
+        $r0.<com.android.server.PowerManagerService: long mLastTouchDown> = 0L;
+
+     label41:
+        goto label18;
+
+        catch java.lang.Throwable from label01 to label04 with label20;
+        catch java.lang.Throwable from label05 to label13 with label20;
+        catch android.os.RemoteException from label14 to label15 with label24;
+        catch java.lang.Throwable from label13 to label15 with label27;
+        catch java.lang.Throwable from label15 to label19 with label20;
+        catch java.lang.Throwable from label20 to label21 with label20;
+        catch java.lang.Throwable from label25 to label26 with label27;
+        catch java.lang.Throwable from label26 to label31 with label20;
+        catch android.os.RemoteException from label32 to label33 with label36;
+        catch java.lang.Throwable from label31 to label33 with label39;
+        catch java.lang.Throwable from label33 to label35 with label20;
+        catch java.lang.Throwable from label37 to label38 with label39;
+        catch java.lang.Throwable from label38 to label41 with label20;
+    }
+
+    private void setScreenOffTimeoutsLocked()
+    {
+        com.android.server.PowerManagerService $r0;
+        int $i0, $i1;
+        boolean $z0;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $i0 = $r0.<com.android.server.PowerManagerService: int mPokey>;
+
+        $i0 = $i0 & 2;
+
+        if $i0 == 0 goto label1;
+
+        $i0 = $r0.<com.android.server.PowerManagerService: int mShortKeylightDelay>;
+
+        $r0.<com.android.server.PowerManagerService: int mKeylightDelay> = $i0;
+
+        $r0.<com.android.server.PowerManagerService: int mDimDelay> = -1;
+
+        $r0.<com.android.server.PowerManagerService: int mScreenOffDelay> = 0;
+
+        return;
+
+     label1:
+        $i0 = $r0.<com.android.server.PowerManagerService: int mPokey>;
+
+        $i0 = $i0 & 4;
+
+        if $i0 == 0 goto label2;
+
+        $r0.<com.android.server.PowerManagerService: int mKeylightDelay> = 15000;
+
+        $r0.<com.android.server.PowerManagerService: int mDimDelay> = -1;
+
+        $r0.<com.android.server.PowerManagerService: int mScreenOffDelay> = 0;
+
+        return;
+
+     label2:
+        $i0 = $r0.<com.android.server.PowerManagerService: int mTotalDelaySetting>;
+
+        $r0.<com.android.server.PowerManagerService: int mKeylightDelay> = 6000;
+
+        if $i0 >= 0 goto label4;
+
+        $r0.<com.android.server.PowerManagerService: int mScreenOffDelay> = 2147483647;
+
+     label3:
+        $z0 = $r0.<com.android.server.PowerManagerService: boolean mDimScreen>;
+
+        if $z0 == 0 goto label6;
+
+        if $i0 < 13000 goto label6;
+
+        $i0 = $r0.<com.android.server.PowerManagerService: int mScreenOffDelay>;
+
+        $i0 = $i0 - 7000;
+
+        $r0.<com.android.server.PowerManagerService: int mDimDelay> = $i0;
+
+        $r0.<com.android.server.PowerManagerService: int mScreenOffDelay> = 7000;
+
+        return;
+
+     label4:
+        $i1 = $r0.<com.android.server.PowerManagerService: int mKeylightDelay>;
+
+        if $i1 >= $i0 goto label5;
+
+        $i1 = $r0.<com.android.server.PowerManagerService: int mKeylightDelay>;
+
+        $i1 = $i0 - $i1;
+
+        $r0.<com.android.server.PowerManagerService: int mScreenOffDelay> = $i1;
+
+        goto label3;
+
+     label5:
+        $r0.<com.android.server.PowerManagerService: int mScreenOffDelay> = 0;
+
+        goto label3;
+
+     label6:
+        $r0.<com.android.server.PowerManagerService: int mDimDelay> = -1;
+
+        return;
+    }
+
+    private void setTimeoutLocked(long, int)
+    {
+        com.android.server.PowerManagerService $r0;
+        long $l0, $l2;
+        int $i1;
+        boolean $z0;
+        android.os.Handler $r1;
+        com.android.server.PowerManagerService$TimeoutTask $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+        com.android.server.PowerManagerService$LockList $r5;
+        java.lang.Throwable $r6;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $l0 := @parameter0: long;
+
+        $i1 := @parameter1: int;
+
+        $z0 = $r0.<com.android.server.PowerManagerService: boolean mDoneBooting>;
+
+        if $z0 == 0 goto label10;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: android.os.Handler mHandler>;
+
+        $r2 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$TimeoutTask mTimeoutTask>;
+
+        virtualinvoke $r1.<android.os.Handler: void removeCallbacks(java.lang.Runnable)>($r2);
+
+        $r2 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$TimeoutTask mTimeoutTask>;
+
+        $r2.<com.android.server.PowerManagerService$TimeoutTask: int nextState> = $i1;
+
+        $l2 = $l0;
+
+        lookupswitch($i1)
+        {
+            case 0: goto label05;
+            case 1: goto label03;
+            case 2: goto label01;
+            case 3: goto label02;
+            default: goto label01;
+        };
+
+     label01:
+        $r1 = $r0.<com.android.server.PowerManagerService: android.os.Handler mHandler>;
+
+        $r2 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$TimeoutTask mTimeoutTask>;
+
+        virtualinvoke $r1.<android.os.Handler: boolean postAtTime(java.lang.Runnable,long)>($r2, $l2);
+
+        $r0.<com.android.server.PowerManagerService: long mNextTimeout> = $l2;
+
+        return;
+
+     label02:
+        $i1 = $r0.<com.android.server.PowerManagerService: int mKeylightDelay>;
+
+        $l2 = (long) $i1;
+
+        $l2 = $l0 + $l2;
+
+        goto label01;
+
+     label03:
+        $i1 = $r0.<com.android.server.PowerManagerService: int mDimDelay>;
+
+        if $i1 < 0 goto label04;
+
+        $i1 = $r0.<com.android.server.PowerManagerService: int mDimDelay>;
+
+        $l2 = (long) $i1;
+
+        $l2 = $l0 + $l2;
+
+        goto label01;
+
+     label04:
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("mDimDelay=");
+
+        $i1 = $r0.<com.android.server.PowerManagerService: int mDimDelay>;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" while trying to dim");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("PowerManagerService", $r4);
+
+     label05:
+        $r5 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        entermonitor $r5;
+
+     label06:
+        $i1 = $r0.<com.android.server.PowerManagerService: int mScreenOffDelay>;
+
+        $l2 = (long) $i1;
+
+        $l2 = $l0 + $l2;
+
+        exitmonitor $r5;
+
+     label07:
+        goto label01;
+
+     label08:
+        $r6 := @caughtexception;
+
+        exitmonitor $r5;
+
+     label09:
+        throw $r6;
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label06 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+    }
+
+    private void updateGservicesValues()
+    {
+        com.android.server.PowerManagerService $r0;
+        android.content.Context $r1;
+        android.content.ContentResolver $r2;
+        int $i0;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: android.content.Context mContext>;
+
+        $r2 = virtualinvoke $r1.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $i0 = staticinvoke <android.provider.Settings$Gservices: int getInt(android.content.ContentResolver,java.lang.String,int)>($r2, "short_keylight_delay_ms", 6000);
+
+        $r0.<com.android.server.PowerManagerService: int mShortKeylightDelay> = $i0;
+
+        return;
+    }
+
+    private void updateLightsLocked(int, int)
+    {
+        com.android.server.PowerManagerService $r0;
+        int $i0, $i1, $i2, $i3, $i4, $i7, $i8;
+        byte $b5, $b6, $b9;
+        boolean $z0;
+        com.android.server.PowerManagerService$BrightnessState $r1;
+        float $f0;
+        long $l10;
+        com.android.internal.app.IBatteryStats $r2;
+        android.os.Handler $r3;
+        com.android.server.PowerManagerService$LightAnimator $r4;
+        com.android.server.BatteryService $r5;
+        android.os.RemoteException $r6;
+        java.lang.Throwable $r7;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i4 = $r0.<com.android.server.PowerManagerService: int mPowerState>;
+
+        $i3 = $i0 ^ $i4;
+
+        $i2 = $i3 | $i1;
+
+        if $i2 != 0 goto label01;
+
+        return;
+
+     label01:
+        $b5 = 0;
+
+        $b6 = 0;
+
+        $i1 = specialinvoke $r0.<com.android.server.PowerManagerService: int getPreferredBrightness()>();
+
+        $z0 = 0;
+
+        $i7 = $i2 & 8;
+
+        if $i7 == 0 goto label02;
+
+        $i7 = $i0 & 8;
+
+        if $i7 != 0 goto label18;
+
+        $b5 = 0 | 8;
+
+     label02:
+        $i7 = $i2 & 4;
+
+        if $i7 == 0 goto label03;
+
+        $i7 = $i0 & 4;
+
+        if $i7 != 0 goto label19;
+
+        $b5 = $b5 | 4;
+
+     label03:
+        $i2 = $i2 & 3;
+
+        if $i2 == 0 goto label13;
+
+        $i2 = -1;
+
+        $i3 = $i3 & 3;
+
+        if $i3 == 0 goto label05;
+
+        $i2 = $i4 & 3;
+
+        lookupswitch($i2)
+        {
+            case 0: goto label22;
+            case 1: goto label21;
+            case 2: goto label04;
+            case 3: goto label20;
+            default: goto label04;
+        };
+
+     label04:
+        $r1 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$BrightnessState mScreenBrightness>;
+
+        $f0 = $r1.<com.android.server.PowerManagerService$BrightnessState: float curValue>;
+
+        $i2 = (int) $f0;
+
+     label05:
+        $i7 = $i1;
+
+        $i3 = 15;
+
+        $i8 = $i0 & 2;
+
+        if $i8 != 0 goto label08;
+
+        $f0 = (float) $i1;
+
+        $f0 = 20.0F / $f0;
+
+        $b9 = $f0 cmpl 1.0F;
+
+        if $b9 <= 0 goto label06;
+
+        $f0 = 1.0F;
+
+     label06:
+        $i1 = $i0 & 1;
+
+        if $i1 != 0 goto label24;
+
+        $i1 = $i4 & 2;
+
+        if $i1 == 0 goto label23;
+
+        $i3 = 15;
+
+     label07:
+        $i7 = 0;
+
+     label08:
+        $l10 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label09:
+        $r2 = $r0.<com.android.server.PowerManagerService: com.android.internal.app.IBatteryStats mBatteryStats>;
+
+     label10:
+        interfaceinvoke $r2.<com.android.internal.app.IBatteryStats: void noteScreenBrightness(int)>($i7);
+
+     label11:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l10);
+
+     label12:
+        $r1 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$BrightnessState mScreenBrightness>;
+
+        virtualinvoke $r1.<com.android.server.PowerManagerService$BrightnessState: void setTargetLocked(int,int,int,int)>($i7, $i3, 255, $i2);
+
+        $z0 = 1;
+
+     label13:
+        if $z0 == 0 goto label14;
+
+        $r3 = $r0.<com.android.server.PowerManagerService: android.os.Handler mHandler>;
+
+        $r4 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LightAnimator mLightAnimator>;
+
+        virtualinvoke $r3.<android.os.Handler: void removeCallbacks(java.lang.Runnable)>($r4);
+
+        $r3 = $r0.<com.android.server.PowerManagerService: android.os.Handler mHandler>;
+
+        $r4 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LightAnimator mLightAnimator>;
+
+        virtualinvoke $r3.<android.os.Handler: boolean post(java.lang.Runnable)>($r4);
+
+     label14:
+        if $b5 == 0 goto label15;
+
+        specialinvoke $r0.<com.android.server.PowerManagerService: void setLightBrightness(int,int)>($b5, 0);
+
+     label15:
+        goto label16;
+
+     label16:
+        if $b6 == 0 goto label30;
+
+        $i1 = specialinvoke $r0.<com.android.server.PowerManagerService: int getPreferredBrightness()>();
+
+        $i4 = $i1;
+
+        $i0 = $i0 & 16;
+
+        if $i0 == 0 goto label17;
+
+        if $i1 <= 10 goto label17;
+
+        $i4 = 10;
+
+     label17:
+        specialinvoke $r0.<com.android.server.PowerManagerService: void setLightBrightness(int,int)>($b6, $i4);
+
+        return;
+
+     label18:
+        $b6 = 0 | 8;
+
+        goto label02;
+
+     label19:
+        $b6 = $b6 | 4;
+
+        goto label03;
+
+     label20:
+        $i2 = $i1;
+
+        goto label05;
+
+     label21:
+        $i2 = 20;
+
+        goto label05;
+
+     label22:
+        $i2 = 0;
+
+        goto label05;
+
+     label23:
+        $f0 = 15.0F * $f0;
+
+        $f0 = $f0 * 1.5F;
+
+        $i3 = (int) $f0;
+
+        goto label07;
+
+     label24:
+        $i1 = $i4 & 1;
+
+        if $i1 == 0 goto label27;
+
+        $f0 = 1.0F - $f0;
+
+        $f0 = 15.0F * $f0;
+
+        $f0 = $f0 * 1.5F;
+
+        $i3 = (int) $f0;
+
+     label25:
+        $i1 = $r0.<com.android.server.PowerManagerService: int mStayOnConditions>;
+
+        if $i1 == 0 goto label26;
+
+        $r5 = $r0.<com.android.server.PowerManagerService: com.android.server.BatteryService mBatteryService>;
+
+        $i1 = $r0.<com.android.server.PowerManagerService: int mStayOnConditions>;
+
+        $z0 = virtualinvoke $r5.<com.android.server.BatteryService: boolean isPowered(int)>($i1);
+
+        if $z0 == 0 goto label26;
+
+        $l10 = staticinvoke <android.os.SystemClock: long elapsedRealtime()>();
+
+        $r0.<com.android.server.PowerManagerService: long mScreenOffTime> = $l10;
+
+     label26:
+        $i7 = 20;
+
+        goto label08;
+
+     label27:
+        $f0 = 15.0F * $f0;
+
+        $i3 = (int) $f0;
+
+        goto label25;
+
+     label28:
+        $r6 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l10);
+
+        goto label12;
+
+     label29:
+        $r7 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l10);
+
+        throw $r7;
+
+     label30:
+        return;
+
+        catch android.os.RemoteException from label10 to label11 with label28;
+        catch java.lang.Throwable from label09 to label11 with label29;
+    }
+
+    private void updateWakeLockLocked()
+    {
+        com.android.server.PowerManagerService $r0;
+        int $i0;
+        boolean $z0;
+        com.android.server.BatteryService $r1;
+        com.android.server.PowerManagerService$UnsynchronizedWakeLock $r2;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $i0 = $r0.<com.android.server.PowerManagerService: int mStayOnConditions>;
+
+        if $i0 == 0 goto label1;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: com.android.server.BatteryService mBatteryService>;
+
+        $i0 = $r0.<com.android.server.PowerManagerService: int mStayOnConditions>;
+
+        $z0 = virtualinvoke $r1.<com.android.server.BatteryService: boolean isPowered(int)>($i0);
+
+        if $z0 == 0 goto label1;
+
+        $r2 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$UnsynchronizedWakeLock mStayOnWhilePluggedInScreenDimLock>;
+
+        virtualinvoke $r2.<com.android.server.PowerManagerService$UnsynchronizedWakeLock: void acquire()>();
+
+        $r2 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$UnsynchronizedWakeLock mStayOnWhilePluggedInPartialLock>;
+
+        virtualinvoke $r2.<com.android.server.PowerManagerService$UnsynchronizedWakeLock: void acquire()>();
+
+        return;
+
+     label1:
+        $r2 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$UnsynchronizedWakeLock mStayOnWhilePluggedInScreenDimLock>;
+
+        virtualinvoke $r2.<com.android.server.PowerManagerService$UnsynchronizedWakeLock: void release()>();
+
+        $r2 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$UnsynchronizedWakeLock mStayOnWhilePluggedInPartialLock>;
+
+        virtualinvoke $r2.<com.android.server.PowerManagerService$UnsynchronizedWakeLock: void release()>();
+
+        return;
+    }
+
+    public void acquireWakeLock(int, android.os.IBinder, java.lang.String)
+    {
+        com.android.server.PowerManagerService $r0;
+        int $i0, $i1;
+        android.os.IBinder $r1;
+        java.lang.String $r2;
+        android.content.Context $r3;
+        long $l2;
+        com.android.server.PowerManagerService$LockList $r4;
+        java.lang.Throwable $r5, $r6;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: android.os.IBinder;
+
+        $r2 := @parameter2: java.lang.String;
+
+        $r3 = $r0.<com.android.server.PowerManagerService: android.content.Context mContext>;
+
+        virtualinvoke $r3.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.WAKE_LOCK", null);
+
+        $i1 = staticinvoke <android.os.Binder: int getCallingUid()>();
+
+        $l2 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label1:
+        $r4 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        entermonitor $r4;
+
+     label2:
+        virtualinvoke $r0.<com.android.server.PowerManagerService: void acquireWakeLockLocked(int,android.os.IBinder,int,java.lang.String)>($i0, $r1, $i1, $r2);
+
+        exitmonitor $r4;
+
+     label3:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l2);
+
+        return;
+
+     label4:
+        $r5 := @caughtexception;
+
+     label5:
+        exitmonitor $r4;
+
+     label6:
+        throw $r5;
+
+     label7:
+        $r6 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l2);
+
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label5 to label6 with label4;
+        catch java.lang.Throwable from label6 to label7 with label7;
+    }
+
+    public void acquireWakeLockLocked(int, android.os.IBinder, int, java.lang.String)
+    {
+        com.android.server.PowerManagerService $r0;
+        int $i0, $i1, $i2, $i3, $i4;
+        android.os.IBinder $r1;
+        java.lang.String $r2, $r3;
+        com.android.server.PowerManagerService$LockList $r4;
+        com.android.server.PowerManagerService$WakeLock $r5;
+        java.lang.StringBuilder $r6;
+        boolean $z0, $z1;
+        byte $b5;
+        com.android.internal.app.IBatteryStats $r7;
+        android.os.RemoteException $r8;
+        java.lang.Object $r9;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: android.os.IBinder;
+
+        $i1 := @parameter2: int;
+
+        $r2 := @parameter3: java.lang.String;
+
+        $i2 = -1;
+
+        $r3 = null;
+
+        $i3 = -1;
+
+        $r4 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        $i4 = virtualinvoke $r4.<com.android.server.PowerManagerService$LockList: int getIndex(android.os.IBinder)>($r1);
+
+        if $i4 >= 0 goto label15;
+
+        $r5 = new com.android.server.PowerManagerService$WakeLock;
+
+        specialinvoke $r5.<com.android.server.PowerManagerService$WakeLock: void <init>(com.android.server.PowerManagerService,int,android.os.IBinder,java.lang.String,int)>($r0, $i0, $r1, $r2, $i1);
+
+        $i1 = $r5.<com.android.server.PowerManagerService$WakeLock: int flags>;
+
+        $i1 = $i1 & 31;
+
+        lookupswitch($i1)
+        {
+            case 1: goto label04;
+            case 6: goto label14;
+            case 10: goto label13;
+            case 26: goto label02;
+            default: goto label01;
+        };
+
+     label01:
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("bad wakelock type for lock \'");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" flags=");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r2 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("PowerManagerService", $r2);
+
+        return;
+
+     label02:
+        $z0 = $r0.<com.android.server.PowerManagerService: boolean mKeyboardVisible>;
+
+        if $z0 == 0 goto label12;
+
+        $b5 = 15;
+
+     label03:
+        $r5.<com.android.server.PowerManagerService$WakeLock: int minState> = $b5;
+
+     label04:
+        $r4 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        virtualinvoke $r4.<com.android.server.PowerManagerService$LockList: void addLock(com.android.server.PowerManagerService$WakeLock)>($r5);
+
+        $z0 = 1;
+
+     label05:
+        $z1 = specialinvoke $r0.<com.android.server.PowerManagerService: boolean isScreenLock(int)>($i0);
+
+        if $z1 == 0 goto label17;
+
+        $i0 = $r5.<com.android.server.PowerManagerService$WakeLock: int flags>;
+
+        $i0 = $i0 & 268435456;
+
+        if $i0 == 0 goto label16;
+
+        specialinvoke $r0.<com.android.server.PowerManagerService: void reactivateWakeLocksLocked()>();
+
+        $r4 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        $i0 = virtualinvoke $r4.<com.android.server.PowerManagerService$LockList: int gatherState()>();
+
+        $r0.<com.android.server.PowerManagerService: int mWakeLockState> = $i0;
+
+     label06:
+        $i0 = $r0.<com.android.server.PowerManagerService: int mWakeLockState>;
+
+        $i1 = $r0.<com.android.server.PowerManagerService: int mUserState>;
+
+        $i0 = $i0 | $i1;
+
+        specialinvoke $r0.<com.android.server.PowerManagerService: void setPowerState(int)>($i0);
+
+     label07:
+        if $z0 == 0 goto label08;
+
+        $i2 = $r5.<com.android.server.PowerManagerService$WakeLock: int uid>;
+
+        $r3 = $r5.<com.android.server.PowerManagerService$WakeLock: java.lang.String tag>;
+
+        $i3 = $r5.<com.android.server.PowerManagerService$WakeLock: int monitorType>;
+
+     label08:
+        if $i3 < 0 goto label19;
+
+        $r7 = $r0.<com.android.server.PowerManagerService: com.android.internal.app.IBatteryStats mBatteryStats>;
+
+     label09:
+        interfaceinvoke $r7.<com.android.internal.app.IBatteryStats: void noteStartWakelock(int,java.lang.String,int)>($i2, $r3, $i3);
+
+     label10:
+        return;
+
+     label11:
+        $r8 := @caughtexception;
+
+        return;
+
+     label12:
+        $b5 = 7;
+
+        goto label03;
+
+     label13:
+        $r5.<com.android.server.PowerManagerService$WakeLock: int minState> = 3;
+
+        goto label04;
+
+     label14:
+        $r5.<com.android.server.PowerManagerService$WakeLock: int minState> = 1;
+
+        goto label04;
+
+     label15:
+        $r4 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        $r9 = virtualinvoke $r4.<java.util.ArrayList: java.lang.Object get(int)>($i4);
+
+        $r5 = (com.android.server.PowerManagerService$WakeLock) $r9;
+
+        $z0 = 0;
+
+        goto label05;
+
+     label16:
+        $i0 = $r0.<com.android.server.PowerManagerService: int mUserState>;
+
+        $i1 = $r0.<com.android.server.PowerManagerService: int mWakeLockState>;
+
+        $i0 = $i0 | $i1;
+
+        $r4 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        $i1 = virtualinvoke $r4.<com.android.server.PowerManagerService$LockList: int gatherState()>();
+
+        $i0 = $i0 & $i1;
+
+        $r0.<com.android.server.PowerManagerService: int mWakeLockState> = $i0;
+
+        goto label06;
+
+     label17:
+        $i0 = $i0 & 31;
+
+        if $i0 != 1 goto label07;
+
+        if $z0 == 0 goto label18;
+
+        $i0 = $r0.<com.android.server.PowerManagerService: int mPartialCount>;
+
+        $i0 = $i0 + 1;
+
+        $r0.<com.android.server.PowerManagerService: int mPartialCount> = $i0;
+
+        $i0 = $r0.<com.android.server.PowerManagerService: int mPartialCount>;
+
+        if $i0 != 1 goto label18;
+
+     label18:
+        staticinvoke <android.os.Power: void acquireWakeLock(int,java.lang.String)>(1, "PowerManagerService");
+
+        goto label07;
+
+     label19:
+        return;
+
+        catch android.os.RemoteException from label09 to label10 with label11;
+    }
+
+    public void dump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[])
+    {
+        com.android.server.PowerManagerService $r0;
+        java.io.FileDescriptor $r1;
+        java.io.PrintWriter $r2;
+        java.lang.String[] $r3;
+        android.content.Context $r4;
+        int $i0, $i4, $i5;
+        java.lang.StringBuilder $r5;
+        java.lang.String $r6, $r13, $r14;
+        long $l1, $l2, $l3;
+        boolean $z0;
+        com.android.server.PowerManagerService$LockList $r7;
+        int[] $r8;
+        com.android.server.PowerManagerService$UnsynchronizedWakeLock $r9;
+        com.android.server.PowerManagerService$BrightnessState $r10;
+        java.lang.Object $r11;
+        com.android.server.PowerManagerService$WakeLock $r12;
+        java.util.HashMap $r15;
+        java.util.Collection $r16;
+        java.util.Iterator $r17;
+        com.android.server.PowerManagerService$PokeLock $r18;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $r1 := @parameter0: java.io.FileDescriptor;
+
+        $r2 := @parameter1: java.io.PrintWriter;
+
+        $r3 := @parameter2: java.lang.String[];
+
+        $r4 = $r0.<com.android.server.PowerManagerService: android.content.Context mContext>;
+
+        $i0 = virtualinvoke $r4.<android.content.Context: int checkCallingOrSelfPermission(java.lang.String)>("android.permission.DUMP");
+
+        if $i0 == 0 goto label01;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Permission Denial: can\'t dump PowerManager from from pid=");
+
+        $i0 = staticinvoke <android.os.Binder: int getCallingPid()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", uid=");
+
+        $i0 = staticinvoke <android.os.Binder: int getCallingUid()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        return;
+
+     label01:
+        $l1 = staticinvoke <android.os.SystemClock: long uptimeMillis()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>("Power Manager State:");
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mIsPowered=");
+
+        $z0 = $r0.<com.android.server.PowerManagerService: boolean mIsPowered>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" mPowerState=");
+
+        $i0 = $r0.<com.android.server.PowerManagerService: int mPowerState>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" mScreenOffTime=");
+
+        $l2 = staticinvoke <android.os.SystemClock: long elapsedRealtime()>();
+
+        $l3 = $r0.<com.android.server.PowerManagerService: long mScreenOffTime>;
+
+        $l2 = $l2 - $l3;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l2);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ms");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mPartialCount=");
+
+        $i0 = $r0.<com.android.server.PowerManagerService: int mPartialCount>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mWakeLockState=");
+
+        $i0 = $r0.<com.android.server.PowerManagerService: int mWakeLockState>;
+
+        $r6 = staticinvoke <com.android.server.PowerManagerService: java.lang.String dumpPowerState(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mUserState=");
+
+        $i0 = $r0.<com.android.server.PowerManagerService: int mUserState>;
+
+        $r6 = staticinvoke <com.android.server.PowerManagerService: java.lang.String dumpPowerState(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mPowerState=");
+
+        $i0 = $r0.<com.android.server.PowerManagerService: int mPowerState>;
+
+        $r6 = staticinvoke <com.android.server.PowerManagerService: java.lang.String dumpPowerState(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mLocks.gather=");
+
+        $r7 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        $i0 = virtualinvoke $r7.<com.android.server.PowerManagerService$LockList: int gatherState()>();
+
+        $r6 = staticinvoke <com.android.server.PowerManagerService: java.lang.String dumpPowerState(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mNextTimeout=");
+
+        $l2 = $r0.<com.android.server.PowerManagerService: long mNextTimeout>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l2);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" now=");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $l2 = $r0.<com.android.server.PowerManagerService: long mNextTimeout>;
+
+        $l1 = $l2 - $l1;
+
+        $l1 = $l1 / 1000L;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("s from now");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mDimScreen=");
+
+        $z0 = $r0.<com.android.server.PowerManagerService: boolean mDimScreen>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" mStayOnConditions=");
+
+        $i0 = $r0.<com.android.server.PowerManagerService: int mStayOnConditions>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mOffBecauseOfUser=");
+
+        $z0 = $r0.<com.android.server.PowerManagerService: boolean mOffBecauseOfUser>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" mUserState=");
+
+        $i0 = $r0.<com.android.server.PowerManagerService: int mUserState>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mBroadcastQueue={");
+
+        $r8 = $r0.<com.android.server.PowerManagerService: int[] mBroadcastQueue>;
+
+        $i0 = $r8[0];
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        $r8 = $r0.<com.android.server.PowerManagerService: int[] mBroadcastQueue>;
+
+        $i0 = $r8[1];
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        $r8 = $r0.<com.android.server.PowerManagerService: int[] mBroadcastQueue>;
+
+        $i0 = $r8[2];
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("}");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mBroadcastWhy={");
+
+        $r8 = $r0.<com.android.server.PowerManagerService: int[] mBroadcastWhy>;
+
+        $i0 = $r8[0];
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        $r8 = $r0.<com.android.server.PowerManagerService: int[] mBroadcastWhy>;
+
+        $i0 = $r8[1];
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(44);
+
+        $r8 = $r0.<com.android.server.PowerManagerService: int[] mBroadcastWhy>;
+
+        $i0 = $r8[2];
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("}");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mPokey=");
+
+        $i0 = $r0.<com.android.server.PowerManagerService: int mPokey>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" mPokeAwakeonSet=");
+
+        $z0 = $r0.<com.android.server.PowerManagerService: boolean mPokeAwakeOnSet>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mKeyboardVisible=");
+
+        $z0 = $r0.<com.android.server.PowerManagerService: boolean mKeyboardVisible>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" mUserActivityAllowed=");
+
+        $z0 = $r0.<com.android.server.PowerManagerService: boolean mUserActivityAllowed>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mKeylightDelay=");
+
+        $i0 = $r0.<com.android.server.PowerManagerService: int mKeylightDelay>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" mDimDelay=");
+
+        $i0 = $r0.<com.android.server.PowerManagerService: int mDimDelay>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" mScreenOffDelay=");
+
+        $i0 = $r0.<com.android.server.PowerManagerService: int mScreenOffDelay>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mPreventScreenOn=");
+
+        $z0 = $r0.<com.android.server.PowerManagerService: boolean mPreventScreenOn>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mScreenBrightnessOverride=");
+
+        $i0 = $r0.<com.android.server.PowerManagerService: int mScreenBrightnessOverride>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mTotalDelaySetting=");
+
+        $i0 = $r0.<com.android.server.PowerManagerService: int mTotalDelaySetting>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mBroadcastWakeLock=");
+
+        $r9 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$UnsynchronizedWakeLock mBroadcastWakeLock>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mStayOnWhilePluggedInScreenDimLock=");
+
+        $r9 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$UnsynchronizedWakeLock mStayOnWhilePluggedInScreenDimLock>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mStayOnWhilePluggedInPartialLock=");
+
+        $r9 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$UnsynchronizedWakeLock mStayOnWhilePluggedInPartialLock>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  mPreventScreenOnPartialLock=");
+
+        $r9 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$UnsynchronizedWakeLock mPreventScreenOnPartialLock>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r10 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$BrightnessState mScreenBrightness>;
+
+        virtualinvoke $r10.<com.android.server.PowerManagerService$BrightnessState: void dump(java.io.PrintWriter,java.lang.String)>($r2, "  mScreenBrightness: ");
+
+        $r10 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$BrightnessState mKeyboardBrightness>;
+
+        virtualinvoke $r10.<com.android.server.PowerManagerService$BrightnessState: void dump(java.io.PrintWriter,java.lang.String)>($r2, "  mKeyboardBrightness: ");
+
+        $r10 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$BrightnessState mButtonBrightness>;
+
+        virtualinvoke $r10.<com.android.server.PowerManagerService$BrightnessState: void dump(java.io.PrintWriter,java.lang.String)>($r2, "  mButtonBrightness: ");
+
+        $r7 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        $i0 = virtualinvoke $r7.<java.util.ArrayList: int size()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println()>();
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("mLocks.size=");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $i4 = 0;
+
+     label02:
+        if $i4 >= $i0 goto label05;
+
+        $r7 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        $r11 = virtualinvoke $r7.<java.util.ArrayList: java.lang.Object get(int)>($i4);
+
+        $r12 = (com.android.server.PowerManagerService$WakeLock) $r11;
+
+        $i5 = $r12.<com.android.server.PowerManagerService$WakeLock: int flags>;
+
+        $i5 = $i5 & 31;
+
+        $r13 = staticinvoke <com.android.server.PowerManagerService: java.lang.String lockType(int)>($i5);
+
+        $r6 = "";
+
+        $i5 = $r12.<com.android.server.PowerManagerService$WakeLock: int flags>;
+
+        $i5 = $i5 & 268435456;
+
+        if $i5 == 0 goto label03;
+
+        $r6 = "ACQUIRE_CAUSES_WAKEUP ";
+
+     label03:
+        $r14 = "";
+
+        $z0 = $r12.<com.android.server.PowerManagerService$WakeLock: boolean activated>;
+
+        if $z0 == 0 goto label04;
+
+        $r14 = " activated";
+
+     label04:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" \'");
+
+        $r13 = $r12.<com.android.server.PowerManagerService$WakeLock: java.lang.String tag>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" (minState=");
+
+        $i5 = $r12.<com.android.server.PowerManagerService$WakeLock: int minState>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i5);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $i4 = $i4 + 1;
+
+        goto label02;
+
+     label05:
+        virtualinvoke $r2.<java.io.PrintWriter: void println()>();
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("mPokeLocks.size=");
+
+        $r15 = $r0.<com.android.server.PowerManagerService: java.util.HashMap mPokeLocks>;
+
+        $i0 = virtualinvoke $r15.<java.util.HashMap: int size()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        $r15 = $r0.<com.android.server.PowerManagerService: java.util.HashMap mPokeLocks>;
+
+        $r16 = virtualinvoke $r15.<java.util.HashMap: java.util.Collection values()>();
+
+        $r17 = interfaceinvoke $r16.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label06:
+        $z0 = interfaceinvoke $r17.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label15;
+
+        $r11 = interfaceinvoke $r17.<java.util.Iterator: java.lang.Object next()>();
+
+        $r18 = (com.android.server.PowerManagerService$PokeLock) $r11;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("    poke lock \'");
+
+        $r6 = $r18.<com.android.server.PowerManagerService$PokeLock: java.lang.String tag>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\':");
+
+        $i0 = $r18.<com.android.server.PowerManagerService$PokeLock: int pokey>;
+
+        $i0 = $i0 & 1;
+
+        if $i0 == 0 goto label11;
+
+        $r6 = " POKE_LOCK_IGNORE_CHEEK_EVENTS";
+
+     label07:
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $i0 = $r18.<com.android.server.PowerManagerService$PokeLock: int pokey>;
+
+        $i0 = $i0 & 8;
+
+        if $i0 == 0 goto label12;
+
+        $r6 = " POKE_LOCK_IGNORE_TOUCH_AND_CHEEK_EVENTS";
+
+     label08:
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $i0 = $r18.<com.android.server.PowerManagerService$PokeLock: int pokey>;
+
+        $i0 = $i0 & 2;
+
+        if $i0 == 0 goto label13;
+
+        $r6 = " POKE_LOCK_SHORT_TIMEOUT";
+
+     label09:
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $i0 = $r18.<com.android.server.PowerManagerService$PokeLock: int pokey>;
+
+        $i0 = $i0 & 4;
+
+        if $i0 == 0 goto label14;
+
+        $r6 = " POKE_LOCK_MEDIUM_TIMEOUT";
+
+     label10:
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintWriter: void println(java.lang.String)>($r6);
+
+        goto label06;
+
+     label11:
+        $r6 = "";
+
+        goto label07;
+
+     label12:
+        $r6 = "";
+
+        goto label08;
+
+     label13:
+        $r6 = "";
+
+        goto label09;
+
+     label14:
+        $r6 = "";
+
+        goto label10;
+
+     label15:
+        virtualinvoke $r2.<java.io.PrintWriter: void println()>();
+
+        return;
+    }
+
+    public void enableUserActivity(boolean)
+    {
+        com.android.server.PowerManagerService $r0;
+        boolean $z0;
+        com.android.server.PowerManagerService$LockList $r1;
+        long $l0;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        entermonitor $r1;
+
+     label1:
+        $r0.<com.android.server.PowerManagerService: boolean mUserActivityAllowed> = $z0;
+
+        $l0 = staticinvoke <android.os.SystemClock: long uptimeMillis()>();
+
+        $r0.<com.android.server.PowerManagerService: long mLastEventTime> = $l0;
+
+        exitmonitor $r1;
+
+     label2:
+        return;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    android.view.WindowManagerPolicy getPolicyLocked()
+    {
+        com.android.server.PowerManagerService $r0;
+        android.view.WindowManagerPolicy $r1;
+        boolean $z0;
+        com.android.server.PowerManagerService$LockList $r2;
+        java.lang.InterruptedException $r3;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+     label1:
+        $r1 = $r0.<com.android.server.PowerManagerService: android.view.WindowManagerPolicy mPolicy>;
+
+        if $r1 == null goto label2;
+
+        $z0 = $r0.<com.android.server.PowerManagerService: boolean mDoneBooting>;
+
+        if $z0 != 0 goto label6;
+
+     label2:
+        $r2 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+     label3:
+        virtualinvoke $r2.<java.lang.Object: void wait()>();
+
+     label4:
+        goto label1;
+
+     label5:
+        $r3 := @caughtexception;
+
+        goto label1;
+
+     label6:
+        $r1 = $r0.<com.android.server.PowerManagerService: android.view.WindowManagerPolicy mPolicy>;
+
+        return $r1;
+
+        catch java.lang.InterruptedException from label3 to label4 with label5;
+    }
+
+    public long getScreenOnTime()
+    {
+        com.android.server.PowerManagerService $r0;
+        long $l0, $l2;
+        com.android.server.PowerManagerService$LockList $r1;
+        byte $b1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        entermonitor $r1;
+
+     label1:
+        $l0 = $r0.<com.android.server.PowerManagerService: long mScreenOnStartTime>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label3;
+
+        $l0 = $r0.<com.android.server.PowerManagerService: long mScreenOnTime>;
+
+        exitmonitor $r1;
+
+     label2:
+        return $l0;
+
+     label3:
+        $l0 = staticinvoke <android.os.SystemClock: long elapsedRealtime()>();
+
+        $l2 = $r0.<com.android.server.PowerManagerService: long mScreenOnStartTime>;
+
+        $l0 = $l0 - $l2;
+
+        $l2 = $r0.<com.android.server.PowerManagerService: long mScreenOnTime>;
+
+        $l0 = $l0 + $l2;
+
+        exitmonitor $r1;
+
+     label4:
+        return $l0;
+
+     label5:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public void goToSleep(long)
+    {
+        com.android.server.PowerManagerService $r0;
+        long $l0;
+        android.content.Context $r1;
+        com.android.server.PowerManagerService$LockList $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $l0 := @parameter0: long;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: android.content.Context mContext>;
+
+        virtualinvoke $r1.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.DEVICE_POWER", null);
+
+        $r2 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        entermonitor $r2;
+
+     label1:
+        specialinvoke $r0.<com.android.server.PowerManagerService: void goToSleepLocked(long)>($l0);
+
+        exitmonitor $r2;
+
+     label2:
+        return;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label4:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    void init(android.content.Context, com.android.server.HardwareService, android.app.IActivityManager, com.android.server.BatteryService)
+    {
+        com.android.server.PowerManagerService $r0;
+        android.content.Context $r1;
+        com.android.server.HardwareService $r2;
+        android.app.IActivityManager $r3;
+        com.android.server.BatteryService $r4;
+        com.android.internal.app.IBatteryStats $r5;
+        com.android.server.PowerManagerService$1 $r6;
+        android.os.HandlerThread $r7, $r8;
+        boolean $z0;
+        java.lang.InterruptedException $r9;
+        java.lang.Throwable $r10;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: com.android.server.HardwareService;
+
+        $r3 := @parameter2: android.app.IActivityManager;
+
+        $r4 := @parameter3: com.android.server.BatteryService;
+
+        $r0.<com.android.server.PowerManagerService: com.android.server.HardwareService mHardware> = $r2;
+
+        $r0.<com.android.server.PowerManagerService: android.content.Context mContext> = $r1;
+
+        $r0.<com.android.server.PowerManagerService: android.app.IActivityManager mActivityService> = $r3;
+
+        $r5 = staticinvoke <com.android.server.am.BatteryStatsService: com.android.internal.app.IBatteryStats getService()>();
+
+        $r0.<com.android.server.PowerManagerService: com.android.internal.app.IBatteryStats mBatteryStats> = $r5;
+
+        $r0.<com.android.server.PowerManagerService: com.android.server.BatteryService mBatteryService> = $r4;
+
+        $r6 = new com.android.server.PowerManagerService$1;
+
+        specialinvoke $r6.<com.android.server.PowerManagerService$1: void <init>(com.android.server.PowerManagerService,java.lang.String)>($r0, "PowerManagerService");
+
+        $r0.<com.android.server.PowerManagerService: android.os.HandlerThread mHandlerThread> = $r6;
+
+        $r7 = $r0.<com.android.server.PowerManagerService: android.os.HandlerThread mHandlerThread>;
+
+        virtualinvoke $r7.<java.lang.Thread: void start()>();
+
+        $r7 = $r0.<com.android.server.PowerManagerService: android.os.HandlerThread mHandlerThread>;
+
+        entermonitor $r7;
+
+     label01:
+        $z0 = $r0.<com.android.server.PowerManagerService: boolean mInitComplete>;
+
+     label02:
+        if $z0 != 0 goto label07;
+
+     label03:
+        $r8 = $r0.<com.android.server.PowerManagerService: android.os.HandlerThread mHandlerThread>;
+
+     label04:
+        virtualinvoke $r8.<java.lang.Object: void wait()>();
+
+     label05:
+        goto label01;
+
+     label06:
+        $r9 := @caughtexception;
+
+        goto label01;
+
+     label07:
+        exitmonitor $r7;
+
+     label08:
+        return;
+
+     label09:
+        $r10 := @caughtexception;
+
+        exitmonitor $r7;
+
+     label10:
+        throw $r10;
+
+        catch java.lang.Throwable from label01 to label02 with label09;
+        catch java.lang.InterruptedException from label04 to label05 with label06;
+        catch java.lang.Throwable from label03 to label05 with label09;
+        catch java.lang.Throwable from label07 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+    }
+
+    void initInThread()
+    {
+        com.android.server.PowerManagerService $r0;
+        android.content.IntentFilter $r1;
+        com.android.server.PowerManagerService$SettingsObserver $r2;
+        android.os.Handler $r3;
+        com.android.server.PowerManagerService$UnsynchronizedWakeLock $r4;
+        android.content.Intent $r5;
+        android.content.Context $r6;
+        android.content.ContentResolver $r7;
+        android.net.Uri $r8;
+        java.lang.String[] $r9;
+        android.database.Cursor $r10;
+        android.content.ContentQueryMap $r11;
+        com.android.server.PowerManagerService$BatteryReceiver $r12;
+        com.android.server.PowerManagerService$GservicesChangedReceiver $r13;
+        android.os.HandlerThread $r14, $r15;
+        java.lang.Throwable $r16;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $r3 = new android.os.Handler;
+
+        specialinvoke $r3.<android.os.Handler: void <init>()>();
+
+        $r0.<com.android.server.PowerManagerService: android.os.Handler mHandler> = $r3;
+
+        $r4 = new com.android.server.PowerManagerService$UnsynchronizedWakeLock;
+
+        specialinvoke $r4.<com.android.server.PowerManagerService$UnsynchronizedWakeLock: void <init>(com.android.server.PowerManagerService,int,java.lang.String,boolean)>($r0, 1, "sleep_broadcast", 1);
+
+        $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$UnsynchronizedWakeLock mBroadcastWakeLock> = $r4;
+
+        $r4 = new com.android.server.PowerManagerService$UnsynchronizedWakeLock;
+
+        specialinvoke $r4.<com.android.server.PowerManagerService$UnsynchronizedWakeLock: void <init>(com.android.server.PowerManagerService,int,java.lang.String,boolean)>($r0, 6, "StayOnWhilePluggedIn Screen Dim", 0);
+
+        $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$UnsynchronizedWakeLock mStayOnWhilePluggedInScreenDimLock> = $r4;
+
+        $r4 = new com.android.server.PowerManagerService$UnsynchronizedWakeLock;
+
+        specialinvoke $r4.<com.android.server.PowerManagerService$UnsynchronizedWakeLock: void <init>(com.android.server.PowerManagerService,int,java.lang.String,boolean)>($r0, 1, "StayOnWhilePluggedIn Partial", 0);
+
+        $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$UnsynchronizedWakeLock mStayOnWhilePluggedInPartialLock> = $r4;
+
+        $r4 = new com.android.server.PowerManagerService$UnsynchronizedWakeLock;
+
+        specialinvoke $r4.<com.android.server.PowerManagerService$UnsynchronizedWakeLock: void <init>(com.android.server.PowerManagerService,int,java.lang.String,boolean)>($r0, 1, "PreventScreenOn Partial", 0);
+
+        $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$UnsynchronizedWakeLock mPreventScreenOnPartialLock> = $r4;
+
+        $r5 = new android.content.Intent;
+
+        specialinvoke $r5.<android.content.Intent: void <init>(java.lang.String)>("android.intent.action.SCREEN_ON");
+
+        $r0.<com.android.server.PowerManagerService: android.content.Intent mScreenOnIntent> = $r5;
+
+        $r5 = $r0.<com.android.server.PowerManagerService: android.content.Intent mScreenOnIntent>;
+
+        virtualinvoke $r5.<android.content.Intent: android.content.Intent addFlags(int)>(1073741824);
+
+        $r5 = new android.content.Intent;
+
+        specialinvoke $r5.<android.content.Intent: void <init>(java.lang.String)>("android.intent.action.SCREEN_OFF");
+
+        $r0.<com.android.server.PowerManagerService: android.content.Intent mScreenOffIntent> = $r5;
+
+        $r5 = $r0.<com.android.server.PowerManagerService: android.content.Intent mScreenOffIntent>;
+
+        virtualinvoke $r5.<android.content.Intent: android.content.Intent addFlags(int)>(1073741824);
+
+        $r6 = $r0.<com.android.server.PowerManagerService: android.content.Context mContext>;
+
+        $r7 = virtualinvoke $r6.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r8 = <android.provider.Settings$System: android.net.Uri CONTENT_URI>;
+
+        $r9 = newarray (java.lang.String)[3];
+
+        $r9[0] = "stay_on_while_plugged_in";
+
+        $r9[1] = "screen_off_timeout";
+
+        $r9[2] = "dim_screen";
+
+        $r10 = virtualinvoke $r7.<android.content.ContentResolver: android.database.Cursor query(android.net.Uri,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String)>($r8, null, "(name=?) or (name=?) or (name=?)", $r9, null);
+
+        $r11 = new android.content.ContentQueryMap;
+
+        $r3 = $r0.<com.android.server.PowerManagerService: android.os.Handler mHandler>;
+
+        specialinvoke $r11.<android.content.ContentQueryMap: void <init>(android.database.Cursor,java.lang.String,boolean,android.os.Handler)>($r10, "name", 1, $r3);
+
+        $r0.<com.android.server.PowerManagerService: android.content.ContentQueryMap mSettings> = $r11;
+
+        $r2 = new com.android.server.PowerManagerService$SettingsObserver;
+
+        specialinvoke $r2.<com.android.server.PowerManagerService$SettingsObserver: void <init>(com.android.server.PowerManagerService,com.android.server.PowerManagerService$1)>($r0, null);
+
+        $r11 = $r0.<com.android.server.PowerManagerService: android.content.ContentQueryMap mSettings>;
+
+        virtualinvoke $r11.<java.util.Observable: void addObserver(java.util.Observer)>($r2);
+
+        $r11 = $r0.<com.android.server.PowerManagerService: android.content.ContentQueryMap mSettings>;
+
+        virtualinvoke $r2.<com.android.server.PowerManagerService$SettingsObserver: void update(java.util.Observable,java.lang.Object)>($r11, null);
+
+        $r1 = new android.content.IntentFilter;
+
+        specialinvoke $r1.<android.content.IntentFilter: void <init>()>();
+
+        virtualinvoke $r1.<android.content.IntentFilter: void addAction(java.lang.String)>("android.intent.action.BATTERY_CHANGED");
+
+        $r6 = $r0.<com.android.server.PowerManagerService: android.content.Context mContext>;
+
+        $r12 = new com.android.server.PowerManagerService$BatteryReceiver;
+
+        specialinvoke $r12.<com.android.server.PowerManagerService$BatteryReceiver: void <init>(com.android.server.PowerManagerService,com.android.server.PowerManagerService$1)>($r0, null);
+
+        virtualinvoke $r6.<android.content.Context: android.content.Intent registerReceiver(android.content.BroadcastReceiver,android.content.IntentFilter)>($r12, $r1);
+
+        $r1 = new android.content.IntentFilter;
+
+        specialinvoke $r1.<android.content.IntentFilter: void <init>(java.lang.String)>("com.google.gservices.intent.action.GSERVICES_CHANGED");
+
+        $r6 = $r0.<com.android.server.PowerManagerService: android.content.Context mContext>;
+
+        $r13 = new com.android.server.PowerManagerService$GservicesChangedReceiver;
+
+        specialinvoke $r13.<com.android.server.PowerManagerService$GservicesChangedReceiver: void <init>(com.android.server.PowerManagerService,com.android.server.PowerManagerService$1)>($r0, null);
+
+        virtualinvoke $r6.<android.content.Context: android.content.Intent registerReceiver(android.content.BroadcastReceiver,android.content.IntentFilter)>($r13, $r1);
+
+        specialinvoke $r0.<com.android.server.PowerManagerService: void updateGservicesValues()>();
+
+        specialinvoke $r0.<com.android.server.PowerManagerService: void setPowerState(int)>(15);
+
+        $r14 = $r0.<com.android.server.PowerManagerService: android.os.HandlerThread mHandlerThread>;
+
+        entermonitor $r14;
+
+     label1:
+        $r0.<com.android.server.PowerManagerService: boolean mInitComplete> = 1;
+
+        $r15 = $r0.<com.android.server.PowerManagerService: android.os.HandlerThread mHandlerThread>;
+
+        virtualinvoke $r15.<java.lang.Object: void notifyAll()>();
+
+        exitmonitor $r14;
+
+     label2:
+        return;
+
+     label3:
+        $r16 := @caughtexception;
+
+        exitmonitor $r14;
+
+     label4:
+        throw $r16;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    void logPointerDownEvent()
+    {
+        com.android.server.PowerManagerService $r0;
+        long $l0;
+        byte $b1;
+        int $i2;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $l0 = $r0.<com.android.server.PowerManagerService: long mLastTouchDown>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        $l0 = staticinvoke <android.os.SystemClock: long elapsedRealtime()>();
+
+        $r0.<com.android.server.PowerManagerService: long mLastTouchDown> = $l0;
+
+        $i2 = $r0.<com.android.server.PowerManagerService: int mTouchCycles>;
+
+        $i2 = $i2 + 1;
+
+        $r0.<com.android.server.PowerManagerService: int mTouchCycles> = $i2;
+
+        return;
+
+     label1:
+        return;
+    }
+
+    void logPointerUpEvent()
+    {
+        com.android.server.PowerManagerService $r0;
+        long $l0, $l1, $l2;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $l2 = $r0.<com.android.server.PowerManagerService: long mTotalTouchDownTime>;
+
+        $l1 = staticinvoke <android.os.SystemClock: long elapsedRealtime()>();
+
+        $l0 = $r0.<com.android.server.PowerManagerService: long mLastTouchDown>;
+
+        $l0 = $l1 - $l0;
+
+        $l2 = $l2 + $l0;
+
+        $r0.<com.android.server.PowerManagerService: long mTotalTouchDownTime> = $l2;
+
+        $r0.<com.android.server.PowerManagerService: long mLastTouchDown> = 0L;
+
+        return;
+    }
+
+    public void monitor()
+    {
+        com.android.server.PowerManagerService $r0;
+        com.android.server.PowerManagerService$LockList $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        entermonitor $r1;
+
+     label1:
+        exitmonitor $r1;
+
+     label2:
+        return;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void preventScreenOn(boolean)
+    {
+        com.android.server.PowerManagerService $r0;
+        boolean $z0;
+        android.content.Context $r1;
+        com.android.server.PowerManagerService$LockList $r2;
+        com.android.server.PowerManagerService$UnsynchronizedWakeLock $r3;
+        android.os.Handler $r4;
+        java.lang.Runnable $r5;
+        int $i0;
+        java.lang.StringBuilder $r6;
+        java.lang.String $r7;
+        java.lang.Throwable $r8;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: android.content.Context mContext>;
+
+        virtualinvoke $r1.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.DEVICE_POWER", null);
+
+        $r2 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        entermonitor $r2;
+
+        if $z0 == 0 goto label4;
+
+     label1:
+        $r3 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$UnsynchronizedWakeLock mPreventScreenOnPartialLock>;
+
+        virtualinvoke $r3.<com.android.server.PowerManagerService$UnsynchronizedWakeLock: void acquire()>();
+
+        $r4 = $r0.<com.android.server.PowerManagerService: android.os.Handler mHandler>;
+
+        $r5 = $r0.<com.android.server.PowerManagerService: java.lang.Runnable mForceReenableScreenTask>;
+
+        virtualinvoke $r4.<android.os.Handler: void removeCallbacks(java.lang.Runnable)>($r5);
+
+        $r4 = $r0.<com.android.server.PowerManagerService: android.os.Handler mHandler>;
+
+        $r5 = $r0.<com.android.server.PowerManagerService: java.lang.Runnable mForceReenableScreenTask>;
+
+        virtualinvoke $r4.<android.os.Handler: boolean postDelayed(java.lang.Runnable,long)>($r5, 5000L);
+
+        $r0.<com.android.server.PowerManagerService: boolean mPreventScreenOn> = 1;
+
+     label2:
+        exitmonitor $r2;
+
+     label3:
+        return;
+
+     label4:
+        $r0.<com.android.server.PowerManagerService: boolean mPreventScreenOn> = 0;
+
+        $r4 = $r0.<com.android.server.PowerManagerService: android.os.Handler mHandler>;
+
+        $r5 = $r0.<com.android.server.PowerManagerService: java.lang.Runnable mForceReenableScreenTask>;
+
+        virtualinvoke $r4.<android.os.Handler: void removeCallbacks(java.lang.Runnable)>($r5);
+
+        $i0 = $r0.<com.android.server.PowerManagerService: int mPowerState>;
+
+        $i0 = $i0 & 1;
+
+        if $i0 == 0 goto label5;
+
+        $i0 = staticinvoke <android.os.Power: int setScreenState(boolean)>(1);
+
+        if $i0 == 0 goto label5;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("preventScreenOn: error from Power.setScreenState(): ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("PowerManagerService", $r7);
+
+     label5:
+        $r3 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$UnsynchronizedWakeLock mPreventScreenOnPartialLock>;
+
+        virtualinvoke $r3.<com.android.server.PowerManagerService$UnsynchronizedWakeLock: void release()>();
+
+        goto label2;
+
+     label6:
+        $r8 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label7:
+        throw $r8;
+
+        catch java.lang.Throwable from label1 to label3 with label6;
+        catch java.lang.Throwable from label4 to label7 with label6;
+    }
+
+    public void releaseWakeLock(android.os.IBinder)
+    {
+        com.android.server.PowerManagerService $r0;
+        android.os.IBinder $r1;
+        android.content.Context $r2;
+        com.android.server.PowerManagerService$LockList $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $r1 := @parameter0: android.os.IBinder;
+
+        $r2 = $r0.<com.android.server.PowerManagerService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.WAKE_LOCK", null);
+
+        $r3 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        entermonitor $r3;
+
+     label1:
+        specialinvoke $r0.<com.android.server.PowerManagerService: void releaseWakeLockLocked(android.os.IBinder,boolean)>($r1, 0);
+
+        exitmonitor $r3;
+
+     label2:
+        return;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label4:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    boolean screenIsBright()
+    {
+        com.android.server.PowerManagerService $r0;
+        com.android.server.PowerManagerService$LockList $r1;
+        int $i0;
+        boolean $z0;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        entermonitor $r1;
+
+     label1:
+        $i0 = $r0.<com.android.server.PowerManagerService: int mPowerState>;
+
+        $i0 = $i0 & 3;
+
+        if $i0 != 3 goto label4;
+
+        $z0 = 1;
+
+     label2:
+        exitmonitor $r1;
+
+     label3:
+        return $z0;
+
+     label4:
+        $z0 = 0;
+
+        goto label2;
+
+     label5:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label3 with label5;
+        catch java.lang.Throwable from label4 to label6 with label5;
+    }
+
+    boolean screenIsOn()
+    {
+        com.android.server.PowerManagerService $r0;
+        com.android.server.PowerManagerService$LockList $r1;
+        int $i0;
+        boolean $z0;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        entermonitor $r1;
+
+     label1:
+        $i0 = $r0.<com.android.server.PowerManagerService: int mPowerState>;
+
+        $i0 = $i0 & 1;
+
+        if $i0 == 0 goto label4;
+
+        $z0 = 1;
+
+     label2:
+        exitmonitor $r1;
+
+     label3:
+        return $z0;
+
+     label4:
+        $z0 = 0;
+
+        goto label2;
+
+     label5:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label3 with label5;
+        catch java.lang.Throwable from label4 to label6 with label5;
+    }
+
+    public void setKeyboardVisibility(boolean)
+    {
+        com.android.server.PowerManagerService $r0;
+        boolean $z0;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $z0 := @parameter0: boolean;
+
+        $r0.<com.android.server.PowerManagerService: boolean mKeyboardVisible> = $z0;
+
+        return;
+    }
+
+    public void setPokeLock(int, android.os.IBinder, java.lang.String)
+    {
+        com.android.server.PowerManagerService $r0;
+        int $i0, $i1, $i2, $i3;
+        android.os.IBinder $r1;
+        java.lang.String $r2;
+        android.content.Context $r3;
+        java.lang.StringBuilder $r4;
+        java.lang.IllegalArgumentException $r5;
+        com.android.server.PowerManagerService$LockList $r6;
+        java.util.HashMap $r7;
+        java.lang.Object $r8;
+        com.android.server.PowerManagerService$PokeLock $r9;
+        boolean $z0, $z1;
+        java.util.Collection $r10;
+        java.util.Iterator $r11;
+        java.lang.Throwable $r12;
+        long $l4;
+        com.android.server.PowerManagerService$TimeoutTask $r13;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: android.os.IBinder;
+
+        $r2 := @parameter2: java.lang.String;
+
+        $r3 = $r0.<com.android.server.PowerManagerService: android.content.Context mContext>;
+
+        virtualinvoke $r3.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.DEVICE_POWER", null);
+
+        if $r1 != null goto label01;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("setPokeLock got null token for tag=\'");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r2 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("PowerManagerService", $r2);
+
+        return;
+
+     label01:
+        $i1 = $i0 & 6;
+
+        if $i1 != 6 goto label02;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("setPokeLock can\'t have both POKE_LOCK_SHORT_TIMEOUT and POKE_LOCK_MEDIUM_TIMEOUT");
+
+        throw $r5;
+
+     label02:
+        $r6 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        entermonitor $r6;
+
+        if $i0 == 0 goto label10;
+
+     label03:
+        $r7 = $r0.<com.android.server.PowerManagerService: java.util.HashMap mPokeLocks>;
+
+        $r8 = virtualinvoke $r7.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r9 = (com.android.server.PowerManagerService$PokeLock) $r8;
+
+        $i1 = 0;
+
+        if $r9 == null goto label07;
+
+        $i1 = $r9.<com.android.server.PowerManagerService$PokeLock: int pokey>;
+
+        $r9.<com.android.server.PowerManagerService$PokeLock: int pokey> = $i0;
+
+     label04:
+        $i2 = $i1 & 6;
+
+        $i1 = $i0 & 6;
+
+        $i3 = $r0.<com.android.server.PowerManagerService: int mPowerState>;
+
+        $i3 = $i3 & 1;
+
+        if $i3 != 0 goto label05;
+
+        if $i2 == $i1 goto label05;
+
+        $r9.<com.android.server.PowerManagerService$PokeLock: boolean awakeOnSet> = 1;
+
+     label05:
+        $i1 = $r0.<com.android.server.PowerManagerService: int mPokey>;
+
+        $i2 = 0;
+
+        $z0 = 0;
+
+        $r7 = $r0.<com.android.server.PowerManagerService: java.util.HashMap mPokeLocks>;
+
+        $r10 = virtualinvoke $r7.<java.util.HashMap: java.util.Collection values()>();
+
+        $r11 = interfaceinvoke $r10.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label06:
+        $z1 = interfaceinvoke $r11.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label11;
+
+        $r8 = interfaceinvoke $r11.<java.util.Iterator: java.lang.Object next()>();
+
+        $r9 = (com.android.server.PowerManagerService$PokeLock) $r8;
+
+        $i3 = $r9.<com.android.server.PowerManagerService$PokeLock: int pokey>;
+
+        $i2 = $i2 | $i3;
+
+        $z1 = $r9.<com.android.server.PowerManagerService$PokeLock: boolean awakeOnSet>;
+
+        if $z1 == 0 goto label06;
+
+        $z0 = 1;
+
+        goto label06;
+
+     label07:
+        $r9 = new com.android.server.PowerManagerService$PokeLock;
+
+        specialinvoke $r9.<com.android.server.PowerManagerService$PokeLock: void <init>(com.android.server.PowerManagerService,int,android.os.IBinder,java.lang.String)>($r0, $i0, $r1, $r2);
+
+        $r7 = $r0.<com.android.server.PowerManagerService: java.util.HashMap mPokeLocks>;
+
+        virtualinvoke $r7.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, $r9);
+
+        goto label04;
+
+     label08:
+        $r12 := @caughtexception;
+
+        exitmonitor $r6;
+
+     label09:
+        throw $r12;
+
+     label10:
+        $r7 = $r0.<com.android.server.PowerManagerService: java.util.HashMap mPokeLocks>;
+
+        virtualinvoke $r7.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>($r1);
+
+        goto label05;
+
+     label11:
+        $r0.<com.android.server.PowerManagerService: int mPokey> = $i2;
+
+        $r0.<com.android.server.PowerManagerService: boolean mPokeAwakeOnSet> = $z0;
+
+        $i1 = $i1 & 6;
+
+        $i0 = $i0 & 6;
+
+        if $i1 == $i0 goto label12;
+
+        specialinvoke $r0.<com.android.server.PowerManagerService: void setScreenOffTimeoutsLocked()>();
+
+        $l4 = staticinvoke <android.os.SystemClock: long uptimeMillis()>();
+
+        $r13 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$TimeoutTask mTimeoutTask>;
+
+        $i0 = $r13.<com.android.server.PowerManagerService$TimeoutTask: int nextState>;
+
+        specialinvoke $r0.<com.android.server.PowerManagerService: void setTimeoutLocked(long,int)>($l4, $i0);
+
+     label12:
+        exitmonitor $r6;
+
+     label13:
+        return;
+
+        catch java.lang.Throwable from label03 to label09 with label08;
+        catch java.lang.Throwable from label10 to label13 with label08;
+    }
+
+    void setPolicy(android.view.WindowManagerPolicy)
+    {
+        com.android.server.PowerManagerService $r0;
+        android.view.WindowManagerPolicy $r1;
+        com.android.server.PowerManagerService$LockList $r2, $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $r1 := @parameter0: android.view.WindowManagerPolicy;
+
+        $r2 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        entermonitor $r2;
+
+     label1:
+        $r0.<com.android.server.PowerManagerService: android.view.WindowManagerPolicy mPolicy> = $r1;
+
+        $r3 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        virtualinvoke $r3.<java.lang.Object: void notifyAll()>();
+
+        exitmonitor $r2;
+
+     label2:
+        return;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label4:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void setScreenBrightnessOverride(int)
+    {
+        com.android.server.PowerManagerService $r0;
+        int $i0, $i1;
+        android.content.Context $r1;
+        com.android.server.PowerManagerService$LockList $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $i0 := @parameter0: int;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: android.content.Context mContext>;
+
+        virtualinvoke $r1.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.DEVICE_POWER", null);
+
+        $r2 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        entermonitor $r2;
+
+     label1:
+        $i1 = $r0.<com.android.server.PowerManagerService: int mScreenBrightnessOverride>;
+
+        if $i1 == $i0 goto label2;
+
+        $r0.<com.android.server.PowerManagerService: int mScreenBrightnessOverride> = $i0;
+
+        $i0 = $r0.<com.android.server.PowerManagerService: int mPowerState>;
+
+        specialinvoke $r0.<com.android.server.PowerManagerService: void updateLightsLocked(int,int)>($i0, 1);
+
+     label2:
+        exitmonitor $r2;
+
+     label3:
+        return;
+
+     label4:
+        $r3 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label5:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public void setStayOnSetting(int)
+    {
+        com.android.server.PowerManagerService $r0;
+        int $i0;
+        android.content.ContentResolver $r1;
+        android.content.Context $r2;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $i0 := @parameter0: int;
+
+        $r2 = $r0.<com.android.server.PowerManagerService: android.content.Context mContext>;
+
+        virtualinvoke $r2.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.WRITE_SETTINGS", null);
+
+        $r2 = $r0.<com.android.server.PowerManagerService: android.content.Context mContext>;
+
+        $r1 = virtualinvoke $r2.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        staticinvoke <android.provider.Settings$System: boolean putInt(android.content.ContentResolver,java.lang.String,int)>($r1, "stay_on_while_plugged_in", $i0);
+
+        return;
+    }
+
+    void systemReady()
+    {
+        com.android.server.PowerManagerService $r0;
+        com.android.server.PowerManagerService$LockList $r1, $r3;
+        long $l0;
+        com.android.internal.app.IBatteryStats $r2;
+        int $i1;
+        android.os.RemoteException $r4;
+        java.lang.Throwable $r5, $r6;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        entermonitor $r1;
+
+     label01:
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("PowerManagerService", "system ready!");
+
+        $r0.<com.android.server.PowerManagerService: boolean mDoneBooting> = 1;
+
+        $l0 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label02:
+        $r2 = $r0.<com.android.server.PowerManagerService: com.android.internal.app.IBatteryStats mBatteryStats>;
+
+     label03:
+        $i1 = specialinvoke $r0.<com.android.server.PowerManagerService: int getPreferredBrightness()>();
+
+        interfaceinvoke $r2.<com.android.internal.app.IBatteryStats: void noteScreenBrightness(int)>($i1);
+
+        $r2 = $r0.<com.android.server.PowerManagerService: com.android.internal.app.IBatteryStats mBatteryStats>;
+
+        interfaceinvoke $r2.<com.android.internal.app.IBatteryStats: void noteScreenOn()>();
+
+     label04:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l0);
+
+     label05:
+        $l0 = staticinvoke <android.os.SystemClock: long uptimeMillis()>();
+
+        virtualinvoke $r0.<com.android.server.PowerManagerService: void userActivity(long,boolean,int,boolean)>($l0, 0, 5, 1);
+
+        specialinvoke $r0.<com.android.server.PowerManagerService: void updateWakeLockLocked()>();
+
+        $r3 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        virtualinvoke $r3.<java.lang.Object: void notifyAll()>();
+
+        exitmonitor $r1;
+
+     label06:
+        return;
+
+     label07:
+        $r4 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l0);
+
+        goto label05;
+
+     label08:
+        $r5 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label09:
+        throw $r5;
+
+     label10:
+        $r6 := @caughtexception;
+
+     label11:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l0);
+
+        throw $r6;
+
+     label12:
+        nop;
+
+        catch java.lang.Throwable from label01 to label02 with label08;
+        catch android.os.RemoteException from label03 to label04 with label07;
+        catch java.lang.Throwable from label02 to label04 with label10;
+        catch java.lang.Throwable from label04 to label06 with label08;
+        catch java.lang.Throwable from label07 to label09 with label08;
+        catch java.lang.Throwable from label11 to label12 with label08;
+    }
+
+    public long timeSinceScreenOn()
+    {
+        com.android.server.PowerManagerService $r0;
+        long $l0, $l1;
+        com.android.server.PowerManagerService$LockList $r1;
+        int $i2;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        entermonitor $r1;
+
+     label1:
+        $i2 = $r0.<com.android.server.PowerManagerService: int mPowerState>;
+
+        $i2 = $i2 & 1;
+
+        if $i2 == 0 goto label3;
+
+        exitmonitor $r1;
+
+     label2:
+        return 0L;
+
+     label3:
+        $l1 = staticinvoke <android.os.SystemClock: long elapsedRealtime()>();
+
+        $l0 = $r0.<com.android.server.PowerManagerService: long mScreenOffTime>;
+
+        $l0 = $l1 - $l0;
+
+        exitmonitor $r1;
+
+     label4:
+        return $l0;
+
+     label5:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public void userActivity(long, boolean)
+    {
+        com.android.server.PowerManagerService $r0;
+        long $l0;
+        boolean $z0;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $l0 := @parameter0: long;
+
+        $z0 := @parameter1: boolean;
+
+        virtualinvoke $r0.<com.android.server.PowerManagerService: void userActivity(long,boolean,int,boolean)>($l0, $z0, 0, 0);
+
+        return;
+    }
+
+    public void userActivity(long, boolean, int)
+    {
+        com.android.server.PowerManagerService $r0;
+        long $l0;
+        boolean $z0;
+        int $i1;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $l0 := @parameter0: long;
+
+        $z0 := @parameter1: boolean;
+
+        $i1 := @parameter2: int;
+
+        virtualinvoke $r0.<com.android.server.PowerManagerService: void userActivity(long,boolean,int,boolean)>($l0, $z0, $i1, 0);
+
+        return;
+    }
+
+    public void userActivity(long, boolean, int, boolean)
+    {
+        com.android.server.PowerManagerService $r0;
+        long $l0, $l3;
+        boolean $z0, $z1, $z2;
+        int $i1, $i2;
+        com.android.server.PowerManagerService$LockList $r1, $r3;
+        byte $b4;
+        com.android.internal.app.IBatteryStats $r2;
+        java.lang.Throwable $r4, $r6;
+        android.os.RemoteException $r5;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $l0 := @parameter0: long;
+
+        $z0 := @parameter1: boolean;
+
+        $i1 := @parameter2: int;
+
+        $z1 := @parameter3: boolean;
+
+        $i2 = $r0.<com.android.server.PowerManagerService: int mPokey>;
+
+        $i2 = $i2 & 1;
+
+        if $i2 == 0 goto label01;
+
+        if $i1 == 1 goto label20;
+
+        if $i1 != 2 goto label01;
+
+        return;
+
+     label01:
+        $i2 = $r0.<com.android.server.PowerManagerService: int mPokey>;
+
+        $i2 = $i2 & 8;
+
+        if $i2 == 0 goto label02;
+
+        if $i1 == 2 goto label21;
+
+        if $i1 == 4 goto label22;
+
+        if $i1 == 3 goto label23;
+
+        if $i1 == 1 goto label24;
+
+     label02:
+        $r1 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        entermonitor $r1;
+
+     label03:
+        $l3 = $r0.<com.android.server.PowerManagerService: long mLastEventTime>;
+
+        $b4 = $l3 cmp $l0;
+
+        if $b4 <= 0 goto label04;
+
+        if $z1 == 0 goto label12;
+
+     label04:
+        $r0.<com.android.server.PowerManagerService: long mLastEventTime> = $l0;
+
+        $z2 = $r0.<com.android.server.PowerManagerService: boolean mUserActivityAllowed>;
+
+        if $z2 != 0 goto label05;
+
+        if $z1 == 0 goto label12;
+
+     label05:
+        if $i1 != 5 goto label17;
+
+        $z1 = $r0.<com.android.server.PowerManagerService: boolean mKeyboardVisible>;
+
+        if $z1 == 0 goto label16;
+
+        $b4 = 15;
+
+     label06:
+        $r0.<com.android.server.PowerManagerService: int mUserState> = $b4;
+
+     label07:
+        $i2 = staticinvoke <android.os.Binder: int getCallingUid()>();
+
+        $l3 = staticinvoke <android.os.Binder: long clearCallingIdentity()>();
+
+     label08:
+        $r2 = $r0.<com.android.server.PowerManagerService: com.android.internal.app.IBatteryStats mBatteryStats>;
+
+     label09:
+        interfaceinvoke $r2.<com.android.internal.app.IBatteryStats: void noteUserActivity(int,int)>($i2, $i1);
+
+     label10:
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l3);
+
+     label11:
+        specialinvoke $r0.<com.android.server.PowerManagerService: void reactivateWakeLocksLocked()>();
+
+        $r3 = $r0.<com.android.server.PowerManagerService: com.android.server.PowerManagerService$LockList mLocks>;
+
+        $i1 = virtualinvoke $r3.<com.android.server.PowerManagerService$LockList: int gatherState()>();
+
+        $r0.<com.android.server.PowerManagerService: int mWakeLockState> = $i1;
+
+        $i1 = $r0.<com.android.server.PowerManagerService: int mUserState>;
+
+        $i2 = $r0.<com.android.server.PowerManagerService: int mWakeLockState>;
+
+        $i1 = $i1 | $i2;
+
+        specialinvoke $r0.<com.android.server.PowerManagerService: void setPowerState(int,boolean,boolean)>($i1, $z0, 1);
+
+        specialinvoke $r0.<com.android.server.PowerManagerService: void setTimeoutLocked(long,int)>($l0, 3);
+
+     label12:
+        exitmonitor $r1;
+
+     label13:
+        return;
+
+     label14:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label15:
+        throw $r4;
+
+     label16:
+        $b4 = 7;
+
+        goto label06;
+
+     label17:
+        $i2 = $r0.<com.android.server.PowerManagerService: int mUserState>;
+
+        $i2 = $i2 | 3;
+
+        $r0.<com.android.server.PowerManagerService: int mUserState> = $i2;
+
+        goto label07;
+
+     label18:
+        $r5 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l3);
+
+        goto label11;
+
+     label19:
+        $r6 := @caughtexception;
+
+        staticinvoke <android.os.Binder: void restoreCallingIdentity(long)>($l3);
+
+        throw $r6;
+
+     label20:
+        return;
+
+     label21:
+        return;
+
+     label22:
+        return;
+
+     label23:
+        return;
+
+     label24:
+        return;
+
+        catch java.lang.Throwable from label03 to label08 with label14;
+        catch android.os.RemoteException from label09 to label10 with label18;
+        catch java.lang.Throwable from label08 to label10 with label19;
+        catch java.lang.Throwable from label10 to label13 with label14;
+        catch java.lang.Throwable from label14 to label15 with label14;
+        catch java.lang.Throwable from label17 to label20 with label14;
+    }
+
+    public void userActivityWithForce(long, boolean, boolean)
+    {
+        com.android.server.PowerManagerService $r0;
+        long $l0;
+        boolean $z0, $z1;
+        android.content.Context $r1;
+
+        $r0 := @this: com.android.server.PowerManagerService;
+
+        $l0 := @parameter0: long;
+
+        $z0 := @parameter1: boolean;
+
+        $z1 := @parameter2: boolean;
+
+        $r1 = $r0.<com.android.server.PowerManagerService: android.content.Context mContext>;
+
+        virtualinvoke $r1.<android.content.Context: void enforceCallingOrSelfPermission(java.lang.String,java.lang.String)>("android.permission.DEVICE_POWER", null);
+
+        virtualinvoke $r0.<com.android.server.PowerManagerService: void userActivity(long,boolean,int,boolean)>($l0, $z0, 0, $z1);
+
+        return;
+    }
+
+    public static void <clinit>()
+    {
+        <com.android.server.PowerManagerService: java.lang.String TAG> = "PowerManagerService";
+
+        <com.android.server.PowerManagerService: int SHORT_KEYLIGHT_DELAY_DEFAULT> = 6000;
+
+        <com.android.server.PowerManagerService: int SCREEN_ON_BIT> = 1;
+
+        <com.android.server.PowerManagerService: int SCREEN_OFF> = 0;
+
+        <com.android.server.PowerManagerService: int SCREEN_DIM> = 1;
+
+        <com.android.server.PowerManagerService: int SCREEN_BUTTON_BRIGHT> = 7;
+
+        <com.android.server.PowerManagerService: int SCREEN_BRIGHT_BIT> = 2;
+
+        <com.android.server.PowerManagerService: int SCREEN_BRIGHT> = 3;
+
+        <com.android.server.PowerManagerService: java.lang.String PARTIAL_NAME> = "PowerManagerService";
+
+        <com.android.server.PowerManagerService: int MEDIUM_KEYLIGHT_DELAY> = 15000;
+
+        <com.android.server.PowerManagerService: int LONG_KEYLIGHT_DELAY> = 6000;
+
+        <com.android.server.PowerManagerService: int LONG_DIM_TIME> = 7000;
+
+        <com.android.server.PowerManagerService: boolean LOG_TOUCH_DOWNS> = 1;
+
+        <com.android.server.PowerManagerService: int LOG_POWER_SLEEP_REQUESTED> = 2724;
+
+        <com.android.server.PowerManagerService: int LOG_POWER_SCREEN_STATE> = 2728;
+
+        <com.android.server.PowerManagerService: int LOG_POWER_SCREEN_BROADCAST_STOP> = 2727;
+
+        <com.android.server.PowerManagerService: int LOG_POWER_SCREEN_BROADCAST_SEND> = 2725;
+
+        <com.android.server.PowerManagerService: int LOG_POWER_SCREEN_BROADCAST_DONE> = 2726;
+
+        <com.android.server.PowerManagerService: int LOG_POWER_PARTIAL_WAKE_STATE> = 2729;
+
+        <com.android.server.PowerManagerService: boolean LOG_PARTIAL_WL> = 0;
+
+        <com.android.server.PowerManagerService: int LOCK_MASK> = 31;
+
+        <com.android.server.PowerManagerService: int LIGHTS_MASK> = 14;
+
+        <com.android.server.PowerManagerService: int KEYBOARD_BRIGHT_BIT> = 8;
+
+        <com.android.server.PowerManagerService: int INITIAL_SCREEN_BRIGHTNESS> = 255;
+
+        <com.android.server.PowerManagerService: int INITIAL_KEYBOARD_BRIGHTNESS> = 0;
+
+        <com.android.server.PowerManagerService: int INITIAL_BUTTON_BRIGHTNESS> = 0;
+
+        <com.android.server.PowerManagerService: int BUTTON_BRIGHT_BIT> = 4;
+
+        <com.android.server.PowerManagerService: int BATTERY_LOW_BIT> = 16;
+
+        <com.android.server.PowerManagerService: int ANIM_STEPS> = 15;
+
+        <com.android.server.PowerManagerService: boolean ANIMATE_SCREEN_LIGHTS> = 1;
+
+        <com.android.server.PowerManagerService: boolean ANIMATE_KEYBOARD_LIGHTS> = 0;
+
+        <com.android.server.PowerManagerService: boolean ANIMATE_BUTTON_LIGHTS> = 0;
+
+        <com.android.server.PowerManagerService: int ALL_BRIGHT> = 15;
+
+        return;
+    }
+}

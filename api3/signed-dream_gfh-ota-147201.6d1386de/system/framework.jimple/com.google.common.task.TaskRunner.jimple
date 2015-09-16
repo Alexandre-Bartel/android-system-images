@@ -1,0 +1,1119 @@
+public class com.google.common.task.TaskRunner extends java.lang.Object implements java.lang.Runnable
+{
+    private static final int DEFAULT_WORKER_COUNT;
+    private static final java.lang.String DEFAULT_WORKER_NAME;
+    private int defaultPriority;
+    protected com.google.common.lang.ThreadFactory factory;
+    private int maxPriority;
+    private int minPriority;
+    protected java.lang.Object mutex;
+    protected java.lang.String name;
+    protected java.util.Vector priorityTaskQueue;
+    protected boolean running;
+    protected java.util.Vector timerTaskQueue;
+    protected java.lang.Thread[] workers;
+
+    public void <init>(com.google.common.lang.ThreadFactory)
+    {
+        com.google.common.task.TaskRunner $r0;
+        com.google.common.lang.ThreadFactory $r1;
+
+        $r0 := @this: com.google.common.task.TaskRunner;
+
+        $r1 := @parameter0: com.google.common.lang.ThreadFactory;
+
+        specialinvoke $r0.<com.google.common.task.TaskRunner: void <init>(com.google.common.lang.ThreadFactory,java.lang.String,int)>($r1, "TaskRunner", 1);
+
+        return;
+    }
+
+    public void <init>(com.google.common.lang.ThreadFactory, java.lang.String)
+    {
+        com.google.common.task.TaskRunner $r0;
+        com.google.common.lang.ThreadFactory $r1;
+        java.lang.String $r2;
+
+        $r0 := @this: com.google.common.task.TaskRunner;
+
+        $r1 := @parameter0: com.google.common.lang.ThreadFactory;
+
+        $r2 := @parameter1: java.lang.String;
+
+        specialinvoke $r0.<com.google.common.task.TaskRunner: void <init>(com.google.common.lang.ThreadFactory,java.lang.String,int)>($r1, $r2, 1);
+
+        return;
+    }
+
+    public void <init>(com.google.common.lang.ThreadFactory, java.lang.String, int)
+    {
+        com.google.common.task.TaskRunner $r0;
+        com.google.common.lang.ThreadFactory $r1;
+        java.lang.String $r2;
+        int $i0;
+        java.util.Vector $r3;
+        java.lang.Object $r4;
+        java.lang.Thread[] $r5;
+
+        $r0 := @this: com.google.common.task.TaskRunner;
+
+        $r1 := @parameter0: com.google.common.lang.ThreadFactory;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $i0 := @parameter2: int;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r3 = new java.util.Vector;
+
+        specialinvoke $r3.<java.util.Vector: void <init>()>();
+
+        $r0.<com.google.common.task.TaskRunner: java.util.Vector priorityTaskQueue> = $r3;
+
+        $r3 = new java.util.Vector;
+
+        specialinvoke $r3.<java.util.Vector: void <init>()>();
+
+        $r0.<com.google.common.task.TaskRunner: java.util.Vector timerTaskQueue> = $r3;
+
+        $r4 = new java.lang.Object;
+
+        specialinvoke $r4.<java.lang.Object: void <init>()>();
+
+        $r0.<com.google.common.task.TaskRunner: java.lang.Object mutex> = $r4;
+
+        $r0.<com.google.common.task.TaskRunner: int defaultPriority> = 127;
+
+        $r0.<com.google.common.task.TaskRunner: int maxPriority> = 255;
+
+        $r0.<com.google.common.task.TaskRunner: int minPriority> = 0;
+
+        $r0.<com.google.common.task.TaskRunner: boolean running> = 0;
+
+        $r0.<com.google.common.task.TaskRunner: com.google.common.lang.ThreadFactory factory> = $r1;
+
+        $r0.<com.google.common.task.TaskRunner: java.lang.String name> = $r2;
+
+        $r5 = newarray (java.lang.Thread)[$i0];
+
+        $r0.<com.google.common.task.TaskRunner: java.lang.Thread[] workers> = $r5;
+
+        return;
+    }
+
+    private static void debug(java.lang.String)
+    {
+        java.lang.String $r0;
+
+        $r0 := @parameter0: java.lang.String;
+
+        return;
+    }
+
+    public int cancelTask(com.google.common.task.AbstractTask)
+    {
+        com.google.common.task.TaskRunner $r0;
+        com.google.common.task.AbstractTask $r1;
+        java.lang.StringBuilder $r2;
+        java.lang.String $r3;
+        java.lang.Object $r4;
+        int $i0;
+        java.lang.Throwable $r5;
+
+        $r0 := @this: com.google.common.task.TaskRunner;
+
+        $r1 := @parameter0: com.google.common.task.AbstractTask;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("TaskRunner.cancelTask(");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.google.common.task.TaskRunner: void debug(java.lang.String)>($r3);
+
+        $r4 = $r0.<com.google.common.task.TaskRunner: java.lang.Object mutex>;
+
+        entermonitor $r4;
+
+     label1:
+        $i0 = virtualinvoke $r1.<com.google.common.task.AbstractTask: int cancelInternal()>();
+
+        exitmonitor $r4;
+
+     label2:
+        return $i0;
+
+     label3:
+        $r5 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label4:
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    boolean cancelTaskInternal(com.google.common.task.AbstractTask)
+    {
+        com.google.common.task.TaskRunner $r0;
+        com.google.common.task.AbstractTask $r1;
+        int $i0;
+        java.lang.Object $r2, $r4;
+        java.util.Vector $r3;
+        java.lang.Throwable $r5;
+
+        $r0 := @this: com.google.common.task.TaskRunner;
+
+        $r1 := @parameter0: com.google.common.task.AbstractTask;
+
+        $r2 = $r0.<com.google.common.task.TaskRunner: java.lang.Object mutex>;
+
+        entermonitor $r2;
+
+     label01:
+        $i0 = virtualinvoke $r1.<com.google.common.task.AbstractTask: int getState()>();
+
+        lookupswitch($i0)
+        {
+            case 1: goto label04;
+            case 2: goto label06;
+            case 3: goto label08;
+            case 4: goto label08;
+            default: goto label02;
+        };
+
+     label02:
+        exitmonitor $r2;
+
+     label03:
+        return 0;
+
+     label04:
+        $r3 = $r0.<com.google.common.task.TaskRunner: java.util.Vector timerTaskQueue>;
+
+        virtualinvoke $r3.<java.util.Vector: boolean removeElement(java.lang.Object)>($r1);
+
+        virtualinvoke $r1.<com.google.common.task.AbstractTask: void setState(int)>(0);
+
+        $r4 = $r0.<com.google.common.task.TaskRunner: java.lang.Object mutex>;
+
+        virtualinvoke $r4.<java.lang.Object: void notifyAll()>();
+
+        exitmonitor $r2;
+
+     label05:
+        return 1;
+
+     label06:
+        $r3 = $r0.<com.google.common.task.TaskRunner: java.util.Vector priorityTaskQueue>;
+
+        virtualinvoke $r3.<java.util.Vector: boolean removeElement(java.lang.Object)>($r1);
+
+        virtualinvoke $r1.<com.google.common.task.AbstractTask: void setState(int)>(0);
+
+        $r4 = $r0.<com.google.common.task.TaskRunner: java.lang.Object mutex>;
+
+        virtualinvoke $r4.<java.lang.Object: void notifyAll()>();
+
+        exitmonitor $r2;
+
+     label07:
+        return 1;
+
+     label08:
+        virtualinvoke $r1.<com.google.common.task.AbstractTask: void setState(int)>(0);
+
+        exitmonitor $r2;
+
+     label09:
+        return 0;
+
+     label10:
+        $r5 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label11:
+        throw $r5;
+
+        catch java.lang.Throwable from label01 to label03 with label10;
+        catch java.lang.Throwable from label04 to label05 with label10;
+        catch java.lang.Throwable from label06 to label07 with label10;
+        catch java.lang.Throwable from label08 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+    }
+
+    int getDefaultPriority()
+    {
+        com.google.common.task.TaskRunner $r0;
+        int i0;
+
+        $r0 := @this: com.google.common.task.TaskRunner;
+
+        i0 = $r0.<com.google.common.task.TaskRunner: int defaultPriority>;
+
+        return i0;
+    }
+
+    int getMaxPriority()
+    {
+        com.google.common.task.TaskRunner $r0;
+        int i0;
+
+        $r0 := @this: com.google.common.task.TaskRunner;
+
+        i0 = $r0.<com.google.common.task.TaskRunner: int maxPriority>;
+
+        return i0;
+    }
+
+    int getMinPriority()
+    {
+        com.google.common.task.TaskRunner $r0;
+        int i0;
+
+        $r0 := @this: com.google.common.task.TaskRunner;
+
+        i0 = $r0.<com.google.common.task.TaskRunner: int minPriority>;
+
+        return i0;
+    }
+
+    public int getPriorityQueueLength()
+    {
+        com.google.common.task.TaskRunner $r0;
+        java.lang.Object $r1;
+        int $i0;
+        java.util.Vector $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: com.google.common.task.TaskRunner;
+
+        $r1 = $r0.<com.google.common.task.TaskRunner: java.lang.Object mutex>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = $r0.<com.google.common.task.TaskRunner: java.util.Vector priorityTaskQueue>;
+
+        $i0 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        exitmonitor $r1;
+
+     label2:
+        return $i0;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public int getTimerQueueLength()
+    {
+        com.google.common.task.TaskRunner $r0;
+        java.lang.Object $r1;
+        int $i0;
+        java.util.Vector $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: com.google.common.task.TaskRunner;
+
+        $r1 = $r0.<com.google.common.task.TaskRunner: java.lang.Object mutex>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = $r0.<com.google.common.task.TaskRunner: java.util.Vector timerTaskQueue>;
+
+        $i0 = virtualinvoke $r2.<java.util.Vector: int size()>();
+
+        exitmonitor $r1;
+
+     label2:
+        return $i0;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public void run()
+    {
+        com.google.common.task.TaskRunner $r0;
+        com.google.common.task.Task $r1;
+        java.lang.Object $r2, $r6;
+        int $i0;
+        java.util.Vector $r3;
+        boolean $z0;
+        java.lang.StringBuilder $r4;
+        long $l1, $l2;
+        java.lang.String $r5;
+        java.lang.Throwable $r7, $r10;
+        com.google.common.task.TimerTask $r8;
+        byte $b3;
+        java.lang.InterruptedException $r9;
+
+        $r0 := @this: com.google.common.task.TaskRunner;
+
+        $r1 = null;
+
+     label01:
+        staticinvoke <com.google.common.task.TaskRunner: void debug(java.lang.String)>("run(): loop");
+
+        $r2 = $r0.<com.google.common.task.TaskRunner: java.lang.Object mutex>;
+
+        entermonitor $r2;
+
+        if $r1 == null goto label31;
+
+     label02:
+        staticinvoke <com.google.common.task.TaskRunner: void debug(java.lang.String)>("run(): clean up");
+
+        $i0 = virtualinvoke $r1.<com.google.common.task.AbstractTask: int getState()>();
+
+        if $i0 != 4 goto label09;
+
+        virtualinvoke $r1.<com.google.common.task.Task: void scheduleInternal()>();
+
+     label03:
+        $r1 = null;
+
+     label04:
+        $r3 = $r0.<com.google.common.task.TaskRunner: java.util.Vector priorityTaskQueue>;
+
+        $z0 = virtualinvoke $r3.<java.util.Vector: boolean isEmpty()>();
+
+        if $z0 == 0 goto label07;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("run(): task queue empty @");
+
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.google.common.task.TaskRunner: void debug(java.lang.String)>($r5);
+
+     label05:
+        $r3 = $r0.<com.google.common.task.TaskRunner: java.util.Vector timerTaskQueue>;
+
+     label06:
+        $z0 = virtualinvoke $r3.<java.util.Vector: boolean isEmpty()>();
+
+        if $z0 == 0 goto label12;
+
+        staticinvoke <com.google.common.task.TaskRunner: void debug(java.lang.String)>("run(): timer task queue empty");
+
+        $r6 = $r0.<com.google.common.task.TaskRunner: java.lang.Object mutex>;
+
+        virtualinvoke $r6.<java.lang.Object: void wait()>();
+
+     label07:
+        $z0 = $r0.<com.google.common.task.TaskRunner: boolean running>;
+
+        if $z0 != 0 goto label22;
+
+        exitmonitor $r2;
+
+     label08:
+        return;
+
+     label09:
+        virtualinvoke $r1.<com.google.common.task.AbstractTask: void setState(int)>(0);
+
+        goto label03;
+
+     label10:
+        $r7 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label11:
+        throw $r7;
+
+     label12:
+        $r3 = $r0.<com.google.common.task.TaskRunner: java.util.Vector timerTaskQueue>;
+
+     label13:
+        $r6 = virtualinvoke $r3.<java.util.Vector: java.lang.Object elementAt(int)>(0);
+
+     label14:
+        $r8 = (com.google.common.task.TimerTask) $r6;
+
+     label15:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("run(): scheduled = ");
+
+        $l1 = virtualinvoke $r8.<com.google.common.task.TimerTask: long getScheduledTime()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.google.common.task.TaskRunner: void debug(java.lang.String)>($r5);
+
+        $l1 = virtualinvoke $r8.<com.google.common.task.TimerTask: long getScheduledTime()>();
+
+        $l2 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+     label16:
+        $l1 = $l1 - $l2;
+
+     label17:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("run(): #1 delta = ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.google.common.task.TaskRunner: void debug(java.lang.String)>($r5);
+
+     label18:
+        $b3 = $l1 cmp 0L;
+
+        if $b3 <= 0 goto label07;
+
+     label19:
+        $r6 = $r0.<com.google.common.task.TaskRunner: java.lang.Object mutex>;
+
+        virtualinvoke $r6.<java.lang.Object: void wait(long)>($l1);
+
+     label20:
+        goto label07;
+
+     label21:
+        $r9 := @caughtexception;
+
+        goto label07;
+
+     label22:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("run(): moving expired tasks @");
+
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.google.common.task.TaskRunner: void debug(java.lang.String)>($r5);
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("run(): timer queue length = ");
+
+        $r3 = $r0.<com.google.common.task.TaskRunner: java.util.Vector timerTaskQueue>;
+
+        $i0 = virtualinvoke $r3.<java.util.Vector: int size()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.google.common.task.TaskRunner: void debug(java.lang.String)>($r5);
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("run(): priority queue length = ");
+
+        $r3 = $r0.<com.google.common.task.TaskRunner: java.util.Vector priorityTaskQueue>;
+
+        $i0 = virtualinvoke $r3.<java.util.Vector: int size()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.google.common.task.TaskRunner: void debug(java.lang.String)>($r5);
+
+     label23:
+        $r3 = $r0.<com.google.common.task.TaskRunner: java.util.Vector timerTaskQueue>;
+
+        $z0 = virtualinvoke $r3.<java.util.Vector: boolean isEmpty()>();
+
+        if $z0 != 0 goto label24;
+
+        $r3 = $r0.<com.google.common.task.TaskRunner: java.util.Vector timerTaskQueue>;
+
+        $r6 = virtualinvoke $r3.<java.util.Vector: java.lang.Object elementAt(int)>(0);
+
+        $r8 = (com.google.common.task.TimerTask) $r6;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("run(): timerTask = ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.google.common.task.TaskRunner: void debug(java.lang.String)>($r5);
+
+        $l1 = virtualinvoke $r8.<com.google.common.task.TimerTask: long getScheduledTime()>();
+
+        $l2 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l1 = $l1 - $l2;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("run(): current = ");
+
+        $l2 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l2);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.google.common.task.TaskRunner: void debug(java.lang.String)>($r5);
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("run(): scheduled = ");
+
+        $l2 = virtualinvoke $r8.<com.google.common.task.TimerTask: long getScheduledTime()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l2);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.google.common.task.TaskRunner: void debug(java.lang.String)>($r5);
+
+        $b3 = $l1 cmp 0L;
+
+        if $b3 > 0 goto label24;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("run(): #2 delta = ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.google.common.task.TaskRunner: void debug(java.lang.String)>($r5);
+
+        $r3 = $r0.<com.google.common.task.TaskRunner: java.util.Vector timerTaskQueue>;
+
+        virtualinvoke $r3.<java.util.Vector: void removeElementAt(int)>(0);
+
+        virtualinvoke $r0.<com.google.common.task.TaskRunner: void schedulePriorityTaskInternal(com.google.common.task.Task)>($r8);
+
+        goto label23;
+
+     label24:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("run(): getting available task @");
+
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.google.common.task.TaskRunner: void debug(java.lang.String)>($r5);
+
+        $r3 = $r0.<com.google.common.task.TaskRunner: java.util.Vector priorityTaskQueue>;
+
+        $z0 = virtualinvoke $r3.<java.util.Vector: boolean isEmpty()>();
+
+        if $z0 != 0 goto label30;
+
+        $r3 = $r0.<com.google.common.task.TaskRunner: java.util.Vector priorityTaskQueue>;
+
+        $r6 = virtualinvoke $r3.<java.util.Vector: java.lang.Object elementAt(int)>(0);
+
+        $r1 = (com.google.common.task.Task) $r6;
+
+        virtualinvoke $r1.<com.google.common.task.AbstractTask: void setState(int)>(3);
+
+        $r3 = $r0.<com.google.common.task.TaskRunner: java.util.Vector priorityTaskQueue>;
+
+        virtualinvoke $r3.<java.util.Vector: void removeElementAt(int)>(0);
+
+     label25:
+        exitmonitor $r2;
+
+     label26:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("run(): running task @");
+
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.google.common.task.TaskRunner: void debug(java.lang.String)>($r5);
+
+        if $r1 == null goto label01;
+
+     label27:
+        virtualinvoke $r1.<com.google.common.task.AbstractTask: void runInternal()>();
+
+     label28:
+        goto label01;
+
+     label29:
+        $r10 := @caughtexception;
+
+        virtualinvoke $r10.<java.lang.Throwable: void printStackTrace()>();
+
+        goto label01;
+
+     label30:
+        goto label25;
+
+     label31:
+        goto label04;
+
+        catch java.lang.Throwable from label02 to label05 with label10;
+        catch java.lang.InterruptedException from label06 to label07 with label21;
+        catch java.lang.Throwable from label05 to label07 with label10;
+        catch java.lang.Throwable from label07 to label08 with label10;
+        catch java.lang.Throwable from label09 to label11 with label10;
+        catch java.lang.InterruptedException from label13 to label14 with label21;
+        catch java.lang.InterruptedException from label15 to label16 with label21;
+        catch java.lang.InterruptedException from label17 to label18 with label21;
+        catch java.lang.InterruptedException from label19 to label20 with label21;
+        catch java.lang.Throwable from label12 to label20 with label10;
+        catch java.lang.Throwable from label22 to label26 with label10;
+        catch java.lang.Throwable from label27 to label28 with label29;
+    }
+
+    void schedulePriorityTaskInternal(com.google.common.task.Task)
+    {
+        com.google.common.task.TaskRunner $r0;
+        com.google.common.task.Task $r1, $r5;
+        java.lang.Object $r2, $r4;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.util.Vector $r3;
+        java.lang.Throwable $r6;
+
+        $r0 := @this: com.google.common.task.TaskRunner;
+
+        $r1 := @parameter0: com.google.common.task.Task;
+
+        $r2 = $r0.<com.google.common.task.TaskRunner: java.lang.Object mutex>;
+
+        entermonitor $r2;
+
+     label1:
+        $i1 = virtualinvoke $r1.<com.google.common.task.Task: int getPriority()>();
+
+        $r3 = $r0.<com.google.common.task.TaskRunner: java.util.Vector priorityTaskQueue>;
+
+        $i2 = virtualinvoke $r3.<java.util.Vector: int size()>();
+
+        $i3 = 0;
+
+     label2:
+        if $i3 >= $i2 goto label5;
+
+        $i0 = $i3 + $i2;
+
+        $i0 = $i0 / 2;
+
+        $r3 = $r0.<com.google.common.task.TaskRunner: java.util.Vector priorityTaskQueue>;
+
+        $r4 = virtualinvoke $r3.<java.util.Vector: java.lang.Object elementAt(int)>($i0);
+
+        $r5 = (com.google.common.task.Task) $r4;
+
+        $i4 = virtualinvoke $r5.<com.google.common.task.Task: int getPriority()>();
+
+        if $i1 > $i4 goto label4;
+
+        $i3 = $i0 + 1;
+
+     label3:
+        goto label2;
+
+     label4:
+        $i2 = $i0;
+
+        goto label3;
+
+     label5:
+        $r3 = $r0.<com.google.common.task.TaskRunner: java.util.Vector priorityTaskQueue>;
+
+        virtualinvoke $r3.<java.util.Vector: void insertElementAt(java.lang.Object,int)>($r1, $i3);
+
+        virtualinvoke $r1.<com.google.common.task.AbstractTask: void setState(int)>(2);
+
+        $r4 = $r0.<com.google.common.task.TaskRunner: java.lang.Object mutex>;
+
+        virtualinvoke $r4.<java.lang.Object: void notifyAll()>();
+
+        exitmonitor $r2;
+
+     label6:
+        return;
+
+     label7:
+        $r6 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label8:
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    void scheduleTask(com.google.common.task.AbstractTask)
+    {
+        com.google.common.task.TaskRunner $r0;
+        com.google.common.task.AbstractTask $r1;
+        java.lang.Object $r2;
+        int $i0;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: com.google.common.task.TaskRunner;
+
+        $r1 := @parameter0: com.google.common.task.AbstractTask;
+
+        $r2 = $r0.<com.google.common.task.TaskRunner: java.lang.Object mutex>;
+
+        entermonitor $r2;
+
+     label1:
+        $i0 = virtualinvoke $r1.<com.google.common.task.AbstractTask: int getState()>();
+
+        lookupswitch($i0)
+        {
+            case 0: goto label4;
+            case 1: goto label2;
+            case 2: goto label2;
+            case 3: goto label7;
+            default: goto label2;
+        };
+
+     label2:
+        exitmonitor $r2;
+
+     label3:
+        return;
+
+     label4:
+        virtualinvoke $r1.<com.google.common.task.AbstractTask: void scheduleInternal()>();
+
+        goto label2;
+
+     label5:
+        $r3 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label6:
+        throw $r3;
+
+     label7:
+        virtualinvoke $r1.<com.google.common.task.AbstractTask: void setState(int)>(4);
+
+     label8:
+        goto label2;
+
+        catch java.lang.Throwable from label1 to label3 with label5;
+        catch java.lang.Throwable from label4 to label6 with label5;
+        catch java.lang.Throwable from label7 to label8 with label5;
+    }
+
+    void scheduleTimerTaskInternal(com.google.common.task.TimerTask)
+    {
+        com.google.common.task.TaskRunner $r0;
+        com.google.common.task.TimerTask $r1, $r5;
+        java.lang.Object $r2, $r4;
+        int $i0, $i2, $i3;
+        long $l1, $l4;
+        java.util.Vector $r3;
+        byte $b5;
+        java.lang.Throwable $r6;
+
+        $r0 := @this: com.google.common.task.TaskRunner;
+
+        $r1 := @parameter0: com.google.common.task.TimerTask;
+
+        $r2 = $r0.<com.google.common.task.TaskRunner: java.lang.Object mutex>;
+
+        entermonitor $r2;
+
+     label1:
+        $l1 = virtualinvoke $r1.<com.google.common.task.TimerTask: long getScheduledTime()>();
+
+        $r3 = $r0.<com.google.common.task.TaskRunner: java.util.Vector timerTaskQueue>;
+
+        $i2 = virtualinvoke $r3.<java.util.Vector: int size()>();
+
+        $i3 = 0;
+
+     label2:
+        if $i3 >= $i2 goto label5;
+
+        $i0 = $i3 + $i2;
+
+        $i0 = $i0 / 2;
+
+        $r3 = $r0.<com.google.common.task.TaskRunner: java.util.Vector timerTaskQueue>;
+
+        $r4 = virtualinvoke $r3.<java.util.Vector: java.lang.Object elementAt(int)>($i0);
+
+        $r5 = (com.google.common.task.TimerTask) $r4;
+
+        $l4 = virtualinvoke $r5.<com.google.common.task.TimerTask: long getScheduledTime()>();
+
+        $b5 = $l1 cmp $l4;
+
+        if $b5 < 0 goto label4;
+
+        $i3 = $i0 + 1;
+
+     label3:
+        goto label2;
+
+     label4:
+        $i2 = $i0;
+
+        goto label3;
+
+     label5:
+        $r3 = $r0.<com.google.common.task.TaskRunner: java.util.Vector timerTaskQueue>;
+
+        virtualinvoke $r3.<java.util.Vector: void insertElementAt(java.lang.Object,int)>($r1, $i3);
+
+        virtualinvoke $r1.<com.google.common.task.AbstractTask: void setState(int)>(1);
+
+        $r4 = $r0.<com.google.common.task.TaskRunner: java.lang.Object mutex>;
+
+        virtualinvoke $r4.<java.lang.Object: void notifyAll()>();
+
+        exitmonitor $r2;
+
+     label6:
+        return;
+
+     label7:
+        $r6 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label8:
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+
+    public void start()
+    {
+        com.google.common.task.TaskRunner $r0;
+        java.lang.Object $r1;
+        boolean $z0;
+        int $i0, $i1;
+        java.lang.Thread[] $r2;
+        com.google.common.lang.ThreadFactory $r3;
+        java.lang.StringBuilder $r4;
+        java.lang.String $r5;
+        java.lang.Thread $r6;
+        java.lang.Throwable $r7;
+
+        $r0 := @this: com.google.common.task.TaskRunner;
+
+        $r1 = $r0.<com.google.common.task.TaskRunner: java.lang.Object mutex>;
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = $r0.<com.google.common.task.TaskRunner: boolean running>;
+
+        if $z0 != 0 goto label3;
+
+        $r0.<com.google.common.task.TaskRunner: boolean running> = 1;
+
+        $i0 = 0;
+
+     label2:
+        $r2 = $r0.<com.google.common.task.TaskRunner: java.lang.Thread[] workers>;
+
+        $i1 = lengthof $r2;
+
+        if $i0 >= $i1 goto label3;
+
+        $r2 = $r0.<com.google.common.task.TaskRunner: java.lang.Thread[] workers>;
+
+        $r3 = $r0.<com.google.common.task.TaskRunner: com.google.common.lang.ThreadFactory factory>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = $r0.<com.google.common.task.TaskRunner: java.lang.String name>;
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("-");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r6 = virtualinvoke $r3.<com.google.common.lang.ThreadFactory: java.lang.Thread createThread(java.lang.String,java.lang.Runnable)>($r5, $r0);
+
+        $r2[$i0] = $r6;
+
+        $r2 = $r0.<com.google.common.task.TaskRunner: java.lang.Thread[] workers>;
+
+        $r6 = $r2[$i0];
+
+        virtualinvoke $r6.<java.lang.Thread: void start()>();
+
+        $i0 = $i0 + 1;
+
+        goto label2;
+
+     label3:
+        exitmonitor $r1;
+
+     label4:
+        return;
+
+     label5:
+        $r7 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r7;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+
+    public void stop()
+    {
+        com.google.common.task.TaskRunner $r0;
+        java.lang.Object $r1, $r3;
+        boolean $z0;
+        int $i0, $i1;
+        java.lang.Thread[] $r2;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: com.google.common.task.TaskRunner;
+
+        $r1 = $r0.<com.google.common.task.TaskRunner: java.lang.Object mutex>;
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = $r0.<com.google.common.task.TaskRunner: boolean running>;
+
+        if $z0 != 1 goto label4;
+
+        $r0.<com.google.common.task.TaskRunner: boolean running> = 0;
+
+        $i0 = 0;
+
+     label2:
+        $r2 = $r0.<com.google.common.task.TaskRunner: java.lang.Thread[] workers>;
+
+        $i1 = lengthof $r2;
+
+        if $i0 >= $i1 goto label3;
+
+        $r2 = $r0.<com.google.common.task.TaskRunner: java.lang.Thread[] workers>;
+
+        $r2[$i0] = null;
+
+        $i0 = $i0 + 1;
+
+        goto label2;
+
+     label3:
+        $r3 = $r0.<com.google.common.task.TaskRunner: java.lang.Object mutex>;
+
+        virtualinvoke $r3.<java.lang.Object: void notifyAll()>();
+
+     label4:
+        exitmonitor $r1;
+
+     label5:
+        return;
+
+     label6:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label7:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+
+    public static void <clinit>()
+    {
+        <com.google.common.task.TaskRunner: java.lang.String DEFAULT_WORKER_NAME> = "TaskRunner";
+
+        <com.google.common.task.TaskRunner: int DEFAULT_WORKER_COUNT> = 1;
+
+        return;
+    }
+}

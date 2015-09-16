@@ -1,0 +1,1585 @@
+public abstract class android.content.AbstractSyncableContentProvider extends android.content.SyncableContentProvider
+{
+    private static final java.lang.String SYNC_ACCOUNT_WHERE_CLAUSE;
+    private static final java.lang.String TAG;
+    private static final java.lang.String[] sAccountProjection;
+    private android.accounts.AccountMonitor mAccountMonitor;
+    private boolean mContainsDiffs;
+    private final android.net.Uri mContentUri;
+    private android.content.AbstractTableMerger mCurrentMerger;
+    private final java.lang.String mDatabaseName;
+    private final int mDatabaseVersion;
+    protected android.database.sqlite.SQLiteDatabase mDb;
+    private boolean mIsMergeCancelled;
+    private boolean mIsTemporary;
+    protected android.database.sqlite.SQLiteOpenHelper mOpenHelper;
+    private android.content.SyncStateContentProviderHelper mSyncState;
+    private java.lang.String mSyncingAccount;
+
+    static void <clinit>()
+    {
+        java.lang.String[] $r0;
+
+        <android.content.AbstractSyncableContentProvider: java.lang.String TAG> = "SyncableContentProvider";
+
+        <android.content.AbstractSyncableContentProvider: java.lang.String SYNC_ACCOUNT_WHERE_CLAUSE> = "_sync_account=?";
+
+        $r0 = newarray (java.lang.String)[1];
+
+        $r0[0] = "_sync_account";
+
+        <android.content.AbstractSyncableContentProvider: java.lang.String[] sAccountProjection> = $r0;
+
+        return;
+    }
+
+    public void <init>(java.lang.String, int, android.net.Uri)
+    {
+        android.content.AbstractSyncableContentProvider $r0;
+        java.lang.String $r1;
+        int $i0;
+        android.net.Uri $r2;
+
+        $r0 := @this: android.content.AbstractSyncableContentProvider;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: android.net.Uri;
+
+        specialinvoke $r0.<android.content.SyncableContentProvider: void <init>()>();
+
+        $r0.<android.content.AbstractSyncableContentProvider: android.content.SyncStateContentProviderHelper mSyncState> = null;
+
+        $r0.<android.content.AbstractSyncableContentProvider: android.content.AbstractTableMerger mCurrentMerger> = null;
+
+        $r0.<android.content.AbstractSyncableContentProvider: boolean mIsMergeCancelled> = 0;
+
+        $r0.<android.content.AbstractSyncableContentProvider: java.lang.String mDatabaseName> = $r1;
+
+        $r0.<android.content.AbstractSyncableContentProvider: int mDatabaseVersion> = $i0;
+
+        $r0.<android.content.AbstractSyncableContentProvider: android.net.Uri mContentUri> = $r2;
+
+        $r0.<android.content.AbstractSyncableContentProvider: boolean mIsTemporary> = 0;
+
+        virtualinvoke $r0.<android.content.AbstractSyncableContentProvider: void setContainsDiffs(boolean)>(0);
+
+        return;
+    }
+
+    static int access$000(android.content.AbstractSyncableContentProvider)
+    {
+        android.content.AbstractSyncableContentProvider $r0;
+        int i0;
+
+        $r0 := @parameter0: android.content.AbstractSyncableContentProvider;
+
+        i0 = $r0.<android.content.AbstractSyncableContentProvider: int mDatabaseVersion>;
+
+        return i0;
+    }
+
+    static android.content.SyncStateContentProviderHelper access$100(android.content.AbstractSyncableContentProvider)
+    {
+        android.content.AbstractSyncableContentProvider $r0;
+        android.content.SyncStateContentProviderHelper r1;
+
+        $r0 := @parameter0: android.content.AbstractSyncableContentProvider;
+
+        r1 = $r0.<android.content.AbstractSyncableContentProvider: android.content.SyncStateContentProviderHelper mSyncState>;
+
+        return r1;
+    }
+
+    static android.net.Uri access$200(android.content.AbstractSyncableContentProvider)
+    {
+        android.content.AbstractSyncableContentProvider $r0;
+        android.net.Uri r1;
+
+        $r0 := @parameter0: android.content.AbstractSyncableContentProvider;
+
+        r1 = $r0.<android.content.AbstractSyncableContentProvider: android.net.Uri mContentUri>;
+
+        return r1;
+    }
+
+    protected void bootstrapDatabase(android.database.sqlite.SQLiteDatabase)
+    {
+        android.content.AbstractSyncableContentProvider $r0;
+        android.database.sqlite.SQLiteDatabase $r1;
+
+        $r0 := @this: android.content.AbstractSyncableContentProvider;
+
+        $r1 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        return;
+    }
+
+    public final int bulkInsert(android.net.Uri, android.content.ContentValues[])
+    {
+        android.content.AbstractSyncableContentProvider $r0;
+        android.net.Uri $r1, $r8;
+        android.content.ContentValues[] $r2;
+        int $i0, $i1, $i2;
+        android.content.SyncStateContentProviderHelper $r3;
+        boolean $z0, $z1;
+        android.database.sqlite.SQLiteOpenHelper $r4;
+        android.database.sqlite.SQLiteDatabase $r5;
+        android.content.ContentProvider $r6;
+        android.content.ContentValues $r7;
+        java.lang.Throwable $r9;
+        android.content.Context $r10;
+        android.content.ContentResolver $r11;
+
+        $r0 := @this: android.content.AbstractSyncableContentProvider;
+
+        $r1 := @parameter0: android.net.Uri;
+
+        $r2 := @parameter1: android.content.ContentValues[];
+
+        $i0 = lengthof $r2;
+
+        $i1 = 0;
+
+        $r3 = $r0.<android.content.AbstractSyncableContentProvider: android.content.SyncStateContentProviderHelper mSyncState>;
+
+        $z0 = virtualinvoke $r3.<android.content.SyncStateContentProviderHelper: boolean matches(android.net.Uri)>($r1);
+
+        $r4 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteOpenHelper mOpenHelper>;
+
+        $r5 = virtualinvoke $r4.<android.database.sqlite.SQLiteOpenHelper: android.database.sqlite.SQLiteDatabase getWritableDatabase()>();
+
+        $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb> = $r5;
+
+        $r5 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb>;
+
+        virtualinvoke $r5.<android.database.sqlite.SQLiteDatabase: void beginTransaction()>();
+
+        $i2 = 0;
+
+     label01:
+        if $i2 >= $i0 goto label08;
+
+     label02:
+        $z1 = virtualinvoke $r0.<android.content.AbstractSyncableContentProvider: boolean isTemporary()>();
+
+        if $z1 == 0 goto label05;
+
+        if $z0 == 0 goto label05;
+
+        $r3 = $r0.<android.content.AbstractSyncableContentProvider: android.content.SyncStateContentProviderHelper mSyncState>;
+
+        $r6 = virtualinvoke $r3.<android.content.SyncStateContentProviderHelper: android.content.ContentProvider asContentProvider()>();
+
+        $r7 = $r2[$i2];
+
+        $r8 = virtualinvoke $r6.<android.content.ContentProvider: android.net.Uri insert(android.net.Uri,android.content.ContentValues)>($r1, $r7);
+
+     label03:
+        if $r8 == null goto label04;
+
+        $i1 = $i1 + 1;
+
+     label04:
+        $i2 = $i2 + 1;
+
+        goto label01;
+
+     label05:
+        $r7 = $r2[$i2];
+
+        $r8 = virtualinvoke $r0.<android.content.AbstractSyncableContentProvider: android.net.Uri insertInternal(android.net.Uri,android.content.ContentValues)>($r1, $r7);
+
+        $r5 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb>;
+
+        virtualinvoke $r5.<android.database.sqlite.SQLiteDatabase: boolean yieldIfContended()>();
+
+     label06:
+        goto label03;
+
+     label07:
+        $r9 := @caughtexception;
+
+        $r5 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb>;
+
+        virtualinvoke $r5.<android.database.sqlite.SQLiteDatabase: void endTransaction()>();
+
+        throw $r9;
+
+     label08:
+        $r5 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb>;
+
+        virtualinvoke $r5.<android.database.sqlite.SQLiteDatabase: void setTransactionSuccessful()>();
+
+     label09:
+        $r5 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb>;
+
+        virtualinvoke $r5.<android.database.sqlite.SQLiteDatabase: void endTransaction()>();
+
+        $z0 = virtualinvoke $r0.<android.content.AbstractSyncableContentProvider: boolean isTemporary()>();
+
+        if $z0 != 0 goto label10;
+
+        if $i1 != $i0 goto label11;
+
+        $r10 = virtualinvoke $r0.<android.content.ContentProvider: android.content.Context getContext()>();
+
+        $r11 = virtualinvoke $r10.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $z0 = virtualinvoke $r0.<android.content.AbstractSyncableContentProvider: boolean changeRequiresLocalSync(android.net.Uri)>($r1);
+
+        virtualinvoke $r11.<android.content.ContentResolver: void notifyChange(android.net.Uri,android.database.ContentObserver,boolean)>($r1, null, $z0);
+
+        return $i1;
+
+     label10:
+        return $i1;
+
+     label11:
+        return $i1;
+
+        catch java.lang.Throwable from label02 to label03 with label07;
+        catch java.lang.Throwable from label05 to label06 with label07;
+        catch java.lang.Throwable from label08 to label09 with label07;
+    }
+
+    public boolean changeRequiresLocalSync(android.net.Uri)
+    {
+        android.content.AbstractSyncableContentProvider $r0;
+        android.net.Uri $r1;
+
+        $r0 := @this: android.content.AbstractSyncableContentProvider;
+
+        $r1 := @parameter0: android.net.Uri;
+
+        return 1;
+    }
+
+    public void close()
+    {
+        android.content.AbstractSyncableContentProvider $r0;
+        android.database.sqlite.SQLiteOpenHelper $r1;
+
+        $r0 := @this: android.content.AbstractSyncableContentProvider;
+
+        $r1 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteOpenHelper mOpenHelper>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteOpenHelper mOpenHelper>;
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteOpenHelper: void close()>();
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public final int delete(android.net.Uri, java.lang.String, java.lang.String[])
+    {
+        android.content.AbstractSyncableContentProvider $r0;
+        android.net.Uri $r1;
+        java.lang.String $r2;
+        java.lang.String[] $r3;
+        android.database.sqlite.SQLiteOpenHelper $r4;
+        android.database.sqlite.SQLiteDatabase $r5;
+        boolean $z0;
+        android.content.SyncStateContentProviderHelper $r6;
+        android.content.ContentProvider $r7;
+        int $i0;
+        android.content.Context $r8;
+        android.content.ContentResolver $r9;
+        java.lang.Throwable $r10;
+
+        $r0 := @this: android.content.AbstractSyncableContentProvider;
+
+        $r1 := @parameter0: android.net.Uri;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.lang.String[];
+
+        $r4 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteOpenHelper mOpenHelper>;
+
+        $r5 = virtualinvoke $r4.<android.database.sqlite.SQLiteOpenHelper: android.database.sqlite.SQLiteDatabase getWritableDatabase()>();
+
+        $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb> = $r5;
+
+        $r5 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb>;
+
+        virtualinvoke $r5.<android.database.sqlite.SQLiteDatabase: void beginTransaction()>();
+
+     label1:
+        $z0 = virtualinvoke $r0.<android.content.AbstractSyncableContentProvider: boolean isTemporary()>();
+
+        if $z0 == 0 goto label3;
+
+        $r6 = $r0.<android.content.AbstractSyncableContentProvider: android.content.SyncStateContentProviderHelper mSyncState>;
+
+        $z0 = virtualinvoke $r6.<android.content.SyncStateContentProviderHelper: boolean matches(android.net.Uri)>($r1);
+
+        if $z0 == 0 goto label3;
+
+        $r6 = $r0.<android.content.AbstractSyncableContentProvider: android.content.SyncStateContentProviderHelper mSyncState>;
+
+        $r7 = virtualinvoke $r6.<android.content.SyncStateContentProviderHelper: android.content.ContentProvider asContentProvider()>();
+
+        $i0 = virtualinvoke $r7.<android.content.ContentProvider: int delete(android.net.Uri,java.lang.String,java.lang.String[])>($r1, $r2, $r3);
+
+        $r5 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb>;
+
+        virtualinvoke $r5.<android.database.sqlite.SQLiteDatabase: void setTransactionSuccessful()>();
+
+     label2:
+        $r5 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb>;
+
+        virtualinvoke $r5.<android.database.sqlite.SQLiteDatabase: void endTransaction()>();
+
+        return $i0;
+
+     label3:
+        $i0 = virtualinvoke $r0.<android.content.AbstractSyncableContentProvider: int deleteInternal(android.net.Uri,java.lang.String,java.lang.String[])>($r1, $r2, $r3);
+
+        $r5 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb>;
+
+        virtualinvoke $r5.<android.database.sqlite.SQLiteDatabase: void setTransactionSuccessful()>();
+
+        $z0 = virtualinvoke $r0.<android.content.AbstractSyncableContentProvider: boolean isTemporary()>();
+
+     label4:
+        if $z0 != 0 goto label6;
+
+     label5:
+        if $i0 <= 0 goto label6;
+
+        $r8 = virtualinvoke $r0.<android.content.ContentProvider: android.content.Context getContext()>();
+
+        $r9 = virtualinvoke $r8.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $z0 = virtualinvoke $r0.<android.content.AbstractSyncableContentProvider: boolean changeRequiresLocalSync(android.net.Uri)>($r1);
+
+        virtualinvoke $r9.<android.content.ContentResolver: void notifyChange(android.net.Uri,android.database.ContentObserver,boolean)>($r1, null, $z0);
+
+     label6:
+        $r5 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb>;
+
+        virtualinvoke $r5.<android.database.sqlite.SQLiteDatabase: void endTransaction()>();
+
+        return $i0;
+
+     label7:
+        $r10 := @caughtexception;
+
+        $r5 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb>;
+
+        virtualinvoke $r5.<android.database.sqlite.SQLiteDatabase: void endTransaction()>();
+
+        throw $r10;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label3 to label4 with label7;
+        catch java.lang.Throwable from label5 to label6 with label7;
+    }
+
+    protected abstract int deleteInternal(android.net.Uri, java.lang.String, java.lang.String[]);
+
+    protected void deleteRowsForRemovedAccounts(java.util.Map, java.lang.String, java.lang.String)
+    {
+        android.content.AbstractSyncableContentProvider $r0;
+        java.util.Map $r1;
+        java.lang.String $r2, $r3, $r8, $r10;
+        android.database.sqlite.SQLiteOpenHelper $r4;
+        android.database.sqlite.SQLiteDatabase $r5;
+        java.lang.String[] $r6;
+        android.database.Cursor $r7;
+        boolean $z0;
+        java.lang.StringBuilder $r9;
+        java.lang.Throwable $r11;
+
+        $r0 := @this: android.content.AbstractSyncableContentProvider;
+
+        $r1 := @parameter0: java.util.Map;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r4 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteOpenHelper mOpenHelper>;
+
+        $r5 = virtualinvoke $r4.<android.database.sqlite.SQLiteOpenHelper: android.database.sqlite.SQLiteDatabase getWritableDatabase()>();
+
+        $r6 = <android.content.AbstractSyncableContentProvider: java.lang.String[] sAccountProjection>;
+
+        $r7 = virtualinvoke $r5.<android.database.sqlite.SQLiteDatabase: android.database.Cursor query(java.lang.String,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String,java.lang.String,java.lang.String)>($r2, $r6, null, null, $r3, null, null);
+
+     label1:
+        $z0 = interfaceinvoke $r7.<android.database.Cursor: boolean moveToNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r8 = interfaceinvoke $r7.<android.database.Cursor: java.lang.String getString(int)>(0);
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r8);
+
+        if $z0 != 0 goto label1;
+
+        $z0 = interfaceinvoke $r1.<java.util.Map: boolean containsKey(java.lang.Object)>($r8);
+
+        if $z0 != 0 goto label1;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("=?");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r6 = newarray (java.lang.String)[1];
+
+        $r6[0] = $r8;
+
+        virtualinvoke $r5.<android.database.sqlite.SQLiteDatabase: int delete(java.lang.String,java.lang.String,java.lang.String[])>($r2, $r10, $r6);
+
+     label2:
+        goto label1;
+
+     label3:
+        $r11 := @caughtexception;
+
+        interfaceinvoke $r7.<android.database.Cursor: void close()>();
+
+        throw $r11;
+
+     label4:
+        interfaceinvoke $r7.<android.database.Cursor: void close()>();
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public boolean getContainsDiffs()
+    {
+        android.content.AbstractSyncableContentProvider $r0;
+        boolean z0;
+
+        $r0 := @this: android.content.AbstractSyncableContentProvider;
+
+        z0 = $r0.<android.content.AbstractSyncableContentProvider: boolean mContainsDiffs>;
+
+        return z0;
+    }
+
+    public android.database.sqlite.SQLiteDatabase getDatabase()
+    {
+        android.content.AbstractSyncableContentProvider $r0;
+        android.database.sqlite.SQLiteDatabase $r1;
+        android.database.sqlite.SQLiteOpenHelper $r2;
+
+        $r0 := @this: android.content.AbstractSyncableContentProvider;
+
+        $r1 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb>;
+
+        if $r1 != null goto label1;
+
+        $r2 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteOpenHelper mOpenHelper>;
+
+        $r1 = virtualinvoke $r2.<android.database.sqlite.SQLiteOpenHelper: android.database.sqlite.SQLiteDatabase getWritableDatabase()>();
+
+        $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb> = $r1;
+
+     label1:
+        $r1 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb>;
+
+        return $r1;
+    }
+
+    protected java.lang.Iterable getMergers()
+    {
+        android.content.AbstractSyncableContentProvider $r0;
+        java.util.List $r1;
+
+        $r0 := @this: android.content.AbstractSyncableContentProvider;
+
+        $r1 = staticinvoke <java.util.Collections: java.util.List emptyList()>();
+
+        return $r1;
+    }
+
+    public java.lang.String getSyncingAccount()
+    {
+        android.content.AbstractSyncableContentProvider $r0;
+        java.lang.String r1;
+
+        $r0 := @this: android.content.AbstractSyncableContentProvider;
+
+        r1 = $r0.<android.content.AbstractSyncableContentProvider: java.lang.String mSyncingAccount>;
+
+        return r1;
+    }
+
+    public android.content.AbstractSyncableContentProvider getTemporaryInstance()
+    {
+        android.content.AbstractSyncableContentProvider $r0, $r3;
+        java.lang.Class $r1;
+        java.lang.Object $r2;
+        android.content.AbstractSyncableContentProvider$DatabaseHelper $r4;
+        android.content.SyncStateContentProviderHelper $r5;
+        android.database.sqlite.SQLiteOpenHelper $r6;
+        boolean $z0;
+        android.database.sqlite.SQLiteDatabase $r7, $r8;
+        java.lang.String $r9;
+        java.lang.InstantiationException $r10;
+        java.lang.RuntimeException $r11;
+        java.lang.IllegalAccessException $r12;
+
+        $r0 := @this: android.content.AbstractSyncableContentProvider;
+
+     label1:
+        $r1 = virtualinvoke $r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.Object newInstance()>();
+
+     label2:
+        $r3 = (android.content.AbstractSyncableContentProvider) $r2;
+
+        $r3.<android.content.AbstractSyncableContentProvider: boolean mIsTemporary> = 1;
+
+        virtualinvoke $r3.<android.content.AbstractSyncableContentProvider: void setContainsDiffs(boolean)>(1);
+
+        $r4 = new android.content.AbstractSyncableContentProvider$DatabaseHelper;
+
+        virtualinvoke $r3.<java.lang.Object: java.lang.Class getClass()>();
+
+        specialinvoke $r4.<android.content.AbstractSyncableContentProvider$DatabaseHelper: void <init>(android.content.AbstractSyncableContentProvider,android.content.Context,java.lang.String)>($r3, null, null);
+
+        $r3.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteOpenHelper mOpenHelper> = $r4;
+
+        $r5 = new android.content.SyncStateContentProviderHelper;
+
+        $r6 = $r3.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteOpenHelper mOpenHelper>;
+
+        specialinvoke $r5.<android.content.SyncStateContentProviderHelper: void <init>(android.database.sqlite.SQLiteOpenHelper)>($r6);
+
+        $r3.<android.content.AbstractSyncableContentProvider: android.content.SyncStateContentProviderHelper mSyncState> = $r5;
+
+        $z0 = virtualinvoke $r0.<android.content.AbstractSyncableContentProvider: boolean isTemporary()>();
+
+        if $z0 != 0 goto label5;
+
+        $r5 = $r0.<android.content.AbstractSyncableContentProvider: android.content.SyncStateContentProviderHelper mSyncState>;
+
+        $r6 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteOpenHelper mOpenHelper>;
+
+        $r7 = virtualinvoke $r6.<android.database.sqlite.SQLiteOpenHelper: android.database.sqlite.SQLiteDatabase getReadableDatabase()>();
+
+        $r6 = $r3.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteOpenHelper mOpenHelper>;
+
+        $r8 = virtualinvoke $r6.<android.database.sqlite.SQLiteOpenHelper: android.database.sqlite.SQLiteDatabase getWritableDatabase()>();
+
+        $r9 = virtualinvoke $r0.<android.content.AbstractSyncableContentProvider: java.lang.String getSyncingAccount()>();
+
+        virtualinvoke $r5.<android.content.SyncStateContentProviderHelper: void copySyncState(android.database.sqlite.SQLiteDatabase,android.database.sqlite.SQLiteDatabase,java.lang.String)>($r7, $r8, $r9);
+
+        return $r3;
+
+     label3:
+        $r10 := @caughtexception;
+
+        $r11 = new java.lang.RuntimeException;
+
+        specialinvoke $r11.<java.lang.RuntimeException: void <init>(java.lang.String,java.lang.Throwable)>("unable to instantiate class, this should never happen", $r10);
+
+        throw $r11;
+
+     label4:
+        $r12 := @caughtexception;
+
+        $r11 = new java.lang.RuntimeException;
+
+        specialinvoke $r11.<java.lang.RuntimeException: void <init>(java.lang.String,java.lang.Throwable)>("IllegalAccess while instantiating class, this should never happen", $r12);
+
+        throw $r11;
+
+     label5:
+        return $r3;
+
+        catch java.lang.InstantiationException from label1 to label2 with label3;
+        catch java.lang.IllegalAccessException from label1 to label2 with label4;
+    }
+
+    public volatile android.content.SyncableContentProvider getTemporaryInstance()
+    {
+        android.content.AbstractSyncableContentProvider $r0;
+
+        $r0 := @this: android.content.AbstractSyncableContentProvider;
+
+        $r0 = virtualinvoke $r0.<android.content.AbstractSyncableContentProvider: android.content.AbstractSyncableContentProvider getTemporaryInstance()>();
+
+        return $r0;
+    }
+
+    public final android.net.Uri insert(android.net.Uri, android.content.ContentValues)
+    {
+        android.content.AbstractSyncableContentProvider $r0;
+        android.net.Uri $r1, $r7;
+        android.content.ContentValues $r2;
+        android.database.sqlite.SQLiteOpenHelper $r3;
+        android.database.sqlite.SQLiteDatabase $r4;
+        boolean $z0;
+        android.content.SyncStateContentProviderHelper $r5;
+        android.content.ContentProvider $r6;
+        android.content.Context $r8;
+        android.content.ContentResolver $r9;
+        java.lang.Throwable $r10;
+
+        $r0 := @this: android.content.AbstractSyncableContentProvider;
+
+        $r1 := @parameter0: android.net.Uri;
+
+        $r2 := @parameter1: android.content.ContentValues;
+
+        $r3 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteOpenHelper mOpenHelper>;
+
+        $r4 = virtualinvoke $r3.<android.database.sqlite.SQLiteOpenHelper: android.database.sqlite.SQLiteDatabase getWritableDatabase()>();
+
+        $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb> = $r4;
+
+        $r4 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb>;
+
+        virtualinvoke $r4.<android.database.sqlite.SQLiteDatabase: void beginTransaction()>();
+
+     label1:
+        $z0 = virtualinvoke $r0.<android.content.AbstractSyncableContentProvider: boolean isTemporary()>();
+
+        if $z0 == 0 goto label3;
+
+        $r5 = $r0.<android.content.AbstractSyncableContentProvider: android.content.SyncStateContentProviderHelper mSyncState>;
+
+        $z0 = virtualinvoke $r5.<android.content.SyncStateContentProviderHelper: boolean matches(android.net.Uri)>($r1);
+
+        if $z0 == 0 goto label3;
+
+        $r5 = $r0.<android.content.AbstractSyncableContentProvider: android.content.SyncStateContentProviderHelper mSyncState>;
+
+        $r6 = virtualinvoke $r5.<android.content.SyncStateContentProviderHelper: android.content.ContentProvider asContentProvider()>();
+
+        $r1 = virtualinvoke $r6.<android.content.ContentProvider: android.net.Uri insert(android.net.Uri,android.content.ContentValues)>($r1, $r2);
+
+        $r4 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb>;
+
+        virtualinvoke $r4.<android.database.sqlite.SQLiteDatabase: void setTransactionSuccessful()>();
+
+     label2:
+        $r4 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb>;
+
+        virtualinvoke $r4.<android.database.sqlite.SQLiteDatabase: void endTransaction()>();
+
+        return $r1;
+
+     label3:
+        $r7 = virtualinvoke $r0.<android.content.AbstractSyncableContentProvider: android.net.Uri insertInternal(android.net.Uri,android.content.ContentValues)>($r1, $r2);
+
+        $r4 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb>;
+
+        virtualinvoke $r4.<android.database.sqlite.SQLiteDatabase: void setTransactionSuccessful()>();
+
+        $z0 = virtualinvoke $r0.<android.content.AbstractSyncableContentProvider: boolean isTemporary()>();
+
+     label4:
+        if $z0 != 0 goto label6;
+
+     label5:
+        if $r7 == null goto label6;
+
+        $r8 = virtualinvoke $r0.<android.content.ContentProvider: android.content.Context getContext()>();
+
+        $r9 = virtualinvoke $r8.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $z0 = virtualinvoke $r0.<android.content.AbstractSyncableContentProvider: boolean changeRequiresLocalSync(android.net.Uri)>($r1);
+
+        virtualinvoke $r9.<android.content.ContentResolver: void notifyChange(android.net.Uri,android.database.ContentObserver,boolean)>($r1, null, $z0);
+
+     label6:
+        $r4 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb>;
+
+        virtualinvoke $r4.<android.database.sqlite.SQLiteDatabase: void endTransaction()>();
+
+        return $r7;
+
+     label7:
+        $r10 := @caughtexception;
+
+        $r4 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb>;
+
+        virtualinvoke $r4.<android.database.sqlite.SQLiteDatabase: void endTransaction()>();
+
+        throw $r10;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label3 to label4 with label7;
+        catch java.lang.Throwable from label5 to label6 with label7;
+    }
+
+    protected abstract android.net.Uri insertInternal(android.net.Uri, android.content.ContentValues);
+
+    public boolean isMergeCancelled()
+    {
+        android.content.AbstractSyncableContentProvider $r0;
+        boolean z0;
+
+        $r0 := @this: android.content.AbstractSyncableContentProvider;
+
+        z0 = $r0.<android.content.AbstractSyncableContentProvider: boolean mIsMergeCancelled>;
+
+        return z0;
+    }
+
+    protected boolean isTemporary()
+    {
+        android.content.AbstractSyncableContentProvider $r0;
+        boolean z0;
+
+        $r0 := @this: android.content.AbstractSyncableContentProvider;
+
+        z0 = $r0.<android.content.AbstractSyncableContentProvider: boolean mIsTemporary>;
+
+        return z0;
+    }
+
+    public void merge(android.content.SyncContext, android.content.SyncableContentProvider, android.content.TempProviderSyncResult, android.content.SyncResult)
+    {
+        android.content.AbstractSyncableContentProvider $r0, $r18;
+        android.content.SyncContext $r1;
+        android.content.TempProviderSyncResult $r2;
+        android.content.SyncResult $r3;
+        android.content.SyncableContentProvider $r4;
+        android.database.sqlite.SQLiteOpenHelper $r5;
+        android.database.sqlite.SQLiteDatabase $r6, $r19, $r20;
+        java.lang.Iterable $r7;
+        java.util.Iterator $r8;
+        boolean $z0;
+        java.lang.Object $r9;
+        android.content.AbstractTableMerger $r10;
+        java.lang.Throwable $r11, $r12, $r14, $r15, $r16, $r21, $r22;
+        java.lang.String $r13;
+        android.content.SyncStateContentProviderHelper $r17;
+
+        $r0 := @this: android.content.AbstractSyncableContentProvider;
+
+        $r1 := @parameter0: android.content.SyncContext;
+
+        $r4 := @parameter1: android.content.SyncableContentProvider;
+
+        $r2 := @parameter2: android.content.TempProviderSyncResult;
+
+        $r3 := @parameter3: android.content.SyncResult;
+
+        $r5 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteOpenHelper mOpenHelper>;
+
+        $r6 = virtualinvoke $r5.<android.database.sqlite.SQLiteOpenHelper: android.database.sqlite.SQLiteDatabase getWritableDatabase()>();
+
+        virtualinvoke $r6.<android.database.sqlite.SQLiteDatabase: void beginTransaction()>();
+
+     label01:
+        entermonitor $r0;
+
+     label02:
+        $r0.<android.content.AbstractSyncableContentProvider: boolean mIsMergeCancelled> = 0;
+
+        exitmonitor $r0;
+
+     label03:
+        $r7 = virtualinvoke $r0.<android.content.AbstractSyncableContentProvider: java.lang.Iterable getMergers()>();
+
+     label04:
+        $r8 = interfaceinvoke $r7.<java.lang.Iterable: java.util.Iterator iterator()>();
+
+     label05:
+        $z0 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label07;
+
+        $r9 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        $r10 = (android.content.AbstractTableMerger) $r9;
+
+        entermonitor $r0;
+
+     label06:
+        $z0 = $r0.<android.content.AbstractSyncableContentProvider: boolean mIsMergeCancelled>;
+
+        if $z0 == 0 goto label16;
+
+        exitmonitor $r0;
+
+     label07:
+        $z0 = $r0.<android.content.AbstractSyncableContentProvider: boolean mIsMergeCancelled>;
+
+     label08:
+        if $z0 == 0 goto label29;
+
+     label09:
+        entermonitor $r0;
+
+     label10:
+        $r0.<android.content.AbstractSyncableContentProvider: android.content.AbstractTableMerger mCurrentMerger> = null;
+
+        exitmonitor $r0;
+
+     label11:
+        virtualinvoke $r6.<android.database.sqlite.SQLiteDatabase: void endTransaction()>();
+
+        return;
+
+     label12:
+        $r11 := @caughtexception;
+
+     label13:
+        exitmonitor $r0;
+
+     label14:
+        throw $r11;
+
+     label15:
+        $r12 := @caughtexception;
+
+        virtualinvoke $r6.<android.database.sqlite.SQLiteDatabase: void endTransaction()>();
+
+        throw $r12;
+
+     label16:
+        $r0.<android.content.AbstractSyncableContentProvider: android.content.AbstractTableMerger mCurrentMerger> = $r10;
+
+        exitmonitor $r0;
+
+     label17:
+        $r13 = virtualinvoke $r0.<android.content.AbstractSyncableContentProvider: java.lang.String getSyncingAccount()>();
+
+        virtualinvoke $r10.<android.content.AbstractTableMerger: void merge(android.content.SyncContext,java.lang.String,android.content.SyncableContentProvider,android.content.TempProviderSyncResult,android.content.SyncResult,android.content.SyncableContentProvider)>($r1, $r13, $r4, $r2, $r3, $r0);
+
+     label18:
+        goto label05;
+
+     label19:
+        $r14 := @caughtexception;
+
+     label20:
+        entermonitor $r0;
+
+     label21:
+        $r0.<android.content.AbstractSyncableContentProvider: android.content.AbstractTableMerger mCurrentMerger> = null;
+
+        exitmonitor $r0;
+
+     label22:
+        throw $r14;
+
+     label23:
+        $r15 := @caughtexception;
+
+     label24:
+        exitmonitor $r0;
+
+     label25:
+        throw $r15;
+
+     label26:
+        $r16 := @caughtexception;
+
+     label27:
+        exitmonitor $r0;
+
+     label28:
+        throw $r16;
+
+     label29:
+        if $r4 == null goto label31;
+
+     label30:
+        $r17 = $r0.<android.content.AbstractSyncableContentProvider: android.content.SyncStateContentProviderHelper mSyncState>;
+
+        $r18 = (android.content.AbstractSyncableContentProvider) $r4;
+
+        $r5 = $r18.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteOpenHelper mOpenHelper>;
+
+        $r19 = virtualinvoke $r5.<android.database.sqlite.SQLiteOpenHelper: android.database.sqlite.SQLiteDatabase getReadableDatabase()>();
+
+        $r5 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteOpenHelper mOpenHelper>;
+
+        $r20 = virtualinvoke $r5.<android.database.sqlite.SQLiteOpenHelper: android.database.sqlite.SQLiteDatabase getWritableDatabase()>();
+
+        $r13 = virtualinvoke $r0.<android.content.AbstractSyncableContentProvider: java.lang.String getSyncingAccount()>();
+
+        virtualinvoke $r17.<android.content.SyncStateContentProviderHelper: void copySyncState(android.database.sqlite.SQLiteDatabase,android.database.sqlite.SQLiteDatabase,java.lang.String)>($r19, $r20, $r13);
+
+     label31:
+        entermonitor $r0;
+
+     label32:
+        $r0.<android.content.AbstractSyncableContentProvider: android.content.AbstractTableMerger mCurrentMerger> = null;
+
+        exitmonitor $r0;
+
+     label33:
+        virtualinvoke $r6.<android.database.sqlite.SQLiteDatabase: void setTransactionSuccessful()>();
+
+     label34:
+        virtualinvoke $r6.<android.database.sqlite.SQLiteDatabase: void endTransaction()>();
+
+        return;
+
+     label35:
+        $r21 := @caughtexception;
+
+     label36:
+        exitmonitor $r0;
+
+     label37:
+        throw $r21;
+
+     label38:
+        $r22 := @caughtexception;
+
+     label39:
+        exitmonitor $r0;
+
+     label40:
+        throw $r22;
+
+     label41:
+        nop;
+
+        catch java.lang.Throwable from label01 to label02 with label15;
+        catch java.lang.Throwable from label02 to label03 with label12;
+        catch java.lang.Throwable from label03 to label04 with label15;
+        catch java.lang.Throwable from label04 to label06 with label19;
+        catch java.lang.Throwable from label06 to label07 with label23;
+        catch java.lang.Throwable from label07 to label08 with label19;
+        catch java.lang.Throwable from label09 to label10 with label15;
+        catch java.lang.Throwable from label10 to label11 with label26;
+        catch java.lang.Throwable from label13 to label14 with label12;
+        catch java.lang.Throwable from label14 to label15 with label15;
+        catch java.lang.Throwable from label16 to label17 with label23;
+        catch java.lang.Throwable from label17 to label18 with label19;
+        catch java.lang.Throwable from label20 to label21 with label15;
+        catch java.lang.Throwable from label21 to label22 with label38;
+        catch java.lang.Throwable from label22 to label23 with label15;
+        catch java.lang.Throwable from label24 to label25 with label23;
+        catch java.lang.Throwable from label25 to label26 with label19;
+        catch java.lang.Throwable from label27 to label28 with label26;
+        catch java.lang.Throwable from label28 to label29 with label15;
+        catch java.lang.Throwable from label30 to label31 with label19;
+        catch java.lang.Throwable from label31 to label32 with label15;
+        catch java.lang.Throwable from label32 to label33 with label35;
+        catch java.lang.Throwable from label33 to label34 with label15;
+        catch java.lang.Throwable from label36 to label37 with label35;
+        catch java.lang.Throwable from label37 to label38 with label15;
+        catch java.lang.Throwable from label39 to label40 with label38;
+        catch java.lang.Throwable from label40 to label41 with label15;
+    }
+
+    protected void onAccountsChanged(java.lang.String[])
+    {
+        android.content.AbstractSyncableContentProvider $r0;
+        java.lang.String[] $r1;
+        java.lang.String $r2;
+        java.util.HashMap $r3;
+        int $i0, $i1;
+        java.util.Vector $r4;
+        java.lang.Boolean $r5;
+        android.database.sqlite.SQLiteOpenHelper $r6;
+        android.database.sqlite.SQLiteDatabase $r7;
+        java.util.Map $r8;
+        java.util.Set $r9;
+        java.util.Collection $r10;
+        android.content.SyncStateContentProviderHelper $r11;
+        java.util.Iterator $r12;
+        boolean $z0;
+        java.lang.Object $r13;
+        java.lang.Throwable $r14;
+
+        $r0 := @this: android.content.AbstractSyncableContentProvider;
+
+        $r1 := @parameter0: java.lang.String[];
+
+        $r3 = new java.util.HashMap;
+
+        specialinvoke $r3.<java.util.HashMap: void <init>()>();
+
+        $i0 = lengthof $r1;
+
+        $i1 = 0;
+
+     label1:
+        if $i1 >= $i0 goto label2;
+
+        $r2 = $r1[$i1];
+
+        $r5 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(0);
+
+        interfaceinvoke $r3.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r2, $r5);
+
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label2:
+        $r5 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(0);
+
+        interfaceinvoke $r3.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("non_syncable", $r5);
+
+        $r6 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteOpenHelper mOpenHelper>;
+
+        $r7 = virtualinvoke $r6.<android.database.sqlite.SQLiteOpenHelper: android.database.sqlite.SQLiteDatabase getWritableDatabase()>();
+
+        $r8 = virtualinvoke $r7.<android.database.sqlite.SQLiteDatabase: java.util.Map getSyncedTables()>();
+
+        $r4 = new java.util.Vector;
+
+        specialinvoke $r4.<java.util.Vector: void <init>()>();
+
+        $r9 = interfaceinvoke $r8.<java.util.Map: java.util.Set keySet()>();
+
+        virtualinvoke $r4.<java.util.Vector: boolean addAll(java.util.Collection)>($r9);
+
+        $r10 = interfaceinvoke $r8.<java.util.Map: java.util.Collection values()>();
+
+        virtualinvoke $r4.<java.util.Vector: boolean addAll(java.util.Collection)>($r10);
+
+        virtualinvoke $r7.<android.database.sqlite.SQLiteDatabase: void beginTransaction()>();
+
+     label3:
+        $r11 = $r0.<android.content.AbstractSyncableContentProvider: android.content.SyncStateContentProviderHelper mSyncState>;
+
+        virtualinvoke $r11.<android.content.SyncStateContentProviderHelper: void onAccountsChanged(java.lang.String[])>($r1);
+
+        $r12 = virtualinvoke $r4.<java.util.AbstractList: java.util.Iterator iterator()>();
+
+     label4:
+        $z0 = interfaceinvoke $r12.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label7;
+
+        $r13 = interfaceinvoke $r12.<java.util.Iterator: java.lang.Object next()>();
+
+        $r2 = (java.lang.String) $r13;
+
+        virtualinvoke $r0.<android.content.AbstractSyncableContentProvider: void deleteRowsForRemovedAccounts(java.util.Map,java.lang.String,java.lang.String)>($r3, $r2, "_sync_account");
+
+     label5:
+        goto label4;
+
+     label6:
+        $r14 := @caughtexception;
+
+        virtualinvoke $r7.<android.database.sqlite.SQLiteDatabase: void endTransaction()>();
+
+        throw $r14;
+
+     label7:
+        virtualinvoke $r7.<android.database.sqlite.SQLiteDatabase: void setTransactionSuccessful()>();
+
+     label8:
+        virtualinvoke $r7.<android.database.sqlite.SQLiteDatabase: void endTransaction()>();
+
+        return;
+
+        catch java.lang.Throwable from label3 to label5 with label6;
+        catch java.lang.Throwable from label7 to label8 with label6;
+    }
+
+    public boolean onCreate()
+    {
+        android.content.AbstractSyncableContentProvider $r0;
+        android.content.AbstractSyncableContentProvider$1 $r1;
+        java.lang.String $r2;
+        boolean $z0;
+        java.lang.IllegalStateException $r3;
+        android.content.AbstractSyncableContentProvider$DatabaseHelper $r4;
+        android.content.Context $r5;
+        android.content.SyncStateContentProviderHelper $r6;
+        android.database.sqlite.SQLiteOpenHelper $r7;
+        android.accounts.AccountMonitor $r8;
+
+        $r0 := @this: android.content.AbstractSyncableContentProvider;
+
+        $z0 = virtualinvoke $r0.<android.content.AbstractSyncableContentProvider: boolean isTemporary()>();
+
+        if $z0 == 0 goto label1;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("onCreate() called for temp provider");
+
+        throw $r3;
+
+     label1:
+        $r4 = new android.content.AbstractSyncableContentProvider$DatabaseHelper;
+
+        $r5 = virtualinvoke $r0.<android.content.ContentProvider: android.content.Context getContext()>();
+
+        $r2 = $r0.<android.content.AbstractSyncableContentProvider: java.lang.String mDatabaseName>;
+
+        specialinvoke $r4.<android.content.AbstractSyncableContentProvider$DatabaseHelper: void <init>(android.content.AbstractSyncableContentProvider,android.content.Context,java.lang.String)>($r0, $r5, $r2);
+
+        $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteOpenHelper mOpenHelper> = $r4;
+
+        $r6 = new android.content.SyncStateContentProviderHelper;
+
+        $r7 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteOpenHelper mOpenHelper>;
+
+        specialinvoke $r6.<android.content.SyncStateContentProviderHelper: void <init>(android.database.sqlite.SQLiteOpenHelper)>($r7);
+
+        $r0.<android.content.AbstractSyncableContentProvider: android.content.SyncStateContentProviderHelper mSyncState> = $r6;
+
+        $r1 = new android.content.AbstractSyncableContentProvider$1;
+
+        specialinvoke $r1.<android.content.AbstractSyncableContentProvider$1: void <init>(android.content.AbstractSyncableContentProvider)>($r0);
+
+        $r8 = new android.accounts.AccountMonitor;
+
+        $r5 = virtualinvoke $r0.<android.content.ContentProvider: android.content.Context getContext()>();
+
+        specialinvoke $r8.<android.accounts.AccountMonitor: void <init>(android.content.Context,android.accounts.AccountMonitorListener)>($r5, $r1);
+
+        $r0.<android.content.AbstractSyncableContentProvider: android.accounts.AccountMonitor mAccountMonitor> = $r8;
+
+        return 1;
+    }
+
+    protected void onDatabaseOpened(android.database.sqlite.SQLiteDatabase)
+    {
+        android.content.AbstractSyncableContentProvider $r0;
+        android.database.sqlite.SQLiteDatabase $r1;
+
+        $r0 := @this: android.content.AbstractSyncableContentProvider;
+
+        $r1 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        return;
+    }
+
+    public void onSyncCanceled()
+    {
+        android.content.AbstractSyncableContentProvider $r0;
+        android.content.AbstractTableMerger $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: android.content.AbstractSyncableContentProvider;
+
+        entermonitor $r0;
+
+     label1:
+        $r0.<android.content.AbstractSyncableContentProvider: boolean mIsMergeCancelled> = 1;
+
+        $r1 = $r0.<android.content.AbstractSyncableContentProvider: android.content.AbstractTableMerger mCurrentMerger>;
+
+        if $r1 == null goto label2;
+
+        $r1 = $r0.<android.content.AbstractSyncableContentProvider: android.content.AbstractTableMerger mCurrentMerger>;
+
+        virtualinvoke $r1.<android.content.AbstractTableMerger: void onMergeCancelled()>();
+
+     label2:
+        exitmonitor $r0;
+
+     label3:
+        return;
+
+     label4:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label5:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public void onSyncStart(android.content.SyncContext, java.lang.String)
+    {
+        android.content.AbstractSyncableContentProvider $r0;
+        android.content.SyncContext $r1;
+        java.lang.String $r2;
+        boolean $z0;
+        java.lang.IllegalArgumentException $r3;
+
+        $r0 := @this: android.content.AbstractSyncableContentProvider;
+
+        $r1 := @parameter0: android.content.SyncContext;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r2);
+
+        if $z0 == 0 goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("you passed in an empty account");
+
+        throw $r3;
+
+     label1:
+        $r0.<android.content.AbstractSyncableContentProvider: java.lang.String mSyncingAccount> = $r2;
+
+        return;
+    }
+
+    public void onSyncStop(android.content.SyncContext, boolean)
+    {
+        android.content.AbstractSyncableContentProvider $r0;
+        android.content.SyncContext $r1;
+        boolean $z0;
+
+        $r0 := @this: android.content.AbstractSyncableContentProvider;
+
+        $r1 := @parameter0: android.content.SyncContext;
+
+        $z0 := @parameter1: boolean;
+
+        return;
+    }
+
+    public final android.database.Cursor query(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String)
+    {
+        android.content.AbstractSyncableContentProvider $r0;
+        android.net.Uri $r1;
+        java.lang.String[] $r2, $r4;
+        java.lang.String $r3, $r5;
+        android.database.sqlite.SQLiteOpenHelper $r6;
+        android.database.sqlite.SQLiteDatabase $r7;
+        boolean $z0;
+        android.content.SyncStateContentProviderHelper $r8;
+        android.content.ContentProvider $r9;
+        android.database.Cursor $r10;
+
+        $r0 := @this: android.content.AbstractSyncableContentProvider;
+
+        $r1 := @parameter0: android.net.Uri;
+
+        $r2 := @parameter1: java.lang.String[];
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r4 := @parameter3: java.lang.String[];
+
+        $r5 := @parameter4: java.lang.String;
+
+        $r6 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteOpenHelper mOpenHelper>;
+
+        $r7 = virtualinvoke $r6.<android.database.sqlite.SQLiteOpenHelper: android.database.sqlite.SQLiteDatabase getReadableDatabase()>();
+
+        $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb> = $r7;
+
+        $z0 = virtualinvoke $r0.<android.content.AbstractSyncableContentProvider: boolean isTemporary()>();
+
+        if $z0 == 0 goto label1;
+
+        $r8 = $r0.<android.content.AbstractSyncableContentProvider: android.content.SyncStateContentProviderHelper mSyncState>;
+
+        $z0 = virtualinvoke $r8.<android.content.SyncStateContentProviderHelper: boolean matches(android.net.Uri)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        $r8 = $r0.<android.content.AbstractSyncableContentProvider: android.content.SyncStateContentProviderHelper mSyncState>;
+
+        $r9 = virtualinvoke $r8.<android.content.SyncStateContentProviderHelper: android.content.ContentProvider asContentProvider()>();
+
+        $r10 = virtualinvoke $r9.<android.content.ContentProvider: android.database.Cursor query(android.net.Uri,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String)>($r1, $r2, $r3, $r4, $r5);
+
+        return $r10;
+
+     label1:
+        $r10 = virtualinvoke $r0.<android.content.AbstractSyncableContentProvider: android.database.Cursor queryInternal(android.net.Uri,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String)>($r1, $r2, $r3, $r4, $r5);
+
+        return $r10;
+    }
+
+    protected abstract android.database.Cursor queryInternal(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String);
+
+    public byte[] readSyncDataBytes(java.lang.String)
+    {
+        android.content.AbstractSyncableContentProvider $r0;
+        java.lang.String $r1;
+        android.content.SyncStateContentProviderHelper $r2;
+        android.database.sqlite.SQLiteOpenHelper $r3;
+        android.database.sqlite.SQLiteDatabase $r4;
+        byte[] $r5;
+
+        $r0 := @this: android.content.AbstractSyncableContentProvider;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = $r0.<android.content.AbstractSyncableContentProvider: android.content.SyncStateContentProviderHelper mSyncState>;
+
+        $r3 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteOpenHelper mOpenHelper>;
+
+        $r4 = virtualinvoke $r3.<android.database.sqlite.SQLiteOpenHelper: android.database.sqlite.SQLiteDatabase getReadableDatabase()>();
+
+        $r5 = virtualinvoke $r2.<android.content.SyncStateContentProviderHelper: byte[] readSyncDataBytes(android.database.sqlite.SQLiteDatabase,java.lang.String)>($r4, $r1);
+
+        return $r5;
+    }
+
+    public void setContainsDiffs(boolean)
+    {
+        android.content.AbstractSyncableContentProvider $r0;
+        boolean $z0, $z1;
+        java.lang.IllegalStateException $r1;
+
+        $r0 := @this: android.content.AbstractSyncableContentProvider;
+
+        $z0 := @parameter0: boolean;
+
+        if $z0 == 0 goto label1;
+
+        $z1 = virtualinvoke $r0.<android.content.AbstractSyncableContentProvider: boolean isTemporary()>();
+
+        if $z1 != 0 goto label1;
+
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>("only a temporary provider can contain diffs");
+
+        throw $r1;
+
+     label1:
+        $r0.<android.content.AbstractSyncableContentProvider: boolean mContainsDiffs> = $z0;
+
+        return;
+    }
+
+    public final int update(android.net.Uri, android.content.ContentValues, java.lang.String, java.lang.String[])
+    {
+        android.content.AbstractSyncableContentProvider $r0;
+        android.net.Uri $r1;
+        android.content.ContentValues $r2;
+        java.lang.String $r3;
+        java.lang.String[] $r4;
+        android.database.sqlite.SQLiteOpenHelper $r5;
+        android.database.sqlite.SQLiteDatabase $r6;
+        boolean $z0;
+        android.content.SyncStateContentProviderHelper $r7;
+        android.content.ContentProvider $r8;
+        int $i0;
+        android.content.Context $r9;
+        android.content.ContentResolver $r10;
+        java.lang.Throwable $r11;
+
+        $r0 := @this: android.content.AbstractSyncableContentProvider;
+
+        $r1 := @parameter0: android.net.Uri;
+
+        $r2 := @parameter1: android.content.ContentValues;
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r4 := @parameter3: java.lang.String[];
+
+        $r5 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteOpenHelper mOpenHelper>;
+
+        $r6 = virtualinvoke $r5.<android.database.sqlite.SQLiteOpenHelper: android.database.sqlite.SQLiteDatabase getWritableDatabase()>();
+
+        $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb> = $r6;
+
+        $r6 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb>;
+
+        virtualinvoke $r6.<android.database.sqlite.SQLiteDatabase: void beginTransaction()>();
+
+     label1:
+        $z0 = virtualinvoke $r0.<android.content.AbstractSyncableContentProvider: boolean isTemporary()>();
+
+        if $z0 == 0 goto label3;
+
+        $r7 = $r0.<android.content.AbstractSyncableContentProvider: android.content.SyncStateContentProviderHelper mSyncState>;
+
+        $z0 = virtualinvoke $r7.<android.content.SyncStateContentProviderHelper: boolean matches(android.net.Uri)>($r1);
+
+        if $z0 == 0 goto label3;
+
+        $r7 = $r0.<android.content.AbstractSyncableContentProvider: android.content.SyncStateContentProviderHelper mSyncState>;
+
+        $r8 = virtualinvoke $r7.<android.content.SyncStateContentProviderHelper: android.content.ContentProvider asContentProvider()>();
+
+        $i0 = virtualinvoke $r8.<android.content.ContentProvider: int update(android.net.Uri,android.content.ContentValues,java.lang.String,java.lang.String[])>($r1, $r2, $r3, $r4);
+
+        $r6 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb>;
+
+        virtualinvoke $r6.<android.database.sqlite.SQLiteDatabase: void setTransactionSuccessful()>();
+
+     label2:
+        $r6 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb>;
+
+        virtualinvoke $r6.<android.database.sqlite.SQLiteDatabase: void endTransaction()>();
+
+        return $i0;
+
+     label3:
+        $i0 = virtualinvoke $r0.<android.content.AbstractSyncableContentProvider: int updateInternal(android.net.Uri,android.content.ContentValues,java.lang.String,java.lang.String[])>($r1, $r2, $r3, $r4);
+
+        $r6 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb>;
+
+        virtualinvoke $r6.<android.database.sqlite.SQLiteDatabase: void setTransactionSuccessful()>();
+
+        $z0 = virtualinvoke $r0.<android.content.AbstractSyncableContentProvider: boolean isTemporary()>();
+
+     label4:
+        if $z0 != 0 goto label6;
+
+     label5:
+        if $i0 <= 0 goto label6;
+
+        $r9 = virtualinvoke $r0.<android.content.ContentProvider: android.content.Context getContext()>();
+
+        $r10 = virtualinvoke $r9.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $z0 = virtualinvoke $r0.<android.content.AbstractSyncableContentProvider: boolean changeRequiresLocalSync(android.net.Uri)>($r1);
+
+        virtualinvoke $r10.<android.content.ContentResolver: void notifyChange(android.net.Uri,android.database.ContentObserver,boolean)>($r1, null, $z0);
+
+     label6:
+        $r6 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb>;
+
+        virtualinvoke $r6.<android.database.sqlite.SQLiteDatabase: void endTransaction()>();
+
+        return $i0;
+
+     label7:
+        $r11 := @caughtexception;
+
+        $r6 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteDatabase mDb>;
+
+        virtualinvoke $r6.<android.database.sqlite.SQLiteDatabase: void endTransaction()>();
+
+        throw $r11;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label3 to label4 with label7;
+        catch java.lang.Throwable from label5 to label6 with label7;
+    }
+
+    protected abstract int updateInternal(android.net.Uri, android.content.ContentValues, java.lang.String, java.lang.String[]);
+
+    protected abstract boolean upgradeDatabase(android.database.sqlite.SQLiteDatabase, int, int);
+
+    public void wipeAccount(java.lang.String)
+    {
+        android.content.AbstractSyncableContentProvider $r0;
+        java.lang.String $r1, $r11;
+        java.util.ArrayList $r2;
+        android.database.sqlite.SQLiteOpenHelper $r3;
+        android.database.sqlite.SQLiteDatabase $r4;
+        java.util.Map $r5;
+        java.util.Set $r6;
+        java.util.Collection $r7;
+        android.content.SyncStateContentProviderHelper $r8;
+        java.util.Iterator $r9;
+        boolean $z0;
+        java.lang.Object $r10;
+        java.lang.String[] $r12;
+        java.lang.Throwable $r13;
+
+        $r0 := @this: android.content.AbstractSyncableContentProvider;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r3 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteOpenHelper mOpenHelper>;
+
+        $r4 = virtualinvoke $r3.<android.database.sqlite.SQLiteOpenHelper: android.database.sqlite.SQLiteDatabase getWritableDatabase()>();
+
+        $r5 = virtualinvoke $r4.<android.database.sqlite.SQLiteDatabase: java.util.Map getSyncedTables()>();
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        $r6 = interfaceinvoke $r5.<java.util.Map: java.util.Set keySet()>();
+
+        virtualinvoke $r2.<java.util.ArrayList: boolean addAll(java.util.Collection)>($r6);
+
+        $r7 = interfaceinvoke $r5.<java.util.Map: java.util.Collection values()>();
+
+        virtualinvoke $r2.<java.util.ArrayList: boolean addAll(java.util.Collection)>($r7);
+
+        virtualinvoke $r4.<android.database.sqlite.SQLiteDatabase: void beginTransaction()>();
+
+     label1:
+        $r8 = $r0.<android.content.AbstractSyncableContentProvider: android.content.SyncStateContentProviderHelper mSyncState>;
+
+        virtualinvoke $r8.<android.content.SyncStateContentProviderHelper: void discardSyncData(android.database.sqlite.SQLiteDatabase,java.lang.String)>($r4, $r1);
+
+        $r9 = virtualinvoke $r2.<java.util.AbstractList: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label5;
+
+        $r10 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+        $r11 = (java.lang.String) $r10;
+
+        $r12 = newarray (java.lang.String)[1];
+
+        $r12[0] = $r1;
+
+        virtualinvoke $r4.<android.database.sqlite.SQLiteDatabase: int delete(java.lang.String,java.lang.String,java.lang.String[])>($r11, "_sync_account=?", $r12);
+
+     label3:
+        goto label2;
+
+     label4:
+        $r13 := @caughtexception;
+
+        virtualinvoke $r4.<android.database.sqlite.SQLiteDatabase: void endTransaction()>();
+
+        throw $r13;
+
+     label5:
+        virtualinvoke $r4.<android.database.sqlite.SQLiteDatabase: void setTransactionSuccessful()>();
+
+     label6:
+        virtualinvoke $r4.<android.database.sqlite.SQLiteDatabase: void endTransaction()>();
+
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label5 to label6 with label4;
+    }
+
+    public void writeSyncDataBytes(java.lang.String, byte[])
+    {
+        android.content.AbstractSyncableContentProvider $r0;
+        java.lang.String $r1;
+        byte[] $r2;
+        android.content.SyncStateContentProviderHelper $r3;
+        android.database.sqlite.SQLiteDatabase $r4;
+        android.database.sqlite.SQLiteOpenHelper $r5;
+
+        $r0 := @this: android.content.AbstractSyncableContentProvider;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: byte[];
+
+        $r3 = $r0.<android.content.AbstractSyncableContentProvider: android.content.SyncStateContentProviderHelper mSyncState>;
+
+        $r5 = $r0.<android.content.AbstractSyncableContentProvider: android.database.sqlite.SQLiteOpenHelper mOpenHelper>;
+
+        $r4 = virtualinvoke $r5.<android.database.sqlite.SQLiteOpenHelper: android.database.sqlite.SQLiteDatabase getWritableDatabase()>();
+
+        virtualinvoke $r3.<android.content.SyncStateContentProviderHelper: void writeSyncDataBytes(android.database.sqlite.SQLiteDatabase,java.lang.String,byte[])>($r4, $r1, $r2);
+
+        return;
+    }
+}

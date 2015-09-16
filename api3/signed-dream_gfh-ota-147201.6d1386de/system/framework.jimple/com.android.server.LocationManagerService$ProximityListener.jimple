@@ -1,0 +1,325 @@
+class com.android.server.LocationManagerService$ProximityListener extends android.location.ILocationListener$Stub
+{
+    boolean isGpsAvailable;
+    final com.android.server.LocationManagerService this$0;
+
+    void <init>(com.android.server.LocationManagerService)
+    {
+        com.android.server.LocationManagerService$ProximityListener $r0;
+        com.android.server.LocationManagerService $r1;
+
+        $r0 := @this: com.android.server.LocationManagerService$ProximityListener;
+
+        $r1 := @parameter0: com.android.server.LocationManagerService;
+
+        $r0.<com.android.server.LocationManagerService$ProximityListener: com.android.server.LocationManagerService this$0> = $r1;
+
+        specialinvoke $r0.<android.location.ILocationListener$Stub: void <init>()>();
+
+        $r0.<com.android.server.LocationManagerService$ProximityListener: boolean isGpsAvailable> = 0;
+
+        return;
+    }
+
+    public void onLocationChanged(android.location.Location)
+    {
+        com.android.server.LocationManagerService$ProximityListener $r0;
+        android.location.Location $r1;
+        android.content.Intent $r2;
+        java.lang.String $r3;
+        boolean $z0, $z1;
+        long $l0, $l1;
+        double $d0, $d1;
+        java.util.ArrayList $r4;
+        com.android.server.LocationManagerService $r5;
+        java.util.HashMap $r6;
+        java.util.Collection $r7;
+        java.util.Iterator $r8;
+        java.lang.Object $r9;
+        com.android.server.LocationManagerService$ProximityAlert $r10;
+        android.app.PendingIntent $r11;
+        byte $b2;
+        java.util.HashSet $r12;
+        android.content.Context $r13;
+        android.app.PendingIntent$CanceledException $r14, $r15;
+
+        $r0 := @this: com.android.server.LocationManagerService$ProximityListener;
+
+        $r1 := @parameter0: android.location.Location;
+
+        $r3 = virtualinvoke $r1.<android.location.Location: java.lang.String getProvider()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("gps");
+
+        if $z0 == 0 goto label01;
+
+        $r0.<com.android.server.LocationManagerService$ProximityListener: boolean isGpsAvailable> = 1;
+
+     label01:
+        $z0 = $r0.<com.android.server.LocationManagerService$ProximityListener: boolean isGpsAvailable>;
+
+        if $z0 == 0 goto label02;
+
+        $r3 = virtualinvoke $r1.<android.location.Location: java.lang.String getProvider()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("network");
+
+        if $z0 == 0 goto label02;
+
+        return;
+
+     label02:
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $d0 = virtualinvoke $r1.<android.location.Location: double getLatitude()>();
+
+        $d1 = virtualinvoke $r1.<android.location.Location: double getLongitude()>();
+
+        $r4 = null;
+
+        $r5 = $r0.<com.android.server.LocationManagerService$ProximityListener: com.android.server.LocationManagerService this$0>;
+
+        $r6 = staticinvoke <com.android.server.LocationManagerService: java.util.HashMap access$700(com.android.server.LocationManagerService)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.util.HashMap: java.util.Collection values()>();
+
+        $r8 = interfaceinvoke $r7.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label03:
+        $z0 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label16;
+
+        $r9 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        $r10 = (com.android.server.LocationManagerService$ProximityAlert) $r9;
+
+        $r11 = virtualinvoke $r10.<com.android.server.LocationManagerService$ProximityAlert: android.app.PendingIntent getIntent()>();
+
+        $l1 = virtualinvoke $r10.<com.android.server.LocationManagerService$ProximityAlert: long getExpiration()>();
+
+        $b2 = $l1 cmp -1L;
+
+        if $b2 == 0 goto label04;
+
+        $b2 = $l0 cmp $l1;
+
+        if $b2 > 0 goto label14;
+
+     label04:
+        $r5 = $r0.<com.android.server.LocationManagerService$ProximityListener: com.android.server.LocationManagerService this$0>;
+
+        $r12 = staticinvoke <com.android.server.LocationManagerService: java.util.HashSet access$800(com.android.server.LocationManagerService)>($r5);
+
+        $z0 = virtualinvoke $r12.<java.util.HashSet: boolean contains(java.lang.Object)>($r10);
+
+        $z1 = virtualinvoke $r10.<com.android.server.LocationManagerService$ProximityAlert: boolean isInProximity(double,double)>($d0, $d1);
+
+        if $z0 != 0 goto label09;
+
+        if $z1 == 0 goto label09;
+
+        $r5 = $r0.<com.android.server.LocationManagerService$ProximityListener: com.android.server.LocationManagerService this$0>;
+
+        $r12 = staticinvoke <com.android.server.LocationManagerService: java.util.HashSet access$800(com.android.server.LocationManagerService)>($r5);
+
+        virtualinvoke $r12.<java.util.HashSet: boolean add(java.lang.Object)>($r10);
+
+        $r2 = new android.content.Intent;
+
+        specialinvoke $r2.<android.content.Intent: void <init>()>();
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,boolean)>("entering", 1);
+
+        $r5 = $r0.<com.android.server.LocationManagerService$ProximityListener: com.android.server.LocationManagerService this$0>;
+
+     label05:
+        $r13 = staticinvoke <com.android.server.LocationManagerService: android.content.Context access$000(com.android.server.LocationManagerService)>($r5);
+
+        virtualinvoke $r11.<android.app.PendingIntent: void send(android.content.Context,int,android.content.Intent,android.app.PendingIntent$OnFinished,android.os.Handler)>($r13, 0, $r2, null, null);
+
+     label06:
+        goto label03;
+
+     label07:
+        $r14 := @caughtexception;
+
+        if $r4 != null goto label08;
+
+        $r4 = new java.util.ArrayList;
+
+        specialinvoke $r4.<java.util.ArrayList: void <init>()>();
+
+     label08:
+        virtualinvoke $r4.<java.util.ArrayList: boolean add(java.lang.Object)>($r11);
+
+        goto label03;
+
+     label09:
+        if $z0 == 0 goto label03;
+
+        if $z1 != 0 goto label03;
+
+        $r5 = $r0.<com.android.server.LocationManagerService$ProximityListener: com.android.server.LocationManagerService this$0>;
+
+        $r12 = staticinvoke <com.android.server.LocationManagerService: java.util.HashSet access$800(com.android.server.LocationManagerService)>($r5);
+
+        virtualinvoke $r12.<java.util.HashSet: boolean remove(java.lang.Object)>($r10);
+
+        $r2 = new android.content.Intent;
+
+        specialinvoke $r2.<android.content.Intent: void <init>()>();
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,boolean)>("entering", 0);
+
+        $r5 = $r0.<com.android.server.LocationManagerService$ProximityListener: com.android.server.LocationManagerService this$0>;
+
+     label10:
+        $r13 = staticinvoke <com.android.server.LocationManagerService: android.content.Context access$000(com.android.server.LocationManagerService)>($r5);
+
+        virtualinvoke $r11.<android.app.PendingIntent: void send(android.content.Context,int,android.content.Intent,android.app.PendingIntent$OnFinished,android.os.Handler)>($r13, 0, $r2, null, null);
+
+     label11:
+        goto label03;
+
+     label12:
+        $r15 := @caughtexception;
+
+        if $r4 != null goto label13;
+
+        $r4 = new java.util.ArrayList;
+
+        specialinvoke $r4.<java.util.ArrayList: void <init>()>();
+
+     label13:
+        virtualinvoke $r4.<java.util.ArrayList: boolean add(java.lang.Object)>($r11);
+
+        goto label03;
+
+     label14:
+        if $r4 != null goto label15;
+
+        $r4 = new java.util.ArrayList;
+
+        specialinvoke $r4.<java.util.ArrayList: void <init>()>();
+
+     label15:
+        $r11 = virtualinvoke $r10.<com.android.server.LocationManagerService$ProximityAlert: android.app.PendingIntent getIntent()>();
+
+        virtualinvoke $r4.<java.util.ArrayList: boolean add(java.lang.Object)>($r11);
+
+        goto label03;
+
+     label16:
+        if $r4 == null goto label18;
+
+        $r8 = virtualinvoke $r4.<java.util.AbstractList: java.util.Iterator iterator()>();
+
+     label17:
+        $z0 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label19;
+
+        $r9 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        $r11 = (android.app.PendingIntent) $r9;
+
+        $r5 = $r0.<com.android.server.LocationManagerService$ProximityListener: com.android.server.LocationManagerService this$0>;
+
+        $r6 = staticinvoke <com.android.server.LocationManagerService: java.util.HashMap access$700(com.android.server.LocationManagerService)>($r5);
+
+        virtualinvoke $r6.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>($r11);
+
+        $r5 = $r0.<com.android.server.LocationManagerService$ProximityListener: com.android.server.LocationManagerService this$0>;
+
+        $r6 = staticinvoke <com.android.server.LocationManagerService: java.util.HashMap access$700(com.android.server.LocationManagerService)>($r5);
+
+        $r9 = virtualinvoke $r6.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r11);
+
+        $r10 = (com.android.server.LocationManagerService$ProximityAlert) $r9;
+
+        $r5 = $r0.<com.android.server.LocationManagerService$ProximityListener: com.android.server.LocationManagerService this$0>;
+
+        $r12 = staticinvoke <com.android.server.LocationManagerService: java.util.HashSet access$800(com.android.server.LocationManagerService)>($r5);
+
+        virtualinvoke $r12.<java.util.HashSet: boolean remove(java.lang.Object)>($r10);
+
+        goto label17;
+
+     label18:
+        return;
+
+     label19:
+        return;
+
+        catch android.app.PendingIntent$CanceledException from label05 to label06 with label07;
+        catch android.app.PendingIntent$CanceledException from label10 to label11 with label12;
+    }
+
+    public void onProviderDisabled(java.lang.String)
+    {
+        com.android.server.LocationManagerService$ProximityListener $r0;
+        java.lang.String $r1;
+        boolean $z0;
+
+        $r0 := @this: com.android.server.LocationManagerService$ProximityListener;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("gps");
+
+        if $z0 == 0 goto label1;
+
+        $r0.<com.android.server.LocationManagerService$ProximityListener: boolean isGpsAvailable> = 0;
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public void onProviderEnabled(java.lang.String)
+    {
+        com.android.server.LocationManagerService$ProximityListener $r0;
+        java.lang.String $r1;
+
+        $r0 := @this: com.android.server.LocationManagerService$ProximityListener;
+
+        $r1 := @parameter0: java.lang.String;
+
+        return;
+    }
+
+    public void onStatusChanged(java.lang.String, int, android.os.Bundle)
+    {
+        com.android.server.LocationManagerService$ProximityListener $r0;
+        java.lang.String $r1;
+        int $i0;
+        android.os.Bundle $r2;
+        boolean $z0;
+
+        $r0 := @this: com.android.server.LocationManagerService$ProximityListener;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: android.os.Bundle;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("gps");
+
+        if $z0 == 0 goto label1;
+
+        if $i0 == 2 goto label2;
+
+        $r0.<com.android.server.LocationManagerService$ProximityListener: boolean isGpsAvailable> = 0;
+
+        return;
+
+     label1:
+        return;
+
+     label2:
+        return;
+    }
+}

@@ -1,0 +1,687 @@
+public class com.google.masf.services.resume.RequestIdStore extends java.lang.Object
+{
+    public static final java.lang.String KEY_RESUMABLE_IDS;
+    private static final long MAX_ID_LIFE_SPAN_MS;
+    private static final int MAX_NUMBER_OF_ID_PAIRS;
+    private java.lang.String[] clientIdsArray;
+    private java.util.Hashtable clientIdsMap;
+    private com.google.common.io.PersistentStore store;
+
+    public void <init>(com.google.common.io.PersistentStore)
+    {
+        com.google.masf.services.resume.RequestIdStore $r0;
+        com.google.common.io.PersistentStore $r1;
+        java.lang.String[] $r2;
+        java.util.Hashtable $r3;
+
+        $r0 := @this: com.google.masf.services.resume.RequestIdStore;
+
+        $r1 := @parameter0: com.google.common.io.PersistentStore;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        $r0.<com.google.masf.services.resume.RequestIdStore: com.google.common.io.PersistentStore store> = $r1;
+
+        $r2 = newarray (java.lang.String)[64];
+
+        $r0.<com.google.masf.services.resume.RequestIdStore: java.lang.String[] clientIdsArray> = $r2;
+
+        $r3 = new java.util.Hashtable;
+
+        specialinvoke $r3.<java.util.Hashtable: void <init>()>();
+
+        $r0.<com.google.masf.services.resume.RequestIdStore: java.util.Hashtable clientIdsMap> = $r3;
+
+        specialinvoke $r0.<com.google.masf.services.resume.RequestIdStore: void loadFromStore()>();
+
+        return;
+    }
+
+    private long getTimeStamp(java.lang.String)
+    {
+        java.lang.String $r0;
+        com.google.masf.services.resume.RequestIdStore $r1;
+        java.util.Hashtable $r2;
+        boolean $z0;
+        java.lang.Object $r3;
+        com.google.masf.services.resume.RequestIdStore$ClientIdInfo $r4;
+        long $l0;
+
+        $r1 := @this: com.google.masf.services.resume.RequestIdStore;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $r2 = $r1.<com.google.masf.services.resume.RequestIdStore: java.util.Hashtable clientIdsMap>;
+
+        $z0 = virtualinvoke $r2.<java.util.Hashtable: boolean containsKey(java.lang.Object)>($r0);
+
+        if $z0 == 0 goto label1;
+
+        $r2 = $r1.<com.google.masf.services.resume.RequestIdStore: java.util.Hashtable clientIdsMap>;
+
+        $r3 = virtualinvoke $r2.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r0);
+
+        $r4 = (com.google.masf.services.resume.RequestIdStore$ClientIdInfo) $r3;
+
+        $l0 = virtualinvoke $r4.<com.google.masf.services.resume.RequestIdStore$ClientIdInfo: long getTimestamp()>();
+
+        return $l0;
+
+     label1:
+        return -1L;
+    }
+
+    private void loadFromStore()
+    {
+        com.google.masf.services.resume.RequestIdStore $r0;
+        com.google.masf.services.resume.RequestIdStore$ClientIdInfo $r1;
+        com.google.common.io.PersistentStore $r2;
+        byte[] $r3;
+        java.io.ByteArrayInputStream $r4;
+        java.io.DataInputStream $r5;
+        long $l0, $l3, $l4;
+        int $i1, $i2;
+        java.lang.String $r6, $r7;
+        byte $b5;
+        java.util.Hashtable $r8;
+        java.lang.String[] $r9;
+        java.io.IOException $r10;
+        java.lang.Throwable $r11;
+
+        $r0 := @this: com.google.masf.services.resume.RequestIdStore;
+
+        $r2 = $r0.<com.google.masf.services.resume.RequestIdStore: com.google.common.io.PersistentStore store>;
+
+        $r3 = interfaceinvoke $r2.<com.google.common.io.PersistentStore: byte[] readPreference(java.lang.String)>("MasfResumableIds");
+
+        if $r3 != null goto label01;
+
+        return;
+
+     label01:
+        $r4 = new java.io.ByteArrayInputStream;
+
+        specialinvoke $r4.<java.io.ByteArrayInputStream: void <init>(byte[])>($r3);
+
+        $r5 = new java.io.DataInputStream;
+
+        specialinvoke $r5.<java.io.DataInputStream: void <init>(java.io.InputStream)>($r4);
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+     label02:
+        $i1 = virtualinvoke $r5.<java.io.DataInputStream: int readInt()>();
+
+     label03:
+        $i2 = 0;
+
+     label04:
+        if $i2 >= $i1 goto label06;
+
+        $r6 = virtualinvoke $r5.<java.io.DataInputStream: java.lang.String readUTF()>();
+
+        $r7 = virtualinvoke $r5.<java.io.DataInputStream: java.lang.String readUTF()>();
+
+        $l3 = virtualinvoke $r5.<java.io.DataInputStream: long readLong()>();
+
+     label05:
+        $l4 = 691200000L + $l3;
+
+        $b5 = $l4 cmp $l0;
+
+        if $b5 >= 0 goto label07;
+
+     label06:
+        staticinvoke <com.google.common.io.IoUtil: void closeInputStream(java.io.InputStream)>($r5);
+
+        staticinvoke <com.google.common.io.IoUtil: void closeInputStream(java.io.InputStream)>($r4);
+
+        return;
+
+     label07:
+        $r8 = $r0.<com.google.masf.services.resume.RequestIdStore: java.util.Hashtable clientIdsMap>;
+
+        $r1 = new com.google.masf.services.resume.RequestIdStore$ClientIdInfo;
+
+     label08:
+        specialinvoke $r1.<com.google.masf.services.resume.RequestIdStore$ClientIdInfo: void <init>(java.lang.String,long)>($r7, $l3);
+
+        virtualinvoke $r8.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r6, $r1);
+
+     label09:
+        $r9 = $r0.<com.google.masf.services.resume.RequestIdStore: java.lang.String[] clientIdsArray>;
+
+        $r9[$i2] = $r6;
+
+     label10:
+        $i2 = $i2 + 1;
+
+        goto label04;
+
+     label11:
+        $r10 := @caughtexception;
+
+     label12:
+        $r8 = $r0.<com.google.masf.services.resume.RequestIdStore: java.util.Hashtable clientIdsMap>;
+
+        virtualinvoke $r8.<java.util.Hashtable: void clear()>();
+
+        $r9 = newarray (java.lang.String)[64];
+
+        $r0.<com.google.masf.services.resume.RequestIdStore: java.lang.String[] clientIdsArray> = $r9;
+
+     label13:
+        staticinvoke <com.google.common.io.IoUtil: void closeInputStream(java.io.InputStream)>($r5);
+
+        staticinvoke <com.google.common.io.IoUtil: void closeInputStream(java.io.InputStream)>($r4);
+
+        return;
+
+     label14:
+        $r11 := @caughtexception;
+
+        staticinvoke <com.google.common.io.IoUtil: void closeInputStream(java.io.InputStream)>($r5);
+
+        staticinvoke <com.google.common.io.IoUtil: void closeInputStream(java.io.InputStream)>($r4);
+
+        throw $r11;
+
+        catch java.io.IOException from label02 to label03 with label11;
+        catch java.io.IOException from label04 to label05 with label11;
+        catch java.lang.Throwable from label02 to label03 with label14;
+        catch java.lang.Throwable from label04 to label05 with label14;
+        catch java.io.IOException from label08 to label09 with label11;
+        catch java.lang.Throwable from label07 to label10 with label14;
+        catch java.lang.Throwable from label12 to label13 with label14;
+    }
+
+    private void removeClientIdNoSave(java.lang.String)
+    {
+        com.google.masf.services.resume.RequestIdStore $r0;
+        java.lang.String $r1, $r4;
+        int $i0, $i1, $i2;
+        java.lang.String[] $r2, $r5;
+        java.util.Hashtable $r3;
+        boolean $z0;
+
+        $r0 := @this: com.google.masf.services.resume.RequestIdStore;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i1 = 0;
+
+     label1:
+        $r3 = $r0.<com.google.masf.services.resume.RequestIdStore: java.util.Hashtable clientIdsMap>;
+
+        $i0 = virtualinvoke $r3.<java.util.Hashtable: int size()>();
+
+        if $i1 >= $i0 goto label3;
+
+        $r2 = $r0.<com.google.masf.services.resume.RequestIdStore: java.lang.String[] clientIdsArray>;
+
+        $r4 = $r2[$i1];
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label2;
+
+        $r5 = $r0.<com.google.masf.services.resume.RequestIdStore: java.lang.String[] clientIdsArray>;
+
+        $i0 = $i1 + 1;
+
+        $r2 = $r0.<com.google.masf.services.resume.RequestIdStore: java.lang.String[] clientIdsArray>;
+
+        $r3 = $r0.<com.google.masf.services.resume.RequestIdStore: java.util.Hashtable clientIdsMap>;
+
+        $i2 = virtualinvoke $r3.<java.util.Hashtable: int size()>();
+
+        $i2 = $i2 - $i1;
+
+        $i2 = $i2 - 1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r5, $i0, $r2, $i1, $i2);
+
+        $r3 = $r0.<com.google.masf.services.resume.RequestIdStore: java.util.Hashtable clientIdsMap>;
+
+        virtualinvoke $r3.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>($r1);
+
+        return;
+
+     label2:
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+
+    private void removeExpiredIdsNoSave()
+    {
+        com.google.masf.services.resume.RequestIdStore $r0;
+        long $l0, $l2;
+        java.util.Hashtable $r1;
+        int $i1;
+        java.lang.String[] $r2;
+        java.lang.String $r3;
+        byte $b3;
+
+        $r0 := @this: com.google.masf.services.resume.RequestIdStore;
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r1 = $r0.<com.google.masf.services.resume.RequestIdStore: java.util.Hashtable clientIdsMap>;
+
+        $i1 = virtualinvoke $r1.<java.util.Hashtable: int size()>();
+
+        $i1 = $i1 - 1;
+
+     label1:
+        if $i1 < 0 goto label2;
+
+        $r2 = $r0.<com.google.masf.services.resume.RequestIdStore: java.lang.String[] clientIdsArray>;
+
+        $r3 = $r2[$i1];
+
+        $l2 = specialinvoke $r0.<com.google.masf.services.resume.RequestIdStore: long getTimeStamp(java.lang.String)>($r3);
+
+        $l2 = $l2 + 691200000L;
+
+        $b3 = $l2 cmp $l0;
+
+        if $b3 >= 0 goto label3;
+
+        $r1 = $r0.<com.google.masf.services.resume.RequestIdStore: java.util.Hashtable clientIdsMap>;
+
+        $r2 = $r0.<com.google.masf.services.resume.RequestIdStore: java.lang.String[] clientIdsArray>;
+
+        $r3 = $r2[$i1];
+
+        virtualinvoke $r1.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>($r3);
+
+        $r2 = $r0.<com.google.masf.services.resume.RequestIdStore: java.lang.String[] clientIdsArray>;
+
+        $r2[$i1] = null;
+
+        $i1 = $i1 + -1;
+
+        goto label1;
+
+     label2:
+        return;
+
+     label3:
+        return;
+    }
+
+    private void saveToStore()
+    {
+        com.google.masf.services.resume.RequestIdStore $r0;
+        java.io.ByteArrayOutputStream $r1;
+        java.io.DataOutputStream $r2;
+        java.util.Hashtable $r3;
+        int $i0, $i1;
+        java.lang.String[] $r4;
+        java.lang.String $r5;
+        long $l2;
+        com.google.common.io.PersistentStore $r6;
+        byte[] $r7;
+        java.io.IOException $r8;
+        java.lang.Throwable $r9;
+
+        $r0 := @this: com.google.masf.services.resume.RequestIdStore;
+
+        $r1 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r1.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        $r2 = new java.io.DataOutputStream;
+
+        specialinvoke $r2.<java.io.DataOutputStream: void <init>(java.io.OutputStream)>($r1);
+
+     label01:
+        specialinvoke $r0.<com.google.masf.services.resume.RequestIdStore: void removeExpiredIdsNoSave()>();
+
+        $r3 = $r0.<com.google.masf.services.resume.RequestIdStore: java.util.Hashtable clientIdsMap>;
+
+        $i0 = virtualinvoke $r3.<java.util.Hashtable: int size()>();
+
+        virtualinvoke $r2.<java.io.DataOutputStream: void writeInt(int)>($i0);
+
+     label02:
+        $i0 = 0;
+
+     label03:
+        $r3 = $r0.<com.google.masf.services.resume.RequestIdStore: java.util.Hashtable clientIdsMap>;
+
+        $i1 = virtualinvoke $r3.<java.util.Hashtable: int size()>();
+
+     label04:
+        if $i0 >= $i1 goto label12;
+
+        $r4 = $r0.<com.google.masf.services.resume.RequestIdStore: java.lang.String[] clientIdsArray>;
+
+     label05:
+        $r5 = $r4[$i0];
+
+        virtualinvoke $r2.<java.io.DataOutputStream: void writeUTF(java.lang.String)>($r5);
+
+     label06:
+        $r4 = $r0.<com.google.masf.services.resume.RequestIdStore: java.lang.String[] clientIdsArray>;
+
+     label07:
+        $r5 = $r4[$i0];
+
+        $r5 = virtualinvoke $r0.<com.google.masf.services.resume.RequestIdStore: java.lang.String getServerId(java.lang.String)>($r5);
+
+        virtualinvoke $r2.<java.io.DataOutputStream: void writeUTF(java.lang.String)>($r5);
+
+     label08:
+        $r4 = $r0.<com.google.masf.services.resume.RequestIdStore: java.lang.String[] clientIdsArray>;
+
+     label09:
+        $r5 = $r4[$i0];
+
+        $l2 = specialinvoke $r0.<com.google.masf.services.resume.RequestIdStore: long getTimeStamp(java.lang.String)>($r5);
+
+        virtualinvoke $r2.<java.io.DataOutputStream: void writeLong(long)>($l2);
+
+     label10:
+        $i0 = $i0 + 1;
+
+     label11:
+        goto label03;
+
+     label12:
+        $r6 = $r0.<com.google.masf.services.resume.RequestIdStore: com.google.common.io.PersistentStore store>;
+
+        $r7 = virtualinvoke $r1.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        interfaceinvoke $r6.<com.google.common.io.PersistentStore: boolean setPreference(java.lang.String,byte[])>("MasfResumableIds", $r7);
+
+        $r6 = $r0.<com.google.masf.services.resume.RequestIdStore: com.google.common.io.PersistentStore store>;
+
+        interfaceinvoke $r6.<com.google.common.io.PersistentStore: void savePreferences()>();
+
+     label13:
+        staticinvoke <com.google.common.io.IoUtil: void closeOutputStream(java.io.OutputStream)>($r2);
+
+        staticinvoke <com.google.common.io.IoUtil: void closeOutputStream(java.io.OutputStream)>($r1);
+
+        return;
+
+     label14:
+        $r8 := @caughtexception;
+
+        staticinvoke <com.google.common.io.IoUtil: void closeOutputStream(java.io.OutputStream)>($r2);
+
+        staticinvoke <com.google.common.io.IoUtil: void closeOutputStream(java.io.OutputStream)>($r1);
+
+        return;
+
+     label15:
+        $r9 := @caughtexception;
+
+        staticinvoke <com.google.common.io.IoUtil: void closeOutputStream(java.io.OutputStream)>($r2);
+
+        staticinvoke <com.google.common.io.IoUtil: void closeOutputStream(java.io.OutputStream)>($r1);
+
+        throw $r9;
+
+        catch java.io.IOException from label01 to label02 with label14;
+        catch java.io.IOException from label03 to label04 with label14;
+        catch java.io.IOException from label05 to label06 with label14;
+        catch java.io.IOException from label07 to label08 with label14;
+        catch java.io.IOException from label09 to label10 with label14;
+        catch java.io.IOException from label12 to label13 with label14;
+        catch java.lang.Throwable from label01 to label10 with label15;
+        catch java.lang.Throwable from label11 to label13 with label15;
+    }
+
+    public java.lang.String[] getClientIds()
+    {
+        com.google.masf.services.resume.RequestIdStore $r0;
+        java.lang.String[] $r1, $r3;
+        int $i0;
+        java.util.Hashtable $r2;
+
+        $r0 := @this: com.google.masf.services.resume.RequestIdStore;
+
+        $r2 = $r0.<com.google.masf.services.resume.RequestIdStore: java.util.Hashtable clientIdsMap>;
+
+        $i0 = virtualinvoke $r2.<java.util.Hashtable: int size()>();
+
+        $r3 = newarray (java.lang.String)[$i0];
+
+        $r1 = $r0.<com.google.masf.services.resume.RequestIdStore: java.lang.String[] clientIdsArray>;
+
+        $i0 = lengthof $r3;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, 0, $r3, 0, $i0);
+
+        return $r3;
+    }
+
+    public java.lang.String getServerId(java.lang.String)
+    {
+        java.lang.String $r0;
+        com.google.masf.services.resume.RequestIdStore $r1;
+        java.util.Hashtable $r2;
+        boolean $z0;
+        java.lang.Object $r3;
+        com.google.masf.services.resume.RequestIdStore$ClientIdInfo $r4;
+
+        $r1 := @this: com.google.masf.services.resume.RequestIdStore;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $r2 = $r1.<com.google.masf.services.resume.RequestIdStore: java.util.Hashtable clientIdsMap>;
+
+        $z0 = virtualinvoke $r2.<java.util.Hashtable: boolean containsKey(java.lang.Object)>($r0);
+
+        if $z0 == 0 goto label1;
+
+        $r2 = $r1.<com.google.masf.services.resume.RequestIdStore: java.util.Hashtable clientIdsMap>;
+
+        $r3 = virtualinvoke $r2.<java.util.Hashtable: java.lang.Object get(java.lang.Object)>($r0);
+
+        $r4 = (com.google.masf.services.resume.RequestIdStore$ClientIdInfo) $r3;
+
+        $r0 = virtualinvoke $r4.<com.google.masf.services.resume.RequestIdStore$ClientIdInfo: java.lang.String getServerId()>();
+
+        return $r0;
+
+     label1:
+        return null;
+    }
+
+    public void removeClientId(java.lang.String)
+    {
+        com.google.masf.services.resume.RequestIdStore $r0;
+        java.lang.String $r1;
+
+        $r0 := @this: com.google.masf.services.resume.RequestIdStore;
+
+        $r1 := @parameter0: java.lang.String;
+
+        specialinvoke $r0.<com.google.masf.services.resume.RequestIdStore: void removeClientIdNoSave(java.lang.String)>($r1);
+
+        specialinvoke $r0.<com.google.masf.services.resume.RequestIdStore: void saveToStore()>();
+
+        return;
+    }
+
+    public void setServerId(java.lang.String, java.lang.String)
+    {
+        com.google.masf.services.resume.RequestIdStore $r0;
+        java.lang.String $r1, $r2, $r7;
+        java.util.Hashtable $r3;
+        boolean $z0;
+        java.lang.String[] $r4, $r5;
+        int $i0;
+        com.google.masf.services.resume.RequestIdStore$ClientIdInfo $r6;
+        long $l1;
+
+        $r0 := @this: com.google.masf.services.resume.RequestIdStore;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 = $r0.<com.google.masf.services.resume.RequestIdStore: java.util.Hashtable clientIdsMap>;
+
+        $z0 = virtualinvoke $r3.<java.util.Hashtable: boolean contains(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label2;
+
+        specialinvoke $r0.<com.google.masf.services.resume.RequestIdStore: void removeClientIdNoSave(java.lang.String)>($r1);
+
+     label1:
+        $r4 = $r0.<com.google.masf.services.resume.RequestIdStore: java.lang.String[] clientIdsArray>;
+
+        $r5 = $r0.<com.google.masf.services.resume.RequestIdStore: java.lang.String[] clientIdsArray>;
+
+        $r3 = $r0.<com.google.masf.services.resume.RequestIdStore: java.util.Hashtable clientIdsMap>;
+
+        $i0 = virtualinvoke $r3.<java.util.Hashtable: int size()>();
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 0, $r5, 1, $i0);
+
+        $r4 = $r0.<com.google.masf.services.resume.RequestIdStore: java.lang.String[] clientIdsArray>;
+
+        $r4[0] = $r1;
+
+        $r3 = $r0.<com.google.masf.services.resume.RequestIdStore: java.util.Hashtable clientIdsMap>;
+
+        $r6 = new com.google.masf.services.resume.RequestIdStore$ClientIdInfo;
+
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        specialinvoke $r6.<com.google.masf.services.resume.RequestIdStore$ClientIdInfo: void <init>(java.lang.String,long)>($r2, $l1);
+
+        virtualinvoke $r3.<java.util.Hashtable: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, $r6);
+
+        specialinvoke $r0.<com.google.masf.services.resume.RequestIdStore: void saveToStore()>();
+
+        return;
+
+     label2:
+        $r3 = $r0.<com.google.masf.services.resume.RequestIdStore: java.util.Hashtable clientIdsMap>;
+
+        $i0 = virtualinvoke $r3.<java.util.Hashtable: int size()>();
+
+        if $i0 != 64 goto label1;
+
+        $r3 = $r0.<com.google.masf.services.resume.RequestIdStore: java.util.Hashtable clientIdsMap>;
+
+        $r4 = $r0.<com.google.masf.services.resume.RequestIdStore: java.lang.String[] clientIdsArray>;
+
+        $r7 = $r4[63];
+
+        virtualinvoke $r3.<java.util.Hashtable: java.lang.Object remove(java.lang.Object)>($r7);
+
+        $r4 = $r0.<com.google.masf.services.resume.RequestIdStore: java.lang.String[] clientIdsArray>;
+
+        $r4[63] = null;
+
+        goto label1;
+    }
+
+    public java.lang.String toString()
+    {
+        com.google.masf.services.resume.RequestIdStore $r0;
+        java.lang.StringBuffer $r1;
+        java.lang.String[] $r2;
+        int $i0, $i1;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+        long $l2;
+
+        $r0 := @this: com.google.masf.services.resume.RequestIdStore;
+
+        $r1 = new java.lang.StringBuffer;
+
+        specialinvoke $r1.<java.lang.StringBuffer: void <init>()>();
+
+        virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("RequestIdStore[");
+
+        $r2 = virtualinvoke $r0.<com.google.masf.services.resume.RequestIdStore: java.lang.String[] getClientIds()>();
+
+        $i0 = 0;
+
+     label1:
+        $i1 = lengthof $r2;
+
+        if $i0 >= $i1 goto label2;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<\'");
+
+        $r4 = $r2[$i0];
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r4);
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\', \'");
+
+        $r4 = $r2[$i0];
+
+        $r4 = virtualinvoke $r0.<com.google.masf.services.resume.RequestIdStore: java.lang.String getServerId(java.lang.String)>($r4);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r4);
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\', ");
+
+        $r4 = $r2[$i0];
+
+        $l2 = specialinvoke $r0.<com.google.masf.services.resume.RequestIdStore: long getTimeStamp(java.lang.String)>($r4);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l2);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r4);
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label2:
+        virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("]");
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r4;
+    }
+
+    public static void <clinit>()
+    {
+        <com.google.masf.services.resume.RequestIdStore: int MAX_NUMBER_OF_ID_PAIRS> = 64;
+
+        <com.google.masf.services.resume.RequestIdStore: long MAX_ID_LIFE_SPAN_MS> = 691200000L;
+
+        <com.google.masf.services.resume.RequestIdStore: java.lang.String KEY_RESUMABLE_IDS> = "MasfResumableIds";
+
+        return;
+    }
+}

@@ -1,0 +1,430 @@
+public abstract class org.apache.http.impl.conn.AbstractPoolEntry extends java.lang.Object
+{
+    protected final org.apache.http.conn.ClientConnectionOperator connOperator;
+    protected final org.apache.http.conn.OperatedClientConnection connection;
+    protected volatile org.apache.http.conn.routing.HttpRoute route;
+    protected volatile java.lang.Object state;
+    protected volatile org.apache.http.conn.routing.RouteTracker tracker;
+
+    protected void <init>(org.apache.http.conn.ClientConnectionOperator, org.apache.http.conn.routing.HttpRoute)
+    {
+        org.apache.http.impl.conn.AbstractPoolEntry $r0;
+        org.apache.http.conn.ClientConnectionOperator $r1;
+        org.apache.http.conn.routing.HttpRoute $r2;
+        org.apache.http.conn.OperatedClientConnection $r3;
+        java.lang.IllegalArgumentException $r4;
+
+        $r0 := @this: org.apache.http.impl.conn.AbstractPoolEntry;
+
+        $r1 := @parameter0: org.apache.http.conn.ClientConnectionOperator;
+
+        $r2 := @parameter1: org.apache.http.conn.routing.HttpRoute;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        if $r1 != null goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Connection operator may not be null");
+
+        throw $r4;
+
+     label1:
+        $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.ClientConnectionOperator connOperator> = $r1;
+
+        $r3 = interfaceinvoke $r1.<org.apache.http.conn.ClientConnectionOperator: org.apache.http.conn.OperatedClientConnection createConnection()>();
+
+        $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.OperatedClientConnection connection> = $r3;
+
+        $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.routing.HttpRoute route> = $r2;
+
+        $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.routing.RouteTracker tracker> = null;
+
+        return;
+    }
+
+    public java.lang.Object getState()
+    {
+        org.apache.http.impl.conn.AbstractPoolEntry $r0;
+        java.lang.Object r1;
+
+        $r0 := @this: org.apache.http.impl.conn.AbstractPoolEntry;
+
+        r1 = $r0.<org.apache.http.impl.conn.AbstractPoolEntry: java.lang.Object state>;
+
+        return r1;
+    }
+
+    public void layerProtocol(org.apache.http.protocol.HttpContext, org.apache.http.params.HttpParams) throws java.io.IOException
+    {
+        org.apache.http.impl.conn.AbstractPoolEntry $r0;
+        org.apache.http.protocol.HttpContext $r1;
+        org.apache.http.params.HttpParams $r2;
+        java.lang.IllegalArgumentException $r3;
+        org.apache.http.conn.routing.RouteTracker $r4;
+        boolean $z0;
+        java.lang.IllegalStateException $r5;
+        org.apache.http.HttpHost $r6;
+        org.apache.http.conn.ClientConnectionOperator $r7;
+        org.apache.http.conn.OperatedClientConnection $r8;
+
+        $r0 := @this: org.apache.http.impl.conn.AbstractPoolEntry;
+
+        $r1 := @parameter0: org.apache.http.protocol.HttpContext;
+
+        $r2 := @parameter1: org.apache.http.params.HttpParams;
+
+        if $r2 != null goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Parameters must not be null.");
+
+        throw $r3;
+
+     label1:
+        $r4 = $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.routing.RouteTracker tracker>;
+
+        if $r4 == null goto label2;
+
+        $r4 = $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.routing.RouteTracker tracker>;
+
+        $z0 = virtualinvoke $r4.<org.apache.http.conn.routing.RouteTracker: boolean isConnected()>();
+
+        if $z0 != 0 goto label3;
+
+     label2:
+        $r5 = new java.lang.IllegalStateException;
+
+        specialinvoke $r5.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Connection not open.");
+
+        throw $r5;
+
+     label3:
+        $r4 = $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.routing.RouteTracker tracker>;
+
+        $z0 = virtualinvoke $r4.<org.apache.http.conn.routing.RouteTracker: boolean isTunnelled()>();
+
+        if $z0 != 0 goto label4;
+
+        $r5 = new java.lang.IllegalStateException;
+
+        specialinvoke $r5.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Protocol layering without a tunnel not supported.");
+
+        throw $r5;
+
+     label4:
+        $r4 = $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.routing.RouteTracker tracker>;
+
+        $z0 = virtualinvoke $r4.<org.apache.http.conn.routing.RouteTracker: boolean isLayered()>();
+
+        if $z0 == 0 goto label5;
+
+        $r5 = new java.lang.IllegalStateException;
+
+        specialinvoke $r5.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Multiple protocol layering not supported.");
+
+        throw $r5;
+
+     label5:
+        $r4 = $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.routing.RouteTracker tracker>;
+
+        $r6 = virtualinvoke $r4.<org.apache.http.conn.routing.RouteTracker: org.apache.http.HttpHost getTargetHost()>();
+
+        $r7 = $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.ClientConnectionOperator connOperator>;
+
+        $r8 = $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.OperatedClientConnection connection>;
+
+        interfaceinvoke $r7.<org.apache.http.conn.ClientConnectionOperator: void updateSecureConnection(org.apache.http.conn.OperatedClientConnection,org.apache.http.HttpHost,org.apache.http.protocol.HttpContext,org.apache.http.params.HttpParams)>($r8, $r6, $r1, $r2);
+
+        $r4 = $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.routing.RouteTracker tracker>;
+
+        $r8 = $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.OperatedClientConnection connection>;
+
+        $z0 = interfaceinvoke $r8.<org.apache.http.conn.OperatedClientConnection: boolean isSecure()>();
+
+        virtualinvoke $r4.<org.apache.http.conn.routing.RouteTracker: void layerProtocol(boolean)>($z0);
+
+        return;
+    }
+
+    public void open(org.apache.http.conn.routing.HttpRoute, org.apache.http.protocol.HttpContext, org.apache.http.params.HttpParams) throws java.io.IOException
+    {
+        org.apache.http.impl.conn.AbstractPoolEntry $r0;
+        org.apache.http.conn.routing.HttpRoute $r1;
+        org.apache.http.protocol.HttpContext $r2;
+        org.apache.http.params.HttpParams $r3;
+        org.apache.http.conn.routing.RouteTracker $r4;
+        java.lang.IllegalArgumentException $r5;
+        boolean $z0;
+        java.lang.IllegalStateException $r6;
+        org.apache.http.HttpHost $r7, $r10;
+        org.apache.http.conn.ClientConnectionOperator $r8;
+        org.apache.http.conn.OperatedClientConnection $r9;
+        java.net.InetAddress $r11;
+        java.io.IOException $r12;
+
+        $r0 := @this: org.apache.http.impl.conn.AbstractPoolEntry;
+
+        $r1 := @parameter0: org.apache.http.conn.routing.HttpRoute;
+
+        $r2 := @parameter1: org.apache.http.protocol.HttpContext;
+
+        $r3 := @parameter2: org.apache.http.params.HttpParams;
+
+        if $r1 != null goto label1;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Route must not be null.");
+
+        throw $r5;
+
+     label1:
+        if $r3 != null goto label2;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Parameters must not be null.");
+
+        throw $r5;
+
+     label2:
+        $r4 = $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.routing.RouteTracker tracker>;
+
+        if $r4 == null goto label3;
+
+        $r4 = $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.routing.RouteTracker tracker>;
+
+        $z0 = virtualinvoke $r4.<org.apache.http.conn.routing.RouteTracker: boolean isConnected()>();
+
+        if $z0 == 0 goto label3;
+
+        $r6 = new java.lang.IllegalStateException;
+
+        specialinvoke $r6.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Connection already open.");
+
+        throw $r6;
+
+     label3:
+        $r4 = new org.apache.http.conn.routing.RouteTracker;
+
+        specialinvoke $r4.<org.apache.http.conn.routing.RouteTracker: void <init>(org.apache.http.conn.routing.HttpRoute)>($r1);
+
+        $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.routing.RouteTracker tracker> = $r4;
+
+        $r7 = virtualinvoke $r1.<org.apache.http.conn.routing.HttpRoute: org.apache.http.HttpHost getProxyHost()>();
+
+        $r8 = $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.ClientConnectionOperator connOperator>;
+
+        $r9 = $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.OperatedClientConnection connection>;
+
+        if $r7 == null goto label5;
+
+        $r10 = $r7;
+
+     label4:
+        $r11 = virtualinvoke $r1.<org.apache.http.conn.routing.HttpRoute: java.net.InetAddress getLocalAddress()>();
+
+        interfaceinvoke $r8.<org.apache.http.conn.ClientConnectionOperator: void openConnection(org.apache.http.conn.OperatedClientConnection,org.apache.http.HttpHost,java.net.InetAddress,org.apache.http.protocol.HttpContext,org.apache.http.params.HttpParams)>($r9, $r10, $r11, $r2, $r3);
+
+        $r4 = $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.routing.RouteTracker tracker>;
+
+        if $r4 != null goto label6;
+
+        $r12 = new java.io.IOException;
+
+        specialinvoke $r12.<java.io.IOException: void <init>(java.lang.String)>("Request aborted");
+
+        throw $r12;
+
+     label5:
+        $r10 = virtualinvoke $r1.<org.apache.http.conn.routing.HttpRoute: org.apache.http.HttpHost getTargetHost()>();
+
+        goto label4;
+
+     label6:
+        if $r7 != null goto label7;
+
+        $r9 = $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.OperatedClientConnection connection>;
+
+        $z0 = interfaceinvoke $r9.<org.apache.http.conn.OperatedClientConnection: boolean isSecure()>();
+
+        virtualinvoke $r4.<org.apache.http.conn.routing.RouteTracker: void connectTarget(boolean)>($z0);
+
+        return;
+
+     label7:
+        $r9 = $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.OperatedClientConnection connection>;
+
+        $z0 = interfaceinvoke $r9.<org.apache.http.conn.OperatedClientConnection: boolean isSecure()>();
+
+        virtualinvoke $r4.<org.apache.http.conn.routing.RouteTracker: void connectProxy(org.apache.http.HttpHost,boolean)>($r7, $z0);
+
+        return;
+    }
+
+    public void setState(java.lang.Object)
+    {
+        org.apache.http.impl.conn.AbstractPoolEntry $r0;
+        java.lang.Object $r1;
+
+        $r0 := @this: org.apache.http.impl.conn.AbstractPoolEntry;
+
+        $r1 := @parameter0: java.lang.Object;
+
+        $r0.<org.apache.http.impl.conn.AbstractPoolEntry: java.lang.Object state> = $r1;
+
+        return;
+    }
+
+    protected void shutdownEntry()
+    {
+        org.apache.http.impl.conn.AbstractPoolEntry $r0;
+
+        $r0 := @this: org.apache.http.impl.conn.AbstractPoolEntry;
+
+        $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.routing.RouteTracker tracker> = null;
+
+        return;
+    }
+
+    public void tunnelProxy(org.apache.http.HttpHost, boolean, org.apache.http.params.HttpParams) throws java.io.IOException
+    {
+        org.apache.http.impl.conn.AbstractPoolEntry $r0;
+        org.apache.http.HttpHost $r1;
+        boolean $z0, $z1;
+        org.apache.http.params.HttpParams $r2;
+        java.lang.IllegalArgumentException $r3;
+        org.apache.http.conn.routing.RouteTracker $r4;
+        java.lang.IllegalStateException $r5;
+        org.apache.http.conn.OperatedClientConnection $r6;
+
+        $r0 := @this: org.apache.http.impl.conn.AbstractPoolEntry;
+
+        $r1 := @parameter0: org.apache.http.HttpHost;
+
+        $z0 := @parameter1: boolean;
+
+        $r2 := @parameter2: org.apache.http.params.HttpParams;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Next proxy must not be null.");
+
+        throw $r3;
+
+     label1:
+        if $r2 != null goto label2;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Parameters must not be null.");
+
+        throw $r3;
+
+     label2:
+        $r4 = $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.routing.RouteTracker tracker>;
+
+        if $r4 == null goto label3;
+
+        $r4 = $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.routing.RouteTracker tracker>;
+
+        $z1 = virtualinvoke $r4.<org.apache.http.conn.routing.RouteTracker: boolean isConnected()>();
+
+        if $z1 != 0 goto label4;
+
+     label3:
+        $r5 = new java.lang.IllegalStateException;
+
+        specialinvoke $r5.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Connection not open.");
+
+        throw $r5;
+
+     label4:
+        $r6 = $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.OperatedClientConnection connection>;
+
+        interfaceinvoke $r6.<org.apache.http.conn.OperatedClientConnection: void update(java.net.Socket,org.apache.http.HttpHost,boolean,org.apache.http.params.HttpParams)>(null, $r1, $z0, $r2);
+
+        $r4 = $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.routing.RouteTracker tracker>;
+
+        virtualinvoke $r4.<org.apache.http.conn.routing.RouteTracker: void tunnelProxy(org.apache.http.HttpHost,boolean)>($r1, $z0);
+
+        return;
+    }
+
+    public void tunnelTarget(boolean, org.apache.http.params.HttpParams) throws java.io.IOException
+    {
+        org.apache.http.impl.conn.AbstractPoolEntry $r0;
+        boolean $z0, $z1;
+        org.apache.http.params.HttpParams $r1;
+        java.lang.IllegalArgumentException $r2;
+        org.apache.http.conn.routing.RouteTracker $r3;
+        java.lang.IllegalStateException $r4;
+        org.apache.http.conn.OperatedClientConnection $r5;
+        org.apache.http.HttpHost $r6;
+
+        $r0 := @this: org.apache.http.impl.conn.AbstractPoolEntry;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 := @parameter1: org.apache.http.params.HttpParams;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Parameters must not be null.");
+
+        throw $r2;
+
+     label1:
+        $r3 = $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.routing.RouteTracker tracker>;
+
+        if $r3 == null goto label2;
+
+        $r3 = $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.routing.RouteTracker tracker>;
+
+        $z1 = virtualinvoke $r3.<org.apache.http.conn.routing.RouteTracker: boolean isConnected()>();
+
+        if $z1 != 0 goto label3;
+
+     label2:
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Connection not open.");
+
+        throw $r4;
+
+     label3:
+        $r3 = $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.routing.RouteTracker tracker>;
+
+        $z1 = virtualinvoke $r3.<org.apache.http.conn.routing.RouteTracker: boolean isTunnelled()>();
+
+        if $z1 == 0 goto label4;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Connection is already tunnelled.");
+
+        throw $r4;
+
+     label4:
+        $r5 = $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.OperatedClientConnection connection>;
+
+        $r3 = $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.routing.RouteTracker tracker>;
+
+        $r6 = virtualinvoke $r3.<org.apache.http.conn.routing.RouteTracker: org.apache.http.HttpHost getTargetHost()>();
+
+        interfaceinvoke $r5.<org.apache.http.conn.OperatedClientConnection: void update(java.net.Socket,org.apache.http.HttpHost,boolean,org.apache.http.params.HttpParams)>(null, $r6, $z0, $r1);
+
+        $r3 = $r0.<org.apache.http.impl.conn.AbstractPoolEntry: org.apache.http.conn.routing.RouteTracker tracker>;
+
+        virtualinvoke $r3.<org.apache.http.conn.routing.RouteTracker: void tunnelTarget(boolean)>($z0);
+
+        return;
+    }
+}

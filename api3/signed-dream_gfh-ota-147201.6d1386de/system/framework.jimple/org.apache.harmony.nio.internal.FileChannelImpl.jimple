@@ -1,0 +1,1994 @@
+public abstract class org.apache.harmony.nio.internal.FileChannelImpl extends java.nio.channels.FileChannel
+{
+    private static final int ALLOC_GRANULARITY;
+    private static final org.apache.harmony.luni.platform.IFileSystem fileSystem;
+    private final int handle;
+    private final org.apache.harmony.nio.internal.LockManager lockManager;
+    private final java.lang.Object repositioningLock;
+    private final java.lang.Object stream;
+
+    static void <clinit>()
+    {
+        org.apache.harmony.luni.platform.IFileSystem $r0;
+        int $i0;
+        java.io.IOException $r1;
+        java.lang.Error $r2;
+
+        $r0 = staticinvoke <org.apache.harmony.luni.platform.Platform: org.apache.harmony.luni.platform.IFileSystem getFileSystem()>();
+
+        <org.apache.harmony.nio.internal.FileChannelImpl: org.apache.harmony.luni.platform.IFileSystem fileSystem> = $r0;
+
+        $r0 = <org.apache.harmony.nio.internal.FileChannelImpl: org.apache.harmony.luni.platform.IFileSystem fileSystem>;
+
+     label1:
+        $i0 = interfaceinvoke $r0.<org.apache.harmony.luni.platform.IFileSystem: int getAllocGranularity()>();
+
+     label2:
+        <org.apache.harmony.nio.internal.FileChannelImpl: int ALLOC_GRANULARITY> = $i0;
+
+        return;
+
+     label3:
+        $r1 := @caughtexception;
+
+        $r2 = new java.lang.Error;
+
+        specialinvoke $r2.<java.lang.Error: void <init>(java.lang.Throwable)>($r1);
+
+        throw $r2;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+
+    public void <init>(java.lang.Object, int)
+    {
+        org.apache.harmony.nio.internal.FileChannelImpl $r0;
+        java.lang.Object $r1;
+        int $i0;
+        org.apache.harmony.nio.internal.LockManager $r2;
+        org.apache.harmony.nio.internal.FileChannelImpl$RepositioningLock $r3;
+
+        $r0 := @this: org.apache.harmony.nio.internal.FileChannelImpl;
+
+        $r1 := @parameter0: java.lang.Object;
+
+        $i0 := @parameter1: int;
+
+        specialinvoke $r0.<java.nio.channels.FileChannel: void <init>()>();
+
+        $r2 = new org.apache.harmony.nio.internal.LockManager;
+
+        specialinvoke $r2.<org.apache.harmony.nio.internal.LockManager: void <init>()>();
+
+        $r0.<org.apache.harmony.nio.internal.FileChannelImpl: org.apache.harmony.nio.internal.LockManager lockManager> = $r2;
+
+        $r3 = new org.apache.harmony.nio.internal.FileChannelImpl$RepositioningLock;
+
+        specialinvoke $r3.<org.apache.harmony.nio.internal.FileChannelImpl$RepositioningLock: void <init>(org.apache.harmony.nio.internal.FileChannelImpl,org.apache.harmony.nio.internal.FileChannelImpl$1)>($r0, null);
+
+        $r0.<org.apache.harmony.nio.internal.FileChannelImpl: java.lang.Object repositioningLock> = $r3;
+
+        $r0.<org.apache.harmony.nio.internal.FileChannelImpl: int handle> = $i0;
+
+        $r0.<org.apache.harmony.nio.internal.FileChannelImpl: java.lang.Object stream> = $r1;
+
+        return;
+    }
+
+    private long kernelTransfer(int, java.io.FileDescriptor, long, long) throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.FileChannelImpl $r0;
+        int $i0;
+        java.io.FileDescriptor $r1;
+        long $l1, $l2;
+        org.apache.harmony.luni.platform.IFileSystem $r2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: org.apache.harmony.nio.internal.FileChannelImpl;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.io.FileDescriptor;
+
+        $l1 := @parameter2: long;
+
+        $l2 := @parameter3: long;
+
+     label1:
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void begin()>();
+
+        $r2 = <org.apache.harmony.nio.internal.FileChannelImpl: org.apache.harmony.luni.platform.IFileSystem fileSystem>;
+
+        $l1 = interfaceinvoke $r2.<org.apache.harmony.luni.platform.IFileSystem: long transfer(int,java.io.FileDescriptor,long,long)>($i0, $r1, $l1, $l2);
+
+     label2:
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void end(boolean)>(1);
+
+        return $l1;
+
+     label3:
+        $r3 := @caughtexception;
+
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void end(boolean)>(0);
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    private int writeImpl(java.nio.ByteBuffer) throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.FileChannelImpl $r0;
+        java.nio.ByteBuffer $r1;
+        java.lang.Object $r2;
+        boolean $z0;
+        org.apache.harmony.nio.internal.DirectBuffer $r3;
+        org.apache.harmony.luni.platform.PlatformAddress $r4;
+        int $i0, $i1, $i2, $i3;
+        org.apache.harmony.luni.platform.IFileSystem $r5;
+        long $l4;
+        java.lang.Throwable $r6, $r7, $r9;
+        byte[] $r8;
+
+        $r0 := @this: org.apache.harmony.nio.internal.FileChannelImpl;
+
+        $r1 := @parameter0: java.nio.ByteBuffer;
+
+        $r2 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: java.lang.Object repositioningLock>;
+
+        entermonitor $r2;
+
+     label01:
+        $z0 = virtualinvoke $r1.<java.nio.ByteBuffer: boolean isDirect()>();
+
+        if $z0 == 0 goto label11;
+
+        $r3 = (org.apache.harmony.nio.internal.DirectBuffer) $r1;
+
+        $r4 = interfaceinvoke $r3.<org.apache.harmony.nio.internal.DirectBuffer: org.apache.harmony.luni.platform.PlatformAddress getEffectiveAddress()>();
+
+        $i0 = virtualinvoke $r4.<org.apache.harmony.luni.platform.PlatformAddress: int toInt()>();
+
+     label02:
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void begin()>();
+
+        $r5 = <org.apache.harmony.nio.internal.FileChannelImpl: org.apache.harmony.luni.platform.IFileSystem fileSystem>;
+
+        $i1 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: int handle>;
+
+        $i2 = virtualinvoke $r1.<java.nio.Buffer: int position()>();
+
+        $i3 = virtualinvoke $r1.<java.nio.Buffer: int remaining()>();
+
+        $l4 = interfaceinvoke $r5.<org.apache.harmony.luni.platform.IFileSystem: long writeDirect(int,int,int,int)>($i1, $i0, $i2, $i3);
+
+     label03:
+        $i0 = (int) $l4;
+
+     label04:
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void end(boolean)>(1);
+
+     label05:
+        if $i0 <= 0 goto label06;
+
+        $i1 = virtualinvoke $r1.<java.nio.Buffer: int position()>();
+
+        $i1 = $i1 + $i0;
+
+        virtualinvoke $r1.<java.nio.Buffer: java.nio.Buffer position(int)>($i1);
+
+     label06:
+        exitmonitor $r2;
+
+     label07:
+        return $i0;
+
+     label08:
+        $r6 := @caughtexception;
+
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void end(boolean)>(0);
+
+        throw $r6;
+
+     label09:
+        $r7 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label10:
+        throw $r7;
+
+     label11:
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void begin()>();
+
+        $r5 = <org.apache.harmony.nio.internal.FileChannelImpl: org.apache.harmony.luni.platform.IFileSystem fileSystem>;
+
+        $i0 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: int handle>;
+
+        $r8 = virtualinvoke $r1.<java.nio.ByteBuffer: byte[] array()>();
+
+        $i1 = virtualinvoke $r1.<java.nio.ByteBuffer: int arrayOffset()>();
+
+        $i2 = virtualinvoke $r1.<java.nio.Buffer: int position()>();
+
+        $i1 = $i1 + $i2;
+
+        $i2 = virtualinvoke $r1.<java.nio.Buffer: int remaining()>();
+
+        $l4 = interfaceinvoke $r5.<org.apache.harmony.luni.platform.IFileSystem: long write(int,byte[],int,int)>($i0, $r8, $i1, $i2);
+
+     label12:
+        $i0 = (int) $l4;
+
+     label13:
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void end(boolean)>(1);
+
+        goto label05;
+
+     label14:
+        $r9 := @caughtexception;
+
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void end(boolean)>(0);
+
+        throw $r9;
+
+     label15:
+        nop;
+
+        catch java.lang.Throwable from label01 to label02 with label09;
+        catch java.lang.Throwable from label02 to label03 with label08;
+        catch java.lang.Throwable from label04 to label07 with label09;
+        catch java.lang.Throwable from label08 to label10 with label09;
+        catch java.lang.Throwable from label11 to label12 with label14;
+        catch java.lang.Throwable from label13 to label15 with label09;
+    }
+
+    protected java.nio.channels.FileLock basicLock(long, long, boolean, boolean) throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.FileChannelImpl $r0;
+        long $l0, $l1;
+        boolean $z0, $z1;
+        org.apache.harmony.nio.internal.FileLockImpl $r1;
+        byte $b2;
+        java.lang.IllegalArgumentException $r2;
+        java.lang.String $r3;
+        org.apache.harmony.nio.internal.LockManager $r4;
+        org.apache.harmony.luni.platform.IFileSystem $r5;
+        int $i3;
+
+        $r0 := @this: org.apache.harmony.nio.internal.FileChannelImpl;
+
+        $l0 := @parameter0: long;
+
+        $l1 := @parameter1: long;
+
+        $z0 := @parameter2: boolean;
+
+        $z1 := @parameter3: boolean;
+
+        $b2 = $l0 cmp 0L;
+
+        if $b2 < 0 goto label1;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 >= 0 goto label2;
+
+     label1:
+        $r2 = new java.lang.IllegalArgumentException;
+
+        $r3 = staticinvoke <org.apache.harmony.nio.internal.nls.Messages: java.lang.String getString(java.lang.String)>("nio.0A");
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r3);
+
+        throw $r2;
+
+     label2:
+        if $z0 == 0 goto label4;
+
+        $b2 = 1;
+
+     label3:
+        $r1 = new org.apache.harmony.nio.internal.FileLockImpl;
+
+        specialinvoke $r1.<org.apache.harmony.nio.internal.FileLockImpl: void <init>(java.nio.channels.FileChannel,long,long,boolean)>($r0, $l0, $l1, $z0);
+
+        $r4 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: org.apache.harmony.nio.internal.LockManager lockManager>;
+
+        virtualinvoke $r4.<org.apache.harmony.nio.internal.LockManager: void addLock(java.nio.channels.FileLock)>($r1);
+
+        $r5 = <org.apache.harmony.nio.internal.FileChannelImpl: org.apache.harmony.luni.platform.IFileSystem fileSystem>;
+
+        $i3 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: int handle>;
+
+        $z0 = interfaceinvoke $r5.<org.apache.harmony.luni.platform.IFileSystem: boolean lock(int,long,long,int,boolean)>($i3, $l0, $l1, $b2, $z1);
+
+        if $z0 == 0 goto label5;
+
+        return $r1;
+
+     label4:
+        $b2 = 2;
+
+        goto label3;
+
+     label5:
+        $r4 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: org.apache.harmony.nio.internal.LockManager lockManager>;
+
+        virtualinvoke $r4.<org.apache.harmony.nio.internal.LockManager: void removeLock(java.nio.channels.FileLock)>($r1);
+
+        return null;
+    }
+
+    public void force(boolean) throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.FileChannelImpl $r0;
+        boolean $z0;
+        org.apache.harmony.luni.platform.IFileSystem $r1;
+        int $i0;
+
+        $r0 := @this: org.apache.harmony.nio.internal.FileChannelImpl;
+
+        $z0 := @parameter0: boolean;
+
+        virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: void openCheck()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = <org.apache.harmony.nio.internal.FileChannelImpl: org.apache.harmony.luni.platform.IFileSystem fileSystem>;
+
+        $i0 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: int handle>;
+
+        interfaceinvoke $r1.<org.apache.harmony.luni.platform.IFileSystem: void fflush(int,boolean)>($i0, $z0);
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public int getHandle()
+    {
+        org.apache.harmony.nio.internal.FileChannelImpl $r0;
+        int i0;
+
+        $r0 := @this: org.apache.harmony.nio.internal.FileChannelImpl;
+
+        i0 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: int handle>;
+
+        return i0;
+    }
+
+    protected void implCloseChannel() throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.FileChannelImpl $r0;
+        java.lang.Object $r1;
+        boolean $z0;
+        java.io.Closeable $r2;
+
+        $r0 := @this: org.apache.harmony.nio.internal.FileChannelImpl;
+
+        $r1 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: java.lang.Object stream>;
+
+        $z0 = $r1 instanceof java.io.Closeable;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: java.lang.Object stream>;
+
+        $r2 = (java.io.Closeable) $r1;
+
+        interfaceinvoke $r2.<java.io.Closeable: void close()>();
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public final java.nio.channels.FileLock lock(long, long, boolean) throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.FileChannelImpl $r0;
+        long $l0, $l1;
+        boolean $z0;
+        java.nio.channels.FileLock $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @this: org.apache.harmony.nio.internal.FileChannelImpl;
+
+        $l0 := @parameter0: long;
+
+        $l1 := @parameter1: long;
+
+        $z0 := @parameter2: boolean;
+
+        virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: void openCheck()>();
+
+     label1:
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void begin()>();
+
+        $r1 = virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: java.nio.channels.FileLock basicLock(long,long,boolean,boolean)>($l0, $l1, $z0, 1);
+
+     label2:
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void end(boolean)>(1);
+
+        return $r1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void end(boolean)>(0);
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+
+    public abstract java.nio.MappedByteBuffer map(java.nio.channels.FileChannel$MapMode, long, long) throws java.io.IOException;
+
+    protected final java.nio.MappedByteBuffer mapImpl(int, long, long) throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.FileChannelImpl $r0;
+        int $i0, $i3, $i7;
+        long $l1, $l2, $l4, $l5;
+        java.lang.Exception $r1;
+        byte $b6;
+        org.apache.harmony.luni.platform.IFileSystem $r2;
+        org.apache.harmony.luni.platform.PlatformAddress $r3;
+        java.nio.MappedByteBuffer $r4;
+        java.io.IOException $r5;
+        java.lang.String $r6;
+
+        $r0 := @this: org.apache.harmony.nio.internal.FileChannelImpl;
+
+        $i0 := @parameter0: int;
+
+        $l1 := @parameter1: long;
+
+        $l2 := @parameter2: long;
+
+        $l4 = $l1 + $l2;
+
+        $l5 = virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: long size()>();
+
+        $b6 = $l4 cmp $l5;
+
+        if $b6 <= 0 goto label1;
+
+        $r2 = <org.apache.harmony.nio.internal.FileChannelImpl: org.apache.harmony.luni.platform.IFileSystem fileSystem>;
+
+        $i3 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: int handle>;
+
+        $l4 = $l1 + $l2;
+
+        interfaceinvoke $r2.<org.apache.harmony.luni.platform.IFileSystem: void truncate(int,long)>($i3, $l4);
+
+     label1:
+        $i3 = <org.apache.harmony.nio.internal.FileChannelImpl: int ALLOC_GRANULARITY>;
+
+        $l4 = (long) $i3;
+
+        $l4 = $l1 % $l4;
+
+        $l4 = $l1 - $l4;
+
+        $l1 = $l1 - $l4;
+
+        $i3 = (int) $l1;
+
+        $i7 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: int handle>;
+
+        $l1 = (long) $i3;
+
+        $l1 = $l1 + $l2;
+
+        $r3 = staticinvoke <org.apache.harmony.luni.platform.PlatformAddressFactory: org.apache.harmony.luni.platform.PlatformAddress allocMap(int,long,long,int)>($i7, $l4, $l1, $i0);
+
+     label2:
+        $r4 = staticinvoke <org.apache.harmony.nio.internal.MappedByteBufferFactory: java.nio.MappedByteBuffer getBuffer(org.apache.harmony.luni.platform.PlatformAddress,int,long,int)>($r3, $i0, $l2, $i3);
+
+     label3:
+        return $r4;
+
+     label4:
+        $r1 := @caughtexception;
+
+        $r5 = new java.io.IOException;
+
+        $r6 = virtualinvoke $r1.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        specialinvoke $r5.<java.io.IOException: void <init>(java.lang.String)>($r6);
+
+        throw $r5;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+    }
+
+    protected final void openCheck() throws java.nio.channels.ClosedChannelException
+    {
+        org.apache.harmony.nio.internal.FileChannelImpl $r0;
+        boolean $z0;
+        java.nio.channels.ClosedChannelException $r1;
+
+        $r0 := @this: org.apache.harmony.nio.internal.FileChannelImpl;
+
+        $z0 = virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: boolean isOpen()>();
+
+        if $z0 != 0 goto label1;
+
+        $r1 = new java.nio.channels.ClosedChannelException;
+
+        specialinvoke $r1.<java.nio.channels.ClosedChannelException: void <init>()>();
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+
+    public long position() throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.FileChannelImpl $r0;
+        int $i0;
+        long $l1;
+        org.apache.harmony.luni.platform.IFileSystem $r1;
+
+        $r0 := @this: org.apache.harmony.nio.internal.FileChannelImpl;
+
+        virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: void openCheck()>();
+
+        $r1 = <org.apache.harmony.nio.internal.FileChannelImpl: org.apache.harmony.luni.platform.IFileSystem fileSystem>;
+
+        $i0 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: int handle>;
+
+        $l1 = interfaceinvoke $r1.<org.apache.harmony.luni.platform.IFileSystem: long seek(int,long,int)>($i0, 0L, 2);
+
+        return $l1;
+    }
+
+    public java.nio.channels.FileChannel position(long) throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.FileChannelImpl $r0;
+        long $l0;
+        int $i1;
+        java.lang.String $r1;
+        byte $b2;
+        java.lang.IllegalArgumentException $r2;
+        java.lang.Object $r3;
+        org.apache.harmony.luni.platform.IFileSystem $r4;
+        java.lang.Throwable $r5;
+
+        $r0 := @this: org.apache.harmony.nio.internal.FileChannelImpl;
+
+        $l0 := @parameter0: long;
+
+        virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: void openCheck()>();
+
+        $b2 = $l0 cmp 0L;
+
+        if $b2 >= 0 goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        $r1 = staticinvoke <org.apache.harmony.nio.internal.nls.Messages: java.lang.String getString(java.lang.String)>("nio.0B");
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r1);
+
+        throw $r2;
+
+     label1:
+        $r3 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: java.lang.Object repositioningLock>;
+
+        entermonitor $r3;
+
+     label2:
+        $r4 = <org.apache.harmony.nio.internal.FileChannelImpl: org.apache.harmony.luni.platform.IFileSystem fileSystem>;
+
+        $i1 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: int handle>;
+
+        interfaceinvoke $r4.<org.apache.harmony.luni.platform.IFileSystem: long seek(int,long,int)>($i1, $l0, 1);
+
+        exitmonitor $r3;
+
+     label3:
+        return $r0;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label5:
+        throw $r5;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+
+    public int read(java.nio.ByteBuffer) throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.FileChannelImpl $r0;
+        java.nio.ByteBuffer $r1;
+        boolean $z0;
+        java.lang.Object $r2;
+        org.apache.harmony.nio.internal.DirectBuffer $r3;
+        org.apache.harmony.luni.platform.PlatformAddress $r4;
+        int $i0, $i1, $i2, $i3;
+        org.apache.harmony.luni.platform.IFileSystem $r5;
+        long $l4;
+        java.lang.Throwable $r6, $r7, $r9;
+        byte[] $r8;
+
+        $r0 := @this: org.apache.harmony.nio.internal.FileChannelImpl;
+
+        $r1 := @parameter0: java.nio.ByteBuffer;
+
+        virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: void openCheck()>();
+
+        $z0 = virtualinvoke $r1.<java.nio.Buffer: boolean hasRemaining()>();
+
+        if $z0 != 0 goto label01;
+
+        return 0;
+
+     label01:
+        $r2 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: java.lang.Object repositioningLock>;
+
+        entermonitor $r2;
+
+     label02:
+        $z0 = virtualinvoke $r1.<java.nio.ByteBuffer: boolean isDirect()>();
+
+        if $z0 == 0 goto label15;
+
+        $r3 = (org.apache.harmony.nio.internal.DirectBuffer) $r1;
+
+        $r4 = interfaceinvoke $r3.<org.apache.harmony.nio.internal.DirectBuffer: org.apache.harmony.luni.platform.PlatformAddress getEffectiveAddress()>();
+
+        $i0 = virtualinvoke $r4.<org.apache.harmony.luni.platform.PlatformAddress: int toInt()>();
+
+     label03:
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void begin()>();
+
+        $r5 = <org.apache.harmony.nio.internal.FileChannelImpl: org.apache.harmony.luni.platform.IFileSystem fileSystem>;
+
+        $i1 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: int handle>;
+
+        $i2 = virtualinvoke $r1.<java.nio.Buffer: int position()>();
+
+        $i3 = virtualinvoke $r1.<java.nio.Buffer: int remaining()>();
+
+        $l4 = interfaceinvoke $r5.<org.apache.harmony.luni.platform.IFileSystem: long readDirect(int,int,int,int)>($i1, $i0, $i2, $i3);
+
+     label04:
+        $i0 = (int) $l4;
+
+        if $i0 < 0 goto label09;
+
+        $z0 = 1;
+
+     label05:
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void end(boolean)>($z0);
+
+     label06:
+        if $i0 <= 0 goto label07;
+
+        $i1 = virtualinvoke $r1.<java.nio.Buffer: int position()>();
+
+        $i1 = $i1 + $i0;
+
+        virtualinvoke $r1.<java.nio.Buffer: java.nio.Buffer position(int)>($i1);
+
+     label07:
+        exitmonitor $r2;
+
+     label08:
+        return $i0;
+
+     label09:
+        $z0 = 0;
+
+        goto label05;
+
+     label10:
+        $r6 := @caughtexception;
+
+        goto label14;
+
+     label11:
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void end(boolean)>($z0);
+
+        throw $r6;
+
+     label12:
+        $r7 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label13:
+        throw $r7;
+
+     label14:
+        $z0 = 0;
+
+        goto label11;
+
+     label15:
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void begin()>();
+
+        $r5 = <org.apache.harmony.nio.internal.FileChannelImpl: org.apache.harmony.luni.platform.IFileSystem fileSystem>;
+
+        $i0 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: int handle>;
+
+        $r8 = virtualinvoke $r1.<java.nio.ByteBuffer: byte[] array()>();
+
+        $i1 = virtualinvoke $r1.<java.nio.ByteBuffer: int arrayOffset()>();
+
+        $i2 = virtualinvoke $r1.<java.nio.Buffer: int position()>();
+
+        $i1 = $i1 + $i2;
+
+        $i2 = virtualinvoke $r1.<java.nio.Buffer: int remaining()>();
+
+        $l4 = interfaceinvoke $r5.<org.apache.harmony.luni.platform.IFileSystem: long read(int,byte[],int,int)>($i0, $r8, $i1, $i2);
+
+     label16:
+        $i0 = (int) $l4;
+
+        if $i0 < 0 goto label18;
+
+        $z0 = 1;
+
+     label17:
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void end(boolean)>($z0);
+
+        goto label06;
+
+     label18:
+        $z0 = 0;
+
+        goto label17;
+
+     label19:
+        $r9 := @caughtexception;
+
+        goto label21;
+
+     label20:
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void end(boolean)>($z0);
+
+        throw $r9;
+
+     label21:
+        $z0 = 0;
+
+        goto label20;
+
+        catch java.lang.Throwable from label02 to label03 with label12;
+        catch java.lang.Throwable from label03 to label04 with label10;
+        catch java.lang.Throwable from label05 to label08 with label12;
+        catch java.lang.Throwable from label09 to label13 with label12;
+        catch java.lang.Throwable from label15 to label16 with label19;
+        catch java.lang.Throwable from label17 to label21 with label12;
+    }
+
+    public int read(java.nio.ByteBuffer, long) throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.FileChannelImpl $r0;
+        java.nio.ByteBuffer $r1;
+        long $l0, $l2;
+        java.lang.NullPointerException $r2;
+        byte $b1;
+        java.lang.IllegalArgumentException $r3;
+        boolean $z0;
+        java.lang.Object $r4;
+        int $i3;
+        java.lang.Throwable $r5, $r6;
+
+        $r0 := @this: org.apache.harmony.nio.internal.FileChannelImpl;
+
+        $r1 := @parameter0: java.nio.ByteBuffer;
+
+        $l0 := @parameter1: long;
+
+        if $r1 != null goto label01;
+
+        $r2 = new java.lang.NullPointerException;
+
+        specialinvoke $r2.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r2;
+
+     label01:
+        $b1 = $l0 cmp 0L;
+
+        if $b1 >= 0 goto label02;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r3;
+
+     label02:
+        virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: void openCheck()>();
+
+        $z0 = virtualinvoke $r1.<java.nio.Buffer: boolean hasRemaining()>();
+
+        if $z0 != 0 goto label03;
+
+        return 0;
+
+     label03:
+        $r4 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: java.lang.Object repositioningLock>;
+
+        entermonitor $r4;
+
+     label04:
+        $l2 = virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: long position()>();
+
+        virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: java.nio.channels.FileChannel position(long)>($l0);
+
+     label05:
+        $i3 = virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: int read(java.nio.ByteBuffer)>($r1);
+
+     label06:
+        virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: java.nio.channels.FileChannel position(long)>($l2);
+
+        exitmonitor $r4;
+
+     label07:
+        return $i3;
+
+     label08:
+        $r5 := @caughtexception;
+
+        virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: java.nio.channels.FileChannel position(long)>($l2);
+
+        throw $r5;
+
+     label09:
+        $r6 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label10:
+        throw $r6;
+
+        catch java.lang.Throwable from label04 to label05 with label09;
+        catch java.lang.Throwable from label05 to label06 with label08;
+        catch java.lang.Throwable from label06 to label07 with label09;
+        catch java.lang.Throwable from label08 to label10 with label09;
+    }
+
+    public long read(java.nio.ByteBuffer[], int, int) throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.FileChannelImpl $r0;
+        java.nio.ByteBuffer[] $r1, $r4;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.lang.IndexOutOfBoundsException $r2;
+        java.nio.ByteBuffer $r3, $r8;
+        long $l5, $l7, $l8;
+        byte $b6;
+        int[] $r5, $r6, $r7;
+        boolean $z0;
+        org.apache.harmony.nio.internal.DirectBuffer $r9;
+        org.apache.harmony.luni.platform.PlatformAddress $r10;
+        java.lang.Object $r11;
+        org.apache.harmony.luni.platform.IFileSystem $r12;
+        java.lang.Throwable $r13, $r14;
+
+        $r0 := @this: org.apache.harmony.nio.internal.FileChannelImpl;
+
+        $r1 := @parameter0: java.nio.ByteBuffer[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i2 = 0;
+
+        if $i0 < 0 goto label01;
+
+        if $i1 < 0 goto label01;
+
+        $i3 = $i0 + $i1;
+
+        $i4 = lengthof $r1;
+
+        if $i3 <= $i4 goto label02;
+
+     label01:
+        $r2 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r2.<java.lang.IndexOutOfBoundsException: void <init>()>();
+
+        throw $r2;
+
+     label02:
+        virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: void openCheck()>();
+
+        $i3 = $i0;
+
+     label03:
+        $i4 = $i0 + $i1;
+
+        if $i3 >= $i4 goto label04;
+
+        $r3 = $r1[$i3];
+
+        $i4 = virtualinvoke $r3.<java.nio.Buffer: int remaining()>();
+
+        $i2 = $i2 + $i4;
+
+        $i3 = $i3 + 1;
+
+        goto label03;
+
+     label04:
+        if $i2 != 0 goto label05;
+
+        return 0L;
+
+     label05:
+        $l5 = virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: long size()>();
+
+        $b6 = $l5 cmp 0L;
+
+        if $b6 != 0 goto label06;
+
+        return -1L;
+
+     label06:
+        $r4 = newarray (java.nio.ByteBuffer)[$i1];
+
+        $r5 = newarray (int)[$i1];
+
+        $r6 = newarray (int)[$i1];
+
+        $r7 = newarray (int)[$i1];
+
+        $i2 = 0;
+
+     label07:
+        if $i2 >= $i1 goto label10;
+
+        $i3 = $i2 + $i0;
+
+        $r3 = $r1[$i3];
+
+        $z0 = virtualinvoke $r3.<java.nio.ByteBuffer: boolean isDirect()>();
+
+        if $z0 != 0 goto label09;
+
+        $i3 = virtualinvoke $r3.<java.nio.Buffer: int remaining()>();
+
+        $r8 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer allocateDirect(int)>($i3);
+
+        $r3 = $r8;
+
+        $r4[$i2] = $r8;
+
+        $r6[$i2] = 0;
+
+     label08:
+        $r9 = (org.apache.harmony.nio.internal.DirectBuffer) $r3;
+
+        $r10 = interfaceinvoke $r9.<org.apache.harmony.nio.internal.DirectBuffer: org.apache.harmony.luni.platform.PlatformAddress getEffectiveAddress()>();
+
+        $i3 = virtualinvoke $r10.<org.apache.harmony.luni.platform.PlatformAddress: int toInt()>();
+
+        $r5[$i2] = $i3;
+
+        $i3 = virtualinvoke $r3.<java.nio.Buffer: int remaining()>();
+
+        $r7[$i2] = $i3;
+
+        $i2 = $i2 + 1;
+
+        goto label07;
+
+     label09:
+        $i3 = virtualinvoke $r3.<java.nio.Buffer: int position()>();
+
+        $r6[$i2] = $i3;
+
+        goto label08;
+
+     label10:
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void begin()>();
+
+        $r11 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: java.lang.Object repositioningLock>;
+
+        entermonitor $r11;
+
+     label11:
+        $r12 = <org.apache.harmony.nio.internal.FileChannelImpl: org.apache.harmony.luni.platform.IFileSystem fileSystem>;
+
+        $i2 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: int handle>;
+
+        $l5 = interfaceinvoke $r12.<org.apache.harmony.luni.platform.IFileSystem: long readv(int,int[],int[],int[],int)>($i2, $r5, $r6, $r7, $i1);
+
+        exitmonitor $r11;
+
+     label12:
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void end(boolean)>(1);
+
+        $i2 = $i0 + $i1;
+
+        $l7 = $l5;
+
+        $i1 = $i0;
+
+     label13:
+        if $i1 >= $i2 goto label20;
+
+        $b6 = $l7 cmp 0L;
+
+        if $b6 <= 0 goto label20;
+
+        $r3 = $r1[$i1];
+
+        $z0 = virtualinvoke $r3.<java.nio.ByteBuffer: boolean isDirect()>();
+
+        if $z0 == 0 goto label21;
+
+        $i3 = $r7[$i1];
+
+        $l8 = (long) $i3;
+
+        $b6 = $l8 cmp $l7;
+
+        if $b6 >= 0 goto label19;
+
+        $r3 = $r1[$i1];
+
+        $i3 = virtualinvoke $r3.<java.nio.Buffer: int limit()>();
+
+        $r3 = $r1[$i1];
+
+        virtualinvoke $r3.<java.nio.Buffer: java.nio.Buffer position(int)>($i3);
+
+        $i3 = $r7[$i1];
+
+        $l8 = (long) $i3;
+
+        $l7 = $l7 - $l8;
+
+     label14:
+        $i1 = $i1 + 1;
+
+        goto label13;
+
+     label15:
+        $r13 := @caughtexception;
+
+     label16:
+        exitmonitor $r11;
+
+     label17:
+        throw $r13;
+
+     label18:
+        $r14 := @caughtexception;
+
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void end(boolean)>(0);
+
+        throw $r14;
+
+     label19:
+        $i0 = (int) $l7;
+
+        $r3 = $r1[$i1];
+
+        virtualinvoke $r3.<java.nio.Buffer: java.nio.Buffer position(int)>($i0);
+
+     label20:
+        return $l5;
+
+     label21:
+        $i3 = $i1 - $i0;
+
+        $r3 = $r4[$i3];
+
+        $i3 = virtualinvoke $r3.<java.nio.Buffer: int remaining()>();
+
+        $l8 = (long) $i3;
+
+        $b6 = $l7 cmp $l8;
+
+        if $b6 >= 0 goto label22;
+
+        $i3 = virtualinvoke $r3.<java.nio.Buffer: int position()>();
+
+        $r8 = $r1[$i1];
+
+        virtualinvoke $r8.<java.nio.ByteBuffer: java.nio.ByteBuffer put(java.nio.ByteBuffer)>($r3);
+
+        $r3 = $r1[$i1];
+
+        $i4 = (int) $l7;
+
+        $i3 = $i4 + $i3;
+
+        virtualinvoke $r3.<java.nio.Buffer: java.nio.Buffer position(int)>($i3);
+
+        $l7 = 0L;
+
+        goto label14;
+
+     label22:
+        $i3 = virtualinvoke $r3.<java.nio.Buffer: int remaining()>();
+
+        $l8 = (long) $i3;
+
+        $l7 = $l7 - $l8;
+
+        $r8 = $r1[$i1];
+
+        virtualinvoke $r8.<java.nio.ByteBuffer: java.nio.ByteBuffer put(java.nio.ByteBuffer)>($r3);
+
+        goto label14;
+
+        catch java.lang.Throwable from label10 to label11 with label18;
+        catch java.lang.Throwable from label11 to label12 with label15;
+        catch java.lang.Throwable from label16 to label17 with label15;
+        catch java.lang.Throwable from label17 to label18 with label18;
+    }
+
+    void release(java.nio.channels.FileLock) throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.FileChannelImpl $r0;
+        java.nio.channels.FileLock $r1;
+        int $i0;
+        org.apache.harmony.luni.platform.IFileSystem $r2;
+        long $l1, $l2;
+        org.apache.harmony.nio.internal.LockManager $r3;
+
+        $r0 := @this: org.apache.harmony.nio.internal.FileChannelImpl;
+
+        $r1 := @parameter0: java.nio.channels.FileLock;
+
+        virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: void openCheck()>();
+
+        $r2 = <org.apache.harmony.nio.internal.FileChannelImpl: org.apache.harmony.luni.platform.IFileSystem fileSystem>;
+
+        $i0 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: int handle>;
+
+        $l1 = virtualinvoke $r1.<java.nio.channels.FileLock: long position()>();
+
+        $l2 = virtualinvoke $r1.<java.nio.channels.FileLock: long size()>();
+
+        interfaceinvoke $r2.<org.apache.harmony.luni.platform.IFileSystem: void unlock(int,long,long)>($i0, $l1, $l2);
+
+        $r3 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: org.apache.harmony.nio.internal.LockManager lockManager>;
+
+        virtualinvoke $r3.<org.apache.harmony.nio.internal.LockManager: void removeLock(java.nio.channels.FileLock)>($r1);
+
+        return;
+    }
+
+    public long size() throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.FileChannelImpl $r0;
+        java.lang.Object $r1;
+        org.apache.harmony.luni.platform.IFileSystem $r2;
+        int $i0;
+        long $l1, $l2;
+        java.lang.Throwable $r3;
+
+        $r0 := @this: org.apache.harmony.nio.internal.FileChannelImpl;
+
+        virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: void openCheck()>();
+
+        $r1 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: java.lang.Object repositioningLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = <org.apache.harmony.nio.internal.FileChannelImpl: org.apache.harmony.luni.platform.IFileSystem fileSystem>;
+
+        $i0 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: int handle>;
+
+        $l1 = interfaceinvoke $r2.<org.apache.harmony.luni.platform.IFileSystem: long seek(int,long,int)>($i0, 0L, 2);
+
+        $r2 = <org.apache.harmony.nio.internal.FileChannelImpl: org.apache.harmony.luni.platform.IFileSystem fileSystem>;
+
+        $i0 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: int handle>;
+
+        $l2 = interfaceinvoke $r2.<org.apache.harmony.luni.platform.IFileSystem: long seek(int,long,int)>($i0, 0L, 4);
+
+        $r2 = <org.apache.harmony.nio.internal.FileChannelImpl: org.apache.harmony.luni.platform.IFileSystem fileSystem>;
+
+        $i0 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: int handle>;
+
+        interfaceinvoke $r2.<org.apache.harmony.luni.platform.IFileSystem: long seek(int,long,int)>($i0, $l1, 1);
+
+        exitmonitor $r1;
+
+     label2:
+        return $l2;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+
+    public long transferFrom(java.nio.channels.ReadableByteChannel, long, long) throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.FileChannelImpl $r0;
+        java.nio.channels.ReadableByteChannel $r1;
+        long $l0, $l1, $l3, $l4;
+        boolean $z0;
+        java.nio.channels.ClosedChannelException $r2;
+        byte $b2;
+        java.lang.IllegalArgumentException $r3;
+        java.nio.ByteBuffer $r4, $r9;
+        java.nio.channels.FileChannel $r5;
+        java.nio.channels.FileChannel$MapMode $r6;
+        java.nio.MappedByteBuffer $r7;
+        int $i5;
+        org.apache.harmony.nio.internal.DirectBuffer $r8;
+        java.lang.Throwable $r10;
+
+        $r0 := @this: org.apache.harmony.nio.internal.FileChannelImpl;
+
+        $r1 := @parameter0: java.nio.channels.ReadableByteChannel;
+
+        $l0 := @parameter1: long;
+
+        $l1 := @parameter2: long;
+
+        virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: void openCheck()>();
+
+        $z0 = interfaceinvoke $r1.<java.nio.channels.ReadableByteChannel: boolean isOpen()>();
+
+        if $z0 != 0 goto label01;
+
+        $r2 = new java.nio.channels.ClosedChannelException;
+
+        specialinvoke $r2.<java.nio.channels.ClosedChannelException: void <init>()>();
+
+        throw $r2;
+
+     label01:
+        $b2 = $l0 cmp 0L;
+
+        if $b2 < 0 goto label02;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 < 0 goto label02;
+
+        $b2 = $l0 cmp 2147483647L;
+
+        if $b2 > 0 goto label02;
+
+        $b2 = $l1 cmp 2147483647L;
+
+        if $b2 <= 0 goto label03;
+
+     label02:
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r3;
+
+     label03:
+        $l3 = virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: long size()>();
+
+        $b2 = $l0 cmp $l3;
+
+        if $b2 <= 0 goto label04;
+
+        return 0L;
+
+     label04:
+        $r4 = null;
+
+     label05:
+        $z0 = $r1 instanceof java.nio.channels.FileChannel;
+
+        if $z0 == 0 goto label10;
+
+        $r5 = (java.nio.channels.FileChannel) $r1;
+
+        $l4 = virtualinvoke $r5.<java.nio.channels.FileChannel: long size()>();
+
+        $l3 = virtualinvoke $r5.<java.nio.channels.FileChannel: long position()>();
+
+        $l4 = $l4 - $l3;
+
+        $l1 = staticinvoke <java.lang.Math: long min(long,long)>($l1, $l4);
+
+        $r6 = <java.nio.channels.FileChannel$MapMode: java.nio.channels.FileChannel$MapMode READ_ONLY>;
+
+        $r7 = virtualinvoke $r5.<java.nio.channels.FileChannel: java.nio.MappedByteBuffer map(java.nio.channels.FileChannel$MapMode,long,long)>($r6, $l3, $l1);
+
+     label06:
+        $r4 = $r7;
+
+     label07:
+        $l1 = $l3 + $l1;
+
+        virtualinvoke $r5.<java.nio.channels.FileChannel: java.nio.channels.FileChannel position(long)>($l1);
+
+     label08:
+        $i5 = virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: int write(java.nio.ByteBuffer,long)>($r4, $l0);
+
+     label09:
+        $l0 = (long) $i5;
+
+        if $r4 == null goto label15;
+
+        $r8 = (org.apache.harmony.nio.internal.DirectBuffer) $r4;
+
+        interfaceinvoke $r8.<org.apache.harmony.nio.internal.DirectBuffer: void free()>();
+
+        return $l0;
+
+     label10:
+        $i5 = (int) $l1;
+
+     label11:
+        $r9 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer allocateDirect(int)>($i5);
+
+        $r4 = $r9;
+
+        interfaceinvoke $r1.<java.nio.channels.ReadableByteChannel: int read(java.nio.ByteBuffer)>($r9);
+
+        virtualinvoke $r9.<java.nio.Buffer: java.nio.Buffer flip()>();
+
+     label12:
+        goto label08;
+
+     label13:
+        $r10 := @caughtexception;
+
+        if $r4 == null goto label14;
+
+        $r8 = (org.apache.harmony.nio.internal.DirectBuffer) $r4;
+
+        interfaceinvoke $r8.<org.apache.harmony.nio.internal.DirectBuffer: void free()>();
+
+     label14:
+        throw $r10;
+
+     label15:
+        return $l0;
+
+        catch java.lang.Throwable from label05 to label06 with label13;
+        catch java.lang.Throwable from label07 to label09 with label13;
+        catch java.lang.Throwable from label11 to label12 with label13;
+    }
+
+    public long transferTo(long, long, java.nio.channels.WritableByteChannel) throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.FileChannelImpl $r0;
+        long $l0, $l1, $l3;
+        java.nio.channels.WritableByteChannel $r1;
+        boolean $z0;
+        java.nio.channels.ClosedChannelException $r2;
+        java.nio.channels.NonWritableChannelException $r3;
+        byte $b2;
+        java.lang.IllegalArgumentException $r4;
+        java.nio.MappedByteBuffer $r5, $r9;
+        int $i4;
+        org.apache.harmony.nio.internal.SocketChannelImpl $r6;
+        java.io.FileDescriptor $r7;
+        java.nio.channels.FileChannel$MapMode $r8;
+        org.apache.harmony.nio.internal.DirectBuffer $r10;
+        java.lang.Throwable $r11;
+
+        $r0 := @this: org.apache.harmony.nio.internal.FileChannelImpl;
+
+        $l0 := @parameter0: long;
+
+        $l1 := @parameter1: long;
+
+        $r1 := @parameter2: java.nio.channels.WritableByteChannel;
+
+        virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: void openCheck()>();
+
+        $z0 = interfaceinvoke $r1.<java.nio.channels.WritableByteChannel: boolean isOpen()>();
+
+        if $z0 != 0 goto label01;
+
+        $r2 = new java.nio.channels.ClosedChannelException;
+
+        specialinvoke $r2.<java.nio.channels.ClosedChannelException: void <init>()>();
+
+        throw $r2;
+
+     label01:
+        $z0 = $r1 instanceof org.apache.harmony.nio.internal.ReadOnlyFileChannel;
+
+        if $z0 == 0 goto label02;
+
+        $r3 = new java.nio.channels.NonWritableChannelException;
+
+        specialinvoke $r3.<java.nio.channels.NonWritableChannelException: void <init>()>();
+
+        throw $r3;
+
+     label02:
+        $b2 = $l0 cmp 0L;
+
+        if $b2 < 0 goto label03;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 < 0 goto label03;
+
+        $b2 = $l0 cmp 2147483647L;
+
+        if $b2 > 0 goto label03;
+
+        $b2 = $l1 cmp 2147483647L;
+
+        if $b2 <= 0 goto label04;
+
+     label03:
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r4;
+
+     label04:
+        $b2 = $l1 cmp 0L;
+
+        if $b2 == 0 goto label05;
+
+        $l3 = virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: long size()>();
+
+        $b2 = $l0 cmp $l3;
+
+        if $b2 < 0 goto label06;
+
+     label05:
+        return 0L;
+
+     label06:
+        $r5 = null;
+
+        $l3 = virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: long size()>();
+
+        $l3 = $l3 - $l0;
+
+        $l1 = staticinvoke <java.lang.Math: long min(long,long)>($l1, $l3);
+
+        $z0 = $r1 instanceof org.apache.harmony.nio.internal.SocketChannelImpl;
+
+        if $z0 == 0 goto label07;
+
+        $i4 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: int handle>;
+
+        $r6 = (org.apache.harmony.nio.internal.SocketChannelImpl) $r1;
+
+        $r7 = virtualinvoke $r6.<org.apache.harmony.nio.internal.SocketChannelImpl: java.io.FileDescriptor getFD()>();
+
+        $l0 = specialinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: long kernelTransfer(int,java.io.FileDescriptor,long,long)>($i4, $r7, $l0, $l1);
+
+        return $l0;
+
+     label07:
+        $r8 = <java.nio.channels.FileChannel$MapMode: java.nio.channels.FileChannel$MapMode READ_ONLY>;
+
+        $r9 = virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: java.nio.MappedByteBuffer map(java.nio.channels.FileChannel$MapMode,long,long)>($r8, $l0, $l1);
+
+        $r5 = $r9;
+
+        $i4 = interfaceinvoke $r1.<java.nio.channels.WritableByteChannel: int write(java.nio.ByteBuffer)>($r9);
+
+     label08:
+        $l0 = (long) $i4;
+
+        if $r9 == null goto label11;
+
+        $r10 = (org.apache.harmony.nio.internal.DirectBuffer) $r9;
+
+        interfaceinvoke $r10.<org.apache.harmony.nio.internal.DirectBuffer: void free()>();
+
+        return $l0;
+
+     label09:
+        $r11 := @caughtexception;
+
+        if $r5 == null goto label10;
+
+        $r10 = (org.apache.harmony.nio.internal.DirectBuffer) $r5;
+
+        interfaceinvoke $r10.<org.apache.harmony.nio.internal.DirectBuffer: void free()>();
+
+     label10:
+        throw $r11;
+
+     label11:
+        return $l0;
+
+        catch java.lang.Throwable from label07 to label08 with label09;
+    }
+
+    public java.nio.channels.FileChannel truncate(long) throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.FileChannelImpl $r0;
+        long $l0, $l3;
+        int $i1;
+        byte $b2;
+        java.lang.IllegalArgumentException $r1;
+        java.lang.Object $r2;
+        org.apache.harmony.luni.platform.IFileSystem $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @this: org.apache.harmony.nio.internal.FileChannelImpl;
+
+        $l0 := @parameter0: long;
+
+        virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: void openCheck()>();
+
+        $b2 = $l0 cmp 0L;
+
+        if $b2 >= 0 goto label1;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r1;
+
+     label1:
+        $l3 = virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: long size()>();
+
+        $b2 = $l0 cmp $l3;
+
+        if $b2 >= 0 goto label8;
+
+        $r2 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: java.lang.Object repositioningLock>;
+
+        entermonitor $r2;
+
+     label2:
+        $l3 = virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: long position()>();
+
+        $r3 = <org.apache.harmony.nio.internal.FileChannelImpl: org.apache.harmony.luni.platform.IFileSystem fileSystem>;
+
+        $i1 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: int handle>;
+
+        interfaceinvoke $r3.<org.apache.harmony.luni.platform.IFileSystem: void truncate(int,long)>($i1, $l0);
+
+        $b2 = $l3 cmp $l0;
+
+        if $b2 <= 0 goto label5;
+
+     label3:
+        virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: java.nio.channels.FileChannel position(long)>($l0);
+
+        exitmonitor $r2;
+
+     label4:
+        return $r0;
+
+     label5:
+        $l0 = $l3;
+
+        goto label3;
+
+     label6:
+        $r4 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label7:
+        throw $r4;
+
+     label8:
+        return $r0;
+
+        catch java.lang.Throwable from label2 to label4 with label6;
+        catch java.lang.Throwable from label5 to label7 with label6;
+    }
+
+    public final java.nio.channels.FileLock tryLock(long, long, boolean) throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.FileChannelImpl $r0;
+        long $l0, $l1;
+        boolean $z0;
+        java.nio.channels.FileLock $r1;
+
+        $r0 := @this: org.apache.harmony.nio.internal.FileChannelImpl;
+
+        $l0 := @parameter0: long;
+
+        $l1 := @parameter1: long;
+
+        $z0 := @parameter2: boolean;
+
+        virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: void openCheck()>();
+
+        $r1 = virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: java.nio.channels.FileLock basicLock(long,long,boolean,boolean)>($l0, $l1, $z0, 0);
+
+        return $r1;
+    }
+
+    public int write(java.nio.ByteBuffer) throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.FileChannelImpl $r0;
+        java.nio.ByteBuffer $r1;
+        int $i0;
+
+        $r0 := @this: org.apache.harmony.nio.internal.FileChannelImpl;
+
+        $r1 := @parameter0: java.nio.ByteBuffer;
+
+        virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: void openCheck()>();
+
+        $i0 = specialinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: int writeImpl(java.nio.ByteBuffer)>($r1);
+
+        return $i0;
+    }
+
+    public int write(java.nio.ByteBuffer, long) throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.FileChannelImpl $r0;
+        java.nio.ByteBuffer $r1;
+        long $l0, $l2;
+        java.lang.NullPointerException $r2;
+        byte $b1;
+        java.lang.IllegalArgumentException $r3;
+        boolean $z0;
+        java.lang.Object $r4;
+        int $i3;
+        java.lang.Throwable $r5, $r6;
+
+        $r0 := @this: org.apache.harmony.nio.internal.FileChannelImpl;
+
+        $r1 := @parameter0: java.nio.ByteBuffer;
+
+        $l0 := @parameter1: long;
+
+        if $r1 != null goto label01;
+
+        $r2 = new java.lang.NullPointerException;
+
+        specialinvoke $r2.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r2;
+
+     label01:
+        $b1 = $l0 cmp 0L;
+
+        if $b1 >= 0 goto label02;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r3;
+
+     label02:
+        virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: void openCheck()>();
+
+        $z0 = virtualinvoke $r1.<java.nio.Buffer: boolean hasRemaining()>();
+
+        if $z0 != 0 goto label03;
+
+        return 0;
+
+     label03:
+        $r4 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: java.lang.Object repositioningLock>;
+
+        entermonitor $r4;
+
+     label04:
+        $l2 = virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: long position()>();
+
+        virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: java.nio.channels.FileChannel position(long)>($l0);
+
+     label05:
+        $i3 = specialinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: int writeImpl(java.nio.ByteBuffer)>($r1);
+
+     label06:
+        virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: java.nio.channels.FileChannel position(long)>($l2);
+
+        exitmonitor $r4;
+
+     label07:
+        return $i3;
+
+     label08:
+        $r5 := @caughtexception;
+
+        virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: java.nio.channels.FileChannel position(long)>($l2);
+
+        throw $r5;
+
+     label09:
+        $r6 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label10:
+        throw $r6;
+
+        catch java.lang.Throwable from label04 to label05 with label09;
+        catch java.lang.Throwable from label05 to label06 with label08;
+        catch java.lang.Throwable from label06 to label07 with label09;
+        catch java.lang.Throwable from label08 to label10 with label09;
+    }
+
+    public long write(java.nio.ByteBuffer[], int, int) throws java.io.IOException
+    {
+        org.apache.harmony.nio.internal.FileChannelImpl $r0;
+        java.nio.ByteBuffer[] $r1;
+        int $i0, $i1, $i2, $i3, $i4;
+        java.lang.IndexOutOfBoundsException $r2;
+        java.nio.ByteBuffer $r3, $r8;
+        int[] $r4, $r5, $r6;
+        org.apache.harmony.nio.internal.DirectBuffer[] $r7;
+        boolean $z0;
+        org.apache.harmony.nio.internal.DirectBuffer $r9;
+        org.apache.harmony.luni.platform.PlatformAddress $r10;
+        java.lang.Object $r11;
+        org.apache.harmony.luni.platform.IFileSystem $r12;
+        long $l5, $l6, $l7;
+        java.lang.Throwable $r13, $r14;
+        byte $b8;
+
+        $r0 := @this: org.apache.harmony.nio.internal.FileChannelImpl;
+
+        $r1 := @parameter0: java.nio.ByteBuffer[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        if $i0 < 0 goto label01;
+
+        if $i1 < 0 goto label01;
+
+        $i2 = $i0 + $i1;
+
+        $i3 = lengthof $r1;
+
+        if $i2 <= $i3 goto label02;
+
+     label01:
+        $r2 = new java.lang.IndexOutOfBoundsException;
+
+        specialinvoke $r2.<java.lang.IndexOutOfBoundsException: void <init>()>();
+
+        throw $r2;
+
+     label02:
+        virtualinvoke $r0.<org.apache.harmony.nio.internal.FileChannelImpl: void openCheck()>();
+
+        $i2 = 0;
+
+        $i3 = $i0;
+
+     label03:
+        $i4 = $i0 + $i1;
+
+        if $i3 >= $i4 goto label04;
+
+        $r3 = $r1[$i3];
+
+        $i4 = virtualinvoke $r3.<java.nio.Buffer: int remaining()>();
+
+        $i2 = $i2 + $i4;
+
+        $i3 = $i3 + 1;
+
+        goto label03;
+
+     label04:
+        if $i2 != 0 goto label05;
+
+        return 0L;
+
+     label05:
+        $r4 = newarray (int)[$i1];
+
+        $r5 = newarray (int)[$i1];
+
+        $r6 = newarray (int)[$i1];
+
+        $r7 = newarray (org.apache.harmony.nio.internal.DirectBuffer)[$i1];
+
+        $i2 = 0;
+
+     label06:
+        if $i2 >= $i1 goto label09;
+
+        $i3 = $i2 + $i0;
+
+        $r3 = $r1[$i3];
+
+        $z0 = virtualinvoke $r3.<java.nio.ByteBuffer: boolean isDirect()>();
+
+        if $z0 != 0 goto label08;
+
+        $i3 = virtualinvoke $r3.<java.nio.Buffer: int remaining()>();
+
+        $r8 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer allocateDirect(int)>($i3);
+
+        virtualinvoke $r8.<java.nio.ByteBuffer: java.nio.ByteBuffer put(java.nio.ByteBuffer)>($r3);
+
+        virtualinvoke $r8.<java.nio.Buffer: java.nio.Buffer flip()>();
+
+        $r3 = $r8;
+
+        $r9 = (org.apache.harmony.nio.internal.DirectBuffer) $r8;
+
+        $r7[$i2] = $r9;
+
+        $r5[$i2] = 0;
+
+     label07:
+        $r9 = (org.apache.harmony.nio.internal.DirectBuffer) $r3;
+
+        $r10 = interfaceinvoke $r9.<org.apache.harmony.nio.internal.DirectBuffer: org.apache.harmony.luni.platform.PlatformAddress getEffectiveAddress()>();
+
+        $i3 = virtualinvoke $r10.<org.apache.harmony.luni.platform.PlatformAddress: int toInt()>();
+
+        $r4[$i2] = $i3;
+
+        $i3 = virtualinvoke $r3.<java.nio.Buffer: int remaining()>();
+
+        $r6[$i2] = $i3;
+
+        $i2 = $i2 + 1;
+
+        goto label06;
+
+     label08:
+        $i3 = virtualinvoke $r3.<java.nio.Buffer: int position()>();
+
+        $r5[$i2] = $i3;
+
+        $r7[$i2] = null;
+
+        goto label07;
+
+     label09:
+        $r11 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: java.lang.Object repositioningLock>;
+
+        entermonitor $r11;
+
+     label10:
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void begin()>();
+
+        $r12 = <org.apache.harmony.nio.internal.FileChannelImpl: org.apache.harmony.luni.platform.IFileSystem fileSystem>;
+
+        $i2 = $r0.<org.apache.harmony.nio.internal.FileChannelImpl: int handle>;
+
+        $l5 = interfaceinvoke $r12.<org.apache.harmony.luni.platform.IFileSystem: long writev(int,int[],int[],int[],int)>($i2, $r4, $r5, $r6, $i1);
+
+     label11:
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void end(boolean)>(1);
+
+        $i2 = 0;
+
+     label12:
+        if $i2 >= $i1 goto label20;
+
+        $r9 = $r7[$i2];
+
+        if $r9 == null goto label13;
+
+        $r9 = $r7[$i2];
+
+        interfaceinvoke $r9.<org.apache.harmony.nio.internal.DirectBuffer: void free()>();
+
+     label13:
+        $i2 = $i2 + 1;
+
+        goto label12;
+
+     label14:
+        $r13 := @caughtexception;
+
+        virtualinvoke $r0.<java.nio.channels.spi.AbstractInterruptibleChannel: void end(boolean)>(0);
+
+        $i0 = 0;
+
+     label15:
+        if $i0 >= $i1 goto label17;
+
+        $r9 = $r7[$i0];
+
+        if $r9 == null goto label16;
+
+        $r9 = $r7[$i0];
+
+        interfaceinvoke $r9.<org.apache.harmony.nio.internal.DirectBuffer: void free()>();
+
+     label16:
+        $i0 = $i0 + 1;
+
+        goto label15;
+
+     label17:
+        throw $r13;
+
+     label18:
+        $r14 := @caughtexception;
+
+        exitmonitor $r11;
+
+     label19:
+        throw $r14;
+
+     label20:
+        exitmonitor $r11;
+
+     label21:
+        $l6 = $l5;
+
+        $i2 = $i0;
+
+     label22:
+        $i3 = $i1 + $i0;
+
+        if $i2 >= $i3 goto label24;
+
+        $r3 = $r1[$i2];
+
+        $i3 = virtualinvoke $r3.<java.nio.Buffer: int remaining()>();
+
+        $l7 = (long) $i3;
+
+        $b8 = $l6 cmp $l7;
+
+        if $b8 <= 0 goto label23;
+
+        $r3 = $r1[$i2];
+
+        $i3 = virtualinvoke $r3.<java.nio.Buffer: int limit()>();
+
+        $r3 = $r1[$i2];
+
+        virtualinvoke $r3.<java.nio.Buffer: java.nio.Buffer position(int)>($i3);
+
+        $r3 = $r1[$i2];
+
+        $i3 = virtualinvoke $r3.<java.nio.Buffer: int remaining()>();
+
+        $l7 = (long) $i3;
+
+        $l6 = $l6 - $l7;
+
+        $i2 = $i2 + 1;
+
+        goto label22;
+
+     label23:
+        $r3 = $r1[$i2];
+
+        $i0 = virtualinvoke $r3.<java.nio.Buffer: int position()>();
+
+        $i1 = (int) $l6;
+
+        $i0 = $i0 + $i1;
+
+        $r3 = $r1[$i2];
+
+        virtualinvoke $r3.<java.nio.Buffer: java.nio.Buffer position(int)>($i0);
+
+     label24:
+        return $l5;
+
+        catch java.lang.Throwable from label10 to label11 with label14;
+        catch java.lang.Throwable from label11 to label19 with label18;
+        catch java.lang.Throwable from label20 to label21 with label18;
+    }
+}

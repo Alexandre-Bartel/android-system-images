@@ -1,0 +1,916 @@
+public class dalvik.system.PathClassLoader extends java.lang.ClassLoader
+{
+    private boolean initialized;
+    private final java.lang.String libPath;
+    private dalvik.system.DexFile[] mDexs;
+    private java.io.File[] mFiles;
+    private java.lang.String[] mLibPaths;
+    private java.lang.String[] mPaths;
+    private java.util.zip.ZipFile[] mZips;
+    private final java.lang.String path;
+
+    public void <init>(java.lang.String, java.lang.ClassLoader)
+    {
+        dalvik.system.PathClassLoader $r0;
+        java.lang.String $r1;
+        java.lang.ClassLoader $r2;
+
+        $r0 := @this: dalvik.system.PathClassLoader;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.ClassLoader;
+
+        specialinvoke $r0.<dalvik.system.PathClassLoader: void <init>(java.lang.String,java.lang.String,java.lang.ClassLoader)>($r1, null, $r2);
+
+        return;
+    }
+
+    public void <init>(java.lang.String, java.lang.String, java.lang.ClassLoader)
+    {
+        dalvik.system.PathClassLoader $r0;
+        java.lang.String $r1, $r2;
+        java.lang.ClassLoader $r3;
+        java.lang.NullPointerException $r4;
+
+        $r0 := @this: dalvik.system.PathClassLoader;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.lang.ClassLoader;
+
+        specialinvoke $r0.<java.lang.ClassLoader: void <init>(java.lang.ClassLoader)>($r3);
+
+        if $r1 != null goto label1;
+
+        $r4 = new java.lang.NullPointerException;
+
+        specialinvoke $r4.<java.lang.NullPointerException: void <init>()>();
+
+        throw $r4;
+
+     label1:
+        $r0.<dalvik.system.PathClassLoader: java.lang.String path> = $r1;
+
+        $r0.<dalvik.system.PathClassLoader: java.lang.String libPath> = $r2;
+
+        return;
+    }
+
+    private void ensureInit()
+    {
+        dalvik.system.PathClassLoader $r0;
+        java.io.File $r1;
+        java.lang.String $r2, $r3, $r10, $r11, $r12;
+        boolean $z0, $z1;
+        java.lang.String[] $r4;
+        int $i0, $i1;
+        java.io.File[] $r5;
+        java.util.zip.ZipFile[] $r6;
+        dalvik.system.DexFile[] $r7;
+        java.util.zip.ZipFile $r8;
+        dalvik.system.DexFile $r9;
+        java.lang.StringBuilder $r13;
+        java.lang.Throwable $r14;
+        java.io.IOException $r15, $r16;
+
+        $r0 := @this: dalvik.system.PathClassLoader;
+
+        entermonitor $r0;
+
+     label01:
+        $z0 = $r0.<dalvik.system.PathClassLoader: boolean initialized>;
+
+     label02:
+        if $z0 == 0 goto label04;
+
+     label03:
+        exitmonitor $r0;
+
+        return;
+
+     label04:
+        $r0.<dalvik.system.PathClassLoader: boolean initialized> = 1;
+
+        $r3 = $r0.<dalvik.system.PathClassLoader: java.lang.String path>;
+
+        $r4 = virtualinvoke $r3.<java.lang.String: java.lang.String[] split(java.lang.String)>(":");
+
+        $r0.<dalvik.system.PathClassLoader: java.lang.String[] mPaths> = $r4;
+
+        $r4 = $r0.<dalvik.system.PathClassLoader: java.lang.String[] mPaths>;
+
+        $i0 = lengthof $r4;
+
+        $r5 = newarray (java.io.File)[$i0];
+
+        $r0.<dalvik.system.PathClassLoader: java.io.File[] mFiles> = $r5;
+
+        $r6 = newarray (java.util.zip.ZipFile)[$i0];
+
+        $r0.<dalvik.system.PathClassLoader: java.util.zip.ZipFile[] mZips> = $r6;
+
+        $r7 = newarray (dalvik.system.DexFile)[$i0];
+
+        $r0.<dalvik.system.PathClassLoader: dalvik.system.DexFile[] mDexs> = $r7;
+
+        $r3 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String,java.lang.String)>("android.vm.dexfile", "");
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("true");
+
+        $i1 = 0;
+
+     label05:
+        if $i1 >= $i0 goto label15;
+
+        $r1 = new java.io.File;
+
+        $r4 = $r0.<dalvik.system.PathClassLoader: java.lang.String[] mPaths>;
+
+        $r3 = $r4[$i1];
+
+        specialinvoke $r1.<java.io.File: void <init>(java.lang.String)>($r3);
+
+        $r5 = $r0.<dalvik.system.PathClassLoader: java.io.File[] mFiles>;
+
+        $r5[$i1] = $r1;
+
+        $z1 = virtualinvoke $r1.<java.io.File: boolean isFile()>();
+
+     label06:
+        if $z1 == 0 goto label14;
+
+     label07:
+        $r6 = $r0.<dalvik.system.PathClassLoader: java.util.zip.ZipFile[] mZips>;
+
+        $r8 = new java.util.zip.ZipFile;
+
+     label08:
+        specialinvoke $r8.<java.util.zip.ZipFile: void <init>(java.io.File)>($r1);
+
+     label09:
+        $r6[$i1] = $r8;
+
+     label10:
+        if $z0 == 0 goto label14;
+
+     label11:
+        $r7 = $r0.<dalvik.system.PathClassLoader: dalvik.system.DexFile[] mDexs>;
+
+        $r9 = new dalvik.system.DexFile;
+
+     label12:
+        specialinvoke $r9.<dalvik.system.DexFile: void <init>(java.io.File)>($r1);
+
+     label13:
+        $r7[$i1] = $r9;
+
+     label14:
+        $i1 = $i1 + 1;
+
+        goto label05;
+
+     label15:
+        $r10 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String,java.lang.String)>("java.library.path", ".");
+
+        $r11 = $r10;
+
+        $r2 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String,java.lang.String)>("path.separator", ":");
+
+        $r3 = staticinvoke <java.lang.System: java.lang.String getProperty(java.lang.String,java.lang.String)>("file.separator", "/");
+
+        $r12 = $r0.<dalvik.system.PathClassLoader: java.lang.String libPath>;
+
+        if $r12 == null goto label16;
+
+        $i0 = virtualinvoke $r10.<java.lang.String: int length()>();
+
+        if $i0 <= 0 goto label19;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r10 = $r0.<dalvik.system.PathClassLoader: java.lang.String libPath>;
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r11 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label16:
+        $r4 = virtualinvoke $r11.<java.lang.String: java.lang.String[] split(java.lang.String)>($r2);
+
+        $r0.<dalvik.system.PathClassLoader: java.lang.String[] mLibPaths> = $r4;
+
+        $r4 = $r0.<dalvik.system.PathClassLoader: java.lang.String[] mLibPaths>;
+
+        $i0 = lengthof $r4;
+
+        $i1 = 0;
+
+     label17:
+        if $i1 >= $i0 goto label03;
+
+        $r4 = $r0.<dalvik.system.PathClassLoader: java.lang.String[] mLibPaths>;
+
+        $r2 = $r4[$i1];
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean endsWith(java.lang.String)>($r3);
+
+        if $z0 != 0 goto label18;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = $r0.<dalvik.system.PathClassLoader: java.lang.String[] mLibPaths>;
+
+        $r2 = $r4[$i1];
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r2 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r4[$i1] = $r2;
+
+     label18:
+        $i1 = $i1 + 1;
+
+        goto label17;
+
+     label19:
+        $r11 = $r0.<dalvik.system.PathClassLoader: java.lang.String libPath>;
+
+     label20:
+        goto label16;
+
+     label21:
+        $r14 := @caughtexception;
+
+        exitmonitor $r0;
+
+        throw $r14;
+
+     label22:
+        $r15 := @caughtexception;
+
+        goto label14;
+
+     label23:
+        $r16 := @caughtexception;
+
+        goto label10;
+
+        catch java.lang.Throwable from label01 to label02 with label21;
+        catch java.lang.Throwable from label04 to label06 with label21;
+        catch java.io.IOException from label08 to label09 with label23;
+        catch java.lang.Throwable from label07 to label10 with label21;
+        catch java.io.IOException from label12 to label13 with label22;
+        catch java.lang.Throwable from label11 to label14 with label21;
+        catch java.lang.Throwable from label15 to label20 with label21;
+    }
+
+    private java.net.URL findResource(java.lang.String, int)
+    {
+        dalvik.system.PathClassLoader $r0;
+        java.lang.String $r1, $r12;
+        int $i0;
+        java.io.File $r2;
+        java.util.zip.ZipFile $r3;
+        java.io.File[] $r4;
+        java.util.zip.ZipFile[] $r5;
+        boolean $z0;
+        java.net.URL $r6, $r8;
+        java.lang.StringBuilder $r7;
+        java.net.MalformedURLException $r9, $r13;
+        java.lang.RuntimeException $r10;
+        java.lang.String[] $r11;
+        java.io.PrintStream $r14;
+
+        $r0 := @this: dalvik.system.PathClassLoader;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $r4 = $r0.<dalvik.system.PathClassLoader: java.io.File[] mFiles>;
+
+        $r2 = $r4[$i0];
+
+        $r5 = $r0.<dalvik.system.PathClassLoader: java.util.zip.ZipFile[] mZips>;
+
+        $r3 = $r5[$i0];
+
+        if $r3 == null goto label04;
+
+        $z0 = specialinvoke $r0.<dalvik.system.PathClassLoader: boolean isInArchive(java.util.zip.ZipFile,java.lang.String)>($r3, $r1);
+
+        if $z0 == 0 goto label09;
+
+        $r6 = new java.net.URL;
+
+        $r7 = new java.lang.StringBuilder;
+
+     label01:
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("jar:");
+
+        $r8 = virtualinvoke $r2.<java.io.File: java.net.URL toURL()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("!/");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<java.net.URL: void <init>(java.lang.String)>($r1);
+
+     label02:
+        return $r6;
+
+     label03:
+        $r9 := @caughtexception;
+
+        $r10 = new java.lang.RuntimeException;
+
+        specialinvoke $r10.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r9);
+
+        throw $r10;
+
+     label04:
+        $z0 = virtualinvoke $r2.<java.io.File: boolean isDirectory()>();
+
+        if $z0 == 0 goto label08;
+
+        $r2 = new java.io.File;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = $r0.<dalvik.system.PathClassLoader: java.lang.String[] mPaths>;
+
+        $r12 = $r11[$i0];
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.io.File: void <init>(java.lang.String)>($r1);
+
+        $z0 = virtualinvoke $r2.<java.io.File: boolean exists()>();
+
+        if $z0 == 0 goto label09;
+
+     label05:
+        $r6 = virtualinvoke $r2.<java.io.File: java.net.URL toURL()>();
+
+     label06:
+        return $r6;
+
+     label07:
+        $r13 := @caughtexception;
+
+        $r10 = new java.lang.RuntimeException;
+
+        specialinvoke $r10.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>($r13);
+
+        throw $r10;
+
+     label08:
+        $z0 = virtualinvoke $r2.<java.io.File: boolean isFile()>();
+
+        if $z0 == 0 goto label10;
+
+     label09:
+        return null;
+
+     label10:
+        $r14 = <java.lang.System: java.io.PrintStream err>;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("PathClassLoader: can\'t find \'");
+
+        $r11 = $r0.<dalvik.system.PathClassLoader: java.lang.String[] mPaths>;
+
+        $r1 = $r11[$i0];
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r1 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r14.<java.io.PrintStream: void println(java.lang.String)>($r1);
+
+        goto label09;
+
+        catch java.net.MalformedURLException from label01 to label02 with label03;
+        catch java.net.MalformedURLException from label05 to label06 with label07;
+    }
+
+    private boolean isInArchive(java.util.zip.ZipFile, java.lang.String)
+    {
+        dalvik.system.PathClassLoader $r0;
+        java.util.zip.ZipFile $r1;
+        java.lang.String $r2;
+        java.util.zip.ZipEntry $r3;
+
+        $r0 := @this: dalvik.system.PathClassLoader;
+
+        $r1 := @parameter0: java.util.zip.ZipFile;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 = virtualinvoke $r1.<java.util.zip.ZipFile: java.util.zip.ZipEntry getEntry(java.lang.String)>($r2);
+
+        if $r3 == null goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    private byte[] loadFromArchive(java.util.zip.ZipFile, java.lang.String)
+    {
+        dalvik.system.PathClassLoader $r0;
+        java.util.zip.ZipFile $r1;
+        java.lang.String $r2;
+        byte[] $r3;
+        java.io.ByteArrayOutputStream $r4;
+        java.util.zip.ZipEntry $r5;
+        java.io.InputStream $r6;
+        long $l0;
+        int $i1;
+        java.io.IOException $r7;
+
+        $r0 := @this: dalvik.system.PathClassLoader;
+
+        $r1 := @parameter0: java.util.zip.ZipFile;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r5 = virtualinvoke $r1.<java.util.zip.ZipFile: java.util.zip.ZipEntry getEntry(java.lang.String)>($r2);
+
+        if $r5 != null goto label1;
+
+        return null;
+
+     label1:
+        $r6 = virtualinvoke $r1.<java.util.zip.ZipFile: java.io.InputStream getInputStream(java.util.zip.ZipEntry)>($r5);
+
+        $r4 = new java.io.ByteArrayOutputStream;
+
+        $l0 = virtualinvoke $r5.<java.util.zip.ZipEntry: long getSize()>();
+
+        $i1 = (int) $l0;
+
+        specialinvoke $r4.<java.io.ByteArrayOutputStream: void <init>(int)>($i1);
+
+        $r3 = newarray (byte)[4096];
+
+     label2:
+        $i1 = virtualinvoke $r6.<java.io.InputStream: int read(byte[])>($r3);
+
+        if $i1 <= 0 goto label4;
+
+        virtualinvoke $r4.<java.io.ByteArrayOutputStream: void write(byte[],int,int)>($r3, 0, $i1);
+
+        goto label2;
+
+     label3:
+        $r7 := @caughtexception;
+
+        return null;
+
+     label4:
+        virtualinvoke $r6.<java.io.InputStream: void close()>();
+
+     label5:
+        $r3 = virtualinvoke $r4.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        return $r3;
+
+        catch java.io.IOException from label1 to label3 with label3;
+        catch java.io.IOException from label4 to label5 with label3;
+    }
+
+    private byte[] loadFromDirectory(java.lang.String)
+    {
+        dalvik.system.PathClassLoader $r0;
+        java.lang.String $r1;
+        java.io.RandomAccessFile $r2;
+        long $l0;
+        int $i1;
+        byte[] $r3;
+        java.io.FileNotFoundException $r4;
+        java.io.IOException $r5;
+        java.io.PrintStream $r6;
+        java.lang.StringBuilder $r7;
+
+        $r0 := @this: dalvik.system.PathClassLoader;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.io.RandomAccessFile;
+
+     label1:
+        specialinvoke $r2.<java.io.RandomAccessFile: void <init>(java.lang.String,java.lang.String)>($r1, "r");
+
+     label2:
+        $l0 = virtualinvoke $r2.<java.io.RandomAccessFile: long length()>();
+
+     label3:
+        $i1 = (int) $l0;
+
+     label4:
+        $r3 = newarray (byte)[$i1];
+
+        virtualinvoke $r2.<java.io.RandomAccessFile: int read(byte[])>($r3);
+
+        virtualinvoke $r2.<java.io.RandomAccessFile: void close()>();
+
+     label5:
+        return $r3;
+
+     label6:
+        $r4 := @caughtexception;
+
+        return null;
+
+     label7:
+        $r5 := @caughtexception;
+
+        $r6 = <java.lang.System: java.io.PrintStream err>;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error reading from ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<java.io.PrintStream: void println(java.lang.String)>($r1);
+
+        $r3 = null;
+
+        goto label5;
+
+        catch java.io.FileNotFoundException from label1 to label2 with label6;
+        catch java.io.IOException from label2 to label3 with label7;
+        catch java.io.IOException from label4 to label5 with label7;
+    }
+
+    protected java.lang.Class findClass(java.lang.String) throws java.lang.ClassNotFoundException
+    {
+        dalvik.system.PathClassLoader $r0;
+        java.lang.String $r1, $r6;
+        int $i0, $i1;
+        java.io.File $r2;
+        java.lang.String[] $r3;
+        dalvik.system.DexFile[] $r4;
+        dalvik.system.DexFile $r5;
+        java.lang.Class $r7;
+        java.util.zip.ZipFile[] $r8;
+        java.util.zip.ZipFile $r9;
+        java.lang.StringBuilder $r10;
+        java.io.File[] $r11;
+        boolean $z0;
+        java.lang.ClassNotFoundException $r12;
+
+        $r0 := @this: dalvik.system.PathClassLoader;
+
+        $r1 := @parameter0: java.lang.String;
+
+        specialinvoke $r0.<dalvik.system.PathClassLoader: void ensureInit()>();
+
+        $r3 = $r0.<dalvik.system.PathClassLoader: java.lang.String[] mPaths>;
+
+        $i0 = lengthof $r3;
+
+        $i1 = 0;
+
+     label1:
+        if $i1 >= $i0 goto label5;
+
+        $r4 = $r0.<dalvik.system.PathClassLoader: dalvik.system.DexFile[] mDexs>;
+
+        $r5 = $r4[$i1];
+
+        if $r5 == null goto label2;
+
+        $r6 = virtualinvoke $r1.<java.lang.String: java.lang.String replace(char,char)>(46, 47);
+
+        $r4 = $r0.<dalvik.system.PathClassLoader: dalvik.system.DexFile[] mDexs>;
+
+        $r5 = $r4[$i1];
+
+        $r7 = virtualinvoke $r5.<dalvik.system.DexFile: java.lang.Class loadClass(java.lang.String,java.lang.ClassLoader)>($r6, $r0);
+
+        if $r7 == null goto label3;
+
+        return $r7;
+
+     label2:
+        $r8 = $r0.<dalvik.system.PathClassLoader: java.util.zip.ZipFile[] mZips>;
+
+        $r9 = $r8[$i1];
+
+        if $r9 == null goto label4;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r1.<java.lang.String: java.lang.String replace(char,char)>(46, 47);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".class");
+
+        $r6 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r8 = $r0.<dalvik.system.PathClassLoader: java.util.zip.ZipFile[] mZips>;
+
+        $r9 = $r8[$i1];
+
+        specialinvoke $r0.<dalvik.system.PathClassLoader: byte[] loadFromArchive(java.util.zip.ZipFile,java.lang.String)>($r9, $r6);
+
+     label3:
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label4:
+        $r11 = $r0.<dalvik.system.PathClassLoader: java.io.File[] mFiles>;
+
+        $r2 = $r11[$i1];
+
+        $z0 = virtualinvoke $r2.<java.io.File: boolean isDirectory()>();
+
+        if $z0 == 0 goto label3;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = $r0.<dalvik.system.PathClassLoader: java.lang.String[] mPaths>;
+
+        $r6 = $r3[$i1];
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r6 = virtualinvoke $r1.<java.lang.String: java.lang.String replace(char,char)>(46, 47);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".class");
+
+        $r6 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r0.<dalvik.system.PathClassLoader: byte[] loadFromDirectory(java.lang.String)>($r6);
+
+        goto label3;
+
+     label5:
+        $r12 = new java.lang.ClassNotFoundException;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" in loader ");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r0);
+
+        $r1 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r12.<java.lang.ClassNotFoundException: void <init>(java.lang.String)>($r1);
+
+        throw $r12;
+    }
+
+    protected java.lang.String findLibrary(java.lang.String)
+    {
+        dalvik.system.PathClassLoader $r0;
+        java.lang.String $r1, $r5;
+        java.io.File $r2;
+        int $i0, $i1;
+        java.lang.String[] $r3;
+        java.lang.StringBuilder $r4;
+        boolean $z0;
+
+        $r0 := @this: dalvik.system.PathClassLoader;
+
+        $r1 := @parameter0: java.lang.String;
+
+        specialinvoke $r0.<dalvik.system.PathClassLoader: void ensureInit()>();
+
+        $r1 = staticinvoke <java.lang.System: java.lang.String mapLibraryName(java.lang.String)>($r1);
+
+        $i0 = 0;
+
+     label1:
+        $r3 = $r0.<dalvik.system.PathClassLoader: java.lang.String[] mLibPaths>;
+
+        $i1 = lengthof $r3;
+
+        if $i0 >= $i1 goto label3;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = $r0.<dalvik.system.PathClassLoader: java.lang.String[] mLibPaths>;
+
+        $r5 = $r3[$i0];
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r2 = new java.io.File;
+
+        specialinvoke $r2.<java.io.File: void <init>(java.lang.String)>($r5);
+
+        $z0 = virtualinvoke $r2.<java.io.File: boolean exists()>();
+
+        if $z0 == 0 goto label2;
+
+        return $r5;
+
+     label2:
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label3:
+        return null;
+    }
+
+    protected java.net.URL findResource(java.lang.String)
+    {
+        dalvik.system.PathClassLoader $r0;
+        java.lang.String $r1;
+        int $i0, $i1;
+        java.net.URL $r2;
+        java.lang.String[] $r3;
+
+        $r0 := @this: dalvik.system.PathClassLoader;
+
+        $r1 := @parameter0: java.lang.String;
+
+        specialinvoke $r0.<dalvik.system.PathClassLoader: void ensureInit()>();
+
+        $r3 = $r0.<dalvik.system.PathClassLoader: java.lang.String[] mPaths>;
+
+        $i0 = lengthof $r3;
+
+        $i1 = 0;
+
+     label1:
+        if $i1 >= $i0 goto label3;
+
+        $r2 = specialinvoke $r0.<dalvik.system.PathClassLoader: java.net.URL findResource(java.lang.String,int)>($r1, $i1);
+
+        if $r2 == null goto label2;
+
+        return $r2;
+
+     label2:
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label3:
+        return null;
+    }
+
+    protected java.util.Enumeration findResources(java.lang.String)
+    {
+        dalvik.system.PathClassLoader $r0;
+        java.lang.String $r1;
+        int $i0, $i1;
+        java.util.ArrayList $r2;
+        java.net.URL $r3;
+        java.lang.String[] $r4;
+        dalvik.system.PathClassLoader$EnumerateListArray $r5;
+
+        $r0 := @this: dalvik.system.PathClassLoader;
+
+        $r1 := @parameter0: java.lang.String;
+
+        specialinvoke $r0.<dalvik.system.PathClassLoader: void ensureInit()>();
+
+        $r4 = $r0.<dalvik.system.PathClassLoader: java.lang.String[] mPaths>;
+
+        $i0 = lengthof $r4;
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        $i1 = 0;
+
+     label1:
+        if $i1 >= $i0 goto label3;
+
+        $r3 = specialinvoke $r0.<dalvik.system.PathClassLoader: java.net.URL findResource(java.lang.String,int)>($r1, $i1);
+
+        if $r3 == null goto label2;
+
+        virtualinvoke $r2.<java.util.ArrayList: boolean add(java.lang.Object)>($r3);
+
+     label2:
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label3:
+        $r5 = new dalvik.system.PathClassLoader$EnumerateListArray;
+
+        specialinvoke $r5.<dalvik.system.PathClassLoader$EnumerateListArray: void <init>(java.util.ArrayList)>($r2);
+
+        return $r5;
+    }
+
+    protected java.lang.Package getPackage(java.lang.String)
+    {
+        dalvik.system.PathClassLoader $r0;
+        java.lang.String $r1, $r2;
+        boolean $z0;
+        java.lang.Package $r3, $r4;
+        java.lang.Throwable $r5;
+
+        $r0 := @this: dalvik.system.PathClassLoader;
+
+        $r1 := @parameter0: java.lang.String;
+
+        if $r1 == null goto label6;
+
+        $r2 = "";
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 != 0 goto label6;
+
+        entermonitor $r0;
+
+     label1:
+        $r3 = specialinvoke $r0.<java.lang.ClassLoader: java.lang.Package getPackage(java.lang.String)>($r1);
+
+        $r4 = $r3;
+
+        if $r3 != null goto label2;
+
+        $r4 = virtualinvoke $r0.<java.lang.ClassLoader: java.lang.Package definePackage(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.net.URL)>($r1, "Unknown", "0.0", "Unknown", "Unknown", "0.0", "Unknown", null);
+
+     label2:
+        exitmonitor $r0;
+
+     label3:
+        return $r4;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label5:
+        throw $r5;
+
+     label6:
+        return null;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+}

@@ -1,0 +1,3379 @@
+public class SQLite.JDBC2y.JDBCPreparedStatement extends SQLite.JDBC2y.JDBCStatement implements java.sql.PreparedStatement
+{
+    private static final boolean nullrepl;
+    private java.lang.String[] args;
+    private java.util.ArrayList batch;
+    private boolean[] blobs;
+    private java.lang.String sql;
+
+    static void <clinit>()
+    {
+        java.lang.String $r0;
+        int $i0;
+        boolean $z0;
+
+        $r0 = staticinvoke <SQLite.Database: java.lang.String version()>();
+
+        $i0 = virtualinvoke $r0.<java.lang.String: int compareTo(java.lang.String)>("2.5.0");
+
+        if $i0 >= 0 goto label2;
+
+        $z0 = 1;
+
+     label1:
+        <SQLite.JDBC2y.JDBCPreparedStatement: boolean nullrepl> = $z0;
+
+        return;
+
+     label2:
+        $z0 = 0;
+
+        goto label1;
+    }
+
+    public void <init>(SQLite.JDBC2y.JDBCConnection, java.lang.String)
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        SQLite.JDBC2y.JDBCConnection $r1;
+        java.lang.String $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: SQLite.JDBC2y.JDBCConnection;
+
+        $r2 := @parameter1: java.lang.String;
+
+        specialinvoke $r0.<SQLite.JDBC2y.JDBCStatement: void <init>(SQLite.JDBC2y.JDBCConnection)>($r1);
+
+        $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args> = null;
+
+        $r0.<SQLite.JDBC2y.JDBCPreparedStatement: boolean[] blobs> = null;
+
+        $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.util.ArrayList batch> = null;
+
+        $r2 = specialinvoke $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String fixup(java.lang.String)>($r2);
+
+        $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String sql> = $r2;
+
+        return;
+    }
+
+    private java.lang.String fixup(java.lang.String)
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1, $r3;
+        java.lang.StringBuffer $r2;
+        boolean $z0, $z1;
+        int $i0, $i1, $i2, $i5;
+        char $c3, $c4;
+        java.lang.String[] $r4;
+        boolean[] $r5;
+        java.sql.SQLException $r6;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.lang.StringBuffer;
+
+        specialinvoke $r2.<java.lang.StringBuffer: void <init>()>();
+
+        $z0 = 0;
+
+        $i0 = 0;
+
+        $i1 = 0;
+
+     label01:
+        $i2 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i1 >= $i2 goto label11;
+
+        $c3 = virtualinvoke $r1.<java.lang.String: char charAt(int)>($i1);
+
+        if $c3 != 39 goto label06;
+
+        if $z0 == 0 goto label05;
+
+        $c4 = 0;
+
+        $i2 = $i1 + 1;
+
+        $i5 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i2 >= $i5 goto label02;
+
+        $i2 = $i1 + 1;
+
+        $c4 = virtualinvoke $r1.<java.lang.String: char charAt(int)>($i2);
+
+     label02:
+        if $c4 != 39 goto label04;
+
+        virtualinvoke $r2.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c3);
+
+        virtualinvoke $r2.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c4);
+
+        $i1 = $i1 + 1;
+
+     label03:
+        $i1 = $i1 + 1;
+
+        goto label01;
+
+     label04:
+        $z0 = 0;
+
+        virtualinvoke $r2.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c3);
+
+        goto label03;
+
+     label05:
+        $z0 = 1;
+
+        virtualinvoke $r2.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c3);
+
+        goto label03;
+
+     label06:
+        if $c3 != 63 goto label10;
+
+        if $z0 == 0 goto label07;
+
+        virtualinvoke $r2.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c3);
+
+        goto label03;
+
+     label07:
+        $i0 = $i0 + 1;
+
+        $z1 = <SQLite.JDBC2y.JDBCPreparedStatement: boolean nullrepl>;
+
+        if $z1 == 0 goto label09;
+
+        $r3 = "\'%q\'";
+
+     label08:
+        virtualinvoke $r2.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r3);
+
+        goto label03;
+
+     label09:
+        $r3 = "%Q";
+
+        goto label08;
+
+     label10:
+        if $c3 != 59 goto label15;
+
+        if $z0 != 0 goto label14;
+
+     label11:
+        $r4 = newarray (java.lang.String)[$i0];
+
+        $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args> = $r4;
+
+        $r5 = newarray (boolean)[$i0];
+
+        $r0.<SQLite.JDBC2y.JDBCPreparedStatement: boolean[] blobs> = $r5;
+
+     label12:
+        virtualinvoke $r0.<SQLite.JDBC2y.JDBCPreparedStatement: void clearParameters()>();
+
+     label13:
+        $r1 = virtualinvoke $r2.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r1;
+
+     label14:
+        virtualinvoke $r2.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c3);
+
+        goto label03;
+
+     label15:
+        if $c3 != 37 goto label16;
+
+        virtualinvoke $r2.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("%%");
+
+        goto label03;
+
+     label16:
+        virtualinvoke $r2.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c3);
+
+        goto label03;
+
+     label17:
+        $r6 := @caughtexception;
+
+        goto label13;
+
+        catch java.sql.SQLException from label12 to label13 with label17;
+    }
+
+    private java.lang.String fixup2(java.lang.String)
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.lang.StringBuffer $r2;
+        SQLite.JDBC2y.JDBCConnection $r3;
+        SQLite.JDBC2y.DatabaseX $r4;
+        boolean $z0;
+        int $i0, $i1, $i2;
+        char $c3, $c4;
+        boolean[] $r5;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r3 = $r0.<SQLite.JDBC2y.JDBCStatement: SQLite.JDBC2y.JDBCConnection conn>;
+
+        $r4 = $r3.<SQLite.JDBC2y.JDBCConnection: SQLite.JDBC2y.DatabaseX db>;
+
+        $z0 = virtualinvoke $r4.<SQLite.Database: boolean is3()>();
+
+        if $z0 != 0 goto label1;
+
+        return $r1;
+
+     label1:
+        $r2 = new java.lang.StringBuffer;
+
+        specialinvoke $r2.<java.lang.StringBuffer: void <init>()>();
+
+        $i0 = -1;
+
+        $i1 = 0;
+
+     label2:
+        $i2 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i1 >= $i2 goto label4;
+
+        $c3 = virtualinvoke $r1.<java.lang.String: char charAt(int)>($i1);
+
+        $c4 = $c3;
+
+        if $c3 != 37 goto label3;
+
+        virtualinvoke $r2.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c3);
+
+        $i1 = $i1 + 1;
+
+        $c3 = virtualinvoke $r1.<java.lang.String: char charAt(int)>($i1);
+
+        $c4 = $c3;
+
+        if $c3 != 81 goto label3;
+
+        $i0 = $i0 + 1;
+
+        $r5 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: boolean[] blobs>;
+
+        $z0 = $r5[$i0];
+
+        if $z0 == 0 goto label3;
+
+        $c4 = 115;
+
+     label3:
+        virtualinvoke $r2.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c4);
+
+        $i1 = $i1 + 1;
+
+        goto label2;
+
+     label4:
+        $r1 = virtualinvoke $r2.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r1;
+    }
+
+    public void addBatch() throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.util.ArrayList $r1;
+        java.lang.String[] $r2;
+        int $i0, $i1;
+        SQLite.JDBC2y.BatchArg $r3;
+        java.lang.String $r4;
+        boolean[] $r5;
+        boolean $z0;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.util.ArrayList batch>;
+
+        if $r1 != null goto label1;
+
+        $r1 = new java.util.ArrayList;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i0 = lengthof $r2;
+
+        specialinvoke $r1.<java.util.ArrayList: void <init>(int)>($i0);
+
+        $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.util.ArrayList batch> = $r1;
+
+     label1:
+        $i0 = 0;
+
+     label2:
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = lengthof $r2;
+
+        if $i0 >= $i1 goto label3;
+
+        $r1 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.util.ArrayList batch>;
+
+        $r3 = new SQLite.JDBC2y.BatchArg;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $r4 = $r2[$i0];
+
+        $r5 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: boolean[] blobs>;
+
+        $z0 = $r5[$i0];
+
+        specialinvoke $r3.<SQLite.JDBC2y.BatchArg: void <init>(java.lang.String,boolean)>($r4, $z0);
+
+        virtualinvoke $r1.<java.util.ArrayList: boolean add(java.lang.Object)>($r3);
+
+        $i0 = $i0 + 1;
+
+        goto label2;
+
+     label3:
+        return;
+    }
+
+    public void clearBatch() throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.util.ArrayList $r1;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.util.ArrayList batch>;
+
+        if $r1 == null goto label1;
+
+        $r1 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.util.ArrayList batch>;
+
+        virtualinvoke $r1.<java.util.ArrayList: void clear()>();
+
+        $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.util.ArrayList batch> = null;
+
+        return;
+
+     label1:
+        return;
+    }
+
+    public void clearParameters() throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0, $i1;
+        java.lang.String[] $r1;
+        boolean $z0;
+        java.lang.String $r2;
+        boolean[] $r3;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 = 0;
+
+     label1:
+        $r1 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = lengthof $r1;
+
+        if $i0 >= $i1 goto label4;
+
+        $r1 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $z0 = <SQLite.JDBC2y.JDBCPreparedStatement: boolean nullrepl>;
+
+        if $z0 == 0 goto label3;
+
+        $r2 = "";
+
+     label2:
+        $r1[$i0] = $r2;
+
+        $r3 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: boolean[] blobs>;
+
+        $r3[$i0] = 0;
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label3:
+        $r2 = null;
+
+        goto label2;
+
+     label4:
+        return;
+    }
+
+    public boolean execute() throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String[] $r1;
+        java.lang.String $r2;
+        java.sql.ResultSet $r3;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String sql>;
+
+        $r2 = specialinvoke $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String fixup2(java.lang.String)>($r2);
+
+        $r1 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $r3 = virtualinvoke $r0.<SQLite.JDBC2y.JDBCStatement: java.sql.ResultSet executeQuery(java.lang.String,java.lang.String[],boolean)>($r2, $r1, 0);
+
+        if $r3 == null goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+
+    public int[] executeBatch() throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0, $i1, $i2, $i3, $i4;
+        int[] $r1;
+        java.util.ArrayList $r2;
+        java.lang.String[] $r3;
+        java.lang.Object $r4;
+        SQLite.JDBC2y.BatchArg $r5;
+        java.lang.String $r6;
+        boolean[] $r7;
+        boolean $z0;
+        java.sql.SQLException $r8;
+        java.sql.BatchUpdateException $r9;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.util.ArrayList batch>;
+
+        if $r2 != null goto label01;
+
+        $r1 = newarray (int)[0];
+
+        return $r1;
+
+     label01:
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.util.ArrayList batch>;
+
+        $i1 = virtualinvoke $r2.<java.util.ArrayList: int size()>();
+
+        $r3 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i2 = lengthof $r3;
+
+        $i1 = $i1 / $i2;
+
+        $r1 = newarray (int)[$i1];
+
+        $i1 = 0;
+
+     label02:
+        $i2 = lengthof $r1;
+
+        if $i1 >= $i2 goto label03;
+
+        $r1[$i1] = -3;
+
+        $i1 = $i1 + 1;
+
+        goto label02;
+
+     label03:
+        $i1 = 0;
+
+        $i2 = 0;
+
+        $i3 = 0;
+
+     label04:
+        $i4 = lengthof $r1;
+
+        if $i3 >= $i4 goto label10;
+
+        $i4 = 0;
+
+     label05:
+        $r3 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i0 = lengthof $r3;
+
+        if $i4 >= $i0 goto label06;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.util.ArrayList batch>;
+
+        $r4 = virtualinvoke $r2.<java.util.ArrayList: java.lang.Object get(int)>($i2);
+
+        $r5 = (SQLite.JDBC2y.BatchArg) $r4;
+
+        $r3 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $r6 = $r5.<SQLite.JDBC2y.BatchArg: java.lang.String arg>;
+
+        $r3[$i3] = $r6;
+
+        $r7 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: boolean[] blobs>;
+
+        $z0 = $r5.<SQLite.JDBC2y.BatchArg: boolean blob>;
+
+        $r7[$i3] = $z0;
+
+        $i4 = $i4 + 1;
+
+        $i2 = $i2 + 1;
+
+        goto label05;
+
+     label06:
+        $i4 = virtualinvoke $r0.<SQLite.JDBC2y.JDBCPreparedStatement: int executeUpdate()>();
+
+     label07:
+        $r1[$i3] = $i4;
+
+     label08:
+        $i3 = $i3 + 1;
+
+        goto label04;
+
+     label09:
+        $r8 := @caughtexception;
+
+        $i1 = $i1 + 1;
+
+        goto label08;
+
+     label10:
+        if $i1 <= 0 goto label11;
+
+        $r9 = new java.sql.BatchUpdateException;
+
+        specialinvoke $r9.<java.sql.BatchUpdateException: void <init>(java.lang.String,int[])>("batch failed", $r1);
+
+        throw $r9;
+
+     label11:
+        return $r1;
+
+        catch java.sql.SQLException from label06 to label07 with label09;
+    }
+
+    public java.sql.ResultSet executeQuery() throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String[] $r1;
+        java.lang.String $r2;
+        java.sql.ResultSet $r3;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String sql>;
+
+        $r2 = specialinvoke $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String fixup2(java.lang.String)>($r2);
+
+        $r1 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $r3 = virtualinvoke $r0.<SQLite.JDBC2y.JDBCStatement: java.sql.ResultSet executeQuery(java.lang.String,java.lang.String[],boolean)>($r2, $r1, 0);
+
+        return $r3;
+    }
+
+    public int executeUpdate() throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String[] $r1;
+        java.lang.String $r2;
+        int i0;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String sql>;
+
+        $r2 = specialinvoke $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String fixup2(java.lang.String)>($r2);
+
+        $r1 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        virtualinvoke $r0.<SQLite.JDBC2y.JDBCStatement: java.sql.ResultSet executeQuery(java.lang.String,java.lang.String[],boolean)>($r2, $r1, 1);
+
+        i0 = $r0.<SQLite.JDBC2y.JDBCStatement: int updcnt>;
+
+        return i0;
+    }
+
+    public java.sql.Array getArray(int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0;
+        java.sql.SQLException $r1;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 = new java.sql.SQLException;
+
+        specialinvoke $r1.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r1;
+    }
+
+    public java.sql.Array getArray(java.lang.String) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public java.math.BigDecimal getBigDecimal(java.lang.String) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public java.sql.Blob getBlob(int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0;
+        java.sql.SQLException $r1;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 = new java.sql.SQLException;
+
+        specialinvoke $r1.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r1;
+    }
+
+    public java.sql.Blob getBlob(java.lang.String) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public boolean getBoolean(java.lang.String) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public byte getByte(java.lang.String) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public byte[] getBytes(java.lang.String) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public java.sql.Clob getClob(int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0;
+        java.sql.SQLException $r1;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 = new java.sql.SQLException;
+
+        specialinvoke $r1.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r1;
+    }
+
+    public java.sql.Clob getClob(java.lang.String) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public java.sql.Date getDate(int, java.util.Calendar) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0;
+        java.util.Calendar $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.util.Calendar;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public java.sql.Date getDate(java.lang.String) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public java.sql.Date getDate(java.lang.String, java.util.Calendar) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.util.Calendar $r2;
+        java.sql.SQLException $r3;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.util.Calendar;
+
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r3;
+    }
+
+    public double getDouble(java.lang.String) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public float getFloat(java.lang.String) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public int getInt(java.lang.String) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public long getLong(java.lang.String) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public java.sql.ResultSetMetaData getMetaData() throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.sql.ResultSetMetaData $r1;
+        SQLite.JDBC2y.JDBCResultSet $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCStatement: SQLite.JDBC2y.JDBCResultSet rs>;
+
+        $r1 = virtualinvoke $r2.<SQLite.JDBC2y.JDBCResultSet: java.sql.ResultSetMetaData getMetaData()>();
+
+        return $r1;
+    }
+
+    public java.lang.Object getObject(int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0;
+        java.sql.SQLException $r1;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 = new java.sql.SQLException;
+
+        specialinvoke $r1.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r1;
+    }
+
+    public java.lang.Object getObject(int, java.util.Map) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0;
+        java.util.Map $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.util.Map;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public java.lang.Object getObject(java.lang.String) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public java.lang.Object getObject(java.lang.String, java.util.Map) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.util.Map $r2;
+        java.sql.SQLException $r3;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.util.Map;
+
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r3;
+    }
+
+    public java.sql.ParameterMetaData getParameterMetaData() throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.sql.SQLException $r1;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 = new java.sql.SQLException;
+
+        specialinvoke $r1.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r1;
+    }
+
+    public java.sql.Ref getRef(int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0;
+        java.sql.SQLException $r1;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 = new java.sql.SQLException;
+
+        specialinvoke $r1.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r1;
+    }
+
+    public java.sql.Ref getRef(java.lang.String) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public short getShort(java.lang.String) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public java.lang.String getString(java.lang.String) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public java.sql.Time getTime(int, java.util.Calendar) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0;
+        java.util.Calendar $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.util.Calendar;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public java.sql.Time getTime(java.lang.String) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public java.sql.Time getTime(java.lang.String, java.util.Calendar) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.util.Calendar $r2;
+        java.sql.SQLException $r3;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.util.Calendar;
+
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r3;
+    }
+
+    public java.sql.Timestamp getTimestamp(int, java.util.Calendar) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0;
+        java.util.Calendar $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.util.Calendar;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public java.sql.Timestamp getTimestamp(java.lang.String) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public java.sql.Timestamp getTimestamp(java.lang.String, java.util.Calendar) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.util.Calendar $r2;
+        java.sql.SQLException $r3;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.util.Calendar;
+
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r3;
+    }
+
+    public java.net.URL getURL(int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0;
+        java.sql.SQLException $r1;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 = new java.sql.SQLException;
+
+        specialinvoke $r1.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r1;
+    }
+
+    public java.net.URL getURL(java.lang.String) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public void registerOutputParameter(java.lang.String, int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        int $i0;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public void registerOutputParameter(java.lang.String, int, int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        int $i0, $i1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public void registerOutputParameter(java.lang.String, int, java.lang.String) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1, $r2;
+        int $i0;
+        java.sql.SQLException $r3;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: java.lang.String;
+
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r3;
+    }
+
+    public void setArray(int, java.sql.Array) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0;
+        java.sql.Array $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.sql.Array;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public void setAsciiStream(int, java.io.InputStream, int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0, $i1;
+        java.io.InputStream $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.io.InputStream;
+
+        $i1 := @parameter2: int;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public void setAsciiStream(java.lang.String, java.io.InputStream, int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.io.InputStream $r2;
+        int $i0;
+        java.sql.SQLException $r3;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.io.InputStream;
+
+        $i0 := @parameter2: int;
+
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r3;
+    }
+
+    public void setBigDecimal(int, java.math.BigDecimal) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0, $i1;
+        java.math.BigDecimal $r1;
+        java.lang.String[] $r2;
+        java.sql.SQLException $r3;
+        boolean $z0;
+        java.lang.String $r4;
+        boolean[] $r5;
+        java.lang.StringBuilder $r6;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.math.BigDecimal;
+
+        if $i0 < 1 goto label1;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = lengthof $r2;
+
+        if $i0 <= $i1 goto label2;
+
+     label1:
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("bad parameter index");
+
+        throw $r3;
+
+     label2:
+        if $r1 != null goto label6;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = $i0 - 1;
+
+        $z0 = <SQLite.JDBC2y.JDBCPreparedStatement: boolean nullrepl>;
+
+        if $z0 == 0 goto label5;
+
+        $r4 = "";
+
+     label3:
+        $r2[$i1] = $r4;
+
+     label4:
+        $r5 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: boolean[] blobs>;
+
+        $i0 = $i0 - 1;
+
+        $r5[$i0] = 0;
+
+        return;
+
+     label5:
+        $r4 = null;
+
+        goto label3;
+
+     label6:
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = $i0 - 1;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r4 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r2[$i1] = $r4;
+
+        goto label4;
+    }
+
+    public void setBigDecimal(java.lang.String, java.math.BigDecimal) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.math.BigDecimal $r2;
+        java.sql.SQLException $r3;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.math.BigDecimal;
+
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r3;
+    }
+
+    public void setBinaryStream(int, java.io.InputStream, int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0, $i1;
+        java.io.InputStream $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.io.InputStream;
+
+        $i1 := @parameter2: int;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public void setBinaryStream(java.lang.String, java.io.InputStream, int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.io.InputStream $r2;
+        int $i0;
+        java.sql.SQLException $r3;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.io.InputStream;
+
+        $i0 := @parameter2: int;
+
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r3;
+    }
+
+    public void setBlob(int, java.sql.Blob) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0;
+        java.sql.Blob $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.sql.Blob;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public void setBoolean(int, boolean) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0, $i1;
+        boolean $z0;
+        java.lang.String[] $r1;
+        java.sql.SQLException $r2;
+        java.lang.String $r3;
+        boolean[] $r4;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $z0 := @parameter1: boolean;
+
+        if $i0 < 1 goto label1;
+
+        $r1 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = lengthof $r1;
+
+        if $i0 <= $i1 goto label2;
+
+     label1:
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("bad parameter index");
+
+        throw $r2;
+
+     label2:
+        $r1 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = $i0 - 1;
+
+        if $z0 == 0 goto label4;
+
+        $r3 = "1";
+
+     label3:
+        $r1[$i1] = $r3;
+
+        $r4 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: boolean[] blobs>;
+
+        $i0 = $i0 - 1;
+
+        $r4[$i0] = 0;
+
+        return;
+
+     label4:
+        $r3 = "0";
+
+        goto label3;
+    }
+
+    public void setBoolean(java.lang.String, boolean) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        boolean $z0;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $z0 := @parameter1: boolean;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public void setByte(int, byte) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0, $i2;
+        byte $b1;
+        java.lang.String[] $r1;
+        java.sql.SQLException $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+        boolean[] $r5;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $b1 := @parameter1: byte;
+
+        if $i0 < 1 goto label1;
+
+        $r1 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i2 = lengthof $r1;
+
+        if $i0 <= $i2 goto label2;
+
+     label1:
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("bad parameter index");
+
+        throw $r2;
+
+     label2:
+        $r1 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i2 = $i0 - 1;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($b1);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r1[$i2] = $r4;
+
+        $r5 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: boolean[] blobs>;
+
+        $i0 = $i0 - 1;
+
+        $r5[$i0] = 0;
+
+        return;
+    }
+
+    public void setByte(java.lang.String, byte) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        byte $b0;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $b0 := @parameter1: byte;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public void setBytes(int, byte[]) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0, $i1;
+        byte[] $r1;
+        java.lang.String[] $r2;
+        java.sql.SQLException $r3;
+        boolean[] $r4;
+        boolean $z0;
+        java.lang.String $r5;
+        SQLite.JDBC2y.JDBCConnection $r6;
+        SQLite.JDBC2y.DatabaseX $r7;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: byte[];
+
+        if $i0 < 1 goto label1;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = lengthof $r2;
+
+        if $i0 <= $i1 goto label2;
+
+     label1:
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("bad parameter index");
+
+        throw $r3;
+
+     label2:
+        $r4 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: boolean[] blobs>;
+
+        $i1 = $i0 - 1;
+
+        $r4[$i1] = 0;
+
+        if $r1 != null goto label5;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i0 = $i0 - 1;
+
+        $z0 = <SQLite.JDBC2y.JDBCPreparedStatement: boolean nullrepl>;
+
+        if $z0 == 0 goto label4;
+
+        $r5 = "";
+
+     label3:
+        $r2[$i0] = $r5;
+
+        return;
+
+     label4:
+        $r5 = null;
+
+        goto label3;
+
+     label5:
+        $r6 = $r0.<SQLite.JDBC2y.JDBCStatement: SQLite.JDBC2y.JDBCConnection conn>;
+
+        $r7 = $r6.<SQLite.JDBC2y.JDBCConnection: SQLite.JDBC2y.DatabaseX db>;
+
+        $z0 = virtualinvoke $r7.<SQLite.Database: boolean is3()>();
+
+        if $z0 == 0 goto label6;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = $i0 - 1;
+
+        $r5 = staticinvoke <SQLite.StringEncoder: java.lang.String encodeX(byte[])>($r1);
+
+        $r2[$i1] = $r5;
+
+        $r4 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: boolean[] blobs>;
+
+        $i0 = $i0 - 1;
+
+        $r4[$i0] = 1;
+
+        return;
+
+     label6:
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i0 = $i0 - 1;
+
+        $r5 = staticinvoke <SQLite.StringEncoder: java.lang.String encode(byte[])>($r1);
+
+        $r2[$i0] = $r5;
+
+        return;
+    }
+
+    public void setBytes(java.lang.String, byte[]) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        byte[] $r2;
+        java.sql.SQLException $r3;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: byte[];
+
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r3;
+    }
+
+    public void setCharacterStream(int, java.io.Reader, int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0, $i1;
+        java.io.Reader $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.io.Reader;
+
+        $i1 := @parameter2: int;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public void setCharacterStream(java.lang.String, java.io.Reader, int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.io.Reader $r2;
+        int $i0;
+        java.sql.SQLException $r3;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.io.Reader;
+
+        $i0 := @parameter2: int;
+
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r3;
+    }
+
+    public void setClob(int, java.sql.Clob) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0;
+        java.sql.Clob $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.sql.Clob;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public void setDate(int, java.sql.Date) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0, $i1;
+        java.sql.Date $r1;
+        java.lang.String $r2;
+        java.lang.String[] $r3;
+        java.sql.SQLException $r4;
+        boolean $z0;
+        boolean[] $r5;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.sql.Date;
+
+        if $i0 < 1 goto label1;
+
+        $r3 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = lengthof $r3;
+
+        if $i0 <= $i1 goto label2;
+
+     label1:
+        $r4 = new java.sql.SQLException;
+
+        specialinvoke $r4.<java.sql.SQLException: void <init>(java.lang.String)>("bad parameter index");
+
+        throw $r4;
+
+     label2:
+        if $r1 != null goto label6;
+
+        $r3 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = $i0 - 1;
+
+        $z0 = <SQLite.JDBC2y.JDBCPreparedStatement: boolean nullrepl>;
+
+        if $z0 == 0 goto label5;
+
+        $r2 = "";
+
+     label3:
+        $r3[$i1] = $r2;
+
+     label4:
+        $r5 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: boolean[] blobs>;
+
+        $i0 = $i0 - 1;
+
+        $r5[$i0] = 0;
+
+        return;
+
+     label5:
+        $r2 = null;
+
+        goto label3;
+
+     label6:
+        $r3 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = $i0 - 1;
+
+        $r2 = virtualinvoke $r1.<java.sql.Date: java.lang.String toString()>();
+
+        $r3[$i1] = $r2;
+
+        goto label4;
+    }
+
+    public void setDate(int, java.sql.Date, java.util.Calendar) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0;
+        java.sql.Date $r1;
+        java.util.Calendar $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.sql.Date;
+
+        $r2 := @parameter2: java.util.Calendar;
+
+        virtualinvoke $r0.<SQLite.JDBC2y.JDBCPreparedStatement: void setDate(int,java.sql.Date)>($i0, $r1);
+
+        return;
+    }
+
+    public void setDate(java.lang.String, java.sql.Date) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.sql.Date $r2;
+        java.sql.SQLException $r3;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.sql.Date;
+
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r3;
+    }
+
+    public void setDate(java.lang.String, java.sql.Date, java.util.Calendar) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.sql.Date $r2;
+        java.util.Calendar $r3;
+        java.sql.SQLException $r4;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.sql.Date;
+
+        $r3 := @parameter2: java.util.Calendar;
+
+        $r4 = new java.sql.SQLException;
+
+        specialinvoke $r4.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r4;
+    }
+
+    public void setDouble(int, double) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0, $i1;
+        double $d0;
+        java.lang.String[] $r1;
+        java.sql.SQLException $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+        boolean[] $r5;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $d0 := @parameter1: double;
+
+        if $i0 < 1 goto label1;
+
+        $r1 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = lengthof $r1;
+
+        if $i0 <= $i1 goto label2;
+
+     label1:
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("bad parameter index");
+
+        throw $r2;
+
+     label2:
+        $r1 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = $i0 - 1;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>($d0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r1[$i1] = $r4;
+
+        $r5 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: boolean[] blobs>;
+
+        $i0 = $i0 - 1;
+
+        $r5[$i0] = 0;
+
+        return;
+    }
+
+    public void setDouble(java.lang.String, double) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        double $d0;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $d0 := @parameter1: double;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public void setFloat(int, float) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0, $i1;
+        float $f0;
+        java.lang.String[] $r1;
+        java.sql.SQLException $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+        boolean[] $r5;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $f0 := @parameter1: float;
+
+        if $i0 < 1 goto label1;
+
+        $r1 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = lengthof $r1;
+
+        if $i0 <= $i1 goto label2;
+
+     label1:
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("bad parameter index");
+
+        throw $r2;
+
+     label2:
+        $r1 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = $i0 - 1;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(float)>($f0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r1[$i1] = $r4;
+
+        $r5 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: boolean[] blobs>;
+
+        $i0 = $i0 - 1;
+
+        $r5[$i0] = 0;
+
+        return;
+    }
+
+    public void setFloat(java.lang.String, float) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        float $f0;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $f0 := @parameter1: float;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public void setInt(int, int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0, $i1, $i2;
+        java.lang.String[] $r1;
+        java.sql.SQLException $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+        boolean[] $r5;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        if $i0 < 1 goto label1;
+
+        $r1 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i2 = lengthof $r1;
+
+        if $i0 <= $i2 goto label2;
+
+     label1:
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("bad parameter index");
+
+        throw $r2;
+
+     label2:
+        $r1 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i2 = $i0 - 1;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r1[$i2] = $r4;
+
+        $r5 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: boolean[] blobs>;
+
+        $i0 = $i0 - 1;
+
+        $r5[$i0] = 0;
+
+        return;
+    }
+
+    public void setInt(java.lang.String, int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        int $i0;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public void setLong(int, long) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0, $i2;
+        long $l1;
+        java.lang.String[] $r1;
+        java.sql.SQLException $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+        boolean[] $r5;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $l1 := @parameter1: long;
+
+        if $i0 < 1 goto label1;
+
+        $r1 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i2 = lengthof $r1;
+
+        if $i0 <= $i2 goto label2;
+
+     label1:
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("bad parameter index");
+
+        throw $r2;
+
+     label2:
+        $r1 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i2 = $i0 - 1;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l1);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r1[$i2] = $r4;
+
+        $r5 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: boolean[] blobs>;
+
+        $i0 = $i0 - 1;
+
+        $r5[$i0] = 0;
+
+        return;
+    }
+
+    public void setLong(java.lang.String, long) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        long $l0;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $l0 := @parameter1: long;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public void setNull(int, int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0, $i1;
+        java.lang.String[] $r1;
+        java.sql.SQLException $r2;
+        boolean $z0;
+        java.lang.String $r3;
+        boolean[] $r4;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        if $i0 < 1 goto label1;
+
+        $r1 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = lengthof $r1;
+
+        if $i0 <= $i1 goto label2;
+
+     label1:
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("bad parameter index");
+
+        throw $r2;
+
+     label2:
+        $r1 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = $i0 - 1;
+
+        $z0 = <SQLite.JDBC2y.JDBCPreparedStatement: boolean nullrepl>;
+
+        if $z0 == 0 goto label4;
+
+        $r3 = "";
+
+     label3:
+        $r1[$i1] = $r3;
+
+        $r4 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: boolean[] blobs>;
+
+        $i0 = $i0 - 1;
+
+        $r4[$i0] = 0;
+
+        return;
+
+     label4:
+        $r3 = null;
+
+        goto label3;
+    }
+
+    public void setNull(int, int, java.lang.String) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0, $i1;
+        java.lang.String $r1;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 := @parameter2: java.lang.String;
+
+        virtualinvoke $r0.<SQLite.JDBC2y.JDBCPreparedStatement: void setNull(int,int)>($i0, $i1);
+
+        return;
+    }
+
+    public void setNull(java.lang.String, int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        int $i0;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public void setNull(java.lang.String, int, java.lang.String) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1, $r2;
+        int $i0;
+        java.sql.SQLException $r3;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: java.lang.String;
+
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r3;
+    }
+
+    public void setObject(int, java.lang.Object) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0, $i1;
+        java.lang.Object $r1;
+        java.lang.String[] $r2;
+        java.sql.SQLException $r3;
+        boolean $z0;
+        java.lang.String $r4;
+        boolean[] $r5;
+        byte[] $r6;
+        SQLite.JDBC2y.JDBCConnection $r7;
+        SQLite.JDBC2y.DatabaseX $r8;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.lang.Object;
+
+        if $i0 < 1 goto label1;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = lengthof $r2;
+
+        if $i0 <= $i1 goto label2;
+
+     label1:
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("bad parameter index");
+
+        throw $r3;
+
+     label2:
+        if $r1 != null goto label6;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = $i0 - 1;
+
+        $z0 = <SQLite.JDBC2y.JDBCPreparedStatement: boolean nullrepl>;
+
+        if $z0 == 0 goto label5;
+
+        $r4 = "";
+
+     label3:
+        $r2[$i1] = $r4;
+
+     label4:
+        $r5 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: boolean[] blobs>;
+
+        $i0 = $i0 - 1;
+
+        $r5[$i0] = 0;
+
+        return;
+
+     label5:
+        $r4 = null;
+
+        goto label3;
+
+     label6:
+        $z0 = $r1 instanceof byte[];
+
+        if $z0 == 0 goto label8;
+
+        $r6 = (byte[]) $r1;
+
+        $r6 = (byte[]) $r6;
+
+        $r7 = $r0.<SQLite.JDBC2y.JDBCStatement: SQLite.JDBC2y.JDBCConnection conn>;
+
+        $r8 = $r7.<SQLite.JDBC2y.JDBCConnection: SQLite.JDBC2y.DatabaseX db>;
+
+        $z0 = virtualinvoke $r8.<SQLite.Database: boolean is3()>();
+
+        if $z0 == 0 goto label7;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = $i0 - 1;
+
+        $r4 = staticinvoke <SQLite.StringEncoder: java.lang.String encodeX(byte[])>($r6);
+
+        $r2[$i1] = $r4;
+
+        $r5 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: boolean[] blobs>;
+
+        $i0 = $i0 - 1;
+
+        $r5[$i0] = 1;
+
+        return;
+
+     label7:
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = $i0 - 1;
+
+        $r4 = staticinvoke <SQLite.StringEncoder: java.lang.String encode(byte[])>($r6);
+
+        $r2[$i1] = $r4;
+
+        goto label4;
+
+     label8:
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = $i0 - 1;
+
+        $r4 = virtualinvoke $r1.<java.lang.Object: java.lang.String toString()>();
+
+        $r2[$i1] = $r4;
+
+        goto label4;
+    }
+
+    public void setObject(int, java.lang.Object, int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0, $i1;
+        java.lang.Object $r1;
+        java.lang.String[] $r2;
+        java.sql.SQLException $r3;
+        boolean $z0;
+        java.lang.String $r4;
+        boolean[] $r5;
+        byte[] $r6;
+        SQLite.JDBC2y.JDBCConnection $r7;
+        SQLite.JDBC2y.DatabaseX $r8;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.lang.Object;
+
+        $i1 := @parameter2: int;
+
+        if $i0 < 1 goto label1;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = lengthof $r2;
+
+        if $i0 <= $i1 goto label2;
+
+     label1:
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("bad parameter index");
+
+        throw $r3;
+
+     label2:
+        if $r1 != null goto label6;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = $i0 - 1;
+
+        $z0 = <SQLite.JDBC2y.JDBCPreparedStatement: boolean nullrepl>;
+
+        if $z0 == 0 goto label5;
+
+        $r4 = "";
+
+     label3:
+        $r2[$i1] = $r4;
+
+     label4:
+        $r5 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: boolean[] blobs>;
+
+        $i0 = $i0 - 1;
+
+        $r5[$i0] = 0;
+
+        return;
+
+     label5:
+        $r4 = null;
+
+        goto label3;
+
+     label6:
+        $z0 = $r1 instanceof byte[];
+
+        if $z0 == 0 goto label8;
+
+        $r6 = (byte[]) $r1;
+
+        $r6 = (byte[]) $r6;
+
+        $r7 = $r0.<SQLite.JDBC2y.JDBCStatement: SQLite.JDBC2y.JDBCConnection conn>;
+
+        $r8 = $r7.<SQLite.JDBC2y.JDBCConnection: SQLite.JDBC2y.DatabaseX db>;
+
+        $z0 = virtualinvoke $r8.<SQLite.Database: boolean is3()>();
+
+        if $z0 == 0 goto label7;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = $i0 - 1;
+
+        $r4 = staticinvoke <SQLite.StringEncoder: java.lang.String encodeX(byte[])>($r6);
+
+        $r2[$i1] = $r4;
+
+        $r5 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: boolean[] blobs>;
+
+        $i0 = $i0 - 1;
+
+        $r5[$i0] = 1;
+
+        return;
+
+     label7:
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = $i0 - 1;
+
+        $r4 = staticinvoke <SQLite.StringEncoder: java.lang.String encode(byte[])>($r6);
+
+        $r2[$i1] = $r4;
+
+        goto label4;
+
+     label8:
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = $i0 - 1;
+
+        $r4 = virtualinvoke $r1.<java.lang.Object: java.lang.String toString()>();
+
+        $r2[$i1] = $r4;
+
+        goto label4;
+    }
+
+    public void setObject(int, java.lang.Object, int, int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0, $i1, $i2;
+        java.lang.Object $r1;
+        java.lang.String[] $r2;
+        java.sql.SQLException $r3;
+        boolean $z0;
+        java.lang.String $r4;
+        boolean[] $r5;
+        byte[] $r6;
+        SQLite.JDBC2y.JDBCConnection $r7;
+        SQLite.JDBC2y.DatabaseX $r8;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.lang.Object;
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        if $i0 < 1 goto label1;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = lengthof $r2;
+
+        if $i0 <= $i1 goto label2;
+
+     label1:
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("bad parameter index");
+
+        throw $r3;
+
+     label2:
+        if $r1 != null goto label6;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = $i0 - 1;
+
+        $z0 = <SQLite.JDBC2y.JDBCPreparedStatement: boolean nullrepl>;
+
+        if $z0 == 0 goto label5;
+
+        $r4 = "";
+
+     label3:
+        $r2[$i1] = $r4;
+
+     label4:
+        $r5 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: boolean[] blobs>;
+
+        $i0 = $i0 - 1;
+
+        $r5[$i0] = 0;
+
+        return;
+
+     label5:
+        $r4 = null;
+
+        goto label3;
+
+     label6:
+        $z0 = $r1 instanceof byte[];
+
+        if $z0 == 0 goto label8;
+
+        $r6 = (byte[]) $r1;
+
+        $r6 = (byte[]) $r6;
+
+        $r7 = $r0.<SQLite.JDBC2y.JDBCStatement: SQLite.JDBC2y.JDBCConnection conn>;
+
+        $r8 = $r7.<SQLite.JDBC2y.JDBCConnection: SQLite.JDBC2y.DatabaseX db>;
+
+        $z0 = virtualinvoke $r8.<SQLite.Database: boolean is3()>();
+
+        if $z0 == 0 goto label7;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = $i0 - 1;
+
+        $r4 = staticinvoke <SQLite.StringEncoder: java.lang.String encodeX(byte[])>($r6);
+
+        $r2[$i1] = $r4;
+
+        $r5 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: boolean[] blobs>;
+
+        $i0 = $i0 - 1;
+
+        $r5[$i0] = 1;
+
+        return;
+
+     label7:
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = $i0 - 1;
+
+        $r4 = staticinvoke <SQLite.StringEncoder: java.lang.String encode(byte[])>($r6);
+
+        $r2[$i1] = $r4;
+
+        goto label4;
+
+     label8:
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = $i0 - 1;
+
+        $r4 = virtualinvoke $r1.<java.lang.Object: java.lang.String toString()>();
+
+        $r2[$i1] = $r4;
+
+        goto label4;
+    }
+
+    public void setObject(java.lang.String, java.lang.Object) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.lang.Object $r2;
+        java.sql.SQLException $r3;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.Object;
+
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r3;
+    }
+
+    public void setObject(java.lang.String, java.lang.Object, int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.lang.Object $r2;
+        int $i0;
+        java.sql.SQLException $r3;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.Object;
+
+        $i0 := @parameter2: int;
+
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r3;
+    }
+
+    public void setObject(java.lang.String, java.lang.Object, int, int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.lang.Object $r2;
+        int $i0, $i1;
+        java.sql.SQLException $r3;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.Object;
+
+        $i0 := @parameter2: int;
+
+        $i1 := @parameter3: int;
+
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r3;
+    }
+
+    public void setRef(int, java.sql.Ref) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0;
+        java.sql.Ref $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.sql.Ref;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public void setShort(int, short) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0, $i2;
+        short $s1;
+        java.lang.String[] $r1;
+        java.sql.SQLException $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+        boolean[] $r5;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $s1 := @parameter1: short;
+
+        if $i0 < 1 goto label1;
+
+        $r1 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i2 = lengthof $r1;
+
+        if $i0 <= $i2 goto label2;
+
+     label1:
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("bad parameter index");
+
+        throw $r2;
+
+     label2:
+        $r1 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i2 = $i0 - 1;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($s1);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r1[$i2] = $r4;
+
+        $r5 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: boolean[] blobs>;
+
+        $i0 = $i0 - 1;
+
+        $r5[$i0] = 0;
+
+        return;
+    }
+
+    public void setShort(java.lang.String, short) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        short $s0;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $s0 := @parameter1: short;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public void setString(int, java.lang.String) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0, $i1;
+        java.lang.String $r1;
+        java.lang.String[] $r2;
+        java.sql.SQLException $r3;
+        boolean $z0;
+        boolean[] $r4;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.lang.String;
+
+        if $i0 < 1 goto label1;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = lengthof $r2;
+
+        if $i0 <= $i1 goto label2;
+
+     label1:
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("bad parameter index");
+
+        throw $r3;
+
+     label2:
+        if $r1 != null goto label6;
+
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = $i0 - 1;
+
+        $z0 = <SQLite.JDBC2y.JDBCPreparedStatement: boolean nullrepl>;
+
+        if $z0 == 0 goto label5;
+
+        $r1 = "";
+
+     label3:
+        $r2[$i1] = $r1;
+
+     label4:
+        $r4 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: boolean[] blobs>;
+
+        $i0 = $i0 - 1;
+
+        $r4[$i0] = 0;
+
+        return;
+
+     label5:
+        $r1 = null;
+
+        goto label3;
+
+     label6:
+        $r2 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = $i0 - 1;
+
+        $r2[$i1] = $r1;
+
+        goto label4;
+    }
+
+    public void setString(java.lang.String, java.lang.String) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1, $r2;
+        java.sql.SQLException $r3;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r3;
+    }
+
+    public void setTime(int, java.sql.Time) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0, $i1;
+        java.sql.Time $r1;
+        java.lang.String $r2;
+        java.lang.String[] $r3;
+        java.sql.SQLException $r4;
+        boolean $z0;
+        boolean[] $r5;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.sql.Time;
+
+        if $i0 < 1 goto label1;
+
+        $r3 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = lengthof $r3;
+
+        if $i0 <= $i1 goto label2;
+
+     label1:
+        $r4 = new java.sql.SQLException;
+
+        specialinvoke $r4.<java.sql.SQLException: void <init>(java.lang.String)>("bad parameter index");
+
+        throw $r4;
+
+     label2:
+        if $r1 != null goto label6;
+
+        $r3 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = $i0 - 1;
+
+        $z0 = <SQLite.JDBC2y.JDBCPreparedStatement: boolean nullrepl>;
+
+        if $z0 == 0 goto label5;
+
+        $r2 = "";
+
+     label3:
+        $r3[$i1] = $r2;
+
+     label4:
+        $r5 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: boolean[] blobs>;
+
+        $i0 = $i0 - 1;
+
+        $r5[$i0] = 0;
+
+        return;
+
+     label5:
+        $r2 = null;
+
+        goto label3;
+
+     label6:
+        $r3 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = $i0 - 1;
+
+        $r2 = virtualinvoke $r1.<java.sql.Time: java.lang.String toString()>();
+
+        $r3[$i1] = $r2;
+
+        goto label4;
+    }
+
+    public void setTime(int, java.sql.Time, java.util.Calendar) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0;
+        java.sql.Time $r1;
+        java.util.Calendar $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.sql.Time;
+
+        $r2 := @parameter2: java.util.Calendar;
+
+        virtualinvoke $r0.<SQLite.JDBC2y.JDBCPreparedStatement: void setTime(int,java.sql.Time)>($i0, $r1);
+
+        return;
+    }
+
+    public void setTime(java.lang.String, java.sql.Time) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.sql.Time $r2;
+        java.sql.SQLException $r3;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.sql.Time;
+
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r3;
+    }
+
+    public void setTime(java.lang.String, java.sql.Time, java.util.Calendar) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.sql.Time $r2;
+        java.util.Calendar $r3;
+        java.sql.SQLException $r4;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.sql.Time;
+
+        $r3 := @parameter2: java.util.Calendar;
+
+        $r4 = new java.sql.SQLException;
+
+        specialinvoke $r4.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r4;
+    }
+
+    public void setTimestamp(int, java.sql.Timestamp) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0, $i1;
+        java.sql.Timestamp $r1;
+        java.lang.String $r2;
+        java.lang.String[] $r3;
+        java.sql.SQLException $r4;
+        boolean $z0;
+        boolean[] $r5;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.sql.Timestamp;
+
+        if $i0 < 1 goto label1;
+
+        $r3 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = lengthof $r3;
+
+        if $i0 <= $i1 goto label2;
+
+     label1:
+        $r4 = new java.sql.SQLException;
+
+        specialinvoke $r4.<java.sql.SQLException: void <init>(java.lang.String)>("bad parameter index");
+
+        throw $r4;
+
+     label2:
+        if $r1 != null goto label6;
+
+        $r3 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = $i0 - 1;
+
+        $z0 = <SQLite.JDBC2y.JDBCPreparedStatement: boolean nullrepl>;
+
+        if $z0 == 0 goto label5;
+
+        $r2 = "";
+
+     label3:
+        $r3[$i1] = $r2;
+
+     label4:
+        $r5 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: boolean[] blobs>;
+
+        $i0 = $i0 - 1;
+
+        $r5[$i0] = 0;
+
+        return;
+
+     label5:
+        $r2 = null;
+
+        goto label3;
+
+     label6:
+        $r3 = $r0.<SQLite.JDBC2y.JDBCPreparedStatement: java.lang.String[] args>;
+
+        $i1 = $i0 - 1;
+
+        $r2 = virtualinvoke $r1.<java.sql.Timestamp: java.lang.String toString()>();
+
+        $r3[$i1] = $r2;
+
+        goto label4;
+    }
+
+    public void setTimestamp(int, java.sql.Timestamp, java.util.Calendar) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0;
+        java.sql.Timestamp $r1;
+        java.util.Calendar $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.sql.Timestamp;
+
+        $r2 := @parameter2: java.util.Calendar;
+
+        virtualinvoke $r0.<SQLite.JDBC2y.JDBCPreparedStatement: void setTimestamp(int,java.sql.Timestamp)>($i0, $r1);
+
+        return;
+    }
+
+    public void setTimestamp(java.lang.String, java.sql.Timestamp) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.sql.Timestamp $r2;
+        java.sql.SQLException $r3;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.sql.Timestamp;
+
+        $r3 = new java.sql.SQLException;
+
+        specialinvoke $r3.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r3;
+    }
+
+    public void setTimestamp(java.lang.String, java.sql.Timestamp, java.util.Calendar) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        java.lang.String $r1;
+        java.sql.Timestamp $r2;
+        java.util.Calendar $r3;
+        java.sql.SQLException $r4;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.sql.Timestamp;
+
+        $r3 := @parameter2: java.util.Calendar;
+
+        $r4 = new java.sql.SQLException;
+
+        specialinvoke $r4.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r4;
+    }
+
+    public void setURL(int, java.net.URL) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0;
+        java.net.URL $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.net.URL;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+
+    public void setUnicodeStream(int, java.io.InputStream, int) throws java.sql.SQLException
+    {
+        SQLite.JDBC2y.JDBCPreparedStatement $r0;
+        int $i0, $i1;
+        java.io.InputStream $r1;
+        java.sql.SQLException $r2;
+
+        $r0 := @this: SQLite.JDBC2y.JDBCPreparedStatement;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.io.InputStream;
+
+        $i1 := @parameter2: int;
+
+        $r2 = new java.sql.SQLException;
+
+        specialinvoke $r2.<java.sql.SQLException: void <init>(java.lang.String)>("not supported");
+
+        throw $r2;
+    }
+}
